@@ -1,0 +1,1085 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言Android 中有几个比较有名的图片加载框架，Universal ImageLoader、Picasso、Glide和Fresco。它们各有优点，以前一直用的是ImageLoader 做项目中的图片加载，由于作者宣布ImageLoader 不会在更新了，因此新的项目打算换一个图片加载框架－Picasso, Picasso 是Square 公司开源的Android 端的图片加载和缓存框架。S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 图片加载框架－Picasso的使用指南">
+<meta property="og:url" content="http://adolph.cc/2017/01/30/android-picasso/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言Android 中有几个比较有名的图片加载框架，Universal ImageLoader、Picasso、Glide和Fresco。它们各有优点，以前一直用的是ImageLoader 做项目中的图片加载，由于作者宣布ImageLoader 不会在更新了，因此新的项目打算换一个图片加载框架－Picasso, Picasso 是Square 公司开源的Android 端的图片加载和缓存框架。S">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148816003127407.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148816675790516.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148816678223732.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148816706778603.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/201702271488167661608.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/2017022714881690255844.png">
+<meta property="og:updated_time" content="2017-04-06T15:56:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 图片加载框架－Picasso的使用指南">
+<meta name="twitter:description" content="前言Android 中有几个比较有名的图片加载框架，Universal ImageLoader、Picasso、Glide和Fresco。它们各有优点，以前一直用的是ImageLoader 做项目中的图片加载，由于作者宣布ImageLoader 不会在更新了，因此新的项目打算换一个图片加载框架－Picasso, Picasso 是Square 公司开源的Android 端的图片加载和缓存框架。S">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148816003127407.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/01/30/android-picasso/"/>
+
+
+
+
+
+  <title> Android 图片加载框架－Picasso的使用指南 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/01/30/android-picasso/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android 图片加载框架－Picasso的使用指南
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-30T12:10:08+08:00">
+                2017-01-30
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>Android 中有几个比较有名的图片加载框架，Universal ImageLoader、Picasso、Glide和Fresco。它们各有优点，以前一直用的是ImageLoader 做项目中的图片加载，由于作者宣布ImageLoader 不会在更新了，因此新的项目打算换一个图片加载框架－Picasso, Picasso 是Square 公司开源的Android 端的图片加载和缓存框架。<strong>Square</strong> 真是一家良心公司啊，为我们Android开发者贡献了很多优秀的开源项目有木有！像什么Rerefoit 、OkHttp、LeakCanary、Picasso等等都是非常火的开源项目。扯远了，回到正题，除了使用简单方便，Picasso还能自动帮我们做以下事情：</p>
+<ul>
+<li>处理Adapter 中ImageView的回收和取消下载。</li>
+<li>使用最小的内存 来做复杂的图片变换。比如高斯模糊，圆角、圆形等处理。</li>
+<li>自动帮我们缓存图片。内存和磁盘缓存。<br>以上只是列出了Picasso 比较核心的几点，其实它的优点远远不止这些，接下来就看一下如何使用Picasso。</li>
+</ul>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148816003127407.png" alt="20170227148816003127407.png"></p>
+<h1 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h1><h2 id="一、添加依赖"><a href="#一、添加依赖" class="headerlink" title="一、添加依赖"></a>一、添加依赖</h2><p>要使用Picasso,首先我们要添加版本依赖，去官网或者Github 看一下当前的最新版本(截止本文最新版本为2.5.2)，然后在build.gradle中添加依赖：</p>
+<pre><code>compile &apos;com.squareup.picasso:picasso:2.5.2&apos;
+</code></pre><h2 id="二、加载显示图片"><a href="#二、加载显示图片" class="headerlink" title="二、加载显示图片"></a>二、加载显示图片</h2><p>将Picasso添加到项目之后，我们就可以用它来加载图片了，使用方法非常简单：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>)</div><div class="line">        .load(<span class="string">"http://ww3.sinaimg.cn/large/610dc034jw1fasakfvqe1j20u00mhgn2.jpg"</span>)</div><div class="line">        .into(mImageView);</div></pre></td></tr></table></figure></p>
+<p>只需要一行代码就完成了加载图片到显示的整个过程，链式调用，非常简洁，其实有三步，一次调用了三个方法：</p>
+<ul>
+<li>with(Context) 获取一个Picasso单例，参数是一个Context上下文</li>
+<li>load(String) 调用load 方法加载图片</li>
+<li>into (ImageView) 将图片显示在对应的View上，可以是ImageView，也可以是实现了Target j接口的自定义View。<br>上面演示了加载一张网络图片，它还支持其它形式的图片加载，加载文件图片，加载本地资源图片，加载一个Uri 路径给的图片，提供了几个重载的方法：</li>
+</ul>
+<h3 id="1-load-Uri-uri-加载一个以Uri路径给的图片"><a href="#1-load-Uri-uri-加载一个以Uri路径给的图片" class="headerlink" title="1.load(Uri uri) 加载一个以Uri路径给的图片"></a>1.load(Uri uri) 加载一个以Uri路径给的图片</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Uri uri = Uri.parse(ANDROID_RESOURCE + context.getPackageName() + FOREWARD_SLASH + resourceId)</div><div class="line">Picasso.with(<span class="keyword">this</span>).load(uri).into(mImageView);</div></pre></td></tr></table></figure>
+<h3 id="2-load-File-file-加载File中的图片"><a href="#2-load-File-file-加载File中的图片" class="headerlink" title="2.load(File file) 加载File中的图片"></a>2.load(File file) 加载File中的图片</h3><p><code>Picasso.with(this).load(file).into(mImageView);</code></p>
+<h3 id="3-load-int-resourceId-加载本地资源图片"><a href="#3-load-int-resourceId-加载本地资源图片" class="headerlink" title="3.load(int resourceId) 加载本地资源图片"></a>3.load(int resourceId) 加载本地资源图片</h3><p><code>Picasso.with(this).load(R.mipmap.ic_launcher).into(mImageView);</code></p>
+<blockquote>
+<p>提醒：上面介绍了load的几个重载方法，加载不同资源的图片，另外提醒注意一下load(String path)接受String 参数的这个方法，参数String 可以是一个网络图片url,也可以是file 路径、content资源 和Android Resource。看一下源码的注释。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">&gt;<span class="comment">/**</span></div><div class="line">   * Start an image request using the specified path. This is a convenience method for calling</div><div class="line">   * &#123;<span class="doctag">@link</span> #load(Uri)&#125;.</div><div class="line">   * &lt;p&gt;</div><div class="line">   * This path may be a remote URL, file resource (prefixed with &#123;<span class="doctag">@code</span> file:&#125;), content resource</div><div class="line">   * (prefixed with &#123;<span class="doctag">@code</span> content:&#125;), or android resource (prefixed with &#123;<span class="doctag">@code</span></div><div class="line">   * android.resource:&#125;.</div><div class="line">   * &lt;p&gt;</div><div class="line">   * Passing &#123;<span class="doctag">@code</span> null&#125; as a &#123;<span class="doctag">@code</span> path&#125; will not trigger any request but will set a</div><div class="line">   * placeholder, if one is specified.</div><div class="line">   *</div><div class="line">   * <span class="doctag">@see</span> #load(Uri)</div><div class="line">   * <span class="doctag">@see</span> #load(File)</div><div class="line">   * <span class="doctag">@see</span> #load(int)</div><div class="line">   * <span class="doctag">@throws</span> IllegalArgumentException if &#123;<span class="doctag">@code</span> path&#125; is empty or blank string.</div><div class="line">   */</div><div class="line">  <span class="function"><span class="keyword">public</span> RequestCreator <span class="title">load</span><span class="params">(String path)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (path == <span class="keyword">null</span>) &#123;</div><div class="line">      <span class="keyword">return</span> <span class="keyword">new</span> RequestCreator(<span class="keyword">this</span>, <span class="keyword">null</span>, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (path.trim().length() == <span class="number">0</span>) &#123;</div><div class="line">      <span class="keyword">throw</span> <span class="keyword">new</span> IllegalArgumentException(<span class="string">"Path must not be empty."</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> load(Uri.parse(path));</div><div class="line">  &#125;</div><div class="line">&gt;</div></pre></td></tr></table></figure></p>
+<p>要使用string 参数加载上面的几种资源，除了网络url,其它几种需要加上对应前缀，file文件路径前缀：file: , content 添加前缀：content: ,Android Resource 添加：android.resource:</p>
+</blockquote>
+<h2 id="三、placeholder-amp-error-amp-noPlaceholder-amp-noFade"><a href="#三、placeholder-amp-error-amp-noPlaceholder-amp-noFade" class="headerlink" title="三、placeholder&amp; error &amp; noPlaceholder &amp; noFade"></a>三、placeholder&amp; error &amp; noPlaceholder &amp; noFade</h2><p>通过上面的第一步我们就可以通过Picasso 加载图片了，我们的项目中通常最常用的就是加载网络图片，但是由于网络环境的差异，有时侯加载网络图片的过程有点慢，这样界面上就会显示空ImageView什么也看不见，用户体验非常不好。其实以前用过ImageLoader的同学都知道，ImageLoader 是可以设置加载中显示默认图片的，Picasso当然也给我们提供了这个功能，这就是我们要说的placeholder(占位图)。</p>
+<h3 id="1-placeholder"><a href="#1-placeholder" class="headerlink" title="1.placeholder"></a>1.placeholder</h3><p>placeholder提供一张在网络请求还没有完成时显示的图片，它必须是本地图片，代码如下：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"> Picasso.with(this).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .into(mImageView);</div><div class="line">```  </div><div class="line">设置placeholder之后，在加载图片的时候，就可以显示设置的默认图了，提升用户体验。</div><div class="line"></div><div class="line">### 2.error</div><div class="line">和placeholder 的用法一样，error 提供一张在加载图片出错的情况下显示的默认图</div><div class="line">``` java</div><div class="line">Picasso.with(this).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<h3 id="3-noPlaceholder"><a href="#3-noPlaceholder" class="headerlink" title="3.noPlaceholder"></a>3.noPlaceholder</h3><p>这个方法的意思就是：在调用into的时候明确告诉你没有占位图设置。根据这个方法签名的解释是阻止View被回收的时候Picasso清空target或者设置一个应用的占位图。需要注意的是placeholder和noPlaceholder 不能同时应用在同一个请求上，会抛异常。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .noPlaceholder()</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<h3 id="4-noFade"><a href="#4-noFade" class="headerlink" title="4.noFade"></a>4.noFade</h3><p>无论你是否设置了占位图，Picasso 从磁盘或者网络加载图片时，into 显示到ImageView 都会有一个简单的渐入过度效果，让你的UI视觉效果更柔顺丝滑一点，如果你不要这个渐入的效果（没有这么坑爹的需求吧！！！），就调用noFade方法。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .noFade()</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<h2 id="四、设置图片尺寸-Resize-、缩放-Scale-和裁剪-Crop"><a href="#四、设置图片尺寸-Resize-、缩放-Scale-和裁剪-Crop" class="headerlink" title="四、设置图片尺寸(Resize)、缩放(Scale)和裁剪(Crop)"></a>四、设置图片尺寸(Resize)、缩放(Scale)和裁剪(Crop)</h2><h3 id="1-Resize-int-w-int-h"><a href="#1-Resize-int-w-int-h" class="headerlink" title="1.Resize(int w,int h)"></a>1.Resize(int w,int h)</h3><p>在项目中，为了带宽、内存使用和下载速度等考虑，服务端给我们的图片的size 应该和我们View 实际的size一样的，但是实际情况并非如此，服务端可能给我们一些奇怪的尺寸的图片，我们可以使用resize(int w,int hei) 来重新设置尺寸。<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Picasso.with(this).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .resize(400,200)</div><div class="line">                .into(mImageView);</div><div class="line">```  </div><div class="line">resize()方法接受的参数的单位是pixels,还有一个可以设置dp单位的方法，将你的尺寸写在dimens.xml文件中，然后用`resizeDimen(int targetWidthResId, int targetHeightResId)`方法   </div><div class="line">``` xml</div><div class="line">&lt;dimen name="image_width"&gt;300dp&lt;/dimen&gt;</div><div class="line">&lt;dimen name="image_height"&gt;200dp&lt;/dimen&gt;</div></pre></td></tr></table></figure></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .resizeDimen(R.dimen.image_width,R.dimen.image_height)</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure>
+<h3 id="2-onlyScaleDown"><a href="#2-onlyScaleDown" class="headerlink" title="2.onlyScaleDown"></a>2.onlyScaleDown</h3><p>当调用了resize 方法重新设置图片尺寸的时候，调用onlyScaleDown 方法，只有当原始图片的尺寸大于我们指定的尺寸时，resize才起作用,如：<br><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">Picasso.with(this).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .resize(4000,2000)</div><div class="line">                .onlyScaleDown()</div><div class="line">                .into(mImageView);</div><div class="line">```  </div><div class="line">只有当原来的图片尺寸大于4000 x 2000的时候，resize 才起作用。</div><div class="line"></div><div class="line">### 3.图片裁剪 centerCrop()</div><div class="line">这个属性应该不陌生吧！ImageView 的ScaleType 就有这个属性。当我们使用resize 来重新设置图片的尺寸的时候，你会发现有些图片拉伸或者扭曲了（使用ImageView的时候碰到过吧），我要避免这种情况，Picasso 同样给我们提供了一个方法，centerCrop，**充满ImageView 的边界，居中裁剪**。</div><div class="line"></div><div class="line">``` java</div><div class="line">Picasso.with(this).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .resize(400,200)</div><div class="line">                .centerCrop()</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<h3 id="4-centerInside"><a href="#4-centerInside" class="headerlink" title="4.centerInside"></a>4.centerInside</h3><p>上面的centerCrop是可能看不到全部图片的，如果你想让View将图片展示完全，可以用centerInside，但是如果图片尺寸小于View尺寸的话，是不能充满View边界的。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .resize(<span class="number">400</span>,<span class="number">200</span>)</div><div class="line">                .centerInside()</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<h3 id="5-fit"><a href="#5-fit" class="headerlink" title="5.fit"></a>5.fit</h3><p>fit 是干什的呢？上面我们需要用resize()来指定我们需要的图片的尺寸，那就是说在程序中需要我们计算我们需要的尺寸（固定大小的除外），这样很麻烦，fit 方法就帮我们解决了这个问题。fit 它会自动测量我们的View的大小，然后内部调用reszie方法把图片裁剪到View的大小，这就帮我们做了计算size和调用resize 这2步。非常方便。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .fit()</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<p>使用fit 还是会出现拉伸扭曲的情况，因此最好配合前面的centerCrop使用，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .fit()</div><div class="line">                .centerCrop()</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<p>看一下对比图:<br><strong>fit(会拉伸):</strong><br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148816675790516.png" alt="20170227148816675790516.png">  </p>
+<p><strong>fit &amp; centerCrop (不会拉伸):</strong><br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148816678223732.png" alt="20170227148816678223732.png"></p>
+<blockquote>
+<p>注意：特别注意，  </p>
+<ol>
+<li>fit 只对ImageView 有效  </li>
+<li>使用fit时，ImageView 宽和高不能为wrap_content,很好理解，因为它要测量宽高。</li>
+</ol>
+</blockquote>
+<h2 id="五、图片旋转Rotation"><a href="#五、图片旋转Rotation" class="headerlink" title="五、图片旋转Rotation()"></a>五、图片旋转Rotation()</h2><p>在图片显示到ImageView 之前，还可以对图片做一些旋转操作，调用<code>rotate(int degree)</code>方法<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .rotate(<span class="number">180</span>)</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<p>这个方法它是以（0，0）点旋转，但是有些时候我们并不想以（0,0）点旋转，还提供了另外一个方法可以指定原点：</p>
+<ul>
+<li>rotate(float degrees, float pivotX, float pivotY) 以(pivotX, pivotY)为原点旋转</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .rotate(<span class="number">180</span>,<span class="number">200</span>,<span class="number">100</span>)</div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure>
+<h2 id="六、转换器Transformation"><a href="#六、转换器Transformation" class="headerlink" title="六、转换器Transformation"></a>六、转换器Transformation</h2><p>Transformation 这就是Picasso的一个非常强大的功能了，它允许你在load图片 -&gt; into ImageView 中间这个过成对图片做一系列的变换。比如你要做图片高斯模糊、添加圆角、做度灰处理、圆形图片等等都可以通过Transformation来完成。</p>
+<p>来看一个高斯模糊的例子：</p>
+<h3 id="1-首先定义一个转换器继承-Transformation"><a href="#1-首先定义一个转换器继承-Transformation" class="headerlink" title="1.首先定义一个转换器继承 Transformation"></a>1.首先定义一个转换器继承 Transformation</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">BlurTransformation</span> <span class="keyword">implements</span> <span class="title">Transformation</span></span>&#123;</div><div class="line"></div><div class="line">        RenderScript rs;</div><div class="line"></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="title">BlurTransformation</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">            <span class="keyword">super</span>();</div><div class="line">            rs = RenderScript.create(context);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> Bitmap <span class="title">transform</span><span class="params">(Bitmap bitmap)</span> </span>&#123;</div><div class="line">            <span class="comment">// Create another bitmap that will hold the results of the filter.</span></div><div class="line">            Bitmap blurredBitmap = bitmap.copy(Bitmap.Config.ARGB_8888, <span class="keyword">true</span>);</div><div class="line"></div><div class="line">            <span class="comment">// Allocate memory for Renderscript to work with</span></div><div class="line">            Allocation input = Allocation.createFromBitmap(rs, blurredBitmap, Allocation.MipmapControl.MIPMAP_FULL, Allocation.USAGE_SHARED);</div><div class="line">            Allocation output = Allocation.createTyped(rs, input.getType());</div><div class="line"></div><div class="line">            <span class="comment">// Load up an instance of the specific script that we want to use.</span></div><div class="line">            ScriptIntrinsicBlur script = ScriptIntrinsicBlur.create(rs, Element.U8_4(rs));</div><div class="line">            script.setInput(input);</div><div class="line"></div><div class="line">            <span class="comment">// Set the blur radius</span></div><div class="line">            script.setRadius(<span class="number">25</span>);</div><div class="line"></div><div class="line">            <span class="comment">// Start the ScriptIntrinisicBlur</span></div><div class="line">            script.forEach(output);</div><div class="line"></div><div class="line">            <span class="comment">// Copy the output to the blurred bitmap</span></div><div class="line">            output.copyTo(blurredBitmap);</div><div class="line"></div><div class="line">            bitmap.recycle();</div><div class="line"></div><div class="line">            <span class="keyword">return</span> blurredBitmap;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">key</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> <span class="string">"blur"</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h3 id="2-加载图片的时候，在into-方法前面调用-transform方法-应用Transformation"><a href="#2-加载图片的时候，在into-方法前面调用-transform方法-应用Transformation" class="headerlink" title="2.加载图片的时候，在into 方法前面调用 transform方法 应用Transformation"></a>2.加载图片的时候，在into 方法前面调用 transform方法 应用Transformation</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .transform(<span class="keyword">new</span> BlurTransformation(<span class="keyword">this</span>))</div><div class="line">                .into(mBlurImage);</div></pre></td></tr></table></figure>
+<p>看一下效果图：<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148816706778603.png" alt="20170227148816706778603.png">  </p>
+<p>上面为原图，下面为高斯模糊图<br>是不是很强大，任何复杂的变换都可以通过Transformation 来做。<br>还不止于此，还有更强大的功能。可以在一个请求上应用多个Transformation<br>比如：我想先做个灰度处理然后在做一个高斯模糊图：  </p>
+<h4 id="1-灰度的Transformation"><a href="#1-灰度的Transformation" class="headerlink" title="1.灰度的Transformation"></a>1.灰度的Transformation</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">static</span> <span class="class"><span class="keyword">class</span> <span class="title">GrayTransformation</span> <span class="keyword">implements</span> <span class="title">Transformation</span></span>&#123;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> Bitmap <span class="title">transform</span><span class="params">(Bitmap source)</span> </span>&#123;</div><div class="line">            <span class="keyword">int</span> width, height;</div><div class="line">            height = source.getHeight();</div><div class="line">            width = source.getWidth();</div><div class="line"></div><div class="line">            Bitmap bmpGrayscale = Bitmap.createBitmap(width, height, Bitmap.Config.RGB_565);</div><div class="line">            Canvas c = <span class="keyword">new</span> Canvas(bmpGrayscale);</div><div class="line">            Paint paint = <span class="keyword">new</span> Paint();</div><div class="line">            ColorMatrix cm = <span class="keyword">new</span> ColorMatrix();</div><div class="line">            cm.setSaturation(<span class="number">0</span>);</div><div class="line">            ColorMatrixColorFilter f = <span class="keyword">new</span> ColorMatrixColorFilter(cm);</div><div class="line">            paint.setColorFilter(f);</div><div class="line">            c.drawBitmap(source, <span class="number">0</span>, <span class="number">0</span>, paint);</div><div class="line"></div><div class="line">            <span class="keyword">if</span>(source!=<span class="keyword">null</span> &amp;&amp; source!=bmpGrayscale)&#123;</div><div class="line">                source.recycle();</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> bmpGrayscale;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">key</span><span class="params">()</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> <span class="string">"gray"</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<h4 id="2-如果是多个Transformation操作，有2种方式应用"><a href="#2-如果是多个Transformation操作，有2种方式应用" class="headerlink" title="2.如果是多个Transformation操作，有2种方式应用"></a>2.如果是多个Transformation操作，有2种方式应用</h4><p><strong>方式一：直接调用多次transform 方法，不会覆盖的。它只是保存到了一个List 里面</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .fit()</div><div class="line">                .centerCrop()</div><div class="line">                .transform(<span class="keyword">new</span> GrayTransformation())<span class="comment">//度灰处理</span></div><div class="line">                .transform(<span class="keyword">new</span> BlurTransformation(<span class="keyword">this</span>))<span class="comment">//高斯模糊</span></div><div class="line">                .into(mBlurImage);</div></pre></td></tr></table></figure></p>
+<p>需要注意调用的顺序<br><strong>方式二：接受一个List，将Transformation 放大list 里</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">List&lt;Transformation&gt; transformations = <span class="keyword">new</span> ArrayList&lt;&gt;();</div><div class="line">transformations.add(<span class="keyword">new</span> GrayTransformation());</div><div class="line">transformations.add(<span class="keyword">new</span> BlurTransformation(<span class="keyword">this</span>));</div><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">		.placeholder(R.drawable.default_bg)</div><div class="line">		.error(R.drawable.error_iamge)</div><div class="line">		.fit()</div><div class="line">		.centerCrop()</div><div class="line">		.transform(transformations)</div><div class="line">		.into(mBlurImage);</div></pre></td></tr></table></figure></p>
+<p>效果图：<br><img src="http://ohtrrgyyd.bkt.clouddn.com/201702271488167661608.png" alt="201702271488167661608.png"></p>
+<p>如上图，第一张为灰度操作，第二张为 灰度＋高斯模糊<br>另外发现了一个开源库，专门写了很多好玩的Transformation，有兴趣的可以看一下：<br><a href="https://github.com/wasabeef/picasso-transformations" target="_blank" rel="external">picasso-transformations</a></p>
+<h2 id="七、请求优先级"><a href="#七、请求优先级" class="headerlink" title="七、请求优先级"></a>七、请求优先级</h2><p>Picasso 为请求设置有优先级，有三种优先级，LOW、NORMAL、HIGH。默认情况下都是NORMAL，除了调用fetch 方法，fetch 方法的优先级是LOW。<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> Priority &#123;</div><div class="line">    LOW,</div><div class="line">    NORMAL,</div><div class="line">    HIGH</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以通过priority方法设置请求的优先级，这会影响请求的执行顺序，但是这是不能保证的，它只会往高的优先级靠拢。代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL)</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .priority(Picasso.Priority.HIGH)</div><div class="line">               <span class="comment">// .priority(Picasso.Priority.LOW)</span></div><div class="line">                .into(mImageView);</div></pre></td></tr></table></figure></p>
+<h2 id="八、Tag管理请求"><a href="#八、Tag管理请求" class="headerlink" title="八、Tag管理请求"></a>八、Tag管理请求</h2><p>Picasso 允许我们为一个请求设置tag来管理请求，看一下对应的几个方法：<br>下面3个方法是Picasso这个类的：  </p>
+<ul>
+<li>cancelTag(Object tag) 取消设置了给定tag的所有请求</li>
+<li>pauseTag(Object tag) 暂停设置了给定tag 的所有请求</li>
+<li>resumeTag(Object tag) resume 被暂停的给定tag的所有请求  </li>
+</ul>
+<p>还有一个方法是RequestCreator的:</p>
+<ul>
+<li>tag(Object tag) 为请求设置tag</li>
+</ul>
+<p>几个方法的意思也很明确，就是我们可以暂停、resume、和取消请求，可以用在哪些场景呢？</p>
+<p><strong>场景一：</strong> 比如一个照片流列表，当我们快速滑动列表浏览照片的时候，后台会一直发起请求加载照片的，这可能会导致卡顿，那么我们就可以为每个请求设置一个相同的Tag，在快速滑动的时候，调用pauseTag暂停请求，当滑动停止的时候，调用resumeTag恢复请求，这样的体验是不是就会更好一些呢。</p>
+<p><strong>Adapter中添加如下代码：</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(mData.get(position))</div><div class="line">                .placeholder(R.drawable.default_bg)</div><div class="line">                .error(R.drawable.error_iamge)</div><div class="line">                .tag(<span class="string">"PhotoTag"</span>)</div><div class="line">                .into(holder.mImageView);</div></pre></td></tr></table></figure></p>
+<p><strong>Activity中为RecyclerView添加滑动监听：</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">mRecyclerView.addOnScrollListener(<span class="keyword">new</span> RecyclerView.OnScrollListener() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onScrollStateChanged</span><span class="params">(RecyclerView recyclerView, <span class="keyword">int</span> newState)</span> </span>&#123;</div><div class="line">                <span class="keyword">final</span> Picasso picasso = Picasso.with(MainActivity.<span class="keyword">this</span>);</div><div class="line"></div><div class="line">                <span class="keyword">if</span> (newState == SCROLL_STATE_IDLE) &#123;</div><div class="line">                    picasso.resumeTag(<span class="string">"PhotoTag"</span>);</div><div class="line">                &#125; <span class="keyword">else</span> &#123;</div><div class="line">                    picasso.pauseTag(<span class="string">"PhotoTag"</span>);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;);</div></pre></td></tr></table></figure></p>
+<p><strong>场景二</strong>： 比如一个照片流列表界面，在弱网环境下，加载很慢，退出这个界面时可能会有很多请求没有完成，这个时候我们就可 以通过tag 来取消请求了。</p>
+<h2 id="九、同步／异步加载图片"><a href="#九、同步／异步加载图片" class="headerlink" title="九、同步／异步加载图片"></a>九、同步／异步加载图片</h2><p>Picasso 加载图片也有同步／异步两种方式</p>
+<h3 id="1-get-同步"><a href="#1-get-同步" class="headerlink" title="1.get() 同步"></a>1.get() 同步</h3><p>很简单，同步加载使用get() 方法，返回一个Bitmap 对象，代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">try</span> &#123;</div><div class="line">	Bitmap bitmap =  Picasso.with(<span class="keyword">this</span>).load(URL).get();</div><div class="line">	&#125; <span class="keyword">catch</span> (IOException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<blockquote>
+<p>注意：使用同步方式加载，不能放在主线程来做。</p>
+</blockquote>
+<h3 id="2-异步的方式加载图片，fetch"><a href="#2-异步的方式加载图片，fetch" class="headerlink" title="2.异步的方式加载图片，fetch()"></a>2.异步的方式加载图片，fetch()</h3><p>一般直接加载图片通过into显示到ImageView 是异步的方式，除此之外，还提供了2个异步的方法：</p>
+<ul>
+<li>fetch() 异步方式加载图片</li>
+<li>fetch(Callback callback) 异步方式加载图片并给一个回调接口。</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>).load(URL).fetch(<span class="keyword">new</span> Callback() &#123;</div><div class="line">	<span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSuccess</span><span class="params">()</span> </span>&#123;</div><div class="line">	<span class="comment">//加载成功</span></div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onError</span><span class="params">()</span> </span>&#123;</div><div class="line">	<span class="comment">//加载失败</span></div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>这里就要吐槽一下接口设计了，回调并没有返回Bitmap, 不知道作者是怎么考虑的，只是一个通知效果，知道请求失败还是成功。<br>fetch 方法异步加载图片并没有返回Bitmap，这个方法在请求成功之后，将结果存到了缓存，包括磁盘和内存缓存。所以使用这种方式加载图片适用于这种场景：知道稍后会加载图片，使用fetch 先加载缓存，起到一个预加载的效果。</p>
+<h2 id="十、缓存（Disk-和-Memory）"><a href="#十、缓存（Disk-和-Memory）" class="headerlink" title="十、缓存（Disk 和 Memory）"></a>十、缓存（Disk 和 Memory）</h2><p>Picasso 有内存缓存(Memory)和磁盘缓存（ Disk）, 首先来看一下源码中对于缓存的介绍：</p>
+<ul>
+<li>LRU memory cache of 15% the available application RAM</li>
+<li>Disk cache of 2% storage space up to 50MB but no less than 5MB. (Note: this is only<br>available on API 14+ or if you are using a standalone library that provides a disk cache on all API levels like OkHttp)</li>
+<li>Three download threads for disk and network access.</li>
+</ul>
+<p>可以看出，内存缓存是使用的LRU 策略的缓存实现，它的大小是内存大小的15%,可以自定义它的大小，最后在扩展那一章节再讲，磁盘缓存是磁盘容量的2%但是不超过50M,不少于5M。处理一个请求的时候，按照这个顺讯检查：memory-&gt;disk-&gt;network 。先检查有木有内存缓存，如果命中，直接返回结果，否则检查磁盘缓存，命中则返回结果，没有命中则从网上获取。</p>
+<p><strong>默认情况下，Picasso 内存缓存和磁盘缓存都开启了的，也就是加载图片的时候，内存和磁盘都缓存了，但是有些时候，我们并不需要缓存，比如说：加载一张大图片的时候，如果再内存中保存一份，很容易造成OOM,这时候我们只希望有磁盘缓存，而不希望缓存到内存，因此就需要我们设置缓存策略了。Picasso 提供了这样的方法。</strong></p>
+<h3 id="1-memoryPolicy-设置内存缓存策略"><a href="#1-memoryPolicy-设置内存缓存策略" class="headerlink" title="1.memoryPolicy 设置内存缓存策略"></a>1.memoryPolicy 设置内存缓存策略</h3><p>就像上面所说的，有时候我们不希望有内存缓存，我们可以通过 memoryPolicy 来设置。MemoryPolicy是一个枚举，有两个值</p>
+<p><strong>NO_CACHE</strong>：表示处理请求的时候跳过检查内存缓存<br><strong>NO_STORE</strong>: 表示请求成功之后，不将最终的结果存到内存。</p>
+<p>示例代码如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">with(<span class="keyword">this</span>).load(URL)</div><div class="line">	.placeholder(R.drawable.default_bg)</div><div class="line">	.error(R.drawable.error_iamge)</div><div class="line">	.memoryPolicy(MemoryPolicy.NO_CACHE,MemoryPolicy.NO_STORE) <span class="comment">//静止内存缓存</span></div><div class="line">	.into(mBlurImage);</div></pre></td></tr></table></figure></p>
+<h3 id="2-networkPolicy-设置磁盘缓存策略"><a href="#2-networkPolicy-设置磁盘缓存策略" class="headerlink" title="2.networkPolicy 设置磁盘缓存策略"></a>2.networkPolicy 设置磁盘缓存策略</h3><p>和内存缓存一样，加载一张图片的时候，你也可以跳过磁盘缓存，和内存缓存策略的控制方式一样，磁盘缓存调用方法networkPolicy(NetworkPolicy policy, NetworkPolicy… additional) , NetworkPolicy是一个枚举类型，有三个值：</p>
+<ul>
+<li>NO_CACHE: 表示处理请求的时候跳过处理磁盘缓存</li>
+<li>NO_STORE: 表示请求成功后，不将结果缓存到Disk,但是这个只对OkHttp有效。</li>
+<li>OFFLINE: 这个就跟 上面两个不一样了，如果networkPolicy方法用的是这个参数，那么Picasso会强制这次请求从缓存中获取结果，不会发起网络请求，不管缓存中能否获取到结果。</li>
+</ul>
+<p>使用示例：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">with(<span class="keyword">this</span>).load(URL)</div><div class="line">			.placeholder(R.drawable.default_bg)</div><div class="line">			.error(R.drawable.error_iamge)</div><div class="line">			.memoryPolicy(MemoryPolicy.NO_CACHE,MemoryPolicy.NO_STORE)<span class="comment">//跳过内存缓存</span></div><div class="line">			.networkPolicy(NetworkPolicy.NO_CACHE)<span class="comment">//跳过磁盘缓存</span></div><div class="line">			.into(mBlurImage);</div></pre></td></tr></table></figure></p>
+<p>强制从缓存获取：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">with(<span class="keyword">this</span>).load(URL)</div><div class="line">			.placeholder(R.drawable.default_bg)</div><div class="line">			.error(R.drawable.error_iamge)</div><div class="line">			.networkPolicy(NetworkPolicy.OFFLINE)<span class="comment">//强制从缓存获取结果</span></div><div class="line">			.into(mBlurImage);</div></pre></td></tr></table></figure></p>
+<h2 id="十一、Debug-和日志"><a href="#十一、Debug-和日志" class="headerlink" title="十一、Debug 和日志"></a>十一、Debug 和日志</h2><h3 id="1-缓存指示器"><a href="#1-缓存指示器" class="headerlink" title="1.缓存指示器"></a>1.缓存指示器</h3><p>上一节说了，Picasso 有内存缓存和磁盘缓存，先从内存获取，没有再去磁盘缓存获取，都有就从网络加载，网络加载是比较昂贵和耗时的。因此，作为一个开发者，我们往往需要加载的图片是从哪儿来的（内存、Disk还是网络），Picasso让我们很容易就实现了。只需要调用一个方法setIndicatorsEnabled(boolean)就可以了,它会在图片的左上角出现一个带色块的三角形标示，有3种颜色，绿色表示从内存加载、蓝色表示从磁盘加载、红色表示从网络加载。<br><code>Picasso.with(this).setIndicatorsEnabled(true);//显示指示器</code><br>效果图：<br><img src="http://ohtrrgyyd.bkt.clouddn.com/2017022714881690255844.png" alt="2017022714881690255844.png"></p>
+<p>如上图所示，第一张图从网络获取，第二张从磁盘获取，第三张图从内存获取。<br>看一下源码中定义指示器的颜色：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/** Describes where the image was loaded from. */</span></div><div class="line"><span class="keyword">public</span> <span class="keyword">enum</span> LoadedFrom &#123;</div><div class="line">	MEMORY(Color.GREEN),</div><div class="line">   DISK(Color.BLUE),</div><div class="line">   NETWORK(Color.RED);</div><div class="line"></div><div class="line">	<span class="keyword">final</span> <span class="keyword">int</span> debugColor;</div><div class="line"></div><div class="line">	<span class="function"><span class="keyword">private</span> <span class="title">LoadedFrom</span><span class="params">(<span class="keyword">int</span> debugColor)</span> </span>&#123;</div><div class="line">		<span class="keyword">this</span>.debugColor = debugColor;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>可以很清楚看出，对应三种颜色代表着图片的来源。</p>
+<h3 id="2-日志"><a href="#2-日志" class="headerlink" title="2.日志"></a>2.日志</h3><p>上面的指示器能够很好的帮助我们看出图片的来源，但是有时候我们需要更详细的信息，Picasso,可以打印一些日志，比如一些关键方法的执行时间等等，我们只需要调用setLoggingEnabled(true)方法，然后App在加载图片的过程中，我们就可以从logcat 看到一些关键的日志信息。<br><code>Picasso.with(this).setLoggingEnabled(true);//开启日志打印</code>  </p>
+<h2 id="十二、Picasso-扩展"><a href="#十二、Picasso-扩展" class="headerlink" title="十二、Picasso 扩展"></a>十二、Picasso 扩展</h2><p>到目前为止，Picasso的基本使用已经讲得差不多了，但是在实际项目中我们这可能还满足不了我们的需求，我们需要对它做一些自己的扩展，比如我们需要换缓存的位置、我们需要扩大缓存、自定义线程池、自定义下载器等等。这些都是可以的，接下来我们来看一下可以做哪些方面的扩展。  </p>
+<h3 id="1-用Builder-自己构造一个Picasso-Instance"><a href="#1-用Builder-自己构造一个Picasso-Instance" class="headerlink" title="1.用Builder 自己构造一个Picasso Instance"></a>1.用Builder 自己构造一个Picasso Instance</h3><p>我们来回顾一下前面是怎么用Picasso加载图片的：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Picasso.with(<span class="keyword">this</span>)</div><div class="line">       .load(<span class="string">"http://ww3.sinaimg.cn/large/610dc034jw1fasakfvqe1j20u00mhgn2.jpg"</span>)</div><div class="line">       .into(mImageView);</div></pre></td></tr></table></figure></p>
+<p><strong>总共3步：</strong></p>
+<ol>
+<li>用with方法获取一个Picasso 示例</li>
+<li>用load方法加载图片</li>
+<li>用into 放法显示图片</li>
+</ol>
+<p>首先Picasso是一个单例模式，我们每一次获取的示例都是默认提供给我们的实例。但是也可以不用它给的Instance,我们直接用builder来构造一个Picasso:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Picasso.Builder builder = <span class="keyword">new</span> Picasso.Builder(<span class="keyword">this</span>);</div><div class="line"><span class="comment">//构造一个Picasso</span></div><div class="line">Picasso picasso = builder.build();</div><div class="line"><span class="comment">//加载图片</span></div><div class="line">picasso.load(URL)</div><div class="line">.into(mImageView);</div></pre></td></tr></table></figure></p>
+<p>这样我们就构造了一个局部的Picasso实例，当然了，我们直接用new 了一个builder，然后build()生成了一个Picasso。这跟默认的通过with方法获取的实例是一样的。那么现在我们就可以配置一些自定义的功能了。</p>
+<h3 id="2-配置自定义下载器-downLoader"><a href="#2-配置自定义下载器-downLoader" class="headerlink" title="2, 配置自定义下载器 downLoader"></a>2, 配置自定义下载器 downLoader</h3><p>如果我们不想用默认提供的Downloader,那么我们可以自定义一个下载器然后配置进去。举个例子：</p>
+<h4 id="1-先自定义一个Downloader-只是举个例子，并没有实现"><a href="#1-先自定义一个Downloader-只是举个例子，并没有实现" class="headerlink" title="(1) 先自定义一个Downloader(只是举个例子，并没有实现):"></a>(1) 先自定义一个Downloader(只是举个例子，并没有实现):</h4><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by zhouwei on 17/2/26.</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomDownloader</span> <span class="keyword">implements</span> <span class="title">Downloader</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> Response <span class="title">load</span><span class="params">(Uri uri, <span class="keyword">int</span> networkPolicy)</span> <span class="keyword">throws</span> IOException </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">shutdown</span><span class="params">()</span> </span>&#123;</div><div class="line"></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="2-然后通过builder配置："><a href="#2-然后通过builder配置：" class="headerlink" title="(2) 然后通过builder配置："></a>(2) 然后通过builder配置：</h4><figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"> //配置下载器</div><div class="line">builder.downloader(new CustomDownloader());</div><div class="line">//构造一个Picasso</div><div class="line">Picasso picasso = builder.build();</div><div class="line">```  </div><div class="line">这样配置后，我们用build()生成的Picasso 实例来加载图片就会使用自定义的下载器来下载图片了。</div><div class="line"></div><div class="line">### 3.配置缓存</div><div class="line">前面说过，内存缓存是用的LRU Cahce ,大小是手机内存的15% ，如果你想缓存大小更大一点或者更小一点，可以自定义，然后配置。</div><div class="line">``` java</div><div class="line">//配置缓存</div><div class="line">LruCache cache = new LruCache(5 * 1024 * 1024);// 设置缓存大小</div><div class="line">builder.memoryCache(cache);</div></pre></td></tr></table></figure>
+<p>上面只是一个简单的举例，当然了你可以自定义，也可以使用LRUCache,改变大小，改变存储路径等等。</p>
+<blockquote>
+<p>提示： 很遗憾，好像没有提供改变磁盘缓存的接口，那就只能用默认的了。</p>
+</blockquote>
+<h3 id="4-配置线程池"><a href="#4-配置线程池" class="headerlink" title="4.配置线程池"></a>4.配置线程池</h3><p>Picasso 默认的线程池的核心线程数为3，如果你觉得不够用的话，可以配置自己需要的线程池，举个列子：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//配置线程池</span></div><div class="line">ExecutorService executorService = Executors.newFixedThreadPool(<span class="number">8</span>);</div><div class="line">builder.executor(executorService);</div></pre></td></tr></table></figure></p>
+<h3 id="5-配置全局的-Picasso-Instance"><a href="#5-配置全局的-Picasso-Instance" class="headerlink" title="5.配置全局的 Picasso Instance"></a>5.配置全局的 Picasso Instance</h3><p>上面说的这些自定义配置项目都是应用在一个局部的Picasso instance 上的，我们不可能每一次使用都要重新配置一下，这样就太麻烦了。我们希望我们的这些自定义配置能在整个项目都应用上，并且只配置一次。其实Picasso 给我们提供了这样的方法。可以调用<code>setSingletonInstance(Picasso picasso)</code>就可以了，看一下这个方法的源码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">  * Set the global instance returned from &#123;<span class="doctag">@link</span> #with&#125;.</div><div class="line">  * &lt;p&gt;</div><div class="line">  * This method must be called before any calls to &#123;<span class="doctag">@link</span> #with&#125; and may only be called once.</div><div class="line">  */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">setSingletonInstance</span><span class="params">(Picasso picasso)</span> </span>&#123;</div><div class="line">	<span class="keyword">synchronized</span> (Picasso.class) &#123;</div><div class="line">		<span class="keyword">if</span> (singleton != <span class="keyword">null</span>) &#123;</div><div class="line">			<span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"Singleton instance already exists."</span>);</div><div class="line">		&#125;</div><div class="line">		singleton = picasso;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>设置一个通过with方法返回的全局instance。我们只希望配置一次，所以，我们应该在Application 的onCreate方法中做全局配置就可以了。app一启动就配置好，然后直接和前面的使用方法一样，调用with方法获取Picasso instance 加载图片就OK了。</p>
+<p>因此在Application 中添加如下代码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">()</span> </span>&#123;</div><div class="line">	<span class="keyword">super</span>.onCreate();</div><div class="line"></div><div class="line">	<span class="comment">// 配置全局的Picasso instance </span></div><div class="line"></div><div class="line">	Picasso.Builder builder = <span class="keyword">new</span> Picasso.Builder(<span class="keyword">this</span>);</div><div class="line">	<span class="comment">//配置下载器</span></div><div class="line">	builder.downloader(<span class="keyword">new</span> CustomDownloader());</div><div class="line">	<span class="comment">//配置缓存</span></div><div class="line">	LruCache cache = <span class="keyword">new</span> LruCache(<span class="number">5</span>*<span class="number">1024</span>*<span class="number">1024</span>);<span class="comment">// 设置缓存大小</span></div><div class="line">	builder.memoryCache(cache);</div><div class="line">	<span class="comment">//配置线程池</span></div><div class="line">	ExecutorService executorService = Executors.newFixedThreadPool(<span class="number">8</span>);</div><div class="line">	builder.executor(executorService);</div><div class="line"></div><div class="line">	<span class="comment">//构造一个Picasso</span></div><div class="line">	Picasso picasso = builder.build();</div><div class="line">	<span class="comment">// 设置全局单列instance </span></div><div class="line">	Picasso.setSingletonInstance(picasso);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>然后应用这些自定义配置加载图片  </p>
+<p><code>Picasso.with(this).load(&quot;http://ww3.sinaimg.cn/large/610dc034jw1fasakfvqe1j20u00mhgn2.jpg&quot;).into(mImageView);</code><br>用法和以前的一样，但是我们已经将我们的自定义配置应用上了。</p>
+<h1 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h1><p>以上就是对Picasso 用法的全部总结，如有什么问题，欢迎留言指正。Picasso真的是一个强大的图片加载缓存库，API 简单好用，而且是链式调用的（这点我特别喜欢）。官方文档写的比较简单，很多用法都要看源码和注释才知道。希望本文能给才开始使用Picasso 的同学一点帮助。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/27/android-view-performance-optimizing/" rel="next" title="Android 界面性能调优">
+                <i class="fa fa-chevron-left"></i> Android 界面性能调优
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/30/android-responsive-code/" rel="prev" title="Android 响应式编程的应用">
+                Android 响应式编程的应用 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">51</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用"><span class="nav-number">2.</span> <span class="nav-text">使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#一、添加依赖"><span class="nav-number">2.1.</span> <span class="nav-text">一、添加依赖</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二、加载显示图片"><span class="nav-number">2.2.</span> <span class="nav-text">二、加载显示图片</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-load-Uri-uri-加载一个以Uri路径给的图片"><span class="nav-number">2.2.1.</span> <span class="nav-text">1.load(Uri uri) 加载一个以Uri路径给的图片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-load-File-file-加载File中的图片"><span class="nav-number">2.2.2.</span> <span class="nav-text">2.load(File file) 加载File中的图片</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-load-int-resourceId-加载本地资源图片"><span class="nav-number">2.2.3.</span> <span class="nav-text">3.load(int resourceId) 加载本地资源图片</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三、placeholder-amp-error-amp-noPlaceholder-amp-noFade"><span class="nav-number">2.3.</span> <span class="nav-text">三、placeholder& error & noPlaceholder & noFade</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-placeholder"><span class="nav-number">2.3.1.</span> <span class="nav-text">1.placeholder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#3-noPlaceholder"><span class="nav-number">2.3.2.</span> <span class="nav-text">3.noPlaceholder</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-noFade"><span class="nav-number">2.3.3.</span> <span class="nav-text">4.noFade</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#四、设置图片尺寸-Resize-、缩放-Scale-和裁剪-Crop"><span class="nav-number">2.4.</span> <span class="nav-text">四、设置图片尺寸(Resize)、缩放(Scale)和裁剪(Crop)</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-Resize-int-w-int-h"><span class="nav-number">2.4.1.</span> <span class="nav-text">1.Resize(int w,int h)</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-onlyScaleDown"><span class="nav-number">2.4.2.</span> <span class="nav-text">2.onlyScaleDown</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-centerInside"><span class="nav-number">2.4.3.</span> <span class="nav-text">4.centerInside</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-fit"><span class="nav-number">2.4.4.</span> <span class="nav-text">5.fit</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#五、图片旋转Rotation"><span class="nav-number">2.5.</span> <span class="nav-text">五、图片旋转Rotation()</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#六、转换器Transformation"><span class="nav-number">2.6.</span> <span class="nav-text">六、转换器Transformation</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-首先定义一个转换器继承-Transformation"><span class="nav-number">2.6.1.</span> <span class="nav-text">1.首先定义一个转换器继承 Transformation</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-加载图片的时候，在into-方法前面调用-transform方法-应用Transformation"><span class="nav-number">2.6.2.</span> <span class="nav-text">2.加载图片的时候，在into 方法前面调用 transform方法 应用Transformation</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-灰度的Transformation"><span class="nav-number">2.6.2.1.</span> <span class="nav-text">1.灰度的Transformation</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-如果是多个Transformation操作，有2种方式应用"><span class="nav-number">2.6.2.2.</span> <span class="nav-text">2.如果是多个Transformation操作，有2种方式应用</span></a></li></ol></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#七、请求优先级"><span class="nav-number">2.7.</span> <span class="nav-text">七、请求优先级</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#八、Tag管理请求"><span class="nav-number">2.8.</span> <span class="nav-text">八、Tag管理请求</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#九、同步／异步加载图片"><span class="nav-number">2.9.</span> <span class="nav-text">九、同步／异步加载图片</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-get-同步"><span class="nav-number">2.9.1.</span> <span class="nav-text">1.get() 同步</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-异步的方式加载图片，fetch"><span class="nav-number">2.9.2.</span> <span class="nav-text">2.异步的方式加载图片，fetch()</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十、缓存（Disk-和-Memory）"><span class="nav-number">2.10.</span> <span class="nav-text">十、缓存（Disk 和 Memory）</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-memoryPolicy-设置内存缓存策略"><span class="nav-number">2.10.1.</span> <span class="nav-text">1.memoryPolicy 设置内存缓存策略</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-networkPolicy-设置磁盘缓存策略"><span class="nav-number">2.10.2.</span> <span class="nav-text">2.networkPolicy 设置磁盘缓存策略</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十一、Debug-和日志"><span class="nav-number">2.11.</span> <span class="nav-text">十一、Debug 和日志</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-缓存指示器"><span class="nav-number">2.11.1.</span> <span class="nav-text">1.缓存指示器</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-日志"><span class="nav-number">2.11.2.</span> <span class="nav-text">2.日志</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#十二、Picasso-扩展"><span class="nav-number">2.12.</span> <span class="nav-text">十二、Picasso 扩展</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#1-用Builder-自己构造一个Picasso-Instance"><span class="nav-number">2.12.1.</span> <span class="nav-text">1.用Builder 自己构造一个Picasso Instance</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#2-配置自定义下载器-downLoader"><span class="nav-number">2.12.2.</span> <span class="nav-text">2, 配置自定义下载器 downLoader</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-先自定义一个Downloader-只是举个例子，并没有实现"><span class="nav-number">2.12.2.1.</span> <span class="nav-text">(1) 先自定义一个Downloader(只是举个例子，并没有实现):</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-然后通过builder配置："><span class="nav-number">2.12.2.2.</span> <span class="nav-text">(2) 然后通过builder配置：</span></a></li></ol></li><li class="nav-item nav-level-3"><a class="nav-link" href="#4-配置线程池"><span class="nav-number">2.12.3.</span> <span class="nav-text">4.配置线程池</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#5-配置全局的-Picasso-Instance"><span class="nav-number">2.12.4.</span> <span class="nav-text">5.配置全局的 Picasso Instance</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#结尾"><span class="nav-number">3.</span> <span class="nav-text">结尾</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

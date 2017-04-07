@@ -1,0 +1,1001 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言写了那么多自定义View，但是对于其中的原理以及工作流程还不是很了解，所以这篇博文来总结和回顾一下Android开发中的View的工作流程，view的工作流程主要包含measure、layout和draw三大流程，在进入主题之前，先要理解一下几个概念，以便更好的理解view的三大流程。转载自《安卓复习之旅——View的工作流程》
+了解ViewRoot和DecorViewViewRoot对应V">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android View的工作流程">
+<meta property="og:url" content="http://adolph.cc/2017/01/08/android-view-workflow/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言写了那么多自定义View，但是对于其中的原理以及工作流程还不是很了解，所以这篇博文来总结和回顾一下Android开发中的View的工作流程，view的工作流程主要包含measure、layout和draw三大流程，在进入主题之前，先要理解一下几个概念，以便更好的理解view的三大流程。转载自《安卓复习之旅——View的工作流程》
+了解ViewRoot和DecorViewViewRoot对应V">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png">
+<meta property="og:updated_time" content="2017-04-06T15:56:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android View的工作流程">
+<meta name="twitter:description" content="前言写了那么多自定义View，但是对于其中的原理以及工作流程还不是很了解，所以这篇博文来总结和回顾一下Android开发中的View的工作流程，view的工作流程主要包含measure、layout和draw三大流程，在进入主题之前，先要理解一下几个概念，以便更好的理解view的三大流程。转载自《安卓复习之旅——View的工作流程》
+了解ViewRoot和DecorViewViewRoot对应V">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/01/08/android-view-workflow/"/>
+
+
+
+
+
+  <title> Android View的工作流程 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/01/08/android-view-workflow/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android View的工作流程
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-01-08T08:59:08+08:00">
+                2017-01-08
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <a id="more"></a>
+<h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>写了那么多自定义View，但是对于其中的原理以及工作流程还不是很了解，所以这篇博文来总结和回顾一下Android开发中的View的工作流程，view的工作流程主要包含measure、layout和draw三大流程，在进入主题之前，先要理解一下几个概念，以便更好的理解view的三大流程。<br><strong>转载自<a href="http://blog.csdn.net/lin_t_s/article/details/56668085" target="_blank" rel="external">《安卓复习之旅——View的工作流程》</a></strong></p>
+<h1 id="了解ViewRoot和DecorView"><a href="#了解ViewRoot和DecorView" class="headerlink" title="了解ViewRoot和DecorView"></a>了解ViewRoot和DecorView</h1><p>ViewRoot对应ViewRootImpl类，实现了ViewParent接口，它是连接WindowManager和DecorView的桥梁，WindowManager的实现类是WindowManagerImpl类:<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="keyword">final</span> <span class="class"><span class="keyword">class</span> <span class="title">WindowManagerImpl</span> <span class="keyword">implements</span> <span class="title">WindowManager</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Context mContext;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">final</span> Window mParentWindow;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> IBinder mDefaultToken;</div></pre></td></tr></table></figure></p>
+<p>其中WindowManagerGlobal相当与一个代理类，WindowManagerImpl 中的实现的方法都是通过WindowManagerGlobal来具体实现的，我们来看看WindowManagerImpl 中的addView()方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(@NonNull View view, @NonNull ViewGroup.LayoutParams params)</span> </span>&#123;</div><div class="line">        applyDefaultToken(params);</div><div class="line">        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出确实是通过WindowManagerGlobal的addView()方法来具体实现的，进入WindowManagerGlobal的addView()方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">addView</span><span class="params">(View view, ViewGroup.LayoutParams params,</span></span></div><div class="line">           Display display, Window parentWindow) &#123;</div><div class="line">     ...</div><div class="line">       <span class="keyword">final</span> WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;</div><div class="line">       ViewRootImpl root;</div><div class="line">       View panelParentView = <span class="keyword">null</span>;</div><div class="line"></div><div class="line">       <span class="keyword">synchronized</span> (mLock) &#123;</div><div class="line">           <span class="keyword">int</span> index = findViewLocked(view, <span class="keyword">false</span>);</div><div class="line">           <span class="keyword">if</span> (index &gt;= <span class="number">0</span>) &#123;</div><div class="line">               <span class="keyword">if</span> (mDyingViews.contains(view)) &#123;</div><div class="line">                   <span class="comment">// Don't wait for MSG_DIE to make it's way through root's queue.</span></div><div class="line">                   mRoots.get(index).doDie();</div><div class="line">               &#125; <span class="keyword">else</span> &#123;</div><div class="line">                   <span class="keyword">throw</span> <span class="keyword">new</span> IllegalStateException(<span class="string">"View "</span> + view</div><div class="line">                           + <span class="string">" has already been added to the window manager."</span>);</div><div class="line">               &#125;</div><div class="line">               <span class="comment">// The previous removeView() had not completed executing. Now it has.</span></div><div class="line">           &#125;</div><div class="line"></div><div class="line">           <span class="comment">// If this is a panel window, then find the window it is being</span></div><div class="line">           <span class="comment">// attached to for future reference.</span></div><div class="line">           <span class="keyword">if</span> (wparams.type &gt;= WindowManager.LayoutParams.FIRST_SUB_WINDOW &amp;&amp;</div><div class="line">                   wparams.type &lt;= WindowManager.LayoutParams.LAST_SUB_WINDOW) &#123;</div><div class="line">               <span class="keyword">final</span> <span class="keyword">int</span> count = mViews.size();</div><div class="line">               <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</div><div class="line">                   <span class="keyword">if</span> (mRoots.get(i).mWindow.asBinder() == wparams.token) &#123;</div><div class="line">                       panelParentView = mViews.get(i);</div><div class="line">                   &#125;</div><div class="line">               &#125;</div><div class="line">           &#125;</div><div class="line">           <span class="comment">//实例化ViewRootImpl</span></div><div class="line">           root = <span class="keyword">new</span> ViewRootImpl(view.getContext(), display);</div><div class="line"></div><div class="line">           view.setLayoutParams(wparams);</div><div class="line"></div><div class="line">           mViews.add(view);</div><div class="line">           mRoots.add(root);</div><div class="line">           mParams.add(wparams);</div><div class="line"></div><div class="line">           <span class="comment">// do this last because it fires off messages to start doing things</span></div><div class="line">           <span class="keyword">try</span> &#123;</div><div class="line">               <span class="comment">//连接WindowManager和DecorView</span></div><div class="line">               root.setView(view, wparams, panelParentView);</div><div class="line">           &#125; <span class="keyword">catch</span> (RuntimeException e) &#123;</div><div class="line">               <span class="comment">// BadTokenException or InvalidDisplayException, clean up.</span></div><div class="line">               <span class="keyword">if</span> (index &gt;= <span class="number">0</span>) &#123;</div><div class="line">                   removeViewLocked(index, <span class="keyword">true</span>);</div><div class="line">               &#125;</div><div class="line">               <span class="keyword">throw</span> e;</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>由上面注释的代码可以看出ViewRootImpl是连接WindowManager和DecorView的桥梁。</p>
+<p>DecorView是FrameLayout的子类，它可以被认为是Android视图树的根节点视图。DecorView作为顶级View，一般情况下它内部包含一个竖直方向的LinearLayout，在这个LinearLayout里面有上下两个部分（具体情况和Android版本及主体有关），上面的是标题栏，下面的是内容栏。在Activity中通过setContentView所设置的布局文件其实就是被加到内容栏之中的，而内容栏的id是content，在代码中可以通过ViewGroup content = （ViewGroup)findViewById(R.android.id.content)来得到content对应的layout。<br>DecorView的结构图：<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"></p>
+<h1 id="View的绘制流程"><a href="#View的绘制流程" class="headerlink" title="View的绘制流程"></a>View的绘制流程</h1><p>View的绘制流程是从ViewRootImpl的performTraversals()方法开始的，它经过measure、layout和draw三个流程才能最终将view绘制出来，其中measure测量view的宽高，layout确定view在父容器中的位置，draw负责将view绘制在屏幕上。<br>view的绘制流程图：<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"></p>
+<p><strong>performTraversals()</strong>方法源码比较长，就不贴出来了，有兴趣可以去查看一下，从上面的流程图可以看出<strong>performTraversals</strong>会依次调用 <strong>performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);</strong> -  <strong>performLayout(lp, mWidth, mHeight);</strong> - <strong>performDraw();</strong>三个方法，这三个方法顶级view的三个流程，在 <strong>performMeasure()</strong>中会调用<strong>mView.measure()</strong>方法，<strong>mView.measure()</strong>又会调用<strong>onMeasure()</strong>方法对所有子元素进行测量，这个时候measure流程就从父容器传递到了子元素中，这样就完成了依次measure过程，<strong>performLayout()</strong>和<strong>performDraw()</strong>与<strong>performMeasure()</strong>过程是类似的，唯一的不同是<strong>performDraw()</strong>过程在draw方法中是通过<strong>dispatchDraw(canvas)</strong>方法来完成绘制的;</p>
+<h1 id="理解MeasureSpec"><a href="#理解MeasureSpec" class="headerlink" title="理解MeasureSpec"></a>理解MeasureSpec</h1><p>MeasureSpec是一个32位的int值，高2位代表SpecMode,低30位代表SpecSize，SpecMode是指测量模式，SpecSize是指某种测量模式下的规格大小；<br>MeasureSpec内部的一些常量：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MODE_SHIFT = <span class="number">30</span>;</div><div class="line">        <span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MODE_MASK  = <span class="number">0x3</span> &lt;&lt; MODE_SHIFT;      </div><div class="line">        <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> UNSPECIFIED = <span class="number">0</span> &lt;&lt; MODE_SHIFT;       </div><div class="line">        <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> EXACTLY     = <span class="number">1</span> &lt;&lt; MODE_SHIFT;        </div><div class="line">        <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> AT_MOST     = <span class="number">2</span> &lt;&lt; MODE_SHIFT;</div><div class="line"></div><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">makeMeasureSpec</span><span class="params">(<span class="keyword">int</span> size,<span class="keyword">int</span> mode)</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span> (sUseBrokenMakeMeasureSpec) &#123;</div><div class="line">                <span class="keyword">return</span> size + mode;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">return</span> (size &amp; ~MODE_MASK) | (mode &amp; MODE_MASK);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getMode</span><span class="params">(<span class="keyword">int</span> measureSpec)</span> </span>&#123;</div><div class="line">            <span class="comment">//noinspection ResourceType</span></div><div class="line">            <span class="keyword">return</span> (measureSpec &amp; MODE_MASK);</div><div class="line">        &#125;</div><div class="line"></div><div class="line"> <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getSize</span><span class="params">(<span class="keyword">int</span> measureSpec)</span> </span>&#123;</div><div class="line">            <span class="keyword">return</span> (measureSpec &amp; ~MODE_MASK);</div><div class="line">        &#125;</div></pre></td></tr></table></figure></p>
+<p>measureSpec 将SpecMode和SpecSize打包成一个int值，一组SpecMode和SpecSize也可以打包成一个measureSpec 通过getMode和getSize可以得到对应的值；<br>SpecMode有三种类型：</p>
+<ul>
+<li>UNSPECIFIED<br>父容器没有对view有任何限制，要多大给多大；</li>
+<li>EXACTLY<br>父容器已经检测出view所需要的精确大小，view的大小就是SpecSize所指定的值，它对应于LayoutParams中的match_parent和具体的数值两种模式；</li>
+<li>AT_MOST<br>父容器指定一个可用的大小即SpecSize，view的大小不能超过这个大小，对应于layoutParams中的wrap——content；</li>
+</ul>
+<p>measureSpec 与LayoutParams有什么关系呢？当我们给view设置了LayoutParams后，系统会将LayoutParams在父容器的约束下转换成对应的measureSpec ；<br>对于DecorView来说，在ViewRootImpl中的measureHierarchy方法中进行了measureSpec 的创建过程，desiredWindowWidth为屏幕宽度，desiredWindowHeight为屏幕高度；<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);</div><div class="line">           childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);</div><div class="line">           performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);</div></pre></td></tr></table></figure></p>
+<p>进入getRootMeasureSpec方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getRootMeasureSpec</span><span class="params">(<span class="keyword">int</span> windowSize, <span class="keyword">int</span> rootDimension)</span> </span>&#123;</div><div class="line">       <span class="keyword">int</span> measureSpec;</div><div class="line">       <span class="keyword">switch</span> (rootDimension) &#123;</div><div class="line"></div><div class="line">       <span class="keyword">case</span> ViewGroup.LayoutParams.MATCH_PARENT:</div><div class="line">           <span class="comment">// Window can't resize. Force root view to be windowSize.</span></div><div class="line">           measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);</div><div class="line">           <span class="keyword">break</span>;</div><div class="line">       <span class="keyword">case</span> ViewGroup.LayoutParams.WRAP_CONTENT:</div><div class="line">           <span class="comment">// Window can resize. Set max size for root view.</span></div><div class="line">           measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.AT_MOST);</div><div class="line">           <span class="keyword">break</span>;</div><div class="line">       <span class="keyword">default</span>:</div><div class="line">           <span class="comment">// Window wants to be an exact size. Force root view to be that size.</span></div><div class="line">           measureSpec = MeasureSpec.makeMeasureSpec(rootDimension, MeasureSpec.EXACTLY);</div><div class="line">           <span class="keyword">break</span>;</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> measureSpec;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>这个方法是根据DecorView自身的LayoutParams来计算出对应的measureSpec ；<br>对于普通view的measure过程是有viewgroup传递下来的，先看看viewgroup的measureChildWithMargins方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">measureChildWithMargins</span><span class="params">(View child,</span></span></div><div class="line">          <span class="keyword">int</span> parentWidthMeasureSpec, <span class="keyword">int</span> widthUsed,</div><div class="line">          <span class="keyword">int</span> parentHeightMeasureSpec, <span class="keyword">int</span> heightUsed) &#123;</div><div class="line">      <span class="keyword">final</span> MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();</div><div class="line"></div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,</div><div class="line">              mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin</div><div class="line">                      + widthUsed, lp.width);</div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,</div><div class="line">              mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin</div><div class="line">                      + heightUsed, lp.height);</div><div class="line"></div><div class="line">      child.measure(childWidthMeasureSpec, childHeightMeasureSpec);</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<p>measureChildWithMargins方法会通过getChildMeasureSpec方法计算出子元素的MeasureSpec然后子元素进行measure，从代码可以看出子元素的MeasureSpec与父容器的MeasureSpec与自身的LayoutParams有关，此外，还与view的margin和padding有关，下面进入getChildMeasureSpec方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getChildMeasureSpec</span><span class="params">(<span class="keyword">int</span> spec, <span class="keyword">int</span> padding, <span class="keyword">int</span> childDimension)</span> </span>&#123;</div><div class="line">       <span class="keyword">int</span> specMode = MeasureSpec.getMode(spec);</div><div class="line">       <span class="keyword">int</span> specSize = MeasureSpec.getSize(spec);</div><div class="line"></div><div class="line">       <span class="keyword">int</span> size = Math.max(<span class="number">0</span>, specSize - padding);</div><div class="line"></div><div class="line">       <span class="keyword">int</span> resultSize = <span class="number">0</span>;</div><div class="line">       <span class="keyword">int</span> resultMode = <span class="number">0</span>;</div><div class="line"></div><div class="line">       <span class="keyword">switch</span> (specMode) &#123;</div><div class="line">       <span class="comment">// Parent has imposed an exact size on us</span></div><div class="line">       <span class="keyword">case</span> MeasureSpec.EXACTLY:</div><div class="line">           <span class="keyword">if</span> (childDimension &gt;= <span class="number">0</span>) &#123;</div><div class="line">               resultSize = childDimension;</div><div class="line">               resultMode = MeasureSpec.EXACTLY;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.MATCH_PARENT) &#123;</div><div class="line">               <span class="comment">// Child wants to be our size. So be it.</span></div><div class="line">               resultSize = size;</div><div class="line">               resultMode = MeasureSpec.EXACTLY;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.WRAP_CONTENT) &#123;</div><div class="line">               <span class="comment">// Child wants to determine its own size. It can't be</span></div><div class="line">               <span class="comment">// bigger than us.</span></div><div class="line">               resultSize = size;</div><div class="line">               resultMode = MeasureSpec.AT_MOST;</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">break</span>;</div><div class="line"></div><div class="line">       <span class="comment">// Parent has imposed a maximum size on us</span></div><div class="line">       <span class="keyword">case</span> MeasureSpec.AT_MOST:</div><div class="line">           <span class="keyword">if</span> (childDimension &gt;= <span class="number">0</span>) &#123;</div><div class="line">               <span class="comment">// Child wants a specific size... so be it</span></div><div class="line">               resultSize = childDimension;</div><div class="line">               resultMode = MeasureSpec.EXACTLY;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.MATCH_PARENT) &#123;</div><div class="line">               <span class="comment">// Child wants to be our size, but our size is not fixed.</span></div><div class="line">               <span class="comment">// Constrain child to not be bigger than us.</span></div><div class="line">               resultSize = size;</div><div class="line">               resultMode = MeasureSpec.AT_MOST;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.WRAP_CONTENT) &#123;</div><div class="line">               <span class="comment">// Child wants to determine its own size. It can't be</span></div><div class="line">               <span class="comment">// bigger than us.</span></div><div class="line">               resultSize = size;</div><div class="line">               resultMode = MeasureSpec.AT_MOST;</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">break</span>;</div><div class="line"></div><div class="line">       <span class="comment">// Parent asked to see how big we want to be</span></div><div class="line">       <span class="keyword">case</span> MeasureSpec.UNSPECIFIED:</div><div class="line">           <span class="keyword">if</span> (childDimension &gt;= <span class="number">0</span>) &#123;</div><div class="line">               <span class="comment">// Child wants a specific size... let him have it</span></div><div class="line">               resultSize = childDimension;</div><div class="line">               resultMode = MeasureSpec.EXACTLY;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.MATCH_PARENT) &#123;</div><div class="line">               <span class="comment">// Child wants to be our size... find out how big it should</span></div><div class="line">               <span class="comment">// be</span></div><div class="line">               resultSize = View.sUseZeroUnspecifiedMeasureSpec ? <span class="number">0</span> : size;</div><div class="line">               resultMode = MeasureSpec.UNSPECIFIED;</div><div class="line">           &#125; <span class="keyword">else</span> <span class="keyword">if</span> (childDimension == LayoutParams.WRAP_CONTENT) &#123;</div><div class="line">               <span class="comment">// Child wants to determine its own size.... find out how</span></div><div class="line">               <span class="comment">// big it should be</span></div><div class="line">               resultSize = View.sUseZeroUnspecifiedMeasureSpec ? <span class="number">0</span> : size;</div><div class="line">               resultMode = MeasureSpec.UNSPECIFIED;</div><div class="line">           &#125;</div><div class="line">           <span class="keyword">break</span>;</div><div class="line">       &#125;</div><div class="line">       <span class="comment">//noinspection ResourceType</span></div><div class="line">       <span class="keyword">return</span> MeasureSpec.makeMeasureSpec(resultSize, resultMode);</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>这个方法主要作用是根据父容器的MeasureSpec与view自身的LayoutParams来确定子元素的MeasureSpec，参数中的padding指父容器已占用的大小。</p>
+<h1 id="View的三大流程"><a href="#View的三大流程" class="headerlink" title="View的三大流程"></a>View的三大流程</h1><h2 id="measure过程"><a href="#measure过程" class="headerlink" title="measure过程"></a>measure过程</h2><p>measure过程要分两种情况，一种是普通view，一种是viewgroup：</p>
+<ul>
+<li>1.view的measure<br>view的measure方法是一个final类型的方法，意味着不能重写这个方法，在这个方法中调用了onMeasure方法，我们可以重写onMeasure方法。<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">measure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">    ...</div><div class="line">          <span class="keyword">if</span> (cacheIndex &lt; <span class="number">0</span> || sIgnoreMeasureCache) &#123;</div><div class="line">              <span class="comment">// measure ourselves, this should set the measured dimension flag back</span></div><div class="line">              onMeasure(widthMeasureSpec, heightMeasureSpec);</div><div class="line">              mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;</div><div class="line">          &#125; <span class="keyword">else</span> &#123;</div><div class="line">              <span class="keyword">long</span> value = mMeasureCache.valueAt(cacheIndex);</div><div class="line">              <span class="comment">// Casting a long to int drops the high 32 bits, no mask needed</span></div><div class="line">              setMeasuredDimensionRaw((<span class="keyword">int</span>) (value &gt;&gt; <span class="number">32</span>), (<span class="keyword">int</span>) value);</div><div class="line">              mPrivateFlags3 |= PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;</div><div class="line">          &#125;</div><div class="line"></div><div class="line">        ...</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>看看onMeasure方法的实现：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onMeasure</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">      setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),</div><div class="line">              getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p>调用setMeasuredDimension方法设置view的测量值，其中getSuggestedMinimumWidth()是系统默认提供的值，这里就不深究了，下面看看getDefaultSize方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">int</span> <span class="title">getDefaultSize</span><span class="params">(<span class="keyword">int</span> size, <span class="keyword">int</span> measureSpec)</span> </span>&#123;</div><div class="line">       <span class="keyword">int</span> result = size;</div><div class="line">       <span class="keyword">int</span> specMode = MeasureSpec.getMode(measureSpec);</div><div class="line">       <span class="keyword">int</span> specSize = MeasureSpec.getSize(measureSpec);</div><div class="line"></div><div class="line">       <span class="keyword">switch</span> (specMode) &#123;</div><div class="line">       <span class="keyword">case</span> MeasureSpec.UNSPECIFIED:</div><div class="line">           result = size;</div><div class="line">           <span class="keyword">break</span>;</div><div class="line">       <span class="keyword">case</span> MeasureSpec.AT_MOST:</div><div class="line">       <span class="keyword">case</span> MeasureSpec.EXACTLY:</div><div class="line">           result = specSize;</div><div class="line">           <span class="keyword">break</span>;</div><div class="line">       &#125;</div><div class="line">       <span class="keyword">return</span> result;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+<p>在UNSPECIFIED模式下，返回系统默认值，EXACTLY和AT_MOST模式下，返回measureSpec中的值；这里也可以得到一个结论：当我们直接继承一个view的自定义控件需要重写onMeasure方法去设置wrap_content时的自身大小，否则在布局中使用wrap_content的效果与match_parent一样，原因是当view设置为wrap_content时，模式是AT_MOST，通过前一篇文章中的getChildMeasureSpec方法可以知道，view的specSize就是parentSize；重写onMeasure的代码思路如下：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> widthMode = MeasureSpec.getMode(widthMeasureSpec);</div><div class="line">    <span class="keyword">int</span> widthSize = MeasureSpec.getSize(widthMeasureSpec);</div><div class="line">    <span class="keyword">int</span> heightMode = MeasureSpec.getMode(heightMeasureSpec);</div><div class="line">    <span class="keyword">int</span> heightSize = MeasureSpec.getSize(heightMeasureSpec);</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">if</span> (widthMode == MeasureSpec.AT_MOST &amp;&amp; heightMode == MeasureSpec.AT_MOST) &#123;</div><div class="line">        setMeasuredDimension(viewWidth, viewHeight);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(widthMode == MeasureSpec.AT_MOST )&#123;</div><div class="line">        setMeasuredDimension(viewWidth, heightSize);</div><div class="line"></div><div class="line">    &#125;</div><div class="line">    <span class="keyword">else</span> <span class="keyword">if</span>(heightMode == MeasureSpec.AT_MOST )&#123;</div><div class="line">        setMeasuredDimension(widthSize, viewHeight);</div><div class="line"></div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<ul>
+<li>2.viewgroup的measure<br>对于viewgroup来说，出了完成自己的measure过程，还要遍历子view的measure方法，各个子view完成对自身的measure过程，与view不同的是，viewgroup是一个抽象类，它是通过measureChildren（）方法开始measure，先看看measureChildren方法的代码：<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">measureChildren</span><span class="params">(<span class="keyword">int</span> widthMeasureSpec, <span class="keyword">int</span> heightMeasureSpec)</span> </span>&#123;</div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> size = mChildrenCount;</div><div class="line">      <span class="keyword">final</span> View[] children = mChildren;</div><div class="line">      <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; size; ++i) &#123;</div><div class="line">          <span class="keyword">final</span> View child = children[i];</div><div class="line">          <span class="keyword">if</span> ((child.mViewFlags &amp; VISIBILITY_MASK) != GONE) &#123;</div><div class="line">              measureChild(child, widthMeasureSpec, heightMeasureSpec);</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>从以上代码可以看出，确实是会通过measureChild方法对每一个子view进行measure，<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">measureChild</span><span class="params">(View child, <span class="keyword">int</span> parentWidthMeasureSpec,</span></span></div><div class="line">          <span class="keyword">int</span> parentHeightMeasureSpec) &#123;</div><div class="line">      <span class="keyword">final</span> LayoutParams lp = child.getLayoutParams();</div><div class="line"></div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,</div><div class="line">              mPaddingLeft + mPaddingRight, lp.width);</div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,</div><div class="line">              mPaddingTop + mPaddingBottom, lp.height);</div><div class="line"></div><div class="line">      child.measure(childWidthMeasureSpec, childHeightMeasureSpec);</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<p>measureChild方法先得到子view的MeasureSpec，然后再调用子view的measure方法；</p>
+<p>view的measure过程是三大流程中最复杂的一个，measure完成以后，通过getMeasuredHeight()和getMeasuredWeight()可以得到view的测量高宽，但是在某些极端情况下，系统可能会多次measure才能得到最终的值，在这种情况下，在onMeasure中可能得到的值不是准确的。我们最好在onLayout中获取；还有一个需要注意的是，我们在onCreate、onStart和onResume中均得不到view的宽高，因为measure过程与activity的生命周期不是同步的；</p>
+<h2 id="layout过程"><a href="#layout过程" class="headerlink" title="layout过程"></a>layout过程</h2><p>layout过程的作用是viewgroup来确定子元素的位置，当viewgroup的位置确定后，会遍历所有子元素并调用其layout方法，在layout方法中又会调用onLayout方法。<br>先看viewgroup的layout方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">final</span> <span class="keyword">void</span> <span class="title">layout</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (!mSuppressLayout &amp;&amp; (mTransition == <span class="keyword">null</span> || !mTransition.isChangingLayout())) &#123;</div><div class="line">            <span class="keyword">if</span> (mTransition != <span class="keyword">null</span>) &#123;</div><div class="line">                mTransition.layoutChange(<span class="keyword">this</span>);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">super</span>.layout(l, t, r, b);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// record the fact that we noop'd it; request layout when transition finishes</span></div><div class="line">            mLayoutCalledWhileSuppressed = <span class="keyword">true</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>可以看出是调用父类的layout方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">layout</span><span class="params">(<span class="keyword">int</span> l, <span class="keyword">int</span> t, <span class="keyword">int</span> r, <span class="keyword">int</span> b)</span> </span>&#123;</div><div class="line">	<span class="keyword">if</span> ((mPrivateFlags3 &amp; PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != <span class="number">0</span>) &#123;</div><div class="line">		onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);</div><div class="line">		mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	<span class="keyword">int</span> oldL = mLeft;</div><div class="line">	<span class="keyword">int</span> oldT = mTop;</div><div class="line">	<span class="keyword">int</span> oldB = mBottom;</div><div class="line">	<span class="keyword">int</span> oldR = mRight;</div><div class="line"></div><div class="line">	<span class="keyword">boolean</span> changed = isLayoutModeOptical(mParent) ?</div><div class="line">	setOpticalFrame(l, t, r, b) : setFrame(l, t, r, b);</div><div class="line"></div><div class="line">	<span class="keyword">if</span> (changed || (mPrivateFlags &amp; PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) &#123;</div><div class="line">		onLayout(changed, l, t, r, b);</div><div class="line"></div><div class="line">		<span class="keyword">if</span> (shouldDrawRoundScrollbar()) &#123;</div><div class="line">			<span class="keyword">if</span>(mRoundScrollbarRenderer == <span class="keyword">null</span>) &#123;</div><div class="line">				mRoundScrollbarRenderer = <span class="keyword">new</span> RoundScrollbarRenderer(<span class="keyword">this</span>);</div><div class="line">			&#125;</div><div class="line">		&#125; <span class="keyword">else</span> &#123;</div><div class="line">			mRoundScrollbarRenderer = <span class="keyword">null</span>;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">		mPrivateFlags &amp;= ~PFLAG_LAYOUT_REQUIRED;</div><div class="line"></div><div class="line">		ListenerInfo li = mListenerInfo;</div><div class="line">		<span class="keyword">if</span> (li != <span class="keyword">null</span> &amp;&amp; li.mOnLayoutChangeListeners != <span class="keyword">null</span>) &#123;</div><div class="line">			ArrayList&lt;OnLayoutChangeListener&gt; listenersCopy = (ArrayList&lt;OnLayoutChangeListener&gt;)li.mOnLayoutChangeListeners.clone();</div><div class="line">			<span class="keyword">int</span> numListeners = listenersCopy.size();</div><div class="line">			<span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; numListeners; ++i) &#123;</div><div class="line">				listenersCopy.get(i).onLayoutChange(<span class="keyword">this</span>, l, t, r, b, oldL, oldT, oldR, oldB);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	mPrivateFlags &amp;= ~PFLAG_FORCE_LAYOUT;</div><div class="line">	mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>首先通过setFrame确定view的四个顶点位置，此时父容器的位置也就确定了，接下来就会调用onLayout方法确定子元素的位置；</p>
+<p><code>protected void onLayout(boolean changed, int left, int top, int right, int bottom) {}</code></p>
+<p>onLayout方法并没有给出具体的实现，当继承特定的组件时，不需要我们重写onLayout方法，继承viewgroup时则需要重写onLayout方法。</p>
+<h2 id="draw过程"><a href="#draw过程" class="headerlink" title="draw过程"></a>draw过程</h2><p>draw的作用是将view绘制到屏幕上，view的绘制流程遵循以下几步：</p>
+<ul>
+<li>绘制背景drawBackground(canvas);</li>
+<li>绘制自己onDraw(canvas);</li>
+<li>绘制子元素dispatchDraw(canvas);</li>
+<li>绘制装饰onDrawForeground(canvas);</li>
+</ul>
+<p>看看draw源码：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">draw</span><span class="params">(Canvas canvas)</span> </span>&#123;</div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> privateFlags = mPrivateFlags;</div><div class="line">      <span class="keyword">final</span> <span class="keyword">boolean</span> dirtyOpaque = (privateFlags &amp; PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &amp;&amp;</div><div class="line">              (mAttachInfo == <span class="keyword">null</span> || !mAttachInfo.mIgnoreDirtyState);</div><div class="line">      mPrivateFlags = (privateFlags &amp; ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;</div><div class="line"></div><div class="line">      <span class="comment">/*</span></div><div class="line">       * Draw traversal performs several drawing steps which must be executed</div><div class="line">       * in the appropriate order:</div><div class="line">       *</div><div class="line">       *      1. Draw the background</div><div class="line">       *      2. If necessary, save the canvas' layers to prepare for fading</div><div class="line">       *      3. Draw view's content</div><div class="line">       *      4. Draw children</div><div class="line">       *      5. If necessary, draw the fading edges and restore layers</div><div class="line">       *      6. Draw decorations (scrollbars for instance)</div><div class="line">       */</div><div class="line"></div><div class="line">      <span class="comment">// Step 1, draw the background, if needed</span></div><div class="line">      <span class="keyword">int</span> saveCount;</div><div class="line"></div><div class="line">      <span class="keyword">if</span> (!dirtyOpaque) &#123;</div><div class="line">          drawBackground(canvas);</div><div class="line">      &#125;</div><div class="line"></div><div class="line">      <span class="comment">// skip step 2 &amp; 5 if possible (common case)</span></div><div class="line">      <span class="keyword">final</span> <span class="keyword">int</span> viewFlags = mViewFlags;</div><div class="line">      <span class="keyword">boolean</span> horizontalEdges = (viewFlags &amp; FADING_EDGE_HORIZONTAL) != <span class="number">0</span>;</div><div class="line">      <span class="keyword">boolean</span> verticalEdges = (viewFlags &amp; FADING_EDGE_VERTICAL) != <span class="number">0</span>;</div><div class="line">      <span class="keyword">if</span> (!verticalEdges &amp;&amp; !horizontalEdges) &#123;</div><div class="line">          <span class="comment">// Step 3, draw the content</span></div><div class="line">          <span class="keyword">if</span> (!dirtyOpaque) onDraw(canvas);</div><div class="line"></div><div class="line">          <span class="comment">// Step 4, draw the children</span></div><div class="line">          dispatchDraw(canvas);</div><div class="line"></div><div class="line">          <span class="comment">// Overlay is part of the content and draws beneath Foreground</span></div><div class="line">          <span class="keyword">if</span> (mOverlay != <span class="keyword">null</span> &amp;&amp; !mOverlay.isEmpty()) &#123;</div><div class="line">              mOverlay.getOverlayView().dispatchDraw(canvas);</div><div class="line">          &#125;</div><div class="line"></div><div class="line">          <span class="comment">// Step 6, draw decorations (foreground, scrollbars)</span></div><div class="line">          onDrawForeground(canvas);</div><div class="line"></div><div class="line">          <span class="comment">// we're done...</span></div><div class="line">          <span class="keyword">return</span>;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">     ...</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<p>view绘制过程的传递是通过 dispatchDraw(canvas)来实现的， dispatchDraw(canvas);会遍历所有的子元素的draw方法，view有一个特殊的方法：setWillNotDraw，先看一下源码;<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line">     * If this view doesn't do any drawing on its own, set this flag to</div><div class="line">     * allow further optimizations. By default, this flag is not set on</div><div class="line">     * View, but could be set on some View subclasses such as ViewGroup.</div><div class="line">     *</div><div class="line">     * Typically, if you override &#123;<span class="doctag">@link</span> #onDraw(android.graphics.Canvas)&#125;</div><div class="line">     * you should clear this flag.</div><div class="line">     *</div><div class="line">     * <span class="doctag">@param</span> willNotDraw whether or not this View draw on its own</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setWillNotDraw</span><span class="params">(<span class="keyword">boolean</span> willNotDraw)</span> </span>&#123;</div><div class="line">        setFlags(willNotDraw ? WILL_NOT_DRAW : <span class="number">0</span>, DRAW_MASK);</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p>意思是如果一个view不需要绘制任何内容，那么设置这个标记位为TRUE后，系统会进行优化，默认情况下标记位为FALSE。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/01/04/android-efficient-tools/" rel="next" title="Android 高效开发工具库">
+                <i class="fa fa-chevron-left"></i> Android 高效开发工具库
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/01/15/android-quick-develop-frame/" rel="prev" title="Android 快速开发框架">
+                Android 快速开发框架 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">51</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#了解ViewRoot和DecorView"><span class="nav-number">2.</span> <span class="nav-text">了解ViewRoot和DecorView</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#View的绘制流程"><span class="nav-number">3.</span> <span class="nav-text">View的绘制流程</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#理解MeasureSpec"><span class="nav-number">4.</span> <span class="nav-text">理解MeasureSpec</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#View的三大流程"><span class="nav-number">5.</span> <span class="nav-text">View的三大流程</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#measure过程"><span class="nav-number">5.1.</span> <span class="nav-text">measure过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#layout过程"><span class="nav-number">5.2.</span> <span class="nav-text">layout过程</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#draw过程"><span class="nav-number">5.3.</span> <span class="nav-text">draw过程</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

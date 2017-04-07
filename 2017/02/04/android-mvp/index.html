@@ -1,0 +1,1050 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="MVP 这种模式出现已经很久了，在网上有些关于 MVP 开源代码2014年就有了。近期由于面试都有问这方面的问题，所以来了解一下。网上关于 MVP 的资料其实也不少，通常都要把 MVP 和 MVC 做一下比较，MVC通常一般都会应用，这篇文章就来学习下MVP模式。
+一、什么是MVP？随着UI创建技术的功能日益增强，UI层也履行着越来越多的职责。为了更好地细分视图(View)与模型(Model)的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android MVP模式">
+<meta property="og:url" content="http://adolph.cc/2017/02/04/android-mvp/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="MVP 这种模式出现已经很久了，在网上有些关于 MVP 开源代码2014年就有了。近期由于面试都有问这方面的问题，所以来了解一下。网上关于 MVP 的资料其实也不少，通常都要把 MVP 和 MVC 做一下比较，MVC通常一般都会应用，这篇文章就来学习下MVP模式。
+一、什么是MVP？随着UI创建技术的功能日益增强，UI层也履行着越来越多的职责。为了更好地细分视图(View)与模型(Model)的">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819849456583.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819875942251.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819877439872.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819813736752.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/2017022714881981564410.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819816221120.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819817269813.png">
+<meta property="og:updated_time" content="2017-04-06T15:56:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android MVP模式">
+<meta name="twitter:description" content="MVP 这种模式出现已经很久了，在网上有些关于 MVP 开源代码2014年就有了。近期由于面试都有问这方面的问题，所以来了解一下。网上关于 MVP 的资料其实也不少，通常都要把 MVP 和 MVC 做一下比较，MVC通常一般都会应用，这篇文章就来学习下MVP模式。
+一、什么是MVP？随着UI创建技术的功能日益增强，UI层也履行着越来越多的职责。为了更好地细分视图(View)与模型(Model)的">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20170227148819849456583.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/02/04/android-mvp/"/>
+
+
+
+
+
+  <title> Android MVP模式 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/02/04/android-mvp/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android MVP模式
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-02-04T20:07:08+08:00">
+                2017-02-04
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <a id="more"></a>
+<p>MVP 这种模式出现已经很久了，在网上有些关于 MVP 开源代码2014年就有了。近期由于面试都有问这方面的问题，所以来了解一下。网上关于 MVP 的资料其实也不少，通常都要把 MVP 和 MVC 做一下比较，MVC通常一般都会应用，这篇文章就来学习下MVP模式。</p>
+<h1 id="一、什么是MVP？"><a href="#一、什么是MVP？" class="headerlink" title="一、什么是MVP？"></a>一、什么是MVP？</h1><p>随着UI创建技术的功能日益增强，UI层也履行着越来越多的职责。为了更好地细分视图(View)与模型(Model)的功能，让View专注于处理数据的可视化以及与用户的交互，同时让Model只关系数据的处理，基于MVC概念的MVP(Model-View-Presenter)模式应运而生。<br>MVP 是 Model、Presenter、View 的缩写，三个部分的关系如下图所示。<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148819849456583.png" alt="20170227148819849456583.png"> </p>
+<p>在 Android 项目中，负责界面展示的模块（所有的 Activitiy 、Fragment以及 View 的子类）都可以划分到 View 这个层次，所有的业务逻辑处理（请求网络数据、数据库读取等）可以划分到 Model 这个层次，为了使得 View 和 Model 之间松耦合，用 Presenter 帮助解耦。所以可以猜测，在具体实现中 Presenter 类肯定要持有 View 和 Model 的引用。现在来说一下，上图中三个箭头的意思。流程是这样子的，从左到右看，比如我们刚进入一个 Activity，那么这个 Activity 做为 View 层，肯定需要通知 Presenter 加载数据，而Presenter会继续调用Model层加载数据，等Model加载完毕后，回调给 Presenter，Presenter 持有View引用，再通知View更新界面。</p>
+<h2 id="MVP模式的三个角色的作用："><a href="#MVP模式的三个角色的作用：" class="headerlink" title="MVP模式的三个角色的作用："></a>MVP模式的三个角色的作用：</h2><ul>
+<li>Presenter-中介<br>主演沟通View和Model的桥梁，他从Model获取数据后返回给View层，是的View层和Model层之间没有耦合，从而奖业务逻辑从View层抽离。</li>
+<li>Model-房主<br>Model主要提供数据的存取、检索、操纵功能，Presenter需要通过Model层存储、获取数据，Model层就想是一个仓库。</li>
+<li>View-用户<br>负责绘制UI元素、与用户进行交互(在Android中体现为Activity)。View通常是指Activity、Fragment或者某个View控件。它含有一个Presenter成员变量，同时它需要实现一个逻辑接口，奖View上的操作转交割Presenter进行实现，最后Presenter调用View逻辑接口将结果返回给View元素。</li>
+<li>View interface<br>需要View实现的接口，View通过View interface与Presenter进行交互，降低耦合，方便进行单元测试;</li>
+</ul>
+<h2 id="为什么使用MVP模式"><a href="#为什么使用MVP模式" class="headerlink" title="为什么使用MVP模式"></a>为什么使用MVP模式</h2><p>在Android开发中，Activity并不是一个标准的MVC模式中的Controller，它的首要职责是加载应用的布局和初始化用户界面，并接受并处理来自用户的操作请求，进而作出响应。随着界面及其逻辑的复杂度不断提升，Activity类的职责不断增加，以致变得庞大臃肿。当我们将其中复杂的逻辑处理移至另外的一个类（Presneter）中时，Activity其实就是MVP模式中View，它负责UI元素的初始化，建立UI元素与Presenter的关联（Listener之类），同时自己也会处理一些简单的逻辑（复杂的逻辑交由Presenter处理）.<br>另外，回想一下你在开发Android应用时是如何对代码逻辑进行单元测试的？是否每次都要将应用部署到Android模拟器或真机上，然后通过模拟用户操作进行测试？然而由于Android平台的特性，每次部署都耗费了大量的时间，这直接导致开发效率的降低。而在MVP模式中，处理复杂逻辑的Presenter是通过interface与View(Activity)进行交互的，这说明了什么？说明我们可以通过自定义类实现这个interface来模拟Activity的行为对Presenter进行单元测试，省去了大量的部署及测试的时间。</p>
+<h2 id="MVP与MVC的异同"><a href="#MVP与MVC的异同" class="headerlink" title="MVP与MVC的异同"></a>MVP与MVC的异同</h2><p>MVC模式与MVP模式都作为用来分离UI层与业务层的一种开发模式被应用了很多年。在我们选择一种开发模式时，首先需要了解一下这种模式的利弊：<br>无论MVC或是MVP模式都不可避免地存在一个弊端：<br>          <strong>额外的代码复杂度及学习成本。</strong><br>这就导致了这两种开发模式也许并不是很小型应用。<br>但比起他们的优点，这点弊端基本可以忽略了：</p>
+<ul>
+<li>(1)降低耦合度</li>
+<li>(2)模块职责划分明显</li>
+<li>(3)利于测试驱动开发</li>
+<li>(4)代码复用</li>
+<li>(5)隐藏数据</li>
+<li>(6)代码灵活性</li>
+</ul>
+<h3 id="MVP模式："><a href="#MVP模式：" class="headerlink" title="MVP模式："></a>MVP模式：</h3><ul>
+<li>View不直接与Model交互，而是通过与Presenter交互来与Model间接交互</li>
+<li>Presenter与View的交互是通过接口来进行的，更有利于添加单元测试</li>
+<li>通常View与Presenter是一对一的，但复杂的View可能绑定多个Presenter来处理逻辑     </li>
+</ul>
+<h3 id="MVC模式："><a href="#MVC模式：" class="headerlink" title="MVC模式："></a>MVC模式：</h3><ul>
+<li>View可以与Model直接交互</li>
+<li>Controller是基于行为的，并且可以被多个View共享</li>
+<li>可以负责决定显示哪个View</li>
+</ul>
+<h1 id="二、MVP的效果"><a href="#二、MVP的效果" class="headerlink" title="二、MVP的效果"></a>二、MVP的效果</h1><p>现在我们来实现这样一个Android上的Demo(如图)：可以从EditText读取用户信息并存取，也可以根据ID来从后台读出用户信息并显示。<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148819875942251.png" alt="20170227148819875942251.png">  </p>
+<p>页面布局很简单，就不介绍了。下面根据MVP原则来进行编码：<br>先来看看java文件的目录结构：<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148819877439872.png" alt="20170227148819877439872.png">  </p>
+<p>可以发现，Presenter与Model、View都是通过接口来进行交互的，既降低耦合也方便进行单元测试。</p>
+<ul>
+<li><p>(1)首先我们需要一个UserBean，用来保存用户信息</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserBean</span> </span>&#123;  </div><div class="line">	<span class="keyword">private</span> String mFirstName ;  </div><div class="line">	<span class="keyword">private</span> String mLastName ;  </div><div class="line">	<span class="function"><span class="keyword">public</span> <span class="title">UserBean</span> <span class="params">(String firstName, String lastName)</span> </span>&#123;  </div><div class="line">		<span class="keyword">this</span>.mFirstName = firstName;  </div><div class="line">		<span class="keyword">this</span>.mLastName = lastName;  </div><div class="line">	&#125;  </div><div class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">getFirstName</span><span class="params">()</span> </span>&#123;  </div><div class="line">		<span class="keyword">return</span> mFirstName ;  </div><div class="line">	&#125;  </div><div class="line">	<span class="function"><span class="keyword">public</span> String <span class="title">getLastName</span><span class="params">()</span> </span>&#123;  </div><div class="line">		<span class="keyword">return</span> mLastName ;  </div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>(2)再来看看View接口：<br>根据需求可知，View可以对ID、FirstName、LastName这三个EditText进行读操作，对FirstName和LastName进行写操作，由此定义IUserView接口：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IUserView</span> </span>&#123;  </div><div class="line">       <span class="function"><span class="keyword">int</span> <span class="title">getID</span><span class="params">()</span></span>;  </div><div class="line">       <span class="function">String <span class="title">getFristName</span><span class="params">()</span></span>;  </div><div class="line">       <span class="function">String <span class="title">getLastName</span><span class="params">()</span></span>;  </div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">setFirstName</span> <span class="params">(String firstName)</span></span>;  </div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">setLastName</span> <span class="params">(String lastName)</span></span>;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>(3)Model接口：<br>同样，Model也需要对这三个字段进行读写操作，并存储在某个载体内(这不是我们所关心的，可以存在内存、文件、数据库或者远程服务器，但对于Presenter及View无影响),定义IUserModel接口：</p>
+</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">IUserModel</span> </span>&#123;  </div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">setID</span> <span class="params">(<span class="keyword">int</span> id)</span></span>;  </div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">setFirstName</span> <span class="params">(String firstName)</span></span>;  </div><div class="line">       <span class="function"><span class="keyword">void</span> <span class="title">setLastName</span> <span class="params">(String lastName)</span></span>;  </div><div class="line">       <span class="function"><span class="keyword">int</span> <span class="title">getID</span><span class="params">()</span></span>;  </div><div class="line">       <span class="function">UserBean <span class="title">load</span> <span class="params">(<span class="keyword">int</span> id)</span></span>;<span class="comment">//通过id读取user信息,返回一个UserBean  </span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ul>
+<li><p>(4)Presenter:<br>至此，Presenter就能通过接口与View及Model进行交互了：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserPresenter</span> </span>&#123;  </div><div class="line">       <span class="keyword">private</span> IUserView mUserView ;  </div><div class="line">       <span class="keyword">private</span> IUserModel mUserModel ;  </div><div class="line">  </div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="title">UserPresenter</span> <span class="params">(IUserView view)</span> </span>&#123;  </div><div class="line">             mUserView = view;  </div><div class="line">             mUserModel = <span class="keyword">new</span> UserModel ();  </div><div class="line">       &#125;  </div><div class="line">  </div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">saveUser</span><span class="params">( <span class="keyword">int</span> id , String firstName , String lastName)</span> </span>&#123;  </div><div class="line">             mUserModel .setID (id );  </div><div class="line">             mUserModel .setFirstName (firstName );  </div><div class="line">             mUserModel .setLastName (lastName );  </div><div class="line">       &#125;  </div><div class="line">  </div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">loadUser</span><span class="params">( <span class="keyword">int</span> id )</span> </span>&#123;  </div><div class="line">             UserBean user = mUserModel .load (id );  </div><div class="line">             mUserrView .setFirstName (user .getFirstName ());<span class="comment">//通过调用IUserView的方法来更新显示  </span></div><div class="line">             mUserView .setLastName (user .getLastName ());  </div><div class="line">       &#125;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>(5)UserActivity:<br>UserActivity实现了IUserView及View.OnClickListener接口，同时有一个UserPresenter成员变量：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">UserActivity</span> <span class="keyword">extends</span> <span class="title">Activity</span> <span class="keyword">implements</span> <span class="title">OnClickListener</span>,  </span></div><div class="line">             <span class="title">IUserView</span> &#123;  </div><div class="line">  </div><div class="line">       <span class="keyword">private</span> EditText mFirstNameEditText , mLastNameEditText , mIdEditText ;  </div><div class="line">       <span class="keyword">private</span> Button mSaveButton , mLoadButton ;  </div><div class="line">       <span class="keyword">private</span> UserPresenter mUserPresenter ;</div></pre></td></tr></table></figure>
+</li>
+</ul>
+<p>重写了OnClick方法：<br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span>  </div><div class="line">       <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;  </div><div class="line">             <span class="comment">// TODO Auto-generated method stub  </span></div><div class="line">             <span class="keyword">switch</span> ( v. getId()) &#123;  </div><div class="line">             <span class="keyword">case</span> R .id .saveButton :  </div><div class="line">                   mUserPresenter .saveUser (getID (), getFristName (),  </div><div class="line">                               getLastName ());  </div><div class="line">                   <span class="keyword">break</span> ;  </div><div class="line">             <span class="keyword">case</span> R .id .loadButton :  </div><div class="line">                   mUserPresenter .loadUser (getID ());  </div><div class="line">                   <span class="keyword">break</span> ;  </div><div class="line">             <span class="keyword">default</span> :  </div><div class="line">                   <span class="keyword">break</span> ;  </div><div class="line">             &#125;  </div><div class="line">       &#125;</div></pre></td></tr></table></figure></p>
+<p>可以看到，View只负责处理与用户进行交互，并把数据相关的逻辑操作都扔给了Presenter去做。而Presenter调用Model处理完数据之后，再通过IUserView更新View显示的信息。</p>
+<h1 id="三、MVP的Android伪代码实现"><a href="#三、MVP的Android伪代码实现" class="headerlink" title="三、MVP的Android伪代码实现"></a>三、MVP的Android伪代码实现</h1><ul>
+<li>首先需要一个Presenter，作为View和Model的中间人<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148819813736752.png" alt="20170227148819813736752.png"></li>
+<li>然后你还需要一个View以及ViewImpl接口<br><img src="http://ohtrrgyyd.bkt.clouddn.com/2017022714881981564410.png" alt="2017022714881981564410.png"><br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148819816221120.png" alt="20170227148819816221120.png"></li>
+<li>最后你还需要Model一个ModelImpl接口<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148819817269813.png" alt="20170227148819817269813.png"></li>
+</ul>
+<h1 id="四、不必纠结是MVC还是MVP"><a href="#四、不必纠结是MVC还是MVP" class="headerlink" title="四、不必纠结是MVC还是MVP"></a>四、不必纠结是MVC还是MVP</h1><blockquote>
+<p>MVC和MVP的最终目的就是要数据和UI分离，互相不影响。那么如何能不必纠结而做到呢？？你听说过面向对象吗？听过再听听我的理解~</p>
+</blockquote>
+<ul>
+<li>面向对象<br>封装、多态，继承。老师好像也都是这么教的，那么到底说明是多态封装继承呢？</li>
+<li>封装<br>封装就是将用户不想看到的东西封装起来，可以用到面向对象中的 Private<br>属性，将用户不想看到的内容写在这里面。比如收音机上的播放功能，用户不用知道收益及如何播放，它只需要知道摁下这个键能播放即可。</li>
+<li>多态<br>多态就是一个对象的多种表现形态，主要表现为：行为多态和状态多态。<br>行为多态就好比一个父亲有多个孩子，每个孩子都不一样，但是都是同一个父亲；状态多态就好比每个孩子在一天中有好多个状态变现，有吃饭，学习，睡觉。</li>
+<li>继承？不！我想说的是对象！<br>我的一个朋友告诉我继承其实是对面向对象的最大误解。继承我们可以理解成一个对象他有多个小对象组成；比如人这个对象是由手脚，脑袋…等其它小对象组成。因此继承我们可以不去记住，我们只要对每个对象有深刻的认识即可把对象描述清楚！</li>
+</ul>
+<blockquote>
+<p>那么MVC、MVP与面向对象有什么关系呢？？  </p>
+</blockquote>
+<p>首先MVC和MVP都是要求数据和UI之间互不影响，那么面向对象不就是吗！？</p>
+<ul>
+<li><p>面向对象View?<br>对象也就是我们说的用户也就是MC或者MVP中View，用户需要什么我们就展示给其什么，不需要的我们将其封装起来提供一个方法给你调用即可，这是不是和MVC或者MVP中很像！</p>
+</li>
+<li><p>面向对象Model?<br>同时面向对象也是需要将对象的行为细分，比如人可以跑，可以游泳…这是不是和MVC中的Model一样，需要处理用户不同的操作。</p>
+</li>
+<li><p>面向对象Controller?<br>最后面向对象也是需要一个状态去控制的，比如人的大脑。通过大脑去协调手和脚的平衡。</p>
+</li>
+</ul>
+<h1 id="五、内存泄露问题"><a href="#五、内存泄露问题" class="headerlink" title="五、内存泄露问题"></a>五、内存泄露问题</h1><p>由上可见，Presenter中持有View接口对象，这个接口对象实际为MainActivity.this，Modle中也同时拥有Presenter对象实例，当MainActivity要销毁时，Presenter中有Modle在获取数据，那么问题来了，这个Activity还能正常销毁吗？   </p>
+<p><strong>答案是不能！</strong> </p>
+<p>当Modle在获取数据时，不做处理，它就一直持有Presenter对象，而Presenter对象又持有Activity对象，这条GC链不剪断，Activity就无法被完整回收。<br>换句话说：Presenter不销毁，Activity就无法正常被回收。  </p>
+<p>解决MVP的内存泄露</p>
+<p>Presenter在Activity的onDestroy方法回调时执行资源释放操作，或者在Presenter引用View对象时使用更加容易回收的软引用，弱应用。<br>比如示例代码：<br><strong>Activity</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDestroy</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onDestroy();</div><div class="line">        mPresenter.destroy();</div><div class="line">        mPresenter = <span class="keyword">null</span>;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></p>
+<p><strong>Presenter</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">destroy</span><span class="params">()</span> </span>&#123;</div><div class="line">    view = <span class="keyword">null</span>;</div><div class="line">    <span class="keyword">if</span>(modle != <span class="keyword">null</span>) &#123;</div><div class="line">        modle.cancleTasks();</div><div class="line">        modle = <span class="keyword">null</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><strong>Modle</strong><br><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">cancleTasks</span><span class="params">()</span> </span>&#123;</div><div class="line">    <span class="comment">// TODO 终止线程池ThreadPool.shutDown()，AsyncTask.cancle()，或者调用框架的取消任务api</span></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>个人总结</p>
+<p>因为面向MVP接口编程，可适应需求变更，所以MVP适用于比较大的项目；因为其简化了Activity和Fragmnt的职责，可大大减少View层的代码量，比起MVC中Activity，Fragment动不动上千行的代码量，简直优雅！</p>
+<h1 id="六、总结"><a href="#六、总结" class="headerlink" title="六、总结"></a>六、总结</h1><p>最后重新梳理一下 MVP 的编写方式。</p>
+<ul>
+<li>1、 根据项目需求，写一个 XXView 接口。然后让对应的 Activity/Fragment 实现这个接口。View 层基本搞定！</li>
+<li>2、编写 Model 层，主要就是网络数据请求了或者其他什么耗时操作，实现方式尽情发挥你的想象，但是最后一定需要用 Presenter 层定义的接口，回调给 Presenter 通知 View 层 更新数据。</li>
+<li>3、编写 Presenter 层，Presenter 层需要持有 View 层和 Model层的引用，并且实现 Presenter 层定义的回调接口。在回调接口中调用 View 层的代码 进行界面更新，最重要的是，有一个调用通过Model层的方法，在此方法中，调用 Model 层请求数据。</li>
+<li>4、回到View 层的Activity ，调用 Presenter 层获取数据。到此完成。</li>
+</ul>
+<p><strong>因为面向MVP接口编程，可适应需求变更，所以MVP适用于比较大的项目；因为其简化了Activity和Fragmnt的职责，可大大减少View层的代码量，比起MVC中Activity，Fragment动不动上千行的代码量，简直优雅！</strong><br><strong>备注：</strong>为了遵守面向接口编程的原则，做了一下接口的抽取。如Presenter 中 实现了 JokePresenter 接口，Model 层中实现了 JokeModel 接口。好了，如果在阅读中，发现了有错误的地方，还望指正。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/02/02/android-wifi/" rel="next" title="Android Wi-Fi 直连">
+                <i class="fa fa-chevron-left"></i> Android Wi-Fi 直连
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/02/05/android-thread/" rel="prev" title="Android Thread">
+                Android Thread <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">51</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">20</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、什么是MVP？"><span class="nav-number">1.</span> <span class="nav-text">一、什么是MVP？</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#MVP模式的三个角色的作用："><span class="nav-number">1.1.</span> <span class="nav-text">MVP模式的三个角色的作用：</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#为什么使用MVP模式"><span class="nav-number">1.2.</span> <span class="nav-text">为什么使用MVP模式</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#MVP与MVC的异同"><span class="nav-number">1.3.</span> <span class="nav-text">MVP与MVC的异同</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#MVP模式："><span class="nav-number">1.3.1.</span> <span class="nav-text">MVP模式：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MVC模式："><span class="nav-number">1.3.2.</span> <span class="nav-text">MVC模式：</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、MVP的效果"><span class="nav-number">2.</span> <span class="nav-text">二、MVP的效果</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、MVP的Android伪代码实现"><span class="nav-number">3.</span> <span class="nav-text">三、MVP的Android伪代码实现</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四、不必纠结是MVC还是MVP"><span class="nav-number">4.</span> <span class="nav-text">四、不必纠结是MVC还是MVP</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五、内存泄露问题"><span class="nav-number">5.</span> <span class="nav-text">五、内存泄露问题</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#六、总结"><span class="nav-number">6.</span> <span class="nav-text">六、总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>
