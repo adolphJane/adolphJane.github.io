@@ -1,0 +1,1021 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言在Android Studio中点击进去看一下源码，可以看到ColorFilter里的代码量很少
+12345678910111213141516171819public class ColorFilter &amp;#123;      /**      * Holds the pointer to the native SkColorFilter instance.      *      * @h">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-ColorFilter详细学习">
+<meta property="og:url" content="http://adolph.cc/2017/08/13/android-colorfilter/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言在Android Studio中点击进去看一下源码，可以看到ColorFilter里的代码量很少
+12345678910111213141516171819public class ColorFilter &amp;#123;      /**      * Holds the pointer to the native SkColorFilter instance.      *      * @h">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781638185946.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781645122295.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781647527079.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781650576419.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781653146217.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781655966867.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781662212525.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781665919671.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781667837297.png">
+<meta property="og:updated_time" content="2017-10-12T13:58:09.306Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-ColorFilter详细学习">
+<meta name="twitter:description" content="前言在Android Studio中点击进去看一下源码，可以看到ColorFilter里的代码量很少
+12345678910111213141516171819public class ColorFilter &amp;#123;      /**      * Holds the pointer to the native SkColorFilter instance.      *      * @h">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171012150781638185946.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/08/13/android-colorfilter/"/>
+
+
+
+
+
+  <title> Android-ColorFilter详细学习 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/08/13/android-colorfilter/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-ColorFilter详细学习
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-13T21:52:00+08:00">
+                2017-08-13
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>在Android Studio中点击进去看一下源码，可以看到ColorFilter里的代码量很少</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ColorFilter</span> </span>&#123;  </div><div class="line">    <span class="comment">/** </span></div><div class="line">     * Holds the pointer to the native SkColorFilter instance. </div><div class="line">     * </div><div class="line">     * <span class="doctag">@hide</span> </div><div class="line">     */  </div><div class="line">    <span class="keyword">public</span> <span class="keyword">long</span> native_instance;  </div><div class="line">  </div><div class="line">    <span class="meta">@Override</span>  </div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">finalize</span><span class="params">()</span> <span class="keyword">throws</span> Throwable </span>&#123;  </div><div class="line">        <span class="keyword">try</span> &#123;  </div><div class="line">            <span class="keyword">super</span>.finalize();  </div><div class="line">        &#125; <span class="keyword">finally</span> &#123;  </div><div class="line">            destroyFilter(native_instance);  </div><div class="line">        &#125;  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">static</span> <span class="keyword">native</span> <span class="keyword">void</span> <span class="title">destroyFilter</span><span class="params">(<span class="keyword">long</span> native_instance)</span></span>;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由此根据我们的经验，判断ColorFilter可能是个父类，具体实现可能下面还有子类完成的，于是再看Google的文档：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781638185946.png" alt="20171012150781638185946.png"></p>
+<p>一目了然了，ColorFilter下有3个子类ColorMatrixColorFilter, LightingColorFilter, PorterDuffColorFilter ，下面逐一学习一下。</p>
+<h1 id="ColorMatrixColorFilter"><a href="#ColorMatrixColorFilter" class="headerlink" title="ColorMatrixColorFilter"></a>ColorMatrixColorFilter</h1><p><code>ColorMatrixColorFilter</code>翻译为颜色矩阵过滤器，神马是颜色矩阵？实际上， 安卓中管理色彩矩阵是以RGBA像素点的方式加载到内存的，这些点统一使用<code>ColorMatrix</code>的矩阵来统一管理，矩阵定义为4*5的排列形式。那好，首先来看看<code>ColorMatrixColorFilter</code>的两个构造器：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ColorMatrixColorFilter</span><span class="params">(ColorMatrix matrix)</span> </span>&#123;  </div><div class="line">        mMatrix.set(matrix);  </div><div class="line">        update();  </div><div class="line">&#125;  </div><div class="line">  </div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ColorMatrixColorFilter</span><span class="params">(<span class="keyword">float</span>[] array)</span> </span>&#123;  </div><div class="line">        <span class="keyword">if</span> (array.length &lt; <span class="number">20</span>) &#123;  </div><div class="line">            <span class="keyword">throw</span> <span class="keyword">new</span> ArrayIndexOutOfBoundsException();  </div><div class="line">        &#125;  </div><div class="line">        mMatrix.set(array);  </div><div class="line">        update();  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ColorMatrixColorFilter中一个构造器需要接收ColorMatrix对象，另一个需要接收一个4*5的float型数组，我们再打开Android Studio追踪一下mMatrix.set()方法，可以看到以上两个构造器里面调的set方法各自实现的方式</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(ColorMatrix src)</span> </span>&#123;  </div><div class="line">        System.arraycopy(src.mArray, <span class="number">0</span>, mArray, <span class="number">0</span>, <span class="number">20</span>);  </div><div class="line">&#125;  </div><div class="line">  </div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">set</span><span class="params">(<span class="keyword">float</span>[] src)</span> </span>&#123;  </div><div class="line">        System.arraycopy(src, <span class="number">0</span>, mArray, <span class="number">0</span>, <span class="number">20</span>);  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>再追踪一下System.arraycopy()方法：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">void</span> <span class="title">arraycopy</span><span class="params">(<span class="keyword">float</span>[] src, <span class="keyword">int</span> srcPos, <span class="keyword">float</span>[] dst, <span class="keyword">int</span> dstPos, <span class="keyword">int</span> length)</span></span></div></pre></td></tr></table></figure>
+<p>好了，到这里，其实已经很明白了，ColorMatrixColorFilter构造器中接收的两个不同的参数，实际上底层实现方式都是一样的，都是同样调用System.arraycopy()中带float数组参数的方法。所以我们不必再考虑怎么样去写一个ColorMatrix对象传递给ColorMatrixColorFilter了，实际上我们使用第二个构造器，传递一个float数组，会显得程序更加直观易懂，那么我们就尝试写一个ColorMatrixColorFilter，并且设置给Paint吧.</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomView1</span> <span class="keyword">extends</span> <span class="title">View</span> </span>&#123;  </div><div class="line">    <span class="keyword">private</span> Paint mPaint;  </div><div class="line">    <span class="keyword">private</span> Context mContext;  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomView1</span><span class="params">(Context context)</span> </span>&#123;  </div><div class="line">        <span class="keyword">this</span>(context, <span class="keyword">null</span>);  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomView1</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;  </div><div class="line">        <span class="keyword">super</span>(context, attrs);  </div><div class="line">        mContext = context;  </div><div class="line">        initPaint();  </div><div class="line">    &#125;  </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initPaint</span><span class="params">()</span> </span>&#123;  </div><div class="line">        <span class="comment">//初始化Paint，并且设置消除锯齿。  </span></div><div class="line">        mPaint = <span class="keyword">new</span> Paint(Paint.ANTI_ALIAS_FLAG);  </div><div class="line">        <span class="comment">//设置画笔样式为描边  </span></div><div class="line">        mPaint.setStyle(Paint.Style.FILL);  </div><div class="line">        <span class="comment">//设置描边的粗细，单位：像素px 注意：当setStrokeWidth(0)的时候描边宽度并不为0而是只占一个像素  </span></div><div class="line">        mPaint.setStrokeWidth(<span class="number">20</span>);  </div><div class="line">        <span class="comment">//设置画笔颜色为自定义颜色  </span></div><div class="line">        mPaint.setColor(Color.argb(<span class="number">255</span>, <span class="number">255</span>, <span class="number">128</span>, <span class="number">102</span>));  </div><div class="line">        ColorMatrixColorFilter colorFilter = <span class="keyword">new</span> ColorMatrixColorFilter(<span class="keyword">new</span> <span class="keyword">float</span>[]&#123;  </div><div class="line">                <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>  </div><div class="line">        &#125;);  </div><div class="line">        mPaint.setColorFilter(colorFilter);  </div><div class="line">    &#125;  </div><div class="line">    <span class="meta">@Override</span>  </div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;  </div><div class="line">        <span class="comment">//画一个圆形，取屏幕中心点为圆心  </span></div><div class="line">        canvas.drawCircle(ScreenUtil.getScreenW(mContext) / <span class="number">2</span>,  </div><div class="line">                ScreenUtil.getScreenH(mContext) / <span class="number">2</span>, <span class="number">100</span>, mPaint);  </div><div class="line">    &#125;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>看上面的例子程序，首先创建了一个ColorMatrixColorFilter对象，并且传递进去一个float型的4*5排列的数组，然后调用Paint的setColorFilter方法将ColorMatrixColorFilter对象传入，我们在模拟器上运行一下，duang~~，我去，什么变化都没有，还是岛国的旗帜。这是怎么回事？下面有必要在学习一下了：</p>
+<p>其实一个4*5的float数组中分别对应的是RGBA的向量值，第一行代表的是R(红色)的向量值，第二行代表G(绿色)的向量值，第三行代表B(蓝色)的向量值，第四行代表A(透明度)的向量值，这4行分别代表不同的RGBA的向量值，并且值的取值范围是[0.0F , 2.0F]，当值为1.0F的时候，表示保持原有的色彩，不发生色彩便宜。so，如果我们想要将上面的红色的圈圈颜色变掉，就不能像上面的代码一样，将所有的向量值都设置为1.0F，下面我们修改一个：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">ColorMatrixColorFilter colorFilter = <span class="keyword">new</span> ColorMatrixColorFilter(<span class="keyword">new</span> <span class="keyword">float</span>[]&#123;  </div><div class="line">                <span class="number">0.5F</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0.5F</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0.5F</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>  </div><div class="line">&#125;);  </div><div class="line">mPaint.setColorFilter(colorFilter);</div></pre></td></tr></table></figure>
+<p>将上面的ColorMatrixColorFilter中的float数组替换成这样的<br>哎哟呵~颜色变深了，看起来神奇很多。那么，这个色彩矩阵以及这个float数组是怎样做到的呢？或者说是怎样通过计算后得到另外一个色彩值的呢？下面作图来说明一下，我们顶一个ColorMatrix的4*5的float型数组，然后定义一个我们自己MyColor，分别代表RGBA的值：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781645122295.jpg" alt="20171012150781645122295.jpg"></p>
+<p>实际上，安卓系统计算色彩值是用矩阵相乘的方式得出的，如上图的样子。这里的MyColor的各项值都要转换到[0,1]之间的值，下面就是我们实际转换的计算方式和结果了。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781647527079.jpg" alt="20171012150781647527079.jpg"></p>
+<p>通过上面的计算，我们得到了最终的RGBA的值是（0.5,0.25,0.2,1），说明RGB色彩值都发生了便宜，只有A未偏移，然后我们将这些值乘以255后还原一下看看，是不是跟上图的圈圈的色彩值是一致的呢，好吧，别看了，肯定必须一定是一样的。那么了解色彩矩阵有什么用呢？上面简单的更换一下色彩值而已，Paint类下也提供了setColor()方法，直接将色彩值设置上去，都TMD的方便，还搞什么玩意的矩阵，显得自己牛逼+蛋疼是不是？解释一下，上面的例子不过是个例子而已啊，真正开发的时候肯定是setColor比较简便嘛。问题来了，我们有可能处理的不是一个纯色彩的东西，而是一直图片呢？一张图片是有几十万中色彩值的，这时候setColor()就不可能让他们变色了吧，还是得用色彩矩阵来搞这玩意。下面我们从drawable目录下加载一张图片吧！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomView2</span> <span class="keyword">extends</span> <span class="title">View</span> </span>&#123;  </div><div class="line">  </div><div class="line">    <span class="keyword">private</span> Context mContext;  </div><div class="line">    <span class="keyword">private</span> Paint mPaint;  </div><div class="line">    <span class="keyword">private</span> Bitmap mBitmap;  </div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> x, y;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomView2</span><span class="params">(Context context)</span> </span>&#123;  </div><div class="line">        <span class="keyword">this</span>(context, <span class="keyword">null</span>);  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomView2</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;  </div><div class="line">        <span class="keyword">super</span>(context, attrs);  </div><div class="line">        mContext = context;  </div><div class="line">        initRes();  </div><div class="line">        initPaint();  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initRes</span><span class="params">()</span> </span>&#123;  </div><div class="line">        <span class="comment">//获取图片  </span></div><div class="line">        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.image);  </div><div class="line">        <span class="comment">//获取图片显示起始位置  </span></div><div class="line">        x = ScreenUtil.getScreenW(mContext) / <span class="number">2</span> - mBitmap.getWidth() / <span class="number">2</span>;  </div><div class="line">        y = ScreenUtil.getScreenH(mContext) / <span class="number">2</span> - mBitmap.getHeight() / <span class="number">2</span>;  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initPaint</span><span class="params">()</span> </span>&#123;  </div><div class="line">        mPaint = <span class="keyword">new</span> Paint(Paint.ANTI_ALIAS_FLAG);  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="meta">@Override</span>  </div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;  </div><div class="line">        canvas.drawBitmap(mBitmap, x, y, mPaint);  </div><div class="line">    &#125;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781650576419.png" alt="20171012150781650576419.png"></p>
+<p>好了图片加载完毕，代码没有难度，上面的Paint没有做任何的处理，下面我们为Paint设置色彩过滤器吧！</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">ColorMatrixColorFilter colorFilter = <span class="keyword">new</span> ColorMatrixColorFilter(<span class="keyword">new</span> <span class="keyword">float</span>[]&#123;  </div><div class="line">                <span class="number">0.33F</span>, <span class="number">0.59F</span>, <span class="number">0.11F</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0.33F</span>, <span class="number">0.59F</span>, <span class="number">0.11F</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0.33F</span>, <span class="number">0.59F</span>, <span class="number">0.11F</span>, <span class="number">0</span>, <span class="number">0</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>,  </div><div class="line">&#125;);  </div><div class="line">mPaint.setColorFilter(colorFilter);</div></pre></td></tr></table></figure>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781653146217.png" alt="20171012150781653146217.png"></p>
+<p>好吧图片变成黑白的了，难道setColor()也可以办吗？再改一个试试：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">ColorMatrixColorFilter colorFilter = <span class="keyword">new</span> ColorMatrixColorFilter(<span class="keyword">new</span> <span class="keyword">float</span>[]&#123;  </div><div class="line">                <span class="number">1.5F</span>, <span class="number">1.5F</span>, <span class="number">1.5F</span>, <span class="number">0</span>, -<span class="number">1</span>,  </div><div class="line">                <span class="number">1.5F</span>, <span class="number">1.5F</span>, <span class="number">1.5F</span>, <span class="number">0</span>, -<span class="number">1</span>,  </div><div class="line">                <span class="number">1.5F</span>, <span class="number">1.5F</span>, <span class="number">1.5F</span>, <span class="number">0</span>, -<span class="number">1</span>,  </div><div class="line">                <span class="number">0</span>, <span class="number">0</span>, <span class="number">0</span>, <span class="number">1</span>, <span class="number">0</span>,  </div><div class="line">        &#125;);  </div><div class="line">mPaint.setColorFilter(colorFilter);</div></pre></td></tr></table></figure>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781655966867.png" alt="20171012150781655966867.png"></p>
+<p>这样的效果是不是有点像负片效果啊！好了，反正我也不懂图像学，ColorMatrixColorFilter想设置什么样的就改改矩阵就行了，到底需要什么效果，效果的值要设置成多少，我也不知道，问问美工吧！我们只负责写程序！呵呵~~</p>
+<h1 id="LightingColorFilter"><a href="#LightingColorFilter" class="headerlink" title="LightingColorFilter"></a>LightingColorFilter</h1><p>LightingColorFilter顾名思义就是“光照色彩过滤器”，就是模拟一个光照照过图像所产生的效果，构造器是这样的：<br><code>public LightingColorFilter(int mul, int add)</code><br>查看一下Google文档，是这样介绍滴：</p>
+<p>光照色彩滤光片，可以用来模拟简单的照明效果。一个lightingcolorfilter定义了两个参数，一个用于与源颜色相乘（称为colormultiply）和一个用于添加到源颜色（称为coloradd）。alpha通道是原封不动的彩色滤光片。给定一个源颜色的RGB，由此产生的特定颜色计算如下：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">R&apos; = R * colorMultiply.R + colorAdd.R</div><div class="line">G&apos; = G * colorMultiply.G + colorAdd.G</div><div class="line">B&apos; = B * colorMultiply.B + colorAdd.B</div></pre></td></tr></table></figure>
+<p>每个通道值的结果范围是0~255。上面的介绍写的比较明白， 算法也很简单，我们以上面的原图为例，看见蓝天了吗，我们现在去掉这个蓝色的天。根据这个短发描述呢，我们仅仅去掉蓝色，就要将蓝色的通道值改变，将B计算为其它值，这时候colorMultiply.B = 00，colorAdd.B =00，计算得到的B = 00，其它的通道R和G均不变，那么,colorAdd.R=0，colorAdd.G =0；colorMultiply.R = FF，colorMultiply.G =FF，Alpha通道A是忽略的，所以随便设置什么都不会有变化的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">LightingColorFilter colorFilter = <span class="keyword">new</span> LightingColorFilter(<span class="number">0xFFFFFF00</span>, <span class="number">0x00000000</span>);  </div><div class="line">mPaint.setColorFilter(colorFilter);</div></pre></td></tr></table></figure>
+<p>运行之后的结果，蓝天没了。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781662212525.png" alt="20171012150781662212525.png"></p>
+<h1 id="PorterDuffColorFilter"><a href="#PorterDuffColorFilter" class="headerlink" title="PorterDuffColorFilter"></a>PorterDuffColorFilter</h1><p>ColorFilter下还有最后一个子类，PorterDuff混合模式的色彩过滤器，下面是其构造器：<br><code>public PorterDuffColorFilter(int color, PorterDuff.Mode mode)</code></p>
+<p>Google文档：PorterDuff滤光器可以用于点源像素使用一个单一的颜色和一个特定的波特达夫复合模式。</p>
+<p>PorterDuffColorFilter的构造器也很简单，其中第一个参数表示一个16进制的色彩值，第二个参数是一个枚举值PorterDuff.Mode，表示图片混排的模式，PorterDuff.Mode在Android下一共有16种。下面我们先写一个小例子看一下，这里我们还是使用上面的图片，为原图添加图片混排模式，颜色值设置为红色0XFFFF0000，混排模式设置为PorterDuff.Mode.DARKEN。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomView2</span> <span class="keyword">extends</span> <span class="title">View</span> </span>&#123;  </div><div class="line">  </div><div class="line">    <span class="keyword">private</span> Context mContext;  </div><div class="line">    <span class="keyword">private</span> Paint mPaint;  </div><div class="line">    <span class="keyword">private</span> Bitmap mBitmap;  </div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> x, y;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomView2</span><span class="params">(Context context)</span> </span>&#123;  </div><div class="line">        <span class="keyword">this</span>(context, <span class="keyword">null</span>);  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">CustomView2</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;  </div><div class="line">        <span class="keyword">super</span>(context, attrs);  </div><div class="line">        mContext = context;  </div><div class="line">        initRes();  </div><div class="line">        initPaint();  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initRes</span><span class="params">()</span> </span>&#123;  </div><div class="line">        <span class="comment">//获取图片  </span></div><div class="line">        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.image);  </div><div class="line">        <span class="comment">//获取图片显示起始位置  </span></div><div class="line">        x = ScreenUtil.getScreenW(mContext) / <span class="number">2</span> - mBitmap.getWidth() / <span class="number">2</span>;  </div><div class="line">        y = ScreenUtil.getScreenH(mContext) / <span class="number">2</span> - mBitmap.getHeight() / <span class="number">2</span>;  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initPaint</span><span class="params">()</span> </span>&#123;  </div><div class="line">        mPaint = <span class="keyword">new</span> Paint(Paint.ANTI_ALIAS_FLAG);  </div><div class="line">        PorterDuffColorFilter colorFilter = <span class="keyword">new</span> PorterDuffColorFilter(<span class="number">0XFFFF0000</span>, PorterDuff.Mode.DARKEN);  </div><div class="line">        mPaint.setColorFilter(colorFilter);  </div><div class="line">    &#125;  </div><div class="line">  </div><div class="line">    <span class="meta">@Override</span>  </div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;  </div><div class="line">        canvas.drawBitmap(mBitmap, x, y, mPaint);  </div><div class="line">    &#125;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面的图片就是运行之后的效果了，原图不仅变红了，而且还变暗了。其实我们这里将PorterDuffColorFilter的构造器参数拆开来分析一下，首先我们传递进去一个红色的颜色值0XFFFF0000，这里相当于创建了一张新的图层，图层的颜色就是0XFFFF0000，而我们的原图可以看作是第二张图层，我们先把这2个图片重叠放在一起，就会发现得到一个原图上很红的图片，然后我们看一下PorterDuff.Mode是DARKEN模式，表示在之前得到的“原图+很红”的图片上进一步将色调调成暗色，最终得到了如上所示的图片。</p>
+<p>关于PorterDuff.Mode，Android系统一共提供了18种混排模式，在模拟器的ApiDemos/Graphics/XferModes，有张效果图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781665919671.png" alt="20171012150781665919671.png"></p>
+<p>这张图可以很形象的说明图片各种混排模式下的效果。其中Src代表原图，Dst代表目标图，两张图片使用不同的混排方式后，得到的图像是如上图所示的。  PorterDuff.Mode也提供了18种混排模式算法，其中比上图多了ADD和OVERLAY两种模式：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781667837297.png" alt="20171012150781667837297.png"></p>
+<p>其中Sa全称为Source alpha表示源图的Alpha通道；Sc全称为Source color表示源图的颜色；Da全称为Destination alpha表示目标图的Alpha通道；Dc全称为Destination color表示目标图的颜色，[…,..]前半部分计算的是结果图像的Alpha通道值，“,”后半部分计算的是结果图像的颜色值。图像混排后是依靠这两个值来重新计算ARGB值的，具体计算算法，抱歉，我也不知道，不过不要紧，不了解计算算法也不影响我们程序员写程序的。我们只要对照上面的apiDemo中提供的图片就能推测出混排后的结果的，下面是在网上找到的汉字语言描述，感谢这位作者的总结。</p>
+<p>注意：先绘制dst，再绘制src。</p>
+<ul>
+<li><strong>1.PorterDuff.Mode.CLEAR</strong>    所绘制源图像不会提交到画布上。</li>
+<li><strong>2.PorterDuff.Mode.SRC</strong>    只显示源图像。</li>
+<li><strong>3.PorterDuff.Mode.DST</strong>    只显示目标图像。</li>
+<li><strong>4.PorterDuff.Mode.SRC_OVER</strong>    正常绘制显示，源图像居上显示。</li>
+<li><strong>5.PorterDuff.Mode.DST_OVER</strong>    上下层都显示。目标图像居上显示。</li>
+<li><strong>6.PorterDuff.Mode.SRC_IN</strong>    取两层绘制交集中的源图像。</li>
+<li><strong>7.PorterDuff.Mode.DST_IN</strong>     取两层绘制交集中的目标图像。</li>
+<li><strong>8.PorterDuff.Mode.SRC_OUT</strong>    只在源图像和目标图像不相交的地方绘制源图像。</li>
+<li><strong>9.PorterDuff.Mode.DST_OUT</strong>    只在源图像和目标图像不相交的地方绘制目标图像。</li>
+<li><strong>10.PorterDuff.Mode.SRC_ATOP</strong>    在源图像和目标图像相交的地方绘制源图像，在不相交的地方绘制目标图像。</li>
+<li><strong>11.PorterDuff.Mode.DST_ATOP</strong>   在源图像和目标图像相交的地方绘制目标图像而在不相交的地方绘制源图像。</li>
+<li><strong>12.PorterDuff.Mode.XOR</strong>    异或：去除两图层交集部分</li>
+<li><strong>13.PorterDuff.Mode.DARKEN</strong>     取两图层全部区域，交集部分颜色加深</li>
+<li><strong>14.PorterDuff.Mode.LIGHTEN</strong>   取两图层全部，点亮交集部分颜色</li>
+<li><strong>15.PorterDuff.Mode.MULTIPLY</strong>    取两图层交集部分叠加后颜色</li>
+<li><strong>16.PorterDuff.Mode.SCREEN</strong>    滤色。</li>
+</ul>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/08/android-databinding/" rel="next" title="Android-DataBinding详细学习">
+                <i class="fa fa-chevron-left"></i> Android-DataBinding详细学习
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/14/android-paint/" rel="prev" title="Android-Paint详细学习">
+                Android-Paint详细学习 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">86</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">22</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#ColorMatrixColorFilter"><span class="nav-number">2.</span> <span class="nav-text">ColorMatrixColorFilter</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#LightingColorFilter"><span class="nav-number">3.</span> <span class="nav-text">LightingColorFilter</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#PorterDuffColorFilter"><span class="nav-number">4.</span> <span class="nav-text">PorterDuffColorFilter</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>
