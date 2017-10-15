@@ -1,0 +1,1010 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言毫无疑问，动画效果能提高用户体验。我们平时使用最多的动画基本上是属性动画和补间动画了，属性动画很强，基本能定制我们想要的动画，但是你是否知道，API 21（5.0）后系统内置了Activity之间的切换动画，而且非常酷炫，今天我跟大家一起分享一下。我们知道，在两个Activity之间切换，我们一般会写出类似下面的代码：
+123Intent intent=new Intent(this,Seco">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-酷炫的Activity切换动画">
+<meta property="og:url" content="http://adolph.cc/2017/08/31/android-activity-handoff-animation/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言毫无疑问，动画效果能提高用户体验。我们平时使用最多的动画基本上是属性动画和补间动画了，属性动画很强，基本能定制我们想要的动画，但是你是否知道，API 21（5.0）后系统内置了Activity之间的切换动画，而且非常酷炫，今天我跟大家一起分享一下。我们知道，在两个Activity之间切换，我们一般会写出类似下面的代码：
+123Intent intent=new Intent(this,Seco">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171015150799839139489.gif">
+<meta property="og:updated_time" content="2017-10-14T16:40:22.990Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-酷炫的Activity切换动画">
+<meta name="twitter:description" content="前言毫无疑问，动画效果能提高用户体验。我们平时使用最多的动画基本上是属性动画和补间动画了，属性动画很强，基本能定制我们想要的动画，但是你是否知道，API 21（5.0）后系统内置了Activity之间的切换动画，而且非常酷炫，今天我跟大家一起分享一下。我们知道，在两个Activity之间切换，我们一般会写出类似下面的代码：
+123Intent intent=new Intent(this,Seco">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171015150799839139489.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/08/31/android-activity-handoff-animation/"/>
+
+
+
+
+
+  <title> Android-酷炫的Activity切换动画 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/08/31/android-activity-handoff-animation/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-酷炫的Activity切换动画
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-31T00:25:00+08:00">
+                2017-08-31
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>毫无疑问，动画效果能提高用户体验。我们平时使用最多的动画基本上是属性动画和补间动画了，属性动画很强，基本能定制我们想要的动画，但是你是否知道，API 21（5.0）后系统内置了Activity之间的切换动画，而且非常酷炫，今天我跟大家一起分享一下。我们知道，在两个Activity之间切换，我们一般会写出类似下面的代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Intent intent=<span class="keyword">new</span> Intent(<span class="keyword">this</span>,SecondActivity.class);</div><div class="line">startActivity(intent);</div><div class="line">overridePendingTransition(R.anim.enter_anim,R.anim.exit_anim);</div></pre></td></tr></table></figure>
+<p>在API 21以后，我们可以使用内置的Activity切换动画啦。但是这样也就意味着只能兼容5.0之后的系统，我们先看一个效果图来压压惊：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799839139489.gif" alt="20171015150799839139489.gif"></p>
+<p>先看看第一个Activity，退出时用的是Explode效果，第二个Activity进入时用的是Slide效果。这些效果无需我们自己去实现，都是内置的效果，我们所编写的代码几乎为零，接下来我们一一看看内置了哪些效果。</p>
+<h1 id="使用内置Activity之间切换动画代码步骤"><a href="#使用内置Activity之间切换动画代码步骤" class="headerlink" title="使用内置Activity之间切换动画代码步骤"></a>使用内置Activity之间切换动画代码步骤</h1><p>Activity之间的切换期间，对于某个Activity来说，无非就是“进入”和“退出”两种情景下的动画。而“进入”分为“第一次进入Activity”和“返回当前Activity”这两种情况。另外系统还提供了一种动画，即共享元素，这是让两个Activity中的View有个过渡切换的效果。执行动画的状态如下所示：</p>
+<blockquote>
+<p><strong>enter</strong>：用于决定第一次打开当前Activity时的动画<br><strong>exit</strong> : 用于决定退出当前Activity时的动画<br><strong>reenter</strong>: 用于决定如果当前Activity已经打开过，并且再次打开该Activity时的动画<br><strong>shared elements</strong>:用于决定在两个Activity之间切换时，指定两个Activity中对应的View的过渡效果  </p>
+</blockquote>
+<p>那么应该怎么去使用Activity切换动画呢？我们看看使用步骤：</p>
+<ul>
+<li>首先在setContentView()之前执行，用于告诉Window页面切换需要使用动画<br><code>getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);</code></li>
+<li>接下来就是加载切换动画<br>其中R.transition.explode就是要执行的动画，是在res/transition目录下的xml文件，我们使用的是系统内置的Explode效果动画，关于怎么去写explode.xml，我们接下来小节去讲解。<br><code>Transition explode = TransitionInflater.from(this).inflateTransition(R.transition.explode);</code></li>
+<li>告诉Window，当前的Activity在什么情况下使用上面的动画<br>上面我们创建好了切换动画，接下来就是要告诉当前窗口，在什么情况下去使用动画效果啦，你可以根据你的需求在不同的切换情景中选择不同的效果:  </li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//退出时使用</span></div><div class="line">getWindow().setExitTransition(explode);</div><div class="line"><span class="comment">//第一次进入时使用</span></div><div class="line">getWindow().setEnterTransition(explode);</div><div class="line"><span class="comment">//再次进入时使用</span></div><div class="line">getWindow().setReenterTransition(explode);</div></pre></td></tr></table></figure>
+<p>当然了，你也可以不使用代码的方式，直接在你使用的主题<style>标签里添加类似如下代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowExitTransition"</span>&gt;</span>@transition/explode<span class="tag">&lt;/<span class="name">item</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowEnterAnimation"</span>&gt;</span>@transition/explode<span class="tag">&lt;/<span class="name">item</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">item</span> <span class="attr">name</span>=<span class="string">"android:windowReenterTransition"</span>&gt;</span>@transition/explode<span class="tag">&lt;/<span class="name">item</span>&gt;</span></div></pre></td></tr></table></figure>
+<ul>
+<li>调用startActivity<br>跟我们之前使用的<code>startActivity(Intent intent);</code>不同，这里多了一个参数<code>Bundle</code>，我们是先通过<code>makeSceneTransitionAnimation</code>函数创建一个<code>ActivityOptions</code>对象，再将其转为<code>Bundle</code>对象:<br><code>startActivity(intent,ActivityOptions.makeSceneTransitionAnimation(this).toBundle());</code><br>整体使用步骤就是以上这些，是不是很简单？接下来我们去学习如何使用内置动画~</li>
+</ul>
+<h1 id="Explode效果"><a href="#Explode效果" class="headerlink" title="Explode效果"></a>Explode效果</h1><p>Explode即爆炸效果，使用Explode效果很简单，在<code>res/transition</code>目录下新建一个xml文件(如<code>explode.xml</code>)，内容如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">explode</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></div><div class="line">    <span class="attr">android:duration</span>=<span class="string">"300"</span> /&gt;</span></div></pre></td></tr></table></figure>
+<p>其中<code>duration</code>表示Explode动画持续时间，由于是Activity之间的切换，最好不要把动画时间设置过大，一般取200~500毫秒比较合适。<br>我们看看效果吧~</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799868975358.gif" alt="20171015150799868975358.gif"></p>
+<h1 id="Slide效果"><a href="#Slide效果" class="headerlink" title="Slide效果"></a>Slide效果</h1><p>即滑动效果，使用Slide跟Explode类似，都是在res/transition目录下新建一个xml文件(如<code>slide.xml</code>)，内容如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">slide</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></div><div class="line">    <span class="attr">android:interpolator</span>=<span class="string">"@android:interpolator/decelerate_cubic"</span></div><div class="line">    <span class="attr">android:slideEdge</span>=<span class="string">"end"</span>/&gt;</span></div></pre></td></tr></table></figure>
+<p>其中，slideEdge表示起始滑动的侧边位置，end表示右侧，start表示左侧，top表示顶部，bottom表示底侧，各种效果你可以亲自试试~，一起看看滑动效果吧</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799873587032.gif" alt="20171015150799873587032.gif"></p>
+<p>GIF 效果看的比较死板，可以下载我的源码实际运行一下~</p>
+<p>如果你不希望顶部的状态栏以及底部的导航栏一起执行动画，可以在xml中指定：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">slide</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></div><div class="line">    <span class="attr">android:interpolator</span>=<span class="string">"@android:interpolator/decelerate_cubic"</span></div><div class="line">    <span class="attr">android:slideEdge</span>=<span class="string">"end"</span>&gt;</span></div><div class="line">    <span class="tag">&lt;<span class="name">targets</span>&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">target</span> <span class="attr">android:excludeId</span>=<span class="string">"@android:id/navigationBarBackground"</span> /&gt;</span></div><div class="line">        <span class="tag">&lt;<span class="name">target</span> <span class="attr">android:excludeId</span>=<span class="string">"@android:id/statusBarBackground"</span> /&gt;</span></div><div class="line">    <span class="tag">&lt;/<span class="name">targets</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">slide</span>&gt;</span></div></pre></td></tr></table></figure>
+<h1 id="Fade效果"><a href="#Fade效果" class="headerlink" title="Fade效果"></a>Fade效果</h1><p>Fade效果即淡化效果，使用淡化效果依然是很简单，在<code>res/transition</code>目录下新建一个xml文件(如<code>fade.xml</code>)，内容如下：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">fade</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></div><div class="line">    <span class="attr">android:duration</span>=<span class="string">"300"</span> /&gt;</span></div></pre></td></tr></table></figure>
+<p>Fade效果就是将View逐步淡化，这里不再贴效果啦，想看效果的可以下载我的源码运行看看~</p>
+<h1 id="Shared-Element效果"><a href="#Shared-Element效果" class="headerlink" title="Shared Element效果"></a>Shared Element效果</h1><p>即共享元素效果，与前面几种效果不同的是，共享元素效果是将前面一个Activity的某个子View与后面一个Activity的某个子View之间有过渡效果，我们先看看动态图感受一下：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799880319943.gif" alt="20171015150799880319943.gif"></p>
+<p>从动态图中看到，第一个Activity的小绿色方块到第二个Activity大绿色方块有个过渡效果~</p>
+<p>接下来我们看看如何实现这个效果：</p>
+<p><strong>1.将两个Activity中需要过渡的View加上<code>android:transitionName</code>属性</strong></p>
+<p>两个View的<code>android:transitionName</code>属性取值要一致，比如：<br>第一个Activity布局：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></div><div class="line">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">View</span></div><div class="line">        <span class="attr">android:id</span>=<span class="string">"@+id/firstSharedView"</span></div><div class="line">        <span class="attr">android:layout_width</span>=<span class="string">"100dp"</span></div><div class="line">        <span class="attr">android:layout_height</span>=<span class="string">"100dp"</span></div><div class="line">        <span class="attr">android:background</span>=<span class="string">"#00cc00"</span></div><div class="line">        <span class="attr">android:onClick</span>=<span class="string">"onClick"</span></div><div class="line">        <span class="attr">android:transitionName</span>=<span class="string">"sharedView"</span> /&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>第二个Activity布局：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version="1.0" encoding="utf-8"?&gt;</div><div class="line"><span class="tag">&lt;<span class="name">RelativeLayout</span> <span class="attr">xmlns:android</span>=<span class="string">"http://schemas.android.com/apk/res/android"</span></div><div class="line">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">    <span class="attr">android:layout_height</span>=<span class="string">"match_parent"</span>&gt;</span></div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">View</span></div><div class="line">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">        <span class="attr">android:layout_height</span>=<span class="string">"300dp"</span></div><div class="line">        <span class="attr">android:layout_alignParentBottom</span>=<span class="string">"true"</span></div><div class="line">        <span class="attr">android:background</span>=<span class="string">"#00cc00"</span></div><div class="line">        <span class="attr">android:onClick</span>=<span class="string">"onClick"</span></div><div class="line">        <span class="attr">android:transitionName</span>=<span class="string">"sharedView"</span> /&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">RelativeLayout</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>两个绿色的View都添加<code>android:transitionName</code>属性，并且取名一致。</p>
+<p><strong>2.调用startActivity</strong><br><code>ActivityOptions</code>的<code>makeSceneTransitionAnimation</code>函数第一个参数<code>Activity</code>没啥解释的，第二个参数就是第一个<code>Activity</code>中的<code>View</code>对象，第三个参数就是两个Activity的View的 <code>android:transitionName</code>属性的值。</p>
+<p><code>startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this, firstSharedView,&quot;sharedView&quot;).toBundle());</code></p>
+<p>现在就可以实现这种<code>Shared Element</code>效果啦，但是可能你会想实现同时让两个View有这样的效果，可是<code>makeSceneTransitionAnimation</code>函数却只能让我们设置一个<code>View</code>和一个<code>transitionName</code>属性。如何添加多个呢？接下来我们一起学习让多个View同时有切换效果。</p>
+<p>除了需要将两个<code>Activity</code>中需要过渡的<code>View</code>对应取相同的名称外，还需将需要过渡的<code>View</code>和<code>transitionName</code>取值对应的String这两个对象封装到一个Pair对象中：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">Pair first = <span class="keyword">new</span> Pair&lt;&gt;(firstSharedView, ViewCompat.getTransitionName(firstSharedView));</div><div class="line">Pair second = <span class="keyword">new</span> Pair&lt;&gt;(secondSharedView, ViewCompat.getTransitionName(secondSharedView));</div></pre></td></tr></table></figure>
+<p>然后调用<code>ActivityOptionsCompat</code>类的<code>makeSceneTransitionAnimation</code>的另一个重载函数<code>makeSceneTransitionAnimation(Activity activity,Pair&lt;View, String&gt;... sharedElements)</code>，第一个参数不解释，后面参数为不定长度的形参，即你可以传递任意多个Pair对象。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ActivityOptionsCompat transitionActivityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(<span class="keyword">this</span>, first, second);</div></pre></td></tr></table></figure>
+<p>最后调用startActivity</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> ActivityCompat.startActivity(this,intent, transitionActivityOptions.toBundle());</div><div class="line">```                </div><div class="line">说了这么多步骤，我们来看看效果吧~</div><div class="line"></div><div class="line">![20171015150799903533027.gif](http://ohtrrgyyd.bkt.clouddn.com/20171015150799903533027.gif)</div><div class="line"></div><div class="line">## 1 自定义 Shared Element切换动画</div><div class="line"></div><div class="line">如果你对内置的 Shared Element还不够满意，你还可以定制View的过渡切换效果。步骤如下：</div><div class="line"></div><div class="line">### 创建一个View的过渡移动的轨迹路径PathMotion类</div><div class="line"></div><div class="line">我们可以创建ArcMotion对象，ArcMotion是PathMotion子类，是个曲线路径。想要了解更多ArcMotion可以查看[【ArcMotion官方文档】](https://developer.android.com/reference/android/transition/ArcMotion.html)</div><div class="line"></div><div class="line">```java</div><div class="line">ArcMotion arcMotion = new ArcMotion();</div><div class="line">arcMotion.setMinimumHorizontalAngle(50f);</div><div class="line">arcMotion.setMinimumVerticalAngle(50f);</div></pre></td></tr></table></figure>
+<h3 id="定义ChangeBounds类"><a href="#定义ChangeBounds类" class="headerlink" title="定义ChangeBounds类"></a>定义ChangeBounds类</h3><p>我们自定义一个继承ChangeBounds的类，主要重写createAnimator函数，即创建你要执行的动画。这个函数由3个参数：</p>
+<blockquote>
+<p>1.<code>ViewGroup  sceneRoot</code>：屏幕根View，即DecorView，第二个Activity的DecorView。<br>2.<code>TransitionValues  startValues</code>：属性动画的起始属性值，TransitionValues 对象内部有各Map类型的属性values，用于保存需要执行属性动画的属性。这个里面的属性值是在函数<code>captureStartValues</code>里放置，因此你可以重写<code>captureStartValues</code>函数，并把你自定义的属性动画中的属性放进去。<br>3.<code>TransitionValues endValues</code> ：与<code>startValues</code>类似，表示属性动画结束时的属性值。可以通过重写<code>captureEndValues</code>函数，并把你自定义的属性动画里面的最终属性值放进去。</p>
+</blockquote>
+<p>我们先看一个最简单的示例：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">package</span> com.hc.util;</div><div class="line"></div><div class="line"><span class="keyword">import</span> android.animation.Animator;</div><div class="line"><span class="keyword">import</span> android.transition.ChangeBounds;</div><div class="line"><span class="keyword">import</span> android.transition.TransitionValues;</div><div class="line"><span class="keyword">import</span> android.view.ViewGroup;</div><div class="line"><span class="keyword">import</span> android.view.animation.AnimationUtils;</div><div class="line"></div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">CustomChangeBounds</span> <span class="keyword">extends</span> <span class="title">ChangeBounds</span> </span>&#123;</div><div class="line"></div><div class="line"> <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> Animator <span class="title">createAnimator</span><span class="params">(<span class="keyword">final</span> ViewGroup sceneRoot,</div><div class="line">                                 TransitionValues startValues,</div><div class="line">                                 <span class="keyword">final</span> TransitionValues endValues)</span> </span>&#123;</div><div class="line">      Animator changeBounds = <span class="keyword">super</span>.createAnimator(sceneRoot, startValues, endValues);</div><div class="line">      <span class="keyword">if</span> (startValues == <span class="keyword">null</span> || endValues == <span class="keyword">null</span> || changeBounds == <span class="keyword">null</span>) </div><div class="line">          <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line"></div><div class="line">      changeBounds.setDuration(<span class="number">300</span>);</div><div class="line">      changeBounds.setInterpolator(AnimationUtils.loadInterpolator(sceneRoot.getContext(),</div><div class="line">              android.R.interpolator.fast_out_slow_in));</div><div class="line">      <span class="keyword">return</span> changeBounds;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>看看效果吧~</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799918618986.gif" alt="20171015150799918618986.gif"></p>
+<p>最后，再献上<a href="http://download.csdn.net/detail/huachao1001/9550440">源码</a></p>
+</style></p>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/30/android-smali/" rel="next" title="Android-smali文件格式">
+                <i class="fa fa-chevron-left"></i> Android-smali文件格式
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/09/01/android-recyclerview/" rel="prev" title="Android-RecyclerView的ItemDecoration入门与进阶">
+                Android-RecyclerView的ItemDecoration入门与进阶 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">99</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#使用内置Activity之间切换动画代码步骤"><span class="nav-number">2.</span> <span class="nav-text">使用内置Activity之间切换动画代码步骤</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

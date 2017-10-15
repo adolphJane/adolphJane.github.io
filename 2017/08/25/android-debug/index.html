@@ -1,0 +1,1048 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="一、 进入 debug 模式的两种姿势第一种是点击运行按钮旁边的“绿色甲虫”(debug app)开始以调试模式编译运行。
+
+这个方式的特点是，一开始就进入了调试模式。适合希望尽早进入调试模式的场景，比如你想从头开始追踪问题，或者断点在启动页或首页之类的。它的弊端是每次需要从头跑一遍，且由于调试模式下应用程序略卡顿，等你到达调试页面时会觉得老费劲。
+
+第二种方式是在手机或模拟器已经跑起来应用程序后">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-Debug">
+<meta property="og:url" content="http://adolph.cc/2017/08/25/android-debug/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="一、 进入 debug 模式的两种姿势第一种是点击运行按钮旁边的“绿色甲虫”(debug app)开始以调试模式编译运行。
+
+这个方式的特点是，一开始就进入了调试模式。适合希望尽早进入调试模式的场景，比如你想从头开始追踪问题，或者断点在启动页或首页之类的。它的弊端是每次需要从头跑一遍，且由于调试模式下应用程序略卡顿，等你到达调试页面时会觉得老费劲。
+
+第二种方式是在手机或模拟器已经跑起来应用程序后">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797278068907.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797280245394.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797289056229.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797294991936.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797301917622.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/2017101415079730545598.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797308856387.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797311954451.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797315866815.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797320181952.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797323062129.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797328687524.png">
+<meta property="og:updated_time" content="2017-10-14T09:29:02.863Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-Debug">
+<meta name="twitter:description" content="一、 进入 debug 模式的两种姿势第一种是点击运行按钮旁边的“绿色甲虫”(debug app)开始以调试模式编译运行。
+
+这个方式的特点是，一开始就进入了调试模式。适合希望尽早进入调试模式的场景，比如你想从头开始追踪问题，或者断点在启动页或首页之类的。它的弊端是每次需要从头跑一遍，且由于调试模式下应用程序略卡顿，等你到达调试页面时会觉得老费劲。
+
+第二种方式是在手机或模拟器已经跑起来应用程序后">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150797278068907.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/08/25/android-debug/"/>
+
+
+
+
+
+  <title> Android-Debug | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/08/25/android-debug/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-Debug
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-08-25T17:18:00+08:00">
+                2017-08-25
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="一、-进入-debug-模式的两种姿势"><a href="#一、-进入-debug-模式的两种姿势" class="headerlink" title="一、 进入 debug 模式的两种姿势"></a>一、 进入 debug 模式的两种姿势</h1><p>第一种是点击运行按钮旁边的“绿色甲虫”(debug app)开始以调试模式编译运行。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797278068907.png" alt="20171014150797278068907.png"></p>
+<p>这个方式的特点是，一开始就进入了调试模式。适合希望尽早进入调试模式的场景，比如你想从头开始追踪问题，或者断点在启动页或首页之类的。它的弊端是每次需要从头跑一遍，且由于调试模式下应用程序略卡顿，等你到达调试页面时会觉得老费劲。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797280245394.png" alt="20171014150797280245394.png"></p>
+<p>第二种方式是在手机或模拟器已经跑起来应用程序后点击 <code>Run</code> -&gt; <code>Attach debugger to Android process</code>，选择应用程序主进程，即可进入调试模式。</p>
+<p>这种方式的特点是，随时随地自由进入调试模式，不需要重头开始跑应用程序，该方式适合绝大多数调试场景。需要注意的是，假如跑的是 <code>release</code> 版本且有混淆加固之类的话，该方式就无法正常调试。</p>
+<h1 id="二、-常见的调试操作"><a href="#二、-常见的调试操作" class="headerlink" title="二、 常见的调试操作"></a>二、 常见的调试操作</h1><h2 id="1-典型的调试场景"><a href="#1-典型的调试场景" class="headerlink" title="1 典型的调试场景"></a>1 典型的调试场景</h2><p>一个最常见的调试场景如下：</p>
+<ol>
+<li>完成包括打开 Android Studio、打开需要调试的类、连接手机等准备工作</li>
+<li>在关键位置打上普通断点，进入调试模式后触发断点，将当前线程阻塞在断点处</li>
+<li>单步调试，一行一行往下运行</li>
+<li>碰到方法调用时进入方法内部</li>
+<li>用单步调试单步执行直到该方法结束回到方法调用的下一行，或者直接退出当前方法</li>
+<li>通过观察观察区的相关变量，推断出问题所在，结束本次调试</li>
+</ol>
+<p>以上是最常规的 debug 场景，下面介绍下调试界面。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797289056229.png" alt="20171014150797289056229.png"></p>
+<p>在 Android Studio 的 debug 标签（假如一开始没有，等触发断点后自然会出现）中有两个面板 debugger 和 console。debugger 又分为 Frames、Threads 和 Variables 三块，分别是堆栈内容、线程、变量区。</p>
+<p>在 debugger 标签右边有一些操作按钮，是我们常用的调试操作，下面会一一介绍。（可以用鼠标悬停在上面看每个按钮的具体名称）</p>
+<h2 id="2-设置断点"><a href="#2-设置断点" class="headerlink" title="2 设置断点"></a>2 设置断点</h2><p>断点有多种类型，我们这里先只谈普通断点。在每行的最前端单击一下即可<strong>添加断点</strong>，在断点上单击一下是<strong>取消断点</strong>。普通模式下断点只是一个普通的红点，但假如是在调试模式下，则红点上会有一个“√”或“✘”表示该行是否会被运行，例如，注释行前的断点会是“✘”。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797294991936.png" alt="20171014150797294991936.png"></p>
+<p>不管怎样，触发断点肯定是调试的起点。只有触发了断点，才会开始阻塞线程（注意是只会阻塞当前线程，这个后面会扩展一下详细介绍），此时当前代码行会被蓝色高亮，观察面板上的变量也会显示当前环境下的值。</p>
+<h2 id="3-跳到下一个断点（F9）"><a href="#3-跳到下一个断点（F9）" class="headerlink" title="3 跳到下一个断点（F9）"></a>3 跳到下一个断点（F9）</h2><p>一般情况下，在调试时我们可以根据我们的经验在几个关键的位置打上断点，这里就需要从一个断点直接跳到下一个断点。操作是继续以 debug 模式运行，快捷键是 F9（假如没改动的话应该都是这个快捷键，假如不同，可以把鼠标悬浮在该图标上看提示，下同）。</p>
+<h2 id="4-单步调试（F8）"><a href="#4-单步调试（F8）" class="headerlink" title="4 单步调试（F8）"></a>4 单步调试（F8）</h2><p>触发断点后，我们当然可以通过加 N 个断点来定位问题，但在较复杂的场景里可能没法判断出关键点。这时可以在比较靠前的位置添加断点作为起点，一行一行执行。操作是单步调试，快捷键是 F8。</p>
+<h2 id="5-进入方法内部（F7）"><a href="#5-进入方法内部（F7）" class="headerlink" title="5 进入方法内部（F7）"></a>5 进入方法内部（F7）</h2><p>在单步调试时方法调用语句会被看做一行，那么如何进入方法内部呢？用“进入内部”操作，快捷键是 F7.</p>
+<h2 id="6-退出当前方法（上档键-F8）"><a href="#6-退出当前方法（上档键-F8）" class="headerlink" title="6 退出当前方法（上档键+F8）"></a>6 退出当前方法（上档键+F8）</h2><p>既然有进入方法内部，就有退出当前方法的操作。当进入某个方法内部后觉得该方法后面的代码不需要看了，不需要猛按 F8 让它们跑完，可以直接退出当前方法去到该方法调用处的下一行。</p>
+<p>有了这些操作，基本可以应付常见的 80% 的调试场景了。但仅仅了解这些，在面对复杂场景时难免效率低下。下面介绍几种非常高效的断点。</p>
+<h1 id="三、-几种高效断点"><a href="#三、-几种高效断点" class="headerlink" title="三、 几种高效断点"></a>三、 几种高效断点</h1><h2 id="1-条件成立时才触发的条件断点"><a href="#1-条件成立时才触发的条件断点" class="headerlink" title="1 条件成立时才触发的条件断点"></a>1 条件成立时才触发的条件断点</h2><p>普通断点在每次运行到时都会被触发，这在多次调用、有“循环”的场景会比较麻烦，比如循环 100 次只希望停留在第 98 次。那么此刻就可以用上条件断点了。</p>
+<p>添加条件断点：先在需要的行前左键单击添加普通断点，右键点击该断点出现对话框，在“Condition”处填入条件即可，条件语法同 Java，如 i == 98。点击 Done，完成添加。这样当条件未满足时，不会阻塞程序运行；当条件满足时断点被触发。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797301917622.png" alt="20171014150797301917622.png"></p>
+<h2 id="2-不会阻塞应用程序的日志断点"><a href="#2-不会阻塞应用程序的日志断点" class="headerlink" title="2 不会阻塞应用程序的日志断点"></a>2 不会阻塞应用程序的日志断点</h2><p>有时候我们仅仅希望在关键时刻输出一些 log，那么我们需要做这些工作：</p>
+<ol>
+<li>在代码里加上 log 代码</li>
+<li>重新运行程序</li>
+<li>重新触发断点</li>
+</ol>
+<p>那么有没有什么方法可以避免这些繁杂的操作呢？这时可以试试日志断点。</p>
+<p>在条件断点弹出的对话框里，将“suspend”设置为未选中状态，断点触发时就不会被阻塞。此时对话框会多出一些选项。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079730545598.png" alt="2017101415079730545598.png"></p>
+<p>我们选中“Evaluated and log”，并在里面填写希望输出的日志，点击 Done 即可。注意，日志将输出到 Console 而非 LogCat。</p>
+<h2 id="3-被异常触发的异常断点"><a href="#3-被异常触发的异常断点" class="headerlink" title="3 被异常触发的异常断点"></a>3 被异常触发的异常断点</h2><p>我们做 debug，一般面对的都是未崩溃的异常，例如 UI 状态不对、数值不对、代码执行逻辑不对等等。碰到直接 crash 的情况，我们往往不会去 debug，而是根据报错信息定位到某某行，然后解决问题。最典型的就是空指针异常了，只要看到报错位置，基本手到擒来。</p>
+<p>但日常开发难免碰到一些给出具体信息和抛异常的位置也没有头绪或者未给出具体位置的情况，比如某 API 抛了个状态异常，那么我们可能得去琢磨为何会状态不对。</p>
+<p>这时还是得调试，但我们也不能眼睁睁看着抛出的异常让应用程序崩了，可以用上“异常断点”。</p>
+<p>我们打开断点管理器，可以看到有一类是“Java Exception Breakpoints”，直接勾上是所有异常都会被触发。</p>
+<p>假如只想被某种异常触发，我们可以点击“+”，选中“Java Exception Breakpoints”，然后输出该种异常即可。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797308856387.png" alt="20171014150797308856387.png"></p>
+<p>有朋友可能注意到除了 “Java Exception Breakpoints” 外还有一个 “Exception Breakpoints”，两者区别主要是前者只支持 Java 本身的异常，后者可以支持自定义异常。</p>
+<h2 id="4-追踪关键点的字段断点和方法断点"><a href="#4-追踪关键点的字段断点和方法断点" class="headerlink" title="4 追踪关键点的字段断点和方法断点"></a>4 追踪关键点的字段断点和方法断点</h2><p>在诸如多线程等复杂场景下，超多的变量和超多的类再加上一些 native 方法和第三方库，调试的复杂度也直线上升。</p>
+<p><strong>这时可以尝试以点破面，抓住关键方法或字段来追踪应用程序的运行轨迹。</strong>于是关注某字段的字段断点和关注某方法的方法断点就派上用场了。</p>
+<p>顾名思义，字段断点的触发条件是字段值被更改，方法断点是方法被调用。</p>
+<p>添加方式：在字段那行、在方法声明的那行单击即可。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797311954451.png" alt="20171014150797311954451.png"></p>
+<h2 id="5-注意事项"><a href="#5-注意事项" class="headerlink" title="5 注意事项"></a>5 注意事项</h2><p>除了以上这些，还有其他断点未列出来，比如临时断点等。考虑到这类断点实用性不强，就不多加说明，有需求的朋友自然会去了解。</p>
+<p><strong>需要说明的是，给断点命名只是为了方便交流，各类型之间并没有特别边界。</strong> 实际上，断点只是某些操作的集合而已。比如日志断点是“不阻塞”和“输出日志”两个操作的集合，那么我们当然可以加上“设置条件”操作变成“条件日志断点”，诸如此类。我们设置断点的面板是允许我们将多种断点条件混合使用的。</p>
+<p>所以，<strong>断点名称和类型不重要，重要的是针对现场选用合适的操作。</strong></p>
+<h1 id="四-调试中的变量"><a href="#四-调试中的变量" class="headerlink" title="四 调试中的变量"></a>四 调试中的变量</h1><p>在设置了合适的断点后，我们就可以进行下一步操作 —— 观察变量，准确的说是观察变量的值。</p>
+<h2 id="1-变量观测面板"><a href="#1-变量观测面板" class="headerlink" title="1 变量观测面板"></a>1 变量观测面板</h2><p>众所周知，应用程序在运行期间元素都处于一种动态状态，此刻你是无法观测到具体变量的值的。只有当动态变成静态，即阻塞住应用程序，才能开始变量观测。</p>
+<p>这个“阻塞”操作也就是上文提到的断点触发。</p>
+<p>这里需要特别指出的是，当需要追踪某一个特定变量时，字段断点是一大利器。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797315866815.png" alt="20171014150797315866815.png"></p>
+<p>如上图所示，变量观察面板会列出所有当前能访问到的成员变量和局部变量。</p>
+<p>点击变量前的箭头，可以将该实例展开，列出所有字段。</p>
+<h2 id="2-Add-New-Watch"><a href="#2-Add-New-Watch" class="headerlink" title="2 Add New Watch"></a>2 Add New Watch</h2><p>将所有变量、所有字段列出来是比较直观，但当我们要去获取某些属性时就略蛋疼了。</p>
+<p>比如，获取某成员变量 View 的第一个 <code>child</code> 的 <code>measuredHeight</code>。假如是靠手动去一个个“打开”属性列表，拿得多麻烦。</p>
+<p>又比如，我们需要获取到两个属性相加后占另一个值的百分比。先去找到这两个属性的值然后额外拿计算器计算？</p>
+<p>这时就可以用上 “Add New Watch”了，添加一个观察表达式。通俗点就是在变量观测区执行一个表达式并得到它的值。</p>
+<p>在面试左侧点击绿色“+”，或者点击右键在菜单中选择“New Watch”, 就会出现一个框，输入表达式即可。</p>
+<p>举个例子：</p>
+<p>在示例中输入<code>toolbar.getChildAt(0).getMeasuredHeight()</code>，可得到如图的结果。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797320181952.png" alt="20171014150797320181952.png"></p>
+<h2 id="3-设置变量的值"><a href="#3-设置变量的值" class="headerlink" title="3 设置变量的值"></a>3 设置变量的值</h2><p><strong>变量的值除了能被观察外，还可以在运行时改变。</strong> 这个可以说是超酷的黑科技了。试想，碰到一个 <code>if else</code> 时，我们可以很轻松无成本地通过更改变量的值，让应用程序能跑到我们期望的分支上。</p>
+<p>设置变量的值有两种方式：方式一是在变量观测区右键单击变量，在菜单中选中“set value”；方式二是鼠标悬浮在代码区中的某个可访问的变量上，在弹出的浮层里更改值。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797323062129.png" alt="20171014150797323062129.png"></p>
+<h1 id="五-犀利的小功能"><a href="#五-犀利的小功能" class="headerlink" title="五 犀利的小功能"></a>五 犀利的小功能</h1><p>除了以上那些常规的操作，还有一些“还有这种操作”的小功能。</p>
+<h2 id="1-Force-Run-to-Cursor"><a href="#1-Force-Run-to-Cursor" class="headerlink" title="1 Force Run to Cursor"></a>1 Force Run to Cursor</h2><p>该操作可以忽视已存在的断点，直接跳到光标所在的行。有种脱离断点、繁琐操作的束缚轻松自由的感觉有木有。</p>
+<h2 id="2-Drop-frame"><a href="#2-Drop-frame" class="headerlink" title="2 Drop frame"></a>2 Drop frame</h2><p>经过不懈努力，终于快到出错的那个时刻啦，你眉飞色舞手指按得飞快，结果小手一抖，多按了几个 F8 （单步调试快捷键），错过了出错的那个时刻。<strong>如果能回退到方法执行前？</strong></p>
+<p>Drop frame 功能能让你回到当前方法被调用的地方，并且当前上下文所有变量也都恢复到方法调用前 —— 时光回溯有木有？</p>
+<p><strong>当然别太兴奋，由于 DalvikVM 和 Android Runtime (ART) 不支持，大部分情况下你是用不到的，那个按钮长期处于不可点击状态。</strong>但如果你是在跑 JUnit 测试的话，是可以用上的。</p>
+<h2 id="3-Log"><a href="#3-Log" class="headerlink" title="3 Log"></a>3 Log</h2><p>在多线程环境下，光靠 debug 是不行的。有时 debug 本身会带来一些问题混淆了现场，比如因为 debug 时的卡顿造成环境不一致等等，这时应该学会使用打日志的形式帮忙调试。</p>
+<h2 id="4-布局查看器"><a href="#4-布局查看器" class="headerlink" title="4 布局查看器"></a>4 布局查看器</h2><p>在 Android Studio 的 Android Device Monitor 里有一个 “Dump View Hierarchy for UI Automator” 功能，可以看到当前手机上应用的具体布局情况 —— 甚至布局元素的属性都会一一给出（仅可用于可调试的应用）。对 UI 调试非常有帮助。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797328687524.png" alt="20171014150797328687524.png"></p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/08/24/android-modularization/" rel="next" title="Android-组件化学习">
+                <i class="fa fa-chevron-left"></i> Android-组件化学习
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/08/26/android-appbarlayout/" rel="prev" title="Android-AppBarLayout">
+                Android-AppBarLayout <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">99</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#一、-进入-debug-模式的两种姿势"><span class="nav-number">1.</span> <span class="nav-text">一、 进入 debug 模式的两种姿势</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#二、-常见的调试操作"><span class="nav-number">2.</span> <span class="nav-text">二、 常见的调试操作</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-典型的调试场景"><span class="nav-number">2.1.</span> <span class="nav-text">1 典型的调试场景</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-设置断点"><span class="nav-number">2.2.</span> <span class="nav-text">2 设置断点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-跳到下一个断点（F9）"><span class="nav-number">2.3.</span> <span class="nav-text">3 跳到下一个断点（F9）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-单步调试（F8）"><span class="nav-number">2.4.</span> <span class="nav-text">4 单步调试（F8）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-进入方法内部（F7）"><span class="nav-number">2.5.</span> <span class="nav-text">5 进入方法内部（F7）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#6-退出当前方法（上档键-F8）"><span class="nav-number">2.6.</span> <span class="nav-text">6 退出当前方法（上档键+F8）</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#三、-几种高效断点"><span class="nav-number">3.</span> <span class="nav-text">三、 几种高效断点</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-条件成立时才触发的条件断点"><span class="nav-number">3.1.</span> <span class="nav-text">1 条件成立时才触发的条件断点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-不会阻塞应用程序的日志断点"><span class="nav-number">3.2.</span> <span class="nav-text">2 不会阻塞应用程序的日志断点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-被异常触发的异常断点"><span class="nav-number">3.3.</span> <span class="nav-text">3 被异常触发的异常断点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-追踪关键点的字段断点和方法断点"><span class="nav-number">3.4.</span> <span class="nav-text">4 追踪关键点的字段断点和方法断点</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#5-注意事项"><span class="nav-number">3.5.</span> <span class="nav-text">5 注意事项</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#四-调试中的变量"><span class="nav-number">4.</span> <span class="nav-text">四 调试中的变量</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-变量观测面板"><span class="nav-number">4.1.</span> <span class="nav-text">1 变量观测面板</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Add-New-Watch"><span class="nav-number">4.2.</span> <span class="nav-text">2 Add New Watch</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-设置变量的值"><span class="nav-number">4.3.</span> <span class="nav-text">3 设置变量的值</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#五-犀利的小功能"><span class="nav-number">5.</span> <span class="nav-text">五 犀利的小功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#1-Force-Run-to-Cursor"><span class="nav-number">5.1.</span> <span class="nav-text">1 Force Run to Cursor</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#2-Drop-frame"><span class="nav-number">5.2.</span> <span class="nav-text">2 Drop frame</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#3-Log"><span class="nav-number">5.3.</span> <span class="nav-text">3 Log</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#4-布局查看器"><span class="nav-number">5.4.</span> <span class="nav-text">4 布局查看器</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>
