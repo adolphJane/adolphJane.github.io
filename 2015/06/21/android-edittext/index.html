@@ -90,7 +90,7 @@
 <meta name="description" content="EditText控件的常用属性如下：android:hint=”请输入数字！”//设置显示在输入位置上的提示信息  
 android:numeric=”integer”//设置只能输入整数，如果是小数则是：decimal  
 android:singleLine=”true”//设置单行输入，一旦设置为true，则文字不会自动换行。  
-android:password=”true”//设置只能">
+android:password=”true”//设置只能输">
 <meta property="og:type" content="article">
 <meta property="og:title" content="EditText">
 <meta property="og:url" content="http://adolph.cc/2015/06/21/android-edittext/index.html">
@@ -98,14 +98,14 @@ android:password=”true”//设置只能">
 <meta property="og:description" content="EditText控件的常用属性如下：android:hint=”请输入数字！”//设置显示在输入位置上的提示信息  
 android:numeric=”integer”//设置只能输入整数，如果是小数则是：decimal  
 android:singleLine=”true”//设置单行输入，一旦设置为true，则文字不会自动换行。  
-android:password=”true”//设置只能">
-<meta property="og:updated_time" content="2017-04-06T15:56:31.000Z">
+android:password=”true”//设置只能输">
+<meta property="og:updated_time" content="2017-10-28T15:17:14.376Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="EditText">
 <meta name="twitter:description" content="EditText控件的常用属性如下：android:hint=”请输入数字！”//设置显示在输入位置上的提示信息  
 android:numeric=”integer”//设置只能输入整数，如果是小数则是：decimal  
 android:singleLine=”true”//设置单行输入，一旦设置为true，则文字不会自动换行。  
-android:password=”true”//设置只能">
+android:password=”true”//设置只能输">
 
 
 
@@ -411,8 +411,7 @@ android:password=”true”//设置只能">
       
 
       
-        <a id="more"></a>
-<h1 id="EditText控件的常用属性如下："><a href="#EditText控件的常用属性如下：" class="headerlink" title="EditText控件的常用属性如下："></a>EditText控件的常用属性如下：</h1><p><strong>android:hint=”请输入数字！”</strong>//设置显示在输入位置上的提示信息  </p>
+        <h1 id="EditText控件的常用属性如下："><a href="#EditText控件的常用属性如下：" class="headerlink" title="EditText控件的常用属性如下："></a>EditText控件的常用属性如下：</h1><p><strong>android:hint=”请输入数字！”</strong>//设置显示在输入位置上的提示信息  </p>
 <p><strong>android:numeric=”integer”</strong>//设置只能输入整数，如果是小数则是：decimal  </p>
 <p><strong>android:singleLine=”true”</strong>//设置单行输入，一旦设置为true，则文字不会自动换行。  </p>
 <p><strong>android:password=”true”</strong>//设置只能输入密码  </p>
@@ -466,7 +465,61 @@ android:password=”true”//设置只能">
 <p><strong>android:width</strong>  //设置文本区域的宽度，支持度量单位：px(像素)/dp/sp/in/mm(毫米)，与layout_width的区别看这里。  </p>
 <p><strong>android:maxWidth</strong>  //设置文本区域的最大宽度  </p>
 <p><strong>android:minWidth</strong>  //设置文本区域的最小宽度  </p>
-
+<h1 id="自动弹出软键盘"><a href="#自动弹出软键盘" class="headerlink" title="自动弹出软键盘"></a>自动弹出软键盘</h1><p>为了改善用户体验，在进入一个Android页面时，自动弹出输入软键盘，实现方法如下。</p>
+<h2 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h2><p>首先要对指定的输入框请求焦点。然后调用输入管理器弹出软键盘。</p>
+<h3 id="绑定软键盘到EditText："><a href="#绑定软键盘到EditText：" class="headerlink" title="绑定软键盘到EditText："></a>绑定软键盘到EditText：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">editText.setFocusable(<span class="keyword">true</span>);  </div><div class="line">editText.setFocusableInTouchMode(<span class="keyword">true</span>);  </div><div class="line">editText.requestFocus();  </div><div class="line">InputMethodManager inputManager = (InputMethodManager)editText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);  </div><div class="line">inputManager.showSoftInput(editText, <span class="number">0</span>);</div></pre></td></tr></table></figure>
+<h3 id="去除软键盘显示："><a href="#去除软键盘显示：" class="headerlink" title="去除软键盘显示："></a>去除软键盘显示：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">edit.setText(<span class="string">""</span>);    </div><div class="line">edit.clearFocus();    </div><div class="line">InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);     </div><div class="line">imm.hideSoftInputFromWindow(edit.getWindowToken(), <span class="number">0</span>);</div></pre></td></tr></table></figure>
+<p>由于调转到一个新的页面，就需要弹出软键盘，往往页面还未加载完，造成软键盘无法弹出，这个时候可采用延时弹出的方法进行解决，延时大概300毫秒来保证页面加载完成：</p>
+<h3 id="方法A"><a href="#方法A" class="headerlink" title="方法A:"></a>方法A:</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> Handler hander=<span class="keyword">new</span> Handler()&#123;    </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(android.os.Message msg)</span> </span>&#123;    </div><div class="line">        edit.setFocusable(<span class="keyword">true</span>);    </div><div class="line">        edit.setFocusableInTouchMode(<span class="keyword">true</span>);    </div><div class="line">        edit.requestFocus();    </div><div class="line">        InputMethodManager inputManager = (InputMethodManager)edit.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);    </div><div class="line">        inputManager.showSoftInput(edit, <span class="number">0</span>);    </div><div class="line">    &#125;;    </div><div class="line">&#125;;   </div><div class="line">  </div><div class="line"><span class="meta">@Override</span>    </div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onWindowFocusChanged</span><span class="params">(<span class="keyword">boolean</span> hasWindowFocus)</span> </span>&#123;    </div><div class="line">    <span class="keyword">if</span>(visible)&#123;        </div><div class="line">        hander.sendEmptyMessageDelayed(<span class="number">0</span>, <span class="number">1000</span>);    </div><div class="line">    &#125;    </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="方法B："><a href="#方法B：" class="headerlink" title="方法B："></a>方法B：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">Timer timer = <span class="keyword">new</span> Timer();  </div><div class="line">timer.schedule(<span class="keyword">new</span> TimerTask()  &#123;  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">run</span><span class="params">()</span></span>&#123;  </div><div class="line">       InputMethodManager inputManager = (InputMethodManager)editText.getContext().getSystemService(Context.INPUT_METHOD_SERVICE);  </div><div class="line">    inputManager.showSoftInput(editText, <span class="number">0</span>);  </div><div class="line">    &#125;  </div><div class="line">&#125;, <span class="number">500</span>);</div></pre></td></tr></table></figure>
+<h2 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h2><p>布局中自动弹出软键盘：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">editText.requestFocus();  </div><div class="line">editText.setFocusable(<span class="keyword">true</span>);  </div><div class="line">InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);  </div><div class="line">imm.showSoftInputFromInputMethod(editText.getWindowToken(),<span class="number">0</span>);</div></pre></td></tr></table></figure>
+<h3 id="布局中自动关闭软键盘："><a href="#布局中自动关闭软键盘：" class="headerlink" title="布局中自动关闭软键盘："></a>布局中自动关闭软键盘：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">InputMethodManager imm = (InputMethodManager) context.getSystemService(Context.INPUT_METHOD_SERVICE);    </div><div class="line">imm.hideSoftInputFromWindow(talking_edit.getWindowToken() , <span class="number">0</span>);</div></pre></td></tr></table></figure>
+<h3 id="对话框中软键盘自动弹出和关闭："><a href="#对话框中软键盘自动弹出和关闭：" class="headerlink" title="对话框中软键盘自动弹出和关闭："></a>对话框中软键盘自动弹出和关闭：</h3><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">getWindow().setSoftInputMode(WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE|WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE);</div></pre></td></tr></table></figure>
+<p><strong>通过各种百度，又搜集并整理了好多关于软键盘的一些方法</strong>：</p>
+<h4 id="1-软键盘的显示原理"><a href="#1-软键盘的显示原理" class="headerlink" title="1.软键盘的显示原理"></a>1.软键盘的显示原理</h4><p>软键盘其实是一个Dialog。InputMethodService为我们的输入法创建了一个Dialog，并且对某些参数进行了设置，使之能够在底部或者全屏显示。当我们点击输入框时，系统会对当前的主窗口进行调整，以便留出相应的空间来显示该Dialog在底部，或者全屏。</p>
+<h4 id="2-活动主窗口调整"><a href="#2-活动主窗口调整" class="headerlink" title="2.活动主窗口调整"></a>2.活动主窗口调整</h4><p>android定义了一个属性windowSoftInputMode, 用它可以让程序控制活动主窗口调整的方式。我们可以在配置文件AndroidManifet.xml中对Activity进行设置。这个属性的设置将会影响两件事情:       </p>
+<ul>
+<li>软键盘的状态——隐藏或显示。      </li>
+<li><p>活动的主窗口调整——是否减少活动主窗口大小以便腾出空间放软键盘或是否当活动窗口的部分被软键盘覆盖时它的内容的当前焦点是可见的。       故该属性的设置必须是下面列表中的一个值，或一个“state…”值加一个“adjust…”值的组合。在任一组设置多个值，各个值之间用|分开。</p>
+</li>
+<li><p>“stateUnspecified”： 软键盘的状态(隐藏或可见)没有被指定。系统将选择一个合适的状态或依赖于主题的设置。这个是软件盘行为的默认设置。</p>
+</li>
+<li>“stateUnchanged”：软键盘被保持上次的状态。</li>
+<li>“stateHidden”：当用户选择该Activity时，软键盘被隐藏。</li>
+<li>“stateAlwaysHidden”： 软键盘总是被隐藏的。</li>
+<li>“stateVisible”： 软键盘是可见的。</li>
+<li>“stateAlwaysVisible”： 当用户选择这个Activity时，软键盘是可见的。</li>
+<li>“adjustUnspecified”： 它不被指定是否该Activity主窗口调整大小以便留出软键盘的空间，或是否窗口上的内容得到屏幕上当前的焦点是可见的。系统将自动选择这些模式中一种主要依赖于是否窗口的内容有任何布局视图能够滚动他们的内容。如果有这样的一个视图，这个窗口将调整大小，这样的假设可以使滚动窗口的内容在一个较小的区域中可见的。这个是主窗口默认的行为设置。也就是说，系统自动决定是采用平移模式还是压缩模式，决定因素在于内容是否可以滚动。</li>
+<li>“adjustResize”：（压缩模式） 当软键盘弹出时，要对主窗口调整屏幕的大小以便留出软键盘的空间。</li>
+<li>“adjustPan”：（平移模式：当输入框不会被遮挡时，该模式没有对布局进行调整，然而当输入框将要被遮挡时，窗口就会进行平移。也就是说，该模式始终是保持输入框为可见。）该Activity主窗口并不调整屏幕的大小以便留出软键盘的空间。相反，当前窗口的内容将自动移动以便当前焦点从不被键盘覆盖和用户能总是看到输入内容的部分。这个通常是不期望比调整大小，因为用户可能关闭软键盘以便获得与被覆盖内容的交互操作。</li>
+</ul>
+<h4 id="3-侦听软键盘的显示隐藏"><a href="#3-侦听软键盘的显示隐藏" class="headerlink" title="3.侦听软键盘的显示隐藏"></a>3.侦听软键盘的显示隐藏</h4><p>有时候，借助系统本身的机制来实现主窗口的调整并非我们想要的结果，我们可能希望在软键盘显示隐藏的时候，手动的对布局进行修改，以便使软键盘弹出时更加美观。这时就需要对软键盘的显示隐藏进行侦听。       我们可以借助软键盘显示和隐藏时，对主窗口进行了重新布局这个特性来进行侦听。如果我们设置的模式为压缩模式，那么我们可以对布局的onSizeChanged函数进行跟踪，如果为平移模式，那么该函数可能不会被调用。</p>
+<p><strong>设置EditText控件默认不弹出软键盘的几种方法</strong>：</p>
+<p>1.在AndroidMainfest.xml中选择哪个activity，设置windowSoftInputMode属性为adjustUnspecified|stateHidden例如：</p>
+<figure class="highlight"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&lt;activity android:name=".Main"                  </div><div class="line">    android:label="@string/app_name"                  </div><div class="line">    android:windowSoftInputMode="adjustUnspecified|stateHidden"                  </div><div class="line">    android:configChanges="orientation|keyboardHidden"&gt;            </div><div class="line">    &lt;intent-filter&gt;                </div><div class="line">        &lt;action android:name="android.intent.action.MAIN" /&gt;                </div><div class="line">        &lt;category android:name="android.intent.category.LAUNCHER" /&gt;            </div><div class="line">    &lt;/intent-filter&gt;        </div><div class="line">&lt;/activity&gt;</div></pre></td></tr></table></figure>
+<p>2.让EditText失去焦点，使用EditText的clearFocus方法例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">EditText edit=(EditText)findViewById(R.id.edit);           </div><div class="line">edit.clearFocus();</div></pre></td></tr></table></figure>
+<p>3.强制隐藏Android输入法窗口例如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">EditText edit=(EditText)findViewById(R.id.edit);             </div><div class="line">InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);            </div><div class="line">imm.hideSoftInputFromWindow(edit.getWindowToken(),<span class="number">0</span>);</div></pre></td></tr></table></figure>
+<p>4.例：EditText edit=(EditText)findViewById(R.id.edit);       edit.setInputType(InputType.TYPE_NULL);</p>
+<p><strong>显示和隐藏软键盘</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">tv.setOnClickListener(<span class="keyword">new</span> OnClickListener() &#123;   </div><div class="line">    <span class="meta">@Override</span> <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View v)</span> </span>&#123;  </div><div class="line">        InputMethodManager imm = (InputMethodManager)getSystemService(Context.INPUT_METHOD_SERVICE);  </div><div class="line">        <span class="comment">//隐藏软键盘 //  </span></div><div class="line">        imm.hideSoftInputFromWindow(tv.getWindowToken(), <span class="number">0</span>);   </div><div class="line">        <span class="comment">//显示软键盘 //   </span></div><div class="line">        imm.showSoftInputFromInputMethod(tv.getWindowToken(), <span class="number">0</span>);   </div><div class="line">        <span class="comment">//切换软键盘的显示与隐藏   </span></div><div class="line">       imm.toggleSoftInputFromWindow(tv.getWindowToken(), <span class="number">0</span>, InputMethodManager.HIDE_NOT_ALWAYS);   </div><div class="line">        <span class="comment">//或者 // imm.toggleSoftInput(0, InputMethodManager.HIDE_NOT_ALWAYS); </span></div><div class="line">    &#125; </div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p><strong>备注</strong>：</p>
+<ul>
+<li>1，Eidtext这个控件默认是你点击了它获得焦点之后就会自动地弹出软键盘，前提是你在竖屏的时候。但横盘的时候，不会自动弹出弹出软键盘了。模拟器横屏时默认是打开了键盘的所以就算你用代码来显示软键盘也是显示不出来的，而像真实的手机（有物理键盘（硬件盘）比如G1）就不一样了。可以通过sensor来把画面横屏而并没正在的将键盘打开时就可以通过代码来显示软键盘了。</li>
+<li>2,问题在通过代码来使得软键盘显示与隐藏时可以写在某控件的onClick事件里来或者用timer来控制，若你直接在onCreate或onResume里面是不行的，从网上找来的理由说是：软件盘是要在所有view画完才能显示的。</li>
+</ul>
+<p><strong>情况一</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="meta">@Override</span>  </div><div class="line"><span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onResume</span><span class="params">()</span> </span>&#123;  </div><div class="line">    <span class="comment">// TODO Auto-generated method stub  </span></div><div class="line">    <span class="keyword">super</span>.onResume();  </div><div class="line">    InputMethodManager im = ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE));  </div><div class="line">    im.showSoftInput(tv, <span class="number">0</span>);  </div><div class="line">    &#125;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>情况二</strong>：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">tv.setOnClickListener(<span class="keyword">new</span> OnClickListener() &#123;  </div><div class="line"><span class="meta">@Override</span>  </div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View arg0)</span> </span>&#123;  </div><div class="line">    InputMethodManager im = ((InputMethodManager) getSystemService(INPUT_METHOD_SERVICE));  </div><div class="line">    <span class="keyword">if</span> (im.showSoftInput(tv, InputMethodManager.SHOW_FORCED)) &#123;  </div><div class="line">        System.out.println(<span class="string">" return is true fullscreenmode"</span> + im.isFullscreenMode());  </div><div class="line">    &#125; <span class="keyword">else</span> &#123;  </div><div class="line">        System.out.println(<span class="string">"return is not true"</span>);  </div><div class="line">    &#125;</div><div class="line">&#125;&#125;);</div></pre></td></tr></table></figure>
+<p><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><em>*</em></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong>自定义软键盘的Enter键<strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><strong><em>*</em></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></strong></p>
+<p>SDK升级到1.5以后，当文本输入框（EditText及其子类）获得焦点后，会弹出系统自带的软键盘为了实现一些自定义的功能，就稍微研究了下<em> 当layout中有多个EditText，把每个控件的android:singleLine的属性都被设置成true的情况下，软键盘的Enter键上 的文字会变成“Next”，按下后下个EditText会自动获得焦点（实现了“Next”的功能）；当最后一个控件获得焦点的时候，Enter键上的文 字会变成“Done”，按下后软键盘会自动隐藏起来</em> 把EditText的Ime Options属性设置成不同的值，Enter键上可以显示不同的文字或图案actionNone : 回车键，按下后光标到下一行actionGo ：  Go，actionSearch ： 一个放大镜actionSend ： SendactionNext ： NextactionDone ： Done，隐藏软键盘，即使不是最后一个文本输入框;</p>
+<p><strong>示例：—————————–&gt;</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">&lt;EditText </div><div class="line">    android:text=<span class="string">""</span>   </div><div class="line">    android:layout_width=<span class="string">"fill_parent"</span>   </div><div class="line">    android:layout_height=<span class="string">"wrap_content"</span>  </div><div class="line">    android:inputType=<span class="string">"text"</span>  </div><div class="line">    android:id=<span class="string">"@+id/edit1"</span>/&gt;  </div><div class="line">&lt;EditText </div><div class="line">    android:layout_width=<span class="string">"fill_parent"</span>  </div><div class="line">    android:layout_height=<span class="string">"wrap_content"</span>  </div><div class="line">    android:id=<span class="string">"@+id/edit2"</span>  </div><div class="line">    android:imeOptions=<span class="string">"actionSend"</span> <span class="comment">//发送  </span></div><div class="line">    android:inputType=<span class="string">"text|textEmailAddress"</span>/&gt;  </div><div class="line">&lt;EditText </div><div class="line">    android:layout_width=<span class="string">"fill_parent"</span>  </div><div class="line">    android:layout_height=<span class="string">"wrap_content"</span>  </div><div class="line">    android:id=<span class="string">"@+id/edit3"</span>  </div><div class="line">    android:imeOptions=<span class="string">"actionDone"</span>  <span class="comment">//确定  </span></div><div class="line">    android:inputType=<span class="string">"number|numberSigned|numberDecimal"</span>/&gt;</div></pre></td></tr></table></figure>
+<p>And <strong>java</strong> 代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">edit1.setOnEditorActionListener(onEditorActionListener);  </div><div class="line">edit2.setOnEditorActionListener(onEditorActionListener);  </div><div class="line">edit3.setOnEditorActionListener(onEditorActionListener);  </div><div class="line">rivate OnEditorActionListener onEditorActionListener = <span class="keyword">new</span> OnEditorActionListener() &#123;  </div><div class="line">     </div><div class="line">    <span class="meta">@Override</span>  </div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onEditorAction</span><span class="params">(TextView v, <span class="keyword">int</span> actionId, KeyEvent event)</span> </span>&#123;  </div><div class="line">        <span class="keyword">switch</span>(actionId)&#123;    </div><div class="line">        <span class="keyword">case</span> EditorInfo.IME_NULL:    </div><div class="line">            System.out.println(<span class="string">"null for default_content: "</span> + v.getText() );    </div><div class="line">            <span class="keyword">break</span>;    </div><div class="line">        <span class="keyword">case</span> EditorInfo.IME_ACTION_SEND:    </div><div class="line">            System.out.println(<span class="string">"action send for email_content: "</span>  + v.getText());    </div><div class="line">            <span class="keyword">break</span>;    </div><div class="line">        <span class="keyword">case</span> EditorInfo.IME_ACTION_DONE:    </div><div class="line">            System.out.println(<span class="string">"action done for number_content: "</span>  + v.getText());    </div><div class="line">            <span class="keyword">break</span>;    </div><div class="line">        &#125;    </div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;  </div><div class="line">    &#125;  </div><div class="line">&#125;;</div></pre></td></tr></table></figure>
       
     </div>
 
@@ -508,8 +561,8 @@ android:password=”true”//设置只能">
         <div class="post-nav">
           <div class="post-nav-next post-nav-item">
             
-              <a href="/2015/06/20/android-bitmapfactory/" rel="next" title="BitmapFactory">
-                <i class="fa fa-chevron-left"></i> BitmapFactory
+              <a href="/2015/06/20/2015-6-20-android-paint/" rel="next" title="Android中的绘画">
+                <i class="fa fa-chevron-left"></i> Android中的绘画
               </a>
             
           </div>
@@ -592,7 +645,7 @@ android:password=”true”//设置只能">
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">96</span>
+                <span class="site-state-item-count">99</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -603,7 +656,7 @@ android:password=”true”//设置只能">
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -614,7 +667,7 @@ android:password=”true”//设置只能">
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-count">24</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -660,7 +713,7 @@ android:password=”true”//设置只能">
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EditText控件的常用属性如下："><span class="nav-number">1.</span> <span class="nav-text">EditText控件的常用属性如下：</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#EditText控件的常用属性如下："><span class="nav-number">1.</span> <span class="nav-text">EditText控件的常用属性如下：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#自动弹出软键盘"><span class="nav-number">2.</span> <span class="nav-text">自动弹出软键盘</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#方法一："><span class="nav-number">2.1.</span> <span class="nav-text">方法一：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#绑定软键盘到EditText："><span class="nav-number">2.1.1.</span> <span class="nav-text">绑定软键盘到EditText：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#去除软键盘显示："><span class="nav-number">2.1.2.</span> <span class="nav-text">去除软键盘显示：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方法A"><span class="nav-number">2.1.3.</span> <span class="nav-text">方法A:</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#方法B："><span class="nav-number">2.1.4.</span> <span class="nav-text">方法B：</span></a></li></ol></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方法二："><span class="nav-number">2.2.</span> <span class="nav-text">方法二：</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#布局中自动关闭软键盘："><span class="nav-number">2.2.1.</span> <span class="nav-text">布局中自动关闭软键盘：</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#对话框中软键盘自动弹出和关闭："><span class="nav-number">2.2.2.</span> <span class="nav-text">对话框中软键盘自动弹出和关闭：</span></a><ol class="nav-child"><li class="nav-item nav-level-4"><a class="nav-link" href="#1-软键盘的显示原理"><span class="nav-number">2.2.2.1.</span> <span class="nav-text">1.软键盘的显示原理</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#2-活动主窗口调整"><span class="nav-number">2.2.2.2.</span> <span class="nav-text">2.活动主窗口调整</span></a></li><li class="nav-item nav-level-4"><a class="nav-link" href="#3-侦听软键盘的显示隐藏"><span class="nav-number">2.2.2.3.</span> <span class="nav-text">3.侦听软键盘的显示隐藏</span></a></li></ol></li></ol></li></ol></li></ol></div>
             
 
           </div>

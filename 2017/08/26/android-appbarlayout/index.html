@@ -100,7 +100,12 @@
 <meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150799499853731.gif">
 <meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150799505696205.gif">
 <meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171014150799532425417.gif">
-<meta property="og:updated_time" content="2017-10-14T15:36:04.963Z">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171019150842247229844.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171019150842251698266.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171019150842256217688.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171019150842260265572.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171019150842265497458.gif">
+<meta property="og:updated_time" content="2017-10-28T15:41:55.798Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android-AppBarLayout">
 <meta name="twitter:description" content="ToolbarToobar主要是用来替换ActionBar的，换句话说，ActionBar能做的，Toolbar都能做。如果你对ActionBar的使用比较熟悉，你会发现Toolbar使用起来非常简单。ok，既然是替换，当然用Toolbar的时候就得先去把ActionBar给隐藏掉啦~
@@ -468,6 +473,60 @@
 <p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799532425417.gif" alt="20171014150799532425417.gif"></p>
 <p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>“，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
 <p>献上<a href="http://download.csdn.net/detail/huachao1001/9538934" target="_blank" rel="external">源码</a></p>
+<h1 id="AppBarLayout的ScrollFlags属性"><a href="#AppBarLayout的ScrollFlags属性" class="headerlink" title="AppBarLayout的ScrollFlags属性"></a>AppBarLayout的ScrollFlags属性</h1><p>在前面两篇MD系列的文章中，通过两个案例基本上能够掌握了CoordinatorLayout与AppBarLayout的配合使用。本文我们回过头来详细聊聊AppBarLayout的ScrollFlags属性，了解一下不同值之间的区别。至此，Android Material Design系列的学习已进行到第七篇，大家可以点击以下链接查看之前的文章：</p>
+<ul>
+<li><a href="http://www.jianshu.com/p/39a66373498c" target="_blank" rel="external">Android TabLayout 分分钟打造一个滑动标签页</a></li>
+<li><a href="http://www.jianshu.com/p/9eb3b17b0e77" target="_blank" rel="external">Android 一文告诉你到底是用Dialog，Snackbar，还是Toast</a></li>
+<li><a href="http://www.jianshu.com/p/5328b2eee827" target="_blank" rel="external">Android FloatingActionButton 重要的操作不要太多，一个就好</a></li>
+<li><a href="http://www.jianshu.com/p/ab04627cce58" target="_blank" rel="external">Android 初识AppBarLayout 和 CoordinatorLayout</a></li>
+<li><a href="http://www.jianshu.com/p/4b0f3c80ebc9" target="_blank" rel="external">Android CoordinatorLayout实战案例学习《一》</a></li>
+<li><a href="http://www.jianshu.com/p/360fd368936d" target="_blank" rel="external">Android CoordinatorLayout 实战案例学习《二》</a></li>
+</ul>
+<p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Toolbar toolbar = ... <span class="comment">// your toolbar within an AppBarLayout</span></div><div class="line">AppBarLayout.LayoutParams params = </div><div class="line">    (AppBarLayout.LayoutParams) toolbar.getLayoutParams();</div><div class="line">params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL</div><div class="line">    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);</div></pre></td></tr></table></figure>
+<p>下面我们通过官网介绍、XML代码和对应的效果图分别分析这五种值的使用（备注：代码中设置也一样，不再赘述）：</p>
+<h2 id="scroll"><a href="#scroll" class="headerlink" title="scroll"></a>scroll</h2><blockquote>
+<p>The view will be scroll in direct relation to scroll events. This flag needs to be set for any of the other flags to take effect. If any sibling views before this one do not have this flag, then this value has no effect.</p>
+</blockquote>
+<p>Child View 伴随着滚动事件而滚出或滚进屏幕。注意两点：第一点，如果使用了其他值，必定要使用这个值才能起作用；第二点：如果在这个child View前面的任何其他Child View没有设置这个值，那么这个Child View的设置将失去作用。</p>
+<p>示例XML代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line"><span class="tag">&lt;<span class="name">android.support.design.widget.AppBarLayout</span></span></div><div class="line">    <span class="attr">android:id</span>=<span class="string">"@+id/appbar"</span></div><div class="line">    <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">    <span class="attr">android:layout_height</span>=<span class="string">"wrap_content"</span></div><div class="line">    <span class="attr">android:theme</span>=<span class="string">"@style/ThemeOverlay.AppCompat.Dark.ActionBar"</span>&gt;</div><div class="line"></div><div class="line">    <span class="tag">&lt;<span class="name">android.support.v7.widget.Toolbar</span></span></div><div class="line">        <span class="attr">xmlns:app</span>=<span class="string">"http://schemas.android.com/apk/res-auto"</span></div><div class="line">        <span class="attr">android:id</span>=<span class="string">"@+id/tb_toolbar"</span></div><div class="line">        <span class="attr">android:layout_width</span>=<span class="string">"match_parent"</span></div><div class="line">        <span class="attr">android:layout_height</span>=<span class="string">"@dimen/dp_56"</span></div><div class="line">        <span class="attr">app:titleTextColor</span>=<span class="string">"@color/white"</span></div><div class="line">        <span class="attr">app:title</span>=<span class="string">"@string/app_name"</span></div><div class="line">        <span class="attr">app:theme</span>=<span class="string">"@style/OverFlowMenuTheme"</span></div><div class="line">        <span class="attr">app:popupTheme</span>=<span class="string">"@style/AppTheme"</span></div><div class="line">        <span class="attr">android:background</span>=<span class="string">"@color/blue"</span></div><div class="line">        <span class="attr">app:layout_scrollFlags</span>=<span class="string">"scroll|enterAlways"</span>/&gt;</div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">android.support.design.widget.AppBarLayout</span>&gt;</span></div></pre></td></tr></table></figure>
+<p>对应效果图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842247229844.gif" alt="20171019150842247229844.gif"></p>
+<h2 id="enterAlways"><a href="#enterAlways" class="headerlink" title="enterAlways"></a>enterAlways</h2><blockquote>
+<p>When entering (scrolling on screen) the view will scroll on any downwards scroll event, regardless of whether the scrolling view is also scrolling. This is commonly referred to as the ‘quick return’ pattern.</p>
+</blockquote>
+<p>快速返回模式。其实就是向下滚动时Scrolling View和Child View之间的滚动优先级问题。对比<code>scroll</code>和<code>scroll | enterAlways</code>设置，发生向下滚动事件时，前者优先滚动Scrolling View，后者优先滚动Child View，当优先滚动的一方已经全部滚进屏幕之后，另一方才开始滚动。</p>
+<p>示例XML代码：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">app:layout_scrollFlags=<span class="string">"scroll|enterAlways"</span></div><div class="line">...</div></pre></td></tr></table></figure>
+<p>对应效果图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842251698266.gif" alt="20171019150842251698266.gif"></p>
+<h2 id="enterAlwaysCollapsed"><a href="#enterAlwaysCollapsed" class="headerlink" title="enterAlwaysCollapsed"></a>enterAlwaysCollapsed</h2><blockquote>
+<p>An additional flag for ‘enterAlways’ which modifies the returning view to only initially scroll back to it’s collapsed height. Once the scrolling view has reached the end of it’s scroll range, the remainder of this view will be scrolled into view. The collapsed height is defined by the view’s minimum height.</p>
+</blockquote>
+<p>enterAlways的附加值。这里涉及到Child View的高度和最小高度，向下滚动时，Child View先向下滚动最小高度值，然后Scrolling View开始滚动，到达边界时，Child View再向下滚动，直至显示完全。</p>
+<p>示例XML代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">android:layout_height="@dimen/dp_200"</div><div class="line">android:minHeight="@dimen/dp_56"</div><div class="line">...</div><div class="line">app:layout_scrollFlags="scroll|enterAlways|enterAlwaysCollapsed"</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>对应效果图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842256217688.gif" alt="20171019150842256217688.gif"></p>
+<h2 id="exitUntilCollapsed"><a href="#exitUntilCollapsed" class="headerlink" title="exitUntilCollapsed"></a>exitUntilCollapsed</h2><blockquote>
+<p>When exiting (scrolling off screen) the view will be scrolled until it is ‘collapsed’. The collapsed height is defined by the view’s minimum height.</p>
+</blockquote>
+<p>这里也涉及到最小高度。发生向上滚动事件时，Child View向上滚动退出直至最小高度，然后Scrolling View开始滚动。也就是，Child View不会完全退出屏幕。</p>
+<p>示例SML代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">android:layout_height="@dimen/dp_200"</div><div class="line">android:minHeight="@dimen/dp_56"</div><div class="line">...</div><div class="line">app:layout_scrollFlags="scroll|exitUntilCollapsed"</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>对应效果图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842260265572.gif" alt="20171019150842260265572.gif"></p>
+<h2 id="snap"><a href="#snap" class="headerlink" title="snap"></a>snap</h2><blockquote>
+<p>Upon a scroll ending, if the view is only partially visible then it will be snapped and scrolled to it’s closest edge. For example, if the view only has it’s bottom 25% displayed, it will be scrolled off screen completely. Conversely, if it’s bottom 75% is visible then it will be scrolled fully into view.</p>
+</blockquote>
+<p>简单理解，就是Child View滚动比例的一个吸附效果。也就是说，Child View不会存在局部显示的情况，滚动Child View的部分高度，当我们松开手指时，Child View要么向上全部滚出屏幕，要么向下全部滚进屏幕，有点类似ViewPager的左右滑动。</p>
+<p>示例XML代码：</p>
+<figure class="highlight xml"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">...</div><div class="line">android:layout_height="@dimen/dp_200"</div><div class="line">...</div><div class="line">app:layout_scrollFlags="scroll|snap"</div><div class="line">...</div></pre></td></tr></table></figure>
+<p>对应效果图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842265497458.gif" alt="20171019150842265497458.gif"></p>
+<h2 id="示例源码"><a href="#示例源码" class="headerlink" title="示例源码"></a>示例源码</h2><p>我在GitHub上建立了一个Repository，用来存放整个Android Material Design系列控件的学习案例，会伴随着文章逐渐更新完善，欢迎大家补充交流，Star地址：</p>
+<p><a href="https://github.com/Mike-bel/MDStudySamples" target="_blank" rel="external">https://github.com/Mike-bel/MDStudySamples</a></p>
 
       
     </div>
@@ -520,8 +579,8 @@
 
           <div class="post-nav-prev post-nav-item">
             
-              <a href="/2017/08/27/android-ndk/" rel="prev" title="Android-NDK图片高斯模糊">
-                Android-NDK图片高斯模糊 <i class="fa fa-chevron-right"></i>
+              <a href="/2017/08/27/android-coordinatorLayout/" rel="prev" title="Android-CoordinatorLayout详细学习">
+                Android-CoordinatorLayout详细学习 <i class="fa fa-chevron-right"></i>
               </a>
             
           </div>
@@ -594,7 +653,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">96</span>
+                <span class="site-state-item-count">99</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -605,7 +664,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">14</span>
+                <span class="site-state-item-count">15</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -616,7 +675,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">23</span>
+                <span class="site-state-item-count">24</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -662,7 +721,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Toolbar"><span class="nav-number">1.</span> <span class="nav-text">Toolbar</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AppBarLayout"><span class="nav-number">2.</span> <span class="nav-text">AppBarLayout</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AppBarLayout子View的动作"><span class="nav-number">2.1.</span> <span class="nav-text">AppBarLayout子View的动作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将AppBarLayout与ScrollView关联起来"><span class="nav-number">2.2.</span> <span class="nav-text">将AppBarLayout与ScrollView关联起来</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CollapsingToolbarLayout"><span class="nav-number">3.</span> <span class="nav-text">CollapsingToolbarLayout</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#Toolbar"><span class="nav-number">1.</span> <span class="nav-text">Toolbar</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AppBarLayout"><span class="nav-number">2.</span> <span class="nav-text">AppBarLayout</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#AppBarLayout子View的动作"><span class="nav-number">2.1.</span> <span class="nav-text">AppBarLayout子View的动作</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#将AppBarLayout与ScrollView关联起来"><span class="nav-number">2.2.</span> <span class="nav-text">将AppBarLayout与ScrollView关联起来</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#CollapsingToolbarLayout"><span class="nav-number">3.</span> <span class="nav-text">CollapsingToolbarLayout</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#AppBarLayout的ScrollFlags属性"><span class="nav-number">4.</span> <span class="nav-text">AppBarLayout的ScrollFlags属性</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#scroll"><span class="nav-number">4.1.</span> <span class="nav-text">scroll</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#enterAlways"><span class="nav-number">4.2.</span> <span class="nav-text">enterAlways</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#enterAlwaysCollapsed"><span class="nav-number">4.3.</span> <span class="nav-text">enterAlwaysCollapsed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#exitUntilCollapsed"><span class="nav-number">4.4.</span> <span class="nav-text">exitUntilCollapsed</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#snap"><span class="nav-number">4.5.</span> <span class="nav-text">snap</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#示例源码"><span class="nav-number">4.6.</span> <span class="nav-text">示例源码</span></a></li></ol></li></ol></div>
             
 
           </div>
