@@ -1,0 +1,986 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="ItemDecoration实现padding 
+ItemDecoration实现下划线 
+ItemDecoration实现酷炫吸顶效果 
+ItemDecoration实现item的拖拽，平移等操作 
+
+ItemDecorationItemDecoration是RecyclerView内部的一个抽象类，要实现这个抽象类自然需要实现内部的抽象方法，除了deprecated的方法只有下面三个方法：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-RecyclerViewItemDecoration的进阶使用">
+<meta property="og:url" content="http://adolph.cc/2017/10/29/android-recyclerview-itemdecoration/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="ItemDecoration实现padding 
+ItemDecoration实现下划线 
+ItemDecoration实现酷炫吸顶效果 
+ItemDecoration实现item的拖拽，平移等操作 
+
+ItemDecorationItemDecoration是RecyclerView内部的一个抽象类，要实现这个抽象类自然需要实现内部的抽象方法，除了deprecated的方法只有下面三个方法：">
+<meta property="og:updated_time" content="2017-11-08T15:52:06.826Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-RecyclerViewItemDecoration的进阶使用">
+<meta name="twitter:description" content="ItemDecoration实现padding 
+ItemDecoration实现下划线 
+ItemDecoration实现酷炫吸顶效果 
+ItemDecoration实现item的拖拽，平移等操作 
+
+ItemDecorationItemDecoration是RecyclerView内部的一个抽象类，要实现这个抽象类自然需要实现内部的抽象方法，除了deprecated的方法只有下面三个方法：">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/10/29/android-recyclerview-itemdecoration/"/>
+
+
+
+
+
+  <title> Android-RecyclerViewItemDecoration的进阶使用 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/10/29/android-recyclerview-itemdecoration/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-RecyclerViewItemDecoration的进阶使用
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-29T23:43:00+08:00">
+                2017-10-29
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <ol>
+<li>ItemDecoration实现padding </li>
+<li>ItemDecoration实现下划线 </li>
+<li>ItemDecoration实现酷炫吸顶效果 </li>
+<li>ItemDecoration实现item的拖拽，平移等操作 </li>
+</ol>
+<h1 id="ItemDecoration"><a href="#ItemDecoration" class="headerlink" title="ItemDecoration"></a>ItemDecoration</h1><p>ItemDecoration是RecyclerView内部的一个抽象类，要实现这个抽象类自然需要实现内部的抽象方法，除了deprecated的方法只有下面三个方法：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">//可以实现类似padding的效果</div><div class="line">public void onDraw(Canvas c, RecyclerView parent, State state) </div><div class="line">//可以实现类似绘制背景的效果，内容在上面</div><div class="line">public void onDrawOver(Canvas c, RecyclerView parent, State state)  </div><div class="line">//可以绘制在内容的上面，覆盖内容</div><div class="line">public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state)</div></pre></td></tr></table></figure>
+<p>声明下：ItemDecoration的使用必须在setAdapter前，通过recyclerView.addItemDecoration()方法设置</p>
+<h1 id="下面讲解ItemDecoration实现的功能"><a href="#下面讲解ItemDecoration实现的功能" class="headerlink" title="下面讲解ItemDecoration实现的功能"></a>下面讲解ItemDecoration实现的功能</h1><h2 id="ItemDecoration实现padding"><a href="#ItemDecoration实现padding" class="headerlink" title="ItemDecoration实现padding"></a>ItemDecoration实现padding</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PaddingDecoration</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">ItemDecoration</span></span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> padding;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PaddingDecoration</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="comment">//即你要设置的分割线的宽度 --这里设为10dp</span></div><div class="line">        padding = context.getResources().getDimensionPixelSize(R.dimen.padding);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getItemOffsets</span><span class="params">(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.getItemOffsets(outRect, view, parent, state);</div><div class="line">        <span class="comment">//outRect就是你那个item条目的矩形</span></div><div class="line">        outRect.left = padding;  <span class="comment">//相当于 设置 left padding</span></div><div class="line">        outRect.top = padding;   <span class="comment">//相当于 设置 top padding</span></div><div class="line">        outRect.right = padding; <span class="comment">//相当于 设置 right padding</span></div><div class="line">        outRect.bottom = padding;  <span class="comment">//相当于 设置 bottom padding</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="ItemDecoration实现下划线"><a href="#ItemDecoration实现下划线" class="headerlink" title="ItemDecoration实现下划线"></a>ItemDecoration实现下划线</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">DeviderDecoration</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">ItemDecoration</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> deviderHeight;</div><div class="line">    <span class="keyword">private</span> Paint dividerPaint;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">DeviderDecoration</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">        <span class="comment">//设置画笔</span></div><div class="line">        dividerPaint = <span class="keyword">new</span> Paint();</div><div class="line">        <span class="comment">//设置分割线颜色</span></div><div class="line">        dividerPaint.setColor(context.getResources().getColor(R.color.colorAccent));</div><div class="line">        <span class="comment">//设置分割线宽度</span></div><div class="line">        deviderHeight = context.getResources().getDimensionPixelSize(R.dimen.divider_height);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getItemOffsets</span><span class="params">(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.getItemOffsets(outRect, view, parent, state);</div><div class="line">        <span class="comment">//改变宽度</span></div><div class="line">        outRect.bottom = deviderHeight;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas c, RecyclerView parent, RecyclerView.State state)</span> </span>&#123;</div><div class="line">        <span class="comment">//得到列表所有的条目</span></div><div class="line">        <span class="keyword">int</span> childCount = parent.getChildCount();</div><div class="line">        <span class="comment">//得到条目的宽和高</span></div><div class="line">        <span class="keyword">int</span> left = parent.getPaddingLeft();</div><div class="line">        <span class="keyword">int</span> right = parent.getWidth() - parent.getPaddingRight();</div><div class="line"></div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount - <span class="number">1</span>; i++) &#123;</div><div class="line">            View view = parent.getChildAt(i);</div><div class="line">            <span class="comment">//计算每一个条目的顶点和底部 float值</span></div><div class="line">            <span class="keyword">float</span> top = view.getBottom();</div><div class="line">            <span class="keyword">float</span> bottom = view.getBottom() + deviderHeight;</div><div class="line">            <span class="comment">//重新绘制</span></div><div class="line">            c.drawRect(left, top, right, bottom, dividerPaint);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="ItemDecoration实现酷炫吸顶效果"><a href="#ItemDecoration实现酷炫吸顶效果" class="headerlink" title="ItemDecoration实现酷炫吸顶效果"></a>ItemDecoration实现酷炫吸顶效果</h2><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div><div class="line">142</div><div class="line">143</div><div class="line">144</div><div class="line">145</div><div class="line">146</div><div class="line">147</div><div class="line">148</div><div class="line">149</div><div class="line">150</div><div class="line">151</div><div class="line">152</div><div class="line">153</div><div class="line">154</div><div class="line">155</div><div class="line">156</div><div class="line">157</div></pre></td><td class="code"><pre><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">SectionDecoration</span> <span class="keyword">extends</span> <span class="title">RecyclerView</span>.<span class="title">ItemDecoration</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> List&lt;String&gt; dataList;</div><div class="line">    <span class="keyword">private</span> DecorationCallback callback;</div><div class="line">    <span class="keyword">private</span> TextPaint textPaint;</div><div class="line">    <span class="keyword">private</span> Paint paint;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> topGap;</div><div class="line">    <span class="keyword">private</span> <span class="keyword">int</span> alignBottom;</div><div class="line">    <span class="keyword">private</span> Paint.FontMetrics fontMetrics;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">SectionDecoration</span><span class="params">(List&lt;String&gt; dataList, Context context, DecorationCallback decorationCallback)</span> </span>&#123;</div><div class="line">        Resources res = context.getResources();</div><div class="line">        <span class="keyword">this</span>.dataList = dataList;</div><div class="line">        <span class="keyword">this</span>.callback = decorationCallback;</div><div class="line">        <span class="comment">//设置悬浮栏的画笔---paint</span></div><div class="line">        paint = <span class="keyword">new</span> Paint();</div><div class="line">        paint.setColor(res.getColor(R.color.colorGray));</div><div class="line"></div><div class="line">        <span class="comment">//设置悬浮栏中文本的画笔</span></div><div class="line">        textPaint = <span class="keyword">new</span> TextPaint();</div><div class="line">        textPaint.setAntiAlias(<span class="keyword">true</span>);</div><div class="line">        textPaint.setTextSize(DensityUtil.dip2px(context, <span class="number">14</span>));</div><div class="line">        textPaint.setColor(Color.DKGRAY);</div><div class="line">        textPaint.setTextAlign(Paint.Align.LEFT);</div><div class="line">        fontMetrics = <span class="keyword">new</span> Paint.FontMetrics();</div><div class="line"></div><div class="line">        <span class="comment">//决定悬浮栏的高度等</span></div><div class="line">        topGap = res.getDimensionPixelSize(R.dimen.sectioned_top);</div><div class="line">        <span class="comment">//决定文本的显示位置等</span></div><div class="line">        alignBottom = res.getDimensionPixelSize(R.dimen.sectioned_alignBottom);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//图1：代表了getItemOffsets(),可以实现类似padding的效果</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">getItemOffsets</span><span class="params">(Rect outRect, View view, RecyclerView parent, RecyclerView.State state)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.getItemOffsets(outRect, view, parent, state);</div><div class="line">        <span class="keyword">int</span> pos = parent.getChildAdapterPosition(view);</div><div class="line"></div><div class="line">        String groupId = callback.getGroupId(pos);</div><div class="line">        <span class="keyword">if</span> (groupId.equals(<span class="string">"-1"</span>)) <span class="keyword">return</span>;</div><div class="line">        <span class="comment">//只有是同一组的第一个才显示悬浮栏</span></div><div class="line">        <span class="keyword">if</span> (pos == <span class="number">0</span> || isFirstInGroup(pos)) &#123;</div><div class="line">            outRect.top = topGap;</div><div class="line">            <span class="keyword">if</span> (dataList.get(pos) == <span class="string">""</span>) &#123;</div><div class="line">                outRect.top = <span class="number">0</span>;</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            outRect.top = <span class="number">0</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//图2：代表了onDraw(),可以实现类似绘制背景的效果，内容在上面</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas c, RecyclerView parent, RecyclerView.State state)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onDraw(c, parent, state);</div><div class="line">        <span class="keyword">int</span> left = parent.getPaddingLeft();</div><div class="line">        <span class="keyword">int</span> right = parent.getWidth() - parent.getPaddingRight();</div><div class="line">        <span class="keyword">int</span> childCount = parent.getChildCount();</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</div><div class="line">            View view = parent.getChildAt(i);</div><div class="line">            <span class="keyword">int</span> position = parent.getChildAdapterPosition(view);</div><div class="line">            String groupId = callback.getGroupId(position);</div><div class="line">            <span class="keyword">if</span> (groupId.equals(<span class="string">"-1"</span>)) <span class="keyword">return</span>;</div><div class="line">            String textLine = callback.getGroupFirstLine(position).toUpperCase();</div><div class="line">            <span class="keyword">if</span> (textLine == <span class="string">""</span>) &#123;</div><div class="line">                <span class="keyword">float</span> top = view.getTop();</div><div class="line">                <span class="keyword">float</span> bottom = view.getTop();</div><div class="line">                c.drawRect(left, top, right, bottom, paint);</div><div class="line">                <span class="keyword">return</span>;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">if</span> (position == <span class="number">0</span> || isFirstInGroup(position)) &#123;</div><div class="line">                    <span class="keyword">float</span> top = view.getTop() - topGap;</div><div class="line">                    <span class="keyword">float</span> bottom = view.getTop();</div><div class="line">                    <span class="comment">//绘制悬浮栏</span></div><div class="line">                    c.drawRect(left, top, right, bottom, paint);</div><div class="line">                    <span class="comment">//绘制文本</span></div><div class="line">                    c.drawText(textLine, left, bottom, textPaint);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//图3：代表了onDrawOver()，可以绘制在内容的上面，覆盖内容</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onDrawOver</span><span class="params">(Canvas c, RecyclerView parent, RecyclerView.State state)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onDrawOver(c, parent, state);</div><div class="line"></div><div class="line">        <span class="keyword">int</span> itemCount = state.getItemCount();</div><div class="line">        <span class="keyword">int</span> childCount = parent.getChildCount();</div><div class="line">        <span class="keyword">int</span> left = parent.getPaddingLeft();</div><div class="line">        <span class="keyword">int</span> right = parent.getWidth() - parent.getPaddingRight();</div><div class="line">        <span class="keyword">float</span> lineHeight = textPaint.getTextSize() + fontMetrics.descent;</div><div class="line"></div><div class="line">        String preGroupId = <span class="string">""</span>;</div><div class="line">        String groupId = <span class="string">"-1"</span>;</div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; childCount; i++) &#123;</div><div class="line">            View view = parent.getChildAt(i);</div><div class="line">            <span class="keyword">int</span> position = parent.getChildAdapterPosition(view);</div><div class="line"></div><div class="line">            preGroupId = groupId;</div><div class="line">            groupId = callback.getGroupId(position);</div><div class="line">            <span class="keyword">if</span> (groupId.equals(<span class="string">"-1"</span>) || groupId.equals(preGroupId)) <span class="keyword">continue</span>;</div><div class="line"></div><div class="line">            String textLine = callback.getGroupFirstLine(position).toUpperCase();</div><div class="line">            <span class="keyword">if</span> (TextUtils.isEmpty(textLine)) <span class="keyword">continue</span>;</div><div class="line"></div><div class="line">            <span class="keyword">int</span> viewBottom = view.getBottom();</div><div class="line">            <span class="keyword">float</span> textY = Math.max(topGap, view.getTop());</div><div class="line">            <span class="comment">//下一个和当前不一样移动当前</span></div><div class="line">            <span class="keyword">if</span> (position + <span class="number">1</span> &lt; itemCount) &#123;</div><div class="line">                String nextGroupId = callback.getGroupId(position + <span class="number">1</span>);</div><div class="line">                <span class="comment">//组内最后一个view进入了header</span></div><div class="line">                <span class="keyword">if</span> (nextGroupId != groupId &amp;&amp; viewBottom &lt; textY) &#123;</div><div class="line">                    textY = viewBottom;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            <span class="comment">//textY - topGap决定了悬浮栏绘制的高度和位置</span></div><div class="line">            c.drawRect(left, textY - topGap, right, textY, paint);</div><div class="line">            <span class="comment">//left+2*alignBottom 决定了文本往左偏移的多少（加--&gt;向左移）</span></div><div class="line">            <span class="comment">//textY-alignBottom  决定了文本往右偏移的多少  (减--&gt;向上移)</span></div><div class="line"><span class="comment">//            c.drawText(textLine, left + 2 * alignBottom, textY - alignBottom, textPaint);</span></div><div class="line">            c.drawText(textLine, left, textY - alignBottom, textPaint);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 判断是不是组中的第一个位置</div><div class="line">     *</div><div class="line">     * <span class="doctag">@param</span> pos</div><div class="line">     * <span class="doctag">@return</span></div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isFirstInGroup</span><span class="params">(<span class="keyword">int</span> pos)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (pos == <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">// 因为是根据 字符串内容的相同与否 来判断是不是同意组的，所以此处的标记id 要是String类型</span></div><div class="line">            <span class="comment">// 如果你只是做联系人列表，悬浮框里显示的只是一个字母，则标记id直接用 int 类型就行了</span></div><div class="line">            String prevGroupId = callback.getGroupId(pos - <span class="number">1</span>);</div><div class="line">            String groupId = callback.getGroupId(pos);</div><div class="line">            <span class="comment">//判断前一个字符串 与 当前字符串 是否相同</span></div><div class="line">            <span class="keyword">if</span> (prevGroupId.equals(groupId)) &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//定义一个借口方便外界的调用</span></div><div class="line">    <span class="keyword">public</span> <span class="class"><span class="keyword">interface</span> <span class="title">DecorationCallback</span> </span>&#123;</div><div class="line">        <span class="function">String <span class="title">getGroupId</span><span class="params">(<span class="keyword">int</span> position)</span></span>;</div><div class="line"></div><div class="line">        <span class="function">String <span class="title">getGroupFirstLine</span><span class="params">(<span class="keyword">int</span> position)</span></span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>使用</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">textRecycler.addItemDecoration(<span class="keyword">new</span> SectionDecoration(list, <span class="keyword">this</span>, <span class="keyword">new</span> SectionDecoration.DecorationCallback() &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getGroupId</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span>(NameBean.get(position)!=<span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">return</span> NameBean.get(position);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> <span class="string">"-1"</span>;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> String <span class="title">getGroupFirstLine</span><span class="params">(<span class="keyword">int</span> position)</span> </span>&#123;</div><div class="line">            <span class="keyword">if</span>(NameBean.get(position)!=<span class="keyword">null</span>) &#123;</div><div class="line">                <span class="keyword">return</span> NameBean.get(position);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">return</span> <span class="string">""</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;));</div></pre></td></tr></table></figure>
+<h2 id="ItemDecoration实现item的拖拽，平移等操作"><a href="#ItemDecoration实现item的拖拽，平移等操作" class="headerlink" title="ItemDecoration实现item的拖拽，平移等操作"></a>ItemDecoration实现item的拖拽，平移等操作</h2><p>（穿插还通过OnItemTouchListener封装了列表的点击和长点击事件）</p>
+<p><strong>item的点击事件和长点击事件</strong></p>
+<p>该功能主要通过addOnItemTouchListener() 来实现。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">textRecycler.addOnItemTouchListener(<span class="keyword">new</span> OnRecyclerItemClickListener(textRecycler) &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onItemClick</span><span class="params">(RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</div><div class="line">            ToastUtils.showToast(viewHolder.getAdapterPosition()+<span class="number">1</span>+<span class="string">""</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLongClick</span><span class="params">(RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</div><div class="line">            ToastUtils.showToast(viewHolder.getAdapterPosition()+<span class="number">1</span>+<span class="string">""</span>);</div><div class="line">            <span class="comment">//当 item 被长按且不是第一个时，开始拖曳这个 item</span></div><div class="line">            <span class="keyword">if</span> (viewHolder.getLayoutPosition() != <span class="number">0</span>) &#123;</div><div class="line">                itemTouchHelper.startDrag(viewHolder);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
+<p>其中 OnRecyclerItemClickListener 是自定义的一个触摸监听器，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">    <span class="keyword">public</span> <span class="keyword">abstract</span> <span class="class"><span class="keyword">class</span> <span class="title">OnRecyclerItemClickListener</span> <span class="keyword">implements</span> <span class="title">RecyclerView</span>.<span class="title">OnItemTouchListener</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">//手势探测器</span></div><div class="line">    <span class="keyword">private</span> GestureDetectorCompat mGestureDetectorCompat;</div><div class="line">    <span class="keyword">private</span> RecyclerView mRecyclerView;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">OnRecyclerItemClickListener</span><span class="params">(RecyclerView mRecyclerView)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.mRecyclerView = mRecyclerView;</div><div class="line">        mGestureDetectorCompat = <span class="keyword">new</span> GestureDetectorCompat(mRecyclerView.getContext(),</div><div class="line">                <span class="keyword">new</span> ItemTouchHelperGestureListener(mRecyclerView,<span class="keyword">this</span>));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//第一个是拦截触摸事件的，第二个是处理触摸事件的，第三个是处理触摸冲突的。第三个这里我们用不到</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onInterceptTouchEvent</span><span class="params">(RecyclerView rv, MotionEvent e)</span> </span>&#123;</div><div class="line">        mGestureDetectorCompat.onTouchEvent(e);</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onTouchEvent</span><span class="params">(RecyclerView rv, MotionEvent e)</span> </span>&#123;</div><div class="line">        mGestureDetectorCompat.onTouchEvent(e);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onRequestDisallowInterceptTouchEvent</span><span class="params">(<span class="keyword">boolean</span> disallowIntercept)</span> </span>&#123;</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//提供单机 长按的方法</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">onItemClick</span><span class="params">(RecyclerView.ViewHolder viewHolder)</span></span>;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">abstract</span> <span class="keyword">void</span> <span class="title">onLongClick</span><span class="params">(RecyclerView.ViewHolder viewHolder)</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>GestureDetectorCompat 中传入了一个 ItemTouchHelperGestureListener，代码如下：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">ItemTouchHelperGestureListener</span> <span class="keyword">extends</span> <span class="title">GestureDetector</span>.<span class="title">SimpleOnGestureListener</span> </span>&#123;</div><div class="line"></div><div class="line"><span class="keyword">private</span> RecyclerView mRecyclerView;</div><div class="line"><span class="keyword">private</span> OnRecyclerItemClickListener onRecyclerItemClickListener;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">ItemTouchHelperGestureListener</span><span class="params">(RecyclerView mRecyclerView, OnRecyclerItemClickListener onRecyclerItemClickListener)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>.mRecyclerView = mRecyclerView;</div><div class="line">    <span class="keyword">this</span>.onRecyclerItemClickListener = onRecyclerItemClickListener;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//一次单独的轻触抬起手指操作，就是普通的点击事件</span></div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onSingleTapUp</span><span class="params">(MotionEvent e)</span> </span>&#123;</div><div class="line">    <span class="comment">//这个ChildHelper类，它会协助获取RecyclerView中的childVIew。 可点击看源码</span></div><div class="line">    View childViewUnder = mRecyclerView.findChildViewUnder(e.getX(), e.getY());</div><div class="line">    <span class="keyword">if</span> (childViewUnder != <span class="keyword">null</span>) &#123;</div><div class="line">        RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(childViewUnder);</div><div class="line">        onRecyclerItemClickListener.onItemClick(childViewHolder);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">//长按屏幕超过一定时长，就会触发，就是长按事件</span></div><div class="line"><span class="meta">@Override</span></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLongPress</span><span class="params">(MotionEvent e)</span> </span>&#123;</div><div class="line">    View childViewUnder = mRecyclerView.findChildViewUnder(e.getX(), e.getY());</div><div class="line">    <span class="keyword">if</span> (childViewUnder != <span class="keyword">null</span>) &#123;</div><div class="line">        RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(childViewUnder);</div><div class="line">        onRecyclerItemClickListener.onLongClick(childViewHolder);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其实通过一个手势探测器 GestureDetectorCompat 来探测屏幕事件，然后通过手势监听器 SimpleOnGestureListener 来识别手势事件的种类，然后调用我们设置的对应的回调方法。 通过findChildViewUnder()可以知道我们点击的是哪个item，可看源码</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"> <span class="function"><span class="keyword">public</span> View <span class="title">findChildViewUnder</span><span class="params">(<span class="keyword">float</span> x, <span class="keyword">float</span> y)</span> </span>&#123;</div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> count = mChildHelper.getChildCount();</div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = count - <span class="number">1</span>; i &gt;= <span class="number">0</span>; i--) &#123;</div><div class="line">        <span class="keyword">final</span> View child = mChildHelper.getChildAt(i);</div><div class="line">        <span class="keyword">final</span> <span class="keyword">float</span> translationX = ViewCompat.getTranslationX(child);</div><div class="line">        <span class="keyword">final</span> <span class="keyword">float</span> translationY = ViewCompat.getTranslationY(child);</div><div class="line">        <span class="keyword">if</span> (x &gt;= child.getLeft() + translationX &amp;&amp;</div><div class="line">                x &lt;= child.getRight() + translationX &amp;&amp;</div><div class="line">                y &gt;= child.getTop() + translationY &amp;&amp;</div><div class="line">                y &lt;= child.getBottom() + translationY) &#123;</div><div class="line">            <span class="keyword">return</span> child;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">null</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>同时我们调用 RecyclerView 的另一个方法 getChildViewHolder()，可以获得该 item 的 ViewHolder，最后再回调我们定义的虚方法 onItemClick() 就ok了，这样我们就可以在外部实现该方法来获得 item 的点击事件了。</p>
+<p><strong>ItemDecoration实现item的拖拽，平移等操作</strong></p>
+<p>ItemTouchHelper 一个帮助开发人员处理拖拽和滑动删除的实现类，它能够让你非常容易实现侧滑删除、拖拽的功能。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div></pre></td><td class="code"><pre><div class="line">    <span class="comment">/**</span></div><div class="line"> * Created by wen on 2017/8/8.</div><div class="line"> * ItemTouchHelper 一个帮助开发人员处理拖拽和滑动删除的实现类，它能够让你非常容易实现侧滑删除、拖拽的功能。</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MyItemTouchHelper</span> <span class="keyword">extends</span> <span class="title">ItemTouchHelper</span>.<span class="title">Callback</span> </span>&#123;</div><div class="line"></div><div class="line">    RecyclerAdapter adapter;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">MyItemTouchHelper</span><span class="params">(RecyclerAdapter adapter)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.adapter = adapter;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//通过返回值来设置是否处理某次拖曳或者滑动事件</span></div><div class="line">    <span class="comment">//dragFlags 是拖拽标志，</span></div><div class="line">    <span class="comment">//swipeFlags 是滑动标志，</span></div><div class="line">    <span class="comment">//swipeFlags 都设置为0，暂时不考虑滑动相关操作。</span></div><div class="line">    <span class="comment">//getMovementFlags() 用于设置是否处理拖拽事件和滑动事件，以及拖拽和滑动操作的方向，有以下两种情况：</span></div><div class="line">    <span class="comment">//如果是列表类型的 RecyclerView，拖拽只有 UP、DOWN 两个方向</span></div><div class="line">    <span class="comment">//如果是网格类型的则有 UP、DOWN、LEFT、RIGHT 四个方向</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">int</span> <span class="title">getMovementFlags</span><span class="params">(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (recyclerView.getLayoutManager() <span class="keyword">instanceof</span> GridLayoutManager) &#123;</div><div class="line">            <span class="keyword">int</span> dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;</div><div class="line">            <span class="keyword">int</span> swipeFlags = <span class="number">0</span>;</div><div class="line">            <span class="keyword">return</span> makeMovementFlags(dragFlags, swipeFlags);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">int</span> dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;</div><div class="line">            <span class="comment">//注意：和拖曳的区别就是在这里</span></div><div class="line">            <span class="keyword">int</span> swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;</div><div class="line">            <span class="keyword">return</span> makeMovementFlags(dragFlags, swipeFlags);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//当长按并进入拖曳状态时，拖曳的过程中不断的回调此方法</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onMove</span><span class="params">(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target)</span> </span>&#123;</div><div class="line">        <span class="comment">//拖动的 item 的下标</span></div><div class="line">        <span class="keyword">int</span> fromPosition = viewHolder.getAdapterPosition();</div><div class="line">        <span class="comment">//目标 item 的下标，目标 item 就是当拖曳过程中，不断和拖动的 item 做位置交换的条目。</span></div><div class="line">        <span class="keyword">int</span> toPosition = target.getAdapterPosition();</div><div class="line">        <span class="comment">//对应某些需求，某一个item不能拖拽</span></div><div class="line">        <span class="keyword">if</span> (toPosition == <span class="number">0</span>) &#123;</div><div class="line">            <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">if</span> (fromPosition &lt; toPosition) &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = fromPosition; i &lt; toPosition; i++) &#123;</div><div class="line">                <span class="comment">//通过你传入的adapter得到你的数据 并进行交换</span></div><div class="line">                Collections.swap(((RecyclerAdapter) adapter).getDataList(), i, i + <span class="number">1</span>);</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="keyword">for</span> (<span class="keyword">int</span> i = fromPosition; i &gt; toPosition; i--) &#123;</div><div class="line">                Collections.swap(((RecyclerAdapter) adapter).getDataList(), i, i - <span class="number">1</span>);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        adapter.notifyItemMoved(fromPosition, toPosition);</div><div class="line">        <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//滑动删除的回调</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSwiped</span><span class="params">(RecyclerView.ViewHolder viewHolder, <span class="keyword">int</span> direction)</span> </span>&#123;</div><div class="line">        <span class="keyword">int</span> adapterPosition = viewHolder.getAdapterPosition();</div><div class="line">        adapter.notifyItemRemoved(adapterPosition);</div><div class="line">        ((RecyclerAdapter)adapter).getDataList().remove(adapterPosition);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//当长按 item 刚开始拖曳的时候调用</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onSelectedChanged</span><span class="params">(RecyclerView.ViewHolder viewHolder, <span class="keyword">int</span> actionState)</span> </span>&#123;</div><div class="line">        <span class="keyword">if</span> (actionState != ItemTouchHelper.ACTION_STATE_IDLE) &#123;</div><div class="line">            <span class="comment">//给被拖曳的 item 设置一个深颜色背景</span></div><div class="line">            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">super</span>.onSelectedChanged(viewHolder, actionState);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//当完成拖曳手指松开的时候调用</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">clearView</span><span class="params">(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.clearView(recyclerView, viewHolder);</div><div class="line">        <span class="comment">//给已经完成拖曳的 item 恢复开始的背景。</span></div><div class="line">        <span class="comment">// 这里我们设置的颜色尽量和你 item 在 xml 中设置的颜色保持一致</span></div><div class="line">        viewHolder.itemView.setBackgroundColor(Color.WHITE);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//返回 false 让它控制所有的 item 都不能拖曳。</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">isLongPressDragEnabled</span><span class="params">()</span> </span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p><strong>使用</strong></p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">itemTouchHelper = <span class="keyword">new</span> ItemTouchHelper(<span class="keyword">new</span> MyItemTouchHelper(adapter));</div><div class="line">    itemTouchHelper.attachToRecyclerView(textRecycler);</div><div class="line"></div><div class="line">    textRecycler.addOnItemTouchListener(<span class="keyword">new</span> OnRecyclerItemClickListener(textRecycler) &#123;</div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onItemClick</span><span class="params">(RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</div><div class="line">            ToastUtils.showToast(viewHolder.getAdapterPosition()+<span class="number">1</span>+<span class="string">""</span>);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="meta">@Override</span></div><div class="line">        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onLongClick</span><span class="params">(RecyclerView.ViewHolder viewHolder)</span> </span>&#123;</div><div class="line">            ToastUtils.showToast(viewHolder.getAdapterPosition()+<span class="number">1</span>+<span class="string">""</span>);</div><div class="line">            <span class="comment">//当 item 被长按且不是第一个时，开始拖曳这个 item（这里只是一个特殊需求）</span></div><div class="line">            <span class="keyword">if</span> (viewHolder.getLayoutPosition() != <span class="number">0</span>) &#123;</div><div class="line">                itemTouchHelper.startDrag(viewHolder);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">    &#125;);</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/28/android-view-distribute/" rel="next" title="Android-事件分发机制详解：史上最全面、最易懂">
+                <i class="fa fa-chevron-left"></i> Android-事件分发机制详解：史上最全面、最易懂
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/30/android-floatingview/" rel="prev" title="Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库">
+                Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">138</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#ItemDecoration"><span class="nav-number">1.</span> <span class="nav-text">ItemDecoration</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#下面讲解ItemDecoration实现的功能"><span class="nav-number">2.</span> <span class="nav-text">下面讲解ItemDecoration实现的功能</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#ItemDecoration实现padding"><span class="nav-number">2.1.</span> <span class="nav-text">ItemDecoration实现padding</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ItemDecoration实现下划线"><span class="nav-number">2.2.</span> <span class="nav-text">ItemDecoration实现下划线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ItemDecoration实现酷炫吸顶效果"><span class="nav-number">2.3.</span> <span class="nav-text">ItemDecoration实现酷炫吸顶效果</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#ItemDecoration实现item的拖拽，平移等操作"><span class="nav-number">2.4.</span> <span class="nav-text">ItemDecoration实现item的拖拽，平移等操作</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

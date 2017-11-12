@@ -1,0 +1,1035 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言最近在一个项目中需要一个像QQ打开个人爱好那样的动画效果如下图:
+
+可以看出每个小球都是以顺时针旋转出来的,说明像这样的曲线动画用Android中自带的平移动画是很难实现的。
+曲线动画怎么画???
+我们先来看看Android自带的绘制曲线的方式是怎样的:
+android自定义View中画图经常用到这几个什么什么To
+moveTomoveTo 不会进行绘制，只用于移动移动画笔,也就是确定绘制的起">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-自定义曲线路径动画框架">
+<meta property="og:url" content="http://adolph.cc/2017/11/02/android-bight-path/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言最近在一个项目中需要一个像QQ打开个人爱好那样的动画效果如下图:
+
+可以看出每个小球都是以顺时针旋转出来的,说明像这样的曲线动画用Android中自带的平移动画是很难实现的。
+曲线动画怎么画???
+我们先来看看Android自带的绘制曲线的方式是怎样的:
+android自定义View中画图经常用到这几个什么什么To
+moveTomoveTo 不会进行绘制，只用于移动移动画笔,也就是确定绘制的起">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041618224358.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041640123831.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041650962507.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/2017111215104165256666.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041654896085.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041656320256.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041657814861.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041659410068.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041661322165.gif">
+<meta property="og:updated_time" content="2017-11-11T16:12:36.709Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-自定义曲线路径动画框架">
+<meta name="twitter:description" content="前言最近在一个项目中需要一个像QQ打开个人爱好那样的动画效果如下图:
+
+可以看出每个小球都是以顺时针旋转出来的,说明像这样的曲线动画用Android中自带的平移动画是很难实现的。
+曲线动画怎么画???
+我们先来看看Android自带的绘制曲线的方式是怎样的:
+android自定义View中画图经常用到这几个什么什么To
+moveTomoveTo 不会进行绘制，只用于移动移动画笔,也就是确定绘制的起">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171112151041618224358.gif">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/11/02/android-bight-path/"/>
+
+
+
+
+
+  <title> Android-自定义曲线路径动画框架 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/11/02/android-bight-path/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-自定义曲线路径动画框架
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-02T00:01:00+08:00">
+                2017-11-02
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>最近在一个项目中需要一个像QQ打开个人爱好那样的动画效果如下图:</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041618224358.gif" alt="20171112151041618224358.gif"></p>
+<p>可以看出每个小球都是以顺时针旋转出来的,说明像这样的曲线动画用Android中自带的平移动画是很难实现的。</p>
+<p>曲线动画怎么画???</p>
+<p>我们先来看看Android自带的绘制曲线的方式是怎样的:</p>
+<p>android自定义View中画图经常用到这几个什么什么To</p>
+<h2 id="moveTo"><a href="#moveTo" class="headerlink" title="moveTo"></a>moveTo</h2><p>moveTo 不会进行绘制，只用于移动移动画笔,也就是确定绘制的起始坐标点。结合以下方法进行使用。</p>
+<h2 id="lineTo"><a href="#lineTo" class="headerlink" title="lineTo"></a>lineTo</h2><p>lineTo 用于进行直线绘制。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mPath.lineTo(<span class="number">300</span>, <span class="number">300</span>);</div><div class="line">canvas.drawPath(mPath, mPaint);</div></pre></td></tr></table></figure>
+<p>默认从坐标(0,0)开始绘制。</p>
+<p>刚才我们不是说了moveTo是用来移动画笔的吗？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mPath.moveTo(<span class="number">100</span>, <span class="number">100</span>);</div><div class="line">mPath.lineTo(<span class="number">300</span>, <span class="number">300</span>);</div><div class="line">canvas.drawPath(mPath, mPaint);</div></pre></td></tr></table></figure>
+<p>把画笔移动(100,100)处开始绘制</p>
+<h2 id="quadTo"><a href="#quadTo" class="headerlink" title="quadTo"></a>quadTo</h2><p>quadTo 用于绘制圆滑曲线，即贝塞尔曲线。</p>
+<h2 id="cubicTo"><a href="#cubicTo" class="headerlink" title="cubicTo"></a>cubicTo</h2><p>cubicTo 同样是用来实现贝塞尔曲线的。mPath.cubicTo(x1, y1, x2, y2, x3, y3) (x1,y1) 为控制点，(x2,y2)为控制点，(x3,y3) 为结束点。那么，cubicTo 和 quadTo 有什么不一样呢？说白了，就是多了一个控制点而已。然后，我们想绘制和上一个一样的曲线，应该怎么写呢？</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">mPath.moveTo(<span class="number">100</span>, <span class="number">500</span>);</div><div class="line">mPath.cubicTo(<span class="number">100</span>, <span class="number">500</span>, <span class="number">300</span>, <span class="number">100</span>, <span class="number">600</span>, <span class="number">500</span>);</div></pre></td></tr></table></figure>
+<p>一模一样！如果我们不加 moveTo 呢？</p>
+<p>则以(0,0)为起点，(100,500)和(300,100)为控制点绘制贝塞尔曲线</p>
+<p>受到上面的启发,我们也可以用同样的方法来实现一个曲线动画框架</p>
+<p>在写框架之前我们必须要先了解一样东西:</p>
+<h1 id="贝塞尔曲线"><a href="#贝塞尔曲线" class="headerlink" title="贝塞尔曲线:"></a>贝塞尔曲线:</h1><p>维基百科中这样说到:</p>
+<p>在数学的数值分析领域中，贝塞尔曲线（英语：Bézier curve）是计算机图形学中相当重要的参数曲线。更高维度的广泛化贝塞尔曲线就称作贝塞尔曲面，其中贝塞尔三角是一种特殊的实例。</p>
+<p>贝塞尔曲线于1962年，由法国工程师皮埃尔·贝塞尔（Pierre Bézier）所广泛发表，他运用贝塞尔曲线来为汽车的主体进行设计。贝塞尔曲线最初由Paul de Casteljau于1959年运用de Casteljau算法开发，以稳定数值的方法求出贝塞尔曲线。</p>
+<h2 id="线性贝塞尔曲线"><a href="#线性贝塞尔曲线" class="headerlink" title="线性贝塞尔曲线"></a>线性贝塞尔曲线</h2><p>给定点P0、P1，线性贝塞尔曲线只是一条两点之间的直线。这条线由下式给出：</p>
+<p>B(t) = P0 + (P1 - P0)t = (1 - t)P0 + tP1,t-&gt;[0,1]</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041640123831.gif" alt="20171112151041640123831.gif"></p>
+<h2 id="二次方贝塞尔曲线"><a href="#二次方贝塞尔曲线" class="headerlink" title="二次方贝塞尔曲线"></a>二次方贝塞尔曲线</h2><p>二次方贝塞尔曲线的路径由给定点P0、P1、P2的函数B（t）追踪：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041650962507.png" alt="20171112151041650962507.png"></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017111215104165256666.gif" alt="2017111215104165256666.gif"></p>
+<h2 id="三次方贝塞尔曲线"><a href="#三次方贝塞尔曲线" class="headerlink" title="三次方贝塞尔曲线"></a>三次方贝塞尔曲线</h2><p>P0、P1、P2、P3四个点在平面或在三维空间中定义了三次方贝塞尔曲线。曲线起始于P0走向P1，并从P2的方向来到P3。一般不会经过P1或P2；这两个点只是在那里提供方向资讯。P0和P1之间的间距，决定了曲线在转而趋进P2之前，走向P1方向的“长度有多长”。</p>
+<p>曲线的参数形式为：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041654896085.png" alt="20171112151041654896085.png"></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041656320256.gif" alt="20171112151041656320256.gif"></p>
+<p>以上都是维基百科给出的定义,以及不同曲线的公式和效果图; 如果不清楚可以自己百度搜索或者维基百科搜索,么么哒!</p>
+<h2 id="一般贝塞尔曲线方程"><a href="#一般贝塞尔曲线方程" class="headerlink" title="一般贝塞尔曲线方程"></a>一般贝塞尔曲线方程</h2><p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041657814861.png" alt="20171112151041657814861.png"></p>
+<p>对于四次曲线，可由线性贝塞尔曲线描述的中介点Q0、Q1、Q2、Q3，由二次贝塞尔曲线描述的点R0、R1、R2，和由三次贝塞尔曲线描述的点S0、S1所建构：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041659410068.gif" alt="20171112151041659410068.gif"></p>
+<p>那么在上代码之前先看看我们最后实现出来的效果图:</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041661322165.gif" alt="20171112151041661322165.gif"></p>
+<p>PathPoint.java中的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by zhengliang on 2016/10/15 0015.</div><div class="line"> * 记录view移动动作的坐标点</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PathPoint</span> </span>&#123;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 起始点操作</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> MOVE=<span class="number">0</span>;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 直线路径操作</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> LINE=<span class="number">1</span>;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 二阶贝塞尔曲线操作</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> SECOND_CURVE =<span class="number">2</span>;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 三阶贝塞尔曲线操作</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="keyword">static</span> <span class="keyword">final</span> <span class="keyword">int</span> THIRD_CURVE=<span class="number">3</span>;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * View移动到的最终位置</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="keyword">float</span> mX,mY;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 控制点</div><div class="line">     */</div><div class="line">    <span class="keyword">public</span> <span class="keyword">float</span> mContorl0X,mContorl0Y;</div><div class="line">    <span class="keyword">public</span> <span class="keyword">float</span> mContorl1X,mContorl1Y;</div><div class="line">    <span class="comment">//操作符</span></div><div class="line">    <span class="keyword">public</span> <span class="keyword">int</span> mOperation;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * Line/Move都通过该构造函数来创建</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathPoint</span><span class="params">(<span class="keyword">int</span> mOperation,<span class="keyword">float</span> mX, <span class="keyword">float</span> mY )</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.mX = mX;</div><div class="line">        <span class="keyword">this</span>.mY = mY;</div><div class="line">        <span class="keyword">this</span>.mOperation = mOperation;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 二阶贝塞尔曲线</div><div class="line">     * <span class="doctag">@param</span> mX</div><div class="line">     * <span class="doctag">@param</span> mY</div><div class="line">     * <span class="doctag">@param</span> mContorl0X</div><div class="line">     * <span class="doctag">@param</span> mContorl0Y</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathPoint</span><span class="params">(<span class="keyword">float</span> mContorl0X, <span class="keyword">float</span> mContorl0Y,<span class="keyword">float</span> mX, <span class="keyword">float</span> mY)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.mX = mX;</div><div class="line">        <span class="keyword">this</span>.mY = mY;</div><div class="line">        <span class="keyword">this</span>.mContorl0X = mContorl0X;</div><div class="line">        <span class="keyword">this</span>.mContorl0Y = mContorl0Y;</div><div class="line">        <span class="keyword">this</span>.mOperation = SECOND_CURVE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 三阶贝塞尔曲线</div><div class="line">     * <span class="doctag">@param</span> mContorl0x</div><div class="line">     * <span class="doctag">@param</span> mContorl0Y</div><div class="line">     * <span class="doctag">@param</span> mContorl1x</div><div class="line">     * <span class="doctag">@param</span> mContorl1Y</div><div class="line">     * <span class="doctag">@param</span> mX</div><div class="line">     * <span class="doctag">@param</span> mY</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathPoint</span><span class="params">(<span class="keyword">float</span> mContorl0x, <span class="keyword">float</span> mContorl0Y, <span class="keyword">float</span> mContorl1x, <span class="keyword">float</span> mContorl1Y,<span class="keyword">float</span> mX, <span class="keyword">float</span> mY)</span> </span>&#123;</div><div class="line">        <span class="keyword">this</span>.mX = mX;</div><div class="line">        <span class="keyword">this</span>.mY = mY;</div><div class="line">        <span class="keyword">this</span>.mContorl0X = mContorl0x;</div><div class="line">        <span class="keyword">this</span>.mContorl0Y = mContorl0Y;</div><div class="line">        <span class="keyword">this</span>.mContorl1X = mContorl1x;</div><div class="line">        <span class="keyword">this</span>.mContorl1Y = mContorl1Y;</div><div class="line">        <span class="keyword">this</span>.mOperation = THIRD_CURVE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 为了方便使用都用静态的方法来返回路径点</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PathPoint <span class="title">moveTo</span><span class="params">(<span class="keyword">float</span> x, <span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PathPoint(MOVE,x,y);</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PathPoint <span class="title">lineTo</span><span class="params">(<span class="keyword">float</span> x,<span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        <span class="keyword">return</span>  <span class="keyword">new</span> PathPoint(LINE,x,y);</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PathPoint <span class="title">secondBesselCurveTo</span><span class="params">(<span class="keyword">float</span> c0X, <span class="keyword">float</span> c0Y,<span class="keyword">float</span> x,<span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PathPoint(c0X,c0Y,x,y);</div><div class="line">    &#125;</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">static</span> PathPoint <span class="title">thirdBesselCurveTo</span><span class="params">(<span class="keyword">float</span> c0X, <span class="keyword">float</span> c0Y, <span class="keyword">float</span> c1X, <span class="keyword">float</span> c1Y, <span class="keyword">float</span> x, <span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">new</span> PathPoint(c0X,c0Y,c1X,c1Y,x,y);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这个类主要是用来记录View移动动作的坐标点,通过不同的构造函数传入不同的参数来区分不同的移动轨迹,注释写的很清楚的…</p>
+<p>为了让不同类型的移动方式都能在使用时一次性使用我写了一个AnimatorPath类</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> java.util.ArrayList;</div><div class="line"><span class="keyword">import</span> java.util.Collection;</div><div class="line"><span class="keyword">import</span> java.util.List;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by zhengliang on 2016/10/15 0015.</div><div class="line"> * 客户端使用类,记录一系列的不同移动轨迹</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">AnimatorPath</span> </span>&#123;</div><div class="line">    <span class="comment">//一系列的轨迹记录动作</span></div><div class="line">    <span class="keyword">private</span> List&lt;PathPoint&gt; mPoints = <span class="keyword">new</span> ArrayList&lt;&gt;();</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 移动位置到:</div><div class="line">     * <span class="doctag">@param</span> x</div><div class="line">     * <span class="doctag">@param</span> y</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">moveTo</span><span class="params">(<span class="keyword">float</span> x,<span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        mPoints.add(PathPoint.moveTo(x,y));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 直线移动</div><div class="line">     * <span class="doctag">@param</span> x</div><div class="line">     * <span class="doctag">@param</span> y</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">lineTo</span><span class="params">(<span class="keyword">float</span> x,<span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        mPoints.add(PathPoint.lineTo(x,y));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 二阶贝塞尔曲线移动</div><div class="line">     * <span class="doctag">@param</span> c0X</div><div class="line">     * <span class="doctag">@param</span> c0Y</div><div class="line">     * <span class="doctag">@param</span> x</div><div class="line">     * <span class="doctag">@param</span> y</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">secondBesselCurveTo</span><span class="params">(<span class="keyword">float</span> c0X, <span class="keyword">float</span> c0Y,<span class="keyword">float</span> x,<span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        mPoints.add(PathPoint.secondBesselCurveTo(c0X,c0Y,x,y));</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 三阶贝塞尔曲线移动</div><div class="line">     * <span class="doctag">@param</span> c0X</div><div class="line">     * <span class="doctag">@param</span> c0Y</div><div class="line">     * <span class="doctag">@param</span> c1X</div><div class="line">     * <span class="doctag">@param</span> c1Y</div><div class="line">     * <span class="doctag">@param</span> x</div><div class="line">     * <span class="doctag">@param</span> y</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">thirdBesselCurveTo</span><span class="params">(<span class="keyword">float</span> c0X, <span class="keyword">float</span> c0Y, <span class="keyword">float</span> c1X, <span class="keyword">float</span> c1Y, <span class="keyword">float</span> x, <span class="keyword">float</span> y)</span></span>&#123;</div><div class="line">        mPoints.add(PathPoint.thirdBesselCurveTo(c0X,c0Y,c1X,c1Y,x,y));</div><div class="line">    &#125;</div><div class="line">    <span class="comment">/**</span></div><div class="line">     *</div><div class="line">     * <span class="doctag">@return</span>  返回移动动作集合</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> Collection&lt;PathPoint&gt; <span class="title">getPoints</span><span class="params">()</span></span>&#123;</div><div class="line">        <span class="keyword">return</span> mPoints;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>该类是最终在客户端使用的,记录一系列的不同移动轨迹,使用时调用里面的方法就可以添加不同的移动轨迹最后通过getPoints()来得到所有的移动轨迹集合</p>
+<p>在Android自带的绘制曲线的方法中都是只是通过moveTo()方法设置起始点,在其它的方法中只是传入了终点或控制点坐标。实际上我们要画连续的曲线或连续的移动时,都需要知道起点到终点的之间所有的坐标,哪么怎么来的到这些点的坐标?</p>
+<p>Android中为我们提供了一个泛型的接口:TypeEvaluator<t>可以很简单的实现这个难题。这里我就把它叫做”估值器”.我们只要创建一个类来实现这个接口,然后通过自己计算公式(就是我们上面的贝塞尔曲线公式)</t></p>
+<p>下面来看看我项目中的估值器类:PathEvaluator</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> android.animation.TypeEvaluator;</div><div class="line"></div><div class="line"><span class="comment">/**</span></div><div class="line"> * Created by zhengliang on 2016/10/15 0015.</div><div class="line"> * 估值器类,实现坐标点的计算</div><div class="line"> */</div><div class="line"></div><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PathEvaluator</span> <span class="keyword">implements</span> <span class="title">TypeEvaluator</span>&lt;<span class="title">PathPoint</span>&gt; </span>&#123;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * <span class="doctag">@param</span> t          :执行的百分比</div><div class="line">     * <span class="doctag">@param</span> startValue : 起点</div><div class="line">     * <span class="doctag">@param</span> endValue   : 终点</div><div class="line">     * <span class="doctag">@return</span></div><div class="line">     */</div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> PathPoint <span class="title">evaluate</span><span class="params">(<span class="keyword">float</span> t, PathPoint startValue, PathPoint endValue)</span> </span>&#123;</div><div class="line">        <span class="keyword">float</span> x, y;</div><div class="line">        <span class="keyword">float</span> oneMiunsT = <span class="number">1</span> - t;</div><div class="line">        <span class="comment">//三阶贝塞尔曲线</span></div><div class="line">        <span class="keyword">if</span> (endValue.mOperation == PathPoint.THIRD_CURVE) &#123;</div><div class="line">            x = startValue.mX*oneMiunsT*oneMiunsT*oneMiunsT+<span class="number">3</span>*endValue.mContorl0X*t*oneMiunsT*oneMiunsT+<span class="number">3</span>*endValue.mContorl1X*t*t*oneMiunsT+endValue.mX*t*t*t;</div><div class="line">            y = startValue.mY*oneMiunsT*oneMiunsT*oneMiunsT+<span class="number">3</span>*endValue.mContorl0Y*t*oneMiunsT*oneMiunsT+<span class="number">3</span>*endValue.mContorl1Y*t*t*oneMiunsT+endValue.mY*t*t*t;</div><div class="line">        <span class="comment">//二阶贝塞尔曲线</span></div><div class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span>(endValue.mOperation == PathPoint.SECOND_CURVE)&#123;</div><div class="line">            x = oneMiunsT*oneMiunsT*startValue.mX+<span class="number">2</span>*t*oneMiunsT*endValue.mContorl0X+t*t*endValue.mX;</div><div class="line">            y = oneMiunsT*oneMiunsT*startValue.mY+<span class="number">2</span>*t*oneMiunsT*endValue.mContorl0Y+t*t*endValue.mY;</div><div class="line">        <span class="comment">//直线</span></div><div class="line">        &#125;<span class="keyword">else</span> <span class="keyword">if</span> (endValue.mOperation == PathPoint.LINE) &#123;</div><div class="line">            <span class="comment">//x起始点+t*起始点和终点的距离</span></div><div class="line">            x = startValue.mX + t * (endValue.mX - startValue.mX);</div><div class="line">            y = startValue.mY + t * (endValue.mY - startValue.mY);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            x = endValue.mX;</div><div class="line">            y = endValue.mY;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">return</span> PathPoint.moveTo(x,y);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>泛型中传入我们自己的定义的PathPoint类;其实这些复杂的计算代码很简单,就是上面贝塞尔曲线的公式,将需要的点直接带入公式即可,我相信仔细看看会明白的!</p>
+<p>核心代码到这里就没有了,下面看看MainActivity中的代码:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">MainActivity</span> <span class="keyword">extends</span> <span class="title">AppCompatActivity</span> <span class="keyword">implements</span> <span class="title">View</span>.<span class="title">OnClickListener</span> </span>&#123;</div><div class="line">    <span class="keyword">private</span> FloatingActionButton fab;</div><div class="line">    <span class="keyword">private</span> AnimatorPath path;<span class="comment">//声明动画集合</span></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onCreate</span><span class="params">(Bundle savedInstanceState)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_main);</div><div class="line">        <span class="keyword">this</span>.fab = (FloatingActionButton) findViewById(R.id.fab);</div><div class="line"></div><div class="line">        setPath();</div><div class="line"></div><div class="line">        fab.setOnClickListener(<span class="keyword">this</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="comment">/*设置动画路径*/</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setPath</span><span class="params">()</span></span>&#123;</div><div class="line">        path = <span class="keyword">new</span> AnimatorPath();</div><div class="line">        path.moveTo(<span class="number">0</span>,<span class="number">0</span>);</div><div class="line">        path.lineTo(<span class="number">400</span>,<span class="number">400</span>);</div><div class="line">        path.secondBesselCurveTo(<span class="number">600</span>, <span class="number">200</span>, <span class="number">800</span>, <span class="number">400</span>); <span class="comment">//订单</span></div><div class="line">        path.thirdBesselCurveTo(<span class="number">100</span>,<span class="number">600</span>,<span class="number">900</span>,<span class="number">1000</span>,<span class="number">200</span>,<span class="number">1200</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 设置动画</div><div class="line">     * <span class="doctag">@param</span> view</div><div class="line">     * <span class="doctag">@param</span> propertyName</div><div class="line">     * <span class="doctag">@param</span> path</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">startAnimatorPath</span><span class="params">(View view, String propertyName, AnimatorPath path)</span> </span>&#123;</div><div class="line">        ObjectAnimator anim = ObjectAnimator.ofObject(<span class="keyword">this</span>, propertyName, <span class="keyword">new</span> PathEvaluator(), path.getPoints().toArray());</div><div class="line">        anim.setInterpolator(<span class="keyword">new</span> DecelerateInterpolator());<span class="comment">//动画插值器</span></div><div class="line">        anim.setDuration(<span class="number">3000</span>);</div><div class="line">        anim.start();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">/**</span></div><div class="line">     * 设置View的属性通过ObjectAnimator.ofObject()的反射机制来调用</div><div class="line">     * <span class="doctag">@param</span> newLoc</div><div class="line">     */</div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">setFab</span><span class="params">(PathPoint newLoc)</span> </span>&#123;</div><div class="line">        fab.setTranslationX(newLoc.mX);</div><div class="line">        fab.setTranslationY(newLoc.mY);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onClick</span><span class="params">(View view)</span> </span>&#123;</div><div class="line">        <span class="keyword">switch</span> (view.getId())&#123;</div><div class="line">            <span class="keyword">case</span> R.id.fab:</div><div class="line">                startAnimatorPath(fab, <span class="string">"fab"</span>, path);</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>上面代码中的:setPath()方法根据你自己项目的需要来设置不同的坐标 注意:(“这里的坐标是View以当前位置的偏移坐标,不是绝对坐标”)</p>
+<p>上面代码中的:startAnimatorPath()参数就不介绍了注释中写的很清楚;这里直接看看ObjectAnimator.ofObject()方法的使用把:</p>
+<p><code>ObjectAnimator.ofObject(this, propertyName, new PathEvaluator(), path.getPoints().toArray())</code></p>
+<p>参数:this:View</p>
+<p>参数:propertyName:属性名字 :起始这个名字是一个反射机制的调用,这样说不明白,看看这条代码:</p>
+<p><code>ObjectAnimator.ofFloat(view, &quot;scaleX&quot;, 0f, 1f).setDuration(500).start();</code></p>
+<p>相信这句代码都能看懂,其中”scaleX”就相当于参数:propertyName</p>
+<p>项目代码中我们传入的参数是:</p>
+<p><code>startAnimatorPath(fab, &quot;fab&quot;, path);</code></p>
+<p>“fab”参数其实对应的就是setFab(PathPoint newLoc)方法,当我们在当前类中定义了该方法,就会自动通过反射的机制来调用该方法! ,如果还不懂,可以看看其它大神写的博客!</p>
+<p>看看Xml中的代码:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</div><div class="line">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;</div><div class="line">    android:id=&quot;@+id/activity_main&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot;</div><div class="line">    android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;</div><div class="line">    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;</div><div class="line">    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;</div><div class="line">    tools:context=&quot;zhengliang.com.customanimationframework.MainActivity&quot;&gt;</div><div class="line"></div><div class="line">    &lt;zhengliang.com.customanimationframework.CustomView.PathView</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot;</div><div class="line">        tools:targetApi=&quot;lollipop&quot; /&gt;</div><div class="line">    &lt;android.support.design.widget.FloatingActionButton</div><div class="line">        android:id=&quot;@+id/fab&quot;</div><div class="line">        android:layout_width=&quot;40dp&quot;</div><div class="line">        android:layout_height=&quot;40dp&quot;</div><div class="line">        /&gt;</div><div class="line">&lt;/RelativeLayout&gt;</div></pre></td></tr></table></figure>
+<p>为了可以清晰的看见小球的移动轨迹,自定义了以个View来显示小球的运动轨迹:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">public</span> <span class="class"><span class="keyword">class</span> <span class="title">PathView</span> <span class="keyword">extends</span> <span class="title">View</span> </span>&#123;</div><div class="line"></div><div class="line">    <span class="keyword">private</span> Paint paint;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">public</span> <span class="title">PathView</span><span class="params">(Context context, AttributeSet attrs)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>(context, attrs);</div><div class="line">        initView();</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">initView</span><span class="params">()</span> </span>&#123;</div><div class="line">        paint = <span class="keyword">new</span> Paint();</div><div class="line">        <span class="comment">//抗锯齿</span></div><div class="line">        paint.setAntiAlias(<span class="keyword">true</span>);</div><div class="line">        <span class="comment">//防抖动</span></div><div class="line">        paint.setDither(<span class="keyword">true</span>);</div><div class="line">        <span class="comment">//设置画笔未实心</span></div><div class="line">        paint.setStyle(Paint.Style.STROKE);</div><div class="line">        <span class="comment">//设置颜色</span></div><div class="line">        paint.setColor(Color.GREEN);</div><div class="line">        <span class="comment">//设置画笔宽度</span></div><div class="line">        paint.setStrokeWidth(<span class="number">3</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="meta">@Override</span></div><div class="line">    <span class="function"><span class="keyword">protected</span> <span class="keyword">void</span> <span class="title">onDraw</span><span class="params">(Canvas canvas)</span> </span>&#123;</div><div class="line">        <span class="keyword">super</span>.onDraw(canvas);</div><div class="line">        Path path = <span class="keyword">new</span> Path();</div><div class="line">        path.moveTo(<span class="number">60</span>,<span class="number">60</span>);</div><div class="line">        path.lineTo(<span class="number">460</span>,<span class="number">460</span>);</div><div class="line">        path.quadTo(<span class="number">660</span>, <span class="number">260</span>, <span class="number">860</span>, <span class="number">460</span>); <span class="comment">//订单</span></div><div class="line">        path.cubicTo(<span class="number">160</span>,<span class="number">660</span>,<span class="number">960</span>,<span class="number">1060</span>,<span class="number">260</span>,<span class="number">1260</span>);</div><div class="line">        canvas.drawPath(path,paint);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/11/01/android-catransation/" rel="next" title="Android-转场动画深度解析">
+                <i class="fa fa-chevron-left"></i> Android-转场动画深度解析
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/02/android-view-event-distribution/" rel="prev" title="Android-事件分发机制源码攻略">
+                Android-事件分发机制源码攻略 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">138</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#moveTo"><span class="nav-number">1.1.</span> <span class="nav-text">moveTo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#lineTo"><span class="nav-number">1.2.</span> <span class="nav-text">lineTo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#quadTo"><span class="nav-number">1.3.</span> <span class="nav-text">quadTo</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#cubicTo"><span class="nav-number">1.4.</span> <span class="nav-text">cubicTo</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#贝塞尔曲线"><span class="nav-number">2.</span> <span class="nav-text">贝塞尔曲线:</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#线性贝塞尔曲线"><span class="nav-number">2.1.</span> <span class="nav-text">线性贝塞尔曲线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#二次方贝塞尔曲线"><span class="nav-number">2.2.</span> <span class="nav-text">二次方贝塞尔曲线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#三次方贝塞尔曲线"><span class="nav-number">2.3.</span> <span class="nav-text">三次方贝塞尔曲线</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#一般贝塞尔曲线方程"><span class="nav-number">2.4.</span> <span class="nav-text">一般贝塞尔曲线方程</span></a></li></ol></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

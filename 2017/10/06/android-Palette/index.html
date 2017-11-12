@@ -1,0 +1,1042 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。
+Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。
+比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android 使用 Palette 让你的 UI 色彩与内容更贴合">
+<meta property="og:url" content="http://adolph.cc/2017/10/06/android-Palette/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。
+Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。
+比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg">
+<meta property="og:updated_time" content="2017-11-04T12:58:15.597Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android 使用 Palette 让你的 UI 色彩与内容更贴合">
+<meta name="twitter:description" content="前言今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。
+Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。
+比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/10/06/android-Palette/"/>
+
+
+
+
+
+  <title> Android 使用 Palette 让你的 UI 色彩与内容更贴合 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/10/06/android-Palette/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android 使用 Palette 让你的 UI 色彩与内容更贴合
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-06T18:30:00+08:00">
+                2017-10-06
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。</p>
+<p>Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。</p>
+<p>比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背景，我们可以提取视频海报的颜色，设置在背景上，使得效果更佳柔和美观。</p>
+<p>Palette 是一个 Support v7 的包，如果使用 Gradle 引入依赖，这里使用最新的 26.+。</p>
+<p><code>compile &quot;com.android.support:palette-v7:26.+&quot;</code></p>
+<h1 id="Palette-的使用"><a href="#Palette-的使用" class="headerlink" title="Palette 的使用"></a>Palette 的使用</h1><p>Palette 使用起来非常的简单，既然目的是从一个图片中提取颜色，它的步骤就有：</p>
+<ol>
+<li>传递一个 Bitmap，得到一个 Palette。</li>
+<li>通过 Palette 提取需要的颜色。</li>
+</ol>
+<p>就是这么简单，如同要将大象放冰箱，需要几步一样清晰。</p>
+<p>那么接下来我们先来了解它使用的细节。</p>
+<h2 id="传递-Bitmap-得到一个-Palette"><a href="#传递-Bitmap-得到一个-Palette" class="headerlink" title="传递 Bitmap 得到一个 Palette"></a>传递 Bitmap 得到一个 Palette</h2><p>Palette 在旧版本上有一些 <code>generate()</code> 的方法，用于生成一个 <code>Palette</code> 对象，但是在新版本上已经被标记为 <code>@Depercated</code> 了，所以这里不推荐使用。</p>
+<p>而在新版上，推荐使用 <code>Palette.Builder</code> 来创建我们的 <code>Palette</code> 对象，我们可以通过 <code>from()</code> 方法使用它。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg" alt="20171104150979158539416.jpg"></p>
+<p>一般我们使用第一个方法即可，直接传递进去一个 Bitmap 对象。得到 Builder 之后，我们还可以配置一些规则，但是一般我们不需要进行额外的（后面会讲到）。再通过 <code>Builder.generate()</code> 即可得到我们需要的 Palette 对象了。</p>
+<h2 id="通过-Palette-提取颜色"><a href="#通过-Palette-提取颜色" class="headerlink" title="通过 Palette 提取颜色"></a>通过 Palette 提取颜色</h2><p>Palette 从图片中提取的颜色，有很多选择。这里又涉及到另外一个类，Swatch 。</p>
+<p>Palette 可被提取的每个颜色，都被封装成一个 Swatch 对象，用来管理多种颜色。</p>
+<p>这些 Swatch 有：</p>
+<ul>
+<li>DominantSwatch</li>
+<li>VibrantSwatch</li>
+<li>DarkVibrantSwatch</li>
+<li>LightVibrantSwatch</li>
+<li>MutedSwatch</li>
+<li>DarkMutedSwatch</li>
+<li>LightMutedSwatch</li>
+</ul>
+<p>其实这些 Swatch，真的不太好解释其意义，唯一特别一点的就是 DominantSwatch ，它是从图片中提取的最突出的颜色。</p>
+<p>这些 Swatch 在 Palette 都提供了对应的 <code>getXxx()</code> 方法获得。不过需要注意的是，这些 <code>getXxx()</code> 方法可能会得到一个 <code>null</code> ，因为有些颜色是没有的。</p>
+<p>如果只是需要得到一个颜色值，Palette 同时也提供了对应的 <code>getXxxColor()</code> 方法，方便我们使用。</p>
+<p>得到 Swatch 对象之后，就可以通过对应的 Swatch 中对应的 Api 获取我们需要的颜色值。</p>
+<ul>
+<li><code>getPopulation()</code> ：Swatch 中的像素个数。</li>
+<li><code>getRgb()</code>：颜色的 RGB 值。</li>
+<li><code>getHsl()</code>：颜色的 HSL 值。</li>
+<li><code>getBodyTextColor()</code>：对应的文字颜色值。</li>
+<li><code>getTitleTextColor()</code>：对应的标题文字颜色值。</li>
+</ul>
+<p>通常来说，我们只需要通过 getRgb() 获取到对应的颜色设置在背景上，如果背景之上还有文字内容，可以通过 getBodyTextColor() 提取出与背景匹配的文字颜色值，这样可以显得更加的柔和，让文字看起来更清晰和舒服。比如，如果一个深色的背景，为它设置一个默认的深色文字，基本上就看不见了，因为对比对太弱。</p>
+<h2 id="举个例子"><a href="#举个例子" class="headerlink" title="举个例子"></a>举个例子</h2><p>到这里，基本上 Palette 的基本 Api 就讲解清楚了，下面举个实际的例子来看看。</p>
+<p>这里找了三张 Eason 的海报，用于做 Palette 的 Demo 资源，间隔去替换图片，然后分别提取出对应的颜色和字体颜色，设置在下面按钮的背景上，然后每 3s 切换一张图片。</p>
+<p>因为有一些图片，获取的 Swatch 可能会返回 null ，所以这里用了一个比价扎眼的红色，作为错误色。</p>
+<p>以下是获取 Swatch 的代码。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg" alt="20171104150979172574268.jpg"></p>
+<p>接下来通过 Swatch 提取我们需要的颜色。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg" alt="20171104150979175346480.jpg"></p>
+<p>这里分别获取了需要的颜色以及字体颜色，下面看看运行的效果：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif" alt="20171104150979178525822.gif"></p>
+<p>可以看到，确实有一些颜色，被标记成了红色，说明当前图片有获取不到的对应颜色。</p>
+<h1 id="分析-Palette-的实现"><a href="#分析-Palette-的实现" class="headerlink" title="分析 Palette 的实现"></a>分析 Palette 的实现</h1><h2 id="Palette-的主线逻辑"><a href="#Palette-的主线逻辑" class="headerlink" title="Palette 的主线逻辑"></a>Palette 的主线逻辑</h2><p>继续深入看看 Palette 的实现原理，先从主线开始看。</p>
+<p>从 <code>Builder.generate()</code> 开始。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg" alt="20171104150979183575637.jpg"></p>
+<p>从代码中可以看到，在 <code>generate()</code> 中，主线逻辑：</p>
+<ol>
+<li>首先会通过 <code>scaleBitmapDown()</code> 方法，将图片压缩成一个小像素的，等于生成了一个新的 <code>Bitmap</code> 对象，这样有利于内存的管理，并且也减少了计算量。</li>
+<li>然后再通过 <code>mRegion</code> 判断是否只是提取图片的某个区域，默认是完整的图片全部提取，当然也可以对 <code>mRegion</code> 进行配置。<br>之后再构造一个 <code>ColorCutQuantizer</code> 对象，使用它的 <code>getQuantizedColors()</code> 方法得到 Swatch。</li>
+<li>使用完前面压缩的 <code>Bitmap</code> 对象之后，再使用 <code>recycle()</code> 将其回收掉。</li>
+<li>最后，通过 <code>Palette</code> 本身的构造函数，去生成一个 <code>Palette</code> 对象，返回出去。</li>
+</ol>
+<p>接下来看看比较关键的 <code>ColorCutQuantizer</code> 中的实现逻辑。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg" alt="20171104150979200867081.jpg"></p>
+<p>从代码中可以看到，其中的逻辑还是很清晰的。</p>
+<ol>
+<li>首先通过 <code>quantizeFromRgb888()</code> 方法，将每个像素的颜色进行量化，类似于将每个颜色取一个靠近的设置。举个不恰当的例子，将不同深度的红，都标记成红色。</li>
+<li>再通过 <code>shouldIgnoreColor()</code> 过滤掉不需要的颜色。</li>
+<li>最终获取到的颜色，如果小于等于我们设置的 <code>maxColors</code>，就可以通过 <code>approximateToRgb888()</code> 生成一批 Swatch。</li>
+<li>如果大于 <code>maxColors</code>，就再通过 <code>quantizePixels()</code> 去掉一些杂色。</li>
+<li>无论如何，最终操作的就是这里得到的 <code>mQuantizedColors</code> 对象。</li>
+</ol>
+<h2 id="Swatch-的-Target"><a href="#Swatch-的-Target" class="headerlink" title="Swatch 的 Target"></a>Swatch 的 Target</h2><p>所有需要的 Swatch ，都是被 Target 对象所标记。不同的 Swatch 都是通过 Target 中标记的常量值，进行运算，得到行的颜色。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg" alt="2017110415097921282334.jpg"></p>
+<h2 id="过滤掉不需要的颜色"><a href="#过滤掉不需要的颜色" class="headerlink" title="过滤掉不需要的颜色"></a>过滤掉不需要的颜色</h2><p>Palette 可以设置一些我们不需要的颜色，让它们不参与运算。这里的过滤条件，通过 Filter 来设定，并且 Palette 也提供给了一个 DEFAULT_FALTER 来标记默认的过滤颜色。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg" alt="20171104150979216238491.jpg"></p>
+<p>可以看到，默认的 Filter 会过滤掉一些靠近黑和白的颜色。</p>
+<p>当然，我们也可以自己定义 Filter ，并通过 Palette 中的 <code>addFilter()</code>、<code>clearFilters()</code> 来管理它。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg" alt="2017110415097964327573.jpg"></p>
+<p>这里存储 Filter 的是一个 ArrayList ，所以我们是可以定义很多个 Filter 加入进去的，它们都会生效。</p>
+<h2 id="设置-MaxColor"><a href="#设置-MaxColor" class="headerlink" title="设置 MaxColor"></a>设置 MaxColor</h2><p>在 ColorCutQuantizer 中，被使用的 maxColor ，主要用于标记需要使用的颜色个数。它是可以通过 maximumColorCount() 方法，进行设置的，如果不对其进行设定，默认值为 16。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg" alt="20171104150979646212624.jpg"></p>
+<p>理论上来说，这里设置的maxColor 的值越大，运算花费的时间就越长。而越小，可以被选择的色值也就越少。</p>
+<p>所以最佳的做法是根据当前 Bitmap 的用途来决定，色彩越丰富的图，设置的 maxColor 越大，即可。不过正常来说也不需要额外的设定，默认的配置就挺好用了。</p>
+<h1 id="小结"><a href="#小结" class="headerlink" title="小结"></a>小结</h1><p>到这里就分析完 Palette 的所有相关的内容，不要仅仅满足使用。实际上看了 Palette 的源码，对色彩的运算，也有了更加深入的了解。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/04/android-LayoutInflate/" rel="next" title="Android 自定义 LayoutInflate 实现酷炫引导页">
+                <i class="fa fa-chevron-left"></i> Android 自定义 LayoutInflate 实现酷炫引导页
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/07/android-technology-stack/" rel="prev" title="Android 基于开源项目搭建属于自己的技术堆栈">
+                Android 基于开源项目搭建属于自己的技术堆栈 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">138</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#Palette-的使用"><span class="nav-number">2.</span> <span class="nav-text">Palette 的使用</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#传递-Bitmap-得到一个-Palette"><span class="nav-number">2.1.</span> <span class="nav-text">传递 Bitmap 得到一个 Palette</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#通过-Palette-提取颜色"><span class="nav-number">2.2.</span> <span class="nav-text">通过 Palette 提取颜色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#举个例子"><span class="nav-number">2.3.</span> <span class="nav-text">举个例子</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#分析-Palette-的实现"><span class="nav-number">3.</span> <span class="nav-text">分析 Palette 的实现</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#Palette-的主线逻辑"><span class="nav-number">3.1.</span> <span class="nav-text">Palette 的主线逻辑</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#Swatch-的-Target"><span class="nav-number">3.2.</span> <span class="nav-text">Swatch 的 Target</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#过滤掉不需要的颜色"><span class="nav-number">3.3.</span> <span class="nav-text">过滤掉不需要的颜色</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#设置-MaxColor"><span class="nav-number">3.4.</span> <span class="nav-text">设置 MaxColor</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#小结"><span class="nav-number">4.</span> <span class="nav-text">小结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

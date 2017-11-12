@@ -93,7 +93,7 @@
 <meta property="og:url" content="http://adolph.cc/2017/06/30/android-dialogfragment/index.html">
 <meta property="og:site_name" content="Magic">
 <meta property="og:description" content="DialogFragment 设置全屏方法方法一12345@Overridepublic void onCreate(Bundle savedInstanceState) &amp;#123;    super.onCreate(savedInstanceState);    setStyle(STYLE_NO_FRAME, android.R.style.Theme_Holo_Light);&amp;#125;">
-<meta property="og:updated_time" content="2017-10-10T15:27:34.018Z">
+<meta property="og:updated_time" content="2017-11-04T08:57:02.429Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android-DialogFragment详细学习">
 <meta name="twitter:description" content="DialogFragment 设置全屏方法方法一12345@Overridepublic void onCreate(Bundle savedInstanceState) &amp;#123;    super.onCreate(savedInstanceState);    setStyle(STYLE_NO_FRAME, android.R.style.Theme_Holo_Light);&amp;#125;">
@@ -423,6 +423,92 @@
 <li>onCreateView</li>
 <li>onStart</li>
 </ul>
+<h1 id="设置背景为透明"><a href="#设置背景为透明" class="headerlink" title="设置背景为透明"></a>设置背景为透明</h1><figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">View decorView = getDialog().getWindow().getDecorView();</div><div class="line">decorView.setBackground(<span class="keyword">new</span> ColorDrawable(Color.TRANSPARENT));</div></pre></td></tr></table></figure>
+<p>(PS:Window -&gt; DecorView -&gt; FrameLayout -&gt; FrameLayout -&gt; 我们的自定义View) 这个逻辑大家应该都知道的，所以我们只需要改变底部的DecorView的背景色即可。</p>
+<h1 id="设置弹框位置"><a href="#设置弹框位置" class="headerlink" title="设置弹框位置"></a>设置弹框位置</h1><p>因为View是在window下面的，我们只需要让window的Grivaty属性是Bottom，这样，里面的元素都是居于底部即可。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">Window window = getDialog().getWindow();</div><div class="line">WindowManager.LayoutParams layoutParams = window.getAttributes();</div><div class="line">layoutParams.gravity = Gravity.BOTTOM;</div><div class="line">window.setAttributes(layoutParams);</div></pre></td></tr></table></figure>
+<h1 id="解决DialogFragment两边的间隙"><a href="#解决DialogFragment两边的间隙" class="headerlink" title="解决DialogFragment两边的间隙"></a>解决DialogFragment两边的间隙</h1><p>因为View都是被包含在window里面，虽然我们的自己的View的宽度已经设置成了match_parent，但是我们并没有对window设置宽度为最大。所以我们先来改变window的宽度。</p>
+<p>改变window的宽度：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">Window window = getDialog().getWindow();</div><div class="line">WindowManager.LayoutParams layoutParams = window.getAttributes();</div><div class="line">layoutParams.gravity = Gravity.BOTTOM;</div><div class="line">layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;</div><div class="line">window.setAttributes(layoutParams);</div></pre></td></tr></table></figure>
+<p>我们在前面修改弹框位置的代码处，多添加一句：</p>
+<p><code>layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;</code></p>
+<p>设置之后虽然二边的间隙变小了很多。但是还是有间隙，既然我们都已经把window的宽度变为match_parent,还是没填充，说明应该是有padding值。那我们马上就想到了，难道是DecorView里面有padding值。毕竟我们的View也是被包含在DecorView里面。废话不多说，我们马上实验：</p>
+<p><code>decorView.setPadding(0,0,0,0);</code></p>
+<blockquote>
+<p>PS:这里还有另外一种方法，不写这句decorView.setPadding(0,0,0,0);而是直接设置window的背景颜色，window.setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));源码中其实也给DecorView设置了padding值。所以效果相同。</p>
+</blockquote>
+<h1 id="设置弹框从下而上显示"><a href="#设置弹框从下而上显示" class="headerlink" title="设置弹框从下而上显示"></a>设置弹框从下而上显示</h1><p>我们看过ios的弹框效果，是从底部从下而上升起，然后消失的时候也是从上而下消失。所以消失的时候我们不能单纯的让DialogFragment执行<code>dismiss()</code>，而是先让弹框执行下移的动画效果，然后再<code>dismiss()</code>。</p>
+<p>既然谈到了上下的移动，大家肯定马上想到了用TranslateAnimation动画来做，我们就一步步来看如何用这个来实现：</p>
+<ul>
+<li>弹框出现动画：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">Animation slide = <span class="keyword">new</span> TranslateAnimation(</div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>,</div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>, </div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">1.0f</span>, </div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span></div><div class="line">);</div><div class="line">slide.setDuration(<span class="number">400</span>);</div><div class="line">slide.setFillAfter(<span class="keyword">true</span>);</div><div class="line">slide.setFillEnabled(<span class="keyword">true</span>);</div><div class="line">view.startAnimation(slide);</div></pre></td></tr></table></figure>
+<p>我们来看TranslateAnimation，这里我们传了八个参数，一般大家用到的是只传四个参数：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">TranslateAnimation(float fromXDelta, float toXDelta, float fromYDelta, float toYDelta)</div></pre></td></tr></table></figure>
+<p>也就是从坐标<code>(fromXDelta,fromYDelta)</code>到<code>(toXDelta,toYDelta)</code>。<br>我们可以点进去这个构造函数查看：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">TranslateAnimation</span><span class="params">(<span class="keyword">float</span> fromXDelta, <span class="keyword">float</span> toXDelta, <span class="keyword">float</span> fromYDelta, <span class="keyword">float</span> toYDelta)</span> </span>&#123;</div><div class="line">      mFromXValue = fromXDelta;</div><div class="line">      mToXValue = toXDelta;</div><div class="line">      mFromYValue = fromYDelta;</div><div class="line">      mToYValue = toYDelta;</div><div class="line"></div><div class="line">      mFromXType = ABSOLUTE;</div><div class="line">      mToXType = ABSOLUTE;</div><div class="line">      mFromYType = ABSOLUTE;</div><div class="line">      mToYType = ABSOLUTE;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>之所以我们以前用的只传了四个参数，是因为他给我们把另外四个参数以及赋了默认值，也就是<code>ABSOLUTE</code>。我们继续看有哪几种可以选择：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * The specified dimension is an absolute number of pixels.</div><div class="line"> */</div><div class="line">public static final int ABSOLUTE = 0;</div><div class="line"></div><div class="line">/**</div><div class="line"> * The specified dimension holds a float and should be multiplied by the</div><div class="line"> * height or width of the object being animated.</div><div class="line"> */</div><div class="line">public static final int RELATIVE_TO_SELF = 1;</div><div class="line"></div><div class="line">/**</div><div class="line"> * The specified dimension holds a float and should be multiplied by the</div><div class="line"> * height or width of the parent of the object being animated.</div><div class="line"> */</div><div class="line">public static final int RELATIVE_TO_PARENT = 2;</div></pre></td></tr></table></figure>
+<p>通过字面意思我们也能理解：<br><code>ABSOLUTE</code>是绝对坐标，<code>RELATIVE_TO_SELF</code>是相对于自身，<code>RELATIVE_TO_PARENT</code>是相对于父View。<br>而我们只需要我们的弹框显示的位置，让的起始位置如下图所示：</p>
+<p>刚开始超过屏幕，并且高度为弹框自身的高度，然后再回到原始位置,所以我们就用：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Animation slide = <span class="keyword">new</span> TranslateAnimation(</div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>,</div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>, </div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">1.0f</span>, </div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span></div><div class="line">);</div></pre></td></tr></table></figure>
+<p>从原来的位置，增加了自身高度的距离为起始点，开始移动，然后再回到原来的位置。</p>
+<ul>
+<li>消失动画：</li>
+</ul>
+<p>只要跟上面反过来就可以了。同时这里我们要额外增加监听动画结束事件，因为我们让弹框往下移动结束后，要让这个弹框dismiss掉:</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">Animation slide = <span class="keyword">new</span> TranslateAnimation(</div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>,</div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>, </div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>, </div><div class="line">      Animation.RELATIVE_TO_SELF, <span class="number">1.0f</span></div><div class="line">);</div><div class="line">slide.setAnimationListener(<span class="keyword">new</span> Animation.AnimationListener() &#123;</div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationStart</span><span class="params">(Animation animation)</span> </span>&#123;&#125;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationEnd</span><span class="params">(Animation animation)</span> </span>&#123;</div><div class="line">      IOSDialogFragment.<span class="keyword">this</span>.dismiss();</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="meta">@Override</span></div><div class="line">  <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationRepeat</span><span class="params">(Animation animation)</span> </span>&#123;&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+<p>所以我们的动画的代码总结下就是：</p>
+<pre><code class="java"><span class="meta">@Nullable</span>
+<span class="meta">@Override</span>
+<span class="function"><span class="keyword">public</span> View <span class="title">onCreateView</span><span class="params">(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState)</span> </span>{
+    getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
+    rootView = inflater.inflate(R.layout.fragment_ios_dialog, container, <span class="keyword">false</span>);
+    slideToUp(rootView);
+    <span class="keyword">return</span> rootView;
+}
+
+
+<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">slideToUp</span><span class="params">(View view)</span></span>{
+    Animation slide = <span class="keyword">new</span> TranslateAnimation(
+        Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>,
+        Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>, 
+        Animation.RELATIVE_TO_SELF,<span class="number">1.0f</span>, Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>);
+
+    slide.setDuration(<span class="number">400</span>);
+    slide.setFillEnabled(<span class="keyword">true</span>);
+    slide.setFillAfter(<span class="keyword">true</span>);
+    view.startAnimation(slide);
+}
+
+<span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">slideToDown</span><span class="params">(View view)</span></span>{
+    Animation slide = <span class="keyword">new</span> TranslateAnimation(
+        Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>,
+        Animation.RELATIVE_TO_SELF, <span class="number">0.0f</span>, Animation.RELATIVE_TO_SELF,<span class="number">0.0f</span>, Animation.RELATIVE_TO_SELF, <span class="number">1.0f</span>);
+
+    slide.setDuration(<span class="number">400</span>);
+    slide.setFillEnabled(<span class="keyword">true</span>);
+    slide.setFillAfter(<span class="keyword">true</span>);
+    view.startAnimation(slide);
+
+    slide.setAnimationListener(<span class="keyword">new</span> Animation.AnimationListener() {
+        <span class="meta">@Override</span>
+        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationStart</span><span class="params">(Animation animation)</span> </span>{
+
+        }
+
+        <span class="meta">@Override</span>
+        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationEnd</span><span class="params">(Animation animation)</span> </span>{
+            IOSDialogFragment.<span class="keyword">this</span>.dismiss();<span class="comment">//弹框消失</span>
+        }
+
+        <span class="meta">@Override</span>
+        <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">onAnimationRepeat</span><span class="params">(Animation animation)</span> </span>{
+
+        }
+    });
+}
+</code></pre>
 
       
     </div>
@@ -549,7 +635,7 @@
           
             <div class="site-state-item site-state-posts">
               <a href="/archives">
-                <span class="site-state-item-count">99</span>
+                <span class="site-state-item-count">138</span>
                 <span class="site-state-item-name">日志</span>
               </a>
             </div>
@@ -560,7 +646,7 @@
             
             <div class="site-state-item site-state-categories">
               <a href="/categories/index.html">
-                <span class="site-state-item-count">15</span>
+                <span class="site-state-item-count">16</span>
                 <span class="site-state-item-name">分类</span>
               </a>
             </div>
@@ -571,7 +657,7 @@
             
             <div class="site-state-item site-state-tags">
               <a href="/tags/index.html">
-                <span class="site-state-item-count">24</span>
+                <span class="site-state-item-count">25</span>
                 <span class="site-state-item-name">标签</span>
               </a>
             </div>
@@ -617,7 +703,7 @@
             
 
             
-              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DialogFragment-设置全屏方法"><span class="nav-number">1.</span> <span class="nav-text">DialogFragment 设置全屏方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#方法一"><span class="nav-number">1.1.</span> <span class="nav-text">方法一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方法二"><span class="nav-number">1.2.</span> <span class="nav-text">方法二</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生命周期"><span class="nav-number">2.</span> <span class="nav-text">生命周期</span></a></li></ol></div>
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#DialogFragment-设置全屏方法"><span class="nav-number">1.</span> <span class="nav-text">DialogFragment 设置全屏方法</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#方法一"><span class="nav-number">1.1.</span> <span class="nav-text">方法一</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#方法二"><span class="nav-number">1.2.</span> <span class="nav-text">方法二</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#生命周期"><span class="nav-number">2.</span> <span class="nav-text">生命周期</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置背景为透明"><span class="nav-number">3.</span> <span class="nav-text">设置背景为透明</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置弹框位置"><span class="nav-number">4.</span> <span class="nav-text">设置弹框位置</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#解决DialogFragment两边的间隙"><span class="nav-number">5.</span> <span class="nav-text">解决DialogFragment两边的间隙</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#设置弹框从下而上显示"><span class="nav-number">6.</span> <span class="nav-text">设置弹框从下而上显示</span></a></li></ol></div>
             
 
           </div>

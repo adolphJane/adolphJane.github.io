@@ -1,0 +1,1020 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-OOM案例分析">
+<meta property="og:url" content="http://adolph.cc/2017/10/20/android-oom/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006844360459.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006883926615.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006888292386.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006892587007.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006895888632.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006910770075.png">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006915714253.png">
+<meta property="og:updated_time" content="2017-11-07T15:39:45.648Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-OOM案例分析">
+<meta name="twitter:description" content="在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171107151006844360459.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/10/20/android-oom/"/>
+
+
+
+
+
+  <title> Android-OOM案例分析 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/10/20/android-oom/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-OOM案例分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-10-20T23:26:00+08:00">
+                2017-10-20
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <p>在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具的使用。</p>
+<h1 id="案例背景"><a href="#案例背景" class="headerlink" title="案例背景"></a>案例背景</h1><p>在美团App 7.4~7.7版本期间，美食业务的OOM数量居高不下，远高于历史水平，主要都是DECODE本地的资源出错。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006844360459.png" alt="20171107151006844360459.png"></p>
+<p>图中OOM数量为各版本发版后第一个月的统计量，包含新发版本及历史版本。对比了同时期其他业务的情况，也有类似OOM。由于美食业务的访问量占美团App的比重较大，因此，OOM的数量相对其他业务也多一些。</p>
+<p>思路方案</p>
+<p>在问题较为严重的7.6~7.7版本期间，团队对OOM频现的原因有过各种猜测。笔者怀疑过是否是业务上某些修改引起的，例如头图尺寸变大，或者是由页面模块加载方式引起的等等。但这些与OOM问题出现的时间并不吻合。其次也怀疑过是否由某些ROM的Bug导致，但此推断缺乏有力的证据支撑。因此，要找到OOM的root cause，根本途径还是找到谁占的内存最多，然后再根据具体case具体分析，为什么占了这么多。</p>
+<p>采集用户手机内存信息</p>
+<p>要分析内存的占用，需要内存的dump文件，但是dump文件一般都比较大，让用户配合上传dump文件不合适。所以希望能够运行时采集一些内存的特征然后随着crash日志上报上来。当用户发生OOM时，dump出用户的内存，然后基于com.squareup.haha:haha:2.0.3分析，得到一些关键数据（内存占用最多的实例及所占比例等）。但这个方案很快就被证明是不可行的。主要基于下面几个原因：</p>
+<p>需要引入新的库。<br>dump和分析内存都很耗时，效率难以接受。<br>OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二次OOM，得不偿失。<br>模拟复现OOM</p>
+<p>采集用户手机内存信息的方案不可行，那么只能采取复现用户场景的方式。由于发生OOM时，用户操作路径的不确定性，无法精确复现线上的OOM，因此采取模拟复现的方式，最终发生OOM时的栈信息基本一致即可。为了能够尽量模拟用户发生OOM的场景，需要基本条件基本一致，即用户使用的手机的各种相关参数。</p>
+<p>挖掘OOM特征</p>
+<p>分析7.4以来的OOM，列出发生OOM的机器的特征，主要是内存和分辨率，适当考虑其它因素例如系统版本。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">机型</th>
+<th style="text-align:center">内存</th>
+<th style="text-align:center">分辨率</th>
+<th style="text-align:center">OS</th>
+<th style="text-align:center">stack log</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">OPPO N1(T/W)</td>
+<td style="text-align:center">2G</td>
+<td style="text-align:center">1920 * 1080</td>
+<td style="text-align:center">4.2.2</td>
+<td style="text-align:center">java.lang.OutOfMemoryError </td>
+</tr>
+</tbody>
+</table>
+<p>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|<br>|HM 2LTE-CMCC|    1G|    1280 <em> 720|    4.4.4|    java.lang.OutOfMemoryError<br>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|<br>|Newman CM810|    2G|    1920 </em> 1080|    4.4.4|    java.lang.OutOfMemoryError<br>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|<br>|LGL22|    2G|    1830 <em> 1080|    4.2.2|    java.lang.OutOfMemoryError<br>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|<br>|OPPO X909|    2G|    1920 </em> 1080|    4.2.2|    java.lang.OutOfMemoryError<br>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|<br>|Lenovo K900|    2G|    1920 <em> 1080|    4.2.2|    java.lang.OutOfMemoryError<br>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|<br>|GiONEE E6|    2G|    1920 </em> 1080|    4.2.1|    java.lang.OutOfMemoryError<br>at android.graphics.BitmapFactory.nativeDecodeAsset(Native Method)|</p>
+<p>这些特征可以总结为：内存一般，分辨率偏高，OOM的堆栈log基本一致。其中，OPPO N1(T/W)上所发生的OOM比重较高，约为65%，因此选定这款机器作为复现OOM的机器。</p>
+<h2 id="关键数据（内存dump文件）"><a href="#关键数据（内存dump文件）" class="headerlink" title="关键数据（内存dump文件）"></a>关键数据（内存dump文件）</h2><p>需要复现OOM然后获取内存dump。思路是采取内存压力测试，让问题暴露的快速且充分。具体方案为：</p>
+<ul>
+<li>选取图片资源多且较为复杂的页面，比如美食的POI详情页。</li>
+<li>加载30次该页面，为了增加OOM的几率，30个POI页面的ID是不同的。</li>
+</ul>
+<p>OOM发生后，使用Android Studio自带的Android Monitor dump出HPROF文件，然后使用SDK中的hprof-conv（位于sdk_root/platform-tools）工具转换为标准的Java堆转储文件格式，这样可以使用MAT（Eclipse Memory Analyzer）继续分析。</p>
+<p>切到histogram视图，按shadow heap降序排列。</p>
+<p>选取byte数组，右击-&gt;list objects-&gt;with incoming references，降序排列可以看到有很多大小一致的byte[]实例。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006883926615.png" alt="20171107151006883926615.png"></p>
+<p>右击其中一个数组-&gt;Path to GC Roots-&gt; exclude xxx references</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006888292386.png" alt="20171107151006888292386.png"></p>
+<p>如上图所示，这些byte[]都是系统的EdgeEffect的drawable所持有，drawable对应的bitmap占用的空间为1566 <em> 406 </em> 4 = 2543184，与byte数组的大小一致。</p>
+<p>再看另外一个：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006892587007.png" alt="20171107151006892587007.png"></p>
+<p>这些byte[]是被App的一个背景图所持有，如下图：</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006895888632.png" alt="20171107151006895888632.png"></p>
+<p>通过ImageView的ID（如图）及build目录下的R.txt反查可知该ImageView的ID名称，即可知其设置的背景图的大小为720 <em> 200（xhdpi），加载到内存并考虑density，size刚好是1080 </em> 300 * 4 = 1296000，与byte数组大小一致。</p>
+<h2 id="数据分析"><a href="#数据分析" class="headerlink" title="数据分析"></a>数据分析</h2><p>为什么会出现这些大小一致的byte数组，或者说，为什么会创建多份EdgeEffect的drawable？查看EdgeEffect的源码（4.2.2）可知，其drawable成员也是通过<code>Resources.getDrawable</code>系统调用获取的。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="comment">/**</span></div><div class="line"> * Construct a new EdgeEffect with a theme appropriate for the provided context.</div><div class="line"> * <span class="doctag">@param</span> context Context used to provide theming and resource information for the EdgeEffect</div><div class="line"> */</div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">EdgeEffect</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">    <span class="keyword">final</span> Resources res = context.getResources();</div><div class="line">    mEdge = res.getDrawable(R.drawable.overscroll_edge);</div><div class="line">    mGlow = res.getDrawable(R.drawable.overscroll_glow);</div><div class="line"></div><div class="line">        ******</div><div class="line"></div><div class="line">    mMinWidth = (<span class="keyword">int</span>) (res.getDisplayMetrics().density * MIN_WIDTH + <span class="number">0.5f</span>);</div><div class="line">    mInterpolator = <span class="keyword">new</span> DecelerateInterpolator();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>ImageView(View)获取background对应的drawable的过程类似。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">for (int i = 0; i &lt; N; i++) &#123;</div><div class="line">    int attr = a.getIndex(i);</div><div class="line">    switch (attr) &#123;</div><div class="line">        case com.android.internal.R.styleable.View_background:</div><div class="line">            background = a.getDrawable(attr); // TypedArray.getDrawable</div><div class="line">            break;</div><div class="line">        ******</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>不论是Resources.getDrawable还是TypedArray.getDrawable，最终都会调用Resources.loadDrawable。继续看<code>Resources.loadDrawable</code>的源码，发现的确是使用了缓存。对于同一个drawable资源，系统只会加载一次，之后都会从缓存去取。</p>
+<p>既然drawable的加载机制并没有问题，那么drawable所在的缓存实例或者获取drawable的Resources实例是否是同一个呢？通过下面的代码，打印出每个Activity的Resources实例及Resources实例的drawable cache。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//noinspection unchecked</span></div><div class="line">LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt; cache = (LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt;) Hack.into(Resources.class).field(<span class="string">"mDrawableCache"</span>).get(getResources());</div><div class="line">Object appCache = Hack.into(Resources.class).field(<span class="string">"mDrawableCache"</span>).get(getApplication().getResources());</div><div class="line">Log.e(<span class="string">"oom"</span>, <span class="string">"Resources: &#123;application="</span> + getApplication().getResources() + <span class="string">", activity="</span> + getResources() + <span class="string">"&#125;"</span>);</div><div class="line">Log.e(<span class="string">"oom"</span>, <span class="string">"Resources.mDrawableCache: &#123;application="</span> + appCache + <span class="string">", activity="</span> + cache + <span class="string">"&#125;"</span>);</div></pre></td></tr></table></figure>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006910770075.png" alt="20171107151006910770075.png"></p>
+<p>这也进一步解释了另外一个现象，即这些大小相同的数组的个数基本和启动Activity的数量成正比。</p>
+<p>通过数据分析可知，这些drawable之所以存在多份，是因为其所在的Resources实例并不是同一个。进一步debug可知，Resources实例存在多个的原因是开启了标志位<code>sCompatVectorFromResourcesEnabled</code>。<br>虽然最终造成OOM突然增多的原因只是开启一个标志位，但是这也告诫大家阅读API文档的重要性，其实很多时候API的使用说明已经明确告知了使用的限制条件甚至风险。</p>
+<p>7.8版本关闭了此标志，发版后第一个月的OOM数量（包含历史版本）为153，如下图。</p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006915714253.png" alt="20171107151006915714253.png"></p>
+<p>其中新版本发生的OOM数量为22。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>对于线上出现的OOM，如何分析和解决可以大致分为三个步骤：</p>
+<ol>
+<li>充分挖掘特征。在挖掘特征时，需要多方面考虑，此过程更多的是猜测怀疑，所以可能的方面都要考虑到，包括但不限于代码改动、机器特征、时间特征等，必要时还需要做一定的统计分析。</li>
+<li>根据掌握的特征寻找稳定的复现的途径。一般需要做内存压力测试，这样比较容易达到OOM的临界值，只是简单的一些正常操作难以触发OOM。</li>
+<li>获取可分析的数据（内存dump文件）。利用MAT分析dump文件，MAT可以方便的按照大小排序实例，可以查看某些实例到GC ROOT的路径。</li>
+</ol>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/20/android-application/" rel="next" title="Android-全面解析 Application类">
+                <i class="fa fa-chevron-left"></i> Android-全面解析 Application类
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/10/21/android-suspend-ball/" rel="prev" title="Android-轻松自制flyme悬浮球">
+                Android-轻松自制flyme悬浮球 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">138</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#案例背景"><span class="nav-number">1.</span> <span class="nav-text">案例背景</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#关键数据（内存dump文件）"><span class="nav-number">1.1.</span> <span class="nav-text">关键数据（内存dump文件）</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#数据分析"><span class="nav-number">1.2.</span> <span class="nav-text">数据分析</span></a></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">2.</span> <span class="nav-text">总结</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>

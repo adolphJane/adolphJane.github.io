@@ -1,0 +1,1103 @@
+<!doctype html>
+
+
+
+  
+
+
+<html class="theme-next mist use-motion" lang="zh-Hans">
+<head>
+  <meta charset="UTF-8"/>
+<meta http-equiv="X-UA-Compatible" content="IE=edge" />
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1"/>
+
+
+
+<meta http-equiv="Cache-Control" content="no-transform" />
+<meta http-equiv="Cache-Control" content="no-siteapp" />
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+  <link href="/lib/fancybox/source/jquery.fancybox.css?v=2.1.5" rel="stylesheet" type="text/css" />
+
+
+
+
+  
+  
+  
+  
+
+  
+    
+    
+  
+
+  
+
+  
+
+  
+
+  
+
+  
+    
+    
+    <link href="//fonts.googleapis.com/css?family=Lato:300,300italic,400,400italic,700,700italic&subset=latin,latin-ext" rel="stylesheet" type="text/css">
+  
+
+
+
+
+
+
+<link href="/lib/font-awesome/css/font-awesome.min.css?v=4.6.2" rel="stylesheet" type="text/css" />
+
+<link href="/css/main.css?v=5.1.0" rel="stylesheet" type="text/css" />
+
+
+  <meta name="keywords" content="Android," />
+
+
+
+
+
+
+
+
+  <link rel="shortcut icon" type="image/x-icon" href="/favicon.ico?v=5.1.0" />
+
+
+
+
+
+
+<meta name="description" content="前言　　在很多视频播放器中，都存在使用不同的手势来控制进度、亮度\音量和暂停播放等功能。Android提供了一个GestureDetector来帮助我们识别一些基本的触摸手势（还有ScaleGestureDetector可以识别缩放手势），让我们很方便地实现手势控制功能。下面我们就来学习一下GestureDetector的使用和通过源码（Android7.0）来分析一下它的实现，让我们对触摸事件处">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android-手势检测GestureDetector全面分析">
+<meta property="og:url" content="http://adolph.cc/2017/11/01/android-gesturedetector/index.html">
+<meta property="og:site_name" content="Magic">
+<meta property="og:description" content="前言　　在很多视频播放器中，都存在使用不同的手势来控制进度、亮度\音量和暂停播放等功能。Android提供了一个GestureDetector来帮助我们识别一些基本的触摸手势（还有ScaleGestureDetector可以识别缩放手势），让我们很方便地实现手势控制功能。下面我们就来学习一下GestureDetector的使用和通过源码（Android7.0）来分析一下它的实现，让我们对触摸事件处">
+<meta property="og:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171111151037082648531.png">
+<meta property="og:updated_time" content="2017-11-11T07:48:33.368Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Android-手势检测GestureDetector全面分析">
+<meta name="twitter:description" content="前言　　在很多视频播放器中，都存在使用不同的手势来控制进度、亮度\音量和暂停播放等功能。Android提供了一个GestureDetector来帮助我们识别一些基本的触摸手势（还有ScaleGestureDetector可以识别缩放手势），让我们很方便地实现手势控制功能。下面我们就来学习一下GestureDetector的使用和通过源码（Android7.0）来分析一下它的实现，让我们对触摸事件处">
+<meta name="twitter:image" content="http://ohtrrgyyd.bkt.clouddn.com/20171111151037082648531.png">
+
+
+
+<script type="text/javascript" id="hexo.configurations">
+  var NexT = window.NexT || {};
+  var CONFIG = {
+    root: '/',
+    scheme: 'Mist',
+    sidebar: {"position":"left","display":"always","offset":12,"offset_float":0,"b2t":true,"scrollpercent":false},
+    fancybox: true,
+    motion: true,
+    duoshuo: {
+      userId: '0',
+      author: '博主'
+    },
+    algolia: {
+      applicationID: '',
+      apiKey: '',
+      indexName: '',
+      hits: {"per_page":10},
+      labels: {"input_placeholder":"Search for Posts","hits_empty":"We didn't find any results for the search: ${query}","hits_stats":"${hits} results found in ${time} ms"}
+    }
+  };
+</script>
+
+
+
+  <link rel="canonical" href="http://adolph.cc/2017/11/01/android-gesturedetector/"/>
+
+
+
+
+
+  <title> Android-手势检测GestureDetector全面分析 | Magic </title>
+</head>
+
+<body itemscope itemtype="http://schema.org/WebPage" lang="zh-Hans">
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  
+  
+    
+  
+
+  <div class="container sidebar-position-left page-post-detail ">
+    <div class="headband"></div>
+
+    <header id="header" class="header" itemscope itemtype="http://schema.org/WPHeader">
+      <div class="header-inner"><div class="site-brand-wrapper">
+  <div class="site-meta custom-logo">
+    
+
+    <div class="custom-logo-site-title">
+      <a href="/"  class="brand" rel="start">
+        <span class="logo-line-before"><i></i></span>
+        <span class="site-title">Magic</span>
+        <span class="logo-line-after"><i></i></span>
+      </a>
+    </div>
+      
+        <p class="site-subtitle"></p>
+      
+  </div>
+
+  <div class="site-nav-toggle">
+    <button>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+      <span class="btn-bar"></span>
+    </button>
+  </div>
+</div>
+
+<nav class="site-nav">
+  
+
+  
+    <ul id="menu" class="menu">
+      
+        
+        <li class="menu-item menu-item-home">
+          <a href="/" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-home"></i> <br />
+            
+            首页
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-categories">
+          <a href="/categories" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-th"></i> <br />
+            
+            分类
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-tags">
+          <a href="/tags" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-tags"></i> <br />
+            
+            标签
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-archives">
+          <a href="/archives" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-archive"></i> <br />
+            
+            归档
+          </a>
+        </li>
+      
+        
+        <li class="menu-item menu-item-about">
+          <a href="/about" rel="section">
+            
+              <i class="menu-item-icon fa fa-fw fa-user"></i> <br />
+            
+            关于
+          </a>
+        </li>
+      
+
+      
+        <li class="menu-item menu-item-search">
+          
+            <a href="javascript:;" class="popup-trigger">
+          
+            
+              <i class="menu-item-icon fa fa-search fa-fw"></i> <br />
+            
+            搜索
+          </a>
+        </li>
+      
+    </ul>
+  
+
+  
+    <div class="site-search">
+      
+  <div class="popup search-popup local-search-popup">
+  <div class="local-search-header clearfix">
+    <span class="search-icon">
+      <i class="fa fa-search"></i>
+    </span>
+    <span class="popup-btn-close">
+      <i class="fa fa-times-circle"></i>
+    </span>
+    <div class="local-search-input-wrapper">
+      <input autocapitalize="off" autocomplete="off" autocorrect="off"
+             placeholder="搜索..." spellcheck="false"
+             type="text" id="local-search-input">
+    </div>
+  </div>
+  <div id="local-search-result"></div>
+</div>
+
+
+
+    </div>
+  
+</nav>
+
+
+
+ </div>
+    </header>
+
+    <main id="main" class="main">
+      <div class="main-inner">
+        <div class="content-wrap">
+          <div id="content" class="content">
+            
+
+  <div id="posts" class="posts-expand">
+    
+
+  
+
+  
+  
+  
+
+  <article class="post post-type-normal " itemscope itemtype="http://schema.org/Article">
+    <link itemprop="mainEntityOfPage" href="http://adolph.cc/2017/11/01/android-gesturedetector/">
+
+    <span hidden itemprop="author" itemscope itemtype="http://schema.org/Person">
+      <meta itemprop="name" content="MagicalRice">
+      <meta itemprop="description" content="">
+      <meta itemprop="image" content="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg">
+    </span>
+
+    <span hidden itemprop="publisher" itemscope itemtype="http://schema.org/Organization">
+      <meta itemprop="name" content="Magic">
+    </span>
+
+    
+      <header class="post-header">
+
+        
+        
+          <h1 class="post-title" itemprop="name headline">
+            
+            
+              
+                Android-手势检测GestureDetector全面分析
+              
+            
+          </h1>
+        
+
+        <div class="post-meta">
+          <span class="post-time">
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-calendar-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">发表于</span>
+              
+              <time title="创建于" itemprop="dateCreated datePublished" datetime="2017-11-01T11:17:00+08:00">
+                2017-11-01
+              </time>
+            
+
+            
+
+            
+          </span>
+
+          
+            <span class="post-category" >
+            
+              <span class="post-meta-divider">|</span>
+            
+              <span class="post-meta-item-icon">
+                <i class="fa fa-folder-o"></i>
+              </span>
+              
+                <span class="post-meta-item-text">分类于</span>
+              
+              
+                <span itemprop="about" itemscope itemtype="http://schema.org/Thing">
+                  <a href="/categories/Android/" itemprop="url" rel="index">
+                    <span itemprop="name">Android</span>
+                  </a>
+                </span>
+
+                
+                
+              
+            </span>
+          
+
+          
+            
+          
+
+          
+          
+
+          
+            <span class="post-meta-divider">|</span>
+            <span class="page-pv">本文总阅读量
+            <span class="busuanzi-value" id="busuanzi_value_page_pv" ></span>次
+            </span>
+          
+
+          
+
+          
+
+        </div>
+      </header>
+    
+
+
+    <div class="post-body" itemprop="articleBody">
+
+      
+      
+
+      
+        <h1 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h1><p>　　在很多视频播放器中，都存在使用不同的手势来控制进度、亮度\音量和暂停播放等功能。Android提供了一个GestureDetector来帮助我们识别一些基本的触摸手势（还有ScaleGestureDetector可以识别缩放手势），让我们很方便地实现手势控制功能。下面我们就来学习一下GestureDetector的使用和通过源码（Android7.0）来分析一下它的实现，让我们对触摸事件处理的理解更加深入。</p>
+<h1 id="GestureDetector介绍"><a href="#GestureDetector介绍" class="headerlink" title="GestureDetector介绍"></a>GestureDetector介绍</h1><p>　　Detector的意思就是探测者，所以GestureDetector就是用来监听手势的发生。它内部有3个Listener接口，用来回调不同类型的触摸事件，用一个简略的类图来显示：<br>　　<br><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151037082648531.png" alt="20171111151037082648531.png"></p>
+<p>里面这些接口的方法，就是相应触摸事件的回调，实现了这些方法，就能实现传入触摸事件之后做出相应的回调。</p>
+<h1 id="一些回调接口："><a href="#一些回调接口：" class="headerlink" title="一些回调接口："></a>一些回调接口：</h1><ol>
+<li><p>OnGestureListener，这个Listener监听一些手势，如单击、滑动、长按等操作： </p>
+<ul>
+<li>onDown(MotionEvent e):用户按下屏幕的时候的回调。 </li>
+<li>onShowPress(MotionEvent e)：用户按下按键后100ms（根据Android7.0源码）还没有松开或者移动就会回调，官方在源码的解释是说一般用于告诉用户已经识别按下事件的回调（我暂时想不出有什么用途，因为这个回调触发之后还会触发其他的，不像长按）。 </li>
+<li>onLongPress(MotionEvent e)：用户长按后（好像不同手机的时间不同，源码里默认是100ms+500ms）触发，触发之后不会触发其他回调，直至松开（UP事件）。 </li>
+<li>onScroll(MotionEvent e1, MotionEvent e2,float distanceX, float distanceY)：手指滑动的时候执行的回调（接收到MOVE事件，且位移大于一定距离），e1,e2分别是之前DOWN事件和当前的MOVE事件，distanceX和distanceY就是当前MOVE事件和上一个MOVE事件的位移量。 </li>
+<li>onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY)：用户执行抛操作之后的回调，MOVE事件之后手松开（UP事件）那一瞬间的x或者y方向速度，如果达到一定数值（源码默认是每秒50px），就是抛操作（也就是快速滑动的时候松手会有这个回调，因此基本上有onFling必然有onScroll）。 </li>
+<li>onSingleTapUp(MotionEvent e)：用户手指松开（UP事件）的时候如果没有执行onScroll()和onLongPress()这两个回调的话，就会回调这个，说明这是一个点击抬起事件，但是不能区分是否双击事件的抬起。</li>
+</ul>
+</li>
+<li><p>OnDoubleTapListener，这个Listener监听双击和单击事件。 </p>
+<ul>
+<li>onSingleTapConfirmed(MotionEvent e)：可以确认（通过单击DOWN后300ms没有下一个DOWN事件确认）这不是一个双击事件，而是一个单击事件的时候会回调。 </li>
+<li>onDoubleTap(MotionEvent e)：可以确认这是一个双击事件的时候回调。 </li>
+<li>onDoubleTapEvent(MotionEvent e)：onDoubleTap()回调之后的输入事件（DOWN、MOVE、UP）都会回调这个方法（这个方法可以实现一些双击后的控制，如让View双击后变得可拖动等）。</li>
+</ul>
+</li>
+<li><p>OnContextClickListener，很多人都不知道ContextClick是什么，我以前也不知道，直到我把平板接上了外接键盘——原来这就是鼠标右键。。。 </p>
+<ul>
+<li>onContextClick(MotionEvent e)：当鼠标/触摸板，右键点击时候的回调。</li>
+</ul>
+</li>
+<li><p>SimpleOnGestureListener，实现了上面三个接口的类，拥有上面三个的所有回调方法。 </p>
+<ul>
+<li>由于SimpleOnGestureListener不是抽象类，所以继承它的时候只需要选取我们所需要的回调方法来重写就可以了，非常方便，也减少了代码量，符合接口隔离原则，也是模板方法模式的实现。而实现上面的三个接口中的一个都要全部重写里面的方法，所以我们一般都是选择SimpleOnGestureListener。</li>
+</ul>
+</li>
+</ol>
+<blockquote>
+<p>ps:上面所有的回调方法的返回值都是boolean类型，和View的事件传递机制一样，返回true表示消耗了事件，flase表示没有消耗。</p>
+</blockquote>
+<h1 id="GestureDetector的使用"><a href="#GestureDetector的使用" class="headerlink" title="GestureDetector的使用"></a>GestureDetector的使用</h1><p>GestureDetector的使用很简单，因为它的功能就是定义为识别手势，所以使用的话就是输入完整的触摸事件（完整的意思就是用户所有的触摸操作都是输入给它。为什么要强调完整，因为我上一篇博客就是分享如何拦截子View的部分触摸事件），识别然后进行相应的回调：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">    <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Context context)</span></span>&#123;</div><div class="line">        mOnGestureListener = <span class="keyword">new</span> MyOnGestureListener();</div><div class="line">        mGestureDetector = <span class="keyword">new</span> GestureDetector(context,mOnGestureListener);</div><div class="line"><span class="comment">//        mGestureDetector.setIsLongpressEnabled(false);</span></div><div class="line">        setOnTouchListener(<span class="keyword">new</span> OnTouchListener() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouch</span><span class="params">(View v, MotionEvent event)</span> </span>&#123;</div><div class="line">                <span class="comment">//监听触摸事件</span></div><div class="line">                <span class="keyword">return</span> mGestureDetector.onTouchEvent(event);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line"></div><div class="line">        setOnGenericMotionListener(<span class="keyword">new</span> OnGenericMotionListener() &#123;</div><div class="line">            <span class="meta">@Override</span></div><div class="line">            <span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onGenericMotion</span><span class="params">(View v, MotionEvent event)</span> </span>&#123;</div><div class="line">                Log.d(TAG, <span class="string">"onGenericMotion: "</span>);</div><div class="line">                <span class="comment">//监听鼠标右键点击事件</span></div><div class="line">                <span class="keyword">return</span> mGestureDetector.onGenericMotionEvent(event);</div><div class="line">            &#125;</div><div class="line">        &#125;);</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
+<blockquote>
+<p>如上面的代码，要使用OnGestureListener和OnDoubleTapListener里面的回调需要调用GestureDetector.onTouchEvent()方法，而使用OnContextClickListener的话则是需要调用onGenericMotionEvent()方法，注意一个是在onTouch()方法一个是在onGenericMotion()方法。</p>
+</blockquote>
+<p>　　看完了上面一堆文字，其实你就会懂得如何使用GestureDetector了，这里有GestureDetector的实践。但是如果你想了解它的回调的时机为什么会是这样的，想具体了解它们的回调时机，可以继续看下去，下面是源码分析。</p>
+<h1 id="GestureDetector源码分析"><a href="#GestureDetector源码分析" class="headerlink" title="GestureDetector源码分析"></a>GestureDetector源码分析</h1><h2 id="初始化处理"><a href="#初始化处理" class="headerlink" title="初始化处理"></a>初始化处理</h2><p>　　GestureDetector的源码接近800行，这在Android源码中已经算是比较短的了（毕竟注释也占一两百行了），所以说它的实现也不是很复杂的。从它的构造方法开始：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">GestureDetector</span><span class="params">(Context context, OnGestureListener listener)</span> </span>&#123;</div><div class="line">    <span class="keyword">this</span>(context, listener, <span class="keyword">null</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">public</span> <span class="title">GestureDetector</span><span class="params">(Context context, OnGestureListener listener, Handler handler)</span> </span>&#123;</div><div class="line">    <span class="comment">//初始化Handler</span></div><div class="line">    <span class="keyword">if</span> (handler != <span class="keyword">null</span>) &#123;</div><div class="line">        mHandler = <span class="keyword">new</span> GestureHandler(handler);</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        mHandler = <span class="keyword">new</span> GestureHandler();</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//设置Listener</span></div><div class="line">    mListener = listener;</div><div class="line">    <span class="keyword">if</span> (listener <span class="keyword">instanceof</span> OnDoubleTapListener) &#123;</div><div class="line">        setOnDoubleTapListener((OnDoubleTapListener) listener);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">if</span> (listener <span class="keyword">instanceof</span> OnContextClickListener) &#123;</div><div class="line">        setContextClickListener((OnContextClickListener) listener);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    init(context);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">init</span><span class="params">(Context context)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (mListener == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">throw</span> <span class="keyword">new</span> NullPointerException(<span class="string">"OnGestureListener must not be null"</span>);</div><div class="line">    &#125;</div><div class="line">    mIsLongpressEnabled = <span class="keyword">true</span>;</div><div class="line"></div><div class="line">    <span class="comment">// Fallback to support pre-donuts releases</span></div><div class="line">    <span class="keyword">int</span> touchSlop, doubleTapSlop, doubleTapTouchSlop;</div><div class="line">    <span class="keyword">if</span> (context == <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="comment">//相当于下面的getScaledTouchSlop，表示滑动的时候，手的移动要大于这个距离才开始移动控件</span></div><div class="line">        touchSlop = ViewConfiguration.getTouchSlop();</div><div class="line">        <span class="comment">//相当于下面的getScaledDoubleTapTouchSlop，表示点击的时候，手指移动大于这个距离，就被认为不可能是双击</span></div><div class="line">        doubleTapTouchSlop = touchSlop; </div><div class="line">        <span class="comment">//相当于下面的getScaledDoubleTapSlop，表示第二次点击的时候，和第一次的点击点位置距离如果大于这个，就被认为不是双击</span></div><div class="line">        doubleTapSlop = ViewConfiguration.getDoubleTapSlop();</div><div class="line">        mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();</div><div class="line">        mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();</div><div class="line">    &#125; <span class="keyword">else</span> &#123;</div><div class="line">        <span class="keyword">final</span> ViewConfiguration configuration = ViewConfiguration.get(context);</div><div class="line">        touchSlop = configuration.getScaledTouchSlop();</div><div class="line">        doubleTapTouchSlop = configuration.getScaledDoubleTapTouchSlop();</div><div class="line">        doubleTapSlop = configuration.getScaledDoubleTapSlop();</div><div class="line">        mMinimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();</div><div class="line">        mMaximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();</div><div class="line">    &#125;</div><div class="line">    <span class="comment">//做平方好计算距离，后面的距离对比也是用平方</span></div><div class="line">    mTouchSlopSquare = touchSlop * touchSlop;</div><div class="line">    mDoubleTapTouchSlopSquare = doubleTapTouchSlop * doubleTapTouchSlop;</div><div class="line">    mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>　　可见GestureDetector的创建就是初始化一些属性，然后就是把对应的Listener设置好，还有初始化Handler，而这里的GestureHandler，是控制onShowPress()，onLongPress()，onSingleTapConfirmed()`回调的关键：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">private</span> <span class="class"><span class="keyword">class</span> <span class="title">GestureHandler</span> <span class="keyword">extends</span> <span class="title">Handler</span> </span>&#123;</div><div class="line">      <span class="comment">//省略构造函数...</span></div><div class="line"></div><div class="line">      <span class="meta">@Override</span></div><div class="line">      <span class="function"><span class="keyword">public</span> <span class="keyword">void</span> <span class="title">handleMessage</span><span class="params">(Message msg)</span> </span>&#123;</div><div class="line">          <span class="keyword">switch</span> (msg.what) &#123;</div><div class="line">          <span class="keyword">case</span> SHOW_PRESS:</div><div class="line">              mListener.onShowPress(mCurrentDownEvent);</div><div class="line">              <span class="keyword">break</span>;</div><div class="line"></div><div class="line">          <span class="keyword">case</span> LONG_PRESS:</div><div class="line">              dispatchLongPress();</div><div class="line">              <span class="keyword">break</span>;</div><div class="line"></div><div class="line">          <span class="keyword">case</span> TAP:</div><div class="line">              <span class="comment">// If the user's finger is still down, do not count it as a tap</span></div><div class="line">              <span class="comment">//这里控制SingleTapConfirmed的回调，</span></div><div class="line">              <span class="keyword">if</span> (mDoubleTapListener != <span class="keyword">null</span>) &#123;</div><div class="line">                  <span class="keyword">if</span> (!mStillDown) &#123;</div><div class="line">                      <span class="comment">//如果已经松开，就立刻调用SingleTapConfirmed</span></div><div class="line">                      mDoubleTapListener.onSingleTapConfirmed(mCurrentDownEvent);</div><div class="line">                  &#125; <span class="keyword">else</span> &#123;</div><div class="line">                      <span class="comment">//如果处理Message的时候还没松开，就设置mDeferConfirmSingleTap为true，在UP事件的时候调用SingleTapConfirme</span></div><div class="line">                      mDeferConfirmSingleTap = <span class="keyword">true</span>;</div><div class="line">                  &#125;</div><div class="line">              &#125;</div><div class="line">              <span class="keyword">break</span>;</div><div class="line"></div><div class="line">          <span class="keyword">default</span>:</div><div class="line">              <span class="keyword">throw</span> <span class="keyword">new</span> RuntimeException(<span class="string">"Unknown message "</span> + msg); <span class="comment">//never</span></div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="comment">//长按处理</span></div><div class="line">  <span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">dispatchLongPress</span><span class="params">()</span> </span>&#123;</div><div class="line">      mHandler.removeMessages(TAP);</div><div class="line">      mDeferConfirmSingleTap = <span class="keyword">false</span>;</div><div class="line">      mInLongPress = <span class="keyword">true</span>;</div><div class="line">      mListener.onLongPress(mCurrentDownEvent);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<h2 id="输入处理"><a href="#输入处理" class="headerlink" title="输入处理"></a>输入处理</h2><p>　　初始化完之后，就是看它的如何处理输入了，这是它的核心逻辑：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onTouchEvent</span><span class="params">(MotionEvent ev)</span> </span>&#123;</div><div class="line">    <span class="comment">//检查事件输入的一致性,log出来一致性的信息，如：有事件只有up没有down</span></div><div class="line">    <span class="keyword">if</span> (mInputEventConsistencyVerifier != <span class="keyword">null</span>) &#123;</div><div class="line">        mInputEventConsistencyVerifier.onTouchEvent(ev, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> action = ev.getAction();</div><div class="line"></div><div class="line">    <span class="comment">//开始速度检测</span></div><div class="line">    <span class="keyword">if</span> (mVelocityTracker == <span class="keyword">null</span>) &#123;</div><div class="line">        mVelocityTracker = VelocityTracker.obtain();</div><div class="line">    &#125;</div><div class="line">    mVelocityTracker.addMovement(ev);</div><div class="line"></div><div class="line"></div><div class="line">    <span class="comment">//检测是否非主要指针抬起动作（如果是多点触摸）</span></div><div class="line">    <span class="keyword">final</span> <span class="keyword">boolean</span> pointerUp =</div><div class="line">            (action &amp; MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP;</div><div class="line"></div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> skipIndex = pointerUp ? ev.getActionIndex() : -<span class="number">1</span>;</div><div class="line"></div><div class="line">    <span class="comment">// Determine focal point</span></div><div class="line">    <span class="comment">// 是非主要指针抬起动作的话会跳过</span></div><div class="line">    <span class="keyword">float</span> sumX = <span class="number">0</span>, sumY = <span class="number">0</span>;</div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> count = ev.getPointerCount();</div><div class="line">    <span class="comment">//把所有还在触摸的手指的位置x，y加起来，后面求平均数，算出中心焦点</span></div><div class="line">    <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</div><div class="line">        <span class="keyword">if</span> (skipIndex == i) <span class="keyword">continue</span>;</div><div class="line">        sumX += ev.getX(i);</div><div class="line">        sumY += ev.getY(i);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> div = pointerUp ? count - <span class="number">1</span> : count;</div><div class="line">    <span class="keyword">final</span> <span class="keyword">float</span> focusX = sumX / div;</div><div class="line">    <span class="keyword">final</span> <span class="keyword">float</span> focusY = sumY / div;</div><div class="line"></div><div class="line">    <span class="keyword">boolean</span> handled = <span class="keyword">false</span>;</div><div class="line"></div><div class="line">    <span class="keyword">switch</span> (action &amp; MotionEvent.ACTION_MASK) &#123;</div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_POINTER_DOWN:</div><div class="line">        <span class="comment">//...</span></div><div class="line">        <span class="keyword">break</span>;</div><div class="line"></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_POINTER_UP:</div><div class="line">        <span class="comment">//...</span></div><div class="line">        <span class="keyword">break</span>;</div><div class="line"></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_DOWN:</div><div class="line">        <span class="comment">//...</span></div><div class="line">        <span class="keyword">break</span>;</div><div class="line"></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_MOVE:</div><div class="line">        <span class="comment">//...</span></div><div class="line">        <span class="keyword">break</span>;</div><div class="line"></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_UP:</div><div class="line">        <span class="comment">//...</span></div><div class="line">        <span class="keyword">break</span>;</div><div class="line"></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_CANCEL:</div><div class="line">        cancel();</div><div class="line">        <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="comment">//对未被处理的事件进行一次一致性检测</span></div><div class="line">    <span class="keyword">if</span> (!handled &amp;&amp; mInputEventConsistencyVerifier != <span class="keyword">null</span>) &#123;</div><div class="line">        mInputEventConsistencyVerifier.onUnhandledEvent(ev, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> handled;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>　　上面的注释写得很清楚了，主要onTouchEvent()的主要思路就是先对输入事件做出统一处理，提取一些共有的信息，如多个点同时触摸时候的中心焦点和滑动速度等，然后根据事件的分类做出相应的处理。</p>
+<blockquote>
+<p>ps：InputEventConsistencyVerifier对输入事件进行的一致性检测的结果并不影响GestureDetector的运行，如果检测到一致性不符合的事件（只有UP事件而前面没有DOWN事件），就只会输出log告诉开发者。</p>
+</blockquote>
+<h3 id="DOWN事件处理"><a href="#DOWN事件处理" class="headerlink" title="DOWN事件处理"></a>DOWN事件处理</h3><p>　　下面进入DOWN事件的处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//...</span></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_DOWN:</div><div class="line">        <span class="keyword">if</span> (mDoubleTapListener != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">//处理双击</span></div><div class="line">            <span class="comment">//取消TAP事件</span></div><div class="line">            <span class="keyword">boolean</span> hadTapMessage = mHandler.hasMessages(TAP);</div><div class="line">            <span class="keyword">if</span> (hadTapMessage) mHandler.removeMessages(TAP);</div><div class="line">            <span class="keyword">if</span> ((mCurrentDownEvent != <span class="keyword">null</span>) &amp;&amp; (mPreviousUpEvent != <span class="keyword">null</span>) &amp;&amp; hadTapMessage &amp;&amp;</div><div class="line">                    isConsideredDoubleTap(mCurrentDownEvent, mPreviousUpEvent, ev)) &#123;</div><div class="line">                <span class="comment">// This is a second tap</span></div><div class="line">                mIsDoubleTapping = <span class="keyword">true</span>;</div><div class="line">                <span class="comment">// Give a callback with the first tap of the double-tap</span></div><div class="line">                <span class="comment">//回调双击</span></div><div class="line">                handled |= mDoubleTapListener.onDoubleTap(mCurrentDownEvent);</div><div class="line">                <span class="comment">// Give a callback with down event of the double-tap</span></div><div class="line">                handled |= mDoubleTapListener.onDoubleTapEvent(ev);</div><div class="line">            &#125; <span class="keyword">else</span> &#123;</div><div class="line">                <span class="comment">// This is a first tap</span></div><div class="line">                <span class="comment">//延时发出单击事件，如果到了时间（300ms）还没有取消的话就确认是TAP事件了</span></div><div class="line">                mHandler.sendEmptyMessageDelayed(TAP, DOUBLE_TAP_TIMEOUT);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        mDownFocusX = mLastFocusX = focusX;</div><div class="line">        mDownFocusY = mLastFocusY = focusY;</div><div class="line">        <span class="comment">//重置mCurrentDownEvent</span></div><div class="line">        <span class="keyword">if</span> (mCurrentDownEvent != <span class="keyword">null</span>) &#123;</div><div class="line">            mCurrentDownEvent.recycle();</div><div class="line">        &#125;</div><div class="line">        mCurrentDownEvent = MotionEvent.obtain(ev);</div><div class="line">        mAlwaysInTapRegion = <span class="keyword">true</span>;</div><div class="line">        mAlwaysInBiggerTapRegion = <span class="keyword">true</span>;</div><div class="line">        mStillDown = <span class="keyword">true</span>;</div><div class="line">        mInLongPress = <span class="keyword">false</span>;</div><div class="line">        mDeferConfirmSingleTap = <span class="keyword">false</span>;</div><div class="line">        <span class="comment">//处理长按</span></div><div class="line">        <span class="keyword">if</span> (mIsLongpressEnabled) &#123;</div><div class="line">            mHandler.removeMessages(LONG_PRESS);</div><div class="line">            <span class="comment">//延时发送长按事件</span></div><div class="line">            mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()</div><div class="line">                    + TAP_TIMEOUT + LONGPRESS_TIMEOUT);</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//延时发送showPress事件</span></div><div class="line">        mHandler.sendEmptyMessageAtTime(SHOW_PRESS, mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);</div><div class="line">        handled |= mListener.onDown(ev);</div><div class="line">        <span class="keyword">break</span>;</div><div class="line"><span class="comment">//...</span></div><div class="line"></div><div class="line"><span class="comment">//判断第二次点击是否有效双击</span></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">boolean</span> <span class="title">isConsideredDoubleTap</span><span class="params">(MotionEvent firstDown, MotionEvent firstUp,</span></span></div><div class="line">        MotionEvent secondDown) &#123;</div><div class="line">    <span class="comment">//第一次点击后是否有移动超出范围</span></div><div class="line">    <span class="keyword">if</span> (!mAlwaysInBiggerTapRegion) &#123;</div><div class="line"></div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">final</span> <span class="keyword">long</span> deltaTime = secondDown.getEventTime() - firstUp.getEventTime();</div><div class="line">    <span class="keyword">if</span> (deltaTime &gt; DOUBLE_TAP_TIMEOUT || deltaTime &lt; DOUBLE_TAP_MIN_TIME) &#123;</div><div class="line">        <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">int</span> deltaX = (<span class="keyword">int</span>) firstDown.getX() - (<span class="keyword">int</span>) secondDown.getX();</div><div class="line">    <span class="keyword">int</span> deltaY = (<span class="keyword">int</span>) firstDown.getY() - (<span class="keyword">int</span>) secondDown.getY();</div><div class="line">    <span class="comment">//判断第二次点击是否在附近，在附近才被认为是双击</span></div><div class="line">    <span class="keyword">return</span> (deltaX * deltaX + deltaY * deltaY &lt; mDoubleTapSlopSquare);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>可见，对DOWN事件涉及： </p>
+<ul>
+<li>处理单击判断：如果收到一次DOWN事件，而且前段时间没有DOWN事件的话，会发送一个延时的TAP信息，而一段时间（300ms）之后没有被取消的话，就执行GestureHandler里面的TAP单击确认操作。 </li>
+<li>处理双击判断：如果前面也有一次DOWN事件，而且也符合isConsideredDoubleTap()的条件（第一次点击后没有移动超出范围，第二次点击也在附近），就可以确认双击，执行onDoubleTap()和onDoubleTapEvent()的回调。 </li>
+<li>处理长按判断：先看用户是否允许检测长按，然后就是发送一个延时的LONG_PRESS信息，如果到时候还没被取消的话就是回调长按方法了。 </li>
+<li>处理showPress判断：这个和长按差不多，就是时间（100ms）短了一点而已。</li>
+</ul>
+<blockquote>
+<p>PS：handled是boolean变量，|=符号是用符号右边的值跟左边的值进行或运算再赋值给左边。a |= b等价于a = a | b，这里使handled变量初始值为false，进行了多次|=操作，一旦有结果是true的话，handled最后的值就是true，所有结果都是false最后才会false，onTouchEvent()方法最后返回这个handled，就可以表示事件有没被处理，实现了对事件处理的封装。</p>
+</blockquote>
+<h3 id="MOVE事件处理"><a href="#MOVE事件处理" class="headerlink" title="MOVE事件处理"></a>MOVE事件处理</h3><p>然后再看看对MOVE事件的处理：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//...</span></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_MOVE:</div><div class="line">        <span class="comment">//如果是正在长按和点击了鼠标右键</span></div><div class="line">        <span class="keyword">if</span> (mInLongPress || mInContextClick) &#123;</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">final</span> <span class="keyword">float</span> scrollX = mLastFocusX - focusX;</div><div class="line">        <span class="keyword">final</span> <span class="keyword">float</span> scrollY = mLastFocusY - focusY;</div><div class="line">        <span class="keyword">if</span> (mIsDoubleTapping) &#123;</div><div class="line">            <span class="comment">// Give the move events of the double-tap</span></div><div class="line">            <span class="comment">//如果是第二次点击的话，把移动事件也当作双击，有点奇怪</span></div><div class="line">            handled |= mDoubleTapListener.onDoubleTapEvent(ev);</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mAlwaysInTapRegion) &#123;</div><div class="line">            <span class="comment">//down才会使mAlwaysInTapRegion为true</span></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> deltaX = (<span class="keyword">int</span>) (focusX - mDownFocusX);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> deltaY = (<span class="keyword">int</span>) (focusY - mDownFocusY);</div><div class="line">            <span class="keyword">int</span> distance = (deltaX * deltaX) + (deltaY * deltaY);</div><div class="line">            <span class="comment">//mTouchSlopSquare是一个距离的平方，表示滑动的时候，手的移动要大于这个距离才认为是Scroll事件</span></div><div class="line">            <span class="keyword">if</span> (distance &gt; mTouchSlopSquare) &#123;</div><div class="line">                <span class="comment">//进入Scroll模式</span></div><div class="line">                handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);</div><div class="line">                mLastFocusX = focusX;</div><div class="line">                mLastFocusY = focusY;</div><div class="line">                mAlwaysInTapRegion = <span class="keyword">false</span>;</div><div class="line">                mHandler.removeMessages(TAP);</div><div class="line">                mHandler.removeMessages(SHOW_PRESS);</div><div class="line">                mHandler.removeMessages(LONG_PRESS);</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">if</span> (distance &gt; mDoubleTapTouchSlopSquare) &#123;</div><div class="line">                <span class="comment">//如果移动距离超过允许范围，则不再可能认为移动事件是双击</span></div><div class="line">                mAlwaysInBiggerTapRegion = <span class="keyword">false</span>;</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> ((Math.abs(scrollX) &gt;= <span class="number">1</span>) || (Math.abs(scrollY) &gt;= <span class="number">1</span>)) &#123;</div><div class="line">            <span class="comment">//后续的Scroll移动，前面的是进入Scroll移动</span></div><div class="line">            handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);</div><div class="line">            mLastFocusX = focusX;</div><div class="line">            mLastFocusY = focusY;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">break</span>;</div><div class="line"><span class="comment">//...</span></div></pre></td></tr></table></figure>
+<p>可见，对MOVE事件涉及： </p>
+<ul>
+<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。 </li>
+<li>onScroll()回调：当MOVE不是长按，不是DoubleTapEvent之后，当移动距离大于一定距离之后，就会进入Scroll模式，然后两个MOVE事件的位移距离scrollX或者scrollY大于1px，都会调用onScroll()。</li>
+</ul>
+<h3 id="UP事件的处理"><a href="#UP事件的处理" class="headerlink" title="UP事件的处理"></a>UP事件的处理</h3><p>接下来再看UP事件：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//...</span></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_UP:</div><div class="line">        mStillDown = <span class="keyword">false</span>;</div><div class="line">        MotionEvent currentUpEvent = MotionEvent.obtain(ev);</div><div class="line">        <span class="keyword">if</span> (mIsDoubleTapping) &#123;</div><div class="line">            <span class="comment">// Finally, give the up event of the double-tap</span></div><div class="line">            <span class="comment">//双击事件</span></div><div class="line">            handled |= mDoubleTapListener.onDoubleTapEvent(ev);</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mInLongPress) &#123;</div><div class="line">            <span class="comment">//长按结束</span></div><div class="line">            mHandler.removeMessages(TAP);</div><div class="line">            mInLongPress = <span class="keyword">false</span>;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (mAlwaysInTapRegion &amp;&amp; !mIgnoreNextUpEvent) &#123;</div><div class="line">            handled = mListener.onSingleTapUp(ev);</div><div class="line">            <span class="comment">//处理单击确认，具体逻辑看GestureHandler如何处理TAP事件</span></div><div class="line">            <span class="keyword">if</span> (mDeferConfirmSingleTap &amp;&amp; mDoubleTapListener != <span class="keyword">null</span>) &#123;</div><div class="line">                mDoubleTapListener.onSingleTapConfirmed(ev);</div><div class="line">            &#125;</div><div class="line">        &#125; <span class="keyword">else</span> <span class="keyword">if</span> (!mIgnoreNextUpEvent) &#123;</div><div class="line">            <span class="comment">//处理Fling，如果速度大于定义的最小速度（50），就回调Fling</span></div><div class="line">            <span class="comment">// A fling must travel the minimum tap distance</span></div><div class="line">            <span class="keyword">final</span> VelocityTracker velocityTracker = mVelocityTracker;</div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> pointerId = ev.getPointerId(<span class="number">0</span>);</div><div class="line">            velocityTracker.computeCurrentVelocity(<span class="number">1000</span>, mMaximumFlingVelocity);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">float</span> velocityY = velocityTracker.getYVelocity(pointerId);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">float</span> velocityX = velocityTracker.getXVelocity(pointerId);</div><div class="line"></div><div class="line">            <span class="keyword">if</span> ((Math.abs(velocityY) &gt; mMinimumFlingVelocity)</div><div class="line">                    || (Math.abs(velocityX) &gt; mMinimumFlingVelocity))&#123;</div><div class="line">                handled = mListener.onFling(mCurrentDownEvent, ev, velocityX, velocityY);</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="comment">//重置mPreviousUpEvent</span></div><div class="line">        <span class="keyword">if</span> (mPreviousUpEvent != <span class="keyword">null</span>) &#123;</div><div class="line">            mPreviousUpEvent.recycle();</div><div class="line">        &#125;</div><div class="line">        <span class="comment">// Hold the event we obtained above - listeners may have changed the original.</span></div><div class="line">        mPreviousUpEvent = currentUpEvent;</div><div class="line">        <span class="comment">//回收mVelocityTracker</span></div><div class="line">        <span class="keyword">if</span> (mVelocityTracker != <span class="keyword">null</span>) &#123;</div><div class="line">            <span class="comment">// This may have been cleared when we called out to the</span></div><div class="line">            <span class="comment">// application above.</span></div><div class="line">            mVelocityTracker.recycle();</div><div class="line">            mVelocityTracker = <span class="keyword">null</span>;</div><div class="line">        &#125;</div><div class="line">        mIsDoubleTapping = <span class="keyword">false</span>;</div><div class="line">        mDeferConfirmSingleTap = <span class="keyword">false</span>;</div><div class="line">        mIgnoreNextUpEvent = <span class="keyword">false</span>;</div><div class="line">        mHandler.removeMessages(SHOW_PRESS);</div><div class="line">        mHandler.removeMessages(LONG_PRESS);</div><div class="line">        <span class="keyword">break</span>;</div><div class="line"><span class="comment">//...</span></div></pre></td></tr></table></figure>
+<p>可见，对MOVE事件涉及： </p>
+<ul>
+<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。 </li>
+<li>onSingleTapUp()回调：DOWN事件之后没有MOVE，或者MOVE的距离没有超出范围，mAlwaysInTapRegion才不会变成false，回调onSingleTapUp()。 </li>
+<li>onSingleTapConfirmed()回调：从前面GestureHandler里面的TAP消息的实现可以看到：</li>
+</ul>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">case</span> TAP:</div><div class="line">    <span class="comment">// If the user's finger is still down, do not count it as a tap</span></div><div class="line">    <span class="comment">//这里控制SingleTapConfirmed的回调，</span></div><div class="line">    <span class="keyword">if</span> (mDoubleTapListener != <span class="keyword">null</span>) &#123;</div><div class="line">        <span class="keyword">if</span> (!mStillDown) &#123;</div><div class="line">            <span class="comment">//如果已经松开，就立刻调用SingleTapConfirmed</span></div><div class="line">            mDoubleTapListener.onSingleTapConfirmed(mCurrentDownEvent);</div><div class="line">        &#125; <span class="keyword">else</span> &#123;</div><div class="line">            <span class="comment">//如果处理Message的时候还没松开，就设置mDeferConfirmSingleTap为true，在UP事件的时候调用SingleTapConfirme</span></div><div class="line">            mDeferConfirmSingleTap = <span class="keyword">true</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">break</span>;</div></pre></td></tr></table></figure>
+<p>　　之前看过，TAP消息是延时（300ms）发送的，然而实际逻辑中，是抬起手指才算是点击，所以这里处理TAP的时候就不一定立刻调用onSingleTapConfirmed()，而是判断手指是否松开了，是松开的话就立刻回调。如果还未松开那就把标志位mDeferConfirmSingleTap设置为true，等到收到UP事件的时候再回调。 </p>
+<ul>
+<li>onFling()回调：当UP事件的速度大于一定速度时，就会回调onFling()，至于mIgnoreNextUpEvent参数，是只有鼠标右键点击的时候才会为true，具体看后面。</li>
+</ul>
+<h3 id="多点触摸的处理"><a href="#多点触摸的处理" class="headerlink" title="多点触摸的处理"></a>多点触摸的处理</h3><p>　　对于多个手指落下，前面的统一处理已经是把所有手指的坐标值加起来然后算平均值了，所以我们多根手指触摸的时候，其实滑动的实际点是这些手指的中心焦点。回看上面的MOVE事件处理，中心焦点的位置值FocusX和FocusY决定onScroll(onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY))的后两个参数值，所以处理多点触控的话就使用它们比较方便。因为MotionEvent是使用数组装着当前屏幕上所有指针的动作的，使用前两个参数的话还要循环用getX(int pointerIndex)和getY(int pointerIndex)方法取出各个指针的值再自己处理。</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//...</span></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_POINTER_DOWN:</div><div class="line">        mDownFocusX = mLastFocusX = focusX;</div><div class="line">        mDownFocusY = mLastFocusY = focusY;</div><div class="line">        <span class="comment">// Cancel long press and taps</span></div><div class="line">        <span class="comment">//如果有多根手指按下，取消长按和点击计时</span></div><div class="line">        cancelTaps();</div><div class="line">        <span class="keyword">break</span>;</div><div class="line"></div><div class="line">    <span class="keyword">case</span> MotionEvent.ACTION_POINTER_UP:</div><div class="line">        mDownFocusX = mLastFocusX = focusX;</div><div class="line">        mDownFocusY = mLastFocusY = focusY;</div><div class="line"></div><div class="line">        <span class="comment">// Check the dot product of current velocities.</span></div><div class="line">        <span class="comment">// If the pointer that left was opposing another velocity vector, clear.</span></div><div class="line">        <span class="comment">//计算每一秒钟的滑动像素</span></div><div class="line">        mVelocityTracker.computeCurrentVelocity(<span class="number">1000</span>, mMaximumFlingVelocity);</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> upIndex = ev.getActionIndex();</div><div class="line">        <span class="keyword">final</span> <span class="keyword">int</span> id1 = ev.getPointerId(upIndex);</div><div class="line">        <span class="keyword">final</span> <span class="keyword">float</span> x1 = mVelocityTracker.getXVelocity(id1);</div><div class="line">        <span class="keyword">final</span> <span class="keyword">float</span> y1 = mVelocityTracker.getYVelocity(id1);</div><div class="line">        <span class="comment">//如果剩下的手指速度方向是和抬起那根手指的速度相反方向的，就说明不是fling，清空速度监听</span></div><div class="line">        <span class="keyword">for</span> (<span class="keyword">int</span> i = <span class="number">0</span>; i &lt; count; i++) &#123;</div><div class="line">            <span class="keyword">if</span> (i == upIndex) <span class="keyword">continue</span>;</div><div class="line"></div><div class="line">            <span class="keyword">final</span> <span class="keyword">int</span> id2 = ev.getPointerId(i);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">float</span> x = x1 * mVelocityTracker.getXVelocity(id2);</div><div class="line">            <span class="keyword">final</span> <span class="keyword">float</span> y = y1 * mVelocityTracker.getYVelocity(id2);</div><div class="line"></div><div class="line">            <span class="keyword">final</span> <span class="keyword">float</span> dot = x + y;</div><div class="line">            <span class="keyword">if</span> (dot &lt; <span class="number">0</span>) &#123;</div><div class="line">                mVelocityTracker.clear();</div><div class="line">                <span class="keyword">break</span>;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        <span class="keyword">break</span>;</div><div class="line"><span class="comment">//...</span></div><div class="line"></div><div class="line"><span class="function"><span class="keyword">private</span> <span class="keyword">void</span> <span class="title">cancelTaps</span><span class="params">()</span> </span>&#123;</div><div class="line">    mHandler.removeMessages(SHOW_PRESS);</div><div class="line">    mHandler.removeMessages(LONG_PRESS);</div><div class="line">    mHandler.removeMessages(TAP);</div><div class="line">    mIsDoubleTapping = <span class="keyword">false</span>;</div><div class="line">    mAlwaysInTapRegion = <span class="keyword">false</span>;</div><div class="line">    mAlwaysInBiggerTapRegion = <span class="keyword">false</span>;</div><div class="line">    mDeferConfirmSingleTap = <span class="keyword">false</span>;</div><div class="line">    mInLongPress = <span class="keyword">false</span>;</div><div class="line">    mInContextClick = <span class="keyword">false</span>;</div><div class="line">    mIgnoreNextUpEvent = <span class="keyword">false</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>　　这是对多个手指的UP和DOWN事件处理，其实就是做一些取消操作而让多点触摸不影响单点触摸的应用，例如在多个手指落下的时候取消点击信息等。</p>
+<h3 id="ContextClick的处理"><a href="#ContextClick的处理" class="headerlink" title="ContextClick的处理"></a>ContextClick的处理</h3><p>　　ContextClick的事件是由onGenericMotionEvent()传入：</p>
+<figure class="highlight java"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">public</span> <span class="keyword">boolean</span> <span class="title">onGenericMotionEvent</span><span class="params">(MotionEvent ev)</span> </span>&#123;</div><div class="line">    <span class="keyword">if</span> (mInputEventConsistencyVerifier != <span class="keyword">null</span>) &#123;</div><div class="line">        mInputEventConsistencyVerifier.onGenericMotionEvent(ev, <span class="number">0</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    <span class="keyword">final</span> <span class="keyword">int</span> actionButton = ev.getActionButton();</div><div class="line">    <span class="keyword">switch</span> (ev.getActionMasked()) &#123;</div><div class="line">        <span class="keyword">case</span> MotionEvent.ACTION_BUTTON_PRESS:</div><div class="line">            <span class="comment">//按下触控笔首选按钮或者鼠标右键</span></div><div class="line">            <span class="keyword">if</span> (mContextClickListener != <span class="keyword">null</span> &amp;&amp; !mInContextClick &amp;&amp; !mInLongPress</div><div class="line">                    &amp;&amp; (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY</div><div class="line">                    || actionButton == MotionEvent.BUTTON_SECONDARY)) &#123;</div><div class="line">                <span class="keyword">if</span> (mContextClickListener.onContextClick(ev)) &#123;</div><div class="line">                    mInContextClick = <span class="keyword">true</span>;</div><div class="line">                    mHandler.removeMessages(LONG_PRESS);</div><div class="line">                    mHandler.removeMessages(TAP);</div><div class="line">                    <span class="keyword">return</span> <span class="keyword">true</span>;</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">break</span>;</div><div class="line"></div><div class="line">        <span class="keyword">case</span> MotionEvent.ACTION_BUTTON_RELEASE:</div><div class="line">            <span class="keyword">if</span> (mInContextClick &amp;&amp; (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY</div><div class="line">                    || actionButton == MotionEvent.BUTTON_SECONDARY)) &#123;</div><div class="line">                mInContextClick = <span class="keyword">false</span>;</div><div class="line">                <span class="comment">//无视下一个UP事件，因为它是由鼠标右键或者触控笔键带起的</span></div><div class="line">                mIgnoreNextUpEvent = <span class="keyword">true</span>;</div><div class="line">            &#125;</div><div class="line">            <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="keyword">return</span> <span class="keyword">false</span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由此可以，当按键按下（ACTION_BUTTON_PRESS）的时候已经回调onContextClick()。</p>
+<h1 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h1><p>读完源码，总结出来的每个回调的调用时机如下表：</p>
+<p>PS：除去onContextClick()，因为它的按下鼠标右键时候是发出一系列的事件。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">回调/输入事件</th>
+<th style="text-align:center">DOWN事件</th>
+<th style="text-align:center">MOVE事件</th>
+<th style="text-align:center">UP事件</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">onDown(MotionEvent e)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+</tr>
+<tr>
+<td style="text-align:center">onShowPress(MotionEvent e)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+</tr>
+<tr>
+<td style="text-align:center">onLongPress(MotionEvent e)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+</tr>
+<tr>
+<td style="text-align:center">onScroll(MotionEvent e1, MotionEvent e2,float distanceX, float distanceY)</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+</tr>
+<tr>
+<td style="text-align:center">onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY))</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td style="text-align:center">onSingleTapUp(MotionEvent e)</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td style="text-align:center">onSingleTapConfirmed(MotionEvent e)</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">√</td>
+</tr>
+<tr>
+<td style="text-align:center">onDoubleTap(MotionEvent e)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">×</td>
+<td style="text-align:center">×</td>
+</tr>
+<tr>
+<td style="text-align:center">onDoubleTapEvent(MotionEvent e)</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+<td style="text-align:center">√</td>
+</tr>
+</tbody>
+</table>
+<p>　　<br>从上面的分析可以看出，虽然GestureDetector能识别很多手势，但是也是不能满足所有的需求的，如滑动和长按之后松开没有回调（这个可以重写onTouch()捕捉UP事件实现）、多点触控缩放手势的实现（这个可以用ScaleGestureDetector）等。</p>
+<h1 id="后话"><a href="#后话" class="headerlink" title="后话"></a>后话</h1><p>　　有人问我看GestureDetector源码这么仔细有什么用，它又不是很常用的东西，网上随便一搜一堆资料。我的回答是因为我觉得要用一个东西的话，首先就是要搞清楚它能干什么，它的限制是什么，为什么要选择它，关于这些方面，网上的很多关于GestureDetector的资料都没有达到我想了解的程度，加上GestureDetector并不复杂，所以写下了这篇博客，这样就可以从源码层面上了解到它的回调是什么时候调用，有bug的时候也能更快的找出。<br>　　不管怎样，GestureDetector里面的SimpleOnGestureListener的设计，和对触摸事件的处理方式是很值得我学习的，记录分享至此，水平有限，如果错漏，欢迎指正和讨论。</p>
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <div>
+      
+        
+
+      
+    </div>
+
+    <footer class="post-footer">
+      
+        <div class="post-tags">
+          
+            <a href="/tags/Android/" rel="tag"># Android</a>
+          
+        </div>
+      
+
+      
+        
+      
+
+      
+        <div class="post-nav">
+          <div class="post-nav-next post-nav-item">
+            
+              <a href="/2017/10/31/android-pathmeasure/" rel="next" title="Android-玩转PathMeasure">
+                <i class="fa fa-chevron-left"></i> Android-玩转PathMeasure
+              </a>
+            
+          </div>
+
+          <span class="post-nav-divider"></span>
+
+          <div class="post-nav-prev post-nav-item">
+            
+              <a href="/2017/11/01/android-catransation/" rel="prev" title="Android-转场动画深度解析">
+                Android-转场动画深度解析 <i class="fa fa-chevron-right"></i>
+              </a>
+            
+          </div>
+        </div>
+      
+
+      
+      
+    </footer>
+  </article>
+
+
+
+    <div class="post-spread">
+      
+    </div>
+  </div>
+
+
+          </div>
+          
+
+
+          
+  <div class="comments" id="comments">
+    
+  </div>
+
+
+        </div>
+        
+          
+  
+  <div class="sidebar-toggle">
+    <div class="sidebar-toggle-line-wrap">
+      <span class="sidebar-toggle-line sidebar-toggle-line-first"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-middle"></span>
+      <span class="sidebar-toggle-line sidebar-toggle-line-last"></span>
+    </div>
+  </div>
+
+  <aside id="sidebar" class="sidebar">
+    <div class="sidebar-inner">
+
+      
+
+      
+        <ul class="sidebar-nav motion-element">
+          <li class="sidebar-nav-toc sidebar-nav-active" data-target="post-toc-wrap" >
+            文章目录
+          </li>
+          <li class="sidebar-nav-overview" data-target="site-overview">
+            站点概览
+          </li>
+        </ul>
+      
+
+      <section class="site-overview sidebar-panel">
+        <div class="site-author motion-element" itemprop="author" itemscope itemtype="http://schema.org/Person">
+          <img class="site-author-image" itemprop="image"
+               src="http://ohtrrgyyd.bkt.clouddn.com/037c5bde749f737e107c8fb8e9321c9d.jpg"
+               alt="MagicalRice" />
+          <p class="site-author-name" itemprop="name">MagicalRice</p>
+           
+              <p class="site-description motion-element" itemprop="description"></p>
+          
+        </div>
+        <nav class="site-state motion-element">
+
+          
+            <div class="site-state-item site-state-posts">
+              <a href="/archives">
+                <span class="site-state-item-count">138</span>
+                <span class="site-state-item-name">日志</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-categories">
+              <a href="/categories/index.html">
+                <span class="site-state-item-count">16</span>
+                <span class="site-state-item-name">分类</span>
+              </a>
+            </div>
+          
+
+          
+            
+            
+            <div class="site-state-item site-state-tags">
+              <a href="/tags/index.html">
+                <span class="site-state-item-count">25</span>
+                <span class="site-state-item-name">标签</span>
+              </a>
+            </div>
+          
+
+        </nav>
+
+        
+
+        <div class="links-of-author motion-element">
+          
+            
+              <span class="links-of-author-item">
+                <a href="https://github.com/adolphJane" target="_blank" title="GitHub">
+                  
+                    <i class="fa fa-fw fa-github"></i>
+                  
+                  GitHub
+                </a>
+              </span>
+            
+          
+        </div>
+
+        
+        
+
+        
+        
+
+        
+
+
+      </section>
+
+      
+      <!--noindex-->
+        <section class="post-toc-wrap motion-element sidebar-panel sidebar-panel-active">
+          <div class="post-toc">
+
+            
+              
+            
+
+            
+              <div class="post-toc-content"><ol class="nav"><li class="nav-item nav-level-1"><a class="nav-link" href="#前言"><span class="nav-number">1.</span> <span class="nav-text">前言</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GestureDetector介绍"><span class="nav-number">2.</span> <span class="nav-text">GestureDetector介绍</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#一些回调接口："><span class="nav-number">3.</span> <span class="nav-text">一些回调接口：</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GestureDetector的使用"><span class="nav-number">4.</span> <span class="nav-text">GestureDetector的使用</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#GestureDetector源码分析"><span class="nav-number">5.</span> <span class="nav-text">GestureDetector源码分析</span></a><ol class="nav-child"><li class="nav-item nav-level-2"><a class="nav-link" href="#初始化处理"><span class="nav-number">5.1.</span> <span class="nav-text">初始化处理</span></a></li><li class="nav-item nav-level-2"><a class="nav-link" href="#输入处理"><span class="nav-number">5.2.</span> <span class="nav-text">输入处理</span></a><ol class="nav-child"><li class="nav-item nav-level-3"><a class="nav-link" href="#DOWN事件处理"><span class="nav-number">5.2.1.</span> <span class="nav-text">DOWN事件处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#MOVE事件处理"><span class="nav-number">5.2.2.</span> <span class="nav-text">MOVE事件处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#UP事件的处理"><span class="nav-number">5.2.3.</span> <span class="nav-text">UP事件的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#多点触摸的处理"><span class="nav-number">5.2.4.</span> <span class="nav-text">多点触摸的处理</span></a></li><li class="nav-item nav-level-3"><a class="nav-link" href="#ContextClick的处理"><span class="nav-number">5.2.5.</span> <span class="nav-text">ContextClick的处理</span></a></li></ol></li></ol></li><li class="nav-item nav-level-1"><a class="nav-link" href="#总结"><span class="nav-number">6.</span> <span class="nav-text">总结</span></a></li><li class="nav-item nav-level-1"><a class="nav-link" href="#后话"><span class="nav-number">7.</span> <span class="nav-text">后话</span></a></li></ol></div>
+            
+
+          </div>
+        </section>
+      <!--/noindex-->
+      
+
+      
+        <div class="back-to-top">
+          <i class="fa fa-arrow-up"></i>
+          
+        </div>
+      
+
+    </div>
+  </aside>
+
+
+        
+      </div>
+    </main>
+
+    <footer id="footer" class="footer">
+      <div class="footer-inner">
+        <div class="copyright" >
+  
+  &copy;  2015 - 
+  <span itemprop="copyrightYear">2017</span>
+  <span class="with-love">
+    <i class="fa fa-heart"></i>
+  </span>
+  <span class="author" itemprop="copyrightHolder">MagicalRice</span>
+</div>
+
+
+<div class="powered-by">
+  由 <a class="theme-link" href="https://hexo.io">Hexo</a> 强力驱动
+</div>
+
+<div class="theme-info">
+  主题 -
+  <a class="theme-link" href="https://github.com/iissnan/hexo-theme-next">
+    NexT.Mist
+  </a>
+</div>
+
+
+        
+<div class="busuanzi-count">
+  <script async src="https://dn-lbstatics.qbox.me/busuanzi/2.3/busuanzi.pure.mini.js"></script>
+
+  
+    <span class="site-uv">
+      本站访客数
+      <span class="busuanzi-value" id="busuanzi_value_site_uv"></span>
+      人次
+    </span>
+  
+
+  
+    <span class="site-pv">
+      本站总访问量
+      <span class="busuanzi-value" id="busuanzi_value_site_pv"></span>
+      次
+    </span>
+  
+</div>
+
+
+        
+      </div>
+    </footer>
+
+    
+
+  </div>
+
+  
+
+<script type="text/javascript">
+  if (Object.prototype.toString.call(window.Promise) !== '[object Function]') {
+    window.Promise = null;
+  }
+</script>
+
+
+
+
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+  <script type="text/javascript" src="/lib/jquery/index.js?v=2.1.3"></script>
+
+  
+  <script type="text/javascript" src="/lib/fastclick/lib/fastclick.min.js?v=1.0.6"></script>
+
+  
+  <script type="text/javascript" src="/lib/jquery_lazyload/jquery.lazyload.js?v=1.9.7"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/velocity/velocity.ui.min.js?v=1.2.1"></script>
+
+  
+  <script type="text/javascript" src="/lib/fancybox/source/jquery.fancybox.pack.js?v=2.1.5"></script>
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/utils.js?v=5.1.0"></script>
+
+  <script type="text/javascript" src="/js/src/motion.js?v=5.1.0"></script>
+
+
+
+  
+  
+
+  
+  <script type="text/javascript" src="/js/src/scrollspy.js?v=5.1.0"></script>
+<script type="text/javascript" src="/js/src/post-details.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/bootstrap.js?v=5.1.0"></script>
+
+
+
+  
+
+
+  
+
+
+
+
+	
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+  
+
+
+
+
+
+
+  
+
+  <script type="text/javascript">
+    // Popup Window;
+    var isfetched = false;
+    // Search DB path;
+    var search_path = "search.xml";
+    if (search_path.length == 0) {
+      search_path = "search.xml";
+    }
+    var path = "/" + search_path;
+    // monitor main search box;
+
+    function proceedsearch() {
+      $("body")
+        .append('<div class="search-popup-overlay local-search-pop-overlay"></div>')
+        .css('overflow', 'hidden');
+      $('.popup').toggle();
+    }
+    // search function;
+    var searchFunc = function(path, search_id, content_id) {
+      'use strict';
+      $.ajax({
+        url: path,
+        dataType: "xml",
+        async: true,
+        success: function( xmlResponse ) {
+          // get the contents from search data
+          isfetched = true;
+          $('.popup').detach().appendTo('.header-inner');
+          var datas = $( "entry", xmlResponse ).map(function() {
+            return {
+              title: $( "title", this ).text(),
+              content: $("content",this).text(),
+              url: $( "url" , this).text()
+            };
+          }).get();
+          var $input = document.getElementById(search_id);
+          var $resultContent = document.getElementById(content_id);
+          $input.addEventListener('input', function(){
+            var matchcounts = 0;
+            var str='<ul class=\"search-result-list\">';
+            var keywords = this.value.trim().toLowerCase().split(/[\s\-]+/);
+            $resultContent.innerHTML = "";
+            if (this.value.trim().length > 1) {
+              // perform local searching
+              datas.forEach(function(data) {
+                var isMatch = false;
+                var content_index = [];
+                var data_title = data.title.trim().toLowerCase();
+                var data_content = data.content.trim().replace(/<[^>]+>/g,"").toLowerCase();
+                var data_url = decodeURIComponent(data.url);
+                var index_title = -1;
+                var index_content = -1;
+                var first_occur = -1;
+                // only match artiles with not empty titles and contents
+                if(data_title != '') {
+                  keywords.forEach(function(keyword, i) {
+                    index_title = data_title.indexOf(keyword);
+                    index_content = data_content.indexOf(keyword);
+                    if( index_title >= 0 || index_content >= 0 ){
+                      isMatch = true;
+                      if (i == 0) {
+                        first_occur = index_content;
+                      }
+                    }
+
+                  });
+                }
+                // show search results
+                if (isMatch) {
+                  matchcounts += 1;
+                  str += "<li><a href='"+ data_url +"' class='search-result-title'>"+ data_title +"</a>";
+                  var content = data.content.trim().replace(/<[^>]+>/g,"");
+                  if (first_occur >= 0) {
+                    // cut out 100 characters
+                    var start = first_occur - 20;
+                    var end = first_occur + 80;
+                    if(start < 0){
+                      start = 0;
+                    }
+                    if(start == 0){
+                      end = 50;
+                    }
+                    if(end > content.length){
+                      end = content.length;
+                    }
+                    var match_content = content.substring(start, end);
+                    // highlight all keywords
+                    keywords.forEach(function(keyword){
+                      var regS = new RegExp(keyword, "gi");
+                      match_content = match_content.replace(regS, "<b class=\"search-keyword\">"+keyword+"</b>");
+                    });
+
+                    str += "<p class=\"search-result\">" + match_content +"...</p>"
+                  }
+                  str += "</li>";
+                }
+              })};
+            str += "</ul>";
+            if (matchcounts == 0) { str = '<div id="no-result"><i class="fa fa-frown-o fa-5x" /></div>' }
+            if (keywords == "") { str = '<div id="no-result"><i class="fa fa-search fa-5x" /></div>' }
+            $resultContent.innerHTML = str;
+          });
+          proceedsearch();
+        }
+      });}
+
+    // handle and trigger popup window;
+    $('.popup-trigger').click(function(e) {
+      e.stopPropagation();
+      if (isfetched == false) {
+        searchFunc(path, 'local-search-input', 'local-search-result');
+      } else {
+        proceedsearch();
+      };
+    });
+
+    $('.popup-btn-close').click(function(e){
+      $('.popup').hide();
+      $(".local-search-pop-overlay").remove();
+      $('body').css('overflow', '');
+    });
+    $('.popup').click(function(e){
+      e.stopPropagation();
+    });
+  </script>
+
+
+
+
+
+  
+
+  
+
+  
+  
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Config({
+        tex2jax: {
+          inlineMath: [ ['$','$'], ["\\(","\\)"]  ],
+          processEscapes: true,
+          skipTags: ['script', 'noscript', 'style', 'textarea', 'pre', 'code']
+        }
+      });
+    </script>
+
+    <script type="text/x-mathjax-config">
+      MathJax.Hub.Queue(function() {
+        var all = MathJax.Hub.getAllJax(), i;
+        for (i=0; i < all.length; i += 1) {
+          all[i].SourceElement().parentNode.className += ' has-jax';
+        }
+      });
+    </script>
+    <script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+
+
+  
+
+
+  <script type="text/javascript" src="/js/src/particle.js" count="50" zindex="-2" opacity="1" color="0,104,183"></script>
+</body>
+</html>
