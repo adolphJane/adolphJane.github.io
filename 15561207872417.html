@@ -1,0 +1,707 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-玩转PathMeasure - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-玩转PathMeasure</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/10/31</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015906869351.gif" alt="20171109151015906869351.gif"/></p>
+
+<h2 id="toc_0">PathMeasure</h2>
+
+<p><strong>Public constructors</strong></p>
+
+<ul>
+<li>PathMeasure 创建一个空的 pathmeasure 对象</li>
+<li>PathMeasure(Path path,boolean forceClosed)创建一个带 path 参数的 PathMeasure,forceClosed控制 path 是否自动闭合</li>
+</ul>
+
+<p><strong>Public methods</strong></p>
+
+<ul>
+<li>getLength() 返回当前 Path 的总长度。</li>
+<li>getMatrix(float distance, Matrix matrix, int flags)</li>
+<li>getPosTan(float distance, float[] pos, float[] tan)获取distance长度的 point 值给 pos，point 点的正切值给 tan。</li>
+<li>getSegment(float startD, float stopD, Path dst, boolean startWithMoveTo) 获取 path 的一个片段，即startD到 stopD 的线段，辅助给 dst。</li>
+<li>isClosed() 是否自动闭合</li>
+<li>nextContour() 移动到下一条曲线。如果 path 中含有不连续的线条，getLength、getPosTan等方法之会在第一条线上运行，需要使用这个方法跳到第二条线</li>
+<li>setPath(Path path, boolean forceClosed)</li>
+</ul>
+
+<p>是不是很简单，就这么几个方法，现在去画光能使者阵有思路了么~~<br/>
+接下来为了便于大家理解，我们再来简单回顾一下 path 的 api，因为静态的光能使者阵是需要 path 去绘制的。</p>
+
+<p><strong>Path</strong></p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center">方法名</th>
+<th style="text-align: center">作用</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: center">moveTo</td>
+<td style="text-align: center">移动到指定点</td>
+</tr>
+<tr>
+<td style="text-align: center">setLastPoint</td>
+<td style="text-align: center">重新设置当前Path的最后一个点，如果当前Path为空，则等同上个方法</td>
+</tr>
+<tr>
+<td style="text-align: center">lineTo</td>
+<td style="text-align: center">添加当前点到一个指定点的直线</td>
+</tr>
+<tr>
+<td style="text-align: center">close</td>
+<td style="text-align: center">连接当前点到起点，形成闭合路径</td>
+</tr>
+<tr>
+<td style="text-align: center">addRect、addRoundRect、addOval、addCircle、addPath、addArc、arcTo</td>
+<td style="text-align: center">添加各种图形</td>
+</tr>
+<tr>
+<td style="text-align: center">isEmpty</td>
+<td style="text-align: center">是否为空</td>
+</tr>
+<tr>
+<td style="text-align: center">isRect</td>
+<td style="text-align: center">是否为矩形</td>
+</tr>
+<tr>
+<td style="text-align: center">set</td>
+<td style="text-align: center">用一个新的path替换</td>
+</tr>
+<tr>
+<td style="text-align: center">offset</td>
+<td style="text-align: center">对当前的路径进行偏移，不会影响后续操作</td>
+</tr>
+<tr>
+<td style="text-align: center">quadTo、cubicTo</td>
+<td style="text-align: center">贝塞尔曲线</td>
+</tr>
+<tr>
+<td style="text-align: center">rMoveTo、rLineTo、rQuaTo、rCubicTo</td>
+<td style="text-align: center">带r的是基于当前点的偏移量，不带r基于坐标原点</td>
+</tr>
+<tr>
+<td style="text-align: center">setFillType、getFillType</td>
+<td style="text-align: center">设置填充模式</td>
+</tr>
+<tr>
+<td style="text-align: center">transform</td>
+<td style="text-align: center">矩阵变换</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_1">动画拆解</h2>
+
+<p>好了，准备工作完成，我们开始撸代码</p>
+
+<p><strong>第一步，绘制静态的光能使者阵</strong><br/>
+首先绘制两个圆，然后就是中间的六角星（其实仔细看就是两个三角形）。<br/>
+都是很简单的方法，同学们动手去画的时候可能会遇到一个这样的问题，就是三角形的三个点不好取。其实很简单，直接在圆上取0，1/3，2/3长度的点即可，刚刚我们不是说了 PathMeasure 的方法么，用getPosTan就可以实现。</p>
+
+<p><strong>第二步，让光能使者阵动起来</strong><br/>
+这里我们把这个动画效果分成三个阶段吧。</p>
+
+<p><strong>第一阶段，绘制两个圆</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015971189141.gif" alt="20171109151015971189141.gif"/></p>
+
+<p>如上图所示，这里两个圆是慢慢绘制出来的， 圆的 path 很容易绘制出来，这里我就不讲了，然后PathMeasure的getLength可以获取 path 总的长度，getSegment可以获取某个点到某个点的 Path。因此一个 ValueAnimator 就可以解决从0到100%长度的过程，具体实现看后面的代码。</p>
+
+<p>然后问题来了，path画出来的圆的起点在哪里？怎么控制两个圆开始绘制的角度不一样。有同学可能想到了旋转90°再画第二个圆，当然这种方式是可以实现的，但是由于后面的三角形也需要旋转，这里我们就不用 path 画圆了，用 path 添加一个正方形 Rect 的圆弧也是一个圆，然后我们的圆弧可以控制开始的角度，弧度。<br/>
+然后变成这样了</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015974099352.gif" alt="20171109151015974099352.gif"/></p>
+
+<p>WTF？角度怎么不对了，我明明设置的开始角度的呀</p>
+
+<pre><code class="language-text">innerCircle.addArc(innerRect, 150, -360);
+outerCircle.addArc(outerRect, 60, -360);
+</code></pre>
+
+<p>最后有个大牛说你的圆变成闭环了，PathMeasure 找不到开始点，用了默认的。你把360度改成359.9让他不是一个闭环的圆就行了。</p>
+
+<p><strong>第二阶段，两个点在圆里面弹射</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015979584476.gif" alt="20171109151015979584476.gif"/></p>
+
+<p>看起来好像还要干什么碰撞反弹之类的事，一副高科技的样子，其实不是的。</p>
+
+<p>轨迹就是两个三角形，怎么让两条线跟着三角形走呢，而且走的时候还要不段变化长度。</p>
+
+<p>刚刚第一步我们用 ValueAnimator 来控制一个圆从0到100%的过程，</p>
+
+<p><code>pathMeasure.getSegment(0, distance * pathMeasure.getLength(), drawPath, true);</code></p>
+
+<p>不断截取起点到*%长度的 path 赋值给drawPath。</p>
+
+<p>从里是从起点开始截取，那么我们不从起点开始截取，从当前点附近开始截取不就行了吗，哈哈哈哈~so easy</p>
+
+<pre><code class="language-text">float stopD = distance * pathMeasure.getLength();
+float startD = stopD - (0.5f - Math.abs(0.5f - distance)) * 200;
+pathMeasure.getSegment(startD, stopD, drawPath, true);
+</code></pre>
+
+<p><strong>第三阶段绘制两个三角形</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015984291399.gif" alt="20171109151015984291399.gif"/></p>
+
+<p>其实两个三角形就是第二步的运动轨迹，也是就是说直接用第阶段的 Path 即可，然后再用第一阶段一样的办法就可以实现效果。</p>
+
+<h2 id="toc_2">代码实现</h2>
+
+<pre><code class="language-java">public class GranzortView extends View {
+    private Paint paint;
+    private Path innerCircle;//内圆 path
+    private Path outerCircle;//外圆 path
+    private Path trangle1;  //第一个三角形的path
+    private Path trangle2;  //第二个三角形的path
+    private Path drawPath;  //用于截取路径的path
+
+    private PathMeasure pathMeasure;
+
+    private float mViewWidth;
+    private float mViewHeight;
+
+    private long duration = 3000;
+    private ValueAnimator valueAnimator;
+
+    private Handler mHandler;
+
+    private float distance;//当前动画执行的百分比取值为0~1
+    private ValueAnimator.AnimatorUpdateListener animatorUpdateListener;
+    private Animator.AnimatorListener animatorListener;
+
+    private State mCurrentState = State.CIRCLE_STATE;
+
+    public GranzortView(Context context) {
+        this(context,null);
+    }
+
+    public GranzortView(Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs,0);
+    }
+
+    public GranzortView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    //三个阶段的枚举
+    private enum State {
+        CIRCLE_STATE,
+        TRANGLE_STATE,
+        FINISH_STATE
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mViewWidth = w;
+        mViewHeight = h;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        canvas.drawColor(getResources().getColor(R.color.colorPrimary));
+        canvas.save();
+        canvas.translate(mViewWidth / 2, mViewHeight / 2);
+        switch (mCurrentState){
+            case CIRCLE_STATE:
+                drawPath.reset();
+                pathMeasure.setPath(innerCircle,false);
+                pathMeasure.getSegment(0,distance * pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                pathMeasure.setPath(outerCircle,false);
+                drawPath.reset();
+                pathMeasure.getSegment(0,distance * pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                break;
+            case TRANGLE_STATE:
+                canvas.drawPath(innerCircle,paint);
+                canvas.drawPath(outerCircle,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle1,false);
+                float stopD = distance * pathMeasure.getLength();
+                float startD = stopD - (0.5f - Math.abs(0.5f - distance)) * 200;
+                pathMeasure.getSegment(startD,stopD,drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle2,false);
+                pathMeasure.getSegment(startD,stopD,drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                break;
+            case FINISH_STATE:
+                canvas.drawPath(innerCircle,paint);
+                canvas.drawPath(outerCircle,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle1,false);
+                pathMeasure.getSegment(0, distance * pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle2,false);
+                pathMeasure.getSegment(0,distance*pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                break;
+        }
+        canvas.restore();
+    }
+
+    private void init(){
+        initPaint();
+        initPath();
+        initHandler();
+        initAnimatorListener();
+        initAnimator();
+        mCurrentState = State.CIRCLE_STATE;
+        valueAnimator.start();
+    }
+
+    private void initHandler(){
+        mHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                switch (mCurrentState){
+                    case CIRCLE_STATE:
+                        mCurrentState = State.TRANGLE_STATE;
+                        valueAnimator.start();
+                        break;
+                    case TRANGLE_STATE:
+                        mCurrentState = State.FINISH_STATE;
+                        valueAnimator.start();
+                        break;
+                }
+            }
+        };
+    }
+
+    private void initAnimatorListener(){
+        animatorUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                distance = animation.getAnimatedValue();
+                invalidate();
+            }
+        };
+
+        animatorListener = new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                Log.e(&quot;start&quot;,mCurrentState + &quot;_&quot;);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Log.e(&quot;end&quot;,mCurrentState+&quot;_&quot;);
+                mHandler.sendEmptyMessage(0);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        }
+    }
+
+    private void initAnimator(){
+        valueAnimator = ValueAnimator.ofFloat(0,1).setDuration(duration);
+        valueAnimator.addUpdateListener(animatorUpdateListener);
+        valueAnimator.addListener(animatorListener);
+    }
+
+    private void initPath(){
+        innerCircle = new Path();
+        outerCircle = new Path();
+        trangle1 = new Path();
+        trangle2 = new Path();
+        drawPath = new Path();
+
+        pathMeasure = new PathMeasure();
+        RectF innerRect = new RectF(-220,-220,220,220);
+        RectF outerRect = new RectF(-280,-280,280,280);
+        innerCircle.addArc(innerRect,150,-359.9f);//不能取360f，否则可能造成测量到的值不准确
+        outerCircle.addArc(outerRect,60,-359.9f);
+
+        pathMeasure.setPath(innerCircle,false);
+
+        float[] pos = new float[2];
+        pathMeasure.getPosTan(0,pos,null);//获取开始位置的坐标
+        trangle1.moveTo(pos[0],pos[1]);
+        pathMeasure.getPosTan((1f / 3f) * pathMeasure.getLength(),pos,null);
+
+        trangle1.lineTo(pos[0],pos[1]);
+        pathMeasure.getPosTan((2f / 3f)*pathMeasure.getLength(),pos,null);
+        trangle1.lineTo(pos[0],pos[1]);
+        trangle1.close();
+
+        pathMeasure.getPosTan((2f / 3f) * pathMeasure.getLength(),pos,null);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(-180);
+        trangle1.transform(matrix,trangle2);
+    }
+
+    private void initPaint(){
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(10);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.BEVEL);
+        paint.setShadowLayer(15,0,0,Color.WHITE);//白色光影效果
+    }
+}
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207872581.html" 
+          title="Previous Post: Android-手势检测GestureDetector全面分析">&laquo; Android-手势检测GestureDetector全面分析</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207872454.html" 
+          title="Next Post: Android-视频播放器开发">Android-视频播放器开发 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

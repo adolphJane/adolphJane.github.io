@@ -1,0 +1,1697 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-Gson详细学习 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-Gson详细学习</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/7/27</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">前言</h2>
+
+<p>最近在项目中发现网络请求回来的Json数据都用Gson进行解析，以前没有对其进行一个系统的了解，所以这里做一个知识点的归纳整理。</p>
+
+<p>Gson（又称Google Gson）是Google公司发布的一个开放源代码的Java库，主要用途为序列化Java对象为JSON字符串，或反序列化JSON字符串成Java对象。而JSON(JavaScript Object Notation) 是一种轻量级的数据交换格式，易于人阅读和编写，同时也易于机器解析和生成，广泛应用于各种数据的交互中，尤其是服务器与客户端的交互。</p>
+
+<h2 id="toc_1">基本概念</h2>
+
+<ul>
+<li>Serialization:序列化，使Java对象到Json字符串的过程。</li>
+<li>Deserialization：反序列化，字符串转换成Java对象。</li>
+<li>JSON数据中的<code>JsonElement</code>有下面这四种类型：  JsonPrimitive —— 例如一个字符串或整型JsonObject—— 一个以 JsonElement 名字（类型为           String）作为索引的集合。也就是说可以把 JsonObject 看作值为 JsonElement 的键值对集合。JsonArray—— JsonElement 的集合。注意数组的元素可以是四种类型中的任意一种，或者混合类型都支持。JsonNull—— 值为null</li>
+</ul>
+
+<h2 id="toc_2">Gson解决的问题</h2>
+
+<ul>
+<li>提供一种像toString()和构造方法的很简单的机制，来实现Java 对象和Json之间的互相转换。</li>
+<li>允许已经存在的无法改变的对象，转换成Json，或者Json转换成已存在的对象。</li>
+<li>允许自定义对象的表现形式</li>
+<li>支持任意的复杂对象</li>
+<li>能够生成可压缩和可读的Json的字符串输出。</li>
+</ul>
+
+<h2 id="toc_3">Gson处理对象的几个重要点</h2>
+
+<ul>
+<li>推荐把成员变量都声明称<code>private</code>的</li>
+<li>没有必要用注解（<code>@Expose</code> 注解）指明某个字段是否会被序列化或者反序列化，所有包含在当前类（包括父类）中的字段都应该默认被序列化或者反序列化</li>
+<li>如果某个字段被 <code>transient</code> 这个Java关键词修饰，就不会被序列化或者反序列化</li>
+<li>下面的实现方式能够正确的处理<code>null</code>
+<ul>
+<li>当序列化的时候，如果对象的某个字段为<code>null</code>，是不会输出到Json字符串中的。</li>
+<li>当反序列化的时候，某个字段在<code>Json</code>字符串中找不到对应的值，就会被赋值为<code>null</code></li>
+</ul></li>
+<li>如果一个字段是 <code>synthetic</code>的,他会被忽视，也即是不应该被序列化或者反序列化</li>
+<li>内部类（或者<code>anonymous class</code>（匿名类），或者<code>local class</code>(局部类，可以理解为在方法内部声明的类)）的某个字段和外部类的某个字段一样的话，就会被忽视，不会被序列化或者反序列化</li>
+</ul>
+
+<h2 id="toc_4">Gson的基本用法</h2>
+
+<p>Gson提供了<code>fromJson()</code> 和<code>toJson()</code>两个直接用于解析和生成的方法，前者实现反序列化，后者实现了序列化。同时每个方法都提供了重载方法，我常用的总共有5个。</p>
+
+<p>基本数据类型的解析</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+int i = gson.fromJson(&quot;100&quot;, int.class);              //100
+double d = gson.fromJson(&quot;\&quot;99.99\&quot;&quot;, double.class);  //99.99
+boolean b = gson.fromJson(&quot;true&quot;, boolean.class);     // true
+String str = gson.fromJson(&quot;String&quot;, String.class);   // String
+</code></pre>
+
+<p><strong>注：不知道你是否注意到了第2、3行有什么不一样没</strong></p>
+
+<p>基本数据类型的生成</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+String jsonNumber = gson.toJson(100);       // 100
+String jsonBoolean = gson.toJson(false);    // false
+String jsonString = gson.toJson(&quot;String&quot;); //&quot;String&quot;
+</code></pre>
+
+<p>POJO类的生成与解析</p>
+
+<pre><code class="language-java">public class User {
+    //省略其它
+    public String name;
+    public int age;
+    public String emailAddress;
+}
+</code></pre>
+
+<p>生成JSON：</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+User user = new User(&quot;怪盗kidou&quot;,24);
+String jsonObject = gson.toJson(user); // {&quot;name&quot;:&quot;怪盗kidou&quot;,&quot;age&quot;:24}
+</code></pre>
+
+<p>解析JSON：</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+String jsonString = &quot;{\&quot;name\&quot;:\&quot;怪盗kidou\&quot;,\&quot;age\&quot;:24}&quot;;
+User user = gson.fromJson(jsonString, User.class);
+</code></pre>
+
+<h3 id="toc_5">Gson中使用泛型</h3>
+
+<p>上面了解的JSON中的Number、boolean、Object和String，现在说一下Array。<br/>
+例：JSON字符串数组</p>
+
+<pre><code class="language-java">[&quot;Android&quot;,&quot;Java&quot;,&quot;PHP&quot;]
+</code></pre>
+
+<p>当我们要通过Gson解析这个json时，一般有两种方式：使用数组，使用List。而List对于增删都是比较方便的，所以实际使用是还是List比较多。</p>
+
+<p>数组比较简单</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+String jsonArray = &quot;[\&quot;Android\&quot;,\&quot;Java\&quot;,\&quot;PHP\&quot;]&quot;;
+String[] strings = gson.fromJson(jsonArray, String[].class);
+</code></pre>
+
+<p>但对于List将上面的代码中的 <code>String[].class</code> 直接改为 <code>List&lt;String&gt;.class</code> 是行不通的。对于Java来说<code>List&lt;String&gt;</code> 和<code>List&lt;User&gt;</code> 这俩个的字节码文件只一个那就是<code>List.class</code>，这是Java泛型使用时要注意的问题 泛型擦除。<br/><br/>
+为了解决的上面的问题，Gson为我们提供了<code>TypeToken</code>来实现对泛型的支持，所以当我们希望使用将以上的数据解析<code>List&lt;String&gt;</code>时需要这样写。</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+String jsonArray = &quot;[\&quot;Android\&quot;,\&quot;Java\&quot;,\&quot;PHP\&quot;]&quot;;
+String[] strings = gson.fromJson(jsonArray, String[].class);
+List&lt;String&gt; stringList = gson.fromJson(jsonArray, new TypeToken&lt;List&lt;String&gt;&gt;() {}.getType());
+</code></pre>
+
+<p>注：<code>TypeToken</code>的构造方法是<code>protected</code>修饰的,所以上面才会写成<code>new TypeToken&lt;List&lt;String&gt;&gt;() {}.getType()</code> 而不是  <code>new TypeToken&lt;List&lt;String&gt;&gt;().getType()</code>泛型解析对接口POJO的设计影响泛型的引入可以减少无关的代码，如我现在所在公司接口返回的数据分为两类：</p>
+
+<pre><code class="language-javascript">{&quot;code&quot;:&quot;0&quot;,&quot;message&quot;:&quot;success&quot;,&quot;data&quot;:{}}
+</code></pre>
+
+<pre><code class="language-javascript">{&quot;code&quot;:&quot;0&quot;,&quot;message&quot;:&quot;success&quot;,&quot;data&quot;:[]}
+</code></pre>
+
+<p>我们真正需要的<code>data</code>所包含的数据，而<code>code</code>只使用一次，<code>message</code>则几乎不用。如果Gson不支持泛型或不知道Gson支持泛型的同学一定会这么定义POJO。</p>
+
+<pre><code class="language-java">public class UserResponse {
+    public int code;
+    public String message;
+    public User data;
+}
+</code></pre>
+
+<p>当其它接口的时候又重新定义一个<code>XXResponse</code>将<code>data</code>的类型改成XX，很明显<code>code</code>，和<code>message</code>被重复定义了多次，通过泛型的话我们可以将<code>code</code>和<code>message</code>字段抽取到一个<code>Result</code>的类中，这样我们只需要编写<code>data</code>字段所对应的POJO即可，更专注于我们的业务逻辑。如：</p>
+
+<pre><code class="language-java">public class Result&lt;T&gt; {
+    public int code;
+    public String message;
+    public T data;
+}
+</code></pre>
+
+<p>那么对于<code>data</code>字段是<code>User</code>时则可以写为 <code>Result&lt;User&gt;</code> ,当是个列表的时候为 <code>Result&lt;List&lt;User&gt;&gt;</code>，其它同理。</p>
+
+<h3 id="toc_6">手动方式</h3>
+
+<p>手动的方式就是使用<code>stream</code>包下的<code>JsonReader</code>类来手动实现反序列化，和Android中使用pull解析XML是比较类似的。</p>
+
+<pre><code class="language-java">String json = &quot;{\&quot;name\&quot;:\&quot;怪盗kidou\&quot;,\&quot;age\&quot;:\&quot;24\&quot;}&quot;;
+User user = new User();
+JsonReader reader = new JsonReader(new StringReader(json));
+reader.beginObject(); // throws IOException
+while (reader.hasNext()) {
+    String s = reader.nextName();
+    switch (s) {
+        case &quot;name&quot;:
+            user.name = reader.nextString();
+            break;
+        case &quot;age&quot;:
+            user.age = reader.nextInt(); //自动转换
+            break;
+        case &quot;email&quot;:
+            user.email = reader.nextString();
+            break;
+    }
+}
+reader.endObject(); // throws IOException
+System.out.println(user.name);  // 怪盗kidou
+System.out.println(user.age);   // 24
+System.out.println(user.email); // ikidou@example.com
+</code></pre>
+
+<p>其实自动方式最终都是通过<code>JsonReader</code>来实现的，如果第一个参数是<code>String</code>类型，那么Gson会创建一个<code>StringReader</code>转换成流操作。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101215077695811912.png" alt="2017101215077695811912.png"/></p>
+
+<h3 id="toc_7">Gson的流式序列化</h3>
+
+<h4 id="toc_8">自动方式</h4>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150776961842252.png" alt="20171012150776961842252.png"/></p>
+
+<p>所以啊，学会利用IDE的自动完成是多么重要这下知道了吧！<br/>
+可以看出用红框选中的部分就是我们要找的东西。<br/><br/>
+提示：<code>PrintStream</code>(System.out) 、<code>StringBuilder</code>、<code>StringBuffer</code>和<code>*Writer</code>都实现了<code>Appendable</code>接口。</p>
+
+<pre><code class="language-java">Gson gson = new Gson();
+User user = new User(&quot;怪盗kidou&quot;,24,&quot;ikidou@example.com&quot;);
+gson.toJson(user,System.out); // 写到控制台
+</code></pre>
+
+<h4 id="toc_9">手动方式</h4>
+
+<pre><code class="language-java">JsonWriter writer = new JsonWriter(new OutputStreamWriter(System.out));
+writer.beginObject() // throws IOException
+        .name(&quot;name&quot;).value(&quot;怪盗kidou&quot;)
+        .name(&quot;age&quot;).value(24)
+        .name(&quot;email&quot;).nullValue() //演示null
+        .endObject(); // throws IOException
+writer.flush(); // throws IOException
+//{&quot;name&quot;:&quot;怪盗kidou&quot;,&quot;age&quot;:24,&quot;email&quot;:null}
+</code></pre>
+
+<p>提示：除了<code>beginObject</code>、<code>endObject</code>还有<code>beginArray</code>和<code>endArray</code>，两者可以相互嵌套，注意配对即可。<code>beginArray</code>后不可以调用<code>name</code>方法，同样<code>beginObject</code>后在调用<code>value</code>之前必须要调用<code>name</code>方法。</p>
+
+<h3 id="toc_10">使用GsonBuilder导出null值、格式化输出、日期时间</h3>
+
+<p>一般情况下<code>Gson</code>类提供的 API已经能满足大部分的使用场景，但我们需要更多更特殊、更强大的功能时，这时候就引入一个新的类 <code>GsonBuilder</code>。<br/>
+<code>GsonBuilder</code>从名上也能知道是用于构建Gson实例的一个类，要想改变Gson默认的设置必须使用该类配置Gson。</p>
+
+<h4 id="toc_11"><strong>GsonBuilder用法</strong></h4>
+
+<pre><code class="language-java">Gson gson = new GsonBuilder()
+               //各种配置
+               .create(); //生成配置好的Gson
+</code></pre>
+
+<p>Gson在默认情况下是不动导出值<code>null</code>的键的，如：</p>
+
+<pre><code class="language-java">public class User {
+    //省略其它
+    public String name;
+    public int age;
+    public String email;
+}
+</code></pre>
+
+<pre><code class="language-java">Gson gson = new Gson();
+User user = new User(&quot;怪盗kidou&quot;,24);
+System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quot;,&quot;age&quot;:24}
+</code></pre>
+
+<p>可以看出，<code>email</code>字段是没有在json中出现的，当我们在调试是、需要导出完整的json串时或API接中要求没有值必须用Null时，就会比较有用。</p>
+
+<p>使用方法：</p>
+
+<pre><code class="language-java">Gson gson = new GsonBuilder()
+        .serializeNulls()
+        .create();
+User user = new User(&quot;怪盗kidou&quot;, 24);
+System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quot;,&quot;age&quot;:24,&quot;email&quot;:null}
+</code></pre>
+
+<h4 id="toc_12">格式化输出、日期时间及其它：</h4>
+
+<p>这些都比较简单就不一一分开写了。</p>
+
+<pre><code class="language-java">Gson gson = new GsonBuilder()
+        //序列化null
+        .serializeNulls()
+        // 设置日期时间格式，另有2个重载方法
+        // 在序列化和反序化时均生效
+        .setDateFormat(&quot;yyyy-MM-dd&quot;)
+        // 禁此序列化内部类
+        .disableInnerClassSerialization()
+        //生成不可执行的Json（多了 )]}&#39; 这4个字符）
+        .generateNonExecutableJson()
+        //禁止转义html标签
+        .disableHtmlEscaping()
+        //格式化输出
+        .setPrettyPrinting()
+        .create();
+</code></pre>
+
+<p>注意：内部类(Inner Class)和嵌套类(Nested Class)的区别</p>
+
+<h2 id="toc_13">Gson中的一些注解</h2>
+
+<h3 id="toc_14">@SerializedName注解</h3>
+
+<p>该注解能指定该字段在JSON中对应的字段名称</p>
+
+<pre><code class="language-java">public class Box {
+
+  @SerializedName(&quot;w&quot;)
+  private int width;
+
+  @SerializedName(&quot;h&quot;)
+  private int height;
+
+  @SerializedName(&quot;d&quot;)
+  private int depth;
+
+  // Methods removed for brevity
+}
+</code></pre>
+
+<p>也就是说<code>{&quot;w&quot;:10,&quot;h&quot;:20,&quot;d&quot;:30}</code> 这个JSON 字符串能够被解析到上面的width，height和depth字段中。</p>
+
+<h3 id="toc_15">@Expose注解</h3>
+
+<p>该注解能够指定该字段是否能够序列化或者反序列化，默认的是都支持（true）。简单说来就是需要导出的字段上加上@Expose 注解，不导出的字段不加。注意是不导出的不加。</p>
+
+<pre><code class="language-java">public class Account {
+
+  @Expose(deserialize = false)
+  private String accountNumber;
+
+  @Expose
+  private String iban;
+
+  @Expose(serialize = false)
+  private String owner;
+
+  @Expose(serialize = false, deserialize = false)
+  private String address;
+
+  private String pin;
+}
+</code></pre>
+
+<p>该注解在使用<code>new Gson()</code> 时是不会发生作用。毕竟最常用的API要最简单，所以该注解必须和<code>GsonBuilder</code>配合使用。需要注意的通过 <code>builder.excludeFieldsWithoutExposeAnnotation()</code>方法使该注解生效。</p>
+
+<pre><code class="language-java">final GsonBuilder builder = new GsonBuilder();
+builder.excludeFieldsWithoutExposeAnnotation();
+final Gson gson = builder.create();
+</code></pre>
+
+<h3 id="toc_16">@Since和@Until注解</h3>
+
+<p>Since代表“自从”，Until 代表”一直到”。它们都是针对该字段生效的版本。比如说<code>@Since(1.2)</code>代表从版本1.2之后才生效，<code>@Until(0.9)</code>代表着在0.9版本之前都是生效的。</p>
+
+<pre><code class="language-java">public class SoccerPlayer {
+
+  private String name;
+
+  @Since(1.2)
+  private int shirtNumber;
+
+  @Until(0.9)
+  private String country;
+
+  private String teamName;
+
+  // Methods removed for brevity
+}
+</code></pre>
+
+<p>也就是说我们利用方法<code>builder.setVersion(1.0)</code>定义版本1.0，如下：</p>
+
+<pre><code class="language-java">final GsonBuilder builder = new GsonBuilder();
+    builder.setVersion(1.0);
+
+    final Gson gson = builder.create();
+
+    final SoccerPlayer account = new SoccerPlayer();
+    account.setName(&quot;Albert Attard&quot;);
+    account.setShirtNumber(10); // Since version 1.2
+    account.setTeamName(&quot;Zejtun Corinthians&quot;);
+    account.setCountry(&quot;Malta&quot;); // Until version 0.9
+
+    final String json = gson.toJson(account);
+    System.out.printf(&quot;Serialised (version 1.0)%n  %s%n&quot;, json);
+</code></pre>
+
+<p>由于<code>shirtNumber</code>和<code>country</code>作用版本分别是1.2之后，和0.9之前，所以在这里都不会得到序列化，所以输出结果是：</p>
+
+<pre><code class="language-java">Serialised (version 1.0)
+  {&quot;name&quot;:&quot;Albert Attard&quot;,&quot;teamName&quot;:&quot;Zejtun Corinthians&quot;}
+</code></pre>
+
+<h4 id="toc_17">基于访问修饰符</h4>
+
+<p>什么是修饰符? <code>public</code>、<code>static</code> 、<code>final</code>、<code>private</code>、<code>protected</code> 这些就是，所以这种方式也是比较特殊的。使用方式：</p>
+
+<pre><code class="language-java">class ModifierSample {
+    final String finalField = &quot;final&quot;;
+    static String staticField = &quot;static&quot;;
+    public String publicField = &quot;public&quot;;
+    protected String protectedField = &quot;protected&quot;;
+    String defaultField = &quot;default&quot;;
+    private String privateField = &quot;private&quot;;
+}
+</code></pre>
+
+<p>使用<code>GsonBuilder.excludeFieldsWithModifiers</code>构建gson,支持<code>int</code>形的可变参数，值由<code>java.lang.reflect.Modifier</code>提供，下面的程序排除了<code>privateField</code> 、 <code>finalField</code> 和<code>staticField</code> 三个字段。</p>
+
+<pre><code class="language-java">ModifierSample modifierSample = new ModifierSample();
+Gson gson = new GsonBuilder()
+        .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.STATIC, Modifier.PRIVATE)
+        .create();
+System.out.println(gson.toJson(modifierSample));
+// 结果：{&quot;publicField&quot;:&quot;public&quot;,&quot;protectedField&quot;:&quot;protected&quot;,&quot;defaultField&quot;:&quot;default&quot;}
+</code></pre>
+
+<p>到此为止，Gson提供的所有注解就还有一个<code>@JsonAdapter</code>没有介绍了，而<code>@JsonAdapter</code>将和<code>TypeAdapter</code>将作为该系列第4篇也是最后一篇文章的主要内容。</p>
+
+<h4 id="toc_18">基于策略（自定义规则）</h4>
+
+<p>上面介绍的了3种排除字段的方法，说实话我除了@Expose以外，其它的都是只在Demo用上过，用得最多的就是马上要介绍的自定义规则，好处是功能强大、灵活，缺点是相比其它3种方法稍麻烦一点，但也仅仅只是想对其它3种稍麻烦一点而已。</p>
+
+<p>基于策略是利用Gson提供的<code>ExclusionStrategy</code>接口，同样需要使用<code>GsonBuilder</code>,相关API 2个，分别是<code>addSerializationExclusionStrategy</code> 和<code>addDeserializationExclusionStrategy</code> 分别针对序列化和反序化时。这里以序列化为例。<br/><br/>
+例如：</p>
+
+<pre><code class="language-java">Gson gson = new GsonBuilder()
+        .addSerializationExclusionStrategy(new ExclusionStrategy() {
+            @Override
+            public boolean shouldSkipField(FieldAttributes f) {
+                // 这里作判断，决定要不要排除该字段,return true为排除
+                if (&quot;finalField&quot;.equals(f.getName())) return true; //按字段名排除
+                Expose expose = f.getAnnotation(Expose.class); 
+                if (expose != null &amp;&amp; expose.deserialize() == false) return true; //按注解排除
+                return false;
+            }
+            @Override
+            public boolean shouldSkipClass(Class&lt;?&gt; clazz) {
+                // 直接排除某个类 ，return true为排除
+                return (clazz == int.class || clazz == Integer.class);
+            }
+        })
+        .create();
+</code></pre>
+
+<h2 id="toc_19">POJO与JSON的字段映射规则</h2>
+
+<p>还是之前User的例子，已经去除所有注解：</p>
+
+<pre><code class="language-java">User user = new User(&quot;怪盗kidou&quot;, 24);
+user.emailAddress = &quot;ikidou@example.com&quot;;
+</code></pre>
+
+<p><code>GsonBuilder</code>提供了<code>FieldNamingStrategy</code>接口和<code>setFieldNamingPolicy</code>和<code>setFieldNamingStrategy</code> 两个方法。</p>
+
+<p><strong>默认实现</strong><br/>
+<code>GsonBuilder.setFieldNamingPolicy</code> 方法与Gson提供的另一个枚举类<code>FieldNamingPolicy</code>配合使用，该枚举类提供了5种实现方式分别为：</p>
+
+<table>
+<thead>
+<tr>
+<th>FieldNamingPolicy</th>
+<th>结果（仅输出emailAddress字段）</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>IDENTITY</td>
+<td>{&quot;emailAddress&quot;:&quot;<a href="mailto:ikidou@example.com">ikidou@example.com</a>&quot;}</td>
+</tr>
+<tr>
+<td>LOWER_CASE_WITH_DASHES</td>
+<td>{&quot;email-address&quot;:&quot;<a href="mailto:ikidou@example.com">ikidou@example.com</a>&quot;}</td>
+</tr>
+<tr>
+<td>LOWER_CASE_WITH_UNDERSCORES</td>
+<td>{&quot;email_address&quot;:&quot;<a href="mailto:ikidou@example.com">ikidou@example.com</a>&quot;}</td>
+</tr>
+<tr>
+<td>UPPER_CAMEL_CASE</td>
+<td>{&quot;EmailAddress&quot;:&quot;<a href="mailto:ikidou@example.com">ikidou@example.com</a>&quot;}</td>
+</tr>
+<tr>
+<td>UPPER_CAMEL_CASE_WITH_SPACES</td>
+<td>{&quot;Email Address&quot;:&quot;<a href="mailto:ikidou@example.com">ikidou@example.com</a>&quot;}</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>自定义实现</strong><br/>
+<code>GsonBuilder.setFieldNamingStrategy</code> 方法需要与Gson提供的<code>FieldNamingStrategy</code>接口配合使用，用于实现将POJO的字段与JSON的字段相对应。上面的<code>FieldNamingPolicy</code>实际上也实现了<code>FieldNamingStrategy</code>接口，也就是说<code>FieldNamingPolicy</code>也可以使用<code>setFieldNamingStrategy</code>方法。</p>
+
+<p>用法：</p>
+
+<pre><code class="language-java">Gson gson = new GsonBuilder()
+        .setFieldNamingStrategy(new FieldNamingStrategy() {
+            @Override
+            public String translateName(Field f) {
+                //实现自己的规则
+                return null;
+            }
+        })
+        .create();
+</code></pre>
+
+<p><strong>注意：</strong> <code>@SerializedName</code>注解拥有最高优先级，在加有<code>@SerializedName</code>注解的字段上<code>FieldNamingStrategy</code>不生效！</p>
+
+<h2 id="toc_20">Gson 序列化</h2>
+
+<p>英文Serialize和format都对应序列化，这是一个Java对象到JSON字符串的过程。接着看一个例子,下面分别是java类和以及我们期望的JSON数据：</p>
+
+<pre><code class="language-java">public class Book {
+  private String[] authors;
+  private String isbn10;
+  private String isbn13;
+  private String title;
+  //为了代码简洁，这里移除getter和setter方法等
+}
+</code></pre>
+
+<pre><code class="language-javascript">{
+  &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
+  &quot;isbn-10&quot;: &quot;032133678X&quot;,
+  &quot;isbn-13&quot;: &quot;978-0321336781&quot;,
+  &quot;authors&quot;: [
+    &quot;Joshua Bloch&quot;,
+    &quot;Neal Gafter&quot;
+  ]
+}
+</code></pre>
+
+<p>你肯定能发现JSON数据中出现了<code>isbn-10</code>和<code>isbn-13</code>, 我们怎么把字段数据<code>isbn10</code>和<code>isbn13</code>转化为JSON数据需要的<code>isbn-10</code>和<code>isbn-13</code>,Gson当然为我们提供了对应的解决方案</p>
+
+<h3 id="toc_21">序列化方案1</h3>
+
+<p>采用上面提到的<code>@SerializedName</code>注解。</p>
+
+<pre><code class="language-java">public class Book {
+  private String[] authors;
+
+  @SerializedName(&quot;isbn-10&quot;)
+  private String isbn10;
+
+  @SerializedName(&quot;isbn-13&quot;)
+  private String isbn13;
+  private String title;
+  //为了代码简洁，这里移除getter和setter方法等
+}
+</code></pre>
+
+<h3 id="toc_22">序列化方案2</h3>
+
+<p>利用<code>JsonSerializer</code>类</p>
+
+<pre><code class="language-java">public class BookSerialiser implements JsonSerializer {
+    @Override
+    public JsonElement serialize(final Book book, final Type typeOfSrc, final JsonSerializationContext context) {
+
+        final JsonObject jsonObject = new JsonObject();
+        jsonObject.addProperty(&quot;title&quot;, book.getTitle());
+        jsonObject.addProperty(&quot;isbn-10&quot;, book.getIsbn10());
+        jsonObject.addProperty(&quot;isbn-13&quot;, book.getIsbn13());
+
+        final JsonArray jsonAuthorsArray = new JsonArray();
+        for (final String author : book.getAuthors()) {
+            final JsonPrimitive jsonAuthor = new JsonPrimitive(author);
+            jsonAuthorsArray.add(jsonAuthor);
+        }
+        jsonObject.add(&quot;authors&quot;, jsonAuthorsArray);
+
+        return jsonObject;
+    }
+}
+</code></pre>
+
+<p>下面对序列化过程进行大致的分析：</p>
+
+<ul>
+<li>JsonSerializer是一个接口，我们需要提供自己的实现，来满足自己的序列化要求。</li>
+</ul>
+
+<pre><code class="language-java">public interface JsonSerializer&lt;T&gt; {
+
+/**
+ *Gson 会在解析指定类型T数据的时候触发当前回调方法进行序列化
+ *
+ * @param T 需要转化为Json数据的类型，对应上面的Book
+ * @return 返回T指定的类对应JsonElement
+ */
+public JsonElement serialize(T src, Type typeOfSrc, JsonSerializationContext context);
+}
+</code></pre>
+
+<ul>
+<li>首先在上面的代码中，我们需要创建的是一个JsonElement对象，这里对应Book是一个对象，所以创建一个JsonObject类型。<br/>
+<code>final JsonObject jsonObject = new JsonObject();</code></li>
+<li>然后我们将相应字段里面的数据填充到jsonObject里面。<br/>
+<code>java
+jsonObject.addProperty...<br/>
+jsonObject.add...
+</code></li>
+<li>下面是jsonObject中的添加方法：<code>jsonObj.add(String property,JsonElement value)</code></li>
+<li>所以最后返回的还是一个JsonElement 类型，这里对应的是jsonObject。完成了javaBean-&gt;JSON数据的转化。 </li>
+<li>同样需要配置, </li>
+</ul>
+
+<pre><code class="language-java">// Configure GSON
+  final GsonBuilder gsonBuilder = new GsonBuilder();
+  gsonBuilder.registerTypeAdapter(Book.class, new BookSerialiser());
+  gsonBuilder.setPrettyPrinting();
+  final Gson gson = gsonBuilder.create();
+
+  final Book javaPuzzlers = new Book();
+  javaPuzzlers.setTitle(&quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;);
+  javaPuzzlers.setIsbn10(&quot;032133678X&quot;);
+  javaPuzzlers.setIsbn13(&quot;978-0321336781&quot;);
+  javaPuzzlers.setAuthors(new String[] { &quot;Joshua Bloch&quot;, &quot;Neal Gafter&quot; });
+
+  // Format to JSON
+  final String json = gson.toJson(javaPuzzlers);
+  System.out.println(json);
+</code></pre>
+
+<p>，这里对应的是<code>gsonBuilder.registerTypeAdapter(Book.class, new BookSerialiser())</code>方法进行JsonSerializer的配置。在上面例子中，通过调用<code>gsonBuilder.setPrettyPrinting();</code>方法还告诉了 Gson 对生成的 JSON 对象进行格式化</p>
+
+<h2 id="toc_23">Gson 反序列化</h2>
+
+<p>英文<code>parse</code>和<code>deserialise</code>对应反序列化，这是一个字符串转换成Java对象的过程。我们同样采用上面一小节的代码片段，只不过现在我们需要做的是将：</p>
+
+<pre><code class="language-javascript">{
+  &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
+  &quot;isbn-10&quot;: &quot;032133678X&quot;,
+  &quot;isbn-13&quot;: &quot;978-0321336781&quot;,
+  &quot;authors&quot;: [
+    &quot;Joshua Bloch&quot;,
+    &quot;Neal Gafter&quot;
+  ]
+}
+</code></pre>
+
+<p>转化为对应的Book实体类。</p>
+
+<h3 id="toc_24">反序列化方案1</h3>
+
+<p>利用<code>@SerializedName</code> 注解也就是说我们的实体类Book.java可以这么写：</p>
+
+<pre><code class="language-java">public class Book {
+  private String[] authors;
+
+  @SerializedName(&quot;isbn-10&quot;)
+  private String isbn10;
+
+  @SerializedName(value = &quot;isbn-13&quot;, alternate = {&quot;isbn13&quot;,&quot;isbn.13&quot;})
+  private String isbn13;
+  private String title;
+  //为了代码简洁，这里移除getter和setter方法等
+}
+</code></pre>
+
+<blockquote>
+<p>可以看到这里我们在<code>@SerializedName</code>  注解使用了一个<code>value</code>, <code>alternate</code>字段,<code>value</code>也就是默认的字段，对序列化和反序列化都有效，<code>alternate</code>只有反序列化才有效果。也就是说一般服务器返回给我们JSON数据的时候可能同样的一个图片，表示&quot;image&quot;,&quot;img&quot;,&quot;icon&quot;等备选属性名，我们利用<code>@SerializedName</code>  中的<code>alternate</code>字段就能解决这个问题，全部转化为我们实体类中的图片字段。</p>
+</blockquote>
+
+<h3 id="toc_25">反序列化方案2</h3>
+
+<p>我们在序列化的时候使用的是<code>JsonSerialize</code> ,这里对应使用<code>JsonDeserializer</code>我们将解析到的json数据传递给Book的setter方法即可。</p>
+
+<pre><code class="language-java">public class BookDeserializer implements JsonDeserializer&lt;Book&gt; {
+
+  @Override
+  public Book deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
+      throws JsonParseException {
+    final JsonObject jsonObject = json.getAsJsonObject();
+
+    final JsonElement jsonTitle = jsonObject.get(&quot;title&quot;);
+    final String title = jsonTitle.getAsString();
+
+    final String isbn10 = jsonObject.get(&quot;isbn-10&quot;).getAsString();
+    final String isbn13 = jsonObject.get(&quot;isbn-13&quot;).getAsString();
+
+    final JsonArray jsonAuthorsArray = jsonObject.get(&quot;authors&quot;).getAsJsonArray();
+    final String[] authors = new String[jsonAuthorsArray.size()];
+    for (int i = 0; i &lt; authors.length; i++) {
+      final JsonElement jsonAuthor = jsonAuthorsArray.get(i);
+      authors[i] = jsonAuthor.getAsString();
+    }
+
+    final Book book = new Book();
+    book.setTitle(title);
+    book.setIsbn10(isbn10);
+    book.setIsbn13(isbn13);
+    book.setAuthors(authors);
+    return book;
+  }
+}
+</code></pre>
+
+<p>和Gson序列化章节一样，我们这里接着分析我们是怎么将JSON数据解析（反序列化）为实体类的：</p>
+
+<ul>
+<li>因为我们可以发现上面的JSON数据是一个<code>{}</code>大括号包围的，也就意味着这是一个Json对象。所以首先我们通过<code>final JsonObject jsonObject = json.getAsJsonObject();</code>将我们的JsonElement转化为JsonObject</li>
+<li>通过<code>jsonObject.get(&quot;xxx&quot;).getAsString()</code>的形式获取相应String的值</li>
+<li>通过<code>jsonObject.get(&quot;xx&quot;).getAsJsonArray();</code>获取相应的json数组，并遍历出其中的相应字段值</li>
+<li>通过setter方法，将获取到的值设置给Book类。</li>
+<li>最终返回的是 Book的对象实例。完成了JSON-&gt;javaBean的转化</li>
+<li>同样需要配置</li>
+<li>关于从本地流中读取Json数据可以使用  <code>InputStreamReader</code>完成</li>
+</ul>
+
+<pre><code class="language-java">// Configure Gson
+  GsonBuilder gsonBuilder = new GsonBuilder();
+  gsonBuilder.registerTypeAdapter(Book.class, new BookDeserializer());
+  Gson gson = gsonBuilder.create();
+
+  // The JSON data
+  try(Reader reader = new InputStreamReader(Main.class.getResourceAsStream(&quot;/part1/sample.json&quot;), &quot;UTF-8&quot;)){
+
+    // Parse JSON to Java
+    Book book = gson.fromJson(reader, Book.class);
+    System.out.println(book);
+  }
+</code></pre>
+
+<h2 id="toc_26">TypeAdapter</h2>
+
+<h3 id="toc_27">TypeAdapter介绍</h3>
+
+<p>之前在上一篇文中提到的<code>JsonSerializer</code>和<code>JsonDeserializer</code>解析的时候都利用到了一个中间件-<code>JsonElement</code>，比如下方的序列化过程。可以看到我们在把Java对象转化为JSON字符串的时候都会用到这个中间件<code>JsonElement</code></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150776994644553.png" alt="20171012150776994644553.png"/></p>
+
+<p>而<code>TypeAdapter</code>的使用正是去掉了这个中间层，直接用流来解析数据，极大程度上提高了解析效率。</p>
+
+<blockquote>
+<p>New applications should prefer TypeAdapter, whose streaming API is more efficient than this interface’s tree API.应用中应当尽量使用<code>TypeAdapter</code>，它流式的API相比于之前的树形解析API将会更加高效。<br/>
+<code>TypeAdapter</code>作为一个抽象类提供两个抽象方法。分别是<code>write()</code>和<code>read()</code>方法,也对应着序列化和反序列化,其它的方法都是<code>final</code>方法并最终调用这两个抽象方法。</p>
+</blockquote>
+
+<p>如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150776998438554.png" alt="20171012150776998438554.png"/></p>
+
+<p>下面就让我们来一起使用和了解TypeAdapter吧。</p>
+
+<h3 id="toc_28">TypeAdapter实例</h3>
+
+<p>为了便于理解，这里还是统 一 一 下，采用和上面一篇文章同样的例子。<br/><br/>
+<code>Book.java</code>实体类：</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+
+public class Book {
+
+  private String[] authors;
+  private String isbn;
+  private String title;
+
+//为了代码简洁，这里移除getter和setter方法等
+}
+</code></pre>
+
+<p>直接贴代码，具体序列化和反序列化的<code>TypeAdapter</code>类，这里是<code>BookTypeAdapter.java</code>：  </p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+import java.io.IOException;
+import org.apache.commons.lang3.StringUtils;
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+public class BookTypeAdapter extends TypeAdapter {
+
+  @Override
+  public Book read(final JsonReader in) throws IOException {
+    final Book book = new Book();
+
+    in.beginObject();
+    while (in.hasNext()) {
+      switch (in.nextName()) {
+      case &quot;isbn&quot;:
+        book.setIsbn(in.nextString());
+        break;
+      case &quot;title&quot;:
+        book.setTitle(in.nextString());
+        break;
+      case &quot;authors&quot;:
+        book.setAuthors(in.nextString().split(&quot;;&quot;));
+        break;
+      }
+    }
+    in.endObject();
+
+    return book;
+  }
+
+  @Override
+  public void write(final JsonWriter out, final Book book) throws IOException {
+    out.beginObject();
+    out.name(&quot;isbn&quot;).value(book.getIsbn());
+    out.name(&quot;title&quot;).value(book.getTitle());
+    out.name(&quot;authors&quot;).value(StringUtils.join(book.getAuthors(), &quot;;&quot;));
+    out.endObject();
+  }
+}
+</code></pre>
+
+<p>同样这里设置<code>TypeAdapter</code>之后还是需要配置（注册）,可以注意到的是<code>gsonBuilder.registerTypeAdapter(xxx)</code>方法进行注册在我们之前的<code>JsonSerializer</code>和<code>JsonDeserializer</code>中也有使用：</p>
+
+<pre><code class="language-java">final GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(Book.class, new BookTypeAdapter());
+    final Gson gson = gsonBuilder.create();
+</code></pre>
+
+<p>下面对两个write方法和read方法进行分别的阐述：</p>
+
+<h4 id="toc_29">TypeAdapter中的write方法</h4>
+
+<p><code>write()</code>方法中会传入<code>JsonWriter</code>，和需要被序列化的<code>Book</code>对象的实例，采用和<code>PrintStream</code>类似的方式 写入到<code>JsonWriter</code>中。</p>
+
+<pre><code class="language-java">  @Override
+  public void write(final JsonWriter out, final Book book) throws IOException {
+    out.beginObject();
+    out.name(&quot;isbn&quot;).value(book.getIsbn());
+    out.name(&quot;title&quot;).value(book.getTitle());
+    out.name(&quot;authors&quot;).value(StringUtils.join(book.getAuthors(), &quot;;&quot;));
+    out.endObject();
+  }
+</code></pre>
+
+<p>下面是上面代码的步骤：</p>
+
+<ul>
+<li><code>out.beginObject()</code>产生<code>{</code>,如果我们希望产生的是一个数组对象，对应的使用<code>beginArray()</code></li>
+<li><code>out.name(&quot;isbn&quot;).value(book.getIsbn()); out.name(&quot;title&quot;).value(book.getTitle());</code>分别获取book中的isbn和title字段并且设置给Json对象中的isbn和title。也就是说上面这段代码，会在json对象中产生：<code>&quot;isbn&quot;: &quot;978-0321336781&quot;,&quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,</code></li>
+<li><code>out.name(&quot;authors&quot;).value(StringUtils.join(book.getAuthors(), &quot;;&quot;));</code>则会对应着：<code>&quot;authors&quot;: &quot;Joshua Bloch;Neal Gafter&quot;</code></li>
+<li>同理  <code>out.endObject()</code>则对应着<code>}</code></li>
+<li>那么整个上面的代码也就会产生JSON对象：<code>{&quot;isbn&quot;: &quot;978-0321336781&quot;,&quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,&quot;authors&quot;: &quot;Joshua Bloch;Neal Gafter&quot;}</code></li>
+</ul>
+
+<blockquote>
+<p>这里需要注意的是，如果没有调用 <code>out.endObject()</code>产生<code>}</code>,那么你的项目会报出 </p>
+</blockquote>
+
+<pre><code class="language-java">JsonSyntaxException`错误`Exception in thread &quot;main&quot; com.google.gson.JsonSyntaxException: java.io.EOFException: End of input at line 4 column 40  at com.google.gson.Gson.fromJson(Gson.java:813)  at com.google.gson.Gson.fromJson(Gson.java:768)  at com.google.gson.Gson.fromJson(Gson.java:717)  at com.google.gson.Gson.fromJson(Gson.java:689)  at com.javacreed.examples.gson.part1.Main.main(Main.java:41)Caused by: java.io.EOFException: End of input at line 4 column 40  at com.google.gson.stream.JsonReader.nextNonWhitespace(JsonReader.java:1377)  at com.google.gson.stream.JsonReader.doPeek(JsonReader.java:471)  at com.google.gson.stream.JsonReader.hasNext(JsonReader.java:403)  at com.javacreed.examples.gson.part1.BookTypeAdapter.read(BookTypeAdapter.java:33)  at com.javacreed.examples.gson.part1.BookTypeAdapter.read(BookTypeAdapter.java:1)  at com.google.gson.Gson.fromJson(Gson.java:803)  ... 4 more
+</code></pre>
+
+<h4 id="toc_30">TypeAdapter中的read方法</h4>
+
+<p><code>read()</code>方法将会传入一个<code>JsonReader</code>对象实例并返回反序列化的对象。</p>
+
+<pre><code class="language-java">  @Override
+  public Book read(final JsonReader in) throws IOException {
+    final Book book = new Book();
+
+    in.beginObject();
+    while (in.hasNext()) {
+      switch (in.nextName()) {
+      case &quot;isbn&quot;:
+        book.setIsbn(in.nextString());
+        break;
+      case &quot;title&quot;:
+        book.setTitle(in.nextString());
+        break;
+      case &quot;authors&quot;:
+        book.setAuthors(in.nextString().split(&quot;;&quot;));
+        break;
+      }
+    }
+    in.endObject();
+
+    return book;
+  }
+</code></pre>
+
+<p>下面是这段代码的步骤：<br/>
+同样是通过<code>in.beginObject();</code>和<code>in.endObject();</code>对应解析<code>{</code>,<code>}</code><br/>
+通过<code>while (in.hasNext()) {switch (in.nextName()) {}}</code>来完成每个<code>JsonElement</code>的遍历,并且通过<code>switch...case</code>的方法获取Json对象中的键值对。并通过我们<code>Book实体类</code>的<code>Setter</code>方法进行设置。</p>
+
+<pre><code class="language-java">while (in.hasNext()) {    
+    switch (in.nextName()) {    
+        case &quot;isbn&quot;:      
+            book.setIsbn(in.nextString());      
+            break;    
+        case &quot;title&quot;:      
+            book.setTitle(in.nextString());      
+            break;    
+        case &quot;authors&quot;:      
+            book.setAuthors(in.nextString().split(&quot;;&quot;));      
+            break;    
+    }  
+}
+</code></pre>
+
+<blockquote>
+<p>同样需要注意的是,如果没有执行<code>in.endObject()</code>，将会出现<code>JsonIOException</code>的错误：</p>
+</blockquote>
+
+<pre><code class="language-java">Exception in thread &quot;main&quot; com.google.gson.JsonIOException: JSON document was not fully consumed.  at   com.google.gson.Gson.assertFullConsumption(Gson.java:776)  at com.google.gson.Gson.fromJson(Gson.java:769)  at com.google.gson.Gson.fromJson(Gson.java:717)  at com.google.gson.Gson.fromJson(Gson.java:689)  at com.javacreed.examples.gson.part1.Main.main(Main.java:41)
+</code></pre>
+
+<p>下面给出使用<code>TypeAdapter</code>的完整代码：</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+
+import java.io.IOException;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class Main {
+  public static void main(final String[] args) throws IOException {
+    final GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(Book.class, new BookTypeAdapter());
+    gsonBuilder.setPrettyPrinting();
+
+    final Gson gson = gsonBuilder.create();
+
+    final Book book = new Book();
+    book.setAuthors(new String[] { &quot;Joshua Bloch&quot;, &quot;Neal Gafter&quot; });
+    book.setTitle(&quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;);
+    book.setIsbn(&quot;978-0321336781&quot;);
+
+    final String json = gson.toJson(book);
+    System.out.println(&quot;Serialised&quot;);
+    System.out.println(json);
+
+    final Book parsedBook = gson.fromJson(json, Book.class);
+    System.out.println(&quot;\nDeserialised&quot;);
+    System.out.println(parsedBook);
+  }
+}
+</code></pre>
+
+<p>对应的编译结果为：</p>
+
+<pre><code class="language-java">Serialised
+{
+  &quot;isbn&quot;: &quot;978-0321336781&quot;,
+  &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
+  &quot;authors&quot;: &quot;Joshua Bloch;Neal Gafter&quot;
+}
+
+Deserialised
+Java Puzzlers: Traps, Pitfalls, and Corner Cases [978-0321336781]
+Written by:
+  &gt;&gt; Joshua Bloch
+  &gt;&gt; Neal Gafter
+</code></pre>
+
+<h3 id="toc_31">TypeAdapter处理简洁的JSON数据</h3>
+
+<p>为了简化JSON数据，其实我们上面的JSON数据可以这么写：</p>
+
+<pre><code class="language-javascript">[&quot;978-0321336781&quot;,&quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,&quot;Joshua Bloch&quot;,&quot;Neal Gafter&quot;]
+</code></pre>
+
+<p>可以看到的是，这样采用的直接是值的形式。当然这样操作简化了JSON数据但是可能就让整个数据的稳定性下降了许多的，你需要按照一定的顺序来解析这个数据。对应的<code>write</code>和<code>read</code>方法如下：</p>
+
+<pre><code class="language-java">  @Override
+  public void write(final JsonWriter out, final Book book) throws IOException {
+    out.beginArray();
+    out.value(book.getIsbn());
+    out.value(book.getTitle());
+    for (final String author : book.getAuthors()) {
+      out.value(author);
+    }
+    out.endArray();
+  }
+</code></pre>
+
+<pre><code class="language-java">  @Override
+  public Book read(final JsonReader in) throws IOException {
+    final Book book = new Book();
+
+    in.beginArray();
+    book.setIsbn(in.nextString());
+    book.setTitle(in.nextString());
+    final List authors = new ArrayList&lt;&gt;();
+    while (in.hasNext()) {
+      authors.add(in.nextString());
+    }
+    book.setAuthors(authors.toArray(new String[authors.size()]));
+    in.endArray();
+
+    return book;
+  }
+</code></pre>
+
+<p>这里的解析原理和上面一致，不再赘述。</p>
+
+<h3 id="toc_32">TypeAdapter解析内置对象</h3>
+
+<p>（这里将nested objects翻译为内置对象，其实就是在Book类）<br/>
+这里对上面的Book实体类进行修改如下，添加Author作者类，每本书可以有多个作者。</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part3;
+
+public class Book {
+
+  private Author[] authors;
+  private String isbn;
+  private String title;
+
+class Author {
+
+  private int id;
+  private String name;
+
+//为了代码简洁，这里移除getter和setter方法等
+}
+//为了代码简洁，这里移除getter和setter方法等
+}
+</code></pre>
+
+<p>这里提供JSON对象，</p>
+
+<pre><code class="language-java">{
+  &quot;isbn&quot;: &quot;978-0321336781&quot;,
+  &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
+  &quot;authors&quot;: [
+    {
+      &quot;id&quot;: 1,
+      &quot;name&quot;: &quot;Joshua Bloch&quot;
+    },
+    {
+      &quot;id&quot;: 2,
+      &quot;name&quot;: &quot;Neal Gafter&quot;
+    }
+  ]
+}
+</code></pre>
+
+<p>下面分别展示write和read方法：</p>
+
+<pre><code class="language-java">  @Override
+  public void write(final JsonWriter out, final Book book) throws IOException {
+    out.beginObject();
+    out.name(&quot;isbn&quot;).value(book.getIsbn());
+    out.name(&quot;title&quot;).value(book.getTitle());
+    out.name(&quot;authors&quot;).beginArray();
+    for (final Author author : book.getAuthors()) {
+      out.beginObject();
+      out.name(&quot;id&quot;).value(author.getId());
+      out.name(&quot;name&quot;).value(author.getName());
+      out.endObject();
+    }
+    out.endArray();
+    out.endObject();
+  }
+</code></pre>
+
+<pre><code class="language-java"> @Override
+  public Book read(final JsonReader in) throws IOException {
+    final Book book = new Book();
+
+    in.beginObject();
+    while (in.hasNext()) {
+      switch (in.nextName()) {
+      case &quot;isbn&quot;:
+        book.setIsbn(in.nextString());
+        break;
+      case &quot;title&quot;:
+        book.setTitle(in.nextString());
+        break;
+      case &quot;authors&quot;:
+        in.beginArray();
+        final List authors = new ArrayList&lt;&gt;();
+        while (in.hasNext()) {
+          in.beginObject();
+          final Author author = new Author();
+          while (in.hasNext()) {
+            switch (in.nextName()) {
+            case &quot;id&quot;:
+              author.setId(in.nextInt());
+              break;
+            case &quot;name&quot;:
+              author.setName(in.nextString());
+              break;
+            }
+          }
+          authors.add(author);
+          in.endObject();
+        }
+        book.setAuthors(authors.toArray(new Author[authors.size()]));
+        in.endArray();
+        break;
+      }
+    }
+    in.endObject();
+
+    return book;
+  }
+</code></pre>
+
+<h2 id="toc_33">Gson性能分析</h2>
+
+<p>首先来看看我们提供一个大一点的数据来论证下面一些方法的优缺点。 这里提供类<code>LargeData.java</code>,并分为四个部分进行内存消耗的分析：</p>
+
+<pre><code class="language-java">public class LargeData {
+
+  private long[] numbers;
+
+  public void create(final int length) {
+    numbers = new long[length];
+    for (int i = 0; i &lt; length; i++) {
+      numbers[i] = i;
+    }
+  }
+
+  public long[] getNumbers() {
+    return numbers;
+  }
+
+}
+</code></pre>
+
+<h3 id="toc_34">第1部分 JsonSerializer的直接使用</h3>
+
+<p>看看下面的<code>JsonSerializer</code>:</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+
+import java.lang.reflect.Type;
+
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonPrimitive;
+import com.google.gson.JsonSerializationContext;
+import com.google.gson.JsonSerializer;
+
+public class LargeDataSerialiser implements JsonSerializer&lt;LargeData&gt; {
+
+  @Override
+  public JsonElement serialize(final LargeData data, final Type typeOfSrc, final JsonSerializationContext context) {
+    final JsonArray jsonNumbers = new JsonArray();
+    for (final long number : data.getNumbers()) {
+      jsonNumbers.add(new JsonPrimitive(number));
+    }
+
+    final JsonObject jsonObject = new JsonObject();
+    jsonObject.add(&quot;numbers&quot;, jsonNumbers);
+    return jsonObject;
+  }
+}
+</code></pre>
+
+<p>上面的代码实现了从<strong>java对象&gt;转化&gt;JSON数组</strong>的序列化过程。下面的代码实现了配置和初始化的过程，被写入文件。这里可以看到的是对<code>LargeData</code>初始化了<code>10485760</code>个元素：</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class Main {
+  public static void main(final String[] args) throws IOException {
+    // Configure GSON
+    final GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataSerialiser());
+    gsonBuilder.setPrettyPrinting();
+
+    final Gson gson = gsonBuilder.create();
+
+    final LargeData data = new LargeData();
+    data.create(10485760);
+
+    final String json = gson.toJson(data);
+
+    final File dir = new File(&quot;target/part1&quot;);
+    dir.mkdirs();
+
+    try (PrintStream out = new PrintStream(new File(dir, &quot;output.json&quot;), &quot;UTF-8&quot;)) {
+      out.println(json);
+    }
+
+    System.out.println(&quot;Done&quot;);
+  }
+}
+</code></pre>
+
+<p>这个例子实现了创建java对象并且转化为JSON字符串并写入文件的整个过程。下面的图标展示了内存的消耗情况：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777023393682.png" alt="20171012150777023393682.png"/></p>
+
+<p>上面的的LargeData在这里会消耗89MB的内存，从java对象转化为JSON字符串的过程将会消耗大概16s的时间并且需要超过1GB的内存。也就是说，序列化1MB的数据我们需要大约11MB的工作空间。1：11的确实是一个不小的比列。下面的 图片会展示整个过程的几个阶段。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777025353382.png" alt="20171012150777025353382.png"/></p>
+
+<p>可以看到的是，这里有四个方块分别代表不同的阶段，（但是IO 缓冲区并没有在这里得到使用，所以以灰色进行标注。）整个过程从java对象（蓝色方块），然后由<code>LargeDataSerialiser</code>类创建的JSONElement对象（红色方块），然后这些临时的对象又被转化为JSON 字符串（绿色方块），上面的示例代码使用<code>PrintStream</code>将内容输出到文件中并没有使用任何缓冲区。<br/>
+完成了第1部分的分析，接下来下面的分析流程是一样的：</p>
+
+<h3 id="toc_35">第2 部分 TypeAdapter的直接使用</h3>
+
+<p>之前的系列文章中都对Gson基础的使用进行了很好的讲解，可以回顾一下。<br/>
+<code>TypeAdapter</code>相比 于上面的方法，并没有使用JSONElement对象，而是直接将Java对象啊转化为了JSON对象。</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part2;
+
+import java.io.IOException;
+
+import com.google.gson.TypeAdapter;
+import com.google.gson.stream.JsonReader;
+import com.google.gson.stream.JsonWriter;
+
+public class LargeDataTypeAdapter extends TypeAdapter&lt;LargeData&gt; {
+
+  @Override
+  public LargeData read(final JsonReader in) throws IOException {
+    throw new UnsupportedOperationException(&quot;Coming soon&quot;);
+  }
+
+  @Override
+  public void write(final JsonWriter out, final LargeData data) throws IOException {
+    out.beginObject();
+    out.name(&quot;numbers&quot;);
+    out.beginArray();
+    for (final long number : data.getNumbers()) {
+      out.value(number);
+    }
+    out.endArray();
+    out.endObject();
+  }
+}
+</code></pre>
+
+<p>同样会需要配置，这里主要使用的方法是<code>gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataTypeAdapter());</code>：</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part2;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.PrintStream;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class Main {
+  public static void main(final String[] args) throws IOException {
+    // Configure GSON
+    final GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataTypeAdapter());
+    gsonBuilder.setPrettyPrinting();
+
+    final Gson gson = gsonBuilder.create();
+
+    final LargeData data = new LargeData();
+    data.create(10485760);
+
+    final String json = gson.toJson(data);
+
+    final File dir = new File(&quot;target/part2&quot;);
+    dir.mkdirs();
+
+    try (PrintStream out = new PrintStream(new File(dir, &quot;output.json&quot;), &quot;UTF-8&quot;)) {
+      out.println(json);
+    }
+
+    System.out.println(&quot;Done&quot;);
+  }
+}
+</code></pre>
+
+<p>上面的代码完成的是从<strong>java对象 &gt;转化&gt;JSON 字符串</strong>并最终写入文件的过程。看看下面的性能分析图表：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777031491897.png" alt="20171012150777031491897.png"/></p>
+
+<p>和最初的那个方法一样，这里的LargeData对象将会需要89MB的内存，从java对象转化为JSON字符串的过程需要消耗4s的时间，大概650MB的内存。也就是说，序列化1MB的数据，大概需要7.5MB的内存空间。相比于之前的第一种JsonSerializer方法，这里减少了接近一半的内存消耗。同样的，来看看这个方法的几个过程：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777032621918.png" alt="20171012150777032621918.png"/></p>
+
+<p>这里的序列化过程主要有两个阶段，相比于之前的<code>JSONSerializer</code>的序列化过程，这里没有了转化为JSONElement的过程，也就完成了内存消耗的减少。</p>
+
+<h3 id="toc_36">第3部分 TypeAdapter的流式处理</h3>
+
+<p>下面的代码，我们使用上面同样的TypeAdapter，只不过我们直接在main()方法中修改Gson的用法，以流的形式进行输出。</p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part3;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class Main {
+  public static void main(final String[] args) throws IOException {
+    // Configure GSON
+    final GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataTypeAdapter());
+    gsonBuilder.setPrettyPrinting();
+
+    final Gson gson = gsonBuilder.create();
+
+    final LargeData data = new LargeData();
+    data.create(10485760);
+
+    final File dir = new File(&quot;target/part3&quot;);
+    dir.mkdirs();
+
+    try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(dir,
+        &quot;output.json&quot;)), &quot;UTF-8&quot;))) {
+      gson.toJson(data, out);
+    }
+
+    System.out.println(&quot;Done&quot;);
+  }
+}
+</code></pre>
+
+<p>这个例子同样是将java对象转化为JSON字符串并且输出，也来看看下面的性能分析图表：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777036368764.png" alt="20171012150777036368764.png"/></p>
+
+<p>可以看到的是同样的最初产生的数据是89MB,序列化过程将java对象转化为JSON字符串花了大概三秒钟的时间，消耗大概160MB的内存。也就是说序列化1MB的数据我们需要大概2MB的内存空间。相比于之前的两种方法，有了很大的改进。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777037225976.png" alt="20171012150777037225976.png"/></p>
+
+<p>这个方法同样的是使用了两个阶段。不过在上面一个示例中的绿色方块部分在这里没有使用，这里直接完成了java对象到IO 缓冲区的转化并写入文件。<br/>
+虽然这里并不是Gson的关系，但是我们使用Gson的方法极大的减少了内存消耗，所以说在使用开源库的时候，能够正确高效的使用API也显得尤为重要。</p>
+
+<h3 id="toc_37">第4部分 JsonSerializer 的流式处理</h3>
+
+<p>同样的使用第一个例子中的JsonSerializer，这里的配置需要注意的是<code>gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataSerialiser());</code></p>
+
+<pre><code class="language-java">package com.javacreed.examples.gson.part4;
+
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+
+public class Main {
+  public static void main(final String[] args) throws IOException {
+    // Configure GSON
+    final GsonBuilder gsonBuilder = new GsonBuilder();
+    gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataSerialiser());
+    gsonBuilder.setPrettyPrinting();
+
+    final Gson gson = gsonBuilder.create();
+
+    final LargeData data = new LargeData();
+    data.create(10485760);
+
+    final File dir = new File(&quot;target/part4&quot;);
+    dir.mkdirs();
+
+    try (BufferedWriter out = new BufferedWriter(new OutputStreamWriter(new FileOutputStream(new File(dir,
+        &quot;output.json&quot;)), &quot;UTF-8&quot;))) {
+      gson.toJson(data, out);
+    }
+
+    System.out.println(&quot;Done&quot;);
+  }
+}
+</code></pre>
+
+<p>经过前面的分析，我们这里也可以这道这里主要分为三个阶段，下面提供性能分析图和JSONSerializer的阶段流程图：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777041919731.png" alt="20171012150777041919731.png"/></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777042722167.png" alt="20171012150777042722167.png"/></p>
+
+<p>这里可以看到三个阶段完成的工作消耗了11s的时间，730MB的内存空间。也就是说1：8的比例。可以相比上面的例子，知道这里使用JSONSerializer产生了JSONElement对象消耗了很多的内存。</p>
+
+<h3 id="toc_38">结论</h3>
+
+<p>在上面的分析过程中，我们采用了GSON的两种不同的方然完成了序列化一个大数据的过程，并且比较了不同的方法之间的差异。上面的第三种方法（TypeAdapter的流式处理）被论证为最合适的，消耗最少内存的一种方法。<br/><br/>
+Gson主要分成两部分,一个就是数据拆解,一个是数据封装。</p>
+
+<h2 id="toc_39">参考</h2>
+
+<p><a href="http://www.jianshu.com/p/e740196225a4"> 你真的会用Gson吗?Gson使用指南（一）</a></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207870240.html" 
+          title="Previous Post: Android-Retrofit详细学习">&laquo; Android-Retrofit详细学习</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207870161.html" 
+          title="Next Post: Android-SpannableString设置复合文本">Android-SpannableString设置复合文本 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

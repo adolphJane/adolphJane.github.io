@@ -1,0 +1,482 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-CoordinatorLayout详细学习 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-CoordinatorLayout详细学习</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/8/27</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>曾在网上找了一些关于<code>CoordinatorLayout</code>的教程，大部分文章都是把<code>CoordinatorLayout</code>、<code>AppbarLayout</code>、<code>CollapsingToolbarLayout</code> 以及<code>Toolbar</code>等一起使用来介绍，这让我不知不觉在心中认为把这几个布局要一起使用，而且只是用于那种场景中。其实<code>CoordinatorLayout</code>的功能并不是局限于与<code>AppBarLayout</code>一起使用，它的功能强大着呢，本文主要对<code>CoordinatorLayout</code>的使用进行介绍，后面再写一篇文章将<code>AppBarLayout</code>和<code>CollapsingToolBarLayout</code>整合<code>CoordinatorLayout</code>一起。那么到底<code>CoordinatorLayout</code>有多好用，请往下感受吧~</p>
+
+<h2 id="toc_0">CoordinatorLayout能做什么</h2>
+
+<p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子View的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子View的布局。我们先看一组动画图~</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799569357936.gif" alt="20171014150799569357936.gif"/></p>
+
+<p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色Button查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。</p>
+
+<p>这个效果如果让你不用<code>CoordinatorLayout</code>去实现，应该没有任何问题，但是代码的耦合度应该非常大，你的代码必须要持有2个View的引用，然后在onTouchEvent里面做各种判断。如果我们想要实现的功能是，有更多的View要根据蓝色的View的移动相应作出响应，那么那就得在蓝色View的<code>onTounchEvent</code>里面针对其他的View处理各种逻辑。这耦合度未免太伤感了~</p>
+
+<p>而<code>CoordinatorLayout</code>既然号称能帮我们协调子View的布局，我们接下来看看<code>CoordinatorLayout</code>如何实现~</p>
+
+<h2 id="toc_1">CoordinatorLayout使用</h2>
+
+<p><code>CoordinatorLayout</code>的使用核心是<code>Behavior</code>，<code>Behavior</code>就是执行你定制的动作。在讲<code>Behavior</code>之前必须先理解两个概念：<code>Child</code>和<code>Dependency</code>，什么意思呢？<code>Child</code>当然是子View的意思了，是谁的子View呢，当然是<code>CoordinatorLayout</code>的子<code>View</code>；其实<code>Child</code>是指要执行动作的<code>CoordinatorLayout</code>的子<code>View</code>。而<code>Dependency</code>是指<code>Child</code>依赖的<code>View</code>。比如上面的gif图中，蓝色的<code>View</code>就是<code>Dependency</code>，黄色的<code>View</code>就是<code>Child</code>，因为黄色的<code>View</code>的动作是依赖于蓝色的<code>View</code>。简而言之，就是如过<code>Dependency</code>这个View发生了变化，那么<code>Child</code>这个View就要相应发生变化。发生变化是具体发生什么变化呢？这里就要引入<code>Behavior</code>，<code>Child</code>发生变化的具体执行的代码都是放在<code>Behavior</code>这个类里面。</p>
+
+<p>怎么使用<code>Behavior</code>呢，首先，我们定义一个类，继承<code>CoordinatorLayout.Behavior&lt;T&gt;</code>,其中，泛型参数T是我们要执行动作的<code>View</code>类，也就是<code>Child</code>。然后就是去实现<code>Behavior</code>的两个方法：</p>
+
+<pre><code class="language-java">/**
+* 判断child的布局是否依赖dependency
+*/
+   @Override
+ public boolean layoutDependsOn(CoordinatorLayout parent, T child, View dependency) {
+    boolean rs;
+    //根据逻辑判断rs的取值
+    //返回false表示child不依赖dependency，ture表示依赖
+    return rs;  
+}
+
+/**
+* 当dependency发生改变时（位置、宽高等），执行这个函数
+* 返回true表示child的位置或者是宽高要发生改变，否则就返回false
+*/
+@Override
+public boolean onDependentViewChanged(CoordinatorLayout parent, T child, View dependency) {
+     //child要执行的具体动作
+        return true;
+}
+</code></pre>
+
+<p>有了上面的概念后，我们看看具体怎么去实现吧~</p>
+
+<p>为了响应跟随手指移动的操作，我们定义一个非常简单的<code>View</code>，这个<code>View</code>只响应跟随手指移动，将这个<code>View</code>作为<code>Dependency</code>。由于过于简单，这个<code>View</code>源码不粘贴，我们只需知道这个<code>View</code>的类名叫：<code>TempView</code>。</p>
+
+<p>我们看看<code>Behavior</code>的使用：</p>
+
+<pre><code class="language-java">package com.hc.studyCoordinatorLayout;
+
+import android.content.Context;
+import android.support.design.widget.CoordinatorLayout;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.widget.Button;
+
+/**
+ * Package com.hc.studyCoordinatorLayout
+ * Created by HuaChao on 2016/6/1.
+ */
+public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
+    private int width;
+
+    public MyBehavior(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        DisplayMetrics display = context.getResources().getDisplayMetrics();
+        width = display.widthPixels;
+    }
+
+    @Override
+    public boolean layoutDependsOn(CoordinatorLayout parent, Button child, View dependency) {
+        //如果dependency是TempView的实例，说明它就是我们所需要的Dependency
+        return dependency instanceof TempView;
+    }
+
+    //每次dependency位置发生变化，都会执行onDependentViewChanged方法
+    @Override
+    public boolean onDependentViewChanged(CoordinatorLayout parent, Button btn, View dependency) {
+
+        //根据dependency的位置，设置Button的位置
+
+        int top = dependency.getTop();
+        int left = dependency.getLeft();
+
+        int x = width - left - btn.getWidth();
+        int y = top;
+
+        setPosition(btn, x, y);
+        return true;
+    }
+
+    private void setPosition(View v, int x, int y) {
+        CoordinatorLayout.MarginLayoutParams layoutParams = (CoordinatorLayout.MarginLayoutParams) v.getLayoutParams();
+        layoutParams.leftMargin = x;
+        layoutParams.topMargin = y;
+        v.setLayoutParams(layoutParams);
+    }
+}
+</code></pre>
+
+<p>OK，现在我们为<code>Button</code>类指定了<code>Dependency</code>，并且定义好了跟随<code>Dependency</code>一直变化的动作（<code>Behavior</code>），接下来我们就要指定好为哪个具体的<code>Button</code>实例来绑定这些。方法很简单，直接在布局文件指定就好：</p>
+
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    tools:context=&quot;com.hc.studyCoordinatorLayout.MainActivity&quot;&gt;
+
+    &lt;Button
+        android:id=&quot;@+id/btn&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_marginLeft=&quot;300dp&quot;
+        android:layout_marginTop=&quot;300dp&quot;
+        android:background=&quot;#FFCC00&quot;
+        android:text=&quot;Hello&quot;
+        app:layout_behavior=&quot;com.hc.studyCoordinatorLayout.MyBehavior&quot; /&gt;
+
+    &lt;com.hc.studyCoordinatorLayout.TempView
+        android:layout_width=&quot;100dp&quot;
+        android:layout_height=&quot;100dp&quot;
+        android:layout_marginLeft=&quot;300dp&quot;
+        android:layout_marginTop=&quot;300dp&quot;
+        android:background=&quot;#3366CC&quot;  /&gt;
+&lt;/android.support.design.widget.CoordinatorLayout&gt;
+</code></pre>
+
+<p>是不是很简单呢？我们只需关注<code>Behavior</code>的编写就好了，把<code>Child</code>和<code>Dependency</code>之间的关系完全解耦了~</p>
+
+<p>附上<a href="http://download.csdn.net/detail/huachao1001/9537636">源码地址</a></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207870815.html" 
+          title="Previous Post: Android-smali文件格式">&laquo; Android-smali文件格式</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207870778.html" 
+          title="Next Post: Android-NDK图片高斯模糊">Android-NDK图片高斯模糊 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

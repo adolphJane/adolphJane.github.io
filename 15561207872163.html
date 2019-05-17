@@ -1,0 +1,446 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-关于android UI适配的一些思考 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-关于android UI适配的一些思考</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/10/23</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">关于xml中写死dp的思考</h2>
+
+<p>首先我们应该先把问题抛出，如果我们在xml把控件的宽度和高度写死，比如</p>
+
+<pre><code class="language-text"> &lt;TextView
+            android:layout_width=&quot;100dp&quot;
+            android:layout_height=&quot;50dp&quot;
+            android:gravity=&quot;center&quot;
+            android:text=&quot;asdasdasd&quot;
+            /&gt;
+</code></pre>
+
+<p>相信大多时候都可以这么写，因为Android dp这个单位就是为了适配屏幕而出现的控件长度单位，它会让100dp在不同的手机不同的屏幕尺寸都有相似的表现。 <br/>
+为什么是相似的表现而不是绝对的表现呢？因为不同的设备，横向和纵向所拥有的dp很可能是不同的，一般手机横向dp在360dp左右，也就是说，如果你写了一个宽度为180dp的控件，在一些手机可能有屏幕的一般宽，有一些手机超过一般，有一些手机不到一半。</p>
+
+<p>我们写这样的一段代码，然后看一下xml的预览效果：</p>
+
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:orientation=&quot;vertical&quot;
+    android:background=&quot;#123333&quot;
+    android:id=&quot;@+id/container&quot;
+    android:layout_width=&quot;360dp&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007149290806.png" alt="20171108151007149290806.png"/></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007150182264.png" alt="20171108151007150182264.png"/></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007150657381.png" alt="20171108151007150657381.png"/></p>
+
+<h2 id="toc_1">关于java动态写控件大小的思考</h2>
+
+<p>我们看到360dp在不同设备的所表现的占屏比是不同的。如果我们写数值比较小的dp相信直接写死的问题不大。但是如果设计稿上某个控件的宽度你换算完刚好是340dp怎么，肯定不能写340dp。其实我们可以用match_parent然后用padding margin之类的东西，在左右留一个小数值dp的距离，来实现效果。但是如果这个控件要求是高度和宽度的比例是固定的，比如展示一个广告浮层的图片，那么xml估计就无法锁定宽高比了，我们就必须借助java代码来决定这个控件高度：</p>
+
+<pre><code class="language-java">RelativeLayout.LayoutParams mLayoutParams = 
+new RelativeLayout.LayoutParams (mHeight,mWidth);
+mLayoutParams.addRule(RelativeLayout.ALIGN_TOP, R.id.supernatant);
+mLayoutParams.addRule(RelativeLayout.ALIGN_LEFT, R.id.supernatant);
+bigSupernatantImgLayoutParams.setMargins(DPIUtil.dip2px(9f), 0, 0, 0);
+bigImg.setLayoutParams(mLayoutParams);
+</code></pre>
+
+<p>类似这样宽度和高度都是活的，我们可以通过获取屏幕的实际宽高像素，来通过等比，相似等一些算法，转换出比例和UI设计图一样的UI，但是最大的弊端应该就是，这么书写会让java代码比较多，比较乱。因此会有一些百分百布局框架等，其实思路都类似，等比缩放就是很核心思路。 <br/>
+有个轻量的方法也就是写个工具类算出设计图到手机屏幕的转换关系：</p>
+
+<pre><code class="language-java">public static int getHeightByValue720(int mValue) {
+return (int) ((float) (DPITools.getHeight() * nDesignValue) / (float) 1280);
+    }
+
+public static int getWidthByValue720(int mValue) {
+return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
+    }
+</code></pre>
+
+<p>这个方法就是如果是720的设计稿，我们将设计稿的值转换为在所用设备下同比例的大小。这似乎很完美。 <br/>
+如果设计给的控件大小是 100X200 ，那么如果运行在1080p的设配上。我们动态得到控件的大小是150X300.很开心，1080的横向纵向像素是720的1.5倍，控件也大了1.5倍这，的确没毛病。但是我们可能低估了安卓阵营了。</p>
+
+<h2 id="toc_2">关于动态宽高写布局的一些思考。</h2>
+
+<p>三星Galaxy S8分辨率： 2960*1440 (570 ppi)</p>
+
+<p>如果按照上述方式我们在三星Galaxy S8上运行效果会是如何呢？结果是200X462。控件已经倍拉伸了，原因就是S8的屏幕比例不是16比9所以，按照原来的方式缩放，就会造成拉伸，为此市面上也有解决方案：</p>
+
+<pre><code class="language-java">public static int getValueByValue720(int mValue) {
+return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
+    }
+</code></pre>
+
+<p>就是无论宽度还是高度，都是用宽度缩放，那么刚才控件在S8上得到的数值就是200X400.控件不会被拉伸，由于现在大多界面都是可以Scroll的，那么就算高度不标准问题也不大，我们比如一个listview我们保证在16比9的手机上，能正好展示4个item，在16比10的手机上展示3个半item，在18.5比9的设备上展示4个半item，这个设计产品还是用户都是可以接受的。</p>
+
+<h2 id="toc_3">关于动态宽度为基准写布局的一些思考。</h2>
+
+<p>然而关于方法三又存在一些问题，设想下面一个场景，页面里展示的是一个cardview，cardview的背景是一张图片，所以cardview宽高必须固定，这个cardview又是不允许上下滑动的，里面又有很多控件，在16比9的设计稿上，cardview里面的控件，排列整齐，最后也没什么太大的边界。</p>
+
+<p>这样面临一个问题，如果在16比10的手机上，其实每次计算出的高度都是大于手机比例的，因此cardview后面的几个控件可能无法正常显示，或被拉伸。在18.5比9的手机上，cardview下面可能有空余，或者根据不同layout方式，可能其他地方有空余。我认为这还是可以接受的，比较这种手机是少数，但是控件被挤压就难以接受了。归纳起来也就说，如果这种不能上下滑动的view，可以让它有空余，但是不能让它挤压。我们可以使用一个保守的方法，判断手机是否是大于16比9，如果大于就说明手机比较瘦高，如果小于就说明手机比较胖。我们就可以用相对充裕的方法计算控件宽高，来保证控件不被挤压。</p>
+
+<pre><code class="language-java">public static boolean bigThan169() {
+        float h = DPIUtil.getHeight();
+        float w = DPIUtil.getWidth();
+        if ((h / w) &gt; 1.78f) return true;
+        else return false;
+    }
+</code></pre>
+
+<pre><code class="language-java">if (bigThan169())
+newWidth = DPIUtil.getWidthByDesignValue720(DesignWidth);（以宽度为基准）
+else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为基准 从而保证控件上下高度够用）
+</code></pre>
+
+<p>总之就这就是一个保守，保证控件装得下的思路，若果是控件横向被挤压也是一样的。我们为了保证显示的下，缩小了控件。</p>
+
+<p>总结：UI适配愈走愈远，有时也要和设计师产品经理协调，不要设计一些容易触发适配问题的页面，减少安卓端的适配压力，但是如果场景真的无法避免，我们就只能有更优雅的方式去解决适配问题。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207872196.html" 
+          title="Previous Post: Android-拍照获取缩略图以及完整图片(适配androidN)">&laquo; Android-拍照获取缩略图以及完整图片(适配androidN)</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207872093.html" 
+          title="Next Post: Android-爱奇艺APK瘦身经验">Android-爱奇艺APK瘦身经验 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

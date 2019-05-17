@@ -1,0 +1,873 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android View的工作流程 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android View的工作流程</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/1/8</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">前言</h2>
+
+<p>写了那么多自定义View，但是对于其中的原理以及工作流程还不是很了解，所以这篇博文来总结和回顾一下Android开发中的View的工作流程，view的工作流程主要包含measure、layout和draw三大流程，在进入主题之前，先要理解一下几个概念，以便更好的理解view的三大流程。<br/><br/>
+<strong>转载自<a href="http://blog.csdn.net/lin_t_s/article/details/56668085">《安卓复习之旅——View的工作流程》</a></strong></p>
+
+<h2 id="toc_1">了解ViewRoot和DecorView</h2>
+
+<p>ViewRoot对应ViewRootImpl类，实现了ViewParent接口，它是连接WindowManager和DecorView的桥梁，WindowManager的实现类是WindowManagerImpl类:</p>
+
+<pre><code class="language-java">public final class WindowManagerImpl implements WindowManager {
+    private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
+    private final Context mContext;
+    private final Window mParentWindow;
+
+    private IBinder mDefaultToken;
+</code></pre>
+
+<p>其中WindowManagerGlobal相当与一个代理类，WindowManagerImpl 中的实现的方法都是通过WindowManagerGlobal来具体实现的，我们来看看WindowManagerImpl 中的addView()方法：</p>
+
+<pre><code class="language-java">@Override
+    public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
+        applyDefaultToken(params);
+        mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
+    }
+</code></pre>
+
+<p>可以看出确实是通过WindowManagerGlobal的addView()方法来具体实现的，进入WindowManagerGlobal的addView()方法：</p>
+
+<pre><code class="language-java">    public void addView(View view, ViewGroup.LayoutParams params,
+            Display display, Window parentWindow) {
+      ...
+        final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
+        ViewRootImpl root;
+        View panelParentView = null;
+
+        synchronized (mLock) {
+            int index = findViewLocked(view, false);
+            if (index &gt;= 0) {
+                if (mDyingViews.contains(view)) {
+                    // Don&#39;t wait for MSG_DIE to make it&#39;s way through root&#39;s queue.
+                    mRoots.get(index).doDie();
+                } else {
+                    throw new IllegalStateException(&quot;View &quot; + view
+                            + &quot; has already been added to the window manager.&quot;);
+                }
+                // The previous removeView() had not completed executing. Now it has.
+            }
+
+            // If this is a panel window, then find the window it is being
+            // attached to for future reference.
+            if (wparams.type &gt;= WindowManager.LayoutParams.FIRST_SUB_WINDOW &amp;&amp;
+                    wparams.type &lt;= WindowManager.LayoutParams.LAST_SUB_WINDOW) {
+                final int count = mViews.size();
+                for (int i = 0; i &lt; count; i++) {
+                    if (mRoots.get(i).mWindow.asBinder() == wparams.token) {
+                        panelParentView = mViews.get(i);
+                    }
+                }
+            }
+            //实例化ViewRootImpl
+            root = new ViewRootImpl(view.getContext(), display);
+
+            view.setLayoutParams(wparams);
+
+            mViews.add(view);
+            mRoots.add(root);
+            mParams.add(wparams);
+
+            // do this last because it fires off messages to start doing things
+            try {
+                //连接WindowManager和DecorView
+                root.setView(view, wparams, panelParentView);
+            } catch (RuntimeException e) {
+                // BadTokenException or InvalidDisplayException, clean up.
+                if (index &gt;= 0) {
+                    removeViewLocked(index, true);
+                }
+                throw e;
+            }
+        }
+    }
+</code></pre>
+
+<p>由上面注释的代码可以看出ViewRootImpl是连接WindowManager和DecorView的桥梁。</p>
+
+<p>DecorView是FrameLayout的子类，它可以被认为是Android视图树的根节点视图。DecorView作为顶级View，一般情况下它内部包含一个竖直方向的LinearLayout，在这个LinearLayout里面有上下两个部分（具体情况和Android版本及主体有关），上面的是标题栏，下面的是内容栏。在Activity中通过setContentView所设置的布局文件其实就是被加到内容栏之中的，而内容栏的id是content，在代码中可以通过ViewGroup content = （ViewGroup)findViewById(R.android.id.content)来得到content对应的layout。 <br/>
+DecorView的结构图： <br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"/></p>
+
+<h2 id="toc_2">View的绘制流程</h2>
+
+<p>View的绘制流程是从ViewRootImpl的performTraversals()方法开始的，它经过measure、layout和draw三个流程才能最终将view绘制出来，其中measure测量view的宽高，layout确定view在父容器中的位置，draw负责将view绘制在屏幕上。<br/><br/>
+view的绘制流程图：<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"/></p>
+
+<p><strong>performTraversals()</strong>方法源码比较长，就不贴出来了，有兴趣可以去查看一下，从上面的流程图可以看出<strong>performTraversals</strong>会依次调用 <strong>performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);</strong> -  <strong>performLayout(lp, mWidth, mHeight);</strong> - <strong>performDraw();</strong>三个方法，这三个方法顶级view的三个流程，在 <strong>performMeasure()</strong>中会调用<strong>mView.measure()</strong>方法，<strong>mView.measure()</strong>又会调用<strong>onMeasure()</strong>方法对所有子元素进行测量，这个时候measure流程就从父容器传递到了子元素中，这样就完成了依次measure过程，<strong>performLayout()</strong>和<strong>performDraw()</strong>与<strong>performMeasure()</strong>过程是类似的，唯一的不同是<strong>performDraw()</strong>过程在draw方法中是通过<strong>dispatchDraw(canvas)</strong>方法来完成绘制的;</p>
+
+<h2 id="toc_3">理解MeasureSpec</h2>
+
+<p>MeasureSpec是一个32位的int值，高2位代表SpecMode,低30位代表SpecSize，SpecMode是指测量模式，SpecSize是指某种测量模式下的规格大小； <br/>
+MeasureSpec内部的一些常量：</p>
+
+<pre><code class="language-java">        private static final int MODE_SHIFT = 30;
+        private static final int MODE_MASK  = 0x3 &lt;&lt; MODE_SHIFT;      
+        public static final int UNSPECIFIED = 0 &lt;&lt; MODE_SHIFT;       
+        public static final int EXACTLY     = 1 &lt;&lt; MODE_SHIFT;        
+        public static final int AT_MOST     = 2 &lt;&lt; MODE_SHIFT;
+
+ public static int makeMeasureSpec(int size,int mode) {
+            if (sUseBrokenMakeMeasureSpec) {
+                return size + mode;
+            } else {
+                return (size &amp; ~MODE_MASK) | (mode &amp; MODE_MASK);
+            }
+        }
+public static int getMode(int measureSpec) {
+            //noinspection ResourceType
+            return (measureSpec &amp; MODE_MASK);
+        }
+
+ public static int getSize(int measureSpec) {
+            return (measureSpec &amp; ~MODE_MASK);
+        }
+</code></pre>
+
+<p>measureSpec 将SpecMode和SpecSize打包成一个int值，一组SpecMode和SpecSize也可以打包成一个measureSpec 通过getMode和getSize可以得到对应的值； <br/>
+SpecMode有三种类型：</p>
+
+<ul>
+<li>UNSPECIFIED <br/>
+父容器没有对view有任何限制，要多大给多大；</li>
+<li>EXACTLY <br/>
+父容器已经检测出view所需要的精确大小，view的大小就是SpecSize所指定的值，它对应于LayoutParams中的match_parent和具体的数值两种模式；</li>
+<li>AT_MOST <br/>
+父容器指定一个可用的大小即SpecSize，view的大小不能超过这个大小，对应于layoutParams中的wrap——content；</li>
+</ul>
+
+<p>measureSpec 与LayoutParams有什么关系呢？当我们给view设置了LayoutParams后，系统会将LayoutParams在父容器的约束下转换成对应的measureSpec ；<br/><br/>
+对于DecorView来说，在ViewRootImpl中的measureHierarchy方法中进行了measureSpec 的创建过程，desiredWindowWidth为屏幕宽度，desiredWindowHeight为屏幕高度；  </p>
+
+<pre><code class="language-java"> childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
+            childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
+            performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
+</code></pre>
+
+<p>进入getRootMeasureSpec方法：</p>
+
+<pre><code class="language-java">    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
+        int measureSpec;
+        switch (rootDimension) {
+
+        case ViewGroup.LayoutParams.MATCH_PARENT:
+            // Window can&#39;t resize. Force root view to be windowSize.
+            measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.EXACTLY);
+            break;
+        case ViewGroup.LayoutParams.WRAP_CONTENT:
+            // Window can resize. Set max size for root view.
+            measureSpec = MeasureSpec.makeMeasureSpec(windowSize, MeasureSpec.AT_MOST);
+            break;
+        default:
+            // Window wants to be an exact size. Force root view to be that size.
+            measureSpec = MeasureSpec.makeMeasureSpec(rootDimension, MeasureSpec.EXACTLY);
+            break;
+        }
+        return measureSpec;
+    }
+</code></pre>
+
+<p>这个方法是根据DecorView自身的LayoutParams来计算出对应的measureSpec ； <br/>
+对于普通view的measure过程是有viewgroup传递下来的，先看看viewgroup的measureChildWithMargins方法：</p>
+
+<pre><code class="language-java">    protected void measureChildWithMargins(View child,
+            int parentWidthMeasureSpec, int widthUsed,
+            int parentHeightMeasureSpec, int heightUsed) {
+        final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
+
+        final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+                mPaddingLeft + mPaddingRight + lp.leftMargin + lp.rightMargin
+                        + widthUsed, lp.width);
+        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
+                mPaddingTop + mPaddingBottom + lp.topMargin + lp.bottomMargin
+                        + heightUsed, lp.height);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    }
+</code></pre>
+
+<p>measureChildWithMargins方法会通过getChildMeasureSpec方法计算出子元素的MeasureSpec然后子元素进行measure，从代码可以看出子元素的MeasureSpec与父容器的MeasureSpec与自身的LayoutParams有关，此外，还与view的margin和padding有关，下面进入getChildMeasureSpec方法：  </p>
+
+<pre><code class="language-java">    public static int getChildMeasureSpec(int spec, int padding, int childDimension) {
+        int specMode = MeasureSpec.getMode(spec);
+        int specSize = MeasureSpec.getSize(spec);
+
+        int size = Math.max(0, specSize - padding);
+
+        int resultSize = 0;
+        int resultMode = 0;
+
+        switch (specMode) {
+        // Parent has imposed an exact size on us
+        case MeasureSpec.EXACTLY:
+            if (childDimension &gt;= 0) {
+                resultSize = childDimension;
+                resultMode = MeasureSpec.EXACTLY;
+            } else if (childDimension == LayoutParams.MATCH_PARENT) {
+                // Child wants to be our size. So be it.
+                resultSize = size;
+                resultMode = MeasureSpec.EXACTLY;
+            } else if (childDimension == LayoutParams.WRAP_CONTENT) {
+                // Child wants to determine its own size. It can&#39;t be
+                // bigger than us.
+                resultSize = size;
+                resultMode = MeasureSpec.AT_MOST;
+            }
+            break;
+
+        // Parent has imposed a maximum size on us
+        case MeasureSpec.AT_MOST:
+            if (childDimension &gt;= 0) {
+                // Child wants a specific size... so be it
+                resultSize = childDimension;
+                resultMode = MeasureSpec.EXACTLY;
+            } else if (childDimension == LayoutParams.MATCH_PARENT) {
+                // Child wants to be our size, but our size is not fixed.
+                // Constrain child to not be bigger than us.
+                resultSize = size;
+                resultMode = MeasureSpec.AT_MOST;
+            } else if (childDimension == LayoutParams.WRAP_CONTENT) {
+                // Child wants to determine its own size. It can&#39;t be
+                // bigger than us.
+                resultSize = size;
+                resultMode = MeasureSpec.AT_MOST;
+            }
+            break;
+
+        // Parent asked to see how big we want to be
+        case MeasureSpec.UNSPECIFIED:
+            if (childDimension &gt;= 0) {
+                // Child wants a specific size... let him have it
+                resultSize = childDimension;
+                resultMode = MeasureSpec.EXACTLY;
+            } else if (childDimension == LayoutParams.MATCH_PARENT) {
+                // Child wants to be our size... find out how big it should
+                // be
+                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultMode = MeasureSpec.UNSPECIFIED;
+            } else if (childDimension == LayoutParams.WRAP_CONTENT) {
+                // Child wants to determine its own size.... find out how
+                // big it should be
+                resultSize = View.sUseZeroUnspecifiedMeasureSpec ? 0 : size;
+                resultMode = MeasureSpec.UNSPECIFIED;
+            }
+            break;
+        }
+        //noinspection ResourceType
+        return MeasureSpec.makeMeasureSpec(resultSize, resultMode);
+    }
+</code></pre>
+
+<p>这个方法主要作用是根据父容器的MeasureSpec与view自身的LayoutParams来确定子元素的MeasureSpec，参数中的padding指父容器已占用的大小。</p>
+
+<h2 id="toc_4">View的三大流程</h2>
+
+<h3 id="toc_5">measure过程</h3>
+
+<p>measure过程要分两种情况，一种是普通view，一种是viewgroup：</p>
+
+<ul>
+<li><p>1.view的measure <br/>
+view的measure方法是一个final类型的方法，意味着不能重写这个方法，在这个方法中调用了onMeasure方法，我们可以重写onMeasure方法。</p>
+<pre><code class="language-java">public final void measure(int widthMeasureSpec, int heightMeasureSpec) {
+  ...<br/>
+        if (cacheIndex &lt; 0 || sIgnoreMeasureCache) {<br/>
+            // measure ourselves, this should set the measured dimension flag back<br/>
+            onMeasure(widthMeasureSpec, heightMeasureSpec);<br/>
+            mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;<br/>
+        } else {<br/>
+            long value = mMeasureCache.valueAt(cacheIndex);<br/>
+            // Casting a long to int drops the high 32 bits, no mask needed<br/>
+            setMeasuredDimensionRaw((int) (value &gt;&gt; 32), (int) value);<br/>
+            mPrivateFlags3 |= PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;<br/>
+        }<br/>
+      ...<br/>
+}
+</code></pre></li>
+</ul>
+
+<p>看看onMeasure方法的实现：</p>
+
+<pre><code class="language-java">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
+                getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
+    }
+</code></pre>
+
+<p>调用setMeasuredDimension方法设置view的测量值，其中getSuggestedMinimumWidth()是系统默认提供的值，这里就不深究了，下面看看getDefaultSize方法：</p>
+
+<pre><code class="language-java">    public static int getDefaultSize(int size, int measureSpec) {
+        int result = size;
+        int specMode = MeasureSpec.getMode(measureSpec);
+        int specSize = MeasureSpec.getSize(measureSpec);
+
+        switch (specMode) {
+        case MeasureSpec.UNSPECIFIED:
+            result = size;
+            break;
+        case MeasureSpec.AT_MOST:
+        case MeasureSpec.EXACTLY:
+            result = specSize;
+            break;
+        }
+        return result;
+    }
+</code></pre>
+
+<p>在UNSPECIFIED模式下，返回系统默认值，EXACTLY和AT_MOST模式下，返回measureSpec中的值；这里也可以得到一个结论：当我们直接继承一个view的自定义控件需要重写onMeasure方法去设置wrap_content时的自身大小，否则在布局中使用wrap_content的效果与match_parent一样，原因是当view设置为wrap_content时，模式是AT_MOST，通过前一篇文章中的getChildMeasureSpec方法可以知道，view的specSize就是parentSize；重写onMeasure的代码思路如下：</p>
+
+<pre><code class="language-java">         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+        int widthSize = MeasureSpec.getSize(widthMeasureSpec);
+        int heightMode = MeasureSpec.getMode(heightMeasureSpec);
+        int heightSize = MeasureSpec.getSize(heightMeasureSpec);
+
+
+        if (widthMode == MeasureSpec.AT_MOST &amp;&amp; heightMode == MeasureSpec.AT_MOST) {
+            setMeasuredDimension(viewWidth, viewHeight);
+        }
+        else if(widthMode == MeasureSpec.AT_MOST ){
+            setMeasuredDimension(viewWidth, heightSize);
+
+        }
+        else if(heightMode == MeasureSpec.AT_MOST ){
+            setMeasuredDimension(widthSize, viewHeight);
+
+        }
+</code></pre>
+
+<ul>
+<li>2.viewgroup的measure<br/>
+对于viewgroup来说，出了完成自己的measure过程，还要遍历子view的measure方法，各个子view完成对自身的measure过程，与view不同的是，viewgroup是一个抽象类，它是通过measureChildren（）方法开始measure，先看看measureChildren方法的代码：
+<code>java
+protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br/>
+    final int size = mChildrenCount;<br/>
+    final View[] children = mChildren;<br/>
+    for (int i = 0; i &lt; size; ++i) {<br/>
+        final View child = children[i];<br/>
+        if ((child.mViewFlags &amp; VISIBILITY_MASK) != GONE) {<br/>
+            measureChild(child, widthMeasureSpec, heightMeasureSpec);<br/>
+        }<br/>
+    }<br/>
+}
+</code></li>
+</ul>
+
+<p>从以上代码可以看出，确实是会通过measureChild方法对每一个子view进行measure，</p>
+
+<pre><code class="language-java">    protected void measureChild(View child, int parentWidthMeasureSpec,
+            int parentHeightMeasureSpec) {
+        final LayoutParams lp = child.getLayoutParams();
+
+        final int childWidthMeasureSpec = getChildMeasureSpec(parentWidthMeasureSpec,
+                mPaddingLeft + mPaddingRight, lp.width);
+        final int childHeightMeasureSpec = getChildMeasureSpec(parentHeightMeasureSpec,
+                mPaddingTop + mPaddingBottom, lp.height);
+
+        child.measure(childWidthMeasureSpec, childHeightMeasureSpec);
+    }
+</code></pre>
+
+<p>measureChild方法先得到子view的MeasureSpec，然后再调用子view的measure方法；</p>
+
+<p>view的measure过程是三大流程中最复杂的一个，measure完成以后，通过getMeasuredHeight()和getMeasuredWeight()可以得到view的测量高宽，但是在某些极端情况下，系统可能会多次measure才能得到最终的值，在这种情况下，在onMeasure中可能得到的值不是准确的。我们最好在onLayout中获取；还有一个需要注意的是，我们在onCreate、onStart和onResume中均得不到view的宽高，因为measure过程与activity的生命周期不是同步的；</p>
+
+<h3 id="toc_6">layout过程</h3>
+
+<p>layout过程的作用是viewgroup来确定子元素的位置，当viewgroup的位置确定后，会遍历所有子元素并调用其layout方法，在layout方法中又会调用onLayout方法。<br/><br/>
+先看viewgroup的layout方法：</p>
+
+<pre><code class="language-java">@Override
+    public final void layout(int l, int t, int r, int b) {
+        if (!mSuppressLayout &amp;&amp; (mTransition == null || !mTransition.isChangingLayout())) {
+            if (mTransition != null) {
+                mTransition.layoutChange(this);
+            }
+            super.layout(l, t, r, b);
+        } else {
+            // record the fact that we noop&#39;d it; request layout when transition finishes
+            mLayoutCalledWhileSuppressed = true;
+        }
+    }
+</code></pre>
+
+<p>可以看出是调用父类的layout方法：</p>
+
+<pre><code class="language-java">public void layout(int l, int t, int r, int b) {
+    if ((mPrivateFlags3 &amp; PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != 0) {
+        onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);
+        mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
+    }
+
+    int oldL = mLeft;
+    int oldT = mTop;
+    int oldB = mBottom;
+    int oldR = mRight;
+
+    boolean changed = isLayoutModeOptical(mParent) ?
+    setOpticalFrame(l, t, r, b) : setFrame(l, t, r, b);
+
+    if (changed || (mPrivateFlags &amp; PFLAG_LAYOUT_REQUIRED) == PFLAG_LAYOUT_REQUIRED) {
+        onLayout(changed, l, t, r, b);
+
+        if (shouldDrawRoundScrollbar()) {
+            if(mRoundScrollbarRenderer == null) {
+                mRoundScrollbarRenderer = new RoundScrollbarRenderer(this);
+            }
+        } else {
+            mRoundScrollbarRenderer = null;
+        }
+
+        mPrivateFlags &amp;= ~PFLAG_LAYOUT_REQUIRED;
+
+        ListenerInfo li = mListenerInfo;
+        if (li != null &amp;&amp; li.mOnLayoutChangeListeners != null) {
+            ArrayList&lt;OnLayoutChangeListener&gt; listenersCopy = (ArrayList&lt;OnLayoutChangeListener&gt;)li.mOnLayoutChangeListeners.clone();
+            int numListeners = listenersCopy.size();
+            for (int i = 0; i &lt; numListeners; ++i) {
+                listenersCopy.get(i).onLayoutChange(this, l, t, r, b, oldL, oldT, oldR, oldB);
+            }
+        }
+    }
+
+    mPrivateFlags &amp;= ~PFLAG_FORCE_LAYOUT;
+    mPrivateFlags3 |= PFLAG3_IS_LAID_OUT;
+}
+</code></pre>
+
+<p>首先通过setFrame确定view的四个顶点位置，此时父容器的位置也就确定了，接下来就会调用onLayout方法确定子元素的位置；</p>
+
+<p><code>protected void onLayout(boolean changed, int left, int top, int right, int bottom) {}</code></p>
+
+<p>onLayout方法并没有给出具体的实现，当继承特定的组件时，不需要我们重写onLayout方法，继承viewgroup时则需要重写onLayout方法。</p>
+
+<h3 id="toc_7">draw过程</h3>
+
+<p>draw的作用是将view绘制到屏幕上，view的绘制流程遵循以下几步：</p>
+
+<ul>
+<li>绘制背景drawBackground(canvas);</li>
+<li>绘制自己onDraw(canvas);</li>
+<li>绘制子元素dispatchDraw(canvas);</li>
+<li>绘制装饰onDrawForeground(canvas);</li>
+</ul>
+
+<p>看看draw源码：</p>
+
+<pre><code class="language-java">    public void draw(Canvas canvas) {
+        final int privateFlags = mPrivateFlags;
+        final boolean dirtyOpaque = (privateFlags &amp; PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &amp;&amp;
+                (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
+        mPrivateFlags = (privateFlags &amp; ~PFLAG_DIRTY_MASK) | PFLAG_DRAWN;
+
+        /*
+         * Draw traversal performs several drawing steps which must be executed
+         * in the appropriate order:
+         *
+         *      1. Draw the background
+         *      2. If necessary, save the canvas&#39; layers to prepare for fading
+         *      3. Draw view&#39;s content
+         *      4. Draw children
+         *      5. If necessary, draw the fading edges and restore layers
+         *      6. Draw decorations (scrollbars for instance)
+         */
+
+        // Step 1, draw the background, if needed
+        int saveCount;
+
+        if (!dirtyOpaque) {
+            drawBackground(canvas);
+        }
+
+        // skip step 2 &amp; 5 if possible (common case)
+        final int viewFlags = mViewFlags;
+        boolean horizontalEdges = (viewFlags &amp; FADING_EDGE_HORIZONTAL) != 0;
+        boolean verticalEdges = (viewFlags &amp; FADING_EDGE_VERTICAL) != 0;
+        if (!verticalEdges &amp;&amp; !horizontalEdges) {
+            // Step 3, draw the content
+            if (!dirtyOpaque) onDraw(canvas);
+
+            // Step 4, draw the children
+            dispatchDraw(canvas);
+
+            // Overlay is part of the content and draws beneath Foreground
+            if (mOverlay != null &amp;&amp; !mOverlay.isEmpty()) {
+                mOverlay.getOverlayView().dispatchDraw(canvas);
+            }
+
+            // Step 6, draw decorations (foreground, scrollbars)
+            onDrawForeground(canvas);
+
+            // we&#39;re done...
+            return;
+        }
+
+       ...
+    }
+</code></pre>
+
+<p>view绘制过程的传递是通过 dispatchDraw(canvas)来实现的， dispatchDraw(canvas);会遍历所有的子元素的draw方法，view有一个特殊的方法：setWillNotDraw，先看一下源码;</p>
+
+<pre><code class="language-java">/**
+     * If this view doesn&#39;t do any drawing on its own, set this flag to
+     * allow further optimizations. By default, this flag is not set on
+     * View, but could be set on some View subclasses such as ViewGroup.
+     *
+     * Typically, if you override {@link #onDraw(android.graphics.Canvas)}
+     * you should clear this flag.
+     *
+     * @param willNotDraw whether or not this View draw on its own
+     */
+    public void setWillNotDraw(boolean willNotDraw) {
+        setFlags(willNotDraw ? WILL_NOT_DRAW : 0, DRAW_MASK);
+    }
+</code></pre>
+
+<p>意思是如果一个view不需要绘制任何内容，那么设置这个标记位为TRUE后，系统会进行优化，默认情况下标记位为FALSE。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207868504.html" 
+          title="Previous Post: Android 快速开发框架">&laquo; Android 快速开发框架</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207868433.html" 
+          title="Next Post: Android 高效开发工具库">Android 高效开发工具库 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

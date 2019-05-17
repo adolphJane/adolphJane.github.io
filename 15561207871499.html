@@ -1,0 +1,606 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android 带滑动效果的bottomBar - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android 带滑动效果的bottomBar</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/9/30</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>看到一个bottomBar的设计,感觉很好看,于是把它实现了出来</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978644456283.gif" alt="20171104150978644456283.gif"/></p>
+
+<p>可以看到这是一个常见的bottomBar<br/>
+把它分解一下</p>
+
+<ol>
+<li>一共有5个item,每个item的背景颜色不一样</li>
+<li>点击item时,item是通过滑动来移动到相应的item上的,这个移动也不是简单的线性移动,而是带有粘性的.</li>
+<li>item移动时,item颜色的切换是有item之间过渡的,类似于加了一个遮罩</li>
+<li>移到item时,item本身是伴随item的移动是有一个动画的.</li>
+</ol>
+
+<p>根据我们的分解,一步一步解决问题<br/><br/>
+考虑到这是一个bottomBar,我选择了自定义ViewGroup来实现.因为用ViewGroup添加item会比较方便.</p>
+
+<pre><code class="language-java">public class AnimationBottomBar extends ViewGroup {
+    @Override
+    protected void onDraw(Canvas canvas) {        
+    super.onDraw(canvas);
+    }
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    }
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+    }
+}
+</code></pre>
+
+<p>另外item内的小动画我也选择用缩放的形式实现,所以个效果图会有一些出入</p>
+
+<h2 id="toc_0">添加item</h2>
+
+<p>通常来说,一个item会有一个图标和简短的标题.<br/>
+举个例子,就像是知乎,即刻下方的bottomBar一样</p>
+
+<p>所以一个item内有也要有一个图标和一个标题<br/><br/>
+添加item的时候要足够方便,使用代码添加是个不错的选择,类似于这样<code>mAnimationBottomBar.addItem(item)</code>.<br/><br/>
+我创建了一个简单的BottomItem类来包装item  </p>
+
+<pre><code class="language-java">public class BottomItem {
+    int drawableRes;//图标资源
+    String title;//标题
+    public BottomItem(@DrawableRes int drawableRes,String title){
+        this.drawableRes=drawableRes;
+        this.title=title;
+    }
+}
+</code></pre>
+
+<p>添加item之后,我将添加的BottomItem保存到一个list里</p>
+
+<pre><code class="language-java">public AnimationBottomBar addItem(BottomItem bottomItem) {
+    mBottomItemArrayList.add(bottomItem);
+    return this;
+}
+</code></pre>
+
+<p>添加item之后会返会对象本身,就可以继续<code>.addItem()</code>了,就像这样</p>
+
+<pre><code class="language-java">mAnimationBottomBar.addItem(new BottomItem(R.drawable.h, &quot;zero&quot;))
+                    .addItem(new BottomItem(R.drawable.h, &quot;one&quot;))
+                    .addItem(new BottomItem(R.drawable.h, &quot;two&quot;))
+                    .addItem(new BottomItem(R.drawable.h, &quot;four&quot;))
+                    .addItem(new BottomItem(R.drawable.h, &quot;five&quot;))
+</code></pre>
+
+<p>好了,现在已经添加了item,嗯?球都没得.运行没有显示出来,当然啦添加了之后需要添加到ViewGroup里,在经过onMeasure和onLayout之后才会显示出来</p>
+
+<pre><code class="language-java">public void build()  {
+    itemCount = mBottomItemArrayList.size();
+    itemWidth=getLayoutParams().width/itemCount;/*获得平均一个item的宽度,这里有个问题,因为这个时候还没有经过OnMeaSure(),width获取不到,在onMeasure里可以再次进行调整*/
+    for (BottomItem bottomItem : mBottomItemArrayList) {/*添加图标*/
+        ImageView imageView = new ImageView(mContext);
+        imageView.setImageResource(bottomItem.drawableRes);
+        addView(imageView, itemWidth, 20);
+    }
+    for (BottomItem bottomItem : mBottomItemArrayList) {/*添加标题/
+        TextView textView=new TextView(mContext);
+        textView.setTextSize(textSize);
+        textView.setText(bottomItem.title);
+        textView.setTextColor(textColor);
+        textView.setGravity(Gravity.CENTER);
+        addView(textView,itemWidth,20);
+    }
+}
+</code></pre>
+
+<p>onMeasure(),遍历刚刚所有添加子View,通知它们测量自己的长宽</p>
+
+<pre><code class="language-java">@Override
+protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+    super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+    childCount = getChildCount();/*获得所有子View的数量*/
+    barWidth = getSize(300,widthMeasureSpec);//bottombar的宽度
+    barHeight =  getSize(300,heightMeasureSpec);//--的高度
+    for (int i = 0; i &lt; childCount; i++) {
+        View childView = getChildAt(i);
+        measureChild(childView, widthMeasureSpec, heightMeasureSpec);
+        childView.getLayoutParams().width=itemWidth;/*调整子view的宽度*/
+    }
+}
+</code></pre>
+
+<p>onLayout(),确定所有的子View应该在的位置</p>
+
+<pre><code class="language-java">@Override
+protected void onLayout(boolean changed, int l, int t, int r, int b) {
+  
+    for (int i = 0; i &lt; itemCount; i++) {/*遍历每一个item,放置item的位置*/
+        itemCenterX[i] = (int) (itemWidth * (i + 0.5));/*记录每个item的中心位置*/
+        View childImageView = getChildAt(i);
+        childImageView.layout(itemWidth * i, 0, itemWidth * (i + 1), 100);//放置图标,
+        View childTextView=getChildAt(itemCount+i);
+        childTextView.layout(itemWidth * i+childTextView.getWidth()/4,100,itemWidth * (i + 1),barHeight);/*放置标题*/
+    }
+}
+</code></pre>
+
+<p>此时的样子应该是这样的</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978671165751.png" alt="20171104150978671165751.png"/></p>
+
+<h2 id="toc_1">添加背景颜色</h2>
+
+<p>你可能会想到用<code>setBackGroundColor()</code>来设置背景颜色,不过不要忘了,我们这个是要实现动画效果的,虽然使用<code>setBackGroundColor()</code>也能实现,但是要复杂一些.我决定使用<code>OnDraw()</code>画出来,在ViewGroup里默认是不调用<code>OnDraw()</code>的具体原因见这里解决方法也很简单</p>
+
+<blockquote>
+<p>如果我们要重写一个ViweGroup的onDraw方法，有两种方法：<br/>
+1.在构造函数里面，给其设置一个颜色，如#00000000。<br/>
+2.在构造函数里面，调用setWillNotDraw(false)，去掉其WILL_NOT_DRAW flag。</p>
+</blockquote>
+
+<p>我选择了第二个方法,因为我们要自己实现背景.</p>
+
+<pre><code class="language-java">@Override
+protected void onDraw(Canvas canvas) {
+    /*绘制item颜色*/
+    for (int i = 0; i &lt; 5; i++) {
+        mPaint.setColor(itemcolors[i]);
+        canvas.drawRect(itemWidth * i, 0, itemWidth * (i + 1), barHeight, mPaint);
+        canvas.save();
+    }
+        
+    /*画出背景,两个长方形*/
+    mPaint.setColor(backGroundColor);
+    canvas.drawRect(0, 0, itemMoveLeft, barHeight, mPaint);
+    canvas.drawRect(itemMoveRight, 0, itemWidth * 5, barHeight, mPaint);
+    canvas.save();
+    super.onDraw(canvas);
+}
+</code></pre>
+
+<p>这里我分了两部分来画,一是每个item的背景颜色,二是整体的背景颜色,注意画的先后顺序哦,我为了实现item的移动,把item部分画在下层,把背景画在了上层,通过改变背景来实现item的移动效果.<br/>
+这时候的效果是这样的</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978685438558.png" alt="20171104150978685438558.png"/></p>
+
+<h2 id="toc_2">实现动画</h2>
+
+<p>注意这里的动画其实分为两个部分,两部分是同时进行的</p>
+
+<ol>
+<li>item的移动动画</li>
+<li>item的缩放动画</li>
+</ol>
+
+<pre><code class="language-java">@Override
+protected void onDraw(Canvas canvas) {
+    /绘制item颜色*/
+    for (int i = 0; i &lt; 5; i++) {
+        mPaint.setColor(itemcolors[i]);
+        canvas.drawRect(itemWidth * i, 0, itemWidth * (i + 1), barHeight, mPaint);
+        canvas.save();
+    }
+    /*画出背景,两个长方形*/
+    mPaint.setColor(backGroundColor);
+    canvas.drawRect(0, 0, itemMoveLeft, barHeight, mPaint);
+    canvas.drawRect(itemMoveRight, 0, itemWidth * 5, barHeight, mPaint);
+    canvas.save();
+    /*遍历每个item位置,画出需要移动和缩放的item*/
+    for (int i = 0; i &lt; itemCount; i++) {
+        int deltaX=Math.abs(itemMoveCenter-itemCenterX[i]);/*获得当前item移动中心点和item固定中心点的距离*/
+        if (deltaX&lt;itemWidth){
+            itemScale[i]= (float) (-0.5*deltaX/itemWidth+1);/*当距离小于一个item的宽度时调整item的缩放系数*/
+        }
+        else itemScale[i]=0.5f;/*非选中的item的缩放系数固定为0.5*/
+        
+        /*对item的大小进行缩放*/
+        View childImageView = getChildAt(i);
+        childImageView.setScaleX(itemScale[i]);
+        childImageView.setScaleY(itemScale[i]);
+        View childTextView = getChildAt(itemCount+i);
+        childTextView.setScaleX(itemScale[i]);
+        childTextView.setScaleY(itemScale[i]);
+    }
+    super.onDraw(canvas);
+}
+</code></pre>
+
+<p>我用了几个数组来记录每个item的固定中心位置,每个item的颜色,每个item的缩放系数.<br/>
+缩放系数这里,默认的未选中item的缩放系数是0.5,选中的item的缩放系数就是1.0,移动的时候,越靠近选中的item就这个系数就越大.<br/>
+既然是动画我们肯定要让她动起来,我继承了Animation类实现了自己的BottomAnimation类</p>
+
+<pre><code class="language-java">private class BottomAnimation extends Animation {
+    @Override
+    protected void applyTransformation(float interpolatedTime, Transformation t) {
+        super.applyTransformation(interpolatedTime, t);
+        int position = selectIndex - selectLastIndex;
+        /*判断不同方向的移动*/
+        if (position &lt; 0) {/*向左滑动*/
+            itemMoveRight = (int) (itemMoveLastRight + interpolatedTime * itemWidth * position);
+            itemMoveLeft = (int) (itemMoveLastLeft + setFirst(interpolatedTime) * itemWidth * position);
+            itemMoveCenter = (int) (itemMoveLastRight + interpolatedTime * itemWidth * position) -itemWidth / 2;/*记录中心点移动的位置*/
+        } else {/*向右滑动*/
+            itemMoveRight = (int) (itemMoveLastRight + setFirst(interpolatedTime) * itemWidth * position);
+            itemMoveLeft = (int) (itemMoveLastLeft + interpolatedTime * itemWidth * position);
+            itemMoveCenter = (int) (itemMoveLastLeft + interpolatedTime * itemWidth * position) + itemWidth / 2;/*记录中心点移动的位置*/
+        }
+        postInvalidate();/*更新画面*/
+    }
+    /*为了实现果冻效果,先移动的一侧要有快速效果*/
+    private float setFirst(float interpolatedTime) {
+        return (float) Math.sin(interpolatedTime * 0.5 * Math.PI);
+    }
+}
+</code></pre>
+
+<p>在判断到有点击事件之后,启动这个动画就ok了</p>
+
+<pre><code class="language-java">@Override
+public boolean dispatchTouchEvent(MotionEvent ev) {
+    int action = ev.getAction();
+    switch (action) {
+        case MotionEvent.ACTION_DOWN:
+            touchDownX = ev.getX();
+            break;
+        case MotionEvent.ACTION_UP:
+            if (ev.getX() / itemWidth == touchDownX / itemWidth) {
+                selectIndex = (int) (ev.getX() / itemWidth);
+                /*点击时开始动画*/
+                startAnimation(mBottomAnimation);
+            }
+            break;
+    }
+    return true;
+}
+</code></pre>
+
+<p>最后的效果是这个样子的</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978699755982.gif" alt="20171104150978699755982.gif"/></p>
+
+<p>最后完整的的代码在<a href="https://github.com/Mran/AnimationBottomBar">我的github</a></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207871543.html" 
+          title="Previous Post: Android 用贝塞尔曲线绘制酷炫轮廓背景">&laquo; Android 用贝塞尔曲线绘制酷炫轮廓背景</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207871413.html" 
+          title="Next Post: Android Studio 快速创建Activity、Fragment模板">Android Studio 快速创建Activity、Fragment模板 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

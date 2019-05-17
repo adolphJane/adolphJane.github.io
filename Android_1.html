@@ -1,0 +1,4914 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+	$(function(){
+		$('#menu_item_index').addClass('is_active');
+	});
+</script>
+<div class="row">
+	<div class="large-8 medium-8 columns">
+		<div class="markdown-body home-categories">
+		
+			<div class="article">
+                <a class="clearlink" href="15561207872718.html">
+                
+                  <h1>Android-自定义View播放Gif动画</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>GIF是一种很常见的动态图片格式，在Android中它的使用场景非常多，大到启动页动画、小到一个Loading展示，都可以用GIF动画来完成，使用也很方便，直接从美工那边拿过来用就成。如果项目赶时间或者自定义原生动画太麻烦，GIF都是一个很好的选择，相比于最新的WEBP格式的动画，也有更好的兼容性（毕竟已经出现很多年了）。<br/><br/>
+关于图片加载我一直用的是Google推荐的Glide，图片加载和缓存都做的很好，同样也支持GIF动画。不过Glide默认就是循环播放Gif，没有开放相关的接口来控制Gif。这就使的我们不能很好地控制Gif的播放，比如控制播放开始时间、播放次数，播放暂停、播放开始、结束事件的监听，虽然用Glide可能做到（网上说可以，但我没找到方法），但操作也会很麻烦。  </p>
+
+<h2 id="toc_1">分析</h2>
+
+<p>除了第三方的库，Android自带的类android.graphics.Movie也可以用来加载播放Gif动画，而且实现起来很简单。按数据来源分别可以从Gif文件的输入流，文件路径，字节数组中得到Movie的实列。然后我们可以通过操作Movie对象来操作Gif文件。</p>
+
+<ul>
+<li>Movie decodeStream(InputStream is)</li>
+<li>Movie decodeFile(String pathName)</li>
+<li>Movie decodeByteArray(byte[] data, int offset,int length)</li>
+</ul>
+
+<p>下面介绍下几个movie的重要方法：</p>
+
+<p><code>int width()</code>     movie的宽，值等于gif图片的宽，单位：px。<br/><br/>
+<code>int height()</code>    movie的高，值等于gif图片的高，单位：px。<br/><br/>
+<code>int duration()</code>  movie播放一次的时长，也就是gif播放一次的时长，单位：毫秒。boolean isOpaque() Gif图片是否带透明  <code>boolean setTime(int relativeMilliseconds)</code> 设置movie当前处在什么时间，然后找到对应时间的图片帧，范围0 ~ duration。返回是否成功找到那一帧。<br/>
+<code>draw(Canvas canvas, float , float y)</code><br/><br/>
+<code>draw(Canvas canvas, float x, float y, Paint paint)</code>在Canves中画出当前帧对应的图像。x，y对应Movie左上角在Canves中的坐标。以上就是Movie平常会用到大部分方法，下面就利用这些自定义VIew实现播放Gif动画。</p>
+
+<h2 id="toc_2">实现</h2>
+
+<p>首先定义一些需要的属性，用于在布局文件中设置gif</p>
+
+<pre><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
+        &lt;!--gif文件引用--&gt;
+        &lt;attr name=&quot;gifSrc&quot; format=&quot;reference&quot;  /&gt;
+        &lt;!--是否加载完自动播放--&gt;
+        &lt;attr name=&quot;authPlay&quot; format=&quot;boolean&quot;  /&gt;
+        &lt;!--播放次放，默认永远播放--&gt;
+        &lt;attr name=&quot;playCount&quot; format=&quot;integer&quot;  /&gt;
+    &lt;/declare-styleable&gt;
+</code></pre>
+
+<p>然后定义Gif的播放监听器,来监听各个时段的事件，命名的含义都很简单就不再介绍了：</p>
+
+<pre><code class="language-java">public interface OnPlayListener {
+        void onPlayStart();
+
+        void onPlaying(int percent);
+
+        void onPlayPause(boolean pauseSuccess);
+
+        void onPlayRestart();
+
+        void onPlayEnd();
+    }
+</code></pre>
+
+<p>声明类，直接继承ImageView，这样我们不仅可以显示Gif动画，也可以显示普通图片：public class GifImageView extends AppCompatImageView然后加载Gif图片资源</p>
+
+<pre><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
+        mOnPlayListener = onPlayListener;
+        movie = Movie.decodeStream(getResources().openRawResource(movieResourceId));
+        if (movie == null) {
+            //如果movie为空，那么就不是gif文件，尝试转换为bitmap显示
+            Bitmap bitmap = BitmapFactory.decodeResource(getResources(), movieResourceId);
+            if (bitmap != null) {
+                setImageBitmap(bitmap);
+                return;
+            }
+        }
+        movieDuration = movie.duration() == 0 ? DEFAULT_DURATION : movie.duration();
+        requestLayout();
+    }
+</code></pre>
+
+<p>调用requestLayout重新计算View大小，并重新绘制。如果是gif格式则View宽高等于movie的宽高，不是则调用父类的测量方法。</p>
+
+<pre><code class="language-text">   @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        if (movie != null) {
+            int movieWidth = movie.width();
+            int movieHeight = movie.height();
+            setMeasuredDimension(movieWidth, movieHeight);
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
+    }
+</code></pre>
+
+<p>开始播放，其实就是调用invalidate从而调用onDraw方法就行UI绘制：</p>
+
+<pre><code class="language-text">    public void play(int counts) {
+        this.counts = counts;
+        reset();
+        if (mOnPlayListener != null) {
+            mOnPlayListener.onPlayStart();
+        }
+        invalidate();
+    }
+</code></pre>
+
+<p>不断调用onDraw方法来绘制Gif当前时间的图片帧（同样需要判断是否是gif格式，不是则调用父类的绘制方法）：</p>
+
+<pre><code class="language-text"> @Override
+    protected void onDraw(Canvas canvas) {
+        if (movie != null) {
+            if (!mPaused &amp;&amp; hasStart) {
+                drawMovieFrame(canvas);
+                invalidateView();
+            } else {
+                drawMovieFrame(canvas);
+            }
+        } else {
+            super.onDraw(canvas);
+        }
+    }
+    /**
+     * 画出gif帧
+     */
+    private void drawMovieFrame(Canvas canvas) {
+        movie.setTime(getCurrentFrameTime());
+        movie.draw(canvas, 0.0f, 0.0f);
+    }
+</code></pre>
+
+<p>最核心的方法就是计算当前时间需要绘制处于movie中的对应时间的图片帧。</p>
+
+<pre><code class="language-text"> private int getCurrentFrameTime() {
+        if (movieDuration == 0)
+            return 0;
+            //因为有暂停，所以需要减去暂停时间
+        long now = SystemClock.uptimeMillis() - dealyTime;
+        int nowCount = (int) ((now - mMovieStart) / movieDuration);
+        if (counts != -1 &amp;&amp; nowCount &gt;= counts) {
+            hasStart = false;
+            if (mOnPlayListener != null) {
+                mOnPlayListener.onPlayEnd();
+            }
+        }
+        int currentTime = (int) ((now - mMovieStart) % movieDuration);
+        int percent = currentTime * 100 / movieDuration;
+        if (mOnPlayListener != null &amp;&amp; hasStart) {
+            mOnPlayListener.onPlaying(percent);
+        }
+        return currentTime;
+    }
+</code></pre>
+
+<p>暂停Gif播放：</p>
+
+<pre><code class="language-text">   public void pause() {
+        if (movie != null &amp;&amp; !mPaused &amp;&amp; hasStart) {
+            mPaused = true;
+            invalidate();
+            mMoviePauseTime = SystemClock.uptimeMillis();
+            if (mOnPlayListener != null) {
+                mOnPlayListener.onPlayPause(true);
+            }
+        } else {
+            if (mOnPlayListener != null) {
+                mOnPlayListener.onPlayPause(false);
+            }
+        }
+    }
+</code></pre>
+
+<p>继续Gif播放：</p>
+
+<pre><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
+                mPaused = false;
+                dealyTime = dealyTime + SystemClock.uptimeMillis() - mMoviePauseTime;
+                invalidate();
+                if (mOnPlayListener != null) {
+                    mOnPlayListener.onPlayRestart();
+                }
+            }
+</code></pre>
+
+<p>经过这些处理，我们就能更好地控制Gif的播放流程了。下面简单看下成品图：</p>
+
+<h2 id="toc_3">进阶</h2>
+
+<h3 id="toc_4">倒叙播放</h3>
+
+<p>相信看了上面GifImageView的实现原理后，倒叙播放的实现也是很容易的。</p>
+
+<pre><code class="language-text">    public void playReserver() {
+        if (movie != null) {
+            reset();
+            reverse = true;
+            if (mOnPlayListener != null) {
+                mOnPlayListener.onPlayStart();
+            }
+            invalidate();
+        }
+    } if (reverse) {
+                    movie.setTime(movieDuration - getCurrentFrameTime());
+                } else {
+                    movie.setTime(getCurrentFrameTime());
+                }
+</code></pre>
+
+<p>如下图，狗子的头已经从原来的左边转到右边变成了现在的右边转到左边（ಠᴗಠ）。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041826167420.gif" alt="20171112151041826167420.gif"/></p>
+
+<p>像播放视频一样播放Gif动画<br/>
+这部分是我在写完GifView后想到的一点进阶功能，既然我们已经实现了播放和暂停，即能控制在某个时间点播放指定的Gif图片帧，如果再加入进度条，快进等功能，那么不就能做到和视频播放器一样的功能了吗？限于篇幅，我只简单实现了进度条功能，更多功能实现请移步Github，地址：<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Frenjianan%2FGifView">GifView</a></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041830828970.gif" alt="20171112151041830828970.gif"/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872676.html">
+                
+                  <h1>Android-事件分发机制源码攻略</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>android事件分发算是自定义View不可缺失的一部分，事件分发是指那一类跟屏幕交互的操作等事件，例如滑动，点击，长按这类。这些事件都是由摁下、移动、抬起等基本事件组成的。那事件分发是指当你点击了屏幕，这个事件是如何从Activity传递到真正处理这个事件的View上的过程。例如，我们在做ListView跟ViewPager嵌套的时候，既能左右滑动，又能上下滑动，这些事件是如何避免彼此间的冲突的。下面我会分三节来介绍这一原理。<br/><br/>
+首先，这次的源码分析是基于25.0.3版本进行的。</p>
+
+<h2 id="toc_1">分发事件</h2>
+
+<p>分发的事件主要是MotionEvent这个类所表示的点击、移动、抬起、取消等事件<br/><br/>
+MotionEvent.ACTION_DOWN<br/><br/>
+MotionEvent.ACTION_MOVE<br/><br/>
+MotionEvent.ACTION_UP<br/><br/>
+MotionEvent.ACTION_CANCEL<br/><br/>
+…</p>
+
+<h2 id="toc_2">分发的对象</h2>
+
+<p>分发的对象是指收到上述事件的类</p>
+
+<p>Activity<br/><br/>
+ViewGroup<br/><br/>
+View  </p>
+
+<p>上述三个类是主要的事件分发对象，后期的讨论也是集中在这三个类里面。这里有个点得提一下就是ViewGroup是View的子类。这些事件会在这三者的dispatchTouchEvent、onTouchEvent这两个方法里面传递，还有一个ViewGroup特有的onInterceptTouchEvent方法。下面给出以上提到的类以及方法之间的关系。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041696377769.png" alt="20171112151041696377769.png"/></p>
+
+<p>从这张图，我们可以看出，不同返回值，事件的分发方向不同，这里不做详细分析，这张图是否画得出来作为你对这次源码阅读的成绩。</p>
+
+<h2 id="toc_3">Demo</h2>
+
+<p><strong>Activity</strong></p>
+
+<pre><code class="language-java">    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
+
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        Log.i(TAG,&quot;onTouchEvent&quot;+event.getAction());
+        return super.onTouchEvent(event);
+    }
+</code></pre>
+
+<p><strong>CusViewGroup</strong></p>
+
+<pre><code class="language-java">    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
+
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+
+        Log.i(TAG,&quot;onInterceptTouchEvent&quot;+ev.getAction());
+
+        return super.onInterceptTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        Log.i(TAG,&quot;onTouchEvent&quot;+event.getAction());
+
+        return super.onTouchEvent(event);
+    }
+</code></pre>
+
+<p><strong>View</strong></p>
+
+<pre><code class="language-java">    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
+
+        return super.dispatchTouchEvent(ev);
+    }
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+
+        Log.i(TAG,&quot;onTouchEvent&quot;+event.getAction());
+
+        return super.onTouchEvent(event);
+    }
+</code></pre>
+
+<p><strong>布局</strong></p>
+
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;com.example.coffeetime.cusviewdemo.CusLineaLayout
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    tools:context=&quot;com.example.coffeetime.cusviewdemo.MainActivity&quot;&gt;
+
+    &lt;com.example.coffeetime.cusviewdemo.CusView
+        android:layout_width=&quot;200dp&quot;
+        android:layout_height=&quot;200dp&quot;
+        android:background=&quot;@color/colorPrimary&quot;/&gt;
+
+&lt;/com.example.coffeetime.cusviewdemo.CusLineaLayout&gt;
+</code></pre>
+
+<h2 id="toc_4">结果</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041703651591.png" alt="20171112151041703651591.png"/></p>
+
+<blockquote>
+<p>ACTION_DOWN的值为0 <br/>
+ACTION_MOVE的值为1</p>
+</blockquote>
+
+<p>从输出的结果的第一行可以看出来最先获取事件的是Activity这一层，从倒数第三行可以看出，ACTION_DOWN这个事件最终消费是在Activity的onTouchEvent这个方法被消费。这个结果跟上面的图片是一致的。<br/><br/>
+再看看输出结果的倒数两行，ACTION_MOVE事件从dispatchTouchEvent直接就传给了同级的onTouchEvent方法去了，说明ACTION_DOWN事件在哪里被消费了，后续事件也在那里消费，并且跳过中间传递。这个原因会在分析源码的时候给出解释。</p>
+
+<h2 id="toc_5">Activity</h2>
+
+<p>从上述的结果，我们可以得出事件最先被拦截的地方是从Activity的dispatchTouchEvent方法开始，那我们的源码攻略也从这里开始。</p>
+
+<pre><code class="language-java"> /**
+     * Called to process touch screen events.  You can override this to
+     * intercept all touch screen events before they are dispatched to the
+     * window.  Be sure to call this implementation for touch screen events
+     * that should be handled normally.
+     *
+     * @param ev The touch screen event.
+     *
+     * @return boolean Return true if this event was consumed.
+     */
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            onUserInteraction();
+        }
+        if (getWindow().superDispatchTouchEvent(ev)) {
+            return true;
+        }
+        return onTouchEvent(ev);
+    }
+</code></pre>
+
+<p>这个方法首先判断事件类型，如果是ACTION_DOWN事件，则先执行onUserInteraction()方法；</p>
+
+<pre><code class="language-text">public void onUserInteraction() {
+}
+</code></pre>
+
+<blockquote>
+<p>这个方法没有实现，根据文档注释，当有任意一个按键、触屏或者轨迹球事件发生时，栈顶Activity的onUserInteraction会被触发。如果我们需要知道用户是不是正在和设备交互，可以在子类中重写这个方法，去获取通知（比如取消屏保这个场景）。跟这个方法配对的还有onUserLeaveHint方法，这个方法是在用户离开设备的时候触发的。</p>
+</blockquote>
+
+<p>我们接着回到刚刚那个地方，判断完事件ACTION_DOWN事件之后，会执行getWindow().superDispatchTouchEvent(ev)这个方法，这个getWindow获取的是哪个Window呢，我们进去看看。</p>
+
+<pre><code class="language-java">public Window getWindow() {
+    return mWindow;
+}
+</code></pre>
+
+<pre><code class="language-text">/**
+ * Abstract base class for a top-level window look and behavior policy.  An
+ * instance of this class should be used as the top-level view added to the
+ * window manager. It provides standard UI policies such as a background, title
+ * area, default key processing, etc.
+ *
+ * &lt;p&gt;The only existing implementation of this abstract class is
+ * android.view.PhoneWindow, which you should instantiate when needing a
+ * Window.
+ */
+public abstract class Window {}
+</code></pre>
+
+<p>通过这块注释，我们可以看出，window的实现类是phoneWindow。其实在Android里面很多都是可以通过阅读注释或者是官方文档去找出具体的实现类，不是只能依靠百度；好了，那我们可以直接进到phoneWindow类去看下superDispatchTouchEvent这个方法做了些什么</p>
+
+<pre><code class="language-java">   @Override
+    public boolean superDispatchTouchEvent(MotionEvent event) {
+        return mDecor.superDispatchTouchEvent(event);
+    }
+</code></pre>
+
+<p>这个方法又是调用mDecor的同名方法去实现，mDecor又是什么</p>
+
+<p><strong>phoneWindow</strong></p>
+
+<pre><code class="language-text"> // This is the top-level view of the window, containing the window decor.
+    private DecorView mDecor;
+</code></pre>
+
+<p><strong>DecorView</strong></p>
+
+<pre><code class="language-text">    public boolean superDispatchTouchEvent(MotionEvent event) {
+        return super.dispatchTouchEvent(event);
+    }
+</code></pre>
+
+<p>DecorView 是window的顶级View，而DecorView是继承FrameLayout的布局，接着去FragmeLayout里面寻找dispatchTouchEvent方法，而FragmeLayout并没有实现这个方法，也即这个是直接交给ViewGroup去处理的。</p>
+
+<h2 id="toc_6">小结</h2>
+
+<p>在Activity层事件的传递过程如下图</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041706262125.png" alt="20171112151041706262125.png"/></p>
+
+<p>从Activity的dispatchTouchEvent获取事件经过PhoneWindow、DecorView再到最终的ViewGroup，这一层代码比较简单，没有比较难分析的，只是经过的类比较多，其实只要把握的主线，分析起来还是比较简单的。这一篇比较少，下一篇是ViewGroup的分析，由于ViewGroup的源码比较多，所以才拆开来写，不然太长了。</p>
+
+<h2 id="toc_7">ViewGroup</h2>
+
+<blockquote>
+<p>如果是ACTION_DOWN事件，就会去寻找子View来处理，如果找不到子View来处理，就自己处理。<br/><br/>
+如果不是ACTION_DOWN事件，就会把这个事件传给处理了ACTION_DOWN事件的View来处理。</p>
+</blockquote>
+
+<p>大致就这两个逻辑，虽说比较粗略，不过，这对于接下来看源码就足够了，并且源码有比较多的注释，基本上大致的方向是可以弄懂了。</p>
+
+<pre><code class="language-java">@Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+
+        ... 
+        //返回值的关键，注意留意handled的值发生改变的地方
+        boolean handled = false;
+        //判断当前window是否有被遮挡，true为分发这个事件，false为丢弃这个事件
+        if (onFilterTouchEventForSecurity(ev)) {
+            final int action = ev.getAction();
+            final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
+
+            // Handle an initial down.
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+                // Throw away all previous state when starting a new touch gesture.
+                // The framework may have dropped the up or cancel event for the previous
+                // due to an app switch, ANR, or some other state change.
+//在新的事件开始（即是新的ACTION_DOWN事件），需要清除掉之前的状态以及设置mFirstTouchTarget=null;
+                cancelAndClearTouchTargets(ev);
+                resetTouchState();
+            }
+
+            // Check for interception.
+            final boolean intercepted;
+            //子View唯一一个可以用来控制父类事件传递
+            //只有ACTION_DOWN事件跟mFirstTouchTarget不为空的情况，后面的讨论大多是围绕着mFirstTouchTarget来进行的
+            if (actionMasked == MotionEvent.ACTION_DOWN
+                    || mFirstTouchTarget != null) {
+                //是否拦截事件，disallowIntercept为true是不拦截，false是拦截
+                final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;
+                if (!disallowIntercept) {
+                    //一般重写onInterceptTouchEvent方法
+                    intercepted = onInterceptTouchEvent(ev);
+                    ev.setAction(action); // restore action in case it was changed
+                } else {
+                    intercepted = false;
+                }
+            } else {
+                // There are no touch targets and this action is not an initial down
+                // so this view group continues to intercept touches.
+                intercepted = true;
+            }
+
+            // If intercepted, start normal event dispatch. Also if there is already
+            // a view that is handling the gesture, do normal event dispatch.
+            if (intercepted || mFirstTouchTarget != null) {
+                ev.setTargetAccessibilityFocus(false);
+            }
+
+            // Check for cancelation.
+            final boolean canceled = resetCancelNextUpFlag(this)
+                    || actionMasked == MotionEvent.ACTION_CANCEL;
+
+            // Update list of touch targets for pointer down, if needed.
+            //split是否分发给多个子View，默认为false
+            final boolean split = (mGroupFlags &amp; FLAG_SPLIT_MOTION_EVENTS) != 0;
+            TouchTarget newTouchTarget = null;
+            boolean alreadyDispatchedToNewTouchTarget = false;
+            //如果不被拦截即可进入或者不是ACTION_CANCEL事件
+            if (!canceled &amp;&amp; !intercepted) {
+
+                // If the event is targeting accessiiblity focus we give it to the
+                // view that has accessibility focus and if it does not handle it
+                // we clear the flag and dispatch the event to all children as usual.
+                // We are looking up the accessibility focused host to avoid keeping
+                // state since these events are very rare.
+                View childWithAccessibilityFocus = ev.isTargetAccessibilityFocus()
+                        ? findChildWithAccessibilityFocus() : null;
+                //只有ACTION_DOWN等事件能够进入
+                if (actionMasked == MotionEvent.ACTION_DOWN
+                        || (split &amp;&amp; actionMasked == MotionEvent.ACTION_POINTER_DOWN)
+                        || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+                    final int actionIndex = ev.getActionIndex(); // always 0 for down
+                    final int idBitsToAssign = split ? 1 &lt;&lt; ev.getPointerId(actionIndex)
+                            : TouchTarget.ALL_POINTER_IDS;
+
+                    // Clean up earlier touch targets for this pointer id in case they
+                    // have become out of sync.
+                    removePointersFromTouchTargets(idBitsToAssign);
+
+                    final int childrenCount = mChildrenCount;
+                    if (newTouchTarget == null &amp;&amp; childrenCount != 0) {
+                        final float x = ev.getX(actionIndex);
+                        final float y = ev.getY(actionIndex);
+                        // Find a child that can receive the event.
+                        // Scan children from front to back.
+                        //获取按Z轴从大到小排序的子View列表
+                        final ArrayList&lt;View&gt; preorderedList = buildTouchDispatchChildList();
+                        //是否有自定义顺序，一般为false
+                        final boolean customOrder = preorderedList == null
+                                &amp;&amp; isChildrenDrawingOrderEnabled();
+                        final View[] children = mChildren;
+                        for (int i = childrenCount - 1; i &gt;= 0; i--) {
+                            //确认这个子View的下标
+                            final int childIndex = getAndVerifyPreorderedIndex(
+                                    childrenCount, i, customOrder);
+                            //根据上面获得的下标，确认这个子View
+                            final View child = getAndVerifyPreorderedView(
+                                    preorderedList, children, childIndex);
+
+                            // If there is a view that has accessibility focus we want it
+                            // to get the event first and if not handled we will perform a
+                            // normal dispatch. We may do a double iteration but this is
+                            // safer given the timeframe.
+                            // 如果当前视图无法获取用户焦点，则跳过本次循环
+                            if (childWithAccessibilityFocus != null) {
+                                if (childWithAccessibilityFocus != child) {
+                                    continue;
+                                }
+                                childWithAccessibilityFocus = null;
+                                i = childrenCount - 1;
+                            }
+                            //是否获得可见，并且落在child的布局范围内
+                            if (!canViewReceivePointerEvents(child)
+                                    || !isTransformedTouchPointInView(x, y, child, null)) {
+                                ev.setTargetAccessibilityFocus(false);
+                                continue;
+                            }
+                            //Child是否已经处理过事件了，有的话更改pointerIdBits值，并结束查找
+                            newTouchTarget = getTouchTarget(child);
+                            if (newTouchTarget != null) {
+                                // Child is already receiving touch within its bounds.
+                                // Give it the new pointer in addition to the ones it is handling.
+                                newTouchTarget.pointerIdBits |= idBitsToAssign;
+                                break;
+                            }
+
+                            resetCancelNextUpFlag(child);
+                            //分发给View的dispatchTouchEvent
+                            if (dispatchTransformedTouchEvent(ev, false, child, idBitsToAssign)) {
+                                // Child wants to receive touch within its bounds.
+                                mLastTouchDownTime = ev.getDownTime();
+                                if (preorderedList != null) {
+                                    // childIndex points into presorted list, find original index
+                                    for (int j = 0; j &lt; childrenCount; j++) {
+                                        if (children[childIndex] == mChildren[j]) {
+                                            mLastTouchDownIndex = j;
+                                            break;
+                                        }
+                                    }
+                                } else {
+                                    mLastTouchDownIndex = childIndex;
+                                }
+                                mLastTouchDownX = ev.getX();
+                                mLastTouchDownY = ev.getY();
+                                //给mFirstTouchTarget赋值，该事件已经被子View确认处理了
+                                newTouchTarget = addTouchTarget(child, idBitsToAssign);
+                                alreadyDispatchedToNewTouchTarget = true;
+                                break;
+                            }
+
+                            // The accessibility focus didn&#39;t handle the event, so clear
+                            // the flag and do a normal dispatch to all children.
+                            ev.setTargetAccessibilityFocus(false);
+                        }
+                        if (preorderedList != null) preorderedList.clear();
+                    }
+
+                    if (newTouchTarget == null &amp;&amp; mFirstTouchTarget != null) {
+                        // Did not find a child to receive the event.
+                        // Assign the pointer to the least recently added target.
+                        newTouchTarget = mFirstTouchTarget;
+                        while (newTouchTarget.next != null) {
+                            newTouchTarget = newTouchTarget.next;
+                        }
+                        newTouchTarget.pointerIdBits |= idBitsToAssign;
+                    }
+                }
+            }
+
+            // Dispatch to touch targets.
+            // 没有子View处理，则自己处理
+            if (mFirstTouchTarget == null) {
+                // No touch targets so treat this as an ordinary view.
+                handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                        TouchTarget.ALL_POINTER_IDS);
+            } else {
+                // Dispatch to touch targets, excluding the new touch target if we already
+                // dispatched to it.  Cancel touch targets if necessary.
+                //处理除了ACTION_DOWN以外的事件
+                TouchTarget predecessor = null;
+                TouchTarget target = mFirstTouchTarget;
+                while (target != null) {
+                    final TouchTarget next = target.next;
+                    if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
+                        handled = true;
+                    } else {
+                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                                || intercepted;
+                        //如果这个事件被拦截了，intercepted为true
+                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                                target.child, target.pointerIdBits)) {
+                            handled = true;
+                        }
+                        //如果事件被拦截掉，
+                        if (cancelChild) {
+                            if (predecessor == null) {
+                                mFirstTouchTarget = next;
+                            } else {
+                                predecessor.next = next;
+                            }
+                            target.recycle();
+                            target = next;
+                            continue;
+                        }
+                    }
+                    predecessor = target;
+                    target = next;
+                }
+            }
+
+            // Update list of touch targets for pointer up or cancel, if needed.
+            if (canceled
+                    || actionMasked == MotionEvent.ACTION_UP
+                    || actionMasked == MotionEvent.ACTION_HOVER_MOVE) {
+                resetTouchState();
+            } else if (split &amp;&amp; actionMasked == MotionEvent.ACTION_POINTER_UP) {
+                final int actionIndex = ev.getActionIndex();
+                final int idBitsToRemove = 1 &lt;&lt; ev.getPointerId(actionIndex);
+                removePointersFromTouchTargets(idBitsToRemove);
+            }
+        }
+
+        if (!handled &amp;&amp; mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(ev, 1);
+        }
+        return handled;
+    }
+</code></pre>
+
+<p>像这么长的代码，很多地方是可以跳过的，不过仔仔细细分析，特别是像Google出品的（个人愚见），因为这些东西考虑的方方面面比较多，而我们这个只是为了了解事件的分发，绘制那块我们不会过多涉及。（说跑题了）回到正题来，像这么长的代码，之前学习的时候，有个牛人是这么写的（个人总结）。</p>
+
+<blockquote>
+<p>从结果出发，留意改变的结果的地方</p>
+</blockquote>
+
+<p>上面的dispatchTouchEvent返回值是由handle决定，我们先来看第一处第8行代码</p>
+
+<pre><code class="language-java"> boolean handled = false;
+        if (onFilterTouchEventForSecurity(ev)) {
+            final int action = ev.getAction();
+            final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
+            // Handle an initial down.
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+                // Throw away all previous state when starting a new touch gesture.
+                // The framework may have dropped the up or cancel event for the previous gesture
+                // due to an app switch, ANR, or some other state change.
+                cancelAndClearTouchTargets(ev);
+                resetTouchState();
+            }
+        ...
+        }
+        return false;
+</code></pre>
+
+<p>这个onFilterTouchEventForSecurity方法如果返回false的话，基本上里面的代码都不用分析了，直接返回false。那我们进去看看这个方法做了什么。</p>
+
+<pre><code class="language-java">    /**
+     * Filter the touch event to apply security policies.
+     *
+     * @param event The motion event to be filtered.
+     * @return True if the event should be dispatched, false if the event should be dropped.
+     *
+     * @see #getFilterTouchesWhenObscured
+     */
+    public boolean onFilterTouchEventForSecurity(MotionEvent event) {
+        //noinspection RedundantIfStatement
+        if ((mViewFlags &amp; FILTER_TOUCHES_WHEN_OBSCURED) != 0
+                &amp;&amp; (event.getFlags() &amp; MotionEvent.FLAG_WINDOW_IS_OBSCURED) != 0) {
+            // Window is obscured, drop this touch.
+            return false;
+        }
+        return true;
+    }
+</code></pre>
+
+<p>这是一个安全策略方面的过滤，我们来看下这两个变量FILTER_TOUCHES_WHEN_OBSCURED、MotionEvent.FLAG_WINDOW_IS_OBSCURED是什么意思</p>
+
+<pre><code class="language-text">    /**
+     * Indicates that the view should filter touches when its window is obscured.
+     * Refer to the class comments for more information about this security feature.
+     * {@hide}
+     */
+    static final int FILTER_TOUCHES_WHEN_OBSCURED = 0x00000400;
+</code></pre>
+
+<pre><code class="language-text">    /**
+     * This flag indicates that the window that received this motion event is partly
+     * or wholly obscured by another visible window above it.  This flag is set to true
+     * even if the event did not directly pass through the obscured area.
+     * A security sensitive application can check this flag to identify situations in which
+     * a malicious application may have covered up part of its content for the purpose
+     * of misleading the user or hijacking touches.  An appropriate response might be
+     * to drop the suspect touches or to take additional precautions to confirm the user&#39;s
+     * actual intent.
+     */
+    public static final int FLAG_WINDOW_IS_OBSCURED = 0x1;
+</code></pre>
+
+<p>从上面的代码注释可以看出来，这个View不能被其他的window遮挡住，这是谷歌的一个安全策略，避免被恶意程序误导用户或劫持触摸。<br/><br/>
+第二处handle的改变是在172行</p>
+
+<pre><code class="language-java">        if (mFirstTouchTarget == null) {
+               // No touch targets so treat this as an ordinary view.
+               handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                    TouchTarget.ALL_POINTER_IDS);
+        } else {
+        ...
+        while (target != null) {
+                 final TouchTarget next = target.next;
+                if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
+                    handled = true;
+                } else {
+                    final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                            || intercepted;
+                    if (dispatchTransformedTouchEvent(ev, cancelChild,
+                            target.child, target.pointerIdBits)) {
+                        handled = true;
+                    }
+                ...
+</code></pre>
+
+<p>很明显handled的值又跟mFirstTouchTarget、alreadyDispatchedToNewTouchTarget这两个值有关，另外还跟dispatchTransformedTouchEvent（）这个方法有关，dispatchTransformedTouchEvent（）方法，我们留在后面分析，我们先来看看这两个值是在什么时候在哪里被改变的。</p>
+
+<pre><code class="language-java">         mLastTouchDownX = ev.getX();
+         mLastTouchDownY = ev.getY();
+         //给mFirstTouchTarget赋值，该事件已经被子View确认处理了
+         newTouchTarget = addTouchTarget(child, idBitsToAssign);
+         alreadyDispatchedToNewTouchTarget = true;
+</code></pre>
+
+<p>这个是第145行的代码，这里是找到处理事件的子View后，做的赋值，addTouchTarget这个方法里面会对 <br/>
+mFirstTouchTarget赋值。</p>
+
+<p>好了，如果是这样，我们再从上面的第13行开始分析。</p>
+
+<pre><code class="language-text"> // Handle an initial down.
+            if (actionMasked == MotionEvent.ACTION_DOWN) {
+                // Throw away all previous state when starting a new touch gesture.
+                // The framework may have dropped the up or cancel event for the previous
+                // due to an app switch, ANR, or some other state change.
+//在新的事件开始（即是新的ACTION_DOWN事件），需要清除掉之前的状态以及设置mFirstTouchTarget=null;
+                cancelAndClearTouchTargets(ev);
+                resetTouchState();
+            }
+</code></pre>
+
+<p>这里先对该事件进行判断，如果是ACTION_DOWN事件会进到这个方法里面，做一些处理。我们来看下这两个方法都做了哪些。</p>
+
+<pre><code class="language-text">    /**
+     * Cancels and clears all touch targets.
+     */
+    private void cancelAndClearTouchTargets(MotionEvent event) {
+        if (mFirstTouchTarget != null) {
+            boolean syntheticEvent = false;
+            //假如event为null,重新实例一个取消（MotionEvent）的事件
+            if (event == null) {
+                final long now = SystemClock.uptimeMillis();
+                event = MotionEvent.obtain(now, now,
+                        MotionEvent.ACTION_CANCEL, 0.0f, 0.0f, 0);
+                event.setSource(InputDevice.SOURCE_TOUCHSCREEN);
+                syntheticEvent = true;
+            }
+
+            for (TouchTarget target = mFirstTouchTarget; target != null; target = target.next) {
+                resetCancelNextUpFlag(target.child);
+                //分发事件
+                dispatchTransformedTouchEvent(event, true, target.child, target.pointerIdBits);
+            }
+           //重置mFirstTouchTarget
+            clearTouchTargets();
+
+            if (syntheticEvent) {
+                event.recycle();
+            }
+        }
+    }
+</code></pre>
+
+<p>从这个方法的名字可以看出来，这个方法做了两件事取消跟清除TouchTarget，首先是取消，这里的取消是指分发ACTION_CANCEL事件，在我上面注释代码的第18行，dispatchTransformedTouchEvent（）这个方法的第二个参数为true，这个值会在更改事件为ACTION_CANCEL，并分发给上次处理事件的View。这个分发事件的方法，我们留在后面分析，现在继续分析清除。</p>
+
+<pre><code class="language-text">    /**
+     * Clears all touch targets.
+     */
+    private void clearTouchTargets() {
+        TouchTarget target = mFirstTouchTarget;
+        if (target != null) {
+            do {
+                TouchTarget next = target.next;
+                target.recycle();
+                target = next;
+            } while (target != null);
+            mFirstTouchTarget = null;
+        }
+    }
+</code></pre>
+
+<p>这个方法很简单了，就对TouchTarget的next是回收，最后再把mFirstTouchTarget置null。好了，这两个方法分析完，我们再回到刚刚的那个地方，看到还有一个方法resetTouchState（）</p>
+
+<pre><code class="language-text">    /**
+     * Resets all touch state in preparation for a new cycle.
+     */
+    private void resetTouchState() {
+        clearTouchTargets();
+        resetCancelNextUpFlag(this);
+        mGroupFlags &amp;= ~FLAG_DISALLOW_INTERCEPT;
+        mNestedScrollAxes = SCROLL_AXIS_NONE;
+    }
+</code></pre>
+
+<p>这个方法除了clearTouchTargets（）、resetCancelNextUpFlag()这两个方法外，还对 mGroupFlags 这个标志做一个拦截方面的修改，这个标志可以让子View请求父布局不要去拦截某个事件（ACTION_DOWN除外），并且可通过getParent().requestDisallowInterceptTouchEvent()去修改这个值。</p>
+
+<pre><code class="language-text">  // Check for interception.
+            final boolean intercepted;
+            //子View唯一一个可以用来控制父类事件传递
+            //只有ACTION_DOWN事件跟mFirstTouchTarget不为空的情况，后面的讨论大多是围绕着mFirstTouchTarget来进行的
+            if (actionMasked == MotionEvent.ACTION_DOWN
+                    || mFirstTouchTarget != null) {
+                //是否拦截事件，disallowIntercept为true是不拦截，false是拦截
+                final boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;
+                if (!disallowIntercept) {
+                    //一般重写onInterceptTouchEvent方法
+                    intercepted = onInterceptTouchEvent(ev);
+                    ev.setAction(action); // restore action in case it was changed
+                } else {
+                    intercepted = false;
+                }
+            } else {
+                // There are no touch targets and this action is not an initial down
+                // so this view group continues to intercept touches.
+                intercepted = true;
+            }
+</code></pre>
+
+<p>这里有个判断，只有ACTION_DOWN以及mFirstTouchTarget不为的空的情况下，才允许进入。我们来先说下，什么时候mFirstTouchTarget会不为空，我这边先简单说下，后面代码会提及；mFirstTouchTarget是在这个事件被所在的子View消费了，这个值才不会空，即使是本身ViewGroup消费了，这个值也是为空。按照这个思路的话，大家估计也不难理解我上面说的子View可以请求父布局对ACTION_DOWN以外的事件不做拦截，另外还有一点就是，一般重写只针对onInterceptTouchEvent这个方法，而dispatchTouchEvent这个方法倒是很少重写。像我们经常遇到的ViewPager跟ScrollView这个横竖滑动冲突的问题，你们去看这两个控件源码，就可以看到都是重写了onInterceptTouchEvent这个方法。</p>
+
+<p>我们回到我上面提供的源码注解中，执行上述判断后，如果canceled跟intercepted都为false的话，并且这个事件为ACTION_DOWN事件，接下来将寻找满足消费条件的子View。我们来看下，是按照什么顺序来寻找View的。</p>
+
+<p>按照我上面提供源码走下来，在87行处有着下面这个方法，这个方法主要是将子View按照Z轴的大小排序。</p>
+
+<pre><code class="language-text">  ArrayList&lt;View&gt; buildOrderedChildList() {
+        final int childrenCount = mChildrenCount;
+        if (childrenCount &lt;= 1 || !hasChildWithZ()) return null;
+
+        if (mPreSortedChildren == null) {
+            mPreSortedChildren = new ArrayList&lt;&gt;(childrenCount);
+        } else {
+            // callers should clear, so clear shouldn&#39;t be necessary, but for safety...
+            mPreSortedChildren.clear();
+            mPreSortedChildren.ensureCapacity(childrenCount);
+        }
+
+        //自定义View排序
+        final boolean customOrder = isChildrenDrawingOrderEnabled();
+        for (int i = 0; i &lt; childrenCount; i++) {
+            // add next child (in child order) to end of list
+            final int childIndex = getAndVerifyPreorderedIndex(childrenCount, i, customOrder);
+            final View nextChild = mChildren[childIndex];
+            final float currentZ = nextChild.getZ();
+
+            // insert ahead of any Views with greater Z
+            int insertIndex = i;
+           //有点类似于插入排序，按Z轴从小到大排序
+            while (insertIndex &gt; 0 &amp;&amp; mPreSortedChildren.get(insertIndex - 1).getZ() &gt; currentZ) {
+                insertIndex--;
+            }
+            mPreSortedChildren.add(insertIndex, nextChild);
+        }
+        return mPreSortedChildren;
+    }
+</code></pre>
+
+<p>其中getAndVerifyPreorderedIndex只是对View的下标进行再次确定。这里面提到一个自定义排序的问题，正常情况的布局排序是根据xml的顺序或者addView的顺序决定的。当然google也提供了setChildrenDrawingOrderEnabled（），getChildDrawingOrder（）这两个方法进行自定义排序，有需求的可以去自行了解下，我们就不深入探讨了。</p>
+
+<pre><code class="language-text">  if (childWithAccessibilityFocus != null) {
+        if (childWithAccessibilityFocus != child) {
+              continue;
+        }
+        childWithAccessibilityFocus = null;
+        i = childrenCount - 1;
+  }
+</code></pre>
+
+<p>现在是取到了所有的子View，那么接下来就是筛选哪些View可以处理了。首先是先获取到哪个是获取焦点的View，并且这个View是否在这些子View里面。如果找到了就走到下一步。</p>
+
+<pre><code class="language-text">//判断这个View是否具备处理的条件
+if (!canViewReceivePointerEvents(child)
+        || !isTransformedTouchPointInView(x, y, child, null)) {
+    ev.setTargetAccessibilityFocus(false);
+    continue;
+}
+</code></pre>
+
+<p><strong>我们来看看第一个判断方法</strong></p>
+
+<pre><code class="language-text">  /**
+     * Returns true if a child view can receive pointer events.
+     * @hide
+     */
+    private static boolean canViewReceivePointerEvents(@NonNull View child) {
+        return (child.mViewFlags &amp; VISIBILITY_MASK) == VISIBLE
+                || child.getAnimation() != null;
+    }
+</code></pre>
+
+<p><strong>第二个方法</strong></p>
+
+<pre><code class="language-text">/**
+ * Returns true if a child view contains the specified point when transformed
+ * into its coordinate space.
+ * Child must not be null.
+ * @hide
+ */
+protected boolean isTransformedTouchPointInView(float x, float y, View child,
+        PointF outLocalPoint) {
+    final float[] point = getTempPoint();
+    point[0] = x;
+    point[1] = y;
+    transformPointToViewLocal(point, child);
+    final boolean isInView = child.pointInView(point[0], point[1]);
+    if (isInView &amp;&amp; outLocalPoint != null) {
+        outLocalPoint.set(point[0], point[1]);
+    }
+    return isInView;
+}
+</code></pre>
+
+<p>可见或者是正在执行动画的，并且位置是落在这个View的范围的。满足这些条件外，再判断这个View是否已经是在mFirstTouchTarget的子View里面了，如果是的话，也是结束循环了。</p>
+
+<pre><code class="language-text">newTouchTarget = getTouchTarget(child);
+if (newTouchTarget != null) {
+    // Child is already receiving touch within its bounds.
+    // Give it the new pointer in addition to the ones it is handling.
+    newTouchTarget.pointerIdBits |= idBitsToAssign;
+    break;
+}
+</code></pre>
+
+<p>以上条件都满足的话，我们就进行分发事件的方法，我们来看下这个方法做了什么操作。</p>
+
+<pre><code class="language-java">/**
+     * Transforms a motion event into the coordinate space of a particular child view,
+     * filters out irrelevant pointer ids, and overrides its action if necessary.
+     * If child is null, assumes the MotionEvent will be sent to this ViewGroup instead.
+     */
+    private boolean dispatchTransformedTouchEvent(MotionEvent event, boolean cancel,
+            View child, int desiredPointerIdBits) {
+        final boolean handled;
+
+        // Canceling motions is a special case.  We don&#39;t need to perform any transformations
+        // or filtering.  The important part is the action, not the contents.
+        final int oldAction = event.getAction();
+        if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
+            event.setAction(MotionEvent.ACTION_CANCEL);
+            if (child == null) {
+                handled = super.dispatchTouchEvent(event);
+            } else {
+                handled = child.dispatchTouchEvent(event);
+            }
+            event.setAction(oldAction);
+            return handled;
+        }
+
+        // Calculate the number of pointers to deliver.
+        final int oldPointerIdBits = event.getPointerIdBits();
+        final int newPointerIdBits = oldPointerIdBits &amp; desiredPointerIdBits;
+
+        // If for some reason we ended up in an inconsistent state where it looks like we
+        // might produce a motion event with no pointers in it, then drop the event.
+        if (newPointerIdBits == 0) {
+            return false;
+        }
+
+        // If the number of pointers is the same and we don&#39;t need to perform any fancy
+        // irreversible transformations, then we can reuse the motion event for this
+        // dispatch as long as we are careful to revert any changes we make.
+        // Otherwise we need to make a copy.
+        final MotionEvent transformedEvent;
+        if (newPointerIdBits == oldPointerIdBits) {
+            if (child == null || child.hasIdentityMatrix()) {
+                if (child == null) {
+                    handled = super.dispatchTouchEvent(event);
+                } else {
+                    final float offsetX = mScrollX - child.mLeft;
+                    final float offsetY = mScrollY - child.mTop;
+                    event.offsetLocation(offsetX, offsetY);
+
+                    handled = child.dispatchTouchEvent(event);
+
+                    event.offsetLocation(-offsetX, -offsetY);
+                }
+                return handled;
+            }
+            transformedEvent = MotionEvent.obtain(event);
+        } else {
+            transformedEvent = event.split(newPointerIdBits);
+        }
+
+        // Perform any necessary transformations and dispatch.
+        if (child == null) {
+            handled = super.dispatchTouchEvent(transformedEvent);
+        } else {
+            final float offsetX = mScrollX - child.mLeft;
+            final float offsetY = mScrollY - child.mTop;
+            transformedEvent.offsetLocation(offsetX, offsetY);
+            if (! child.hasIdentityMatrix()) {
+                transformedEvent.transform(child.getInverseMatrix());
+            }
+
+            handled = child.dispatchTouchEvent(transformedEvent);
+        }
+
+        // Done.
+        transformedEvent.recycle();
+        return handled;
+    }
+</code></pre>
+
+<p>这个方法一看就有点长了，慌不慌~其实这个方法就做了两件事，第一件事，就是如果cancel为true的话，更改这个事件为ACTION_CANCEL；第二件事，就是child为null的话，调用super.dispatchTouchEvent(event);child不为空的话，就调用super.dispatchTouchEvent(event);好吧，其实这个方法，只需要看上面那部分就差不多了。</p>
+
+<pre><code class="language-text">...
+if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
+            event.setAction(MotionEvent.ACTION_CANCEL);
+            if (child == null) {
+                handled = super.dispatchTouchEvent(event);
+            } else {
+                handled = child.dispatchTouchEvent(event);
+            }
+            event.setAction(oldAction);
+            return handled;
+        }
+...
+</code></pre>
+
+<p>精简版的分发~~~</p>
+
+<p>如果dispatchTransformedTouchEvent方法返回true的话，就代表了这个事件已经被子View消费了，接下来关键的方法就是调用addTouchTarget（）这个方法，给mFirstTouchTarget赋值。</p>
+
+<pre><code class="language-text"> /**
+     * Adds a touch target for specified child to the beginning of the list.
+     * Assumes the target child is not already present.
+     */
+    private TouchTarget addTouchTarget(@NonNull View child, int pointerIdBits) {
+        final TouchTarget target = TouchTarget.obtain(child, pointerIdBits);
+        target.next = mFirstTouchTarget;
+        mFirstTouchTarget = target;
+        return target;
+    }
+</code></pre>
+
+<p>如果dispatchTransformedTouchEvent方法返回false的话，那么就代表这个事件没有View消费，那就是只能自己消费了</p>
+
+<pre><code class="language-text"> if (mFirstTouchTarget == null) {
+           // No touch targets so treat this as an ordinary view.
+           handled = dispatchTransformedTouchEvent(ev, canceled, null,
+                   ouchTarget.ALL_POINTER_IDS);
+ }
+</code></pre>
+
+<p>其实到这里，整个ACTION_DOWN事件的传递就结束了。我们来做了小结，当有触摸事件传递过来时</p>
+
+<ol>
+<li><p>先对当前设备状态进行判断，是否没被遮挡</p></li>
+<li><p>紧接着如果是ACTION_DOWN事件的话，就清除状态</p></li>
+<li><p>如果onInterceptTouchEvent返回true，则事件交给自己处理</p></li>
+<li><p>如果是ACTION_DOWN事件的话，先去寻找获得焦点的View，如果找到了，就分发给View去处理；如果找不到就交给自己处理。</p></li>
+</ol>
+
+<p>接着我们再来说下除了ACTION_DOWN以外的事件传递情况，从上面的demo我们可以得知，消费了ACTION_DOWN事件，后续的事件也将给这个View消费。也即是mFirstTouchTarget != null的情况。</p>
+
+<pre><code class="language-java">// Dispatch to touch targets, excluding the new touch target if we already
+                // dispatched to it.  Cancel touch targets if necessary.
+                //处理除了ACTION_DOWN以外的事件
+                TouchTarget predecessor = null;
+                TouchTarget target = mFirstTouchTarget;
+                while (target != null) {
+                    final TouchTarget next = target.next;
+                   //alreadyDispatchedToNewTouchTarget为true的话，说明已经被消费了
+                    if (alreadyDispatchedToNewTouchTarget &amp;&amp; target == newTouchTarget) {
+                        handled = true;
+                    } else {
+                        final boolean cancelChild = resetCancelNextUpFlag(target.child)
+                                || intercepted;
+                        //如果这个事件被拦截了，intercepted为true
+                        if (dispatchTransformedTouchEvent(ev, cancelChild,
+                                target.child, target.pointerIdBits)) {
+                            handled = true;
+                        }
+                        //如果事件被拦截掉，
+                        if (cancelChild) {
+                            if (predecessor == null) {
+                                mFirstTouchTarget = next;
+                            } else {
+                                predecessor.next = next;
+                            }
+                            target.recycle();
+                            target = next;
+                            continue;
+                        }
+                    }
+                    predecessor = target;
+                    target = next;
+                }
+            }
+</code></pre>
+
+<p>上面代码的第9行，这一块的的判断我们可以回溯到之前的mFirstTouchTarget赋值，也即是addTouchTarget()这个方法。可以发现，上述的判断如果为true，说明这个事件已经被消费了，所以handled就为true了。</p>
+
+<p>上面代码的第12行，如果intercepted为true的话，那cancelChild也就为true了。而dispatchTransformedTouchEvent（）上面已经分析过，cancelChild为true，会向之前消费事件的View发送ACTION_CANCEL事件。后面再把mFirstTouchTarget置成next，也即是null，那么接下来的事件将被本身给消费掉。这也验证了我们上面的demo。当然，大家也可以多做几个例子好好理解理解。</p>
+
+<p>下面是整个dispatchTouchEvent()里面关键方法的调用流程，可以方便理解。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041743495516.png" alt="20171112151041743495516.png"/></p>
+
+<p>好了，整个ViewGroup层dispatchTouchEvent传递到View层的dispatchTouchEvent或者传递给super.dispatchTouchEvent(event)，下一节将对View层的源码进行解析。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872628.html">
+                
+                  <h1>Android-自定义曲线路径动画框架</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>最近在一个项目中需要一个像QQ打开个人爱好那样的动画效果如下图:</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041618224358.gif" alt="20171112151041618224358.gif"/></p>
+
+<p>可以看出每个小球都是以顺时针旋转出来的,说明像这样的曲线动画用Android中自带的平移动画是很难实现的。</p>
+
+<p>曲线动画怎么画???</p>
+
+<p>我们先来看看Android自带的绘制曲线的方式是怎样的:</p>
+
+<p>android自定义View中画图经常用到这几个什么什么To</p>
+
+<h3 id="toc_1">moveTo</h3>
+
+<p>moveTo 不会进行绘制，只用于移动移动画笔,也就是确定绘制的起始坐标点。结合以下方法进行使用。</p>
+
+<h3 id="toc_2">lineTo</h3>
+
+<p>lineTo 用于进行直线绘制。</p>
+
+<pre><code class="language-java">mPath.lineTo(300, 300);
+canvas.drawPath(mPath, mPaint);
+</code></pre>
+
+<p>默认从坐标(0,0)开始绘制。</p>
+
+<p>刚才我们不是说了moveTo是用来移动画笔的吗？</p>
+
+<pre><code class="language-java">mPath.moveTo(100, 100);
+mPath.lineTo(300, 300);
+canvas.drawPath(mPath, mPaint);
+</code></pre>
+
+<p>把画笔移动(100,100)处开始绘制</p>
+
+<h3 id="toc_3">quadTo</h3>
+
+<p>quadTo 用于绘制圆滑曲线，即贝塞尔曲线。</p>
+
+<h3 id="toc_4">cubicTo</h3>
+
+<p>cubicTo 同样是用来实现贝塞尔曲线的。mPath.cubicTo(x1, y1, x2, y2, x3, y3) (x1,y1) 为控制点，(x2,y2)为控制点，(x3,y3) 为结束点。那么，cubicTo 和 quadTo 有什么不一样呢？说白了，就是多了一个控制点而已。然后，我们想绘制和上一个一样的曲线，应该怎么写呢？</p>
+
+<pre><code class="language-java">mPath.moveTo(100, 500);
+mPath.cubicTo(100, 500, 300, 100, 600, 500);
+</code></pre>
+
+<p>一模一样！如果我们不加 moveTo 呢？</p>
+
+<p>则以(0,0)为起点，(100,500)和(300,100)为控制点绘制贝塞尔曲线</p>
+
+<p>受到上面的启发,我们也可以用同样的方法来实现一个曲线动画框架</p>
+
+<p>在写框架之前我们必须要先了解一样东西:</p>
+
+<h2 id="toc_5">贝塞尔曲线:</h2>
+
+<p>维基百科中这样说到:</p>
+
+<p>在数学的数值分析领域中，贝塞尔曲线（英语：Bézier curve）是计算机图形学中相当重要的参数曲线。更高维度的广泛化贝塞尔曲线就称作贝塞尔曲面，其中贝塞尔三角是一种特殊的实例。</p>
+
+<p>贝塞尔曲线于1962年，由法国工程师皮埃尔·贝塞尔（Pierre Bézier）所广泛发表，他运用贝塞尔曲线来为汽车的主体进行设计。贝塞尔曲线最初由Paul de Casteljau于1959年运用de Casteljau算法开发，以稳定数值的方法求出贝塞尔曲线。</p>
+
+<h3 id="toc_6">线性贝塞尔曲线</h3>
+
+<p>给定点P0、P1，线性贝塞尔曲线只是一条两点之间的直线。这条线由下式给出：</p>
+
+<p>B(t) = P0 + (P1 - P0)t = (1 - t)P0 + tP1,t-&gt;[0,1]</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041640123831.gif" alt="20171112151041640123831.gif"/></p>
+
+<h3 id="toc_7">二次方贝塞尔曲线</h3>
+
+<p>二次方贝塞尔曲线的路径由给定点P0、P1、P2的函数B（t）追踪：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041650962507.png" alt="20171112151041650962507.png"/></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017111215104165256666.gif" alt="2017111215104165256666.gif"/></p>
+
+<h3 id="toc_8">三次方贝塞尔曲线</h3>
+
+<p>P0、P1、P2、P3四个点在平面或在三维空间中定义了三次方贝塞尔曲线。曲线起始于P0走向P1，并从P2的方向来到P3。一般不会经过P1或P2；这两个点只是在那里提供方向资讯。P0和P1之间的间距，决定了曲线在转而趋进P2之前，走向P1方向的“长度有多长”。</p>
+
+<p>曲线的参数形式为：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041654896085.png" alt="20171112151041654896085.png"/></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041656320256.gif" alt="20171112151041656320256.gif"/></p>
+
+<p>以上都是维基百科给出的定义,以及不同曲线的公式和效果图; 如果不清楚可以自己百度搜索或者维基百科搜索,么么哒!</p>
+
+<h3 id="toc_9">一般贝塞尔曲线方程</h3>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041657814861.png" alt="20171112151041657814861.png"/></p>
+
+<p>对于四次曲线，可由线性贝塞尔曲线描述的中介点Q0、Q1、Q2、Q3，由二次贝塞尔曲线描述的点R0、R1、R2，和由三次贝塞尔曲线描述的点S0、S1所建构：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041659410068.gif" alt="20171112151041659410068.gif"/></p>
+
+<p>那么在上代码之前先看看我们最后实现出来的效果图:</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041661322165.gif" alt="20171112151041661322165.gif"/></p>
+
+<p>PathPoint.java中的代码:</p>
+
+<pre><code class="language-java">/**
+ * Created by zhengliang on 2016/10/15 0015.
+ * 记录view移动动作的坐标点
+ */
+
+public class PathPoint {
+    /**
+     * 起始点操作
+     */
+    public static final int MOVE=0;
+    /**
+     * 直线路径操作
+     */
+    public static final int LINE=1;
+    /**
+     * 二阶贝塞尔曲线操作
+     */
+    public static final int SECOND_CURVE =2;
+    /**
+     * 三阶贝塞尔曲线操作
+     */
+    public static final int THIRD_CURVE=3;
+    /**
+     * View移动到的最终位置
+     */
+    public float mX,mY;
+    /**
+     * 控制点
+     */
+    public float mContorl0X,mContorl0Y;
+    public float mContorl1X,mContorl1Y;
+    //操作符
+    public int mOperation;
+
+    /**
+     * Line/Move都通过该构造函数来创建
+     */
+    public PathPoint(int mOperation,float mX, float mY ) {
+        this.mX = mX;
+        this.mY = mY;
+        this.mOperation = mOperation;
+    }
+
+    /**
+     * 二阶贝塞尔曲线
+     * @param mX
+     * @param mY
+     * @param mContorl0X
+     * @param mContorl0Y
+     */
+    public PathPoint(float mContorl0X, float mContorl0Y,float mX, float mY) {
+        this.mX = mX;
+        this.mY = mY;
+        this.mContorl0X = mContorl0X;
+        this.mContorl0Y = mContorl0Y;
+        this.mOperation = SECOND_CURVE;
+    }
+
+    /**
+     * 三阶贝塞尔曲线
+     * @param mContorl0x
+     * @param mContorl0Y
+     * @param mContorl1x
+     * @param mContorl1Y
+     * @param mX
+     * @param mY
+     */
+    public PathPoint(float mContorl0x, float mContorl0Y, float mContorl1x, float mContorl1Y,float mX, float mY) {
+        this.mX = mX;
+        this.mY = mY;
+        this.mContorl0X = mContorl0x;
+        this.mContorl0Y = mContorl0Y;
+        this.mContorl1X = mContorl1x;
+        this.mContorl1Y = mContorl1Y;
+        this.mOperation = THIRD_CURVE;
+    }
+
+    /**
+     * 为了方便使用都用静态的方法来返回路径点
+     */
+    public static PathPoint moveTo(float x, float y){
+        return new PathPoint(MOVE,x,y);
+    }
+    public static PathPoint lineTo(float x,float y){
+        return  new PathPoint(LINE,x,y);
+    }
+    public static PathPoint secondBesselCurveTo(float c0X, float c0Y,float x,float y){
+        return new PathPoint(c0X,c0Y,x,y);
+    }
+    public static PathPoint thirdBesselCurveTo(float c0X, float c0Y, float c1X, float c1Y, float x, float y){
+        return new PathPoint(c0X,c0Y,c1X,c1Y,x,y);
+    }
+}
+</code></pre>
+
+<p>这个类主要是用来记录View移动动作的坐标点,通过不同的构造函数传入不同的参数来区分不同的移动轨迹,注释写的很清楚的…</p>
+
+<p>为了让不同类型的移动方式都能在使用时一次性使用我写了一个AnimatorPath类</p>
+
+<pre><code class="language-java">import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+
+/**
+ * Created by zhengliang on 2016/10/15 0015.
+ * 客户端使用类,记录一系列的不同移动轨迹
+ */
+
+public class AnimatorPath {
+    //一系列的轨迹记录动作
+    private List&lt;PathPoint&gt; mPoints = new ArrayList&lt;&gt;();
+
+    /**
+     * 移动位置到:
+     * @param x
+     * @param y
+     */
+    public void moveTo(float x,float y){
+        mPoints.add(PathPoint.moveTo(x,y));
+    }
+
+    /**
+     * 直线移动
+     * @param x
+     * @param y
+     */
+    public void lineTo(float x,float y){
+        mPoints.add(PathPoint.lineTo(x,y));
+    }
+
+    /**
+     * 二阶贝塞尔曲线移动
+     * @param c0X
+     * @param c0Y
+     * @param x
+     * @param y
+     */
+    public void secondBesselCurveTo(float c0X, float c0Y,float x,float y){
+        mPoints.add(PathPoint.secondBesselCurveTo(c0X,c0Y,x,y));
+    }
+
+    /**
+     * 三阶贝塞尔曲线移动
+     * @param c0X
+     * @param c0Y
+     * @param c1X
+     * @param c1Y
+     * @param x
+     * @param y
+     */
+    public void thirdBesselCurveTo(float c0X, float c0Y, float c1X, float c1Y, float x, float y){
+        mPoints.add(PathPoint.thirdBesselCurveTo(c0X,c0Y,c1X,c1Y,x,y));
+    }
+    /**
+     *
+     * @return  返回移动动作集合
+     */
+    public Collection&lt;PathPoint&gt; getPoints(){
+        return mPoints;
+    }
+}
+</code></pre>
+
+<p>该类是最终在客户端使用的,记录一系列的不同移动轨迹,使用时调用里面的方法就可以添加不同的移动轨迹最后通过getPoints()来得到所有的移动轨迹集合</p>
+
+<p>在Android自带的绘制曲线的方法中都是只是通过moveTo()方法设置起始点,在其它的方法中只是传入了终点或控制点坐标。实际上我们要画连续的曲线或连续的移动时,都需要知道起点到终点的之间所有的坐标,哪么怎么来的到这些点的坐标?</p>
+
+<p>Android中为我们提供了一个泛型的接口:TypeEvaluator<T>可以很简单的实现这个难题。这里我就把它叫做”估值器”.我们只要创建一个类来实现这个接口,然后通过自己计算公式(就是我们上面的贝塞尔曲线公式)</p>
+
+<p>下面来看看我项目中的估值器类:PathEvaluator</p>
+
+<pre><code class="language-java">import android.animation.TypeEvaluator;
+
+/**
+ * Created by zhengliang on 2016/10/15 0015.
+ * 估值器类,实现坐标点的计算
+ */
+
+public class PathEvaluator implements TypeEvaluator&lt;PathPoint&gt; {
+
+    /**
+     * @param t          :执行的百分比
+     * @param startValue : 起点
+     * @param endValue   : 终点
+     * @return
+     */
+    @Override
+    public PathPoint evaluate(float t, PathPoint startValue, PathPoint endValue) {
+        float x, y;
+        float oneMiunsT = 1 - t;
+        //三阶贝塞尔曲线
+        if (endValue.mOperation == PathPoint.THIRD_CURVE) {
+            x = startValue.mX*oneMiunsT*oneMiunsT*oneMiunsT+3*endValue.mContorl0X*t*oneMiunsT*oneMiunsT+3*endValue.mContorl1X*t*t*oneMiunsT+endValue.mX*t*t*t;
+            y = startValue.mY*oneMiunsT*oneMiunsT*oneMiunsT+3*endValue.mContorl0Y*t*oneMiunsT*oneMiunsT+3*endValue.mContorl1Y*t*t*oneMiunsT+endValue.mY*t*t*t;
+        //二阶贝塞尔曲线
+        }else if(endValue.mOperation == PathPoint.SECOND_CURVE){
+            x = oneMiunsT*oneMiunsT*startValue.mX+2*t*oneMiunsT*endValue.mContorl0X+t*t*endValue.mX;
+            y = oneMiunsT*oneMiunsT*startValue.mY+2*t*oneMiunsT*endValue.mContorl0Y+t*t*endValue.mY;
+        //直线
+        }else if (endValue.mOperation == PathPoint.LINE) {
+            //x起始点+t*起始点和终点的距离
+            x = startValue.mX + t * (endValue.mX - startValue.mX);
+            y = startValue.mY + t * (endValue.mY - startValue.mY);
+        } else {
+            x = endValue.mX;
+            y = endValue.mY;
+        }
+        return PathPoint.moveTo(x,y);
+    }
+}
+</code></pre>
+
+<p>泛型中传入我们自己的定义的PathPoint类;其实这些复杂的计算代码很简单,就是上面贝塞尔曲线的公式,将需要的点直接带入公式即可,我相信仔细看看会明白的!</p>
+
+<p>核心代码到这里就没有了,下面看看MainActivity中的代码:</p>
+
+<pre><code class="language-java">public class MainActivity extends AppCompatActivity implements View.OnClickListener {
+    private FloatingActionButton fab;
+    private AnimatorPath path;//声明动画集合
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        this.fab = (FloatingActionButton) findViewById(R.id.fab);
+
+        setPath();
+
+        fab.setOnClickListener(this);
+    }
+    /*设置动画路径*/
+    public void setPath(){
+        path = new AnimatorPath();
+        path.moveTo(0,0);
+        path.lineTo(400,400);
+        path.secondBesselCurveTo(600, 200, 800, 400); //订单
+        path.thirdBesselCurveTo(100,600,900,1000,200,1200);
+    }
+
+    /**
+     * 设置动画
+     * @param view
+     * @param propertyName
+     * @param path
+     */
+    private void startAnimatorPath(View view, String propertyName, AnimatorPath path) {
+        ObjectAnimator anim = ObjectAnimator.ofObject(this, propertyName, new PathEvaluator(), path.getPoints().toArray());
+        anim.setInterpolator(new DecelerateInterpolator());//动画插值器
+        anim.setDuration(3000);
+        anim.start();
+    }
+
+    /**
+     * 设置View的属性通过ObjectAnimator.ofObject()的反射机制来调用
+     * @param newLoc
+     */
+    public void setFab(PathPoint newLoc) {
+        fab.setTranslationX(newLoc.mX);
+        fab.setTranslationY(newLoc.mY);
+    }
+
+    @Override
+    public void onClick(View view) {
+        switch (view.getId()){
+            case R.id.fab:
+                startAnimatorPath(fab, &quot;fab&quot;, path);
+                break;
+        }
+    }
+}
+</code></pre>
+
+<p>上面代码中的:setPath()方法根据你自己项目的需要来设置不同的坐标 注意:(“这里的坐标是View以当前位置的偏移坐标,不是绝对坐标”)</p>
+
+<p>上面代码中的:startAnimatorPath()参数就不介绍了注释中写的很清楚;这里直接看看ObjectAnimator.ofObject()方法的使用把:</p>
+
+<p><code>ObjectAnimator.ofObject(this, propertyName, new PathEvaluator(), path.getPoints().toArray())</code></p>
+
+<p>参数:this:View</p>
+
+<p>参数:propertyName:属性名字 :起始这个名字是一个反射机制的调用,这样说不明白,看看这条代码:</p>
+
+<p><code>ObjectAnimator.ofFloat(view, &quot;scaleX&quot;, 0f, 1f).setDuration(500).start();</code></p>
+
+<p>相信这句代码都能看懂,其中”scaleX”就相当于参数:propertyName</p>
+
+<p>项目代码中我们传入的参数是:</p>
+
+<p><code>startAnimatorPath(fab, &quot;fab&quot;, path);</code></p>
+
+<p>“fab”参数其实对应的就是setFab(PathPoint newLoc)方法,当我们在当前类中定义了该方法,就会自动通过反射的机制来调用该方法! ,如果还不懂,可以看看其它大神写的博客!</p>
+
+<p>看看Xml中的代码:</p>
+
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:id=&quot;@+id/activity_main&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:paddingBottom=&quot;@dimen/activity_vertical_margin&quot;
+    android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+    android:paddingTop=&quot;@dimen/activity_vertical_margin&quot;
+    tools:context=&quot;zhengliang.com.customanimationframework.MainActivity&quot;&gt;
+
+    &lt;zhengliang.com.customanimationframework.CustomView.PathView
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        tools:targetApi=&quot;lollipop&quot; /&gt;
+    &lt;android.support.design.widget.FloatingActionButton
+        android:id=&quot;@+id/fab&quot;
+        android:layout_width=&quot;40dp&quot;
+        android:layout_height=&quot;40dp&quot;
+        /&gt;
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<p>为了可以清晰的看见小球的移动轨迹,自定义了以个View来显示小球的运动轨迹:</p>
+
+<pre><code class="language-java">public class PathView extends View {
+
+    private Paint paint;
+
+
+    public PathView(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        initView();
+    }
+
+    private void initView() {
+        paint = new Paint();
+        //抗锯齿
+        paint.setAntiAlias(true);
+        //防抖动
+        paint.setDither(true);
+        //设置画笔未实心
+        paint.setStyle(Paint.Style.STROKE);
+        //设置颜色
+        paint.setColor(Color.GREEN);
+        //设置画笔宽度
+        paint.setStrokeWidth(3);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        Path path = new Path();
+        path.moveTo(60,60);
+        path.lineTo(460,460);
+        path.quadTo(660, 260, 860, 460); //订单
+        path.cubicTo(160,660,960,1060,260,1260);
+        canvas.drawPath(path,paint);
+    }
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872492.html">
+                
+                  <h1>Android-转场动画深度解析</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>Android5.0之后新增了很多好看的转场动画，相比于以前的overridePendingTransition()丰富了很多，特别新增了共享元素跳转的方式。本篇文章介绍转场动画框架的基本概念，并着手自己实现转场动画。</p>
+
+<h2 id="toc_0">Scene（场景）</h2>
+
+<p>Scene保存了一个布局文件。我们可以通过以下方式生成一个Scene：</p>
+
+<p><code>public static Scene getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code></p>
+
+<p>这个方法时静态的，传入一个根布局ViewGroup(作为显示场景的容器),一个layoutId(场景的显示内容),最后传入当前上下文。源码很短，我们一起来看一下：</p>
+
+<pre><code class="language-java">public static Scene getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context) {
+        SparseArray&lt;Scene&gt; scenes = (SparseArray&lt;Scene&gt;) sceneRoot.getTag(
+                com.android.internal.R.id.scene_layoutid_cache);
+        if (scenes == null) {
+            scenes = new SparseArray&lt;Scene&gt;();
+            sceneRoot.setTagInternal(com.android.internal.R.id.scene_layoutid_cache, scenes);
+        }
+        Scene scene = scenes.get(layoutId);
+        if (scene != null) {
+            return scene;
+        } else {
+            scene = new Scene(sceneRoot, layoutId, context);
+            scenes.put(layoutId, scene);
+            return scene;
+        }
+    }
+</code></pre>
+
+<ul>
+<li>根据一个固定的Tag取得保存依附于这个ViewGroup的scene集合SparseArray<Scene> scenes,如果是空就先new一个。</li>
+<li>以要显示场景的layoutId为Key，先尝试获取这个场景，如果已经有这个layoutId对应的场景就直接返回，没有就先调用构造方法生成一个再放入进去，然后返回。</li>
+<li>一个scene只能对应一个布局，scene只是简单保存了sceneRoot, layoutId, context的值，并没有通过layoutId来分析处理里面的View信息（也没有必要）</li>
+<li>可以通过<code>setEnterAction(Runnable action)</code>,<code>setExitAction(Runnable action)</code>，在场景被加载和移除时回调，做相应的操作。</li>
+</ul>
+
+<h2 id="toc_1">Transition(变换）</h2>
+
+<p>上面的介绍scene将一个或多个布局和一个加载这些布局的根布局建立起关系。真正的动画是由Transition实现的。所以大致的流程是：</p>
+
+<pre><code class="language-java">//为Scene创建scene root  
+mSceneRoot = (ViewGroup) findViewById(R.id.scene_root);  
+//创建 scenes  
+Scene mAScene = Scene.getSceneForLayout(mSceneRoot, R.layout.a_scene, this);  
+Scene mAnotherScene =  Scene.getSceneForLayout(mSceneRoot, R.layout.another_scene, this);
+  //代码中创建Transition
+Transition mFadeTransition = new Fade();  
+//用TransitionManager负责场景变换
+TransitionManager.go(mEndingScene, mFadeTransition);
+</code></pre>
+
+<h2 id="toc_2">自定义Transition</h2>
+
+<p>Transition是个抽象类，必须要实现以下方法：</p>
+
+<ul>
+<li><code>public abstract void captureStartValues(TransitionValues transitionValues);</code>捕获当前场景的视图，这里会对视图树中所有的View调用，有几个View就会调用几次。</li>
+<li><code>public abstract void captureEndValues(TransitionValues transitionValues);</code>捕获目标场景的视图，这里会对视图树中所有的View调用，有几个View就会调用几次。</li>
+<li><code>public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,TransitionValues endValues)</code>（不实现方法这个就没动画效果）从命名就可以看到captureStartValues和captureStartValues分别用来捕获当前场景和目标场景。</li>
+</ul>
+
+<p>TransitionValues有三个重要属性，对理解Transition框架的机制有很大帮助。</p>
+
+<ul>
+<li><code>View view</code>:就是一个场景的一个View,在里面拿到View，我们可以从里面得到这个View我们所需要的属性。</li>
+<li><code>Map&lt;String, Object&gt; values</code>：默认为空，我们拿到属性后需要放到里面，如果这个Transition需要改变多个属性，就可以放多次进去。</li>
+<li><code>ArrayList&lt;Transition&gt; targetedTransitions</code>：默认为空，用来记录这个View执行了哪些Transition，我们可以在对这个View执行Transition的时候，把这个Transition存进去。</li>
+</ul>
+
+<p>createAnimator方法就是Transition真正的实现方法了，返回一个属性动画。<br/>
+好了实战开始，我们就实现一个Transition来实现直角移动：</p>
+
+<pre><code class="language-java">public class ChangeRect extends Transition {
+
+    private static final String PROPNAME_BER =
+            &quot;changeposition:Rect&quot;;
+
+    // 开始的状态，这里会对视图树中所有的View调用，这里我们可以记录一下View的我们感兴趣的状态，比如这里：position
+    @Override
+    public void captureStartValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+
+    }
+
+    // 结束也会对所有的View进行调用
+    @Override
+    public void captureEndValues(TransitionValues transitionValues) {
+        captureValues(transitionValues);
+    }
+
+    private void captureValues(TransitionValues transitionValues) {
+        float[] location = new float[2];
+        location[0] = transitionValues.view.getX();
+        location[1] = transitionValues.view.getY();
+        transitionValues.values.put(PROPNAME_BER, location);
+    }
+
+    //新建动画
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues, TransitionValues endValues) {
+        if (null == startValues || null == endValues) {
+            return null;
+        }
+        final View view = endValues.view;
+        float[] startPosition = (float[]) startValues.values.get(PROPNAME_BER);
+        float[] endPosition = (float[]) endValues.values.get(PROPNAME_BER);
+
+        if (startPosition[0] != endPosition[0] || startPosition[1] != endPosition[1]) {
+            Path path=new Path();
+            path.moveTo(startPosition[0],startPosition[1]);
+            path.lineTo(endPosition[0],startPosition[1]);
+            path.lineTo(endPosition[0],endPosition[1]);
+            ObjectAnimator animator = ObjectAnimator.ofFloat(view, View.X, View.Y, path);
+            animator.setDuration(getDuration());
+            animator.start();
+
+            return animator;
+        }
+        return null;
+    }
+}
+</code></pre>
+
+<h2 id="toc_3">总结</h2>
+
+<p>简述下Transition框架的执行机制，我们定义了两个Scene，，当我们通过  <code>TransitionManager.go( scene , transition)</code>，从Scene跳转到目标Scene的时候，会去取得scene对应布局，遍历布局中的每一个View（包括根布局和容器View），获取我们需要的属性。通过View的Id我们建立起两个布局中View的对应关系，所以最终只会在目标场景执行原场景有相同Id的View的动画（满足startValues != null &amp;&amp;  endValues!= null）。这篇文章只是简单解析了转场动画的原理，详细的两个页面的跳转将会的下一篇展开。</p>
+
+<h2 id="toc_4">Content Transition</h2>
+
+<p>Content Transition就是最常见的转场动画了。为了方便大家理解，我们先来上个图。</p>
+
+<p>部分代码：</p>
+
+<h3 id="toc_5">源Activity：</h3>
+
+<pre><code class="language-java">Slide slide=new Slide();
+slide.setDuration(3000);
+slide.setSlideEdge(Gravity.BOTTOM);
+getWindow().setExitTransition(slide);
+
+Explode explode = new Explode();
+explode.setDuration(3000);
+explode.setMode(Visibility.MODE_IN);
+getWindow().setReenterTransition(explode);
+</code></pre>
+
+<h3 id="toc_6">目标Activity：</h3>
+
+<pre><code class="language-java">Slide slideEnter=new Slide();
+slideEnter.setDuration(1500);
+slideEnter.setSlideEdge(Gravity.RIGHT);
+getWindow().setEnterTransition(slideEnter);
+
+Slide slide=new Slide();
+slide.setDuration(1500);
+slide.setSlideEdge(Gravity.RIGHT);
+getWindow().setReturnTransition(slide);
+</code></pre>
+
+<p>然后在A页面调用方法跳到B页面：</p>
+
+<pre><code class="language-java">Intent intent = new Intent(this, BActivity.class);
+ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
+startActivity(intent, activityOptionsCompat.toBundle());
+</code></pre>
+
+<p>可以看到一共可以设置四个Transition：</p>
+
+<ul>
+<li>(1)setExitTransition() - 当A 跳转到 B时,A中的View退出场景的效果（默认Null）</li>
+<li>(2)setEnterTransition() - 当A 跳转到 B时，B中的View进入场景的效果（默认Fade）</li>
+<li>(3)setReturnTransition() - 当B 返回 A时,B中的View退出场景的效果（默认同EnterTransition）</li>
+<li>(4)setReenterTransition() - 当B 返回 A时,A中的View进入场景的效果（默认同ExitTransition）</li>
+</ul>
+
+<p>以上这个过程同样可以看做是Transition作用在Scene上的一系列效果，只不过这里的Scene从上一篇中的单一布局换成了Window。不过细心的同学可能发现了，明明我为四个过程都设置动画效果，可为什么ExitTransition没有生效呢？接下来我们为每个Transition加入监听，看看动画的执行流程。下面是其中一个的代码，其他三个都一样：</p>
+
+<pre><code class="language-java">Explode explode = new Explode();
+explode.setDuration(3000);
+explode.setMode(Visibility.MODE_IN);
+  explode.addListener(new Transition.TransitionListener(){
+            @Override
+            public void onTransitionStart(Transition transition) {
+
+                Log.d(&quot;Transitions--&quot;,&quot;ReenterTransitionStart&quot;);
+            }
+
+            @Override
+            public void onTransitionEnd(Transition transition) {
+
+                Log.d(&quot;Transitions--&quot;,&quot;ReenterTransitionEnd&quot;);
+            }
+
+            @Override
+            public void onTransitionCancel(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionPause(Transition transition) {
+
+            }
+
+            @Override
+            public void onTransitionResume(Transition transition) {
+
+            }
+        });
+   getWindow().setReenterTransition(explode);
+</code></pre>
+
+<p>再次执行程序，日志信息如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041141118718.png" alt="20171111151041141118718.png"/></p>
+
+<p>原来A页面的退出动画和B页面的进入动画、B页面的返回动画和A页面的重现动画是并行执行的。也就是说A页面的ExitTransition不是没有执行，而是在它执行的时候，B页面已经覆盖上来，并且EnterTransition已经同时在执行了，这时A页面已经不可见了。这也是Android默认的转场动画执行流程。<br/><br/>
+那问题来了，如果想要并行执行该怎么办呢？<br/><br/>
+有两种方法：<br/><br/>
+在设置Transition的时候同时设置不允许Transition重叠，也就是并行执行：</p>
+
+<pre><code class="language-java">getWindow().setAllowEnterTransitionOverlap(false);
+getWindow().setWindowAllowReturnTransitionOverlap(false);
+</code></pre>
+
+<p>或者在主题文件全局设置这个属性，这样无疑更好，即减少了代码又保证了应用视觉效果的统一：</p>
+
+<pre><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt;
+&lt;item name=&quot;android:windowAllowReturnTransitionOverlap&quot;&gt;false&lt;/item&gt;
+</code></pre>
+
+<p>修改后效果如下：<br/>
+日志也显示现在是串行执行了：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041148016665.png" alt="20171111151041148016665.png"/></p>
+
+<h2 id="toc_7">生命周期分析</h2>
+
+<p>保持上面的打印信息不变，我们增加两个Activity的生命周期日志信息，串行结果如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041150877583.png" alt="20171111151041150877583.png"/></p>
+
+<p>并行如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041153077770.png" alt="20171111151041153077770.png"/></p>
+
+<p>可以得到如下信息：</p>
+
+<ul>
+<li>在A页面的onPause执行前，ExitTransition就已经开始执行了</li>
+<li>Transition不会阻塞BActivity的生命周期，尽管是串行执行的，即使ExitTransition没结束，BActivity已经执行完OnResume了。</li>
+<li>ReturnExitTransition需要等到AActivity OnStart执行完才开始执行，而且ReturnExitTransition会阻塞AActivity的生命周期，AActivity的OnResume会等到ReturnExitTransition执行完再执行。关于这点可以简要说明下：直接调用Finish不会有动画直接结束掉，需要执行onBackPressed()才会有ReturnExitTransition。看源码就很明显了：</li>
+</ul>
+
+<pre><code class="language-java"> public void onBackPressed() {
+        if (mActionBar != null &amp;&amp; mActionBar.collapseActionView()) {
+            return;
+        }
+
+        if (!mFragments.getFragmentManager().popBackStackImmediate()) {
+            finishAfterTransition();
+        }
+    }
+</code></pre>
+
+<h2 id="toc_8">总结</h2>
+
+<p>最后简单分析下转场动画的大致流程（以slide为例），看过上一篇文章的同学应该很好理解：</p>
+
+<pre><code class="language-text">1.从DecoerView开始，依次遍历获得当前Window上的视图树里的所有View
+
+2.执行captureStartValues(TransitionValues transitionValues)，捕获View开始状态的一些属性（visibility，Parent，LocationOnScree）
+
+3.设置所有的VIew为INVISIBLE。
+
+4.执行captureEndValues(TransitionValues transitionValues)，捕获View结束状态的一些属性（visibility，Parent，LocationOnScree）
+
+5.比较属性的不同,创建属性动画。下一个过程就是返回属性动画并执行了。
+</code></pre>
+
+<p>这是ExitTransiton的流程，其他三个也差不多。下一篇将会讲带共享元素的转场动画，也是material design中很有特色的动画了。</p>
+
+<p>终于到了material design转场动画中最好玩，最有特色的一部分了。我们沿用上一篇的图，不过将跳转Activity的代码作如下更改：</p>
+
+<pre><code class="language-java">Intent intent = new Intent(this,BBBActivity.class);
+ActivityOptionsCompat activityOptionsCompat =ActivityOptionsCompat.makeSceneTransitionAnimation(this
+                , new Pair&lt;View, String&gt;(shared_image, &quot;shared_image_&quot;)
+                , new Pair&lt;View, String&gt;(shared_text, &quot;shared_text_&quot;));
+startActivity(intent, activityOptionsCompat.toBundle());
+</code></pre>
+
+<p>然后在BBBActivity的布局文件想要设置共享元素的部分设置android:transitionName，值和上个页面中设置的值要一一对应，比如：</p>
+
+<pre><code class="language-text"> &lt;TextView
+            android:id=&quot;@+id/tv_show&quot;
+            android:layout_width=&quot;wrap_content&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;我是一行文字&quot;
+            android:transitionName=&quot;shared_text_&quot;/&gt;         
+</code></pre>
+
+<p>当然也可以在代码中设置（注意要在调用时机，不能晚于OnResume）：<code>shared_image.setTransitionName(&quot;shared_image_&quot;);</code><br/>
+这样简单两步，咱们的带共享元素的转场动画就改造完成了：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041179398841.gif" alt="20171111151041179398841.gif"/></p>
+
+<h2 id="toc_9">自定义共享元素动画</h2>
+
+<p>自带的共享元素动画很简单，可以通过如下代码定义进入和返回动画：</p>
+
+<pre><code class="language-text"> getWindow().setSharedElementEnterTransition(Transition transition) 
+ getWindow().setSharedElementReturnTransition(Transition transition)
+</code></pre>
+
+<p>仔细一看这两个方法都只需要一个transition作为动画，所以意味着自定义共享元素动画就是自定义Transition了。套用第一篇自定义的那个直角移动ChangeRect，效果如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041183822484.gif" alt="20171111151041183822484.gif"/></p>
+
+<h2 id="toc_10">其他方法</h2>
+
+<p>上面我们只用两个方法就完成了一次完整的共享元素进入到返回动画。但其实和普通的转场动画一样，设置共享元素的转场动画有四个，除了上面介绍的还有两个就是</p>
+
+<pre><code class="language-text">setSharedElementExitTransition
+setSharedElementReenterTransition
+</code></pre>
+
+<p>看命名方式和普通的转场动画非常相似，也就是共享元素离开和重现动画的方法。但是共享元素转场是为了表现两个页面相似内容连贯性而设计的，一组动画就足以完成了。但如果我们都加上后会怎么样呢？为了动画更明显，我们把普通动画设为串行：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017111115104118664268.gif" alt="2017111115104118664268.gif"/></p>
+
+<p>可以看到新增的两个并没有生效，通过日志打印也可以卡出这一点：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017111115104118919019.png" alt="2017111115104118919019.png"/></p>
+
+<p>SharedElementExitTransition和SharedElementReenterTransition开始后立即就结束了。关于这一点，参看stackoverflow上的回答，简单来说这两个动画的设计只是为了作一些初始化而存在的。当我们点击跳转按钮的时候，马上就已经跳到了B（参看上一篇生命周期的分析），而共享元素动画没有所谓的串行机制，会马上执行SharedElementEnterTransition，所以转场动画内部会立即结束掉ExitTransition。而ReenterTransition我们也可以从gif图看到，SharedElementReturnTransition已经完成了动画，将目标View变为目标状态，所以不再进行SharedElementReturnTransition（也因为没必要），所以只进行了普通转场动画的ReenterTransition。</p>
+
+<h2 id="toc_11">共享元素执行空间</h2>
+
+<p>Window中有个关于共享元素的设置setSharedElementsUseOverlay(boolean sharedElementsUseOverlay)，我们将其设为false，重启App：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041191716571.gif" alt="20171111151041191716571.gif"/></p>
+
+<p>可以看到动画执行流程没有变但是共享元素在移动过程中被遮住了，我们来看源码</p>
+
+<pre><code class="language-text">  protected void moveSharedElementsToOverlay() {
+        if (mWindow == null || !mWindow.getSharedElementsUseOverlay()) {
+            return;
+        }
+        setSharedElementMatrices();
+        int numSharedElements = mSharedElements.size();
+        ViewGroup decor = getDecor();
+        if (decor != null) {
+            boolean moveWithParent = moveSharedElementWithParent();
+            Matrix tempMatrix = new Matrix();
+            for (int i = 0; i &lt; numSharedElements; i++) {
+                View view = mSharedElements.get(i);
+                tempMatrix.reset();
+                mSharedElementParentMatrices.get(i).invert(tempMatrix);
+                GhostView.addGhost(view, decor, tempMatrix);
+                ViewGroup parent = (ViewGroup) view.getParent();
+                if (moveWithParent &amp;&amp; !isInTransitionGroup(parent, decor)) {
+                    GhostViewListeners listener = new GhostViewListeners(view, parent, decor);
+                    parent.getViewTreeObserver().addOnPreDrawListener(listener);
+                    mGhostViewListeners.add(listener);
+                }
+            }
+        }
+    }
+</code></pre>
+
+<p>可以看到,如果<code>getSharedElementsUseOverlay==true</code>（也就是默认状态），系统会得到这个View，然后<code>GhostView.addGhost(view, decor, tempMatrix)</code>，放置在decorView的Overlay上，因为是decorView，所以也就是在整个view树结构的最上层。Overlay它是view的最上面的一个透明的层，添加到上面的和view不会被其他View遮挡住。</p>
+
+<h2 id="toc_12">拓展：共享元素形变动画</h2>
+
+<p>前面的动画效果都是操作View原有的一些属性，View的内容没有(或者内容没有改变），所以如果与Svg矢量动画配合一番，会产生怎么样的效果呢：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041200523866.gif" alt="20171111151041200523866.gif"/></p>
+
+<p>其实很简单，监听SharedElementEnterTransition和SharedElementReturnTransition动画，在其执行的时候执行矢量动画就行了。在更多关于这个矢量动画实现的东西可以参考这篇文章。</p>
+
+<h2 id="toc_13">写在最后</h2>
+
+<p>好了关于Android转场动画的内容完结了，代码已上传<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Frenjianan%2Ftranslate">gitHub</a>，欢迎指正！</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872581.html">
+                
+                  <h1>Android-手势检测GestureDetector全面分析</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>　　在很多视频播放器中，都存在使用不同的手势来控制进度、亮度\音量和暂停播放等功能。Android提供了一个GestureDetector来帮助我们识别一些基本的触摸手势（还有ScaleGestureDetector可以识别缩放手势），让我们很方便地实现手势控制功能。下面我们就来学习一下GestureDetector的使用和通过源码（Android7.0）来分析一下它的实现，让我们对触摸事件处理的理解更加深入。</p>
+
+<h2 id="toc_1">GestureDetector介绍</h2>
+
+<p>　　Detector的意思就是探测者，所以GestureDetector就是用来监听手势的发生。它内部有3个Listener接口，用来回调不同类型的触摸事件，用一个简略的类图来显示：<br/>
+　　<br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151037082648531.png" alt="20171111151037082648531.png"/></p>
+
+<p>里面这些接口的方法，就是相应触摸事件的回调，实现了这些方法，就能实现传入触摸事件之后做出相应的回调。</p>
+
+<h2 id="toc_2">一些回调接口：</h2>
+
+<ol>
+<li><p>OnGestureListener，这个Listener监听一些手势，如单击、滑动、长按等操作： </p>
+<ul>
+<li>onDown(MotionEvent e):用户按下屏幕的时候的回调。 </li>
+<li>onShowPress(MotionEvent e)：用户按下按键后100ms（根据Android7.0源码）还没有松开或者移动就会回调，官方在源码的解释是说一般用于告诉用户已经识别按下事件的回调（我暂时想不出有什么用途，因为这个回调触发之后还会触发其他的，不像长按）。 </li>
+<li>onLongPress(MotionEvent e)：用户长按后（好像不同手机的时间不同，源码里默认是100ms+500ms）触发，触发之后不会触发其他回调，直至松开（UP事件）。 </li>
+<li>onScroll(MotionEvent e1, MotionEvent e2,float distanceX, float distanceY)：手指滑动的时候执行的回调（接收到MOVE事件，且位移大于一定距离），e1,e2分别是之前DOWN事件和当前的MOVE事件，distanceX和distanceY就是当前MOVE事件和上一个MOVE事件的位移量。 </li>
+<li>onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY)：用户执行抛操作之后的回调，MOVE事件之后手松开（UP事件）那一瞬间的x或者y方向速度，如果达到一定数值（源码默认是每秒50px），就是抛操作（也就是快速滑动的时候松手会有这个回调，因此基本上有onFling必然有onScroll）。 </li>
+<li>onSingleTapUp(MotionEvent e)：用户手指松开（UP事件）的时候如果没有执行onScroll()和onLongPress()这两个回调的话，就会回调这个，说明这是一个点击抬起事件，但是不能区分是否双击事件的抬起。</li>
+</ul></li>
+<li><p>OnDoubleTapListener，这个Listener监听双击和单击事件。 </p>
+<ul>
+<li>onSingleTapConfirmed(MotionEvent e)：可以确认（通过单击DOWN后300ms没有下一个DOWN事件确认）这不是一个双击事件，而是一个单击事件的时候会回调。 </li>
+<li>onDoubleTap(MotionEvent e)：可以确认这是一个双击事件的时候回调。 </li>
+<li>onDoubleTapEvent(MotionEvent e)：onDoubleTap()回调之后的输入事件（DOWN、MOVE、UP）都会回调这个方法（这个方法可以实现一些双击后的控制，如让View双击后变得可拖动等）。</li>
+</ul></li>
+<li><p>OnContextClickListener，很多人都不知道ContextClick是什么，我以前也不知道，直到我把平板接上了外接键盘——原来这就是鼠标右键。。。 </p>
+<ul>
+<li>onContextClick(MotionEvent e)：当鼠标/触摸板，右键点击时候的回调。</li>
+</ul></li>
+<li><p>SimpleOnGestureListener，实现了上面三个接口的类，拥有上面三个的所有回调方法。 </p>
+<ul>
+<li>由于SimpleOnGestureListener不是抽象类，所以继承它的时候只需要选取我们所需要的回调方法来重写就可以了，非常方便，也减少了代码量，符合接口隔离原则，也是模板方法模式的实现。而实现上面的三个接口中的一个都要全部重写里面的方法，所以我们一般都是选择SimpleOnGestureListener。</li>
+</ul></li>
+</ol>
+
+<blockquote>
+<p>ps:上面所有的回调方法的返回值都是boolean类型，和View的事件传递机制一样，返回true表示消耗了事件，flase表示没有消耗。</p>
+</blockquote>
+
+<h2 id="toc_3">GestureDetector的使用</h2>
+
+<p>GestureDetector的使用很简单，因为它的功能就是定义为识别手势，所以使用的话就是输入完整的触摸事件（完整的意思就是用户所有的触摸操作都是输入给它。为什么要强调完整，因为我上一篇博客就是分享如何拦截子View的部分触摸事件），识别然后进行相应的回调：</p>
+
+<pre><code class="language-java">    private void init(Context context){
+        mOnGestureListener = new MyOnGestureListener();
+        mGestureDetector = new GestureDetector(context,mOnGestureListener);
+//        mGestureDetector.setIsLongpressEnabled(false);
+        setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                //监听触摸事件
+                return mGestureDetector.onTouchEvent(event);
+            }
+        });
+
+        setOnGenericMotionListener(new OnGenericMotionListener() {
+            @Override
+            public boolean onGenericMotion(View v, MotionEvent event) {
+                Log.d(TAG, &quot;onGenericMotion: &quot;);
+                //监听鼠标右键点击事件
+                return mGestureDetector.onGenericMotionEvent(event);
+            }
+        });
+    }
+</code></pre>
+
+<blockquote>
+<p>如上面的代码，要使用OnGestureListener和OnDoubleTapListener里面的回调需要调用GestureDetector.onTouchEvent()方法，而使用OnContextClickListener的话则是需要调用onGenericMotionEvent()方法，注意一个是在onTouch()方法一个是在onGenericMotion()方法。</p>
+</blockquote>
+
+<p>　　看完了上面一堆文字，其实你就会懂得如何使用GestureDetector了，这里有GestureDetector的实践。但是如果你想了解它的回调的时机为什么会是这样的，想具体了解它们的回调时机，可以继续看下去，下面是源码分析。</p>
+
+<h2 id="toc_4">GestureDetector源码分析</h2>
+
+<h3 id="toc_5">初始化处理</h3>
+
+<p>　　GestureDetector的源码接近800行，这在Android源码中已经算是比较短的了（毕竟注释也占一两百行了），所以说它的实现也不是很复杂的。从它的构造方法开始：</p>
+
+<pre><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
+        this(context, listener, null);
+    }
+
+    public GestureDetector(Context context, OnGestureListener listener, Handler handler) {
+        //初始化Handler
+        if (handler != null) {
+            mHandler = new GestureHandler(handler);
+        } else {
+            mHandler = new GestureHandler();
+        }
+        //设置Listener
+        mListener = listener;
+        if (listener instanceof OnDoubleTapListener) {
+            setOnDoubleTapListener((OnDoubleTapListener) listener);
+        }
+        if (listener instanceof OnContextClickListener) {
+            setContextClickListener((OnContextClickListener) listener);
+        }
+
+        init(context);
+    }
+
+    private void init(Context context) {
+        if (mListener == null) {
+            throw new NullPointerException(&quot;OnGestureListener must not be null&quot;);
+        }
+        mIsLongpressEnabled = true;
+
+        // Fallback to support pre-donuts releases
+        int touchSlop, doubleTapSlop, doubleTapTouchSlop;
+        if (context == null) {
+            //相当于下面的getScaledTouchSlop，表示滑动的时候，手的移动要大于这个距离才开始移动控件
+            touchSlop = ViewConfiguration.getTouchSlop();
+            //相当于下面的getScaledDoubleTapTouchSlop，表示点击的时候，手指移动大于这个距离，就被认为不可能是双击
+            doubleTapTouchSlop = touchSlop; 
+            //相当于下面的getScaledDoubleTapSlop，表示第二次点击的时候，和第一次的点击点位置距离如果大于这个，就被认为不是双击
+            doubleTapSlop = ViewConfiguration.getDoubleTapSlop();
+            mMinimumFlingVelocity = ViewConfiguration.getMinimumFlingVelocity();
+            mMaximumFlingVelocity = ViewConfiguration.getMaximumFlingVelocity();
+        } else {
+            final ViewConfiguration configuration = ViewConfiguration.get(context);
+            touchSlop = configuration.getScaledTouchSlop();
+            doubleTapTouchSlop = configuration.getScaledDoubleTapTouchSlop();
+            doubleTapSlop = configuration.getScaledDoubleTapSlop();
+            mMinimumFlingVelocity = configuration.getScaledMinimumFlingVelocity();
+            mMaximumFlingVelocity = configuration.getScaledMaximumFlingVelocity();
+        }
+        //做平方好计算距离，后面的距离对比也是用平方
+        mTouchSlopSquare = touchSlop * touchSlop;
+        mDoubleTapTouchSlopSquare = doubleTapTouchSlop * doubleTapTouchSlop;
+        mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;
+    }
+</code></pre>
+
+<p>　　可见GestureDetector的创建就是初始化一些属性，然后就是把对应的Listener设置好，还有初始化Handler，而这里的GestureHandler，是控制onShowPress()，onLongPress()，onSingleTapConfirmed()`回调的关键：</p>
+
+<pre><code class="language-java">  private class GestureHandler extends Handler {
+        //省略构造函数...
+
+        @Override
+        public void handleMessage(Message msg) {
+            switch (msg.what) {
+            case SHOW_PRESS:
+                mListener.onShowPress(mCurrentDownEvent);
+                break;
+
+            case LONG_PRESS:
+                dispatchLongPress();
+                break;
+
+            case TAP:
+                // If the user&#39;s finger is still down, do not count it as a tap
+                //这里控制SingleTapConfirmed的回调，
+                if (mDoubleTapListener != null) {
+                    if (!mStillDown) {
+                        //如果已经松开，就立刻调用SingleTapConfirmed
+                        mDoubleTapListener.onSingleTapConfirmed(mCurrentDownEvent);
+                    } else {
+                        //如果处理Message的时候还没松开，就设置mDeferConfirmSingleTap为true，在UP事件的时候调用SingleTapConfirme
+                        mDeferConfirmSingleTap = true;
+                    }
+                }
+                break;
+
+            default:
+                throw new RuntimeException(&quot;Unknown message &quot; + msg); //never
+            }
+        }
+    }
+
+    //长按处理
+    private void dispatchLongPress() {
+        mHandler.removeMessages(TAP);
+        mDeferConfirmSingleTap = false;
+        mInLongPress = true;
+        mListener.onLongPress(mCurrentDownEvent);
+    }
+</code></pre>
+
+<h3 id="toc_6">输入处理</h3>
+
+<p>　　初始化完之后，就是看它的如何处理输入了，这是它的核心逻辑：</p>
+
+<pre><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
+        //检查事件输入的一致性,log出来一致性的信息，如：有事件只有up没有down
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onTouchEvent(ev, 0);
+        }
+
+        final int action = ev.getAction();
+
+        //开始速度检测
+        if (mVelocityTracker == null) {
+            mVelocityTracker = VelocityTracker.obtain();
+        }
+        mVelocityTracker.addMovement(ev);
+
+
+        //检测是否非主要指针抬起动作（如果是多点触摸）
+        final boolean pointerUp =
+                (action &amp; MotionEvent.ACTION_MASK) == MotionEvent.ACTION_POINTER_UP;
+
+        final int skipIndex = pointerUp ? ev.getActionIndex() : -1;
+
+        // Determine focal point
+        // 是非主要指针抬起动作的话会跳过
+        float sumX = 0, sumY = 0;
+        final int count = ev.getPointerCount();
+        //把所有还在触摸的手指的位置x，y加起来，后面求平均数，算出中心焦点
+        for (int i = 0; i &lt; count; i++) {
+            if (skipIndex == i) continue;
+            sumX += ev.getX(i);
+            sumY += ev.getY(i);
+        }
+        final int div = pointerUp ? count - 1 : count;
+        final float focusX = sumX / div;
+        final float focusY = sumY / div;
+
+        boolean handled = false;
+
+        switch (action &amp; MotionEvent.ACTION_MASK) {
+        case MotionEvent.ACTION_POINTER_DOWN:
+            //...
+            break;
+
+        case MotionEvent.ACTION_POINTER_UP:
+            //...
+            break;
+
+        case MotionEvent.ACTION_DOWN:
+            //...
+            break;
+
+        case MotionEvent.ACTION_MOVE:
+            //...
+            break;
+
+        case MotionEvent.ACTION_UP:
+            //...
+            break;
+
+        case MotionEvent.ACTION_CANCEL:
+            cancel();
+            break;
+        }
+
+        //对未被处理的事件进行一次一致性检测
+        if (!handled &amp;&amp; mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onUnhandledEvent(ev, 0);
+        }
+        return handled;
+    }
+</code></pre>
+
+<p>　　上面的注释写得很清楚了，主要onTouchEvent()的主要思路就是先对输入事件做出统一处理，提取一些共有的信息，如多个点同时触摸时候的中心焦点和滑动速度等，然后根据事件的分类做出相应的处理。</p>
+
+<blockquote>
+<p>ps：InputEventConsistencyVerifier对输入事件进行的一致性检测的结果并不影响GestureDetector的运行，如果检测到一致性不符合的事件（只有UP事件而前面没有DOWN事件），就只会输出log告诉开发者。</p>
+</blockquote>
+
+<h4 id="toc_7">DOWN事件处理</h4>
+
+<p>　　下面进入DOWN事件的处理：</p>
+
+<pre><code class="language-java">    //...
+        case MotionEvent.ACTION_DOWN:
+            if (mDoubleTapListener != null) {
+                //处理双击
+                //取消TAP事件
+                boolean hadTapMessage = mHandler.hasMessages(TAP);
+                if (hadTapMessage) mHandler.removeMessages(TAP);
+                if ((mCurrentDownEvent != null) &amp;&amp; (mPreviousUpEvent != null) &amp;&amp; hadTapMessage &amp;&amp;
+                        isConsideredDoubleTap(mCurrentDownEvent, mPreviousUpEvent, ev)) {
+                    // This is a second tap
+                    mIsDoubleTapping = true;
+                    // Give a callback with the first tap of the double-tap
+                    //回调双击
+                    handled |= mDoubleTapListener.onDoubleTap(mCurrentDownEvent);
+                    // Give a callback with down event of the double-tap
+                    handled |= mDoubleTapListener.onDoubleTapEvent(ev);
+                } else {
+                    // This is a first tap
+                    //延时发出单击事件，如果到了时间（300ms）还没有取消的话就确认是TAP事件了
+                    mHandler.sendEmptyMessageDelayed(TAP, DOUBLE_TAP_TIMEOUT);
+                }
+            }
+
+            mDownFocusX = mLastFocusX = focusX;
+            mDownFocusY = mLastFocusY = focusY;
+            //重置mCurrentDownEvent
+            if (mCurrentDownEvent != null) {
+                mCurrentDownEvent.recycle();
+            }
+            mCurrentDownEvent = MotionEvent.obtain(ev);
+            mAlwaysInTapRegion = true;
+            mAlwaysInBiggerTapRegion = true;
+            mStillDown = true;
+            mInLongPress = false;
+            mDeferConfirmSingleTap = false;
+            //处理长按
+            if (mIsLongpressEnabled) {
+                mHandler.removeMessages(LONG_PRESS);
+                //延时发送长按事件
+                mHandler.sendEmptyMessageAtTime(LONG_PRESS, mCurrentDownEvent.getDownTime()
+                        + TAP_TIMEOUT + LONGPRESS_TIMEOUT);
+            }
+            //延时发送showPress事件
+            mHandler.sendEmptyMessageAtTime(SHOW_PRESS, mCurrentDownEvent.getDownTime() + TAP_TIMEOUT);
+            handled |= mListener.onDown(ev);
+            break;
+    //...
+
+    //判断第二次点击是否有效双击
+    private boolean isConsideredDoubleTap(MotionEvent firstDown, MotionEvent firstUp,
+            MotionEvent secondDown) {
+        //第一次点击后是否有移动超出范围
+        if (!mAlwaysInBiggerTapRegion) {
+
+            return false;
+        }
+
+        final long deltaTime = secondDown.getEventTime() - firstUp.getEventTime();
+        if (deltaTime &gt; DOUBLE_TAP_TIMEOUT || deltaTime &lt; DOUBLE_TAP_MIN_TIME) {
+            return false;
+        }
+
+        int deltaX = (int) firstDown.getX() - (int) secondDown.getX();
+        int deltaY = (int) firstDown.getY() - (int) secondDown.getY();
+        //判断第二次点击是否在附近，在附近才被认为是双击
+        return (deltaX * deltaX + deltaY * deltaY &lt; mDoubleTapSlopSquare);
+    }
+</code></pre>
+
+<p>可见，对DOWN事件涉及： </p>
+
+<ul>
+<li>处理单击判断：如果收到一次DOWN事件，而且前段时间没有DOWN事件的话，会发送一个延时的TAP信息，而一段时间（300ms）之后没有被取消的话，就执行GestureHandler里面的TAP单击确认操作。 </li>
+<li>处理双击判断：如果前面也有一次DOWN事件，而且也符合isConsideredDoubleTap()的条件（第一次点击后没有移动超出范围，第二次点击也在附近），就可以确认双击，执行onDoubleTap()和onDoubleTapEvent()的回调。 </li>
+<li>处理长按判断：先看用户是否允许检测长按，然后就是发送一个延时的LONG_PRESS信息，如果到时候还没被取消的话就是回调长按方法了。 </li>
+<li>处理showPress判断：这个和长按差不多，就是时间（100ms）短了一点而已。</li>
+</ul>
+
+<blockquote>
+<p>PS：handled是boolean变量，|=符号是用符号右边的值跟左边的值进行或运算再赋值给左边。a |= b等价于a = a | b，这里使handled变量初始值为false，进行了多次|=操作，一旦有结果是true的话，handled最后的值就是true，所有结果都是false最后才会false，onTouchEvent()方法最后返回这个handled，就可以表示事件有没被处理，实现了对事件处理的封装。</p>
+</blockquote>
+
+<h4 id="toc_8">MOVE事件处理</h4>
+
+<p>然后再看看对MOVE事件的处理：</p>
+
+<pre><code class="language-java">    //...
+        case MotionEvent.ACTION_MOVE:
+            //如果是正在长按和点击了鼠标右键
+            if (mInLongPress || mInContextClick) {
+                break;
+            }
+            final float scrollX = mLastFocusX - focusX;
+            final float scrollY = mLastFocusY - focusY;
+            if (mIsDoubleTapping) {
+                // Give the move events of the double-tap
+                //如果是第二次点击的话，把移动事件也当作双击，有点奇怪
+                handled |= mDoubleTapListener.onDoubleTapEvent(ev);
+            } else if (mAlwaysInTapRegion) {
+                //down才会使mAlwaysInTapRegion为true
+                final int deltaX = (int) (focusX - mDownFocusX);
+                final int deltaY = (int) (focusY - mDownFocusY);
+                int distance = (deltaX * deltaX) + (deltaY * deltaY);
+                //mTouchSlopSquare是一个距离的平方，表示滑动的时候，手的移动要大于这个距离才认为是Scroll事件
+                if (distance &gt; mTouchSlopSquare) {
+                    //进入Scroll模式
+                    handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
+                    mLastFocusX = focusX;
+                    mLastFocusY = focusY;
+                    mAlwaysInTapRegion = false;
+                    mHandler.removeMessages(TAP);
+                    mHandler.removeMessages(SHOW_PRESS);
+                    mHandler.removeMessages(LONG_PRESS);
+                }
+                if (distance &gt; mDoubleTapTouchSlopSquare) {
+                    //如果移动距离超过允许范围，则不再可能认为移动事件是双击
+                    mAlwaysInBiggerTapRegion = false;
+                }
+            } else if ((Math.abs(scrollX) &gt;= 1) || (Math.abs(scrollY) &gt;= 1)) {
+                //后续的Scroll移动，前面的是进入Scroll移动
+                handled = mListener.onScroll(mCurrentDownEvent, ev, scrollX, scrollY);
+                mLastFocusX = focusX;
+                mLastFocusY = focusY;
+            }
+            break;
+    //...
+</code></pre>
+
+<p>可见，对MOVE事件涉及： </p>
+
+<ul>
+<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。 </li>
+<li>onScroll()回调：当MOVE不是长按，不是DoubleTapEvent之后，当移动距离大于一定距离之后，就会进入Scroll模式，然后两个MOVE事件的位移距离scrollX或者scrollY大于1px，都会调用onScroll()。</li>
+</ul>
+
+<h4 id="toc_9">UP事件的处理</h4>
+
+<p>接下来再看UP事件：</p>
+
+<pre><code class="language-java">    //...
+        case MotionEvent.ACTION_UP:
+            mStillDown = false;
+            MotionEvent currentUpEvent = MotionEvent.obtain(ev);
+            if (mIsDoubleTapping) {
+                // Finally, give the up event of the double-tap
+                //双击事件
+                handled |= mDoubleTapListener.onDoubleTapEvent(ev);
+            } else if (mInLongPress) {
+                //长按结束
+                mHandler.removeMessages(TAP);
+                mInLongPress = false;
+            } else if (mAlwaysInTapRegion &amp;&amp; !mIgnoreNextUpEvent) {
+                handled = mListener.onSingleTapUp(ev);
+                //处理单击确认，具体逻辑看GestureHandler如何处理TAP事件
+                if (mDeferConfirmSingleTap &amp;&amp; mDoubleTapListener != null) {
+                    mDoubleTapListener.onSingleTapConfirmed(ev);
+                }
+            } else if (!mIgnoreNextUpEvent) {
+                //处理Fling，如果速度大于定义的最小速度（50），就回调Fling
+                // A fling must travel the minimum tap distance
+                final VelocityTracker velocityTracker = mVelocityTracker;
+                final int pointerId = ev.getPointerId(0);
+                velocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
+                final float velocityY = velocityTracker.getYVelocity(pointerId);
+                final float velocityX = velocityTracker.getXVelocity(pointerId);
+
+                if ((Math.abs(velocityY) &gt; mMinimumFlingVelocity)
+                        || (Math.abs(velocityX) &gt; mMinimumFlingVelocity)){
+                    handled = mListener.onFling(mCurrentDownEvent, ev, velocityX, velocityY);
+                }
+            }
+            //重置mPreviousUpEvent
+            if (mPreviousUpEvent != null) {
+                mPreviousUpEvent.recycle();
+            }
+            // Hold the event we obtained above - listeners may have changed the original.
+            mPreviousUpEvent = currentUpEvent;
+            //回收mVelocityTracker
+            if (mVelocityTracker != null) {
+                // This may have been cleared when we called out to the
+                // application above.
+                mVelocityTracker.recycle();
+                mVelocityTracker = null;
+            }
+            mIsDoubleTapping = false;
+            mDeferConfirmSingleTap = false;
+            mIgnoreNextUpEvent = false;
+            mHandler.removeMessages(SHOW_PRESS);
+            mHandler.removeMessages(LONG_PRESS);
+            break;
+    //...
+</code></pre>
+
+<p>可见，对MOVE事件涉及： </p>
+
+<ul>
+<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。 </li>
+<li>onSingleTapUp()回调：DOWN事件之后没有MOVE，或者MOVE的距离没有超出范围，mAlwaysInTapRegion才不会变成false，回调onSingleTapUp()。 </li>
+<li>onSingleTapConfirmed()回调：从前面GestureHandler里面的TAP消息的实现可以看到：</li>
+</ul>
+
+<pre><code class="language-java">            case TAP:
+                // If the user&#39;s finger is still down, do not count it as a tap
+                //这里控制SingleTapConfirmed的回调，
+                if (mDoubleTapListener != null) {
+                    if (!mStillDown) {
+                        //如果已经松开，就立刻调用SingleTapConfirmed
+                        mDoubleTapListener.onSingleTapConfirmed(mCurrentDownEvent);
+                    } else {
+                        //如果处理Message的时候还没松开，就设置mDeferConfirmSingleTap为true，在UP事件的时候调用SingleTapConfirme
+                        mDeferConfirmSingleTap = true;
+                    }
+                }
+                break;
+</code></pre>
+
+<p>　　之前看过，TAP消息是延时（300ms）发送的，然而实际逻辑中，是抬起手指才算是点击，所以这里处理TAP的时候就不一定立刻调用onSingleTapConfirmed()，而是判断手指是否松开了，是松开的话就立刻回调。如果还未松开那就把标志位mDeferConfirmSingleTap设置为true，等到收到UP事件的时候再回调。 </p>
+
+<ul>
+<li>onFling()回调：当UP事件的速度大于一定速度时，就会回调onFling()，至于mIgnoreNextUpEvent参数，是只有鼠标右键点击的时候才会为true，具体看后面。</li>
+</ul>
+
+<h4 id="toc_10">多点触摸的处理</h4>
+
+<p>　　对于多个手指落下，前面的统一处理已经是把所有手指的坐标值加起来然后算平均值了，所以我们多根手指触摸的时候，其实滑动的实际点是这些手指的中心焦点。回看上面的MOVE事件处理，中心焦点的位置值FocusX和FocusY决定onScroll(onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY))的后两个参数值，所以处理多点触控的话就使用它们比较方便。因为MotionEvent是使用数组装着当前屏幕上所有指针的动作的，使用前两个参数的话还要循环用getX(int pointerIndex)和getY(int pointerIndex)方法取出各个指针的值再自己处理。</p>
+
+<pre><code class="language-java">    //...
+        case MotionEvent.ACTION_POINTER_DOWN:
+            mDownFocusX = mLastFocusX = focusX;
+            mDownFocusY = mLastFocusY = focusY;
+            // Cancel long press and taps
+            //如果有多根手指按下，取消长按和点击计时
+            cancelTaps();
+            break;
+
+        case MotionEvent.ACTION_POINTER_UP:
+            mDownFocusX = mLastFocusX = focusX;
+            mDownFocusY = mLastFocusY = focusY;
+
+            // Check the dot product of current velocities.
+            // If the pointer that left was opposing another velocity vector, clear.
+            //计算每一秒钟的滑动像素
+            mVelocityTracker.computeCurrentVelocity(1000, mMaximumFlingVelocity);
+            final int upIndex = ev.getActionIndex();
+            final int id1 = ev.getPointerId(upIndex);
+            final float x1 = mVelocityTracker.getXVelocity(id1);
+            final float y1 = mVelocityTracker.getYVelocity(id1);
+            //如果剩下的手指速度方向是和抬起那根手指的速度相反方向的，就说明不是fling，清空速度监听
+            for (int i = 0; i &lt; count; i++) {
+                if (i == upIndex) continue;
+
+                final int id2 = ev.getPointerId(i);
+                final float x = x1 * mVelocityTracker.getXVelocity(id2);
+                final float y = y1 * mVelocityTracker.getYVelocity(id2);
+
+                final float dot = x + y;
+                if (dot &lt; 0) {
+                    mVelocityTracker.clear();
+                    break;
+                }
+            }
+            break;
+    //...
+
+    private void cancelTaps() {
+        mHandler.removeMessages(SHOW_PRESS);
+        mHandler.removeMessages(LONG_PRESS);
+        mHandler.removeMessages(TAP);
+        mIsDoubleTapping = false;
+        mAlwaysInTapRegion = false;
+        mAlwaysInBiggerTapRegion = false;
+        mDeferConfirmSingleTap = false;
+        mInLongPress = false;
+        mInContextClick = false;
+        mIgnoreNextUpEvent = false;
+    }
+</code></pre>
+
+<p>　　这是对多个手指的UP和DOWN事件处理，其实就是做一些取消操作而让多点触摸不影响单点触摸的应用，例如在多个手指落下的时候取消点击信息等。</p>
+
+<h4 id="toc_11">ContextClick的处理</h4>
+
+<p>　　ContextClick的事件是由onGenericMotionEvent()传入：</p>
+
+<pre><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
+        if (mInputEventConsistencyVerifier != null) {
+            mInputEventConsistencyVerifier.onGenericMotionEvent(ev, 0);
+        }
+
+        final int actionButton = ev.getActionButton();
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_BUTTON_PRESS:
+                //按下触控笔首选按钮或者鼠标右键
+                if (mContextClickListener != null &amp;&amp; !mInContextClick &amp;&amp; !mInLongPress
+                        &amp;&amp; (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                        || actionButton == MotionEvent.BUTTON_SECONDARY)) {
+                    if (mContextClickListener.onContextClick(ev)) {
+                        mInContextClick = true;
+                        mHandler.removeMessages(LONG_PRESS);
+                        mHandler.removeMessages(TAP);
+                        return true;
+                    }
+                }
+                break;
+
+            case MotionEvent.ACTION_BUTTON_RELEASE:
+                if (mInContextClick &amp;&amp; (actionButton == MotionEvent.BUTTON_STYLUS_PRIMARY
+                        || actionButton == MotionEvent.BUTTON_SECONDARY)) {
+                    mInContextClick = false;
+                    //无视下一个UP事件，因为它是由鼠标右键或者触控笔键带起的
+                    mIgnoreNextUpEvent = true;
+                }
+                break;
+        }
+        return false;
+    }
+</code></pre>
+
+<p>由此可以，当按键按下（ACTION_BUTTON_PRESS）的时候已经回调onContextClick()。</p>
+
+<h2 id="toc_12">总结</h2>
+
+<p>读完源码，总结出来的每个回调的调用时机如下表：</p>
+
+<p>PS：除去onContextClick()，因为它的按下鼠标右键时候是发出一系列的事件。</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center">回调/输入事件</th>
+<th style="text-align: center">DOWN事件</th>
+<th style="text-align: center">MOVE事件</th>
+<th style="text-align: center">UP事件</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: center">onDown(MotionEvent e)</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+</tr>
+<tr>
+<td style="text-align: center">onShowPress(MotionEvent e)</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+</tr>
+<tr>
+<td style="text-align: center">onLongPress(MotionEvent e)</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+</tr>
+<tr>
+<td style="text-align: center">onScroll(MotionEvent e1, MotionEvent e2,float distanceX, float distanceY)</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">×</td>
+</tr>
+<tr>
+<td style="text-align: center">onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY))</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">√</td>
+</tr>
+<tr>
+<td style="text-align: center">onSingleTapUp(MotionEvent e)</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">√</td>
+</tr>
+<tr>
+<td style="text-align: center">onSingleTapConfirmed(MotionEvent e)</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">√</td>
+</tr>
+<tr>
+<td style="text-align: center">onDoubleTap(MotionEvent e)</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">×</td>
+<td style="text-align: center">×</td>
+</tr>
+<tr>
+<td style="text-align: center">onDoubleTapEvent(MotionEvent e)</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">√</td>
+<td style="text-align: center">√</td>
+</tr>
+</tbody>
+</table>
+
+<p>　　<br/>
+从上面的分析可以看出，虽然GestureDetector能识别很多手势，但是也是不能满足所有的需求的，如滑动和长按之后松开没有回调（这个可以重写onTouch()捕捉UP事件实现）、多点触控缩放手势的实现（这个可以用ScaleGestureDetector）等。</p>
+
+<h2 id="toc_13">后话</h2>
+
+<p>　　有人问我看GestureDetector源码这么仔细有什么用，它又不是很常用的东西，网上随便一搜一堆资料。我的回答是因为我觉得要用一个东西的话，首先就是要搞清楚它能干什么，它的限制是什么，为什么要选择它，关于这些方面，网上的很多关于GestureDetector的资料都没有达到我想了解的程度，加上GestureDetector并不复杂，所以写下了这篇博客，这样就可以从源码层面上了解到它的回调是什么时候调用，有bug的时候也能更快的找出。<br/><br/>
+　　不管怎样，GestureDetector里面的SimpleOnGestureListener的设计，和对触摸事件的处理方式是很值得我学习的，记录分享至此，水平有限，如果错漏，欢迎指正和讨论。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/11/1</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872417.html">
+                
+                  <h1>Android-玩转PathMeasure</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015906869351.gif" alt="20171109151015906869351.gif"/></p>
+
+<h2 id="toc_0">PathMeasure</h2>
+
+<p><strong>Public constructors</strong></p>
+
+<ul>
+<li>PathMeasure 创建一个空的 pathmeasure 对象</li>
+<li>PathMeasure(Path path,boolean forceClosed)创建一个带 path 参数的 PathMeasure,forceClosed控制 path 是否自动闭合</li>
+</ul>
+
+<p><strong>Public methods</strong></p>
+
+<ul>
+<li>getLength() 返回当前 Path 的总长度。</li>
+<li>getMatrix(float distance, Matrix matrix, int flags)</li>
+<li>getPosTan(float distance, float[] pos, float[] tan)获取distance长度的 point 值给 pos，point 点的正切值给 tan。</li>
+<li>getSegment(float startD, float stopD, Path dst, boolean startWithMoveTo) 获取 path 的一个片段，即startD到 stopD 的线段，辅助给 dst。</li>
+<li>isClosed() 是否自动闭合</li>
+<li>nextContour() 移动到下一条曲线。如果 path 中含有不连续的线条，getLength、getPosTan等方法之会在第一条线上运行，需要使用这个方法跳到第二条线</li>
+<li>setPath(Path path, boolean forceClosed)</li>
+</ul>
+
+<p>是不是很简单，就这么几个方法，现在去画光能使者阵有思路了么~~<br/>
+接下来为了便于大家理解，我们再来简单回顾一下 path 的 api，因为静态的光能使者阵是需要 path 去绘制的。</p>
+
+<p><strong>Path</strong></p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center">方法名</th>
+<th style="text-align: center">作用</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: center">moveTo</td>
+<td style="text-align: center">移动到指定点</td>
+</tr>
+<tr>
+<td style="text-align: center">setLastPoint</td>
+<td style="text-align: center">重新设置当前Path的最后一个点，如果当前Path为空，则等同上个方法</td>
+</tr>
+<tr>
+<td style="text-align: center">lineTo</td>
+<td style="text-align: center">添加当前点到一个指定点的直线</td>
+</tr>
+<tr>
+<td style="text-align: center">close</td>
+<td style="text-align: center">连接当前点到起点，形成闭合路径</td>
+</tr>
+<tr>
+<td style="text-align: center">addRect、addRoundRect、addOval、addCircle、addPath、addArc、arcTo</td>
+<td style="text-align: center">添加各种图形</td>
+</tr>
+<tr>
+<td style="text-align: center">isEmpty</td>
+<td style="text-align: center">是否为空</td>
+</tr>
+<tr>
+<td style="text-align: center">isRect</td>
+<td style="text-align: center">是否为矩形</td>
+</tr>
+<tr>
+<td style="text-align: center">set</td>
+<td style="text-align: center">用一个新的path替换</td>
+</tr>
+<tr>
+<td style="text-align: center">offset</td>
+<td style="text-align: center">对当前的路径进行偏移，不会影响后续操作</td>
+</tr>
+<tr>
+<td style="text-align: center">quadTo、cubicTo</td>
+<td style="text-align: center">贝塞尔曲线</td>
+</tr>
+<tr>
+<td style="text-align: center">rMoveTo、rLineTo、rQuaTo、rCubicTo</td>
+<td style="text-align: center">带r的是基于当前点的偏移量，不带r基于坐标原点</td>
+</tr>
+<tr>
+<td style="text-align: center">setFillType、getFillType</td>
+<td style="text-align: center">设置填充模式</td>
+</tr>
+<tr>
+<td style="text-align: center">transform</td>
+<td style="text-align: center">矩阵变换</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_1">动画拆解</h2>
+
+<p>好了，准备工作完成，我们开始撸代码</p>
+
+<p><strong>第一步，绘制静态的光能使者阵</strong><br/>
+首先绘制两个圆，然后就是中间的六角星（其实仔细看就是两个三角形）。<br/>
+都是很简单的方法，同学们动手去画的时候可能会遇到一个这样的问题，就是三角形的三个点不好取。其实很简单，直接在圆上取0，1/3，2/3长度的点即可，刚刚我们不是说了 PathMeasure 的方法么，用getPosTan就可以实现。</p>
+
+<p><strong>第二步，让光能使者阵动起来</strong><br/>
+这里我们把这个动画效果分成三个阶段吧。</p>
+
+<p><strong>第一阶段，绘制两个圆</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015971189141.gif" alt="20171109151015971189141.gif"/></p>
+
+<p>如上图所示，这里两个圆是慢慢绘制出来的， 圆的 path 很容易绘制出来，这里我就不讲了，然后PathMeasure的getLength可以获取 path 总的长度，getSegment可以获取某个点到某个点的 Path。因此一个 ValueAnimator 就可以解决从0到100%长度的过程，具体实现看后面的代码。</p>
+
+<p>然后问题来了，path画出来的圆的起点在哪里？怎么控制两个圆开始绘制的角度不一样。有同学可能想到了旋转90°再画第二个圆，当然这种方式是可以实现的，但是由于后面的三角形也需要旋转，这里我们就不用 path 画圆了，用 path 添加一个正方形 Rect 的圆弧也是一个圆，然后我们的圆弧可以控制开始的角度，弧度。<br/>
+然后变成这样了</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015974099352.gif" alt="20171109151015974099352.gif"/></p>
+
+<p>WTF？角度怎么不对了，我明明设置的开始角度的呀</p>
+
+<pre><code class="language-text">innerCircle.addArc(innerRect, 150, -360);
+outerCircle.addArc(outerRect, 60, -360);
+</code></pre>
+
+<p>最后有个大牛说你的圆变成闭环了，PathMeasure 找不到开始点，用了默认的。你把360度改成359.9让他不是一个闭环的圆就行了。</p>
+
+<p><strong>第二阶段，两个点在圆里面弹射</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015979584476.gif" alt="20171109151015979584476.gif"/></p>
+
+<p>看起来好像还要干什么碰撞反弹之类的事，一副高科技的样子，其实不是的。</p>
+
+<p>轨迹就是两个三角形，怎么让两条线跟着三角形走呢，而且走的时候还要不段变化长度。</p>
+
+<p>刚刚第一步我们用 ValueAnimator 来控制一个圆从0到100%的过程，</p>
+
+<p><code>pathMeasure.getSegment(0, distance * pathMeasure.getLength(), drawPath, true);</code></p>
+
+<p>不断截取起点到*%长度的 path 赋值给drawPath。</p>
+
+<p>从里是从起点开始截取，那么我们不从起点开始截取，从当前点附近开始截取不就行了吗，哈哈哈哈~so easy</p>
+
+<pre><code class="language-text">float stopD = distance * pathMeasure.getLength();
+float startD = stopD - (0.5f - Math.abs(0.5f - distance)) * 200;
+pathMeasure.getSegment(startD, stopD, drawPath, true);
+</code></pre>
+
+<p><strong>第三阶段绘制两个三角形</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171109151015984291399.gif" alt="20171109151015984291399.gif"/></p>
+
+<p>其实两个三角形就是第二步的运动轨迹，也是就是说直接用第阶段的 Path 即可，然后再用第一阶段一样的办法就可以实现效果。</p>
+
+<h2 id="toc_2">代码实现</h2>
+
+<pre><code class="language-java">public class GranzortView extends View {
+    private Paint paint;
+    private Path innerCircle;//内圆 path
+    private Path outerCircle;//外圆 path
+    private Path trangle1;  //第一个三角形的path
+    private Path trangle2;  //第二个三角形的path
+    private Path drawPath;  //用于截取路径的path
+
+    private PathMeasure pathMeasure;
+
+    private float mViewWidth;
+    private float mViewHeight;
+
+    private long duration = 3000;
+    private ValueAnimator valueAnimator;
+
+    private Handler mHandler;
+
+    private float distance;//当前动画执行的百分比取值为0~1
+    private ValueAnimator.AnimatorUpdateListener animatorUpdateListener;
+    private Animator.AnimatorListener animatorListener;
+
+    private State mCurrentState = State.CIRCLE_STATE;
+
+    public GranzortView(Context context) {
+        this(context,null);
+    }
+
+    public GranzortView(Context context, @Nullable AttributeSet attrs) {
+        this(context, attrs,0);
+    }
+
+    public GranzortView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        init();
+    }
+
+    //三个阶段的枚举
+    private enum State {
+        CIRCLE_STATE,
+        TRANGLE_STATE,
+        FINISH_STATE
+    }
+
+    @Override
+    protected void onSizeChanged(int w, int h, int oldw, int oldh) {
+        super.onSizeChanged(w, h, oldw, oldh);
+        mViewWidth = w;
+        mViewHeight = h;
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        canvas.drawColor(getResources().getColor(R.color.colorPrimary));
+        canvas.save();
+        canvas.translate(mViewWidth / 2, mViewHeight / 2);
+        switch (mCurrentState){
+            case CIRCLE_STATE:
+                drawPath.reset();
+                pathMeasure.setPath(innerCircle,false);
+                pathMeasure.getSegment(0,distance * pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                pathMeasure.setPath(outerCircle,false);
+                drawPath.reset();
+                pathMeasure.getSegment(0,distance * pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                break;
+            case TRANGLE_STATE:
+                canvas.drawPath(innerCircle,paint);
+                canvas.drawPath(outerCircle,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle1,false);
+                float stopD = distance * pathMeasure.getLength();
+                float startD = stopD - (0.5f - Math.abs(0.5f - distance)) * 200;
+                pathMeasure.getSegment(startD,stopD,drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle2,false);
+                pathMeasure.getSegment(startD,stopD,drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                break;
+            case FINISH_STATE:
+                canvas.drawPath(innerCircle,paint);
+                canvas.drawPath(outerCircle,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle1,false);
+                pathMeasure.getSegment(0, distance * pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                drawPath.reset();
+                pathMeasure.setPath(trangle2,false);
+                pathMeasure.getSegment(0,distance*pathMeasure.getLength(),drawPath,true);
+                canvas.drawPath(drawPath,paint);
+                break;
+        }
+        canvas.restore();
+    }
+
+    private void init(){
+        initPaint();
+        initPath();
+        initHandler();
+        initAnimatorListener();
+        initAnimator();
+        mCurrentState = State.CIRCLE_STATE;
+        valueAnimator.start();
+    }
+
+    private void initHandler(){
+        mHandler = new Handler(){
+            @Override
+            public void handleMessage(Message msg) {
+                switch (mCurrentState){
+                    case CIRCLE_STATE:
+                        mCurrentState = State.TRANGLE_STATE;
+                        valueAnimator.start();
+                        break;
+                    case TRANGLE_STATE:
+                        mCurrentState = State.FINISH_STATE;
+                        valueAnimator.start();
+                        break;
+                }
+            }
+        };
+    }
+
+    private void initAnimatorListener(){
+        animatorUpdateListener = new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                distance = animation.getAnimatedValue();
+                invalidate();
+            }
+        };
+
+        animatorListener = new Animator.AnimatorListener() {
+            @Override
+            public void onAnimationStart(Animator animation) {
+                Log.e(&quot;start&quot;,mCurrentState + &quot;_&quot;);
+            }
+
+            @Override
+            public void onAnimationEnd(Animator animation) {
+                Log.e(&quot;end&quot;,mCurrentState+&quot;_&quot;);
+                mHandler.sendEmptyMessage(0);
+            }
+
+            @Override
+            public void onAnimationCancel(Animator animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animator animation) {
+
+            }
+        }
+    }
+
+    private void initAnimator(){
+        valueAnimator = ValueAnimator.ofFloat(0,1).setDuration(duration);
+        valueAnimator.addUpdateListener(animatorUpdateListener);
+        valueAnimator.addListener(animatorListener);
+    }
+
+    private void initPath(){
+        innerCircle = new Path();
+        outerCircle = new Path();
+        trangle1 = new Path();
+        trangle2 = new Path();
+        drawPath = new Path();
+
+        pathMeasure = new PathMeasure();
+        RectF innerRect = new RectF(-220,-220,220,220);
+        RectF outerRect = new RectF(-280,-280,280,280);
+        innerCircle.addArc(innerRect,150,-359.9f);//不能取360f，否则可能造成测量到的值不准确
+        outerCircle.addArc(outerRect,60,-359.9f);
+
+        pathMeasure.setPath(innerCircle,false);
+
+        float[] pos = new float[2];
+        pathMeasure.getPosTan(0,pos,null);//获取开始位置的坐标
+        trangle1.moveTo(pos[0],pos[1]);
+        pathMeasure.getPosTan((1f / 3f) * pathMeasure.getLength(),pos,null);
+
+        trangle1.lineTo(pos[0],pos[1]);
+        pathMeasure.getPosTan((2f / 3f)*pathMeasure.getLength(),pos,null);
+        trangle1.lineTo(pos[0],pos[1]);
+        trangle1.close();
+
+        pathMeasure.getPosTan((2f / 3f) * pathMeasure.getLength(),pos,null);
+        Matrix matrix = new Matrix();
+        matrix.postRotate(-180);
+        trangle1.transform(matrix,trangle2);
+    }
+
+    private void initPaint(){
+        paint = new Paint(Paint.ANTI_ALIAS_FLAG);
+        paint.setColor(Color.WHITE);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setStrokeWidth(10);
+        paint.setStrokeCap(Paint.Cap.ROUND);
+        paint.setStrokeJoin(Paint.Join.BEVEL);
+        paint.setShadowLayer(15,0,0,Color.WHITE);//白色光影效果
+    }
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872454.html">
+                
+                  <h1>Android-视频播放器开发</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>android中在实际的视频开发中多用即成的框架,或者自己封装相关的Manager来实现;下面介绍一个简单的android视频开发的过程: </p>
+
+<ol>
+<li>实现网络和本地视频播放 </li>
+<li>点击控制播放,暂停 </li>
+<li>支持进度条的拖动,实时跟新进度,时间 </li>
+<li>支持横竖屏切换 </li>
+<li>在横屏状态下,音量键显示并且可调节 </li>
+<li>支持手势触摸,即:上下滑动左半屏,弹出dialog,控制屏幕亮度,并且显示进度条;上下滑动右半屏,弹出dialog,控制声音大小,并且显示进度条; </li>
+</ol>
+
+<h2 id="toc_0">First</h2>
+
+<p>首先demo是基于videoView为基础,当然简单的开发,没有过多要求可以用原生的控制器可以可以解决,在这里控制都是自定义;首先为保证横竖屏幕的宽高不适配,需要自定义vieoView重写测量方法:</p>
+
+<pre><code class="language-java">public class AlpshVideo extends VideoView {
+    public AlpshVideo(Context context) {
+        super(context);
+    }
+
+    public AlpshVideo(Context context, AttributeSet attrs) {
+        super(context, attrs);
+    }
+
+    public AlpshVideo(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+    }
+
+    @Override
+    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+        //我们重新计算高度
+        int width = getDefaultSize(0, widthMeasureSpec);
+        int height = getDefaultSize(0, heightMeasureSpec);
+        setMeasuredDimension(width, height);
+    }
+}
+</code></pre>
+
+<p>接着xml中嵌入自定义的vieoView:</p>
+
+<pre><code class="language-text">&lt;com.example.video.customView.AlpshVideo
+            android:id=&quot;@+id/videoView&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;240dp&quot;
+            /&gt;
+</code></pre>
+
+<p>在MainActivity中加载本地或者网络视频:</p>
+
+<pre><code class="language-text"> //加载本地
+mVideoView.setVideoPath(&quot;android.resource://&quot;+getPackageName()+&quot;/&quot;+R.raw.welcome);
+mVideoView.start();
+
+//加载网络url
+//mVideoView.setVideoURI(Uri.parse(&quot;xxxx&quot;));
+</code></pre>
+
+<p>我们这里以本地为例;ok这样videoView就可以开始比方视频;</p>
+
+<h2 id="toc_1">自定义控制器—-&gt;布局</h2>
+
+<p>接下来看代码,xml比较简单,仅展示代码:</p>
+
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:id=&quot;@+id/activity_main&quot;
+    android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;FrameLayout
+        android:id=&quot;@+id/fr_video&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;240dp&quot;&gt;
+
+        &lt;com.example.video.customView.AlpshVideo
+            android:id=&quot;@+id/videoView&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;240dp&quot;
+            /&gt;
+
+        &lt;LinearLayout
+            android:orientation=&quot;vertical&quot;
+            android:layout_gravity=&quot;bottom&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;50dp&quot;&gt;
+
+            &lt;SeekBar
+                android:id=&quot;@+id/media_progress&quot;
+                android:thumb=&quot;@null&quot;
+                android:progressDrawable=&quot;@drawable/seekbar_style2&quot;
+                android:max=&quot;100&quot;
+                android:progress=&quot;20&quot;
+                android:indeterminate=&quot;false&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;5dp&quot;
+                android:layout_marginLeft=&quot;-20dp&quot;
+                android:layout_marginRight=&quot;-20dp&quot;/&gt;
+
+            &lt;RelativeLayout
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;match_parent&quot;
+                android:background=&quot;#101010&quot;
+                android:gravity=&quot;center_vertical&quot;&gt;
+
+                &lt;LinearLayout
+                    android:layout_width=&quot;match_parent&quot;
+                    android:layout_height=&quot;match_parent&quot;
+                    android:gravity=&quot;center_vertical&quot;&gt;
+
+
+                    &lt;ImageView
+                        android:id=&quot;@+id/media_actions&quot;
+                        android:layout_marginLeft=&quot;15dp&quot;
+                        android:layout_width=&quot;20dp&quot;
+                        android:layout_height=&quot;match_parent&quot;
+                        android:src=&quot;@drawable/stop_btn&quot;/&gt;
+
+                    &lt;TextView
+                        android:id=&quot;@+id/media_time&quot;
+                        android:layout_marginLeft=&quot;30dp&quot;
+                        android:layout_width=&quot;wrap_content&quot;
+                        android:layout_height=&quot;wrap_content&quot;
+                        android:text=&quot;00:00:00&quot;
+                        android:textColor=&quot;#fff&quot;
+                        android:textSize=&quot;12sp&quot;/&gt;
+
+                    &lt;TextView
+                        android:layout_marginLeft=&quot;5dp&quot;
+                        android:layout_width=&quot;wrap_content&quot;
+                        android:layout_height=&quot;wrap_content&quot;
+                        android:text=&quot;/&quot;
+                        android:textColor=&quot;#fff&quot;
+                        android:textSize=&quot;12sp&quot;/&gt;
+
+                    &lt;TextView
+                        android:id=&quot;@+id/media_total_time&quot;
+                        android:layout_marginLeft=&quot;5dp&quot;
+                        android:layout_width=&quot;wrap_content&quot;
+                        android:layout_height=&quot;wrap_content&quot;
+                        android:text=&quot;00:00:00&quot;
+                        android:textColor=&quot;#fff&quot;
+                        android:textSize=&quot;12sp&quot;/&gt;
+
+                    &lt;ImageView
+                        android:id=&quot;@+id/media_sounds&quot;
+                        android:visibility=&quot;gone&quot;
+                        android:layout_marginLeft=&quot;100dp&quot;
+                        android:layout_width=&quot;20dp&quot;
+                        android:layout_height=&quot;match_parent&quot;
+                        android:src=&quot;@drawable/icon_sounds&quot;/&gt;
+
+
+                    &lt;SeekBar
+                        android:visibility=&quot;gone&quot;
+                        android:id=&quot;@+id/media_sounds_progress&quot;
+                        android:thumb=&quot;@null&quot;
+                        android:progressDrawable=&quot;@drawable/seekbar_style&quot;
+                        android:max=&quot;100&quot;
+                        android:progress=&quot;20&quot;
+                        android:indeterminate=&quot;false&quot;
+                        android:layout_width=&quot;100dp&quot;
+                        android:layout_height=&quot;5dp&quot;
+                        android:layout_marginLeft=&quot;-10dp&quot;
+                        /&gt;
+                &lt;/LinearLayout&gt;
+
+                &lt;ImageView
+                    android:id=&quot;@+id/media_full_screen&quot;
+                    android:layout_marginRight=&quot;15dp&quot;
+                    android:layout_alignParentRight=&quot;true&quot;
+                    android:layout_centerVertical=&quot;true&quot;
+                    android:layout_width=&quot;20dp&quot;
+                    android:layout_height=&quot;20dp&quot;
+                    android:src=&quot;@drawable/ic_full_screen&quot;/&gt;
+            &lt;/RelativeLayout&gt;
+        &lt;/LinearLayout&gt;
+
+        &lt;LinearLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;match_parent&quot;
+            android:gravity=&quot;center&quot;&gt;
+            &lt;include layout=&quot;@layout/dialog&quot;
+                android:visibility=&quot;gone&quot;/&gt;
+        &lt;/LinearLayout&gt;
+
+    &lt;/FrameLayout&gt;
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<h2 id="toc_2">控制器中播放暂停按钮的实现</h2>
+
+<p>初始化音量进度条:</p>
+
+<pre><code class="language-java">//获取音频管理器
+mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
+int streamMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+int streamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+mMediaSoundsProgress.setMax(streamMaxVolume);
+mMediaSoundsProgress.setProgress(streamVolume);
+</code></pre>
+
+<p>点击事件的普片切换比较简单,通过按钮的图形化切换来控制videoView的开始和暂停:在播放过程中要实时更新播放时间和进度,这里用handler来实现:</p>
+
+<pre><code class="language-java">private void setPlayer() {
+    mMediaActions.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (mVideoView.isPlaying()){
+                mMediaActions.setImageResource(R.drawable.play_btn);
+                mVideoView.pause();
+                mHandler.removeMessages(UpDate);
+            }else {
+                mMediaActions.setImageResource(R.drawable.stop_btn);
+                mVideoView.start();
+                mHandler.sendEmptyMessage(UpDate);
+            }
+        }
+    });
+}
+</code></pre>
+
+<p>在上面代码中看到,由播放状态改变为暂停状态,实时跟新的hanler停止,切换为播放再次开启;下面看下线程中实时更新的代码:</p>
+
+<pre><code class="language-java">private Handler mHandler = new Handler(){
+    @Override
+    public void handleMessage(Message msg) {
+        super.handleMessage(msg);
+        if (msg.what == UpDate){
+            //当前时间
+            int currentPosition = mVideoView.getCurrentPosition();
+
+            //总时间
+            int duration = mVideoView.getDuration();
+            //设置时间
+            updateTime(mMediaTime,currentPosition);
+            updateTime(mMediaTotalTime,duration);
+          //设置进度
+          mMediaProgress.setMax(duration);
+          mMediaProgress.setProgress(currentPosition);
+
+          mHandler.sendEmptyMessageDelayed(UpDate,500);
+        }
+    }
+};
+</code></pre>
+
+<p>到这一步,视频可以播放,播放进度条实时跟新,播放时间可以实时更新;</p>
+
+<p>当然在一个视频播放器中,必须实现进度条的拖动来实现进度的控制(就是快进和快退);那么需要监听播放进度条的拖动事件:</p>
+
+<p>private void setScrollSeek() {<br/>
+    //播放器的进度条监听<br/>
+    mMediaProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {<br/>
+        @Override<br/>
+        public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {<br/>
+            updateTime(mMediaTime,progress);<br/>
+        }</p>
+
+<pre><code class="language-text">    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+        mHandler.removeMessages(UpDate);
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+        int progress = seekBar.getProgress();
+        mVideoView.seekTo(progress);
+        mHandler.sendEmptyMessage(UpDate);
+    }
+</code></pre>
+
+<p>});</p>
+
+<h2 id="toc_3">横竖屏切换;</h2>
+
+<h3 id="toc_4">VideoView重新测量</h3>
+
+<p>手机翻转然后横竖屏自由切换,当然在第一步中有提到自定义videoView重新测量,也是为了横竖屏切换时候做准备,防止半屏显示不全的出现:首先在清单文件中配置:(而且切换横屏之后音量键开始显示)</p>
+
+<pre><code class="language-text">&lt;activity
+    android:configChanges=&quot;orientation|screenSize|keyboard|keyboardHidden&quot;
+    android:name=&quot;.MainActivity&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
+
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity&gt;
+</code></pre>
+
+<p>这样设置之后可以全屏,但是videoView并不可以适配,所以需要MainActivity中重写onConfigurationChanged:</p>
+
+<pre><code class="language-text">@Override
+public void onConfigurationChanged(Configuration newConfig) {
+    super.onConfigurationChanged(newConfig);
+    //当为横屏时候
+    if (getResources().getConfiguration().orientation == Configuration.ORIENTATION_LANDSCAPE){
+        setConfigWh(ViewGroup.LayoutParams.MATCH_PARENT,ViewGroup.LayoutParams.MATCH_PARENT);
+        isFull = true;
+
+        //音量键的显示
+        mMediaSounds.setVisibility(View.VISIBLE);
+        mMediaSoundsProgress.setVisibility(View.VISIBLE);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+
+    }else{
+        //当为竖屏时候
+        setConfigWh(ViewGroup.LayoutParams.MATCH_PARENT, DensityUtil.dp2px(this,240));
+        isFull = false;
+
+        mMediaSounds.setVisibility(View.GONE);
+        mMediaSoundsProgress.setVisibility(View.GONE);
+        getWindow().clearFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN);
+        getWindow().addFlags(WindowManager.LayoutParams.FLAG_FORCE_NOT_FULLSCREEN);
+    }
+}
+</code></pre>
+
+<h3 id="toc_5">全屏</h3>
+
+<p>在竖屏状态下,点击右下角的全屏按钮 也会显示横屏,所以需要设置其点击事件:</p>
+
+<pre><code class="language-java">private void setFullScreen() {
+    //设置全屏播放
+    mMediaFullScreen.setOnClickListener(new View.OnClickListener() {
+        @Override
+        public void onClick(View view) {
+            if (isFull){
+                //此时是全屏
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_PORTRAIT);
+
+            }else {
+                //此时是半屏
+                setRequestedOrientation(ActivityInfo.SCREEN_ORIENTATION_LANDSCAPE);
+
+            }
+        }
+    });
+}
+</code></pre>
+
+<p>当这里横竖屏切换和适配就可以正常显示了</p>
+
+<h2 id="toc_6">音量显示</h2>
+
+<p>切换到横屏之后音量键显示,则需要显示器控制音量的功能:</p>
+
+<pre><code class="language-java">//声音调节进度条
+mMediaSoundsProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+    @Override
+    public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
+        mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC,progress,0);
+    }
+
+    @Override
+    public void onStartTrackingTouch(SeekBar seekBar) {
+    }
+
+    @Override
+    public void onStopTrackingTouch(SeekBar seekBar) {
+    }
+});
+</code></pre>
+
+<p>当这里一个简单的播放器基本完备</p>
+
+<h2 id="toc_7">手势</h2>
+
+<p><strong>接下来来添加手势</strong></p>
+
+<p>大概策略是这样:横屏状态下(需要添加boolean判断来限定横屏之下触发):当上下滑动屏幕左半边,亮度改变,弹出一个类似dialog显示连读进度条的改变,结束触摸,则弹窗消失;当上下滑动屏幕右半边,声音改变,弹出一个类似dialog显示连读进度条的改变,结束触摸,则弹窗消失,在这个过程中控制台区域的声音进度条也会实时改变; </p>
+
+<h3 id="toc_8">手势添加</h3>
+
+<p>先来看手势的添加:</p>
+
+<pre><code class="language-java">private void setScrollScreen() {
+    mVideoView.setOnTouchListener(new View.OnTouchListener() {
+    @Override
+    public boolean onTouch(View view, MotionEvent event) {
+        float x = event.getX();
+        float y = event.getY();
+        switch (event.getAction()){
+            case MotionEvent.ACTION_DOWN:
+                lastX = x;
+                lastY = y;
+                break;
+            case MotionEvent.ACTION_MOVE:
+                //获取屏幕宽和高
+                widthPixels = getResources().getDisplayMetrics().widthPixels;
+                heightPixels = getResources().getDisplayMetrics().heightPixels;
+                //偏移量的记录
+                float dx = x - lastX;
+                float dy = y - lastY;
+                float absX = Math.abs(dx);
+                float absY = Math.abs(dy);
+
+                if (absX &gt; trueshold &amp;&amp; absY &gt; trueshold){
+                    if (absX &gt;= absY){
+                        isadjust = false;
+                    }else if (absY &gt; absX){
+                        isadjust = true;
+                    }
+                }else if (absX &gt;= trueshold &amp;&amp; absY &lt; trueshold){
+                    isadjust = false;
+                }else if(absX &lt; trueshold &amp;&amp; absY &gt;= trueshold){
+                    isadjust = true;
+                }
+
+                //开始判断 音量调节 和 亮度调节
+                if (isadjust){
+                    //Log.i(&quot;==widthPixels&quot;,x + &quot;&quot;);
+                    if (x &gt; widthPixels/2){
+                        //声音
+                        if (dy &gt; 0){
+                            //降低声音
+                        }else {
+                            //增大声音
+                        }
+                        //改变声音
+                        changeVoice(-dy);
+
+                    }else if(x &lt; widthPixels/2){
+                        //亮度
+                        if (dy &gt; 0){
+                            //降低亮度
+                            //Log.i(&quot;==降低亮度&quot;,dy + &quot;&quot;);
+                        }else {
+                            //增大亮度
+                            //Log.i(&quot;==增大亮度&quot;,dy + &quot;&quot;);
+                        }
+
+                        //改变亮度
+                        changeBrightness(-dy);
+                    }
+                }
+                lastX = x;
+                lastY = y;
+                break;
+            case MotionEvent.ACTION_UP:
+                mDialogLl.setVisibility(View.GONE);
+                break;
+            }
+        return true;
+        }
+    });
+}
+</code></pre>
+
+<p>就是一个onTouch的触摸事件,首先判断手势是否合法,规定一个偏移量,当,当dx dy全部超过偏移量,dy&gt;dx 手势触发 isadjust = true;<br/><br/>
+当dx&lt;偏移量,dy大于偏移量手势触发 isadjust = true;<br/><br/>
+触发之后判断 当x &gt; widthPixels/2,在屏幕右半边,触发音量控制<br/><br/>
+当当x &lt; widthPixels/2,在屏幕左半边,触发屏幕亮度控制  </p>
+
+<p>ok~接下来看屏幕亮度变化的代码:</p>
+
+<pre><code class="language-java">//控制亮度
+public void changeBrightness(float absY){
+    mDialogLl.setVisibility(View.VISIBLE);
+
+    WindowManager.LayoutParams attributes = getWindow().getAttributes();
+    mScreenBrightness = attributes.screenBrightness;
+    float index = absY / heightPixels;
+    mScreenBrightness += index;
+    //进行判断
+    if (mScreenBrightness &gt; 1.0f){
+        mScreenBrightness = 1.0f;
+    }else if (mScreenBrightness &lt; 0.01f){
+        mScreenBrightness = 0.01f;
+    }
+    attributes.screenBrightness = mScreenBrightness;
+    getWindow().setAttributes(attributes);
+
+
+    //设置弹窗
+    mDialogPic.setImageResource(R.drawable.icon_media_screen);
+    mDialogProgress.setMax(10);
+    mDialogProgress.setProgress((int)(mScreenBrightness * 10));
+    Log.i(&quot;==mScreenBrightness&quot;,mScreenBrightness * 100 + &quot;&quot;);
+}
+</code></pre>
+
+<p><strong>声音变化的代码</strong>:</p>
+
+<pre><code class="language-java">//控制声音
+public void changeVoice(float absY){
+
+    mDialogLl.setVisibility(View.VISIBLE);
+
+    int maxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+    int volume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
+
+    int dVoice = (int) (absY / heightPixels * maxVolume * 3);
+    int max = Math.max(dVoice + volume, 0);
+    //设置声音
+    mAudioManager.setStreamVolume(AudioManager.STREAM_MUSIC,max,0);
+    mMediaSoundsProgress.setProgress(max);
+    //设置弹窗
+    mDialogPic.setImageResource(R.drawable.icon_media_sounds);
+    mDialogProgress.setMax(maxVolume);
+    mDialogProgress.setProgress(max);
+}
+</code></pre>
+
+<p>这样就实现声音,屏幕亮度和手势的交互;当然不要忘了结束触摸要隐藏dialog窗口:</p>
+
+<pre><code class="language-text">case MotionEvent.ACTION_UP:
+    mDialogLl.setVisibility(View.GONE);
+    break;
+</code></pre>
+
+<p>到此为止,一个横竖屏切换自如,快进快退可实现,手势和声音,屏幕亮度可以实时交互,播放信息实时更新的android播放器就完成</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872529.html">
+                
+                  <h1>Android-最适合使用RxJava处理的四种场景</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>RxJava是非常热门的函数响应式编程库，在Android开发中已经非常流行了，刚开始上手会有点难，但只要理解了它，就再也回不去了；不使用RxJava写异步请求的话，就感觉各种不爽。</p>
+
+<p>本文不准备讲RxJava的基础知识，如果你对RxJava不熟悉，这里有篇不错的教程可以参考《给 Android 开发者的 RxJava 详解》。</p>
+
+<p>下面我们开始介绍RxJava最适合使用的四种场景，代码示例基于RxJava1</p>
+
+<h2 id="toc_1">场景一： 单请求异步处理</h2>
+
+<p>由于在Android UI线程中不能做一些耗时操作，比如网络请求，大文件保存等，所以在开发中经常会碰到异步处理的情况，我们最典型的使用场景是RxJava+Retrofit处理网络请求</p>
+
+<pre><code class="language-java">MyService myService = retrofit.create(MyService.class);
+myService.getSomething()
+            .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::updateUI, this::showError);
+</code></pre>
+
+<p>为了使代码看起来简洁点，这边还使用了lambda表达式，updateUI和showError需要在当前类中实现，比如：</p>
+
+<pre><code class="language-java">public void updateUI(Data data){
+      //TODO something
+}
+
+public void showError(throwable t){
+      //show error msg
+}
+</code></pre>
+
+<h2 id="toc_2">场景二： 多异步请求连续调用</h2>
+
+<p>这种场景其实也很常见，我们做用户头像编辑的使用，一般就会有三个请求需要连续调用：</p>
+
+<ol>
+<li>请求头像上传的地址</li>
+<li>上传头像</li>
+<li>更新用户信息</li>
+</ol>
+
+<p>在平时的代码里，我们需要一步步callback嵌套下来，代码冗长太难看，而且不好维护，使用RxJava链式调用处理代码逻辑就会非常清晰</p>
+
+<pre><code class="language-java">MyService myService = retrofit.create(MyService.class);
+myService.getUploadUrl()
+        .flatMap(this::uploadImageTask)
+        .flatMap(this::updateUserInfo)
+        .subscribeOn(Schedulers.io())
+        .observeOn(AndroidSchedulers.mainThread())
+        .subscribe(this::updateUI, this::showError);
+</code></pre>
+
+<p>先获取请求，再上传头像，最后更新用户信息，后面的任务依赖上一步的处理结果，依次执行。</p>
+
+<h2 id="toc_3">场景三： 多异步请求合并处理</h2>
+
+<p>有时候在项目中，我们会碰到组合多个请求的结果后，再更新UI的情况，比如我们项目中就有一个从多个请求地址获取通知数据，然后在APP上再按时间顺序组合后展示的需求，这时候我们就可以用RxJava的zip函数来处理了</p>
+
+<pre><code class="language-java">MyService myService = retrofit.create(MyService.class);
+Observable o1 = myService.getNotification1();
+Observable o2 = myService.getNotification2();
+Observable.zip(o1,o2, this::combiNotification)
+             .subscribeOn(Schedulers.io())
+            .observeOn(AndroidSchedulers.mainThread())
+            .subscribe(this::updateUI, this::showError);
+
+
+public List&lt;Notification&gt; combiNotification(List&lt;Notification&gt; n1, List&lt;Notification&gt; n2){
+      //TODO 合并通知列表
+}
+</code></pre>
+
+<p>zip函数会等待两个请求都完成后，调用我们的合并方法combiNotification，等合并处理后再回调subscribe中的方法。</p>
+
+<h2 id="toc_4">场景四： 定时轮询</h2>
+
+<p>RxJava还特别适合对定时轮询任务的处理， 一种典型的例子就是APP提交了一个任务给后台异步处理，假设后台处理需要1-2分钟左右，我们需要定时到后台查询进度，并更新到UI上, 传统的做法是用Handler的postDelay方法，用RxJava实现的话就会非常简洁</p>
+
+<pre><code class="language-java">Subscription subscription =  Observable.interval(2, TimeUnit.SECONDS)
+                .map(this::getProgress)
+                .takeUntil(progress -&gt; progress !=  100)
+                .subscribeOn(Schedulers.newThread())
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Subscriber&lt;Long&gt;() {
+                    @Override
+                    public void onCompleted() {
+                        //TODO finished
+                    }
+
+                    @Override
+                    public void onError(Throwable e) {
+                    }
+
+                    @Override
+                    public void onNext(int progress) {
+                         //TODO update progress
+                    }
+                });
+</code></pre>
+
+<p>我们以定时2秒查询一次，直到进度progress=100为止，自动终止轮询。<br/>
+以上各种RxJava方法都是异步耗时调用，考虑到Activity的退出时请求还没有完成，我们需要在Activity的OnDestroy方法中取消RxJava调用<br/><br/>
+<code>subscription.unsubscribe();</code></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872380.html">
+                
+                  <h1>Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>FloatingView-android能够让View执行漂亮的漂浮动画的库</p>
+
+<h2 id="toc_0">使用</h2>
+
+<h3 id="toc_1">Step 1</h3>
+
+<p>在 <code>build.gradle</code> 文件中添加库依赖</p>
+
+<pre><code class="language-text">dependencies {  
+    compile &#39;com.ufreedom.uikit:FloatingViewLib:1.0.2&#39;
+}
+</code></pre>
+
+<h3 id="toc_2">Step 2</h3>
+
+<p>使用 <code>FloatingBuilder</code> 创建一个 <code>FloatingElement</code></p>
+
+<pre><code class="language-java">FloatingElement builder = new FloatingBuilder()
+                            .anchorView(View)
+                            .targetView(View)
+                            .offsetX(int)
+                            .offsetY(int)
+                            .floatingTransition(FloatingTransition)
+                            .build();
+</code></pre>
+
+<p>使用 FloatingBuilder 可以设置的有</p>
+
+<ul>
+<li>anchorView ：锚点，也就是你想在哪个 View 上面进行漂浮动画</li>
+<li>target：目标，你想漂浮的 View</li>
+<li>offsetX：x 方向的偏移量，单位 px</li>
+<li>offsetY: y 方向的偏移量，单位 px</li>
+<li>floatingTransition : 漂浮效果，默认是 ScaleFloatingTransition，也可以自己实现漂浮效果</li>
+</ul>
+
+<h3 id="toc_3">Step 3</h3>
+
+<p>创建一个 <code>FloatingView</code> 作为 <code>FloatingElement</code> 的容器,然后让你的 View 飞起来</p>
+
+<pre><code class="language-java">Floating floating = new Floating(getActivity());
+    floating.startFloating(builder);
+</code></pre>
+
+<h2 id="toc_4">自定义</h2>
+
+<h3 id="toc_5">坐标系</h3>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015672071477.png" alt="20171108151015672071477.png"/></p>
+
+<h3 id="toc_6">图类</h3>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015676013276.png" alt="20171108151015676013276.png"/></p>
+
+<h3 id="toc_7">漂浮动画</h3>
+
+<p>实现漂浮动画很简单，你只需要实现 <code>FloatingTransition</code> 接口就可以</p>
+
+<pre><code class="language-text">public interface FloatingTransition {
+  public void applyFloating(YumFloating yumFloating);  
+}
+</code></pre>
+
+<p>在applyFloating方法，你可以使用 Android Animation 创建动画，然后使用 YumFloating 进行 Alpha,Scale,Translate,Rotate 等变换如果你想加入 <a href="http://facebook.github.io/rebound/">Facebook Rebound</a> 回弹动画效果，你可以使用 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/spring/SpringHelper.java">SpringHelper</a>,例如 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/effect/ScaleFloatingTransition.java">ScaleFloatingTransition</a>: </p>
+
+<pre><code class="language-text">public class ScaleFloatingTransition implements FloatingTransition {
+...
+
+@Override
+public void applyFloating(final YumFloating yumFloating) {
+
+    ValueAnimator alphaAnimator = ObjectAnimator.ofFloat(1.0f, 0.0f);
+    alphaAnimator.setDuration(duration);
+    alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        @Override
+        public void onAnimationUpdate(ValueAnimator valueAnimator) {
+            yumFloating.setAlpha((Float) valueAnimator.getAnimatedValue());
+        }
+    });
+    alphaAnimator.start();
+
+    SpringHelper.createWidthBouncinessAndSpeed(0.0f, 1.0f,bounciness, speed)
+            .reboundListener(new SimpleReboundListener(){
+                @Override
+                public void onReboundUpdate(double currentValue) {
+                    yumFloating.setScaleX((float) currentValue);
+                    yumFloating.setScaleY((float) currentValue);
+                }
+            }).start(yumFloating);
+}}
+</code></pre>
+
+<p>如果 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/spring/SpringHelper.java">SpringHelper</a> 无法满足你的需求，你可以直接使用 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/transition/YumFloating.java">YumFloating</a> 的createSpringByBouncinessAndSpeed(double bounciness, double speed)<br/>
+或者createSpringByTensionAndFriction(double tension, double friction)<br/>
+创建 Spring, 然后使用transition(double progress, float startValue, float endValue)<br/>
+进行数值转换</p>
+
+<h3 id="toc_8">路径漂浮动画</h3>
+
+<p>实现路径漂浮同样很简单，例如 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/effect/CurveFloatingPathTransition.java">CurveFloatingPathTransition</a> ,首先你需要继承 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/transition/BaseFloatingPathTransition.java">BaseFloatingPathTransition</a> 类.和继承 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/transition/FloatingTransition.java">FloatingTransition</a> 类不同的是，你需要再实现一个getFloatingPath()<br/>
+方法.在getFloatingPath()方法内使用Path创建你想漂浮的路径，然后调用FloatingPath.create(path, false)<br/>
+进行返回. 例如 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/effect/CurveFloatingPathTransition.java">CurveFloatingPathTransition</a> 实现：</p>
+
+<pre><code class="language-java">public class CurveFloatingPathTransition extends BaseFloatingPathTransition {
+    ...
+
+    @Override
+    public FloatingPath getFloatingPath() {
+        if (path == null){
+            path = new Path();
+            path.moveTo(0, 0);
+            path.quadTo(-100, -200, 0, -300);
+            path.quadTo(200, -400, 0, -500);
+        }
+        return FloatingPath.create(path, false);
+    }
+
+    @Override
+    public void applyFloating(final YumFloating yumFloating) {
+        ValueAnimator translateAnimator;
+        ValueAnimator alphaAnimator;
+
+
+        translateAnimator = ObjectAnimator.ofFloat(getStartPathPosition(), getEndPathPosition());
+        translateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator valueAnimator) {
+                float value = (float) valueAnimator.getAnimatedValue();
+                PathPosition floatingPosition = getFloatingPosition(value);
+                yumFloating.setTranslationX(floatingPosition.x);
+                yumFloating.setTranslationY(floatingPosition.y);
+
+            }
+        });
+
+       ...
+    }}
+</code></pre>
+
+<p>使用 Path 将你想要漂浮的路径的描绘出来，然后在 applyFloating(final YumFloating yumFloating) 方法中:</p>
+
+<ul>
+<li>使用 getStartPathPosition() 方法获取路径的开始位置</li>
+<li>使用 getEndPathPosition()方法获取路径的结束位置</li>
+<li>使用 getFloatingPosition(float progress) 获取当前进度的位置</li>
+</ul>
+
+<p>getFloatingPosition(float progress) 方法会返回一个 PathPosition 对象，其属性 x,y 分别代表当前路径动画的 x 坐标，和 y 坐标.</p>
+
+<h2 id="toc_9">设计思想</h2>
+
+<p>对于开源库来说，易用，扩展性强，非常重要， FloatingView 正在努力朝这方面发展</p>
+
+<p>项目地址为:<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FUFreedom%2FFloatingView">github.com/UFreedom/Fl…</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872340.html">
+                
+                  <h1>Android-RecyclerViewItemDecoration的进阶使用</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<ol>
+<li>ItemDecoration实现padding </li>
+<li>ItemDecoration实现下划线 </li>
+<li>ItemDecoration实现酷炫吸顶效果 </li>
+<li>ItemDecoration实现item的拖拽，平移等操作 </li>
+</ol>
+
+<h2 id="toc_0">ItemDecoration</h2>
+
+<p>ItemDecoration是RecyclerView内部的一个抽象类，要实现这个抽象类自然需要实现内部的抽象方法，除了deprecated的方法只有下面三个方法：</p>
+
+<pre><code class="language-text">//可以实现类似padding的效果
+public void onDraw(Canvas c, RecyclerView parent, State state) 
+//可以实现类似绘制背景的效果，内容在上面
+public void onDrawOver(Canvas c, RecyclerView parent, State state)  
+//可以绘制在内容的上面，覆盖内容
+public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state)
+</code></pre>
+
+<p>声明下：ItemDecoration的使用必须在setAdapter前，通过recyclerView.addItemDecoration()方法设置</p>
+
+<h2 id="toc_1">下面讲解ItemDecoration实现的功能</h2>
+
+<h3 id="toc_2">ItemDecoration实现padding</h3>
+
+<pre><code class="language-java">    public class PaddingDecoration extends RecyclerView.ItemDecoration{
+
+    private int padding;
+
+    public PaddingDecoration(Context context) {
+        //即你要设置的分割线的宽度 --这里设为10dp
+        padding = context.getResources().getDimensionPixelSize(R.dimen.padding);
+    }
+
+    @Override
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+        super.getItemOffsets(outRect, view, parent, state);
+        //outRect就是你那个item条目的矩形
+        outRect.left = padding;  //相当于 设置 left padding
+        outRect.top = padding;   //相当于 设置 top padding
+        outRect.right = padding; //相当于 设置 right padding
+        outRect.bottom = padding;  //相当于 设置 bottom padding
+    }
+}
+</code></pre>
+
+<h3 id="toc_3">ItemDecoration实现下划线</h3>
+
+<pre><code class="language-java">    public class DeviderDecoration extends RecyclerView.ItemDecoration {
+
+    private int deviderHeight;
+    private Paint dividerPaint;
+
+    public DeviderDecoration(Context context) {
+        //设置画笔
+        dividerPaint = new Paint();
+        //设置分割线颜色
+        dividerPaint.setColor(context.getResources().getColor(R.color.colorAccent));
+        //设置分割线宽度
+        deviderHeight = context.getResources().getDimensionPixelSize(R.dimen.divider_height);
+    }
+
+    @Override
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+        super.getItemOffsets(outRect, view, parent, state);
+        //改变宽度
+        outRect.bottom = deviderHeight;
+    }
+
+    @Override
+    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+        //得到列表所有的条目
+        int childCount = parent.getChildCount();
+        //得到条目的宽和高
+        int left = parent.getPaddingLeft();
+        int right = parent.getWidth() - parent.getPaddingRight();
+
+        for (int i = 0; i &lt; childCount - 1; i++) {
+            View view = parent.getChildAt(i);
+            //计算每一个条目的顶点和底部 float值
+            float top = view.getBottom();
+            float bottom = view.getBottom() + deviderHeight;
+            //重新绘制
+            c.drawRect(left, top, right, bottom, dividerPaint);
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_4">ItemDecoration实现酷炫吸顶效果</h3>
+
+<pre><code class="language-java">    public class SectionDecoration extends RecyclerView.ItemDecoration {
+
+    private List&lt;String&gt; dataList;
+    private DecorationCallback callback;
+    private TextPaint textPaint;
+    private Paint paint;
+    private int topGap;
+    private int alignBottom;
+    private Paint.FontMetrics fontMetrics;
+
+
+    public SectionDecoration(List&lt;String&gt; dataList, Context context, DecorationCallback decorationCallback) {
+        Resources res = context.getResources();
+        this.dataList = dataList;
+        this.callback = decorationCallback;
+        //设置悬浮栏的画笔---paint
+        paint = new Paint();
+        paint.setColor(res.getColor(R.color.colorGray));
+
+        //设置悬浮栏中文本的画笔
+        textPaint = new TextPaint();
+        textPaint.setAntiAlias(true);
+        textPaint.setTextSize(DensityUtil.dip2px(context, 14));
+        textPaint.setColor(Color.DKGRAY);
+        textPaint.setTextAlign(Paint.Align.LEFT);
+        fontMetrics = new Paint.FontMetrics();
+
+        //决定悬浮栏的高度等
+        topGap = res.getDimensionPixelSize(R.dimen.sectioned_top);
+        //决定文本的显示位置等
+        alignBottom = res.getDimensionPixelSize(R.dimen.sectioned_alignBottom);
+    }
+
+    //图1：代表了getItemOffsets(),可以实现类似padding的效果
+    @Override
+    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+        super.getItemOffsets(outRect, view, parent, state);
+        int pos = parent.getChildAdapterPosition(view);
+
+        String groupId = callback.getGroupId(pos);
+        if (groupId.equals(&quot;-1&quot;)) return;
+        //只有是同一组的第一个才显示悬浮栏
+        if (pos == 0 || isFirstInGroup(pos)) {
+            outRect.top = topGap;
+            if (dataList.get(pos) == &quot;&quot;) {
+                outRect.top = 0;
+            }
+        } else {
+            outRect.top = 0;
+        }
+    }
+
+    //图2：代表了onDraw(),可以实现类似绘制背景的效果，内容在上面
+    @Override
+    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
+        super.onDraw(c, parent, state);
+        int left = parent.getPaddingLeft();
+        int right = parent.getWidth() - parent.getPaddingRight();
+        int childCount = parent.getChildCount();
+        for (int i = 0; i &lt; childCount; i++) {
+            View view = parent.getChildAt(i);
+            int position = parent.getChildAdapterPosition(view);
+            String groupId = callback.getGroupId(position);
+            if (groupId.equals(&quot;-1&quot;)) return;
+            String textLine = callback.getGroupFirstLine(position).toUpperCase();
+            if (textLine == &quot;&quot;) {
+                float top = view.getTop();
+                float bottom = view.getTop();
+                c.drawRect(left, top, right, bottom, paint);
+                return;
+            } else {
+                if (position == 0 || isFirstInGroup(position)) {
+                    float top = view.getTop() - topGap;
+                    float bottom = view.getTop();
+                    //绘制悬浮栏
+                    c.drawRect(left, top, right, bottom, paint);
+                    //绘制文本
+                    c.drawText(textLine, left, bottom, textPaint);
+                }
+            }
+        }
+    }
+
+    //图3：代表了onDrawOver()，可以绘制在内容的上面，覆盖内容
+    @Override
+    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
+        super.onDrawOver(c, parent, state);
+
+        int itemCount = state.getItemCount();
+        int childCount = parent.getChildCount();
+        int left = parent.getPaddingLeft();
+        int right = parent.getWidth() - parent.getPaddingRight();
+        float lineHeight = textPaint.getTextSize() + fontMetrics.descent;
+
+        String preGroupId = &quot;&quot;;
+        String groupId = &quot;-1&quot;;
+        for (int i = 0; i &lt; childCount; i++) {
+            View view = parent.getChildAt(i);
+            int position = parent.getChildAdapterPosition(view);
+
+            preGroupId = groupId;
+            groupId = callback.getGroupId(position);
+            if (groupId.equals(&quot;-1&quot;) || groupId.equals(preGroupId)) continue;
+
+            String textLine = callback.getGroupFirstLine(position).toUpperCase();
+            if (TextUtils.isEmpty(textLine)) continue;
+
+            int viewBottom = view.getBottom();
+            float textY = Math.max(topGap, view.getTop());
+            //下一个和当前不一样移动当前
+            if (position + 1 &lt; itemCount) {
+                String nextGroupId = callback.getGroupId(position + 1);
+                //组内最后一个view进入了header
+                if (nextGroupId != groupId &amp;&amp; viewBottom &lt; textY) {
+                    textY = viewBottom;
+                }
+            }
+            //textY - topGap决定了悬浮栏绘制的高度和位置
+            c.drawRect(left, textY - topGap, right, textY, paint);
+            //left+2*alignBottom 决定了文本往左偏移的多少（加--&gt;向左移）
+            //textY-alignBottom  决定了文本往右偏移的多少  (减--&gt;向上移)
+//            c.drawText(textLine, left + 2 * alignBottom, textY - alignBottom, textPaint);
+            c.drawText(textLine, left, textY - alignBottom, textPaint);
+        }
+    }
+
+
+    /**
+     * 判断是不是组中的第一个位置
+     *
+     * @param pos
+     * @return
+     */
+    private boolean isFirstInGroup(int pos) {
+        if (pos == 0) {
+            return true;
+        } else {
+            // 因为是根据 字符串内容的相同与否 来判断是不是同意组的，所以此处的标记id 要是String类型
+            // 如果你只是做联系人列表，悬浮框里显示的只是一个字母，则标记id直接用 int 类型就行了
+            String prevGroupId = callback.getGroupId(pos - 1);
+            String groupId = callback.getGroupId(pos);
+            //判断前一个字符串 与 当前字符串 是否相同
+            if (prevGroupId.equals(groupId)) {
+                return false;
+            } else {
+                return true;
+            }
+        }
+    }
+
+    //定义一个借口方便外界的调用
+    public interface DecorationCallback {
+        String getGroupId(int position);
+
+        String getGroupFirstLine(int position);
+    }
+}
+</code></pre>
+
+<p><strong>使用</strong></p>
+
+<pre><code class="language-java">    textRecycler.addItemDecoration(new SectionDecoration(list, this, new SectionDecoration.DecorationCallback() {
+            @Override
+            public String getGroupId(int position) {
+                if(NameBean.get(position)!=null) {
+                    return NameBean.get(position);
+                }
+                return &quot;-1&quot;;
+            }
+
+            @Override
+            public String getGroupFirstLine(int position) {
+                if(NameBean.get(position)!=null) {
+                    return NameBean.get(position);
+                }
+                return &quot;&quot;;
+            }
+        }));
+</code></pre>
+
+<h3 id="toc_5">ItemDecoration实现item的拖拽，平移等操作</h3>
+
+<p>（穿插还通过OnItemTouchListener封装了列表的点击和长点击事件）</p>
+
+<p><strong>item的点击事件和长点击事件</strong></p>
+
+<p>该功能主要通过addOnItemTouchListener() 来实现。</p>
+
+<pre><code class="language-java">    textRecycler.addOnItemTouchListener(new OnRecyclerItemClickListener(textRecycler) {
+            @Override
+            public void onItemClick(RecyclerView.ViewHolder viewHolder) {
+                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
+            }
+
+            @Override
+            public void onLongClick(RecyclerView.ViewHolder viewHolder) {
+                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
+                //当 item 被长按且不是第一个时，开始拖曳这个 item
+                if (viewHolder.getLayoutPosition() != 0) {
+                    itemTouchHelper.startDrag(viewHolder);
+                }
+            }
+        });
+</code></pre>
+
+<p>其中 OnRecyclerItemClickListener 是自定义的一个触摸监听器，代码如下：</p>
+
+<pre><code class="language-java">    public abstract class OnRecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
+
+    //手势探测器
+    private GestureDetectorCompat mGestureDetectorCompat;
+    private RecyclerView mRecyclerView;
+
+    public OnRecyclerItemClickListener(RecyclerView mRecyclerView) {
+        this.mRecyclerView = mRecyclerView;
+        mGestureDetectorCompat = new GestureDetectorCompat(mRecyclerView.getContext(),
+                new ItemTouchHelperGestureListener(mRecyclerView,this));
+    }
+
+    //第一个是拦截触摸事件的，第二个是处理触摸事件的，第三个是处理触摸冲突的。第三个这里我们用不到
+    @Override
+    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+        mGestureDetectorCompat.onTouchEvent(e);
+        return false;
+    }
+
+    @Override
+    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+        mGestureDetectorCompat.onTouchEvent(e);
+    }
+
+    @Override
+    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+    }
+    //提供单机 长按的方法
+    public abstract void onItemClick(RecyclerView.ViewHolder viewHolder);
+    public abstract void onLongClick(RecyclerView.ViewHolder viewHolder);
+}
+</code></pre>
+
+<p>GestureDetectorCompat 中传入了一个 ItemTouchHelperGestureListener，代码如下：</p>
+
+<pre><code class="language-java">    public class ItemTouchHelperGestureListener extends GestureDetector.SimpleOnGestureListener {
+
+    private RecyclerView mRecyclerView;
+    private OnRecyclerItemClickListener onRecyclerItemClickListener;
+
+    public ItemTouchHelperGestureListener(RecyclerView mRecyclerView, OnRecyclerItemClickListener onRecyclerItemClickListener) {
+        this.mRecyclerView = mRecyclerView;
+        this.onRecyclerItemClickListener = onRecyclerItemClickListener;
+    }
+
+    //一次单独的轻触抬起手指操作，就是普通的点击事件
+    @Override
+    public boolean onSingleTapUp(MotionEvent e) {
+        //这个ChildHelper类，它会协助获取RecyclerView中的childVIew。 可点击看源码
+        View childViewUnder = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
+        if (childViewUnder != null) {
+            RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(childViewUnder);
+            onRecyclerItemClickListener.onItemClick(childViewHolder);
+        }
+        return true;
+    }
+
+    //长按屏幕超过一定时长，就会触发，就是长按事件
+    @Override
+    public void onLongPress(MotionEvent e) {
+        View childViewUnder = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
+        if (childViewUnder != null) {
+            RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(childViewUnder);
+            onRecyclerItemClickListener.onLongClick(childViewHolder);
+        }
+    }
+</code></pre>
+
+<p>其实通过一个手势探测器 GestureDetectorCompat 来探测屏幕事件，然后通过手势监听器 SimpleOnGestureListener 来识别手势事件的种类，然后调用我们设置的对应的回调方法。 通过findChildViewUnder()可以知道我们点击的是哪个item，可看源码</p>
+
+<pre><code class="language-java">     public View findChildViewUnder(float x, float y) {
+        final int count = mChildHelper.getChildCount();
+        for (int i = count - 1; i &gt;= 0; i--) {
+            final View child = mChildHelper.getChildAt(i);
+            final float translationX = ViewCompat.getTranslationX(child);
+            final float translationY = ViewCompat.getTranslationY(child);
+            if (x &gt;= child.getLeft() + translationX &amp;&amp;
+                    x &lt;= child.getRight() + translationX &amp;&amp;
+                    y &gt;= child.getTop() + translationY &amp;&amp;
+                    y &lt;= child.getBottom() + translationY) {
+                return child;
+            }
+        }
+        return null;
+    }
+</code></pre>
+
+<p>同时我们调用 RecyclerView 的另一个方法 getChildViewHolder()，可以获得该 item 的 ViewHolder，最后再回调我们定义的虚方法 onItemClick() 就ok了，这样我们就可以在外部实现该方法来获得 item 的点击事件了。</p>
+
+<p><strong>ItemDecoration实现item的拖拽，平移等操作</strong></p>
+
+<p>ItemTouchHelper 一个帮助开发人员处理拖拽和滑动删除的实现类，它能够让你非常容易实现侧滑删除、拖拽的功能。</p>
+
+<pre><code class="language-java">    /**
+ * Created by wen on 2017/8/8.
+ * ItemTouchHelper 一个帮助开发人员处理拖拽和滑动删除的实现类，它能够让你非常容易实现侧滑删除、拖拽的功能。
+ */
+
+public class MyItemTouchHelper extends ItemTouchHelper.Callback {
+
+    RecyclerAdapter adapter;
+
+    public MyItemTouchHelper(RecyclerAdapter adapter) {
+        this.adapter = adapter;
+    }
+
+    //通过返回值来设置是否处理某次拖曳或者滑动事件
+    //dragFlags 是拖拽标志，
+    //swipeFlags 是滑动标志，
+    //swipeFlags 都设置为0，暂时不考虑滑动相关操作。
+    //getMovementFlags() 用于设置是否处理拖拽事件和滑动事件，以及拖拽和滑动操作的方向，有以下两种情况：
+    //如果是列表类型的 RecyclerView，拖拽只有 UP、DOWN 两个方向
+    //如果是网格类型的则有 UP、DOWN、LEFT、RIGHT 四个方向
+    @Override
+    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
+            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
+            int swipeFlags = 0;
+            return makeMovementFlags(dragFlags, swipeFlags);
+        } else {
+            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
+            //注意：和拖曳的区别就是在这里
+            int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
+            return makeMovementFlags(dragFlags, swipeFlags);
+        }
+
+    }
+
+    //当长按并进入拖曳状态时，拖曳的过程中不断的回调此方法
+    @Override
+    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
+        //拖动的 item 的下标
+        int fromPosition = viewHolder.getAdapterPosition();
+        //目标 item 的下标，目标 item 就是当拖曳过程中，不断和拖动的 item 做位置交换的条目。
+        int toPosition = target.getAdapterPosition();
+        //对应某些需求，某一个item不能拖拽
+        if (toPosition == 0) {
+            return false;
+        }
+        if (fromPosition &lt; toPosition) {
+            for (int i = fromPosition; i &lt; toPosition; i++) {
+                //通过你传入的adapter得到你的数据 并进行交换
+                Collections.swap(((RecyclerAdapter) adapter).getDataList(), i, i + 1);
+            }
+        } else {
+            for (int i = fromPosition; i &gt; toPosition; i--) {
+                Collections.swap(((RecyclerAdapter) adapter).getDataList(), i, i - 1);
+            }
+        }
+        adapter.notifyItemMoved(fromPosition, toPosition);
+        return true;
+    }
+
+    //滑动删除的回调
+    @Override
+    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
+        int adapterPosition = viewHolder.getAdapterPosition();
+        adapter.notifyItemRemoved(adapterPosition);
+        ((RecyclerAdapter)adapter).getDataList().remove(adapterPosition);
+    }
+
+    //当长按 item 刚开始拖曳的时候调用
+    @Override
+    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
+        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
+            //给被拖曳的 item 设置一个深颜色背景
+            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
+        }
+        super.onSelectedChanged(viewHolder, actionState);
+    }
+
+    //当完成拖曳手指松开的时候调用
+    @Override
+    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
+        super.clearView(recyclerView, viewHolder);
+        //给已经完成拖曳的 item 恢复开始的背景。
+        // 这里我们设置的颜色尽量和你 item 在 xml 中设置的颜色保持一致
+        viewHolder.itemView.setBackgroundColor(Color.WHITE);
+    }
+
+    //返回 false 让它控制所有的 item 都不能拖曳。
+    @Override
+    public boolean isLongPressDragEnabled() {
+        return false;
+    }
+}
+</code></pre>
+
+<p><strong>使用</strong></p>
+
+<pre><code class="language-java">    itemTouchHelper = new ItemTouchHelper(new MyItemTouchHelper(adapter));
+        itemTouchHelper.attachToRecyclerView(textRecycler);
+
+        textRecycler.addOnItemTouchListener(new OnRecyclerItemClickListener(textRecycler) {
+            @Override
+            public void onItemClick(RecyclerView.ViewHolder viewHolder) {
+                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
+            }
+
+            @Override
+            public void onLongClick(RecyclerView.ViewHolder viewHolder) {
+                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
+                //当 item 被长按且不是第一个时，开始拖曳这个 item（这里只是一个特殊需求）
+                if (viewHolder.getLayoutPosition() != 0) {
+                    itemTouchHelper.startDrag(viewHolder);
+                }
+            }
+        });
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+              
+
+
+			<div class="row">
+			  <div class="large-6 columns">
+			  <p class="text-left" style="padding-top:25px;">
+			   <a href="Android.html">&laquo; Prev Page</a>  
+			  </p>
+			  </div>
+			  <div class="large-6 columns">
+			<p class="text-right" style="padding-top:25px;">
+			 <a href="Android_2.html">&raquo; Next Page</a> 
+			</p>
+			  </div>
+			</div>
+		</div>
+	</div><!-- large 8 -->
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,445 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-VelocityTracker详细学习 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-VelocityTracker详细学习</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/6/10</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">简介</h2>
+
+<p>VelocityTracker是一个跟踪触摸事件滑动速度的帮助类，用于实现flinging以及其它类似的手势。它的原理是把触摸事件 MotionEvent 对象传递给VelocityTracker的 addMovement(MotionEvent) 方法，然后分析MotionEvent 对象在单位时间类发生的位移来计算速度。你可以使用getXVelocity() 或getXVelocity()获得横向和竖向的速率到速率时，但是使用它们之前请先调用computeCurrentVelocity(int)来初始化速率的单位 。</p>
+
+<h2 id="toc_1">主要函数</h2>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: left">Public Methods</th>
+<th style="text-align: left"></th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: left">void</td>
+<td style="text-align: left"><code>addMovement(MotionEvent event)</code> <br>Add a users movement to the tracker.</td>
+</tr>
+<tr>
+<td style="text-align: left">void</td>
+<td style="text-align: left"><code>clear()</code> <br>Reset the velocity tracker back to its initial state.</td>
+</tr>
+<tr>
+<td style="text-align: left">void</td>
+<td style="text-align: left"><code>compute CurrentVelocity(int units,float maxVelocity)</code><br>Compute the current velocity based on the points that have been collected.<br><br>intunitis表示速率的基本时间单位。unitis值为1的表示是，一毫秒时间单位内运动了多少个像素， unitis值为1000表示一秒（1000毫秒）时间单位内运动了多少个像素<br><br>floatVelocity表示速率的最大值</td>
+</tr>
+<tr>
+<td style="text-align: left">void</td>
+<td style="text-align: left"><code>computeCurrentVelocity(int units)</code><br>Equivalent to invoking computeCurrentVelocity(int, float)with a maximum velocity of Float.MAX_VALUE.</td>
+</tr>
+<tr>
+<td style="text-align: left">abstract T</td>
+<td style="text-align: left"><code>getNextPoolable()</code></td>
+</tr>
+<tr>
+<td style="text-align: left">float</td>
+<td style="text-align: left"><code>getXVelocity()</code><br>Retrieve the last computed X velocity.</td>
+</tr>
+<tr>
+<td style="text-align: left">float</td>
+<td style="text-align: left"><code>getXVelocity(int id)</code><br>Retrieve the last computed X velocity.</td>
+</tr>
+<tr>
+<td style="text-align: left">float</td>
+<td style="text-align: left"><code>float   getYVelocity(int id)</code><br>Retrieve the last computed Y velocity.</td>
+</tr>
+<tr>
+<td style="text-align: left">float</td>
+<td style="text-align: left"><code>getYVelocity()</code><br>Retrieve the last computed Y velocity.</td>
+</tr>
+<tr>
+<td style="text-align: left">abstract boolean</td>
+<td style="text-align: left"><code>isPooled()</code></td>
+</tr>
+<tr>
+<td style="text-align: left">static VelocityTracker</td>
+<td style="text-align: left"><code>obtain()</code><br>Retrieve a new VelocityTracker object to watch the velocity of a motion.</td>
+</tr>
+<tr>
+<td style="text-align: left">void</td>
+<td style="text-align: left"><code>recycle()</code><br>Return a VelocityTracker object back to be re-used by others.</td>
+</tr>
+<tr>
+<td style="text-align: left">abstract void</td>
+<td style="text-align: left"><code>setNextPoolable(T element)</code></td>
+</tr>
+<tr>
+<td style="text-align: left">abstract void</td>
+<td style="text-align: left"><code>setPooled(boolean isPooled)</code></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_2">示例</h2>
+
+<pre><code class="language-java">private VelocityTracker mVelocityTracker;//生命变量  
+//在onTouchEvent(MotionEvent ev)中  
+if (mVelocityTracker == null) {  
+    mVelocityTracker = VelocityTracker.obtain();//获得VelocityTracker类实例  
+}  
+mVelocityTracker.addMovement(ev);//将事件加入到VelocityTracker类实例中  
+//判断当ev事件是MotionEvent.ACTION_UP时：计算速率  
+final VelocityTracker velocityTracker = mVelocityTracker;  
+// 1000 provides pixels per second  
+velocityTracker.computeCurrentVelocity(1, (float)0.01);//设置maxVelocity值为0.1时，速率大于0.01时，显示的速率都是0.01,速率小于0.01时，显示正常  
+Log.i(&quot;test&quot;,&quot;velocityTraker&quot;+velocityTracker.getXVelocity());  
+velocityTracker.computeCurrentVelocity(1000); //设置units的值为1000，意思为一秒时间内运动了多少个像素  
+Log.i(&quot;test&quot;,&quot;velocityTraker&quot;+velocityTracker.getXVelocity());
+
+</code></pre>
+
+<p>大体的使用是这样的：<br/>
+当你需要跟踪触摸屏事件的速度的时候,使用obtain()方法来获得VelocityTracker类的一个实例对象<br/>
+在onTouchEvent回调函数中，使用addMovement(MotionEvent)函数将当前的移动事件传递给VelocityTracker对象<br/>
+使用computeCurrentVelocity (int units)函数来计算当前的速度，使用getXVelocity ()、 getYVelocity ()函数来获得当前的速度</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207869891.html" 
+          title="Previous Post: Android-基类实现及学习">&laquo; Android-基类实现及学习</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207869807.html" 
+          title="Next Post: Android-Toolbar详细学习">Android-Toolbar详细学习 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

@@ -1,0 +1,561 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-Fresco详细学习 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-Fresco详细学习</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/7/10</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">Android Fresco网络图片加载库</h2>
+
+<p>Fresco是Facebook最新推出的一款用于Android应用中展示图片的强大图片库，可以从网络、本地存储和本地资源中加载图片。相对于ImageLoader，拥有更快的图片下载速度以及可以加载和显示gif图等诸多优势，是个很好的图片框架。</p>
+
+<p><strong>github地址</strong>： <a href="https://github.com/facebook/fresco">https://github.com/facebook/fresco</a></p>
+
+<h2 id="toc_1">基本的用法：</h2>
+
+<ol>
+<li>导入 Android Studio 或者 Gradle
+<code>
+dependencies {<br/>
+compile &#39;com.facebook.fresco:fresco:0.9.0+&#39;<br/>
+}
+</code></li>
+<li>在xml中引入SimpleDraweeView
+<code>SQL
+&lt;com.facebook.drawee.view.SimpleDraweeView<br/>
+android:id=&quot;@+id/image_view&quot;<br/>
+android:layout_width=&quot;20dp&quot;<br/>
+android:layout_height=&quot;20dp&quot;<br/>
+fresco:placeholderImage=&quot;@drawable/my_drawable&quot;<br/>
+/&gt;
+</code>
+<strong>注意：1、在SimpleDraweeView的父控件或者根节点中配置xmlns:fresco=&quot;<a href="http://schemas.android.com/apk/res-auto">http://schemas.android.com/apk/res-auto</a>&quot;;</strong></li>
+<li>配置网络权限</li>
+<li>在Java代码中开始加载图片
+<code>
+Uri uri = Uri.parse(&quot;https://raw.githubusercontent.com/facebook/fresco/gh-pages/static/fresco-logo.png&quot;);<br/>
+SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);<br/>
+draweeView.setImageURI(uri);
+</code></li>
+</ol>
+
+<h2 id="toc_2">URIs的使用</h2>
+
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>Scheme</th>
+<th>示例</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>远程图片</td>
+<td>http:// 和 https://</td>
+<td>HttpURLConnection 或者参考  <a href="http://fresco-cn.org/docs/using-other-network-layers.html">使用其他网络加载方案</a></td>
+</tr>
+<tr>
+<td>本地文件</td>
+<td>file://</td>
+<td>FileInputStream</td>
+</tr>
+<tr>
+<td>Content Provider</td>
+<td>content://</td>
+<td>ContentResolver</td>
+</tr>
+<tr>
+<td>asset目录下的资源</td>
+<td>asset://</td>
+<td>AssetManager</td>
+</tr>
+<tr>
+<td>res目录下的资源</td>
+<td>res://</td>
+<td>Resources.openRawResource</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>res 示例:Uri uri = Uri.parse(&quot;res://包名(实际可以是任何字符串甚至留空)/&quot; + R.drawable.ic_launcher);*<br/>
+*注意：Fresco 不支持 相对路径的URI. 所有的URI都必须是绝对路径，并且带上该URI的scheme。</strong></p>
+
+<h2 id="toc_3">在XML中使用SimpleDraweeView</h2>
+
+<pre><code class="language-markup">&lt;com.facebook.drawee.view.SimpleDraweeView
+    android:id=&quot;@+id/my_image_view&quot;
+    android:layout_width=&quot;20dp&quot;
+    android:layout_height=&quot;20dp&quot;
+    fresco:fadeDuration=&quot;300&quot; // 淡入淡出的持续时间  
+    fresco:actualImageScaleType=&quot;focusCrop&quot;  // 实际图像的缩放类型  
+    fresco:placeholderImage=&quot;@color/wait_color&quot;  //占位图  
+    fresco:placeholderImageScaleType=&quot;fitCenter&quot; //占位图的缩放类型  
+    fresco:failureImage=&quot;@drawable/error&quot; //下载失败显示的图片  
+    fresco:failureImageScaleType=&quot;centerInside&quot; //失败图的缩放类型  
+    fresco:retryImage=&quot;@drawable/retrying&quot; //图片加载失败时显示，提示用户点击重新加载，重复加载4次还是没有加载出来的时候才会显示failureImage的图片  
+    fresco:retryImageScaleType=&quot;centerCrop&quot; //重新加载的图片缩放类型  
+    fresco:progressBarImage=&quot;@drawable/progress_bar&quot; //进度条图片  
+    fresco:progressBarImageScaleType=&quot;centerInside&quot;  
+    fresco:progressBarAutoRotateInterval=&quot;1000&quot; //进度图自动旋转间隔时间(单位：毫秒ms)  
+    fresco:backgroundImage=&quot;@color/blue&quot;  //背景图片，这里的背景图片首先被绘制  
+    fresco:overlayImage=&quot;@drawable/watermark&quot;  // 设置叠加图，在xml中只能设置一张叠加图片，如果需要多张图片的话，需要在java代码中设置哦  
+    fresco:pressedStateOverlayImage=&quot;@color/red&quot;  // 设置点击状态下的叠加图  
+    fresco:roundAsCircle=&quot;false&quot; //设置为圆形图  
+    fresco:roundedCornerRadius=&quot;1dp&quot; // 圆角半径  
+    fresco:roundTopLeft=&quot;true&quot; // 左上角是否为圆角  
+    fresco:roundTopRight=&quot;false&quot;  
+    fresco:roundBottomLeft=&quot;false&quot;  
+    fresco:roundBottomRight=&quot;true&quot;  
+    fresco:roundWithOverlayColor=&quot;@color/corner_color&quot;  
+    fresco:roundingBorderWidth=&quot;2dp&quot; //边框的宽度  
+    fresco:roundingBorderColor=&quot;@color/border_color&quot; //边框颜色
+  /&gt;
+</code></pre>
+
+<p>说明：必须声明 android:layout_width 和 android:layout_height，否则将无法正确加载图像，另外不支持 wrap_content 属性，但也有例外的时候，如果想固定控件的宽高比，则可以使用wrap_content,并通过在xml代码中设置fresco:viewAspectRatio=&quot;小数&quot;或者在Java代码中设置mSimpleDraweeView.setAspectRatio(1.33f);即可。</p>
+
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>center</td>
+<td>居中，无缩放</td>
+</tr>
+<tr>
+<td>centerCrop</td>
+<td>保持宽高比缩小或放大，是的两边都大于或等于边界，且宽和高契合显示边界，居中显示</td>
+</tr>
+<tr>
+<td>focusCrop</td>
+<td>同centerCrop，但居中点不是中点，而是指定的某个点</td>
+</tr>
+<tr>
+<td>centerInside</td>
+<td>缩放图片使两边都在显示边界内，居中显示。和fitCenter不同，不会对图片进行放大。如果尺寸大于显示边界，则保持宽高比例缩小图片。</td>
+</tr>
+<tr>
+<td>fitCenter</td>
+<td>保持宽高比，缩小或者放大，使得图片完全显示在显示边界内，且宽或高契合显示边界，居中显示。</td>
+</tr>
+<tr>
+<td>fitStart</td>
+<td>同上，但不居中，和显示边界左上对齐。</td>
+</tr>
+<tr>
+<td>fitEnd</td>
+<td>同fitCenter，但不居中，和显示边界右下对齐。</td>
+</tr>
+<tr>
+<td>fitXY</td>
+<td>不保存宽高比，填充满显示边界。</td>
+</tr>
+<tr>
+<td>none</td>
+<td>如果要使用tile mode显示，则需要设置为none</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_4">在Java中自定义显示图</h2>
+
+<p>一般情况下，在XML设置显示效果即可, 如果想更多定制化，可以这样:<br/>
+创建一个 builder 然后设置给 SimpleDraweeView:</p>
+
+<pre><code class="language-java">List&lt;Drawable&gt; backgroundsList;
+List&lt;Drawable&gt; overlaysList;
+GenericDraweeHierarchyBuilder builder =
+    new GenericDraweeHierarchyBuilder(getResources());
+GenericDraweeHierarchy hierarchy = builder
+    .setFadeDuration(300)
+    .setPlaceholderImage(new MyCustomDrawable())
+    .setBackgrounds(backgroundList)
+    .setOverlays(overlaysList)
+    .build();
+mSimpleDraweeView.setHierarchy(hierarchy);
+</code></pre>
+
+<p>注意：请不要多次调用setHierarchy，即使这个View是可回收的。创建 DraweeHierarchy 的较为耗时的一个过程，应该多次利用。</p>
+
+<h2 id="toc_5">修改 DraweeHierarchy</h2>
+
+<p>DraweeHierarchy 的一些属性可以在运行时改变。<br/>
+要改变这些属性，首先获取一个引用:<br/>
+<code>GenericDraweeHierarchy hierarchy = mSimpleDraweeView.getHierarchy();</code></p>
+
+<h2 id="toc_6">修改占位图</h2>
+
+<p>修改占位图为资源id:<code>hierarchy.setPlaceholderImage(R.drawable.placeholderId);</code><br/>
+或者修改为一个 <code>Drawable:Drawable drawable;</code><br/><br/>
+<code>hierarchy.setPlaceholderImage(drawable);</code></p>
+
+<h2 id="toc_7">改变图像的显示</h2>
+
+<p>修改缩放类型:<br/>
+<code>hierarchy.setActualImageScaleType(ScalingUtils.ScaleType.CENTER_INSIDE);</code><br/><br/>
+如果你选择缩放类型为 focusCrop，需要指定一个居中点:<code>hierarchy.setActualImageFocusPoint(point);</code><br/>
+你可以为图像添加一个 color filter:</p>
+
+<pre><code class="language-java">ColorFilter filter;
+// 创建filter
+hierarchy.setActualImageColorFilter(filter);
+</code></pre>
+
+<h2 id="toc_8">圆角</h2>
+
+<p>除了圆角显示方式（原来为圆角的不能修改为圆圈，反之亦然），其他圆角相关的呈现参数, 具体参见这里 是可以动态修改的。<br/>
+如下: 获取DraweeHierarchy的圆角显示参数，修改圆角半径为10。</p>
+
+<pre><code class="language-java">RoundingParams roundingParams = hierarchy.getRoundingParams();
+roundingParams.setCornersRadius(10);
+hierarchy.setRoundingParams(roundingParams);
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207870123.html" 
+          title="Previous Post: Android-RxJava详细学习">&laquo; Android-RxJava详细学习</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207870050.html" 
+          title="Next Post: Android-AppBarLayout&CollapsingToolbar&Toolbar组合使用">Android-AppBarLayout&CollapsingToolbar&Toolbar组合使用 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

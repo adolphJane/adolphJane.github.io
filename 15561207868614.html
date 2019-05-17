@@ -1,0 +1,998 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android 响应式编程的应用 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android 响应式编程的应用</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/1/30</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">响应式编程简介</h2>
+
+<ul>
+<li>响应式编程是一种基于异步数据流概念的编程模式。数据流就像一条河：它可以被观测，被过滤，被操作，或者为新的消费者与另外一条流合并为一条新的流。</li>
+<li>响应式编程的一个关键概念是事件。事件可以被等待，可以触发过程，也可以触发其它事件。事件是唯一的以合适的方式将我们的现实世界映射到我们的软件中：如果屋里太热了我们就打开一扇窗户。同样的，当我们更改电子表（变化的传播）中的一些数值时，我们需要更新整个表格或者我们的机器人碰到墙时会转弯（响应事件）。</li>
+<li>今天，响应式编程最通用的一个场景是UI：我们的移动App必须做出对网络调用、用户触摸输入和系统弹框的响应。在这个世界上，软件之所以是事件驱动并响应的是因为现实生活也是如此。</li>
+</ul>
+
+<h2 id="toc_1">响应式编程的具体实现-RxJava</h2>
+
+<h3 id="toc_2">基本概念</h3>
+
+<h4 id="toc_3">RxJava的四种角色</h4>
+
+<ul>
+<li>Observable</li>
+<li>Observer</li>
+<li>Subscriber</li>
+<li>Subject</li>
+<li>Observable和Subject是两个“生产”实体，Observer和Subscriber是两个“消费”实体。</li>
+</ul>
+
+<h4 id="toc_4">热Observable和冷Observable</h4>
+
+<p>从发射物的角度来看，有两种不同的Observable:热的和冷的。一个”热”的Observable典型的只要一创建完就开始发射数据，因此所有后续订阅它的观察者可能从序列中间的某个位置开始接受数据（有一些数据错过了）。一个”冷”的Observable会一直等待，直到有观察者订阅它才开始发射数据，因此这个观察者可以确保会收到整个数据序列。</p>
+
+<h4 id="toc_5">Observable创建符</h4>
+
+<ul>
+<li>Observable.create()</li>
+</ul>
+
+<pre><code class="language-java">Observable.create(new Observable.OnSubscribe&lt;Object&gt;(){
+    @Override
+    public void call(Subscriber&lt;? super Object&gt; subscriber{
+    }
+});
+</code></pre>
+
+<ul>
+<li>Observable.from()<br/>
+from() 创建符可以从一个列表/数组来创建Observable,并一个接一个的从列表/数组中发射出来每一个对象，或者也可以从Java Future 类来创建Observable，并发射Future对象的 .get() 方法返回的结果值。传入 Future 作为参数时，我们可以指定一个超时的值。Observable将等待来自 Future 的结果；如果在超时之前仍然没有结果返回，Observable将会触发 onError() 方法通知观察者有错误发生了。<br/>
+``` java<br/>
+List<Integer> items = new ArrayList<Integer>();<br/>
+items.add(1);<br/>
+items.add(10);<br/>
+items.add(100);<br/>
+items.add(200);</li>
+</ul>
+
+<p>Observable<Integer> observableString = Observable.from(items);<br/>
+Subscription subscriptionPrint = observableString.subscribe(new Observer<Integer>() {<br/>
+    @Override<br/>
+    public void onCompleted() {<br/>
+    System.out.println(&quot;Observable completed&quot;);<br/>
+    }<br/>
+    @Override<br/>
+    public void onError(Throwable e) {<br/>
+    System.out.println(&quot;Oh,no! Something wrong happened！&quot;);<br/>
+    }<br/>
+    @Override<br/>
+    public void onNext(Integer item) {<br/>
+    System.out.println(&quot;Item is &quot; + item);<br/>
+    }<br/>
+});</p>
+
+<pre><code class="language-text">
+- Observable.just()   
+just() 方法可以传入一到九个参数，它们会按照传入的参数的顺序来发射它们。 just() 方法也可以接受列表或数组，就像 from() 方法，但是它不会迭代列表发射每个值,它将会发射整个列表。通常，当我们想发射一组已经定义好的值时会用到它。但是如果我们的函数不是时变性的，我们可以用just来创建一个更有组织性和可测性的代码库。
+
+``` java
+Observable&lt;String&gt; observableString = Observable.just(helloWorld
+());
+Subscription subscriptionPrint = observableString.subscribe(new
+Observer&lt;String&gt;() {
+    @Override
+    public void onCompleted() {
+    System.out.println(&quot;Observable completed&quot;);
+    }
+    @Override
+    public void onError(Throwable e) {
+    System.out.println(&quot;Oh,no! Something wrong happened!&quot;);
+    }
+    @Override
+    public void onNext(String message) {
+    System.out.println(message);
+    }
+});
+</code></pre>
+
+<p>helloWorld() 方法比较简单，像这样：</p>
+
+<pre><code class="language-java">private String helloWorld(){
+    return &quot;Hello World&quot;;
+}
+</code></pre>
+
+<h3 id="toc_6">Subject</h3>
+
+<p>Subject 既可以是 Observable，也可以是 Observer。 <br/>
+RxJava 提供四种不同的 Subject :</p>
+
+<ul>
+<li>PublishSubject</li>
+<li>BehaviorSubject<br/>
+BehaviorSubject会首先向他的订阅者发送截至订阅前最新的一个数据对象（或初始值）,然后正常发送订阅后的数据流。<br/></li>
+</ul>
+
+<p><code>BehaviorSubject&lt;Integer&gt; behaviorSubject = BehaviorSubject.create(1);</code>  </p>
+
+<p>在这个短例子中，我们创建了一个能发射整形(Integer)的BehaviorSubject。由于每当Observes订阅它时就会发射最新的数据，所以它需要一个初始值。</p>
+
+<ul>
+<li>ReplaySubject<br/>
+ReplaySubject 会缓存它所订阅的所有数据,向任意一个订阅它的观察者重发:<br/></li>
+</ul>
+
+<p><code>ReplaySubject&lt;Integer&gt; replaySubject = ReplaySubject.create();</code></p>
+
+<ul>
+<li>AsyncSubject<br/>
+当Observable完成时AsyncSubject只会发布最后一个数据给已经订阅的每一个观察者。<br/></li>
+</ul>
+
+<p><code>AsyncSubject&lt;Integer&gt; asyncSubject = AsyncSubject.create();</code></p>
+
+<h3 id="toc_7">直接创建 Observable</h3>
+
+<p>在我们的第一个列子里，我们将检索安装的应用列表并填充RecycleView的item来展示它们。我们也设想一个下拉刷新的功能和一个进度条来告知用户当前任务正在执行。</p>
+
+<p>首先，我们创建Observable。我们需要一个函数来检索安装的应用程序列表并把它提供给我们的观察者。我们一个接一个的发射这些应用程序数据，将它们分组到一个单独的列表中，以此来展示响应式方法的灵活性。</p>
+
+<pre><code class="language-java">private Observable&lt;AppInfo&gt; getApps(){
+    return Observable.create(subscriber -&gt; {
+        List&lt;AppInfoRich&gt; apps = new ArrayList&lt;AppInfoRich&gt;();
+        final Intent mainIntent = new Intent(Intent.ACTION_MAIN, null);
+        mainIntent.addCategory(Intent.CATEGORY_LAUNCHER);
+        List&lt;ResolveInfo&gt; infos = getActivity().queryIntentActivities(mainIntent, 0);
+        for(ResolveInfo info : infos){
+            apps.add(new AppInfoRich(getActivity(),info));
+        }
+        for (AppInfoRich appInfo:apps) {
+            Bitmap icon = Utils.drawableToBitmap(appInfo.getIcon());
+            String name = appInfo.getName();
+            String iconPath = mFilesDir + &quot;/&quot; + name;
+            Utils.storeBitmap(App.instance, icon,name);
+            if (subscriber.isUnsubscribed()){
+                return;
+            }
+            subscriber.onNext(new AppInfo(name, iconPath, appInfo.getLastUpdateTime()));
+        }
+        if (!subscriber.isUnsubscribed()){
+            subscriber.onCompleted();
+        }
+    });
+}
+</code></pre>
+
+<p>AppInfo为App信息的实体类，包括上次更新时间、图标、名字三个属性，此处省略。</p>
+
+<p><strong>需要重点注意的是在发射新的数据或者完成序列之前要检测观察者的订阅情况。这样的话代码会更高效，因为如果没有观察者等待时我们就不生成没有必要的数据项。</strong></p>
+
+<p>接下来，我们来定义下拉刷新的方法：  </p>
+
+<pre><code class="language-java">private void refreshTheList() {
+    getApps().toSortedList()
+    .subscribe(new Observer&lt;List&lt;AppInfo&gt;&gt;() {
+    @Override
+    public void onCompleted() {
+        Toast.makeText(getActivity(), &quot;Here is the list!&quot;, Toast.LENGTH_LONG).show();
+    }
+    @Override
+    public void onError(Throwable e) {
+        Toast.makeText(getActivity(), &quot;Something went wrong!&quot;, Toast.LENGTH_SHORT).show();
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+    @Override
+    public void onNext(List&lt;AppInfo&gt; appInfos) {
+        mRecyclerView.setVisibility(View.VISIBLE);
+        mAdapter.addApplications(appInfos);
+        mSwipeRefreshLayout.setRefreshing(false);
+    }
+    });
+}
+</code></pre>
+
+<h3 id="toc_8">从列表创建 Observable</h3>
+
+<p>在这个例子中，我们将引入 from() 函数。使用这个特殊的“创建”函数，我们可以从一个列表中创建一个Observable。Observable将发射出列表中的每一个元素，我们可以通过订阅它们来对这些发出的元素做出响应。  </p>
+
+<pre><code class="language-java">private void loadList(List&lt;AppInfo&gt; apps) {
+    mRecyclerView.setVisibility(View.VISIBLE);
+    Observable.from(apps).subscribe(new Observer&lt;AppInfo&gt;() {
+        @Override
+        public void onCompleted() {
+            mSwipeRefreshLayout.setRefreshing(false);
+            Toast.makeText(getActivity(), &quot;Here is the list!&quot;, Toast.LENGTH_LONG).show();
+        }
+        @Override
+        public void onError(Throwable e) {
+            Toast.makeText(getActivity(), &quot;Something went wrong!&quot;, Toast.LENGTH_SHORT).show();
+            mSwipeRefreshLayout.setRefreshing(false);
+        }
+        @Override
+        public void onNext(AppInfo appInfo) {
+            mAddedApps.add(appInfo);
+            mAdapter.addApplication(mAddedApps.size() - 1, appInfo);
+        }
+    });
+}
+</code></pre>
+
+<p>和第一个例子一个主要的不同是我们在 onCompleted() 函数中停掉进度条是因为我们一个一个的发射元素；<br/><br/>
+第一个例子中的Observable发射的是整个list,因此在 onNext() 函数中停掉进度条的做法是安全的。  </p>
+
+<h3 id="toc_9">具有特殊功能的创建符</h3>
+
+<ul>
+<li>just()<br/>
+你可以将一个函数作为参数传给 just() 方法，你将会得到一个已存在代码的原始Observable版本。在一个新的响应式架构的基础上迁移已存在的代码，这个方法可能是一个有用的开始点。</li>
+<li>repeat()<br/>
+假如你想对一个Observable重复发射三次数据 :
+<code>java
+Observable.just(appOne,appTwo,appThree)<br/>
+.repeat(3)<br/>
+.subscribe();
+</code></li>
+</ul>
+
+<p>我们在 just() 创建Observable后追加了 repeat(3) ，它将会创建9个元素的序列，每一个都单独发射。</p>
+
+<ul>
+<li>defer()<br/>
+有这样一个场景，你想在这声明一个Observable但是你又想推迟这个Observable的创建直到观察者订阅时。看下面的 getInt() 函数：
+<code>java
+private Observable&lt;Integer&gt; getInt(){<br/>
+return Observable.create(subscriber -&gt; {<br/>
+    if(subscriber.isUnsubscribed()){<br/>
+        return;<br/>
+    }<br/>
+    App.L.debug(&quot;GETINT&quot;);<br/>
+    subscriber.onNext(42);<br/>
+    subscriber.onCompleted();<br/>
+});<br/>
+}
+</code></li>
+</ul>
+
+<p>这比较简单，并且它没有做太多事情，但是它正好为我们服务。现在，我们可以创建一个新的Observable并且应用 defer() :</p>
+
+<p><code>Observable&lt;Integer&gt; deferred = Observable.defer(this::getInt);</code>  </p>
+
+<p>这次， deferred 存在，但是 getInt() create() 方法还没有调用 : logcat日志也没有“GETINT”打印出来 :</p>
+
+<pre><code class="language-java">deferred.subscribe(number -&gt; {
+    App.L.debug(String.valueOf(number));
+});
+</code></pre>
+
+<p>但是一旦我们订阅了， create() 方法就会被调用并且我们也可以在logcat日志中打印出两个值：GETINT 和 42。</p>
+
+<ul>
+<li><p>range()<br/><br/>
+从一个指定的数字X开始发射N个数字。range() 函数用两个数字作为参数：第一个是起始点，第二个是我们想发射数字的个数。</p></li>
+<li><p>interval()<br/><br/>
+interval() 函数在你需要创建一个轮询程序时非常好用。interval() 函数的两个参数：一个指定两次发射的时间间隔，另一个是用到的时间单位。</p></li>
+<li><p>timer()<br/><br/>
+如果你需要一个一段时间之后才发射的Observable，你可以使用 timer()。</p></li>
+</ul>
+
+<h2 id="toc_10">过滤Observables</h2>
+
+<h3 id="toc_11">过滤序列</h3>
+
+<p>RxJava让我们使用 filter() 方法来过滤我们观测序列中不想要的值。</p>
+
+<p>我们从发出的每个元素中过滤掉开头字母不是C的 :</p>
+
+<pre><code class="language-java">.filter(new Func1&lt;AppInfo,Boolean&gt;(){
+    @Override
+    public Boolean call(AppInfo appInfo){
+        return appInfo.getName().startsWith(&quot;C&quot;);
+    }
+})
+</code></pre>
+
+<p>我们传一个新的 Func1 对象给 filter() 函数，即只有一个参数的函数。 Func1 有一个 AppInfo 对象来作为它的参数类型并且返回 Boolean 对象。只要条件符合 filter() 函数就会返回 true 。此时，值会发射出去并且所有的观察者都会接收到。</p>
+
+<p>filter() 函数最常用的用法之一时过滤 null 对象：</p>
+
+<pre><code class="language-java">.filter(new Func1&lt;AppInfo,Boolean&gt;(){
+    @Override
+    public Boolean call(AppInfo appInfo){
+        return appInfo != null;
+    }
+})
+</code></pre>
+
+<p>它帮我们免去了在 onNext() 函数调用中再去检测 null 值，让我们把注意力集中在应用业务逻辑上。</p>
+
+<h3 id="toc_12">获取我们需要的数据</h3>
+
+<p>当我们不需要整个序列时，而是只想取开头或结尾的几个元素，我们可以用 take() 或 takeLast() 。</p>
+
+<ul>
+<li><p>take()<br/><br/>
+take() 函数用整数N来作为一个参数，从原始的序列中发射前N个元素，然后完成：</p>
+<pre><code class="language-java">Observable.from(apps)
+.take(3)<br/>
+.subscribe(...);
+</code></pre></li>
+<li><p>takeLast()<br/><br/>
+如果我们想要最后N个元素，我们只需使用 takeLast() 函数：</p>
+<pre><code class="language-java">Observable.from(apps)
+.takeLast(3)<br/>
+.subscribe(...);
+</code></pre></li>
+</ul>
+
+<h3 id="toc_13">有且仅有一次</h3>
+
+<ul>
+<li><p>distinct()<br/><br/>
+就像 takeLast() 一样， distinct() 作用于一个完整的序列，然后得到重复的过滤项，它需要记录每一个发射的值。如果你在处理一大堆序列或者大的数据记得关注内存使用情况。</p>
+<pre><code class="language-java">Observable&lt;AppInfo&gt; fullOfDuplicates = Observable.from(apps)
+.take(3)<br/>
+.repeat(3);<br/>
+fullOfDuplicates.distinct()<br/>
+.subscribe(...);
+</code></pre></li>
+<li><p>ditinctUntilChanged()<br/><br/>
+如果在一个可观测序列发射一个不同于之前的一个新值时让我们得到通知这时候该怎么做？ditinctUntilChanged() 过滤函数能做到这一点。它能轻易的忽略掉所有的重复并且只发射出新的值。</p></li>
+</ul>
+
+<h3 id="toc_14">First and last</h3>
+
+<p>first() 方法和 last() 方法很容易弄明白。它们从Observable中只发射第一个元素或者最后一个元素。这两个都可以传 Func1 作为参数。 <br/>
+与 first() 和 last() 相似的变量有： firstOrDefault() 和 lastOrDefault() 。这两个函数当可观测序列完成时不再发射任何值时用得上。在这种场景下，如果Observable不再发射任何值时我们可以指定发射一个默认的值。</p>
+
+<h3 id="toc_15">Skip and SkipLast</h3>
+
+<p>skip() 和 skipLast() 函数与 take() 和 takeLast() 相对应。它们用整数N作参数，从本质上来说，它们不让Observable发射前N个或者后N个值。</p>
+
+<h3 id="toc_16">ElementAt</h3>
+
+<p>如果我们只想要可观测序列发射的第五个元素该怎么办？ elementAt() 函数仅从一个序列中发射第n个元素然后就完成了。 <br/>
+如果我们想查找第五个元素但是可观测序列只有三个元素可供发射时该怎么办？我们可以使用 elementAtOrDefault() 。</p>
+
+<h3 id="toc_17">Sampling</h3>
+
+<p>在Observable后面加一个 sample() ，我们将创建一个新的可观测序列，它将在一个指定的时间间隔里由Observable发射最近一次的数值：  </p>
+
+<pre><code class="language-java">Observable&lt;Integer&gt; sensor = [...]
+sensor.sample(30,TimeUnit.SECONDS)
+    .subscribe(...);
+</code></pre>
+
+<p>如果我们想让它定时发射第一个元素而不是最近的一个元素，我们可以使用 throttleFirst() 。</p>
+
+<h3 id="toc_18">Timeout</h3>
+
+<p>我们可以使用 timeout() 函数来监听源可观测序列,就是在我们设定的时间间隔内如果没有得到一个值则发射一个错误。我们可以认为 timeout() 为一个Observable的限时的副本。如果在指定的时间间隔内Observable不发射值的话，它监听的原始的Observable时就会触发 onError() 函数。</p>
+
+<pre><code class="language-java">Subscription subscription = getCurrentTemperature()
+    .timeout(2,TimeUnit.SECONDS)
+    .subscribe(...);
+</code></pre>
+
+<h3 id="toc_19">Debounce</h3>
+
+<p>debounce() 函数过滤掉由Observable发射的速率过快的数据；如果在一个指定的时间间隔过去了仍旧没有发射一个，那么它将发射最后的那个。  </p>
+
+<p>下图展示了多久从Observable发射一次新的数据， debounce() 函数开启一个内部定时器，如果在这个时间间隔内没有新的据发射，则新的Observable发射出最后一个数据：<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818620477547.png" alt="20170227148818620477547.png"/>  </p>
+
+<h2 id="toc_20">变换Observables</h2>
+
+<h3 id="toc_21">*map家族</h3>
+
+<p>RxJava提供了几个mapping函数： map() , flatMap() , concatMap() , flatMapIterable() 以及 switchMap() .所有这些函数都作用于一个可观测序列，然后变换它发射的值，最后用一种新的形式返回它们。</p>
+
+<ul>
+<li><p>Map<br/><br/>
+RxJava的 map 函数接收一个指定的 Func 对象然后将它应用到每一个由Observable发射的值上。</p>
+<pre><code class="language-java">Observable.from(apps)
+.map(new Func1&lt;AppInfo,AppInfo&gt;(){<br/>
+    @Override<br/>
+    public Appinfo call(AppInfo appInfo){<br/>
+        String currentName = appInfo.getName();<br/>
+        String lowerCaseName = currentName.toLowerCase();<br/>
+        appInfo.setName(lowerCaseName);<br/>
+        return appInfo;<br/>
+    }<br/>
+})<br/>
+.subscribe(...);
+</code></pre>
+<p>正如你看到的，像往常一样创建我们发射的Observable之后，我们追加一个 map 调用，我们创建一个简单的函数来更新 AppInfo对象并提供一个名字小写的新版本给观察者。</p></li>
+<li><p>FlatMap<br/><br/>
+在复杂的场景中，我们有一个这样的Observable：它发射一个数据序列，这些数据本身也可以发射Observable。RxJava的 flatMap() 函数提供一种铺平序列的方式，然后合并这些Observables发射的数据，最后将合并后的结果作为最终的Observable。<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818631525343.png" alt="20170227148818631525343.png"/><br/><br/>
+当我们在处理可能有大量的Observables时，重要是记住任何一个Observables发生错误的情况， flatMap() 将会触发它自己的 onError() 函数并放弃整个链。重要的一点提示是关于合并部分：它允许交叉。正如上图所示，这意味着 flatMap() 不能够保证在最终生成的Observable中源Observables确切的发射顺序。</p></li>
+<li><p>ConcatMap<br/><br/>
+RxJava的 concatMap() 函数解决了 flatMap() 的交叉问题，提供了一种能够把发射的值连续在一起的铺平函数，而不是合并它们，如下图所示：<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/2017022714881863516790.png" alt="2017022714881863516790.png"/></p></li>
+<li><p>FlatMapIterable<br/><br/>
+作为*map家族的一员， flatMapInterable() 和 flatMap() 很像。仅有的本质不同是它将源数据两两结成对并生成Iterable，而不是原始数据项和生成的Observables。</p></li>
+<li><p>SwitchMap<br/><br/>
+switchMap() 和 flatMap() 很像，除了一点：每当源Observable发射一个新的数据项（Observable）时，它将取消订阅并停止监视之前那个数据项产生的Observable，并开始监视当前发射的这一个。</p></li>
+<li><p>Scan<br/><br/>
+RxJava的 scan() 函数可以看做是一个累积函数。 scan() 函数对原始Observable发射的每一项数据都应用一个函数，计算出函数的结果值，并将该值填充回可观测序列，等待和下一次发射的数据一起使用。</p></li>
+</ul>
+
+<p>作为一个通用的例子，给出一个累加器：</p>
+
+<pre><code class="language-java">Observable.just(1,2,3,4,5)
+    .scan((sum,item) -&gt; sum + item)
+    .subscribe(new Subscriber&lt;Integer&gt;() {
+        @Override
+        public void onCompleted() {
+            Log.d(&quot;RXJAVA&quot;, &quot;Sequence completed.&quot;);
+        }
+        @Override
+        public void onError(Throwable e) {
+            Log.e(&quot;RXJAVA&quot;, &quot;Something went south!&quot;);
+        }
+        @Override
+        public void onNext(Integer item) {
+            Log.d(&quot;RXJAVA&quot;, &quot;item is: &quot; + item);
+        }
+    });
+</code></pre>
+
+<p>我们得到的结果是：</p>
+
+<p><code>RXJAVA: item is: 1</code><br/><br/>
+<code>RXJAVA: item is: 3</code><br/><br/>
+<code>RXJAVA: item is: 6</code><br/><br/>
+<code>RXJAVA: item is: 10</code><br/><br/>
+<code>RXJAVA: item is: 15</code><br/><br/>
+<code>RXJAVA: Sequence completed.</code>  </p>
+
+<h3 id="toc_22">GroupBy</h3>
+
+<p>RxJava提供了一个有用的函数从列表中按照指定的规则： groupBy() 来分组元素。下图中的例子展示了 groupBy() 如何将发射的值根据他们的形状来进行分组。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818647619248.png" alt="20170227148818647619248.png"/></p>
+
+<p>这个函数将源Observable变换成一个发射Observables的新的Observable。它们中的每一个新的Observable都发射一组指定的数据。</p>
+
+<p>为了创建一个分组了的已安装应用列表，我们在 loadList() 函数中引入了一个新的元素：</p>
+
+<pre><code class="language-java">Observable&lt;GroupedObservable&lt;String,AppInfo&gt;&gt; groupedItems = Observable.from(apps)
+            .groupBy(new Func1&lt;AppInfo,String&gt;(){
+                @Override
+                public String call(AppInfo appInfo){
+                    SimpleDateFormat formatter = new SimpleDateFormat(&quot;MM/yyyy&quot;);
+                    return formatter.format(new Date(appInfo.getLastUpdateTime()));
+                }
+            });
+</code></pre>
+
+<p>现在我们创建了一个新的Observable， groupedItems ，它将会发射一个带有 GroupedObservable 的序列。 GroupedObservable 是一个特殊的Observable，它源自一个分组的key。在这个例子中，key就是 String ，代表的意思是 Month/Year 格式化的最近更新日期。</p>
+
+<h3 id="toc_23">Buffer</h3>
+
+<p>RxJava中的 buffer() 函数将源Observable变换一个新的Observable，这个新的Observable每次发射一组列表值而不是一个一个发射。</p>
+
+<p>buffer() 函数有几种变体。其中有一个是允许你指定一个 skip 值：此后每 skip 项数据，用count项数据填充缓冲区。另一个是buffer() 带一个 timespan 的参数，会创建一个每隔timespan时间段就会发射一个列表的Observable。</p>
+
+<h3 id="toc_24">Window</h3>
+
+<p>RxJava的 window() 函数和 buffer() 很像，但是它发射的是Observable而不是列表。</p>
+
+<p>正如 buffer() 一样, window() 也有一个 skip 变体。</p>
+
+<h3 id="toc_25">Cast</h3>
+
+<p>cast() 函数是 map() 操作符的特殊版本。它将源Observable中的每一项数据都转换为新的类型，把它变成了不同的 Class 。</p>
+
+<h2 id="toc_26">组合Observables</h2>
+
+<h3 id="toc_27">Merge</h3>
+
+<p>在”异步的世界“中经常会创建这样的场景，我们有多个来源但是又只想有一个结果：多输入，单输出。RxJava的 merge() 方法将帮助你把两个甚至更多的Observables合并到他们发射的数据项里。下图给出了把两个序列合并在一个最终发射的Observable。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201702271488186536493.png" alt="201702271488186536493.png"/></p>
+
+<p>正如你看到的那样，发射的数据被交叉合并到一个Observable里面。注意如果你同步的合并Observable，它们将连接在一起并且不会交叉。</p>
+
+<pre><code class="language-java">Observable&lt;AppInfo&gt; mergedObserbable = Observable.merge(observableApps,observableReversedApps);
+mergedObserbable.subscribe(...);
+</code></pre>
+
+<p>注意错误时的toast消息，你可以认为每个Observable抛出的错误都将会打断合并。如果你需要避免这种情况，RxJava提供了 mergeDelayError() ，它能从一个Observable中继续发射数据即便是其中有一个抛出了错误。当所有的Observables都完成时， mergeDelayError() 将会发射 onError()。</p>
+
+<h3 id="toc_28">ZIP</h3>
+
+<p>在一种新的可能场景中处理多个数据来源时会带来：多从个Observables接收数据，处理它们，然后将它们合并成一个新的可观测序列来使用。RxJava有一个特殊的方法可以完成： zip() 合并两个或者多个Observables发射出的数据项，根据指定的函数Func* 变换它们，并发射一个新值。下图展示了 zip() 方法如何处理发射的“numbers”和“letters”然后将它们合并一个新的数据项：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818658329706.png" alt="20170227148818658329706.png"/></p>
+
+<pre><code class="language-java">Observable.zip(observableApp, tictoc, (AppInfo appInfo, Long time) -&gt; updateTitle(appInfo, time))
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(...);
+</code></pre>
+
+<p>zip() 函数有三个参数：两个Observables和一个 Func2 。</p>
+
+<h3 id="toc_29">Join</h3>
+
+<p>前面两个方法， zip() 和 merge() 方法作用在发射数据的范畴内，在决定如何操作值之前有些场景我们需要考虑时间的。RxJava的 join() 函数基于时间窗口将两个Observables发射的数据结合在一起。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818661695074.png" alt="20170227148818661695074.png"/></p>
+
+<p>为了正确的理解上一张图，我们解释下 join() 需要的参数：</p>
+
+<ul>
+<li>第二个Observable和源Observable结合。</li>
+<li>Func1 参数：在指定的由时间窗口定义时间间隔内，源Observable发射的数据和从第二个Observable发射的数据相互配合返回的Observable。</li>
+<li>Func1 参数：在指定的由时间窗口定义时间间隔内，第二个Observable发射的数据和从源Observable发射的数据相互配合返回的Observable。</li>
+<li>Func2 参数：定义已发射的数据如何与新发射的数据项相结合。</li>
+</ul>
+
+<h3 id="toc_30">combineLatest</h3>
+
+<p>RxJava的 combineLatest() 函数有点像 zip() 函数的特殊形式。正如我们已经学习的， zip() 作用于最近未打包的两个Observables。相反， combineLatest() 作用于最近发射的数据项：如果 Observable1 发射了A并且 Observable2 发射了B和C， combineLatest() 将会分组处理AB和AC，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818665751005.png" alt="20170227148818665751005.png"/></p>
+
+<h3 id="toc_31">And,Then和When</h3>
+
+<p>在将来还有一些 zip() 满足不了的场景。如复杂的架构，或者是仅仅为了个人爱好，你可以使用And/Then/When解决方案。它们在RxJava的joins包下，使用Pattern和Plan作为中介，将发射的数据集合并到一起。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170227148818667457515.png" alt="20170227148818667457515.png"/></p>
+
+<h3 id="toc_32">Switch</h3>
+
+<p>给出一个发射多个Observables序列的源Observable， switch() 订阅到源Observable然后开始发射由第一个发射的Observable发射的一样的数据。当源Observable发射一个新的Observable时， switch() 立即取消订阅前一个发射数 <br/>
+据的Observable（因此打断了从它那里发射的数据流）然后订阅一个新的Observable，并开始发射它的数据。</p>
+
+<h3 id="toc_33">StartWith</h3>
+
+<p>RxJava的 startWith() 是 concat() 的对应部分。正如 concat() 向发射数据的Observable追加数据那样，在Observable开始发射他们的数据之前，startWith() 通过传递一个参数来先发射一个数据序列。</p>
+
+<h2 id="toc_34">Schedulers-解决Android主线程问题</h2>
+
+<h3 id="toc_35">Schedulers</h3>
+
+<p>调度器以一种最简单的方式将多线程用在你的Apps的中。它们时RxJava重要的一部分并能很好地与Observables协同工作。它们无需处理实现、同步、线程、平台限制、平台变化而可以提供一种灵活的方式来创建并发程序。</p>
+
+<p>RxJava提供了5种调度器：</p>
+
+<ul>
+<li>.io()</li>
+<li>.computation()</li>
+<li>.immediate()</li>
+<li>.newThread()</li>
+<li>.trampoline()</li>
+</ul>
+
+<h4 id="toc_36">Schedulers.io()</h4>
+
+<p>这个调度器时用于I/O操作。它基于根据需要，增长或缩减来自适应的线程池。我们将使用它来修复我们之前看到的 StrictMode 违规做法。由于它专用于I/O操作，所以并不是RxJava的默认方法；正确的使用它是由开发者决定的。</p>
+
+<p><strong>重点需要注意的是线程池是无限制的，大量的I/O调度操作将创建许多个线程并占用内存。一如既往的是，我们需要在性能和简捷两者之间找到一个有效的平衡点。</strong></p>
+
+<h4 id="toc_37">Schedulers.computation()</h4>
+
+<p>这个是计算工作默认的调度器，它与I/O操作无关。它也是许多RxJava方法的默认调度器： buffer() , debounce() , delay() , interval() , sample() , skip()。</p>
+
+<h4 id="toc_38">Schedulers.immediate()</h4>
+
+<p>这个调度器允许你立即在当前线程执行你指定的工作。它是 timeout() , timeInterval() ,以及 timestamp() 方法默认的调度器。</p>
+
+<h4 id="toc_39">Schedulers.newThread()</h4>
+
+<p>这个调度器正如它所看起来的那样：它为指定任务启动一个新的线程。</p>
+
+<h4 id="toc_40">Schedulers.trampoline()</h4>
+
+<p>当我们想在当前线程执行一个任务时，并不是立即，我们可以用 .trampoline() 将它入队。这个调度器将会处理它的队列并且按序运行队列中每一个任务。它是 repeat() 和 retry() 方法默认的调度器。</p>
+
+<h3 id="toc_41">非阻塞I/O操作</h3>
+
+<p>使用 Schedulers.io() 创建非阻塞的版本：</p>
+
+<pre><code class="language-java">public static void storeBitmap(Context context, Bitmap bitmap, String filename) {
+    Schedulers.io().createWorker().schedule(() -&gt; {
+        blockingStoreBitmap(context, bitmap, filename);
+    });
+}
+</code></pre>
+
+<h3 id="toc_42">SubscribeOn and ObserveOn</h3>
+
+<p>我们学到了如何在一个调度器上运行一个任务。但是我们如何利用它来和Observables一起工作呢？RxJava提供了 subscribeOn() 方法来用于每个Observable对象。 subscribeOn() 方法用 Scheduler 来作为参数并在这个Scheduler上执行Observable调用。</p>
+
+<p>首先，我们需要一个新的 getApps() 方法来检索已安装的应用列表：</p>
+
+<pre><code class="language-java">private Observable&lt;AppInfo&gt; getApps() {
+    return Observable.create(subscriber -&gt; {
+        List&lt;AppInfo&gt; apps = new ArrayList&lt;&gt;();
+        SharedPreferences sharedPref = getActivity().getPreferences(Context.MODE_PRIVATE);
+        Type appInfoType = new TypeToken&lt;List&lt;AppInfo&gt;&gt;(){}.getType();
+        String serializedApps = sharedPref.getString(&quot;APPS&quot;, &quot;&quot;);
+        if (!&quot;&quot;.equals(serializedApps)) {
+            apps = new Gson().fromJson(serializedApps,appInfoType);
+        }
+        for (AppInfo app : apps) {
+            subscriber.onNext(app);
+        }
+        subscriber.onCompleted();
+    });
+}
+</code></pre>
+
+<p>然后，我们所需要做的是指定 getApps() 需要在调度器上执行：</p>
+
+<pre><code class="language-java">getApps().subscribeOn(Schedulers.io())
+    .subscribe(new Observer&lt;AppInfo&gt;() { [...]
+</code></pre>
+
+<p>最后，我们只需在 loadList() 函数添加几行代码，那么每一项就都准备好了：</p>
+
+<pre><code class="language-java">getApps()
+    .onBackpressureBuffer()
+    .subscribeOn(Schedulers.io())
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(new Observer&lt;AppInfo&gt;() { [...]
+</code></pre>
+
+<p>observeOn() 方法将会在指定的调度器上返回结果：如例子中的UI线程。 onBackpressureBuffer() 方法将告诉Observable发射的数据如果比观察者消费的数据要更快的话，它必须把它们存储在缓存中并提供一个合适的时间给它们。</p>
+
+<h3 id="toc_43">处理耗时的任务</h3>
+
+<p>一个与I/O无关的耗时的任务：  </p>
+
+<pre><code class="language-java">getObservableApps(apps)
+    .onBackpressureBuffer()
+    .subscribeOn(Schedulers.computation())
+    .observeOn(AndroidSchedulers.mainThread())
+    .subscribe(new Observer&lt;AppInfo&gt;() { [...]
+</code></pre>
+
+<h1 id="toc_44">总结</h1>
+
+<p>RxJava提供了一种以面向时序的方式考虑数据的机会：所有事情都是持续变化的，数据在更新，事件在触发，然后你就可以创建事件响应式的、灵活的、运行流畅的App。</p>
+
+<p><strong>转载自<a href="http://blog.csdn.net/cmder1000/article/details/54848060">响应式编程在Android中的应用</a></strong></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207868683.html" 
+          title="Previous Post: Android 存储方式以及路径API">&laquo; Android 存储方式以及路径API</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207868578.html" 
+          title="Next Post: Android 图片加载框架－Picasso的使用指南">Android 图片加载框架－Picasso的使用指南 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

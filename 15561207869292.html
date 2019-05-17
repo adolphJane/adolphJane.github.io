@@ -1,0 +1,571 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  EventBus 3.0的使用 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>EventBus 3.0的使用</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/4/2</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">前言</h2>
+
+<p>一直用Handler来处理应用内的通信，但是发现局限性还是太大了。EventBus是一个Android端优化的publish/subscribe消息总线，简化了应用程序内各组件间、组件与后台线程间的通信。比如请求网络，等网络返回时通过Handler或Broadcast通知UI，两个Fragment之间需要通过Listener通信，这些需求都可以通过EventBus实现。</p>
+
+<h2 id="toc_1">使用EventBus</h2>
+
+<h3 id="toc_2">添加依赖库</h3>
+
+<p><code>compile &#39;org.greenrobot:eventbus:3.0.0&#39;</code></p>
+
+<h3 id="toc_3">注册</h3>
+
+<p>举个例子，你需要在一个activity中注册eventbus事件，然后定义接收方法，这和Android的广播机制很像，你需要首先注册广播，然后需要编写内部类，实现接收广播，然后操作UI,在EventBus中，你同样需要这么做。</p>
+
+<pre><code class="language-java">@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    EventBus.getDefault().register(this);
+
+}
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    EventBus.getDefault().unregister(this);
+}
+</code></pre>
+
+<h3 id="toc_4">订阅者</h3>
+
+<p>类似广播，但是有别于2.4版本，你不必再去约定OnEvent方法开头了:</p>
+
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
+public void helloEventBus(String message){
+    mText.setText(message);
+}
+</code></pre>
+
+<p>该操作很简单，定义了一个hello方法，需要传入String参数，在其中操作UI操作，注意：<br/>
+我们添加了注解@Subscribe，其含义为订阅者，在其内传入了threadMode，我们定义为ThreadMode.MainThread，其含义为该方法在UI线程完成，这样你就不要担心抛出异常啦。是不是很简单？</p>
+
+<h3 id="toc_5">发布者</h3>
+
+<p>既然你在某个地方订阅了内容，当然就会在某个地方发布消息。举个例子，你的这个activity需要http请求，而http请求你肯定是在异步线程中操作，其返回结果后，你可以这么写：</p>
+
+<pre><code class="language-java">String json=&quot;&quot;;
+EventBus.getDefault().post(json);
+</code></pre>
+
+<p>这样就OK了，你可以试下能否正常运行了！</p>
+
+<h2 id="toc_6">原理初探</h2>
+
+<p>你订阅了内容，所以你需要在该类注册EventBus，而你订阅的方法需要传入String,即你的接收信息为String类型，那么在post的时候，你post出去的也应该是String类型，其才会接收到消息。</p>
+
+<h3 id="toc_7">如果你post的是对象</h3>
+
+<p>首先你需要定义一个类似pojo类：</p>
+
+<pre><code class="language-java">public class MessageEvent {
+  public final String name;
+  public final String password;
+  public MessageEvent(String name,String password) {
+    this.name = name;
+    this.password=password;
+  }
+}
+</code></pre>
+
+<h3 id="toc_8">然后你post的时候：</h3>
+
+<p><code>EventBus.getDefault().post(new MessageEvent(&quot;hello&quot;,&quot;world&quot;));</code></p>
+
+<h3 id="toc_9">当然，你接收的方法也需要改为：</h3>
+
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
+public void helloEventBus(MessageEvent message){
+    mText.setText(message.name);
+}
+</code></pre>
+
+<h2 id="toc_10">ThreadMode提供了四个常量：</h2>
+
+<ul>
+<li>MainThread 主线程</li>
+<li>BackgroundThread 后台线程</li>
+<li>Async 后台线程</li>
+<li>PostThread 发送线程（默认）</li>
+</ul>
+
+<p>BackgroundThread:当事件是在UI线程发出，那么事件处理实际上是需要新建单独线程，如果是在后台线程发出，那么事件处理就在该线程。该事件处理方法应该是快速的，避免阻塞后台线程。<br/><br/>
+Async：发送事件方不需要等待事件处理完毕。这种方式适用于该事件处理方法需要较长时间，例如网络请求。</p>
+
+<h2 id="toc_11">EventBus黏性事件</h2>
+
+<p>EventBus除了普通事件也支持粘性事件，这个有点类似广播分类中的粘性广播。本身粘性广播用的就比较少，为了方便理解成订阅在发布事件之后，但同样可以收到事件。订阅/解除订阅和普通事件一样，但是处理订阅函数有所不同，需要注解中添加<code>sticky = true</code></p>
+
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,sticky = true) //在ui线程执行
+    public void onDataSynEvent(DataSynEvent event) {
+        Log.e(TAG, &quot;event----&gt;&quot; + event.getCount());
+}
+</code></pre>
+
+<h3 id="toc_12">发送粘性事件</h3>
+
+<p><code>EventBus.getDefault().postSticky(new DataSynEvent());</code>  </p>
+
+<h3 id="toc_13">对于粘性广播我们都比较清楚属于常驻广播，对于EventBus粘性事件也类似，我们如果不再需要该粘性事件我们可以移除</h3>
+
+<p><code>EventBus.getDefault().removeStickyEvent(new DataSynEvent());</code>  </p>
+
+<h3 id="toc_14">或者调用移除所有粘性事件</h3>
+
+<p><code>EventBus.getDefault().removeAllStickyEvents();</code>  </p>
+
+<p>默认情况下，其为false。什么情况下使用sticky呢？<br/><br/>
+当你希望你的事件不被马上处理的时候，举个栗子，比如说，在一个详情页点赞之后，产生一个VoteEvent，VoteEvent并不立即被消费，而是等用户退出详情页回到商品列表之后，接收到该事件，然后刷新Adapter等。其实这就是之前我们用startActivityForResult和onActivityResult做的事情。  </p>
+
+<h2 id="toc_15">订阅事件的优先级</h2>
+
+<p>事件的优先级类似广播的优先级，优先级越高优先获得消息</p>
+
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,priority = 100) //在ui线程执行 优先级100
+    public void onDataSynEvent(DataSynEvent event) {
+        Log.e(TAG, &quot;event----&gt;&quot; + event.getCount());
+}
+</code></pre>
+
+<h2 id="toc_16">终止事件往下传递</h2>
+
+<p>发送有序广播可以终止广播的继续往下传递，EventBus也实现了此功能<br/>
+<code>EventBus.getDefault().cancelEventDelivery(event) ;//优先级高的订阅者可以终止事件往下传递</code></p>
+
+<h2 id="toc_17">建议</h2>
+
+<p>推荐大家在使用EventBus的时候，创建一个事件类，把你的每一个参数（或者可能发生冲突的参数），封装成一个类：</p>
+
+<pre><code class="language-java">public class Event  {  
+    public static class UserListEvent {  
+        public List&lt;User&gt; users ;  
+    }
+    public static class ItemListEvent {  
+        public List&lt;Item&gt; items;  
+    }    
+}
+</code></pre>
+
+<h2 id="toc_18">processor使用</h2>
+
+<p>按照Markus Junginger的说法（EventBus创作者），在3.0中，如果你想进一步提升你的app的性能.<br/>
+EventBus提供了一个EventBusAnnotationProcessor注解处理器来在编译期通过读取@Subscribe()注解并解析,处理其中所包含的信息,然后生成java类来保存所有订阅者关于订阅的信息,这样就比在运行时使用反射来获得这些订阅者的信息速度要快.<br/><br/>
+其在编译的时候为注册类构建了一个索引，而不是在运行时，这样的结果是其让EventBus 3.0的性能提升了一倍，相比2.4来说，其会是它的3到6倍。大家可以感受下：<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149145841588866.png" alt="20170406149145841588866.png"/>  </p>
+
+<h3 id="toc_19">具体使用：在build.gradle中添加如下配置</h3>
+
+<pre><code class="language-text">buildscript {
+    dependencies {
+        classpath &#39;com.neenbedankt.gradle.plugins:android-apt:1.8&#39;
+    }
+}
+apply plugin: &#39;com.neenbedankt.android-apt&#39;
+
+dependencies {
+    compile &#39;org.greenrobot:eventbus:3.0.0&#39;
+    apt &#39;org.greenrobot:eventbus-annotation-processor:3.0.1&#39;
+}
+apt {
+    arguments {
+        eventBusIndex &quot;com.whoislcj.eventbus.MyEventBusIndex&quot;
+    }
+}
+</code></pre>
+
+<h3 id="toc_20">使用索引</h3>
+
+<p>此时编译一次，自动生成生成索引类。在\build\generated\source\apt\PakageName\下看到通过注解分析生成的索引类，这样我们便可以在初始化EventBus时应用我们生成的索引了。自动生成的代码。</p>
+
+<pre><code class="language-java">/** This class is generated by EventBus, do not edit. */
+public class MyEventBusIndex implements SubscriberInfoIndex {
+    private static final Map&lt;Class&lt;?&gt;, SubscriberInfo&gt; SUBSCRIBER_INDEX;
+
+    static {
+        SUBSCRIBER_INDEX = new HashMap&lt;Class&lt;?&gt;, SubscriberInfo&gt;();
+
+        putIndex(new SimpleSubscriberInfo(com.whoislcj.testhttp.MainActivity.class, true, new SubscriberMethodInfo[] {
+            new SubscriberMethodInfo(&quot;onDataSynEvent&quot;, com.whoislcj.testhttp.eventBus.DataSynEvent.class,
+                    ThreadMode.MAIN, 100, false),
+            new SubscriberMethodInfo(&quot;onDataSynEvent1&quot;, com.whoislcj.testhttp.eventBus.TestEvent.class, ThreadMode.MAIN,
+                    0, true),
+        }));
+
+    }
+
+    private static void putIndex(SubscriberInfo info) {
+        SUBSCRIBER_INDEX.put(info.getSubscriberClass(), info);
+    }
+
+    @Override
+    public SubscriberInfo getSubscriberInfo(Class&lt;?&gt; subscriberClass) {
+        SubscriberInfo info = SUBSCRIBER_INDEX.get(subscriberClass);
+        if (info != null) {
+            return info;
+        } else {
+            return null;
+        }
+    }
+}
+</code></pre>
+
+<p>添加索引到EventBus默认的单例中<br/><br/>
+<code>EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();</code>  </p>
+
+<h3 id="toc_21">对比添加前后注册效率对比</h3>
+
+<p>分别EventBus.getDefault().register(this);</p>
+
+<ul>
+<li>添加之前：前后用了9毫秒</li>
+<li>添加之后：前后用了2毫秒</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207869331.html" 
+          title="Previous Post: Git学习笔记">&laquo; Git学习笔记</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207869255.html" 
+          title="Next Post: GreenDao3.2.0的使用">GreenDao3.2.0的使用 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

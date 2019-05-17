@@ -1,0 +1,1723 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android-ViewPager详细学习 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android-ViewPager详细学习</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2017/6/2</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">简介</h2>
+
+<p>ViewPager是android扩展包v4包中的类，这个类可以让用户左右切换当前的view</p>
+
+<ul>
+<li>ViewPager类直接继承了ViewGroup类，所有它是一个容器类，可以在其中添加其他的view类。</li>
+<li>ViewPager类需要一个PagerAdapter适配器类给它提供数据。</li>
+<li>ViewPager经常和Fragment一起使用，并且提供了专门的FragmentPagerAdapter和FragmentStatePagerAdapter类供Fragment中的ViewPager使用。</li>
+</ul>
+
+<h2 id="toc_1">ViewPager的适配器</h2>
+
+<p>简介中提到了PagerAdapter，和ListView等控件使用一样,需要ViewPager设置PagerAdapter来完成页面和数据的绑定，这个PagerAdapter是一个基类适配器，我们经常用它来实现app引导图，它的子类有FragmentPagerAdapter和FragmentStatePagerAdapter,这两个子类适配器用于和Fragment一起使用，在安卓应用中它们就像listview一样出现的频繁。</p>
+
+<h3 id="toc_2">实现一个最基本的PagerAdapter,必须实现四个方法，在代码里有注释</h3>
+
+<pre><code class="language-java">public class AdapterViewpager extends PagerAdapter {
+    private List&lt;View&gt; mViewList;
+
+    public AdapterViewpager(List&lt;View&gt; mViewList) {
+        this.mViewList = mViewList;
+    }
+
+    @Override
+    public int getCount() {//必须实现,返回要滑动的VIew的个数
+        return mViewList.size();
+    }
+
+    @Override
+    public boolean isViewFromObject(View view, Object object) {//必须实现,该函数用来判断instantiateItem(ViewGroup, int)函数所返回来的Key与一个页面视图是否是代表的同一个视图(即它俩是否是对应的，对应的表示同一个View)
+        return view == object;
+    }
+
+    @Override
+    public Object instantiateItem(ViewGroup container, int position) {//必须实现，做了两件事，第一：将当前视图添加到container中，第二：返回当前View
+        container.addView(mViewList.get(position));
+        return mViewList.get(position);
+    }
+
+    @Override
+    public void destroyItem(ViewGroup container, int position, Object object) {//必须实现，从当前container中删除指定位置（position）的View
+        container.removeView(mViewList.get(position));
+    }
+}
+</code></pre>
+
+<h3 id="toc_3">实现一个最基本的FragmentPagerAdapter</h3>
+
+<pre><code class="language-java">public class AdapterFragment extends FragmentPagerAdapter {
+    private List&lt;Fragment&gt; mFragments;
+
+    public AdapterFragment(FragmentManager fm, List&lt;Fragment&gt; mFragments) {
+        super(fm);
+        this.mFragments = mFragments;
+    }
+
+    @Override
+    public Fragment getItem(int position) {//必须实现
+        return mFragments.get(position);
+    }
+
+    @Override
+    public int getCount() {//必须实现
+        return mFragments.size();
+    }
+
+    @Override
+    public CharSequence getPageTitle(int position) {//选择性实现
+        return mFragments.get(position).getClass().getSimpleName();
+    }
+}
+</code></pre>
+
+<p>PagerAdapter是基类适配器是一个通用的ViewPager适配器，相比PagerAdapter，FragmentPagerAdapter和FragmentStatePagerAdapter更专注于每一页是Fragment的情况，而这两个子类适配器使用情况也是有区别的。FragmentPagerAdapter适用于页面比较少的情况，FragmentStatePagerAdapter适用于页面比较多的情况。为什么？简单分析下两个适配器的源码就可以知道了。</p>
+
+<p><strong>源码略，查官网</strong></p>
+
+<p>从源码中我们可以看出FragmentStatePagerAdapter中fragment实例在destroyItem的时候被真正释放，所以FragmentStatePagerAdapter省内存。FragmentPagerAdapter中的fragment实例在destroyItem的时候并没有真正释放fragment对象只是detach，所以FragmentPagerAdapter消耗更多的内存，带来的好处就是效率更高一些。所以得出这样的结论：FragmentPagerAdapter适用于页面比较少的情况，FragmentStatePagerAdapter适用于页面比较多的情况，因此不同的场合选择合适的适配器才是正确的做法。</p>
+
+<h2 id="toc_4">ViewPager的翻页动画</h2>
+
+<p>为ViewPager设置适配器后，就可以正常使用了，接下来我们为ViewPager增加翻页动画，毕竟人的审美会疲劳，加上一些动画交互会提高不少逼格~~，ViewPager提供了PageTransformer接口用于实现翻页动画。官方提供了PageTransformer的实现例子。</p>
+
+<h3 id="toc_5">例一</h3>
+
+<pre><code class="language-java"> public class DepthPageTransformer implements ViewPager.PageTransformer {
+    private static final float MIN_SCALE = 0.75f;
+
+    public void transformPage(View view, float position) {
+        Log.d(&quot;DepthPageTransformer&quot;, view.getTag() + &quot; , &quot; + position + &quot;&quot;);
+        int pageWidth = view.getWidth();
+
+        if (position &lt; -1) { // [-Infinity,-1)
+            // This page is way off-screen to the left.
+            view.setAlpha(0);
+
+        } else if (position &lt;= 0) { // [-1,0]
+            // Use the default slide transition when moving to the left page
+            view.setAlpha(1);
+            view.setTranslationX(0);
+            view.setScaleX(1);
+            view.setScaleY(1);
+
+        } else if (position &lt;= 1) { // (0,1]
+            // Fade the page out.
+            view.setAlpha(1 - position);
+
+            // Counteract the default slide transition
+            view.setTranslationX(pageWidth * -position);
+
+            // Scale the page down (between MIN_SCALE and 1)
+            float scaleFactor = MIN_SCALE
+                    + (1 - MIN_SCALE) * (1 - Math.abs(position));
+            view.setScaleX(scaleFactor);
+            view.setScaleY(scaleFactor);
+
+        } else { // (1,+Infinity]
+            // This page is way off-screen to the right.
+            view.setAlpha(0);
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_6">例二</h3>
+
+<pre><code class="language-java"> public class ZoomOutPageTransformer implements ViewPager.PageTransformer {
+    private static final float MIN_SCALE = 0.85f;
+    private static final float MIN_ALPHA = 0.5f;
+
+    @SuppressLint(&quot;NewApi&quot;)
+    public void transformPage(View view, float position) {
+        int pageWidth = view.getWidth();
+        int pageHeight = view.getHeight();
+
+        Log.e(&quot;TAG&quot;, view + &quot; , &quot; + position + &quot;&quot;);
+
+        if (position &lt; -1) { // [-Infinity,-1)
+            // This page is way off-screen to the left.
+            view.setAlpha(0);
+
+        } else if (position &lt;= 1) 
+        { // [-1,1]
+            // Modify the default slide transition to shrink the page as well
+            float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));
+            float vertMargin = pageHeight * (1 - scaleFactor) / 2;
+            float horzMargin = pageWidth * (1 - scaleFactor) / 2;
+            if (position &lt; 0) {
+                view.setTranslationX(horzMargin - vertMargin / 2);
+            } else {
+                view.setTranslationX(-horzMargin + vertMargin / 2);
+            }
+
+            // Scale the page down (between MIN_SCALE and 1)
+            view.setScaleX(scaleFactor);
+            view.setScaleY(scaleFactor);
+
+            // Fade the page relative to its size.
+            view.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE)
+                    / (1 - MIN_SCALE) * (1 - MIN_ALPHA));
+
+        } else { // (1,+Infinity]
+            // This page is way off-screen to the right.
+            view.setAlpha(0);
+        }
+    }
+}
+</code></pre>
+
+<p>实现翻页动画的关键就是重写transformPage方法，方法里有两个参数view和position,理解这两个参数非常重要。假设有三个页面view1，view2，view3从左至右在viewPager中显示</p>
+
+<ul>
+<li>往左滑动时：view1，view2，view3的position都是不断变小的。
+<code>
+           view1的position: 0 → -1 → 负无穷大<br/>
+           view2的position: 1 → 0 → -1 <br/>
+           view3的position: 1 → 0
+</code></li>
+<li>往右滑动时：view1，view2，view3的position都是不断变大的。
+<code>
+           view1的position: -1 → 0 <br/>
+           view2的position: -1 → 0 → 1 <br/>
+           view3的position: 0 → 1→ 正无穷大
+</code>
+当position是正负无穷大时view就离开屏幕视野了。因此最核心的控制逻辑是在[-1,0]和(0,1]这两个区间，通过设置透明度，平移，旋转，缩放等动画组合可以实现各式各样的页面变化效果。</li>
+</ul>
+
+<h3 id="toc_7">简化ViewPager的使用</h3>
+
+<ul>
+<li>PagerAdapter简化</li>
+</ul>
+
+<pre><code class="language-java">public class QuickPageAdapter&lt;T extends View&gt; extends PagerAdapter {
+  private List&lt;T&gt; mList;
+
+  public QuickPageAdapter(List&lt;T&gt; mList) {
+      this.mList = mList;
+  }
+
+  @Override
+  public int getCount() {
+      return mList.size();
+  }
+
+  @Override
+  public boolean isViewFromObject(View view, Object object) {
+      return object == view;
+  }
+
+  @Override
+  public Object instantiateItem(ViewGroup container, int position) {
+      container.addView(mList.get(position));
+      return mList.get(position);
+  }
+
+  @Override
+  public void destroyItem(ViewGroup container, int position, Object object) {
+      container.removeView(mList.get(position));
+  }
+}
+</code></pre>
+
+<p>使用它，这样不用每次都写个适配器List<View> views = new ArrayList&lt;&gt;();...mViewPager.setAdapter(new QuickPageAdapter<View>(views));</p>
+
+<ul>
+<li>FragmentPagerAdapter简化</li>
+</ul>
+
+<pre><code class="language-java">public class QuickFragmentPageAdapter&lt;T extends Fragment&gt; extends FragmentPagerAdapter {
+  private List&lt;T&gt; mList;
+  private String[] mStrings;
+
+  /**
+   * @param fm
+   * @param list
+   * @param titles PageTitles
+   */
+  public QuickFragmentPageAdapter(FragmentManager fm, List&lt;T&gt; list, String[] titles) {
+      super(fm);
+      mList = list;
+      mStrings = titles;
+  }
+
+  @Override
+  public Fragment getItem(int position) {
+      return mList.get(position);
+  }
+
+  @Override
+  public int getCount() {
+      return mList.size();
+  }
+
+  @Override
+  public CharSequence getPageTitle(int position) {
+      return mStrings == null ? super.getPageTitle(position) : mStrings[position];
+  }
+}
+</code></pre>
+
+<h2 id="toc_8">PagerTitleStrip</h2>
+
+<ul>
+<li>将它作为子控件添加在xml布局文件中的ViewPager中</li>
+<li>标题的获取，是重写适配器的getPageTitle(int)函数来获取的。</li>
+</ul>
+
+<p>重写CharSequence <code>getPageTitle(int)</code>函数来对其进行实现</p>
+
+<h2 id="toc_9">PagerTabStrip</h2>
+
+<ul>
+<li>PagerTabStrip在当前页面下，会有一个下划线条来提示当前页面的Tab是哪个。</li>
+<li>PagerTabStrip的Tab是可以点击的，当用户点击某一个Tab时，当前页面就会跳转到这个页面，而PagerTitleStrip则没这个功能。</li>
+<li>将它作为子控件添加在xml布局文件中的ViewPager中</li>
+<li>标题的获取，是重写适配器的getPageTitle(int)函数来获取的。</li>
+</ul>
+
+<h3 id="toc_10">扩展：PagerTabStrip属性更改</h3>
+
+<p><code>setTabIndicatorColorResource</code>——修改Tab颜色<br/><br/>
+重写适配器CharSequence getPageTitle(int)方法——添加标题</p>
+
+<h3 id="toc_11">总结PagerTitleStrip和PagerTabStrip</h3>
+
+<p>通过前面的讲解，我们应该清楚的认识到PagerTabStrip与PagerTitleStrip在添加标题栏的异同，但他们实现的标题栏效果很不好，不能指定一个页面一次显示一个，或者全部显示，而且标题还滑动。所以注定主流的App都没有用这个玩意的。所以这里也只是一个过渡，在开发中，我们也不建议使用这两个东东。</p>
+
+<h2 id="toc_12">SimpleOnPageChangeListener</h2>
+
+<p>如果不想继承实现<code>ViewPager.OnPageChangeListener</code>的方法，可以直接继承SimpleOnPageChangeListener对ViewPager的页面滑动事件进行简单的处理。</p>
+
+<ul>
+<li> <strong>onPageScrolled] (int position, float positionOffset, int positionOffsetPixels)：</strong>
+<ul>
+<li>position:当前的位置</li>
+<li>positionoffset:当前滚动比例（左－右／0-1）（右－左／1-0）</li>
+<li>positionOffsetPixels：当前实际滚动的像素（左－右／0-页宽） （右－左／页宽－0）<br/>
+被调用的场景： ViewPager滚动时总被回调，这个函数在操作ViewPager时被回调很多次。</li>
+</ul></li>
+<li>手指拖动 action_move 。n次</li>
+<li><p>惯性还原 computeScroll()。n次<br/>
+使用场景：做view的动画效果时可以用这个回调函数。</p></li>
+<li><p><strong>onPageSelected(int position)</strong><br/>
+被调用的场景：ViewPager确定页面是哪一页时。1次</p></li>
+<li><p>手指拖动后抬起 action_up 。1次</p></li>
+<li><p>或者手指滑动超出屏幕时 action_cancel。1次<br/>
+使用场景：页面切换后改变对应的tab的状态可以用这个回调函数。</p></li>
+<li><p><strong>onPageScrollStateChange (int state):</strong><br/>
+被调用的场景：ViewPager状态切换时被调用。这个函数在操作ViewPager时被回调3次。</p>
+<ul>
+<li>开始滚动 dragging拖动状态。1次</li>
+<li>惯性滚动 settling还原状态。1次</li>
+<li>滚动结束 idle空闲状态。1次<br/>
+使用场景：做页面状态变化后引起的view特效时可以用这个回调函数</li>
+</ul></li>
+</ul>
+
+<h2 id="toc_13">ViewPager.OnPageChangeListener</h2>
+
+<ul>
+<li><code>onPageScrollStateChanged(int state)</code>//在状态改变的时候调用其中arg0这个参数有三种状态（0，1，2）。arg0 <mark>1表示正在滑动，arg0</mark>2表示滑动完毕了，arg0==0表示什么都没做。当页面开始滑动的时候，三种状态的变化顺序为(1,2,0)</li>
+<li><code>onPageScrolled(int position, float positionOffset, int positionOffsetPixels)</code>//当页面在滑动的时候会调用此方法，在滑动被停止之前，此方法回一直得到调用。其中三个参数的含义分别为：arg0 :当前页面，及你点击滑动的页面。arg1:当前页面偏移的百分比。arg2:当前页面偏移的像素位置</li>
+<li><code>onPageSelected(int position)</code>//页面跳转完后得到调用，arg0是你当前选中的页面的position</li>
+</ul>
+
+<h2 id="toc_14">ViewPager.OnAdapterChangeListener</h2>
+
+<p><code>void onAdapterChanged ( ViewPagerew viewPager, PagerAdapter oldAdapter,PagerAdapter newAdapter)</code></p>
+
+<ul>
+<li>viewPager:  ViewPager where the adapter change has happened(传入发生改变的ViewPager)</li>
+<li>oldAdapter: the previously set adapter(老的adapter)</li>
+<li>newAdapter: the newly set adapter(新的adapter)</li>
+</ul>
+
+<h2 id="toc_15">注意点</h2>
+
+<p><code>mViewPager.setOffscreenPageLimit()</code>//这个方法是用来控制fragment不重新走生命周期的个数的，打个比方一共4个fragment页面，如果<code>mViewPager.setOffscreenPageLimit(3)</code>，那么所有的fragment都只走一次生命周期，如果是<code>mViewPager.setOffscreenPageLimit(2)</code>，那么其中有一个fragment会在切换的时候重新走一遍生命周期，<code>FragmentStatePagerAdapter</code>和<code>FragmentPagerAdapter</code>都是这样，但是<code>FragmentPagerAdapter</code>设置<code>setOffscreenPageLimit()</code>不影响fragment缓存的个数,而<code>FragmentStatePagerAdapter</code>缓存的fragment实例个数就是<code>setOffscreenPageLimit()</code>设置的值+1。另外<code>setOffscreenPageLimit()</code>的缺省值是1，设置0是无效的会被强制赋值成1。</p>
+
+<h2 id="toc_16">提高</h2>
+
+<h3 id="toc_17">ViewPager结合第三方库实现小圆点指示器效果</h3>
+
+<p><a href="https://github.com/ongakuer/CircleIndicator">https://github.com/ongakuer/CircleIndicator</a></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170221497391480849-687604baae5b6559.gif" alt="20170221497391480849-687604baae5b6559.gif"/></p>
+
+<p>使用看官方文档很简单。</p>
+
+<p><strong>看一下实现思路</strong></p>
+
+<pre><code class="language-java">public void setViewPager(ViewPager viewPager) {
+        mViewpager = viewPager;
+        if (mViewpager != null &amp;&amp; mViewpager.getAdapter() != null) {
+            mLastPosition = -1;
+            createIndicators();
+            mViewpager.removeOnPageChangeListener(mInternalPageChangeListener);
+            mViewpager.addOnPageChangeListener(mInternalPageChangeListener);//绑定上内部实现的PageChangeListener
+            mInternalPageChangeListener.onPageSelected(mViewpager.getCurrentItem());
+        }
+    }
+
+    private final OnPageChangeListener mInternalPageChangeListener = new OnPageChangeListener() {
+
+        @Override
+        public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
+        }
+
+        @Override public void onPageSelected(int position) {//这里是动画的核心
+
+            if (mViewpager.getAdapter() == null || mViewpager.getAdapter().getCount() &lt;= 0) {
+                return;
+            }
+
+            if (mAnimatorIn.isRunning()) {
+                mAnimatorIn.end();
+                mAnimatorIn.cancel();
+            }
+
+            if (mAnimatorOut.isRunning()) {
+                mAnimatorOut.end();
+                mAnimatorOut.cancel();
+            }
+
+            View currentIndicator;
+            if (mLastPosition &gt;= 0 &amp;&amp; (currentIndicator = getChildAt(mLastPosition)) != null) {//页面离开屏幕时指示器动画
+                currentIndicator.setBackgroundResource(mIndicatorUnselectedBackgroundResId);
+                mAnimatorIn.setTarget(currentIndicator);
+                mAnimatorIn.start();
+            }
+
+            View selectedIndicator = getChildAt(position);
+            if (selectedIndicator != null) {//页面进入屏幕时指示器动画
+                selectedIndicator.setBackgroundResource(mIndicatorBackgroundResId);
+                mAnimatorOut.setTarget(selectedIndicator);
+                mAnimatorOut.start();
+            }
+            mLastPosition = position;
+        }
+
+        @Override public void onPageScrollStateChanged(int state) {
+        }
+    };
+</code></pre>
+
+<h3 id="toc_18">ViewPager结合design库实现tab切换</h3>
+
+<p>在design库中有个TabLayout可以为viewPager加上Tab标题头</p>
+
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    android:orientation=&quot;vertical&quot;
+    tools:context=&quot;com.example.administrator.viewpager.MainActivity&quot;&gt;
+
+    &lt;android.support.design.widget.TabLayout
+        android:id=&quot;@+id/mTabLayout&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;&gt;&lt;/android.support.design.widget.TabLayout&gt;
+
+    &lt;android.support.v4.view.ViewPager
+        android:id=&quot;@+id/mViewPager&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;&gt;&lt;/android.support.v4.view.ViewPager&gt;
+
+&lt;/LinearLayout&gt;
+
+mTabLayout.setupWithViewPager(mViewPager);//一行代码完成绑定
+</code></pre>
+
+<p>更多高级的用法包括tab中添加icon等请转至这里<a href="http://www.jcodecraeer.com/a/anzhuokaifa/androidkaifa/2015/0731/3247.html">传送门</a></p>
+
+<h3 id="toc_19">基于ViewPager实现广告轮播控件</h3>
+
+<p><a href="https://github.com/daimajia/AndroidImageSlider">https://github.com/daimajia/AndroidImageSlider</a></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222397961480849-687604baae5b6559.gif" alt="20170222397961480849-687604baae5b6559.gif"/></p>
+
+<p><strong>源码分析，省略了部分代码</strong>：</p>
+
+<pre><code class="language-java">public class SliderLayout extends RelativeLayout{
+
+    private InfiniteViewPager mViewPager;//这个ViewPager只是修改了setPageTransformer方法去掉了if (Build.VERSION.SDK_INT &gt;= 11) 的限制，结合NineOldDroid库让动画兼容低版本
+
+    /**
+     * InfiniteViewPager adapter.
+     */
+    private SliderAdapter mSliderAdapter;//这个是PagerAdapter
+
+    /**
+     * {@link com.daimajia.slider.library.Tricks.ViewPagerEx} indicator.
+     */
+    private PagerIndicator mIndicator;//页面指示器
+
+
+    /**
+     * A timer and a TimerTask using to cycle the {@link com.daimajia.slider.library.Tricks.ViewPagerEx}.
+     */
+    private Timer mCycleTimer;//用于轮播的定时器
+    private TimerTask mCycleTask;
+
+    /**
+     * For resuming the cycle, after user touch or click the {@link com.daimajia.slider.library.Tricks.ViewPagerEx}.
+     */
+    private Timer mResumingTimer;
+    private TimerTask mResumingTask;
+
+    /**
+     * {@link com.daimajia.slider.library.Tricks.ViewPagerEx} &#39;s transformer
+     */
+    private BaseTransformer mViewPagerTransformer;//PageTransformer的封装用于控制页面翻页效果
+
+    public SliderLayout(Context context, AttributeSet attrs, int defStyle) {//核心代码，用于初始化ViewPager
+        super(context, attrs, defStyle);
+        mContext = context;
+        LayoutInflater.from(context).inflate(R.layout.slider_layout, this, true);
+
+        final TypedArray attributes = context.getTheme().obtainStyledAttributes(attrs,R.styleable.SliderLayout,
+                defStyle,0);
+
+        mTransformerSpan = attributes.getInteger(R.styleable.SliderLayout_pager_animation_span, 1100);
+        mTransformerId = attributes.getInt(R.styleable.SliderLayout_pager_animation, Transformer.Default.ordinal());
+        mAutoCycle = attributes.getBoolean(R.styleable.SliderLayout_auto_cycle,true);
+        int visibility = attributes.getInt(R.styleable.SliderLayout_indicator_visibility,0);
+        for(PagerIndicator.IndicatorVisibility v: PagerIndicator.IndicatorVisibility.values()){
+            if(v.ordinal() == visibility){
+                mIndicatorVisibility = v;
+                break;
+            }
+        }
+        mSliderAdapter = new SliderAdapter(mContext);
+        PagerAdapter wrappedAdapter = new InfinitePagerAdapter(mSliderAdapter);
+
+        mViewPager = (InfiniteViewPager)findViewById(R.id.daimajia_slider_viewpager);
+        mViewPager.setAdapter(wrappedAdapter);
+
+        mViewPager.setOnTouchListener(new OnTouchListener() {
+            @Override
+            public boolean onTouch(View v, MotionEvent event) {
+                int action = event.getAction();
+                switch (action) {
+                     case MotionEvent.ACTION_UP:
+                        recoverCycle();
+                        break;
+                }
+                return false;
+            }
+        });
+
+        attributes.recycle();
+        setPresetIndicator(PresetIndicators.Center_Bottom);
+        setPresetTransformer(mTransformerId);
+        setSliderTransformDuration(mTransformerSpan,null);
+        setIndicatorVisibility(mIndicatorVisibility);
+        if(mAutoCycle){
+            startAutoCycle();
+        }
+    }
+
+    @Override
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        int action = ev.getAction();
+        switch (action) {
+            case MotionEvent.ACTION_DOWN://手指按下时候暂停轮播
+                pauseAutoCycle();
+                break;
+        }
+        return false;
+    }
+
+    /**
+     * preset transformers and their names
+     */
+    public enum Transformer{//PageTransformer枚举
+        Default(&quot;Default&quot;),
+        Accordion(&quot;Accordion&quot;),
+        Background2Foreground(&quot;Background2Foreground&quot;),
+        CubeIn(&quot;CubeIn&quot;),
+        DepthPage(&quot;DepthPage&quot;),
+        Fade(&quot;Fade&quot;),
+        FlipHorizontal(&quot;FlipHorizontal&quot;),
+        FlipPage(&quot;FlipPage&quot;),
+        Foreground2Background(&quot;Foreground2Background&quot;),
+        RotateDown(&quot;RotateDown&quot;),
+        RotateUp(&quot;RotateUp&quot;),
+        Stack(&quot;Stack&quot;),
+        Tablet(&quot;Tablet&quot;),
+        ZoomIn(&quot;ZoomIn&quot;),
+        ZoomOutSlide(&quot;ZoomOutSlide&quot;),
+        ZoomOut(&quot;ZoomOut&quot;);
+
+        private final String name;
+
+        private Transformer(String s){
+            name = s;
+        }
+        public String toString(){
+            return name;
+        }
+
+        public boolean equals(String other){
+            return (other == null)? false:name.equals(other);
+        }
+    };
+}
+</code></pre>
+
+<p><strong>通过分析我们可以对SliderLayout实现思路小结一下：</strong></p>
+
+<ol>
+<li>内部持有一个修改过的ViewPager控件，可以兼容低版本的页面转换动画</li>
+<li>内部有一个实现了PagerAdapter的SliderAdapter适配器</li>
+<li>内部持有一个PagerIndicator 页面指示器可供选择</li>
+<li>维护一个定时任务用于控制轮播</li>
+<li>对手势事件进行处理暂停轮播，继续轮播</li>
+<li>提供了很多缺省的PageTransformer方便调用</li>
+</ol>
+
+<p>最后在构造函数中初始化ViewPager。</p>
+
+<h2 id="toc_20">自定义 ViewPager 打造千变万化的图片切换效果</h2>
+
+<p>ViewPager使用时间长了，他的切换效果容易觉得枯燥，形成一种审美疲劳<del>我们需要改变，学习学习改变ViewPager切换时的效果，实现个性化的图片切换</del></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222778011406001554_7159.gif" alt="20170222778011406001554_7159.gif"/></p>
+
+<p>是不是比传统的效果个性很多，嘿嘿<del>其实很简单，学习完这篇博客，保证你可以自定义切换效果，做出各种丧心病狂的切换</del></p>
+
+<h3 id="toc_21">制作前的分析</h3>
+
+<p>观察下效果图，实际上改变的就是切换时的动画，那么简单了，只需要用户在切换时，拿到当前的View和下一个View，然后添加动画是不是就可以了。好，第一步，获取用户切换时的当前View和切换至的目的View。我们再来看一下，如果获取了当前View和目的View，对于动画我们需要缓慢的变化，最好是根据用户的手势滑动。比如上述效果，用户滑动时，目的图片根据用户滑动距离缓缓出现和慢慢变大。好，第二步，设计动画的梯度变化。<br/><br/>
+经过分析，我们总结出两个步骤，下面我们开始一步一步来打造~~</p>
+
+<h3 id="toc_22">获取用户切换时当前View和切换至的目的View。</h3>
+
+<p>ViewPager也需要监听用户的手势，所以肯定提供了某个方法。于是纵观ViewPager的方法，发现了一个叫做 onPageScrolled(int position, float positionOffset, int positionOffsetPixels)的方法~~<br/><br/>
+没错就是这个方法：在页面滚动时调用~<br/><br/>
+下面仔细研究下这几个参数：<br/><br/>
+直接说测试结果：<br/><br/>
+在非第一页与最后一页时，滑动到下一页，position为当前页位置；滑动到上一页：position为当前页-1<br/><br/>
+positionOffset 滑动到下一页，[0,1)区间上变化；滑动到上一页：(1,0]区间上变化<br/><br/>
+positionOffsetPixels这个和positionOffset很像：滑动到下一页，[0,宽度)区间上变化；滑动到上一页：(宽度,0]区间上变化<br/>
+第一页时：滑动到上一页position=0 ，其他基本为0 ；最后一页滑动到下一页 position为当前页位置，其他两个参数为0<br/><br/>
+豁然发现，我们需要的步骤的第二步解决了，positionOffset很适合作为，渐变，缩放的控制参数；positionOffsetPixels则可以作为平移等的控制参数。  </p>
+
+<p><strong><em>那么如何获得当前View和目的View呢：</em></strong><br/><br/>
+分享几个我的歧途：</p>
+
+<ul>
+<li>【错误】我通过getChildAt(position)，getChildAt(position+1)，getChildAt(position-1)获得滑动时，左右的两个View；乍一看，还真觉得不错<del>在代码写出来，再乍效果也出不来</del>错误原因：我们忽略一个特别大的东西，ViewPager的机制，滑动时动态加载和删除View，ViewPager其实只会维持2到3个View，而position的范围基本属于无限~~</li>
+<li>【错误】我通过getCurrentItem获得当前的位置，然后+1，-1获得后一个或者前一个<del>正在窃喜，赶快代码改过来，效果怎么也不对，乱七八糟的</del>仔细观察日志，这个getCurrentItem当用户手指离开的屏幕，Page还在动画执行时，就改变了<del>难怪~整个滑动过程并不是固定的</del>唉，心都碎了~</li>
+<li>【错误】position在整个滑动的过程中是不变化的，而且ViewPager会保存2个或3个View;那么我考虑，如果是第一页、或者最后一页那么我取getChildAt(0)和getChildAt(1)，如果在其他页面则为getChildAt(0),getChildAt(2),然后经过一系列的变化～我想这会总该对了吧，于是我遇到第一问题，第一页的时候，不管左右position都为0，尼玛，这哪个为左View，哪个为右View~~<br/>
+说了这么多错误，大家可以绕过这些弯路，也能从这些弯路里面看出点什么~<br/>
+下面说正确的，其实ViewPager在添加一个View或者销毁一个View时，是我们自己的PageAdapter中控制的，于是我们可以在ViewPager里面维系一个HashMap<Position，View>，然后滑动的时候，通过get（position）取出，比如上述效果，始终是右边的View变化，要么从小到大，要么从大到小<br/>
+那么滑倒下一页：左边的View:map.get(position) ，右边的View : map.get(position+1) .<br/>
+那么滑倒上一页：左边的View : map.get(position) ， 右边的View : map.get(position+1) ， 一样的，因为滑到上一页，position为当前页-1<br/>
+好了，至此，我们分析了且解决了所有步骤。<br/></li>
+</ul>
+
+<h3 id="toc_23">代码</h3>
+
+<p><strong>MainActivity</strong>  </p>
+
+<pre><code class="language-java">package com.example.zhy_jazzyviewpager;  
+  
+import android.app.Activity;  
+import android.os.Bundle;  
+import android.support.v4.view.PagerAdapter;  
+import android.view.Menu;  
+import android.view.View;  
+import android.view.ViewGroup;  
+import android.widget.ImageView;  
+import android.widget.ImageView.ScaleType;  
+  
+public class MainActivity extends Activity  
+{  
+    protected static final String TAG = &quot;MainActivity&quot;;  
+    private int[] mImgIds;  
+    private MyJazzyViewPager mViewPager;  
+  
+    @Override  
+    protected void onCreate(Bundle savedInstanceState)  
+    {  
+        super.onCreate(savedInstanceState);  
+        setContentView(R.layout.activity_main);  
+        mImgIds = new int[] { R.drawable.a, R.drawable.b, R.drawable.c,  
+                R.drawable.d };  
+        mViewPager = (MyJazzyViewPager) findViewById(R.id.id_viewPager);  
+        mViewPager.setAdapter(new PagerAdapter()  
+        {  
+  
+            @Override  
+            public boolean isViewFromObject(View arg0, Object arg1)  
+            {  
+                return arg0 == arg1;  
+            }  
+  
+            @Override  
+            public void destroyItem(ViewGroup container, int position,  
+                    Object object)  
+            {  
+                container.removeView((View) object);  
+            }  
+  
+            @Override  
+            public Object instantiateItem(ViewGroup container, int position)  
+            {  
+                ImageView imageView = new ImageView(MainActivity.this);  
+                imageView.setImageResource(mImgIds[position]);  
+                imageView.setScaleType(ScaleType.CENTER_CROP);  
+                container.addView(imageView);  
+                mViewPager.setObjectForPosition(imageView, position);  
+                return imageView;  
+            }  
+  
+            @Override  
+            public int getCount()  
+            {  
+                return mImgIds.length;  
+            }  
+        });  
+  
+    }  
+  
+}
+</code></pre>
+
+<p>这个很常见的代码，就是初始化ViewPager<del>就没啥可说的了</del>有一点需要注意：在instantiateItem方法，我们多调用了一个mViewPager.setObjectForPosition(imageView, position);其实就是为了给我们的Map存值</p>
+
+<p><strong>主要看自定义的ViewPager</strong>  </p>
+
+<pre><code class="language-java">package com.example.zhy_jazzyviewpager;  
+  
+import java.util.HashMap;  
+import java.util.LinkedHashMap;  
+  
+import android.content.Context;  
+import android.support.v4.view.ViewPager;  
+import android.util.AttributeSet;  
+import android.util.Log;  
+import android.view.View;  
+  
+import com.nineoldandroids.view.ViewHelper;  
+  
+public class MyJazzyViewPager extends ViewPager  
+{  
+    private float mTrans;  
+    private float mScale;  
+    /** 
+     * 最大的缩小比例 
+     */  
+    private static final float SCALE_MAX = 0.5f;  
+    private static final String TAG = &quot;MyJazzyViewPager&quot;;  
+    /** 
+     * 保存position与对于的View 
+     */  
+    private HashMap&lt;Integer, View&gt; mChildrenViews = new LinkedHashMap&lt;Integer, View&gt;();  
+    /** 
+     * 滑动时左边的元素 
+     */  
+    private View mLeft;  
+    /** 
+     * 滑动时右边的元素 
+     */  
+    private View mRight;  
+  
+    public MyJazzyViewPager(Context context, AttributeSet attrs)  
+    {  
+        super(context, attrs);  
+    }  
+  
+    @Override  
+    public void onPageScrolled(int position, float positionOffset,  
+            int positionOffsetPixels)  
+    {  
+  
+//      Log.e(TAG, &quot;position=&quot; + position+&quot;, positionOffset = &quot;+positionOffset+&quot; ,positionOffsetPixels =  &quot; + positionOffsetPixels+&quot; , currentPos = &quot; + getCurrentItem());  
+          
+        //滑动特别小的距离时，我们认为没有动，可有可无的判断  
+        float effectOffset = isSmall(positionOffset) ? 0 : positionOffset;  
+          
+        //获取左边的View  
+        mLeft = findViewFromObject(position);  
+        //获取右边的View  
+        mRight = findViewFromObject(position + 1);  
+          
+        // 添加切换动画效果  
+        animateStack(mLeft, mRight, effectOffset, positionOffsetPixels);  
+        super.onPageScrolled(position, positionOffset, positionOffsetPixels);  
+    }  
+  
+    public void setObjectForPosition(View view, int position)  
+    {  
+        mChildrenViews.put(position, view);  
+    }  
+  
+    /** 
+     * 通过过位置获得对应的View 
+     *  
+     * @param position 
+     * @return 
+     */  
+    public View findViewFromObject(int position)  
+    {  
+        return mChildrenViews.get(position);  
+    }  
+  
+    private boolean isSmall(float positionOffset)  
+    {  
+        return Math.abs(positionOffset) &lt; 0.0001;  
+    }  
+  
+    protected void animateStack(View left, View right, float effectOffset,  
+            int positionOffsetPixels)  
+    {  
+        if (right != null)  
+        {  
+            /** 
+             * 缩小比例 如果手指从右到左的滑动（切换到后一个）：0.0~1.0，即从一半到最大 
+             * 如果手指从左到右的滑动（切换到前一个）：1.0~0，即从最大到一半 
+             */  
+            mScale = (1 - SCALE_MAX) * effectOffset + SCALE_MAX;  
+            /** 
+             * x偏移量： 如果手指从右到左的滑动（切换到后一个）：0-720 如果手指从左到右的滑动（切换到前一个）：720-0 
+             */  
+            mTrans = -getWidth() - getPageMargin() + positionOffsetPixels;  
+            ViewHelper.setScaleX(right, mScale);  
+            ViewHelper.setScaleY(right, mScale);  
+            ViewHelper.setTranslationX(right, mTrans);  
+        }  
+        if (left != null)  
+        {  
+            left.bringToFront();  
+        }  
+    }  
+}
+</code></pre>
+
+<p>可以看到，核心代码都是onPageScrolled，我们通过findViewFromObject(position); findViewFromObject(position + 1);分别获取了左右两边的View，然后添加动画效果；当前这个例子添加了两个动画，一个是从0.5放大到1.0或者1.0缩小到0.5，没错由我们的positionOffset提供梯度的变化<del>还有个平移的动画：下一页直接移动到当前屏幕（默认是在右边，可以注释这个效果，怎么运行看看），然后不断的通过positionOffsetPixels抵消原来默认移动时的位移，让用户感觉它就在原地放大缩小</del><br/><br/>
+好了，这样就实现了<del>你可以随便写自己喜欢的动画效果，比如在默认上面加个淡入淡出或者神马，随便</del>是不是很随意~~<br/><br/>
+我们的布局文件：  </p>
+
+<pre><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;  
+    android:layout_width=&quot;match_parent&quot;  
+    android:layout_height=&quot;match_parent&quot;  
+  &gt;  
+  
+    &lt;com.example.zhy_jazzyviewpager.MyJazzyViewPager  
+        android:layout_width=&quot;wrap_content&quot;  
+        android:layout_height=&quot;wrap_content&quot;  
+        android:id=&quot;@+id/id_viewPager&quot; /&gt;  
+  
+&lt;/RelativeLayout&gt; 
+</code></pre>
+
+<h3 id="toc_24">JazzyViewPager的使用</h3>
+
+<p>其实上面的实现就是github上JazzyViewPager的源码，用法不用说了，就是我们的MainActivity，它内置了大概10来种效果，我们可以通过代码或者布局上面设置动画效果<del>我们上面的例子效果，它叫做Stack；<br/><br/>
+使用JazzViewPager的代码：其实基本一样</del>最后也会贴上JazzyViewPager的源码的下载  </p>
+
+<p><strong>MainActivity</strong>  </p>
+
+<pre><code class="language-java">package com.jfeinstein.jazzyviewpager;  
+  
+import com.jfeinstein.jazzyviewpager.JazzyViewPager.TransitionEffect;  
+  
+import android.app.Activity;  
+import android.os.Bundle;  
+import android.support.v4.view.PagerAdapter;  
+import android.view.View;  
+import android.view.ViewGroup;  
+import android.widget.ImageView;  
+import android.widget.ImageView.ScaleType;  
+  
+public class MainActivity extends Activity  
+{  
+    protected static final String TAG = &quot;MainActivity&quot;;  
+    private int[] mImgIds;  
+    private JazzyViewPager mViewPager;  
+  
+    @Override  
+    protected void onCreate(Bundle savedInstanceState)  
+    {  
+        super.onCreate(savedInstanceState);  
+        setContentView(R.layout.activity_main);  
+        mImgIds = new int[] { R.drawable.a, R.drawable.b, R.drawable.c,  
+                R.drawable.d };  
+        mViewPager = (JazzyViewPager) findViewById(R.id.id_viewPager);  
+        //设置切换效果  
+        mViewPager.setTransitionEffect(TransitionEffect.Stack);  
+          
+          
+        mViewPager.setAdapter(new PagerAdapter()  
+        {  
+  
+            @Override  
+            public boolean isViewFromObject(View arg0, Object arg1)  
+            {  
+                return arg0 == arg1;  
+            }  
+  
+            @Override  
+            public void destroyItem(ViewGroup container, int position,  
+                    Object object)  
+            {  
+                container.removeView((View) object);  
+            }  
+  
+            @Override  
+            public Object instantiateItem(ViewGroup container, int position)  
+            {  
+                ImageView imageView = new ImageView(MainActivity.this);  
+                imageView.setImageResource(mImgIds[position]);  
+                imageView.setScaleType(ScaleType.CENTER_CROP);  
+                container.addView(imageView);  
+                mViewPager.setObjectForPosition(imageView, position);  
+                return imageView;  
+            }  
+  
+            @Override  
+            public int getCount()  
+            {  
+                return mImgIds.length;  
+            }  
+        });  
+  
+    }  
+}
+</code></pre>
+
+<p>与我们的代码唯一区别就是：<br/><br/>
+//设置切换效果<br/><br/>
+mViewPager.setTransitionEffect(TransitionEffect.Stack);<br/><br/>
+它有12中可选的切换效果，其实就是写了12个切换的动画~~~<br/><br/>
+好了，最后附上一个我比较喜欢的效果：Tablet  </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201702229727320140722145522928.gif" alt="201702229727320140722145522928.gif"/></p>
+
+<h2 id="toc_25">实现个性的ViewPager切换动画 实战PageTransformer（兼容Android3.0以下）</h2>
+
+<h3 id="toc_26">概述</h3>
+
+<p>本篇博文，将：</p>
+
+<ol>
+<li>介绍如何使用setPageTransformer设置切换动画；</li>
+<li>自定义PageTransformer实现个性的切换动画；</li>
+<li>该方法在SDK11以下的版本不起作用，我们会对其做一定修改，让其向下兼容。<br/>
+官方示例地址：<a href="http://developer.Android.com/training/animation/screen-slide.html">http://developer.Android.com/training/animation/screen-slide.html</a> 有兴趣的可以去看看~~</li>
+</ol>
+
+<h3 id="toc_27">setPageTransformer的使用</h3>
+
+<p>首先我们迅速的实现一个传统的ViewPager效果~</p>
+
+<h4 id="toc_28">布局文件</h4>
+
+<pre><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;  
+    android:layout_width=&quot;match_parent&quot;  
+    android:layout_height=&quot;match_parent&quot; &gt;  
+  
+    &lt;android.support.v4.view.ViewPager  
+        android:id=&quot;@+id/id_viewpager&quot;  
+        android:layout_width=&quot;fill_parent&quot;  
+        android:layout_height=&quot;fill_parent&quot; /&gt;  
+  
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<h4 id="toc_29">MainActivity</h4>
+
+<pre><code class="language-java">package com.zhy.demo_zhy_08_viewpageranim;  
+  
+import java.util.ArrayList;  
+import java.util.List;  
+  
+import android.app.Activity;  
+import android.os.Bundle;  
+import android.support.v4.view.PagerAdapter;  
+import android.support.v4.view.ViewPager;  
+import android.view.View;  
+import android.view.ViewGroup;  
+import android.view.Window;  
+import android.widget.ImageView;  
+import android.widget.ImageView.ScaleType;  
+  
+public class MainActivity extends Activity  
+{  
+    private ViewPager mViewPager;  
+    private int[] mImgIds = new int[] { R.drawable.guide_image1,  
+            R.drawable.guide_image2, R.drawable.guide_image3 };  
+    private List&lt;ImageView&gt; mImageViews = new ArrayList&lt;ImageView&gt;();  
+  
+    @Override  
+    protected void onCreate(Bundle savedInstanceState)  
+    {  
+        super.onCreate(savedInstanceState);  
+  
+        requestWindowFeature(Window.FEATURE_NO_TITLE);  
+        setContentView(R.layout.activity_main);  
+  
+        initData();  
+  
+        mViewPager = (ViewPager) findViewById(R.id.id_viewpager);  
+  
+        mViewPager.setAdapter(new PagerAdapter()  
+        {  
+            @Override  
+            public Object instantiateItem(ViewGroup container, int position)  
+            {  
+  
+                container.addView(mImageViews.get(position));  
+                return mImageViews.get(position);  
+            }  
+  
+            @Override  
+            public void destroyItem(ViewGroup container, int position,  
+                    Object object)  
+            {  
+  
+                container.removeView(mImageViews.get(position));  
+            }  
+  
+            @Override  
+            public boolean isViewFromObject(View view, Object object)  
+            {  
+                return view == object;  
+            }  
+  
+            @Override  
+            public int getCount()  
+            {  
+                return mImgIds.length;  
+            }  
+        });  
+  
+    }  
+  
+    private void initData()  
+    {  
+        for (int imgId : mImgIds)  
+        {  
+            ImageView imageView = new ImageView(getApplicationContext());  
+            imageView.setScaleType(ScaleType.CENTER_CROP);  
+            imageView.setImageResource(imgId);  
+            mImageViews.add(imageView);  
+        }  
+    }  
+  
+}
+</code></pre>
+
+<p>好了，这样一个传统ViewPager就实现了<del>大家对上面代码应该不会有任何陌生的感觉~运行效果也不用贴图了，大家肯定知道</del></p>
+
+<h4 id="toc_30">PageTransformer</h4>
+
+<p>ViewPager有个方法叫做：<br/><br/>
+<code>setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer)</code><br/><br/>
+用于设置ViewPager切换时的动画效果，并且google官方还给出了两个示例。<br/><br/>
+只需要在上述代码中调用setPageTransformer即可添加切换动画效果~~下面演示google的两个PageTransformer的代码，以及运行效果。  </p>
+
+<h5 id="toc_31">DepthPageTransformer</h5>
+
+<pre><code class="language-java">
+public class DepthPageTransformer implements ViewPager.PageTransformer {  
+    private static final float MIN_SCALE = 0.75f;  
+  
+    public void transformPage(View view, float position) {  
+        int pageWidth = view.getWidth();  
+  
+        if (position &lt; -1) { // [-Infinity,-1)  
+            // This page is way off-screen to the left.  
+            view.setAlpha(0);  
+  
+        } else if (position &lt;= 0) { // [-1,0]  
+            // Use the default slide transition when moving to the left page  
+            view.setAlpha(1);  
+            view.setTranslationX(0);  
+            view.setScaleX(1);  
+            view.setScaleY(1);  
+  
+        } else if (position &lt;= 1) { // (0,1]  
+            // Fade the page out.  
+            view.setAlpha(1 - position);  
+  
+            // Counteract the default slide transition  
+            view.setTranslationX(pageWidth * -position);  
+  
+            // Scale the page down (between MIN_SCALE and 1)  
+            float scaleFactor = MIN_SCALE  
+                    + (1 - MIN_SCALE) * (1 - Math.abs(position));  
+            view.setScaleX(scaleFactor);  
+            view.setScaleY(scaleFactor);  
+  
+        } else { // (1,+Infinity]  
+            // This page is way off-screen to the right.  
+            view.setAlpha(0);  
+        }  
+    }  
+}
+</code></pre>
+
+<p>调用代码：<br/><br/>
+<code>mViewPager.setPageTransformer(true, new DepthPageTransformer());</code><br/><br/>
+效果：<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/201702227053520141028231742399.gif" alt="201702227053520141028231742399.gif"/>  </p>
+
+<h5 id="toc_32">ZoomOutPageTransformer</h5>
+
+<pre><code class="language-java">package com.zhy.view;  
+  
+import android.annotation.SuppressLint;  
+import android.support.v4.view.ViewPager;  
+import android.util.Log;  
+import android.view.View;  
+  
+public class ZoomOutPageTransformer implements ViewPager.PageTransformer  
+{  
+    private static final float MIN_SCALE = 0.85f;  
+    private static final float MIN_ALPHA = 0.5f;  
+  
+    @SuppressLint(&quot;NewApi&quot;)  
+    public void transformPage(View view, float position)  
+    {  
+        int pageWidth = view.getWidth();  
+        int pageHeight = view.getHeight();  
+  
+        Log.e(&quot;TAG&quot;, view + &quot; , &quot; + position + &quot;&quot;);  
+  
+        if (position &lt; -1)  
+        { // [-Infinity,-1)  
+            // This page is way off-screen to the left.  
+            view.setAlpha(0);  
+  
+        } else if (position &lt;= 1) //a页滑动至b页 ； a页从 0.0 -1 ；b页从1 ~ 0.0  
+        { // [-1,1]  
+            // Modify the default slide transition to shrink the page as well  
+            float scaleFactor = Math.max(MIN_SCALE, 1 - Math.abs(position));  
+            float vertMargin = pageHeight * (1 - scaleFactor) / 2;  
+            float horzMargin = pageWidth * (1 - scaleFactor) / 2;  
+            if (position &lt; 0)  
+            {  
+                view.setTranslationX(horzMargin - vertMargin / 2);  
+            } else  
+            {  
+                view.setTranslationX(-horzMargin + vertMargin / 2);  
+            }  
+  
+            // Scale the page down (between MIN_SCALE and 1)  
+            view.setScaleX(scaleFactor);  
+            view.setScaleY(scaleFactor);  
+  
+            // Fade the page relative to its size.  
+            view.setAlpha(MIN_ALPHA + (scaleFactor - MIN_SCALE)  
+                    / (1 - MIN_SCALE) * (1 - MIN_ALPHA));  
+  
+        } else  
+        { // (1,+Infinity]  
+            // This page is way off-screen to the right.  
+            view.setAlpha(0);  
+        }  
+    }  
+}
+</code></pre>
+
+<p>调用代码：<br/><br/>
+<code>mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());</code>  </p>
+
+<p>效果：<br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/201702224016820141028231715785.gif" alt="201702224016820141028231715785.gif"/></p>
+
+<p>效果图都是google官网上的，我们的测试图会在兼容3.0以下贴出来，不然就重复了~~<br/><br/>
+为ViewPager添加切换就一行代码是不是很happy，可惜是不兼容3.0以下的版本的，该方法的注释上写到：<br/><br/>
+setting a PageTransformer prior to Android 3.0 (API 11) will have no effect 在3.0之前的版本设置此方法是没有效果的，那么下面我们就看如何让其兼容3.0以下版本。  </p>
+
+<h3 id="toc_33">版本的向下兼容</h3>
+
+<h4 id="toc_34">不兼容的原因</h4>
+
+<p>首先看下为什么不兼容，3.0以下呢？<br/><br/>
+看上面的两个示例代码，代码中View的动画使用的是属性动画，而属性动画是3.0才推出的，那么这么写肯定是不兼容3.0以下了~<br/><br/>
+那么我们首先引入nineoldandroids，让动画先能在3.0以下跑再说：<br/><br/>
+修改DepthPageTransformer  </p>
+
+<pre><code class="language-java">package com.zhy.view;  
+  
+import com.nineoldandroids.view.ViewHelper;  
+  
+import android.annotation.SuppressLint;  
+import android.support.v4.view.ViewPager;  
+import android.view.View;  
+  
+public class DepthPageTransformer implements ViewPager.PageTransformer  
+{  
+    private static final float MIN_SCALE = 0.75f;  
+  
+    public void transformPage(View view, float position)  
+    {  
+        int pageWidth = view.getWidth();  
+  
+        if (position &lt; -1)  
+        { // [-Infinity,-1)  
+            // This page is way off-screen to the left.  
+            // view.setAlpha(0);  
+            ViewHelper.setAlpha(view, 0);  
+        } else if (position &lt;= 0)// a页滑动至b页 ； a页从 0.0 -1 ；b页从1 ~ 0.0  
+        { // [-1,0]  
+            // Use the default slide transition when moving to the left page  
+            // view.setAlpha(1);  
+            ViewHelper.setAlpha(view, 1);  
+            // view.setTranslationX(0);  
+            ViewHelper.setTranslationX(view, 0);  
+            // view.setScaleX(1);  
+            ViewHelper.setScaleX(view, 1);  
+            // view.setScaleY(1);  
+            ViewHelper.setScaleY(view, 1);  
+  
+        } else if (position &lt;= 1)  
+        { // (0,1]  
+            // Fade the page out.  
+            // view.setAlpha(1 - position);  
+            ViewHelper.setAlpha(view, 1 - position);  
+  
+            // Counteract the default slide transition  
+            // view.setTranslationX(pageWidth * -position);  
+            ViewHelper.setTranslationX(view, pageWidth * -position);  
+  
+            // Scale the page down (between MIN_SCALE and 1)  
+            float scaleFactor = MIN_SCALE + (1 - MIN_SCALE) * (1 - position);  
+            // view.setScaleX(scaleFactor);  
+            ViewHelper.setScaleX(view, scaleFactor);  
+            // view.setScaleY(1);  
+            ViewHelper.setScaleY(view, scaleFactor);  
+  
+        } else  
+        { // (1,+Infinity]  
+            // This page is way off-screen to the right.  
+            // view.setAlpha(0);  
+            ViewHelper.setAlpha(view, 1);  
+        }  
+    }  
+}
+</code></pre>
+
+<p>很简单，把所有属性动画换成ViewHelper去设置就好了。现在我们去3.0以下的机子上去运行，发现还是没有效果~~<br/><br/>
+为什么呢？<br/><br/>
+我们再去看看setPageTransformer的源码：  </p>
+
+<pre><code class="language-java">public void setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer) {  
+       if (Build.VERSION.SDK_INT &gt;= 11) {  
+           final boolean hasTransformer = transformer != null;  
+           final boolean needsPopulate = hasTransformer != (mPageTransformer != null);  
+           mPageTransformer = transformer;  
+           setChildrenDrawingOrderEnabledCompat(hasTransformer);  
+           if (hasTransformer) {  
+               mDrawingOrder = reverseDrawingOrder ? DRAW_ORDER_REVERSE : DRAW_ORDER_FORWARD;  
+           } else {  
+               mDrawingOrder = DRAW_ORDER_DEFAULT;  
+           }  
+           if (needsPopulate) populate();  
+       }  
+   }
+</code></pre>
+
+<p>终于发现原因了，原来在此方法内部判断了如果是11以上的版本才让动画生效~~<br/><br/>
+那么，没办法了，如果想兼容，必须修改ViewPager的源码了~~  </p>
+
+<h4 id="toc_35">完美向下兼容</h4>
+
+<p>我们将ViewPager的源码拷贝一份至我们的项目中，修改名称为ViewPagerCompat；然后注释掉SDK版本判断那一句  </p>
+
+<pre><code class="language-java">public class ViewPagerCompat extends ViewGroup {  
+    public void setPageTransformer(boolean reverseDrawingOrder, ViewPager.PageTransformer transformer) {  
+//        if (Build.VERSION.SDK_INT &gt;= 11)   
+        {  
+            final boolean hasTransformer = transformer != null;  
+            final boolean needsPopulate = hasTransformer != (mPageTransformer != null);  
+            mPageTransformer = transformer;  
+            setChildrenDrawingOrderEnabledCompat(hasTransformer);  
+            if (hasTransformer) {  
+                mDrawingOrder = reverseDrawingOrder ? DRAW_ORDER_REVERSE : DRAW_ORDER_FORWARD;  
+            } else {  
+                mDrawingOrder = DRAW_ORDER_DEFAULT;  
+            }  
+            if (needsPopulate) populate();  
+        }  
+    }
+ }
+ ```
+ 
+注意，所有的PageTransformer使用ViewPager.PageTransformer  
+然后我们把项目中的ViewPager改为ViewPagerCompat；记得修改布局文件，以及MainActivity中的ViewPager为ViewPagerCompat
+我们在2.3.3的模拟器上测试下效果：  
+![201702225837420141028231840899.gif](http://ohtrrgyyd.bkt.clouddn.com/201702225837420141028231840899.gif)
+
+可以看到，我们的切换动画完美的运行在2.3.3的机器上~~so happy ~~没有ViewPager源码的童鞋不要紧，我会在文末的源码下载中加入ViewPager源码，让你可以尽情去测试~~  
+当然了，仅仅是兼容当然不能满足我们的好奇心，难道我们做到了兼容，还只能使用Google给的示例动画么~~我们强大的创新呢~~下面带领大家分析setPageTransformer方法，然后设计一个个性的动画切换效果  
+
+#### 自定义PageTransformer实现个性切换动画
+
+``` java
+
+public interface PageTransformer {  
+       /** 
+        * Apply a property transformation to the given page. 
+        * 
+        * @param page Apply the transformation to this page 
+        * @param position Position of page relative to the current front-and-center 
+        *                 position of the pager. 0 is front and center. 1 is one full 
+        *                 page position to the right, and -1 is one page position to the left. 
+        */  
+       public void transformPage(View page, float position);  
+   }
+</code></pre>
+
+<p>可以看到该接口只有一个方法，第一个是我们的view，第二个是position~~<br/><br/>
+当我们滑动时：会打印出当然ViewPager中存活的每个View以及它们的position的变化<del>注意是每一个，所以建议别只log position，不然你会觉得莫名其妙的输出</del><br/><br/>
+position的可能性的值有，其实从官方示例的注释就能看出：<br/><br/>
+[-Infinity,-1)  已经看不到了<br/><br/>
+(1,+Infinity] 已经看不到了<br/><br/>
+ [-1,1] <br/>
+重点看[-1,1]这个区间 ， 其他两个的View都已经看不到了~~  </p>
+
+<p>假设现在ViewPager在A页现在滑出B页，则:<br/><br/>
+A页的position变化就是( 0, -1]<br/><br/>
+B页的position变化就是[ 1 , 0 ]<br/><br/>
+知道了我们滑动时position的变化~~那么就开始设计我们的个性的切换效果；<br/><br/>
+官方给的例子，有变化透明度、偏移量、缩放的，我们准备来个不一样的，我们变化角度，即rotation;<br/><br/>
+大概的效果是这样的：  </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222949151414293422_1593.gif" alt="20170222949151414293422_1593.gif"/>  </p>
+
+<p>下面我们分析代码：<br/><br/>
+我们设置View的旋转中心为：<br/><br/>
+ViewHelper.setPivotX(view, view.getMeasuredWidth() * 0.5f);<br/><br/>
+ViewHelper.setPivotY(view, view.getMeasuredHeight());<br/><br/>
+依然是ViewPager在A页现在滑出B页<br/><br/>
+那么A页应当在滑动过程中0度到-20度的偏移，B页应当在滑动过程中+20度到0度的偏移<br/><br/>
+结合<br/><br/>
+A页的position变化就是( 0, -1]<br/><br/>
+B页的position变化就是[ 1 , 0 ]<br/><br/>
+那么旋转的角度即：mRot = (20 * position); A页 mRot :0 ,~ -20 ; B页 mRot :20 ~ 0  ;<br/><br/>
+瞬间觉得好简单： </p>
+
+<p><strong>完整代码</strong>：  </p>
+
+<pre><code class="language-java">package com.zhy.view;  
+  
+import com.nineoldandroids.view.ViewHelper;  
+  
+import android.annotation.SuppressLint;  
+import android.support.v4.view.ViewPager;  
+import android.util.Log;  
+import android.view.View;  
+  
+public class RotateDownPageTransformer implements ViewPager.PageTransformer  
+{  
+      
+    private static final float ROT_MAX = 20.0f;  
+    private float mRot;  
+      
+  
+      
+    public void transformPage(View view, float position)  
+    {  
+  
+        Log.e(&quot;TAG&quot;, view + &quot; , &quot; + position + &quot;&quot;);  
+  
+        if (position &lt; -1)  
+        { // [-Infinity,-1)  
+            // This page is way off-screen to the left.  
+            ViewHelper.setRotation(view, 0);  
+  
+        } else if (position &lt;= 1) // a页滑动至b页 ； a页从 0.0 ~ -1 ；b页从1 ~ 0.0  
+        { // [-1,1]  
+            // Modify the default slide transition to shrink the page as well  
+            if (position &lt; 0)  
+            {  
+  
+                mRot = (ROT_MAX * position);  
+                ViewHelper.setPivotX(view, view.getMeasuredWidth() * 0.5f);  
+                ViewHelper.setPivotY(view, view.getMeasuredHeight());  
+                ViewHelper.setRotation(view, mRot);  
+            } else  
+            {  
+  
+                mRot = (ROT_MAX * position);  
+                ViewHelper.setPivotX(view, view.getMeasuredWidth() * 0.5f);  
+                ViewHelper.setPivotY(view, view.getMeasuredHeight());  
+                ViewHelper.setRotation(view, mRot);  
+            }  
+  
+            // Scale the page down (between MIN_SCALE and 1)  
+  
+            // Fade the page relative to its size.  
+  
+        } else  
+        { // (1,+Infinity]  
+            // This page is way off-screen to the right.  
+            ViewHelper.setRotation(view, 0);  
+        }  
+    }  
+}
+</code></pre>
+
+<p>你没看错，if else 里面代码是一样的，为了好理解特意没有合并到一起~~  </p>
+
+<p>到此，我们从setPageTransformer使用，到修改ViewPager做到向下兼容，直至自己定义出个性的切换效果 都已经介绍完毕～～<br/><br/>
+大家可以发挥自己的创造力，做出各种神奇的动画效果，ok，就到这里！  </p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15561207869629.html" 
+          title="Previous Post: Android-XML参数详细了解">&laquo; Android-XML参数详细了解</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15561207869535.html" 
+          title="Next Post: Android-Android Studio 快捷键">Android-Android Studio 快捷键 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576631048737.html">单例模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15561207873102.html">Android 基础复习</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
