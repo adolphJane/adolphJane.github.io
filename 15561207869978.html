@@ -156,7 +156,7 @@
 
 <h4 id="toc_4">RecyclerView的初步用法(包括RecyclerView.Adapter用法)</h4>
 
-<pre><code class="language-java">recyclerView = (RecyclerView) findViewById(R.id.recyclerView);  
+<pre class="line-numbers"><code class="language-java">recyclerView = (RecyclerView) findViewById(R.id.recyclerView);  
 LinearLayoutManager layoutManager = new LinearLayoutManager(this );  
 //设置布局管理器  
 recyclerView.setLayoutManager(layoutManager);  
@@ -186,7 +186,7 @@ recyclerView.setItemAnimator( new DefaultItemAnimator());
 tips1:如果你调用了：</li>
 </ul>
 
-<pre><code class="language-text">viewHolder.setIsRecyclable(false);
+<pre class="line-numbers"><code class="language-text">viewHolder.setIsRecyclable(false);
 </code></pre>
 
 <p>那么这个Item的onViewRecycled将永远不会调用。<br/>
@@ -225,7 +225,7 @@ tips2:如果你的界面出现了错乱的现象，请调用如上代码可能�
 <p>从谷歌官方的介绍可以知道，ItemDecoration是用于给列表的item添加各种装饰效果，开发中最常见的就是为item添加分割线。<br/><br/>
 ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关心的方法只有三个：</p>
 
-<pre><code class="language-java">public static abstract class ItemDecoration {
+<pre class="line-numbers"><code class="language-java">public static abstract class ItemDecoration {
     public void onDraw(Canvas c, RecyclerView parent, State state) {
         onDraw(c, parent);
     }
@@ -246,7 +246,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 <li><code>getItemOffsets</code>：在每次测量item尺寸时被调用，将decoration的尺寸计算到item的尺寸中</li>
 </ul>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799957749046.png" alt="20171015150799957749046.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799957749046.png" alt="20171015150799957749046.png"/><figcaption>20171015150799957749046.png</figcaption></figure></p>
 
 <h3 id="toc_8">ItemDecoration三个方法的测试</h3>
 
@@ -254,7 +254,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <h4 id="toc_9">onDraw</h4>
 
-<pre><code class="language-java">private void drawVertical(Canvas canvas, RecyclerView parent) {
+<pre class="line-numbers"><code class="language-java">private void drawVertical(Canvas canvas, RecyclerView parent) {
     canvas.save();
    final int left;
    final int right;
@@ -284,7 +284,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <h4 id="toc_10">getItemOffsets</h4>
 
-<pre><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent,RecyclerView.State state) {
+<pre class="line-numbers"><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent,RecyclerView.State state) {
     if (mOrientation == VERTICAL) {
         outRect.set(0, 0, 0, mDivider.getIntrinsicHeight());
     } else {
@@ -302,13 +302,13 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <p>先上动图【注2】：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799983096582.gif" alt="20171015150799983096582.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799983096582.gif" alt="20171015150799983096582.gif"/><figcaption>20171015150799983096582.gif</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799985361609.gif" alt="20171015150799985361609.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799985361609.gif" alt="20171015150799985361609.gif"/><figcaption>20171015150799985361609.gif</figcaption></figure></p>
 
 <p>上图中，getItemOffsets方法里，返回outRect不同，而onDraw方法绘制的分割线高度初始值设为25，并通过外部增减来观察其UI效果。</p>
 
-<pre><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+<pre class="line-numbers"><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
     outRect.set(0, 0, 0, 50);// outRect.set(50,50,50,50);
 }
 
@@ -335,7 +335,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <h4 id="toc_12">getItemOffsets &amp; onDrawOver</h4>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799996057841.gif" alt="20171015150799996057841.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799996057841.gif" alt="20171015150799996057841.gif"/><figcaption>20171015150799996057841.gif</figcaption></figure></p>
 
 <p>将之前onDraw方法内代码完整拷贝到onDrawOver下，并注释掉之前onDraw中的方法，很容易验证出onDrawOver与onDraw的唯一不同之处。</p>
 
@@ -351,7 +351,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <p>我们可以创建一个继承RecyclerView.ItemDecoration类来绘制分隔线，通过ItemDecoration可以让我们每一个Item从视觉上面相互分开来，例如ListView的divider非常相似的效果。也可以不设置ItemDecoration，那说明ItemDecoration我们并不是强制需要使用，作为我们开发者可以设置或者不设置Decoration的。实现一个ItemDecoration，系统提供的ItemDecoration是一个抽象类，内部除去已经废弃的方法以外，我们主要实现以下三个方法:</p>
 
-<pre><code class="language-java">public static abstract class ItemDecoration {   
+<pre class="line-numbers"><code class="language-java">public static abstract class ItemDecoration {   
     public void onDraw(Canvas c,RecyclerView parent,State state) {   
         onDraw(c,parent);   
     }   
@@ -372,7 +372,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <p>又因为当我们RecyclerView在进行绘制的时候会进行绘制Decoration,那么会去调用onDraw和onDrawOver方法，那么这边我们其实只要去重写onDraw和getItemOffsets这两个方法就可以实现啦。然后LayoutManager会进行Item布局的时候，会去调用getItemOffset方法来计算每个Item的Decoration合适的尺寸，下面我们来具体实现一个</p>
 
-<pre><code class="language-java">package com.example.reclerviewpractice;  
+<pre class="line-numbers"><code class="language-java">package com.example.reclerviewpractice;  
   
 import android.content.Context;  
 import android.content.res.TypedArray;  
@@ -460,7 +460,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 
 <p>那么怎么更改分隔线的样式呢？在上面的DividerItemDecoration这个类中可以看到这个分隔线是跟ListView一样的，即系统的默认的样式，因此我们可以在styles的xml文件中进行更改，更改如下：</p>
 
-<pre><code class="language-java">&lt;!-- Application theme. --&gt;  
+<pre class="line-numbers"><code class="language-java">&lt;!-- Application theme. --&gt;  
 &lt;style name =&quot;AppTheme&quot; parent=&quot;AppBaseTheme&quot;&gt;  
     &lt;!-- All customizations that are NOT specific to a particular API-level can go here. --&gt;  
     &lt;item name= &quot;android:listDivider&quot;&gt;@drawable/divider &lt;/item &gt;   
@@ -469,7 +469,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 
 <p>divider的内容如下：</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding= &quot;utf-8&quot;?&gt;  
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding= &quot;utf-8&quot;?&gt;  
 &lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
     android:shape=&quot;rectangle&quot; &gt;  
      
@@ -493,11 +493,11 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 <li>支持自定义View作为Decoration</li>
 </ul>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101515080000957381.gif" alt="2017101515080000957381.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101515080000957381.gif" alt="2017101515080000957381.gif"/><figcaption>2017101515080000957381.gif</figcaption></figure></p>
 
 <p>上图hoverGroup.gif的使用代码如下：</p>
 
-<pre><code class="language-java">recyclerView.addItemDecoration(new MKItemDecoration.Builder()
+<pre class="line-numbers"><code class="language-java">recyclerView.addItemDecoration(new MKItemDecoration.Builder()
 .height(50)
 .color(Color.parseColor(&quot;#525D97&quot;))
 .textSize(30)
@@ -580,7 +580,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 
 <p>ListView给我们提供了onItemClickListener的监听器，但对于RecyclerView来讲，非常可惜的是，该控件没有给我们提供这样的内置监听器方法，不过我们可以进行改造实现，可以这样实现Item的点击事件的监听，在我们的adapter中增加这两个方法</p>
 
-<pre><code class="language-java">public interface OnItemClickListener{
+<pre class="line-numbers"><code class="language-java">public interface OnItemClickListener{
     void onClick( int position);
     void onLongClick( int position);
 }
@@ -592,7 +592,7 @@ public void setOnItemClickListener(OnItemClickListener onItemClickListener ){
 
 <p>然后onBindViewHolder方法要做如下更改</p>
 
-<pre><code class="language-java">@Override  
+<pre class="line-numbers"><code class="language-java">@Override  
 public void onBindViewHolder(MyViewHolder holder, final int position) {  
     holder. tv.setText( mDatas.get(position));  
     if( mOnItemClickListener!= null){  
@@ -619,7 +619,7 @@ public void onBindViewHolder(MyViewHolder holder, final int position) { 
 
 <p>RecyclerView addView调用的时候ViewGroup addView的源码，源码如下(如无特殊说明，以下源码均为api 25)</p>
 
-<pre><code class="language-java">public void addView(View child, int index, LayoutParams params) {
+<pre class="line-numbers"><code class="language-java">public void addView(View child, int index, LayoutParams params) {
     if (DBG) {
         System.out.println(this + &quot; addView&quot;);
     }
@@ -639,7 +639,7 @@ public void onBindViewHolder(MyViewHolder holder, final int position) { 
 <p>也就是会调用requestLayout，这是一个全局刷新的函数，也就是说整个界面将会被刷新，有全局刷新在View层级较多较复杂的时必然存在卡顿<br/>
 那么RecyclerView 如何做到滑动时addView时不卡的呢，也就是说RecyclerView addView时候为什么没有引起RecyclerView 的onMeasure触发呢，答案就是RecyclerView 以下代码</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public void requestLayout() {
     if (mEatRequestLayout == 0 &amp;&amp; !mLayoutFrozen) {
         super.requestLayout();
@@ -657,7 +657,7 @@ public void requestLayout() {
 
 <p>MainActivity布局如下</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;com.zjw.appmethodtime.MyRelativeLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
@@ -684,7 +684,7 @@ public void requestLayout() {
 
 <p>自定义一个RelativeLayout 用以看是否局部刷新是否生效，如果局部刷新无效则顶层onMeasure会调用（因为改变了控件大小嘛全局刷新肯定会调用到处于顶层的onMeasure）</p>
 
-<pre><code class="language-java">public class MyRelativeLayout extends RelativeLayout {
+<pre class="line-numbers"><code class="language-java">public class MyRelativeLayout extends RelativeLayout {
     public MyRelativeLayout(Context context) {
         super(context);
     }
@@ -707,7 +707,7 @@ public void requestLayout() {
 <p>自定义一个MyLayout 继承自LinearLayout ，这里只是demo你想用什么ViewGroup可以自己改。<br/>
 这里MyLayout 就类似于RecyclerView 了，该子View宽高改变时会调用requestLayout，MyLayout 这里做拦截，然后自行处理。</p>
 
-<pre><code class="language-java">public class MyLayout extends LinearLayout {
+<pre class="line-numbers"><code class="language-java">public class MyLayout extends LinearLayout {
     private int mWidthMeasureSpec;
     private int mheightMeasureSpec;
     private int mLeft;
@@ -762,7 +762,7 @@ public void requestLayout() {
 
 <p>以下代码就是在MainActivity里使用改变子View宽高局部刷新界面</p>
 
-<pre><code class="language-java">package com.zjw.appmethodtime;
+<pre class="line-numbers"><code class="language-java">package com.zjw.appmethodtime;
 
 import android.content.res.Resources;
 import android.os.Bundle;

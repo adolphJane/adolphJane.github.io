@@ -127,23 +127,23 @@
 
 <p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989405862477.gif" alt="20171105150989405862477.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989405862477.gif" alt="20171105150989405862477.gif"/><figcaption>20171105150989405862477.gif</figcaption></figure></p>
 
 <p>还有github上很火的plaid</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989409049352.gif" alt="20171105150989409049352.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989409049352.gif" alt="20171105150989409049352.gif"/><figcaption>20171105150989409049352.gif</figcaption></figure></p>
 
 <p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。</p>
 
 <p>先看官网的一张关系图</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098941297532.png" alt="2017110515098941297532.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098941297532.png" alt="2017110515098941297532.png"/><figcaption>2017110515098941297532.png</figcaption></figure></p>
 
 <p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
 
 <h3 id="toc_1">Scene</h3>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989413916140.png" alt="20171105150989413916140.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989413916140.png" alt="20171105150989413916140.png"/><figcaption>20171105150989413916140.png</figcaption></figure></p>
 
 <p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法</p>
 
@@ -151,13 +151,13 @@
 
 <p>比如：</p>
 
-<pre><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene0, getContext());
+<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene0, getContext());
 mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene1, getContext());
 </code></pre>
 
 <p>也可以直接new Scene(ViewGroup sceneRoot, View layout)</p>
 
-<pre><code class="language-java">View view0 = inflater.inflate(R.layout.scene0, container, false);
+<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0, container, false);
 View view1 = inflater.inflate(R.layout.scene1, container, false);
 mScene0 = new Scene(mSceneRoot, view0);
 mScene1 = new Scene(mSceneRoot, view1);
@@ -167,7 +167,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <h3 id="toc_2">Transition</h3>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989419933684.png" alt="20171105150989419933684.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989419933684.png" alt="20171105150989419933684.png"/><figcaption>20171105150989419933684.png</figcaption></figure></p>
 
 <p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：</p>
 
@@ -177,7 +177,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>然后在代码中：</p>
 
-<pre><code class="language-java">Transition mFadeTransition =
+<pre class="line-numbers"><code class="language-java">Transition mFadeTransition =
         TransitionInflater.from(this).
         inflateTransition(R.transition.fade_transition);
 </code></pre>
@@ -190,7 +190,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098942555933.gif" alt="2017110515098942555933.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098942555933.gif" alt="2017110515098942555933.gif"/><figcaption>2017110515098942555933.gif</figcaption></figure></p>
 
 <p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
 
@@ -204,7 +204,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>其实是以下几个动画组合顺序执行：</p>
 
-<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;sequential&quot;&gt;
     &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
     &lt;changeBounds /&gt;
@@ -214,7 +214,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>在代码中使用：</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new AutoTransition());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new AutoTransition());
         if (mTextView.getVisibility() != View.VISIBLE) {
             mTextView.setVisibility(View.VISIBLE);
         } else {
@@ -222,13 +222,13 @@ mScene1 = new Scene(mSceneRoot, view1);
         }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989430739154.gif" alt="20171105150989430739154.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989430739154.gif" alt="20171105150989430739154.gif"/><figcaption>20171105150989430739154.gif</figcaption></figure></p>
 
 <h3 id="toc_6">ChangeBounds</h3>
 
 <p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeBounds());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeBounds());
 FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
 if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
     lp.gravity = Gravity.BOTTOM | Gravity.END;
@@ -238,13 +238,13 @@ if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
 mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098943515468.gif" alt="2017110515098943515468.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098943515468.gif" alt="2017110515098943515468.gif"/><figcaption>2017110515098943515468.gif</figcaption></figure></p>
 
 <h3 id="toc_7">ChangeClipBounds</h3>
 
 <p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
 
-<pre><code class="language-java">Rect BOUNDS = new Rect(20, 20, 100, 100);
+<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20, 20, 100, 100);
 TransitionManager.beginDelayedTransition(mRoot, new ChangeClipBounds());
 if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
     ViewCompat.setClipBounds(mImageView, null);
@@ -253,33 +253,33 @@ if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989440946179.gif" alt="20171105150989440946179.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989440946179.gif" alt="20171105150989440946179.gif"/><figcaption>20171105150989440946179.gif</figcaption></figure></p>
 
 <h3 id="toc_8">ChangeImageTransform</h3>
 
 <p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeImageTransform());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeImageTransform());
 mImageView.setScaleType(ImageView.ScaleType.XXX);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098944414343.gif" alt="2017110515098944414343.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098944414343.gif" alt="2017110515098944414343.gif"/><figcaption>2017110515098944414343.gif</figcaption></figure></p>
 
 <h3 id="toc_9">ChangeScroll</h3>
 
 <p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeScroll());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeScroll());
 mTarget.scrollBy(-100, -100);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989447884273.gif" alt="20171105150989447884273.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989447884273.gif" alt="20171105150989447884273.gif"/><figcaption>20171105150989447884273.gif</figcaption></figure></p>
 
 <h3 id="toc_10">ChangeTransform</h3>
 
 <p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeTransform());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeTransform());
 if (mContainer2.getChildCount() &gt; 0) {
     mContainer2.removeAllViews();
     showRedSquare(mContainer1);
@@ -295,20 +295,20 @@ private void showRedSquare(FrameLayout container) {
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989451859396.gif" alt="20171105150989451859396.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989451859396.gif" alt="20171105150989451859396.gif"/><figcaption>20171105150989451859396.gif</figcaption></figure></p>
 
 <h3 id="toc_11">Explode</h3>
 
 <p>对应xml tag为explode，作用对象：View的Visibility</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Explode());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Explode());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews) {
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989454127663.gif" alt="20171105150989454127663.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989454127663.gif" alt="20171105150989454127663.gif"/><figcaption>20171105150989454127663.gif</figcaption></figure></p>
 
 <h3 id="toc_12">Fade</h3>
 
@@ -316,14 +316,14 @@ for (View view : mViews) {
 
 <p>可以在初始化时指定IN或者OUT分别对应淡入和淡出，也可以通过fade.setMode方法设置，若不指定默认为淡入淡出效果</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Fade());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Fade());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews) {
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989462426664.gif" alt="20171105150989462426664.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989462426664.gif" alt="20171105150989462426664.gif"/><figcaption>20171105150989462426664.gif</figcaption></figure></p>
 
 <h3 id="toc_13">Slide</h3>
 
@@ -331,14 +331,14 @@ for (View view : mViews) {
 
 <p>可以初始化时传入Gravity.XX，也可以通过slide.setSlideEdge方法设置，默认方向为Gravity.BOTTOM</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Slide());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Slide());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews) {
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989465258549.gif" alt="20171105150989465258549.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989465258549.gif" alt="20171105150989465258549.gif"/><figcaption>20171105150989465258549.gif</figcaption></figure></p>
 
 <h3 id="toc_14">TransitionSet</h3>
 
@@ -346,7 +346,7 @@ for (View view : mViews) {
 
 <p>可以在代码中创建transitionSet如：</p>
 
-<pre><code class="language-java">mTransition = new TransitionSet();
+<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
 mTransition.addTransition(new ChangeImageTransform());
 mTransition.addTransition(new ChangeTransform());
 TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
@@ -364,7 +364,7 @@ TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
 
 <p>xml布局长这样：</p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;together&quot;&gt;
     &lt;changeImageTransform/&gt;
@@ -376,7 +376,7 @@ TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
 
 <p>在代码中：</p>
 
-<pre><code class="language-java">mTransition = (TransitionSet) TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet) TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
 TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
         if (mInnerFrame.getChildCount() &gt; 0) {
             mInnerFrame.removeAllViews();
@@ -390,15 +390,15 @@ TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
 
 <p>这里结合changeImageTransform和changeTransform，效果如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989470836625.gif" alt="20171105150989470836625.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989470836625.gif" alt="20171105150989470836625.gif"/><figcaption>20171105150989470836625.gif</figcaption></figure></p>
 
 <h3 id="toc_15">PathMotion</h3>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989473563526.png" alt="20171105150989473563526.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989473563526.png" alt="20171105150989473563526.png"/><figcaption>20171105150989473563526.png</figcaption></figure></p>
 
 <p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
 
-<pre><code class="language-java">mTransition = new AutoTransition();
+<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
 mTransition.setPathMotion(new ArcMotion());
 TransitionManager.beginDelayedTransition(mRoot, mTransition);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
@@ -410,17 +410,17 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
         mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989476785110.gif" alt="20171105150989476785110.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989476785110.gif" alt="20171105150989476785110.gif"/><figcaption>20171105150989476785110.gif</figcaption></figure></p>
 
 <p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989479123778.png" alt="20171105150989479123778.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989479123778.png" alt="20171105150989479123778.png"/><figcaption>20171105150989479123778.png</figcaption></figure></p>
 
 <h3 id="toc_16">自定义Transition</h3>
 
 <p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
 
-<pre><code class="language-java">public class CustomTransition extends Transition {
+<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
     @Override
     public void captureStartValues(TransitionValues values) {}
     @Override
@@ -438,11 +438,11 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989483061249.gif" alt="20171105150989483061249.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989483061249.gif" alt="20171105150989483061249.gif"/><figcaption>20171105150989483061249.gif</figcaption></figure></p>
 
 <p>在两个Scene中使用自定义过渡动画，效果如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989484813223.gif" alt="20171105150989484813223.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989484813223.gif" alt="20171105150989484813223.gif"/><figcaption>20171105150989484813223.gif</figcaption></figure></p>
 
 <h2 id="toc_17">Note</h2>
 
@@ -462,18 +462,18 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>先看下content transition的一个例子，在Google Play Games上的应用：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989496665009.gif" alt="20171105150989496665009.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989496665009.gif" alt="20171105150989496665009.gif"/><figcaption>20171105150989496665009.gif</figcaption></figure></p>
 
 <p>在经过学习后我们也可以设计出类似的效果，首先需要了解在界面过渡中涉及到的一些重要方法，从ActivtyA调用startActivity方法唤起ActivityB，到ActivityB按返回键返回ActivityA涉及到与Transition有关的方法</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098950616029.png" alt="2017110515098950616029.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098950616029.png" alt="2017110515098950616029.png"/><figcaption>2017110515098950616029.png</figcaption></figure></p>
 
 <ul>
 <li>ActivityA.exitTransition()</li>
 <li>ActivityB.enterTransition()</li>
 </ul>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989510757346.png" alt="20171105150989510757346.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989510757346.png" alt="20171105150989510757346.png"/><figcaption>20171105150989510757346.png</figcaption></figure></p>
 
 <ul>
 <li>ActivityB.returnTransition()</li>
@@ -486,7 +486,7 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>在style中添加<code>android:windowContentTransitions</code> 属性启用窗口内容转换(Material-theme应用默认为true)，指定该Activity的Transition</p>
 
-<pre><code class="language-text">&lt;!-- Base application theme. --&gt;
+<pre class="line-numbers"><code class="language-text">&lt;!-- Base application theme. --&gt;
 &lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
     &lt;!-- enable window content transitions --&gt;
     &lt;item name=&quot;android:windowContentTransitions&quot;&gt;true&lt;/item&gt;
@@ -500,7 +500,7 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>也可以在代码中指定</p>
 
-<pre><code class="language-text">// inside your activity (if you did not enable transitions in your theme)
+<pre class="line-numbers"><code class="language-text">// inside your activity (if you did not enable transitions in your theme)
 getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
 // set an enter transition
 getWindow().setEnterTransition(new Explode());
@@ -510,7 +510,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>然后启动Acticity</p>
 
-<pre><code class="language-text">startActivity(intent,
+<pre class="line-numbers"><code class="language-text">startActivity(intent,
               ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
 </code></pre>
 
@@ -518,7 +518,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>这里在代码中指定ActivityA的exitTransition:</p>
 
-<pre><code class="language-text">private void setupTransition() {
+<pre class="line-numbers"><code class="language-text">private void setupTransition() {
         Slide slide = new Slide(Gravity.LEFT);
         slide.setDuration(1000);
         slide.setInterpolator(new FastOutSlowInInterpolator());
@@ -528,7 +528,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>使用xml方式指定ActivityB的enterTransition：</p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;slide
         android:duration=&quot;1000&quot;
@@ -551,7 +551,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>运行效果如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989524969946.gif" alt="20171105150989524969946.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989524969946.gif" alt="20171105150989524969946.gif"/><figcaption>20171105150989524969946.gif</figcaption></figure></p>
 
 <p>上图动画有两个问题:</p>
 
@@ -562,23 +562,23 @@ getWindow().setExitTransition(new Explode());
 
 <p>问题1是因为默认情况下enter/return transition会比exit/reenter transition完全结束前稍微快一点运行，如果想让前者完全运行完后者再进来，可以在代码中调用Window的</p>
 
-<pre><code class="language-text">setWindowAllowEnterTransitionOverlap(false)
+<pre class="line-numbers"><code class="language-text">setWindowAllowEnterTransitionOverlap(false)
 setWindowAllowReturnTransitionOverlap(false)
 </code></pre>
 
 <p>或者在xml中设置</p>
 
-<pre><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt; 
+<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt; 
 &lt;item name=&quot;android:windowAllowReturnTransitionOverlap&quot;&gt;false&lt;/item&gt;
 </code></pre>
 
 <p>运行如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989532889905.gif" alt="20171105150989532889905.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989532889905.gif" alt="20171105150989532889905.gif"/><figcaption>20171105150989532889905.gif</figcaption></figure></p>
 
 <p>再看下问题2，默认情况下状态栏和标题栏也会参与动画(如果有导航栏也会，测试机默认木有导航栏)，当我们把xxxoverlap属性设为false后就看得比较明显了，如果不想让它们参与动画通过excludeTarget()将其排除，在代码中：</p>
 
-<pre><code class="language-java">private void setupTransition() {
+<pre class="line-numbers"><code class="language-java">private void setupTransition() {
     Slide slide = new Slide(Gravity.LEFT);
     slide.setDuration(1000);
     slide.setInterpolator(new FastOutSlowInInterpolator());
@@ -591,7 +591,7 @@ setWindowAllowReturnTransitionOverlap(false)
 
 <p>或者在xml中：</p>
 
-<pre><code class="language-text">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre class="line-numbers"><code class="language-text">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:slideEdge=&quot;left&quot;
     android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;
     android:duration=&quot;1000&quot;&gt;
@@ -608,7 +608,7 @@ setWindowAllowReturnTransitionOverlap(false)
 
 <p>效果如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098956444650.gif" alt="2017110515098956444650.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098956444650.gif" alt="2017110515098956444650.gif"/><figcaption>2017110515098956444650.gif</figcaption></figure></p>
 
 <h4 id="toc_22">具体流程</h4>
 
@@ -636,15 +636,15 @@ setWindowAllowReturnTransitionOverlap(false)
 
 <p>shareElement Transition的例子</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989573322645.gif" alt="20171105150989573322645.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989573322645.gif" alt="20171105150989573322645.gif"/><figcaption>20171105150989573322645.gif</figcaption></figure></p>
 
 <p>shareElement Transition指的是共享元素从activity/fragment到其他activity/fragment时的动画</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989577752186.png" alt="20171105150989577752186.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989577752186.png" alt="20171105150989577752186.png"/><figcaption>20171105150989577752186.png</figcaption></figure></p>
 
 <p>有了上面的分析看名字应该也猜得出方法对应的功能了，如果没有设置exit/enter shared element transitions，默认为 @android:transition/move，上面的Content Transition是根据Visibility的变化创建动画，而shareElement Transition是根据大小，位置，和外观的变化创建动画，如chanageBounds、changeTransform、ChangeClipBounds、 ChangeImageTransform等，具体API使用和效果可以参考上篇。指定shareElement Transition可以通过代码形式：</p>
 
-<pre><code class="language-text">getWindow().setSharedElementEnterTransition();
+<pre class="line-numbers"><code class="language-text">getWindow().setSharedElementEnterTransition();
 getWindow().setSharedElementExitTransition();
 getWindow().setSharedElementReturnTransition();
 getWindow().setSharedElementReenterTransition();
@@ -652,7 +652,7 @@ getWindow().setSharedElementReenterTransition();
 
 <p>也可以通过xml形式：</p>
 
-<pre><code class="language-text">&lt;!-- Base application theme. --&gt;
+<pre class="line-numbers"><code class="language-text">&lt;!-- Base application theme. --&gt;
 &lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
     &lt;!-- specify shared element transitions --&gt;
     &lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
@@ -664,7 +664,7 @@ getWindow().setSharedElementReenterTransition();
 
 <p>然后启动Acticity</p>
 
-<pre><code class="language-text">Intent intent = new Intent(this, DetailsActivity.class);
+<pre class="line-numbers"><code class="language-text">Intent intent = new Intent(this, DetailsActivity.class);
 // Pass data object in the bundle and populate details activity.
 intent.putExtra(DetailsActivity.EXTRA_CONTACT, contact);
 ActivityOptionsCompat options = ActivityOptionsCompat.
@@ -674,7 +674,7 @@ startActivity(intent, options.toBundle());
 
 <p>在布局文件中对于要共享的View添加android:transitionName且保持一致，如果要共享的View有点多，可以通过Pair，Pair<View,String> 存储着共享View和View的名称，使用如下</p>
 
-<pre><code class="language-text">Intent intent = new Intent(context, DetailsActivity.class);
+<pre class="line-numbers"><code class="language-text">Intent intent = new Intent(context, DetailsActivity.class);
 intent.putExtra(DetailsActivity.EXTRA_CONTACT, contact);
 Pair&lt;View, String&gt; p1 = Pair.create((View)ivProfile, &quot;profile&quot;);
 Pair&lt;View, String&gt; p2 = Pair.create(vPalette, &quot;palette&quot;);
@@ -688,14 +688,14 @@ startActivity(intent, options.toBundle());
 
 <p>在ActivityB的theme中添加SharedElementEnterTransition</p>
 
-<pre><code class="language-text">&lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
 @transition/change_image_transform
 &lt;/item&gt;
 </code></pre>
 
 <p>change_image_transform.xml</p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;changeBounds
         android:duration=&quot;1000&quot;
@@ -708,7 +708,7 @@ startActivity(intent, options.toBundle());
 
 <p>执行效果：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989590151493.gif" alt="20171105150989590151493.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989590151493.gif" alt="20171105150989590151493.gif"/><figcaption>20171105150989590151493.gif</figcaption></figure></p>
 
 <h3 id="toc_25">具体流程</h3>
 
@@ -728,7 +728,7 @@ startActivity(intent, options.toBundle());
 
 <p>为了更直观，把ActivityA的exitTransition先注释掉，运行效果：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989597967932.gif" alt="20171105150989597967932.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989597967932.gif" alt="20171105150989597967932.gif"/><figcaption>20171105150989597967932.gif</figcaption></figure></p>
 
 <p>可以看到，ActivityB确实像盖在ActivityA上，这里用到了 ViewOverlay，原理简单来说就是在其他View上draw，共享View利用该技术可以实现画在其他View上。我们可以通过Window的setSharedElementsUseOverlay(false)来关闭该功能，不过这样一来会使最终结果和你预想的不一致，默认该值为true。</p>
 
@@ -736,7 +736,7 @@ startActivity(intent, options.toBundle());
 
 <p>上面分析Transition会获取共享视图前后的状态值来创建动画，如果我们的图片是网上下载的，那么很有可能图片的准确大小需要下载下来才能确定，Activity Transitions API提供了一对方法暂时推迟过渡，直到我们确切地知道共享元素已经被适当的渲染和放置。在onCreate中调用postponeEnterTransition()(API &gt;= 21)或者supportPostponeEnterTransition()（API &lt; 21）延迟过渡；当图片的状态确定后，调用startPostponedEnterTransition()（API &gt;= 21）或supportStartPostponedEnterTransition()（API &lt; 21）恢复过渡，常见处理：</p>
 
-<pre><code class="language-text">// ... load remote image with Glide/Picasso here
+<pre class="line-numbers"><code class="language-text">// ... load remote image with Glide/Picasso here
 
 supportPostponeEnterTransition();
 ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
@@ -890,7 +890,7 @@ ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
 
 <h2 id="toc_6">Java集合框架</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098931725903.png" alt="2017110515098931725903.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098931725903.png" alt="2017110515098931725903.png"/><figcaption>2017110515098931725903.png</figcaption></figure></p>
 
 <p>Collection是List、Set等集合高度抽象出来的接口，它包含了这些集合的基本操作，它主要又分为两大部分：List和Set。</p>
 
@@ -1124,15 +1124,15 @@ SortedSet s = Collections.synchronizedSortedSet(new TreeSet(...));</li>
 
 <h3 id="toc_1">第一个视频，无散列</h3>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982542062457.gif" alt="20171105150982542062457.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982542062457.gif" alt="20171105150982542062457.gif"/><figcaption>20171105150982542062457.gif</figcaption></figure></p>
 
 <h3 id="toc_2">第二个视频，具备散列</h3>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982545476983.gif" alt="20171105150982545476983.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982545476983.gif" alt="20171105150982545476983.gif"/><figcaption>20171105150982545476983.gif</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982548447008.png" alt="20171105150982548447008.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982548447008.png" alt="20171105150982548447008.png"/><figcaption>20171105150982548447008.png</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982550163583.png" alt="20171105150982550163583.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982550163583.png" alt="20171105150982550163583.png"/><figcaption>20171105150982550163583.png</figcaption></figure></p>
 
 <h2 id="toc_3">概述</h2>
 
@@ -1160,7 +1160,7 @@ SortedSet s = Collections.synchronizedSortedSet(new TreeSet(...));</li>
 
 <p><strong>调用</strong></p>
 
-<pre><code class="language-java">// 粒子变幻
+<pre class="line-numbers"><code class="language-java">// 粒子变幻
 particleView.setConfigAndRefreshView(
     new ParticleView.Config()
             .setCanvasWidth(
@@ -1243,7 +1243,7 @@ particleView.setConfigAndRefreshView(
 
 <p>对于LayoutInflater之前一直只会用，却不知道LayoutInflater的加载原理，每次直接</p>
 
-<pre><code class="language-java">LayoutInflater.from(context).inflate(R.layout.activity_test, root, false);
+<pre class="line-numbers"><code class="language-java">LayoutInflater.from(context).inflate(R.layout.activity_test, root, false);
 
 //不行就这样，反正有一种能实现我要的效果
 LayoutInflater.from(context).inflate(R.layout.activity_test, null);
@@ -1265,19 +1265,19 @@ LayoutInflater.from(context).inflate(R.layout.activity_test, null);
 
 <h3 id="toc_3">在Activity中</h3>
 
-<pre><code class="language-java">LayoutInflater inflater = getLayoutInflater();
+<pre class="line-numbers"><code class="language-java">LayoutInflater inflater = getLayoutInflater();
 View view = inflater.inflate(R.layout.activity_main, null);
 </code></pre>
 
 <h3 id="toc_4">在Fragment中</h3>
 
-<pre><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
+<pre class="line-numbers"><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
 return view;
 </code></pre>
 
 <h3 id="toc_5">在Adapter中</h3>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View getView(int position, View convertView, ViewGroup parent) {
     View view = LayoutInflater.from(convertView.getContext()).inflate(R.layout.activity_main, parent, false);
     return view;
@@ -1298,7 +1298,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 
 <p>LayoutInflater属于 android.view包下，在LayoutInflater的头部有一段关于LayoutInflater的介绍：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981598486071.png" alt="20171105150981598486071.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981598486071.png" alt="20171105150981598486071.png"/><figcaption>20171105150981598486071.png</figcaption></figure></p>
 
 <p>由于篇幅原因，这里只截取了一部分图片，总结一下：</p>
 
@@ -1307,7 +1307,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 <li>LayoutInflater在Android开发过程中，获取的方式不是直接new出来的，都是经过这两个方法得到的关联上下文的LayoutInflater：</li>
 </ul>
 
-<pre><code class="language-java">//在Activity中
+<pre class="line-numbers"><code class="language-java">//在Activity中
 LayoutInflater inflater = Activity#getLayoutInflater()
 //其他情况
 LayoutInflater inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)
@@ -1327,7 +1327,7 @@ LayoutInflater inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVI
 
 <p>其实，大家在使用LayoutInflater时，也会注意到无非就是将布局资源通过LayoutInflater转换为相对应的View，然后在进行一些其他操作,就是<strong>LayoutInflater常见场景</strong>中的几种情况：</p>
 
-<pre><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
+<pre class="line-numbers"><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
 return view;
 </code></pre>
 
@@ -1339,7 +1339,7 @@ return view;
 
 <p>其实LayoutInflater.from()这个方法是官方帮我们封装了一层而已，底层还是调用getSystemService()方法，目的是使LayoutInflater与Context对象相绑定：</p>
 
-<pre><code class="language-java">public static LayoutInflater from(Context context) {
+<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -1366,7 +1366,7 @@ return view;
 
 <p>这里故意将结束符，写错</p>
 
-<pre><code class="language-markup">&lt;TextView
+<pre class="line-numbers"><code class="language-markup">&lt;TextView
     android:layout_width=&quot;wrap_content&quot;
     android:layout_height=&quot;wrap_content&quot;
     android:layout_gravity=&quot;center_horizontal&quot;
@@ -1375,14 +1375,14 @@ return view;
 
 <p>这里就会收到报错信息提示，每个XML都会有一个预编译的过程，这个过程发生在构建阶段（Build），而不是运行时。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981625428282.png" alt="20171105150981625428282.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981625428282.png" alt="20171105150981625428282.png"/><figcaption>20171105150981625428282.png</figcaption></figure></p>
 
 <h3 id="toc_13">LayoutInflater只能加载通过XmlPullParser解析的R文件资源</h3>
 
 <p>这里的R文件资源就是指这些资源文件<br/><br/>
 例如：</p>
 
-<pre><code class="language-text">R.layout.xxxx
+<pre class="line-numbers"><code class="language-text">R.layout.xxxx
 R.drawable.xxxx
 R.color.xxx
 R.string.xxx
@@ -1399,14 +1399,14 @@ R.string.xxx
 
 <h2 id="toc_15">LayoutInflater的构造方法</h2>
 
-<pre><code class="language-java">protected LayoutInflater(Context context) {
+<pre class="line-numbers"><code class="language-java">protected LayoutInflater(Context context) {
     mContext = context;
 }
 </code></pre>
 
 <p>这种是LayoutInflater常规的构造方法，将Context传入，最后生成的LayoutInflater与对应的Context相绑定。</p>
 
-<pre><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
+<pre class="line-numbers"><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
     mContext = newContext;
     mFactory = original.mFactory;
     mFactory2 = original.mFactory2;
@@ -1421,14 +1421,14 @@ R.string.xxx
 
 <p>根据介绍篇的内容，LayoutInflater在Android开发中一般是通过</p>
 
-<pre><code class="language-java">context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+<pre class="line-numbers"><code class="language-java">context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 LayoutInflater.from(context);
 </code></pre>
 
 <p>因为第一种方式，已经是LayoutInflater介绍中声明获取的方式之一，那么这里我们看一下LayoutInflater#form的方法。</p>
 
-<pre><code class="language-java">public static LayoutInflater from(Context context) {
+<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -1445,7 +1445,7 @@ LayoutInflater.from(context);
 
 <p>Activity#getSystemService()这个方法：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public Object getSystemService(@ServiceName @NonNull String name) {
     if (getBaseContext() == null) {
         throw new IllegalStateException(
@@ -1465,7 +1465,7 @@ public Object getSystemService(@ServiceName @NonNull String name) {
 
 <p>从上面看到，在Activity中只处理了两种类型的服务，分别是获取WindowManager、获取SearchManager，那我们接着看其父类的SystemService()方法：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public Object getSystemService(String name) {
     //找到我们要的东西，注意这是个单例
     if (LAYOUT_INFLATER_SERVICE.equals(name)) {
@@ -1537,7 +1537,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p>其实这个过程即LayoutInflater.inflater()这个过程：</p>
 
-<pre><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre class="line-numbers"><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
     final Resources res = getContext().getResources();
     if (DEBUG) {
         Log.d(TAG, &quot;INFLATING from resource: \&quot;&quot; + res.getResourceName(resource) + &quot;\&quot; (&quot; + Integer.toHexString(resource) + &quot;)&quot;);
@@ -1556,7 +1556,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p>这里只看一些关键的信息，具体代码大家自行查看</p>
 
-<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
 
     //》》》》》》》》》》》》》》》》》第一部分》》》》》》》》》》》》》》》》》》》
     try {
@@ -1615,7 +1615,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p>下面给大家介绍下，几种常见的解析标识：</p>
 
-<pre><code class="language-text">XmlPullParser.START_DOCUMENT                                    文档开始
+<pre class="line-numbers"><code class="language-text">XmlPullParser.START_DOCUMENT                                    文档开始
 
 XmlPullParser.END_DOCUMENT                                      文档结束
 
@@ -1644,7 +1644,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>我们再看一下第三部分的代码，代码中会有一些简要的说明：</p>
 
-<pre><code class="language-java">         //》》》》》》》》》》》》》》》》》第三部分》》》》》》》》》》》》》》》》》》》
+<pre class="line-numbers"><code class="language-java">         //》》》》》》》》》》》》》》》》》第三部分》》》》》》》》》》》》》》》》》》》
                     //createViewFromTag是一个根据name来创建View的方法
                     final View temp = createViewFromTag(root, name, inflaterContext, attrs);
 
@@ -1682,7 +1682,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>接下来，我们要介绍的是inflater()方法中的参数，到底有什么作用？</p>
 
-<pre><code class="language-java">                    ViewGroup.LayoutParams params = null;
+<pre class="line-numbers"><code class="language-java">                    ViewGroup.LayoutParams params = null;
                     //当Root存在
                     if (root != null) {
                         params = root.generateLayoutParams(attrs);
@@ -1718,14 +1718,14 @@ XmlPullParser.TEXT                                              XML标签的内�
 <li>当root不为null的话，attactToRoot的默认值是true。</li>
 </ol>
 
-<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root) {
+<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root) {
     return inflate(parser, root, root != null);
 }
 </code></pre>
 
 <p>上面的代码中，我们还少分析了一处代码rInflateChildren()，即解析子类：</p>
 
-<pre><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
     rInflate(parser, parent, parent.getContext(), attrs, finishInflate);
 }
 </code></pre>
@@ -1734,18 +1734,18 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <h2 id="toc_21">流程图</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981981211425.png" alt="20171105150981981211425.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981981211425.png" alt="20171105150981981211425.png"/><figcaption>20171105150981981211425.png</figcaption></figure></p>
 
 <h2 id="toc_22">CreateViewFromTag源码解析</h2>
 
-<pre><code class="language-java">private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
+<pre class="line-numbers"><code class="language-java">private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
     return createViewFromTag(parent, name, context, attrs, false);
 }
 </code></pre>
 
 <p>createViewFromTag在LayoutInflater中存在重载，最终还是会调用5个参数的createViewFromTag方法。</p>
 
-<pre><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
+<pre class="line-numbers"><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
 
     //解析view标签
     if (name.equals(&quot;view&quot;)) {
@@ -1814,7 +1814,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>如果标签的名称是view，注意是小写的view，这个标签一般大家不太常用，具体的使用情况如下：</p>
 
-<pre><code class="language-text">&lt;view
+<pre class="line-numbers"><code class="language-text">&lt;view
     class=&quot;RelativeLayout&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;&gt;&lt;/view&gt;
@@ -1832,7 +1832,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>这个标签最后会被解析成BlinkLayout，BlinkLayout其实就是一个FrameLayout，这个控件最后会将包裹内容一直闪烁(就和电脑版QQ消息提示一样)，有空大家可以自行尝试下，很简单，下面贴一下用法：</p>
 
-<pre><code class="language-text">&lt;blink
+<pre class="line-numbers"><code class="language-text">&lt;blink
     android:layout_width=&quot;wrap_content&quot;
     android:layout_height=&quot;wrap_content&quot;&gt;
 
@@ -1849,14 +1849,14 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <h5 id="toc_28">Factory</h5>
 
-<pre><code class="language-java">public interface Factory {
+<pre class="line-numbers"><code class="language-java">public interface Factory {
     public View onCreateView(String name, Context context, AttributeSet attrs);
 }
 </code></pre>
 
 <h5 id="toc_29">Factory2</h5>
 
-<pre><code class="language-java">public interface Factory2 extends Factory {
+<pre class="line-numbers"><code class="language-java">public interface Factory2 extends Factory {
     public View onCreateView(View parent, String name, Context context, AttributeSet attrs);
 }
 </code></pre>
@@ -1865,7 +1865,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>这里我自定义了一个Factory，下面自定义解析View的过程：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
     View view = null;
     try {
@@ -1900,7 +1900,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>setFactory()</strong></p>
 
-<pre><code class="language-java">public void setFactory(Factory factory) {
+<pre class="line-numbers"><code class="language-java">public void setFactory(Factory factory) {
     //如果已经设置Factory，不可以继续设置Factory
     if (mFactorySet) {
         throw new IllegalStateException(&quot;A factory has already been set on this LayoutInflater&quot;);
@@ -1920,7 +1920,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>setFactory2()</strong></p>
 
-<pre><code class="language-java">public void setFactory2(Factory2 factory) {
+<pre class="line-numbers"><code class="language-java">public void setFactory2(Factory2 factory) {
     if (mFactorySet) {
         throw new IllegalStateException(&quot;A factory has already been set on this LayoutInflater&quot;);
     }
@@ -1945,7 +1945,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>如果Factory或者Factory2没有设置，或者返回View为null，才会使用默认解析方式。</p>
 
-<pre><code class="language-text">if (-1 == name.indexOf(&#39;.&#39;)) {
+<pre class="line-numbers"><code class="language-text">if (-1 == name.indexOf(&#39;.&#39;)) {
     view = onCreateView(parent, name, attrs);
 } else {
     view = createView(name, null, attrs);
@@ -1954,27 +1954,27 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>这段就是对自定义View和原生的控件进行判断，这里给大家说明下原生控件和自定义View的name区别：</p>
 
-<pre><code class="language-text">原生 ：  RelativeLayout
+<pre class="line-numbers"><code class="language-text">原生 ：  RelativeLayout
 自定义View ： com.demo.guidepagedemo.customview.CustomImageView
 </code></pre>
 
 <p>原生控件的解析方式 onCreateView ：</p>
 
-<pre><code class="language-java">protected View onCreateView(View parent, String name, AttributeSet attrs) throws ClassNotFoundException {
+<pre class="line-numbers"><code class="language-java">protected View onCreateView(View parent, String name, AttributeSet attrs) throws ClassNotFoundException {
     return onCreateView(name, attrs);
 }
 </code></pre>
 
 <p>然后调用的还是2个参数的onCreateView()方法</p>
 
-<pre><code class="language-java">protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
+<pre class="line-numbers"><code class="language-java">protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
     return createView(name, &quot;android.view.&quot;, attrs);
 }
 </code></pre>
 
 <p>可以看到最终方法的指向还是调用createView方法：</p>
 
-<pre><code class="language-java">public final View createView(String name, String prefix, AttributeSet attrs) throws ClassNotFoundException, InflateException {
+<pre class="line-numbers"><code class="language-java">public final View createView(String name, String prefix, AttributeSet attrs) throws ClassNotFoundException, InflateException {
     //判断构造器是否存在    
     Constructor&lt;? extends View&gt; constructor = sConstructorMap.get(name);
     if (constructor != null &amp;&amp; !verifyClassLoader(constructor)) {
@@ -2039,7 +2039,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>判断ClassLoader是否安全的verifyClassLoader ：</p>
 
-<pre><code class="language-java">private final boolean verifyClassLoader(Constructor&lt;? extends View&gt; constructor) {
+<pre class="line-numbers"><code class="language-java">private final boolean verifyClassLoader(Constructor&lt;? extends View&gt; constructor) {
     final ClassLoader constructorLoader = constructor.getDeclaringClass().getClassLoader();
     if (constructorLoader == BOOT_CLASS_LOADER) {
         //这里注意BootClassLoader是相当于所有派生出来的ClassLoader的原始基类，所有的ClassLoader都是根据其衍生的。
@@ -2074,11 +2074,11 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <h2 id="toc_31">流程图</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982093163000.png" alt="20171105150982093163000.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982093163000.png" alt="20171105150982093163000.png"/><figcaption>20171105150982093163000.png</figcaption></figure></p>
 
 <h2 id="toc_32">rInflate()的源码分析</h2>
 
-<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 
     //获取该标签的深度
     final int depth = parser.getDepth();
@@ -2135,7 +2135,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>requestFocus标签使用</strong>：</p>
 
-<pre><code class="language-text">&lt;EditText  
+<pre class="line-numbers"><code class="language-text">&lt;EditText  
     android:id=&quot;@+id/text&quot;  
     android:layout_width=&quot;match_parent&quot;  
     android:layout_height=&quot;wrap_content&quot; &gt;  
@@ -2145,7 +2145,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>parseRequestFocus方法</strong>：</p>
 
-<pre><code class="language-java">private void parseRequestFocus(XmlPullParser parser, View view) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">private void parseRequestFocus(XmlPullParser parser, View view) throws XmlPullParserException, IOException {
     //调用其父View的requestFocus（）方法
     view.requestFocus();
     consumeChildElements(parser);
@@ -2158,7 +2158,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>tag标签使用</strong>：</p>
 
-<pre><code class="language-text">&lt;Button
+<pre class="line-numbers"><code class="language-text">&lt;Button
     android:id=&quot;@+id/tag_btn&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;wrap_content&quot;
@@ -2173,7 +2173,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>parseViewTag</strong>方法 ：</p>
 
-<pre><code class="language-java">private void parseViewTag(XmlPullParser parser, View view, AttributeSet attrs) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">private void parseViewTag(XmlPullParser parser, View view, AttributeSet attrs) throws XmlPullParserException, IOException {
     final Context context = view.getContext();
     final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ViewTag);
     //这里设置tag的key
@@ -2200,7 +2200,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>所谓深度就是XML的层级关系，例如这样：</p>
 
-<pre><code class="language-text">&lt;!-- outside --&gt;     
+<pre class="line-numbers"><code class="language-text">&lt;!-- outside --&gt;     
 &lt;root&gt;                     
    sometext                
    &lt;foobar&gt;                    
@@ -2216,7 +2216,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 <li><p>最后是其他标签，例如View，一起其他的一些标签</p></li>
 </ul>
 
-<pre><code class="language-java">final View view = createViewFromTag(parent, name, context, attrs);
+<pre class="line-numbers"><code class="language-java">final View view = createViewFromTag(parent, name, context, attrs);
 final ViewGroup viewGroup = (ViewGroup) parent;
 final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
 rInflateChildren(parser, view, attrs, true);
@@ -2237,7 +2237,7 @@ viewGroup.addView(view, params);
 
 <h3 id="toc_34">第二阶段 ：rInflateChildren()</h3>
 
-<pre><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
     rInflate(parser, parent, parent.getContext(), attrs, finishInflate);
 }
 </code></pre>
@@ -2259,11 +2259,11 @@ viewGroup.addView(view, params);
 
 <h2 id="toc_36">流程图</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982208420747.png" alt="20171105150982208420747.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982208420747.png" alt="20171105150982208420747.png"/><figcaption>20171105150982208420747.png</figcaption></figure></p>
 
 <h2 id="toc_37">parseInclude()是在哪里使用的？</h2>
 
-<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
     //----------------省略部分代码--------------------//
 
 } else if (TAG_INCLUDE.equals(name)) {
@@ -2280,7 +2280,7 @@ viewGroup.addView(view, params);
 
 <h2 id="toc_38">parseInclude()源码解析</h2>
 
-<pre><code class="language-java"> //参数说明：
+<pre class="line-numbers"><code class="language-java"> //参数说明：
  // parser      解析布局的解析器
  // context     当前加载布局的上下文对象
  // parent      父容器
@@ -2455,7 +2455,7 @@ viewGroup.addView(view, params);
 
 <p>一般来说theme（主题）一般出现在Activtiy的AndroidManifest文件下，来给Activity设置统一的布局效果，而且可以使用如下的操作来进行主题属性的使用。</p>
 
-<pre><code class="language-text">//  ?attr这样的形式，使用主题中的设置参数
+<pre class="line-numbers"><code class="language-text">//  ?attr这样的形式，使用主题中的设置参数
 android:background=&quot;?attr/colorPrimary&quot;
 </code></pre>
 
@@ -2469,7 +2469,7 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>先定义好两个基础Theme，一个是作为App的基础主题，另一个是include中的主题。</p>
 
-<pre><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
     &lt;!-- BaseApplication theme --&gt;
     &lt;item name=&quot;colorPrimary&quot;&gt;@color/colorPrimary&lt;/item&gt;
     &lt;item name=&quot;colorPrimaryDark&quot;&gt;@color/colorPrimaryDark&lt;/item&gt;
@@ -2489,14 +2489,14 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>设置Activity的基础主题为AppTheme</p>
 
-<pre><code class="language-text">&lt;activity
+<pre class="line-numbers"><code class="language-text">&lt;activity
     android:name=&quot;com.demo.MainActivity&quot;
     android:theme=&quot;@style/AppTheme&quot;&gt;&lt;/activity&gt;
 </code></pre>
 
 <p><strong>activity_main.xml</strong></p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;
@@ -2524,7 +2524,7 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p><strong>test_toolbar.xml</strong></p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;wrap_content&quot;
@@ -2541,13 +2541,13 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>从上面的XML文件我们可以看出两个Toolbar调用的background都指向theme的colorPrimary属性，接下来看一下显示效果：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982270724112.png" alt="20171105150982270724112.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982270724112.png" alt="20171105150982270724112.png"/><figcaption>20171105150982270724112.png</figcaption></figure></p>
 
 <p>从效果图可以发现，Include Toolbar显示的颜色是粉色的，也就是Include额外设置的theme，这里也是从正面证明了这个概念。</p>
 
 <h2 id="toc_46">第一部分：Include Theme主题的设置</h2>
 
-<pre><code class="language-java">//------------------&lt;第一部分&gt;-------------------//
+<pre class="line-numbers"><code class="language-java">//------------------&lt;第一部分&gt;-------------------//
 //提取出Theme属性
 final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
 final int themeResId = ta.getResourceId(0, 0);
@@ -2563,7 +2563,7 @@ ta.recycle();
 
 <h2 id="toc_47">第二部分：Include 内容布局的设置</h2>
 
-<pre><code class="language-java">//------------------&lt;第二部分&gt;-------------------//
+<pre class="line-numbers"><code class="language-java">//------------------&lt;第二部分&gt;-------------------//
 //先获取 layout 属性（资源 id）是否设置
 int layout = attrs.getAttributeResourceValue(null, ATTR_LAYOUT, 0);
 if (layout == 0) {
@@ -2600,7 +2600,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <h4 id="toc_51">包裹Include标签的布局Theme（注意：这里不是Include设置的主题）：</h4>
 
-<pre><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
     &lt;item name=&quot;colorPrimary&quot;&gt;@color/colorPrimary&lt;/item&gt;
     &lt;item name=&quot;colorPrimaryDark&quot;&gt;@color/colorPrimaryDark&lt;/item&gt;
     &lt;item name=&quot;colorAccent&quot;&gt;@color/colorAccent&lt;/item&gt;
@@ -2613,7 +2613,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <h3 id="toc_52">第三部分： Include标签的View处理</h3>
 
-<pre><code class="language-text">            //------------------&lt;第三部分&gt;-------------------//
+<pre class="line-numbers"><code class="language-text">            //------------------&lt;第三部分&gt;-------------------//
             //如果此时还找不到layout，那么必然异常~，会报找不到资源ID的layout异常
             if (layout == 0) {
                 final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
@@ -2705,7 +2705,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 <p>这里分成两块内容<br/><br/>
 <strong>第一块是设置LayoutParams</strong>：</p>
 
-<pre><code class="language-text">ViewGroup.LayoutParams params = null;
+<pre class="line-numbers"><code class="language-text">ViewGroup.LayoutParams params = null;
 try {
     //加载Include的父ViewGroup的LayoutParams
     params = group.generateLayoutParams(attrs);
@@ -2725,7 +2725,7 @@ view.setLayoutParams(params);
 
 <p><strong>第二块是在这里设置子ViewGroup的显隐性</strong>：</p>
 
-<pre><code class="language-java">// 加载include内容时，需要直接设置其 可见性
+<pre class="line-numbers"><code class="language-java">// 加载include内容时，需要直接设置其 可见性
 switch (visibility) {
     case 0:
         view.setVisibility(View.VISIBLE);
@@ -2745,13 +2745,13 @@ group.addView(view);
 
 <h2 id="toc_55">流程图</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982400667682.png" alt="20171105150982400667682.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982400667682.png" alt="20171105150982400667682.png"/><figcaption>20171105150982400667682.png</figcaption></figure></p>
 
 <h2 id="toc_56">效果</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/><figcaption>201711041509789321695.jpg</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982283383132.gif" alt="20171105150982283383132.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982283383132.gif" alt="20171105150982283383132.gif"/><figcaption>20171105150982283383132.gif</figcaption></figure></p>
 
 <h2 id="toc_57">分析</h2>
 
@@ -2769,7 +2769,7 @@ group.addView(view);
 
 <p>同时考虑第二张Gif上，发现物体Y轴也存在移动，所以也得需要考虑Y轴方向的滑动，整理下：</p>
 
-<pre><code class="language-text">//进入时：
+<pre class="line-numbers"><code class="language-text">//进入时：
 view.setTranslateX((vpWidth - positionOffsetPixels) * xIn);
 view.setTranslateY((vpWidth - positionOffsetPixels) * yIn);
 
@@ -2816,7 +2816,7 @@ view.setTranslateY((0 - positionOffsetPixels) * yOut);
 
 <p>在介绍之前，先看一段代码：</p>
 
-<pre><code class="language-text">View view;
+<pre class="line-numbers"><code class="language-text">View view;
 //如果Factory2存在，就会调用其onCreateView方法
 if (mFactory2 != null) {
     view = mFactory2.onCreateView(parent, name, context, attrs);
@@ -2850,7 +2850,7 @@ if (view == null &amp;&amp; mPrivateFactory != null) {
 
 <h2 id="toc_60">自定义Factory还是Factory2 ？</h2>
 
-<pre><code class="language-java">View view;
+<pre class="line-numbers"><code class="language-java">View view;
 //如果Factory2存在，就会调用其onCreateView方法
 if (mFactory2 != null) {
     view = mFactory2.onCreateView(parent, name, context, attrs);
@@ -2864,14 +2864,14 @@ if (mFactory2 != null) {
 
 <p>我们能够从这段代码中得出，Factory2比Factory的优先级要高，即Factory2存在Factory就不可能会被调用，同理可以得出结论：</p>
 
-<pre><code class="language-text">优先级顺序:
+<pre class="line-numbers"><code class="language-text">优先级顺序:
 
 mFactory2  &gt; mFactory &gt; mPrivateFactory &gt; LayoutInflater默认处理方式
 </code></pre>
 
 <p>而且我们还能够发现mFactory2的onCreateView()方法与mFactory是不相同的：</p>
 
-<pre><code class="language-text">//mFactory2
+<pre class="line-numbers"><code class="language-text">//mFactory2
 mFactory2.onCreateView(parent, name, context, attrs);
 
 //mFactory
@@ -2880,7 +2880,7 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>根据上述的分析，我们可以得出结论：</p>
 
-<pre><code class="language-text">(1)Factory2的调用优先级比Factory要高
+<pre class="line-numbers"><code class="language-text">(1)Factory2的调用优先级比Factory要高
 
 (2)Factory2的onCreateView()方法，会比Factory多返回一个父View的参数。
 
@@ -2897,14 +2897,14 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>因为一般使用方式，是直接调用cloneInContext()方法，我们知道一般的默认解析器都是PhoneLayoutInflater，我们看下其实现方式：</p>
 
-<pre><code class="language-text">protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
+<pre class="line-numbers"><code class="language-text">protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
     super(original, newContext);
 }
 </code></pre>
 
 <p>本质就是调用LayoutInflater的两参构造方法：</p>
 
-<pre><code class="language-text">protected LayoutInflater(LayoutInflater original, Context newContext) {
+<pre class="line-numbers"><code class="language-text">protected LayoutInflater(LayoutInflater original, Context newContext) {
     mContext = newContext;
     mFactory = original.mFactory;
     mFactory2 = original.mFactory2;
@@ -2921,7 +2921,7 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>（1）自定义LayoutInflater，并且改写cloneInContext，使其不复制原LayoutInflater的Factory2以及Factory。</p>
 
-<pre><code class="language-java">public class CustomLayoutInflater extends LayoutInflater {
+<pre class="line-numbers"><code class="language-java">public class CustomLayoutInflater extends LayoutInflater {
 
     protected CustomLayoutInflater(Context context) {
         super(context);
@@ -2936,7 +2936,7 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>（2）使用时，直接通过new出实例，然后setFactory</p>
 
-<pre><code class="language-java">CustomLayoutInflater newInflater = new CustomLayoutInflater(getActivity());
+<pre class="line-numbers"><code class="language-java">CustomLayoutInflater newInflater = new CustomLayoutInflater(getActivity());
 newInflater.setFactory2(new CustomAppFactory(newInflater, this));
 return newInflater.inflate(layoutId, null);
 </code></pre>
@@ -2945,7 +2945,7 @@ return newInflater.inflate(layoutId, null);
 
 <p>这是因为 AppCompatActivity 在初始化的时候，已经设置了 Factory，下面来看下这部分代码</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 protected void onCreate(@Nullable Bundle savedInstanceState) {
     final AppCompatDelegate delegate = getDelegate();
     //注意这个方法
@@ -2958,7 +2958,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
 
 <p>继续查看 installViewFactory（）方法</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public void installViewFactory() {
     LayoutInflater layoutInflater = LayoutInflater.from(mContext);
     if (layoutInflater.getFactory() == null) {
@@ -2972,7 +2972,7 @@ public void installViewFactory() {
 
 <p>可以发现，在onCreate 时 LayoutInflater 已经设置过一次 Factory 了，然后我再来看下 setFactory() 的源码：</p>
 
-<pre><code class="language-java">public void setFactory(Factory factory) {
+<pre class="line-numbers"><code class="language-java">public void setFactory(Factory factory) {
     if (mFactorySet) {
         //原因就是这一句
         throw new IllegalStateException(&quot;A factory has already been set on this LayoutInflater&quot;);
@@ -2992,7 +2992,7 @@ public void installViewFactory() {
 
 <p>在使用前，先使用 cloneInContext()克隆出一个新的 LayoutInflater，然后在进行设置操作。</p>
 
-<pre><code class="language-text">LayoutInflate  newInflater = LayoutInflater.cloneInContext(inflater,context);
+<pre class="line-numbers"><code class="language-text">LayoutInflate  newInflater = LayoutInflater.cloneInContext(inflater,context);
 
 newInflater.setFactory(new CustomFactory（）)；
 </code></pre>
@@ -3007,7 +3007,7 @@ newInflater.setFactory(new CustomFactory（）)；
 
 <h3 id="toc_65">使用方式</h3>
 
-<pre><code class="language-text">public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+<pre class="line-numbers"><code class="language-text">public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     Bundle bundle = getArguments();
     int layoutId = bundle.getInt(LAYOUT_ID);
     //注意需要调用cloneInContext方法生成新的LayoutInflater
@@ -3022,7 +3022,7 @@ newInflater.setFactory(new CustomFactory（）)；
 
 <p>那么就创建一个类CustomAppFactory来实现Factory2的接口，复写onCreateView的方法。</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
     View view = null;
     //&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;第一部分&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
@@ -3070,7 +3070,7 @@ public View onCreateView(View parent, String name, Context context, AttributeSet
 
 <h2 id="toc_67">onCreateView第一部分内容</h2>
 
-<pre><code class="language-java">if (name.contains(&quot;.&quot;)) {
+<pre class="line-numbers"><code class="language-java">if (name.contains(&quot;.&quot;)) {
     String checkName = name.substring(name.lastIndexOf(&quot;.&quot;));
     String prefix = name.substring(0, name.lastIndexOf(&quot;.&quot;));
     view = defaultInflater(checkName, prefix, attrs);
@@ -3084,7 +3084,7 @@ if (name.equals(&quot;View&quot;) || name.equals(&quot;ViewGroup&quot;)) {
 
 <p>这里判断了name中是否包含“.”，是用来判断生成的View是否是自定义View，下面来看下自定义View和Android自带的组件的区别：</p>
 
-<pre><code class="language-text">//原生的组件
+<pre class="line-numbers"><code class="language-text">//原生的组件
 RelativeLayout
 //自定义View
 com.demo.guidepagedemo.customview.CustomImageView
@@ -3094,7 +3094,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 
 <p>而原生组件中View和ViewGroup是属于android.view包下，其他的例如：RelativeLayout，LinearLayout是属于android.widget包下。</p>
 
-<pre><code class="language-text">private final String[] sClassPrefix = {
+<pre class="line-numbers"><code class="language-text">private final String[] sClassPrefix = {
     &quot;android.widget.&quot;,
     &quot;android.view.&quot;
 };
@@ -3104,7 +3104,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 
 <p>而这里真正的解析过程最后还是交给LayoutInflater，调用LayoutInflater的onCreateView方法：</p>
 
-<pre><code class="language-java">private View defaultInflater(String name, String prefix, AttributeSet attrs) {
+<pre class="line-numbers"><code class="language-java">private View defaultInflater(String name, String prefix, AttributeSet attrs) {
     View view = null;
     try {
         view = mInflater.createView(name, prefix, attrs);
@@ -3117,7 +3117,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 
 <h2 id="toc_68">onCreateView第二部分内容</h2>
 
-<pre><code class="language-java">//实例化完成
+<pre class="line-numbers"><code class="language-java">//实例化完成
 if (view != null) {
     //获取自定义属性,通过标签关联到视图上
     setViewTag(view, context, attrs);
@@ -3129,7 +3129,7 @@ if (view != null) {
 
 <p><strong>setViewTag方法</strong></p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * 将View的属性信息存储在Tag中
  */
 private void setViewTag(View view, Context context, AttributeSet attrs) {
@@ -3150,7 +3150,7 @@ private void setViewTag(View view, Context context, AttributeSet attrs) {
 
 <p>上面对应的是本文我们开始设置的4个系数：</p>
 
-<pre><code class="language-java">R.styleable.CustomImageView_in_value_x              --&gt;   进入时 x方向的系数
+<pre class="line-numbers"><code class="language-java">R.styleable.CustomImageView_in_value_x              --&gt;   进入时 x方向的系数
 
 R.styleable.CustomImageView_out_value_x             --&gt;   退出时 x方向的系数
 
@@ -3161,7 +3161,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>而这里的mInflaterView是一个抽象接口，让Fragment来实现的，通过在Fragment中内置一个List《View》，到时候可以遍历统一操作这些View，下面是实现过程：</p>
 
-<pre><code class="language-java">public interface InflaterViewImpl {
+<pre class="line-numbers"><code class="language-java">public interface InflaterViewImpl {
 
     /**
      * 获取View集合
@@ -3180,7 +3180,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p><strong>Fragment中的实现过程</strong>：</p>
 
-<pre><code class="language-java">public class PageFragment extends Fragment implements InflaterViewImpl {
+<pre class="line-numbers"><code class="language-java">public class PageFragment extends Fragment implements InflaterViewImpl {
 
     private List&lt;View&gt; views = new ArrayList&lt;&gt;();
 
@@ -3207,7 +3207,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>因为本文主要介绍内容是自定义LayoutInflater.Factory，所以这里会简单叙述下：</p>
 
-<pre><code class="language-java">mInflaterVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+<pre class="line-numbers"><code class="language-java">mInflaterVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         //获取ViewPager的宽度
@@ -3320,11 +3320,11 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <h2 id="toc_1">先看效果图</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098153104205.gif" alt="2017110515098153104205.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098153104205.gif" alt="2017110515098153104205.gif"/><figcaption>2017110515098153104205.gif</figcaption></figure></p>
 
 <p>垂直方向的3D旋转</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098153351203.gif" alt="2017110515098153351203.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098153351203.gif" alt="2017110515098153351203.gif"/><figcaption>2017110515098153351203.gif</figcaption></figure></p>
 
 <p>水平方向的3D旋转</p>
 
@@ -3336,7 +3336,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>这里拿垂直布局的一种状态来做示例</p>
 
-<pre><code class="language-java">    /**
+<pre class="line-numbers"><code class="language-java">    /**
      * 画垂直布局时的item
      * @param c
      * @param rect
@@ -3384,7 +3384,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>滑动的时候,item要能滑动距中心点以上,也可以滑动到中心点以下,所以适配器中的item数量也要对应改变,直接上代码</p>
 
-<pre><code class="language-java">class WheelViewAdapter extends RecyclerView.Adapter&lt;WheelViewHolder&gt; {
+<pre class="line-numbers"><code class="language-java">class WheelViewAdapter extends RecyclerView.Adapter&lt;WheelViewHolder&gt; {
 
     ...伪代码
 
@@ -3450,7 +3450,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>本文实现了 Android 中 dialog 的 3D 翻转效果。这里通过一个简单的应用场景记录下。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981489051639.gif" alt="20171105150981489051639.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981489051639.gif" alt="20171105150981489051639.gif"/><figcaption>20171105150981489051639.gif</figcaption></figure></p>
 
 <h2 id="toc_1">分析</h2>
 
@@ -3458,7 +3458,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 <p>起初自己的思路是 Activity 进行界面跳转实现旋转效果，网上看了很多，写下来发现效果不对。之后又看到 Google 上面的 Card Flid Animation 效果是这样的。</p>
 </blockquote>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201711051509814926496.gif" alt="201711051509814926496.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201711051509814926496.gif" alt="201711051509814926496.gif"/><figcaption>201711051509814926496.gif</figcaption></figure></p>
 
 <p>看着确实不错，然而拿下来 demo 放慢翻转速度后发现，不是我想要的。但是跟我看到的一个 app 里面的效果一样<br/>
 然后想改成 dialog 试试效果，发现更是不行了。</p>
@@ -3468,7 +3468,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 这个是通过Activity来切换Fragment实现的，可以看到区别是翻转时候貌似会变大，其实没用，只是翻转后的视觉问题。</p>
 </blockquote>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981496621515.gif" alt="20171105150981496621515.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981496621515.gif" alt="20171105150981496621515.gif"/><figcaption>20171105150981496621515.gif</figcaption></figure></p>
 
 <p>听说 openGl 比较麻烦，并且没有用过。然后就搜了下Rotate3DAnimaitons。<br/>
 搜到了<a href="http://blog.csdn.net/growing_tree/article/details/50428148">这篇文章</a><br/>
@@ -3478,7 +3478,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p><strong>Rotate3dAnimation</strong></p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * An animation that rotates the view on the Y axis between two specified angles.
  * This animation also adds a translation on the Z axis (depth) to improve the effect.
  */
@@ -3552,7 +3552,7 @@ public class Rotate3dAnimation extends Animation {
 
 <h2 id="toc_2">dialog实现3D翻转代码</h2>
 
-<pre><code class="language-java">public class MyDialog extends Dialog {
+<pre class="line-numbers"><code class="language-java">public class MyDialog extends Dialog {
 
     @BindView(R.id.et_user_name)
     EditText etUserName;
@@ -3802,7 +3802,7 @@ public class Rotate3dAnimation extends Animation {
 
 <p>它们的区别在于 SpannableString像一个String一样，构造对象的时候传入一个String，之后再无法更改String的内容，也无法拼接多个 SpannableString；而SpannableStringBuilder则更像是StringBuilder，它可以通过其append()方法来拼接多个String：</p>
 
-<pre><code class="language-java">//使用SpannableString，必须一次传入，构造完成  
+<pre class="line-numbers"><code class="language-java">//使用SpannableString，必须一次传入，构造完成  
 SpannableString word = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);  
   
 //使用SpannableStringBuilder,可以使用append()再添加  
@@ -3812,7 +3812,7 @@ multiWord.append(&quot;Harvic的&quot;);
 multiWord.append(&quot;博客&quot;);  
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981357471011.png" alt="20171105150981357471011.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981357471011.png" alt="20171105150981357471011.png"/><figcaption>20171105150981357471011.png</figcaption></figure></p>
 
 <p>因为Spannable等最终都实现了CharSequence接口，所以可以直接把SpannableString和SpannableStringBuilder通过TextView.setText()设置给TextView。</p>
 
@@ -3840,7 +3840,7 @@ multiWord.append(&quot;博客&quot;);
 
 <p>(1)、布局XML中加入一个EditText控件：</p>
 
-<pre><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+<pre class="line-numbers"><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;  
     android:layout_width=&quot;match_parent&quot;  
     android:layout_height=&quot;match_parent&quot;  
@@ -3856,7 +3856,7 @@ multiWord.append(&quot;博客&quot;);
 
 <p>（2）、这里用一个改变字体颜色的Span来做下演示</p>
 
-<pre><code class="language-markup">public class MainActivity extends Activity {  
+<pre class="line-numbers"><code class="language-markup">public class MainActivity extends Activity {  
       
     private EditText editText;    
     @Override  
@@ -3881,11 +3881,11 @@ multiWord.append(&quot;博客&quot;);
 
 <p>初始化效果是这样的：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098137022646.png" alt="2017110515098137022646.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098137022646.png" alt="2017110515098137022646.png"/><figcaption>2017110515098137022646.png</figcaption></figure></p>
 
 <p>分别在设置Span的前面和后面加入新文字，结果是这样的</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981371612095.png" alt="20171105150981371612095.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981371612095.png" alt="20171105150981371612095.png"/><figcaption>20171105150981371612095.png</figcaption></figure></p>
 
 <p>在前面和后面都加入虾米两个字，可见，前面的虾米没有任何效果，后面的则不同，添加上相同的Span特效，这是由于我们设置了Spannable.SPAN_EXCLUSIVE_INCLUSIVE的原因，即（前面不应用特效，后面应用特效），其它几个Flags参数的含义想必大家也都清楚了。在此就不再赘述。</p>
 
@@ -3901,7 +3901,7 @@ multiWord.append(&quot;博客&quot;);
 
 <h3 id="toc_5">字体颜色设置（ForegroundColorSpan）</h3>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 //再构造一个改变字体颜色的Span  
 ForegroundColorSpan span = new ForegroundColorSpan(Color.BLUE);    
 //将这个Span应用于指定范围的字体  
@@ -3912,63 +3912,63 @@ editText.setText(spanString);
 
 <p>效果：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981376259433.png" alt="20171105150981376259433.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981376259433.png" alt="20171105150981376259433.png"/><figcaption>20171105150981376259433.png</figcaption></figure></p>
 
 <h3 id="toc_6">字体背景颜色（BackgroundColorSpan）</h3>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 BackgroundColorSpan span = new BackgroundColorSpan(Color.YELLOW);    
 spanString.setSpan(span, 0, 3, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);    
 editText.setText(spanString);    
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981378799995.png" alt="20171105150981378799995.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981378799995.png" alt="20171105150981378799995.png"/><figcaption>20171105150981378799995.png</figcaption></figure></p>
 
 <h3 id="toc_7">字体大小（AbsoluteSizeSpan）</h3>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 AbsoluteSizeSpan span = new AbsoluteSizeSpan(16);    
 spanString.setSpan(span, 2, 5, Spannable.SPAN_INCLUSIVE_INCLUSIVE);    
 editText.setText(spanString); 
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981381112225.png" alt="20171105150981381112225.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981381112225.png" alt="20171105150981381112225.png"/><figcaption>20171105150981381112225.png</figcaption></figure></p>
 
 <h3 id="toc_8">粗体、斜体（StyleSpan）</h3>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 StyleSpan span = new StyleSpan(Typeface.BOLD_ITALIC);    
 spanString.setSpan(span, 1, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);    
 editText.setText(spanString);   
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981385959014.png" alt="20171105150981385959014.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981385959014.png" alt="20171105150981385959014.png"/><figcaption>20171105150981385959014.png</figcaption></figure></p>
 
 <h3 id="toc_9">删除线（StrikethroughSpan）</h3>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 StrikethroughSpan span = new StrikethroughSpan();    
 spanString.setSpan(span, 2, 5, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);    
 editText.setText(spanString);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981388447056.png" alt="20171105150981388447056.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981388447056.png" alt="20171105150981388447056.png"/><figcaption>20171105150981388447056.png</figcaption></figure></p>
 
 <h3 id="toc_10">下划线（UnderlineSpan）</h3>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 UnderlineSpan span = new UnderlineSpan();    
 spanString.setSpan(span, 1, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);    
 editText.setText(spanString); 
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981391043913.png" alt="20171105150981391043913.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981391043913.png" alt="20171105150981391043913.png"/><figcaption>20171105150981391043913.png</figcaption></figure></p>
 
 <h3 id="toc_11">图片置换（ImageSpan）</h3>
 
 <p>ImagSpan有很多构造函数，一般是通过传入Drawableg来构造，详细的构造说明看这里：<a href="http://developer.android.com/reference/android/text/style/ImageSpan.html">http://developer.android.com/reference/android/text/style/ImageSpan.html</a></p>
 
-<pre><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
+<pre class="line-numbers"><code class="language-java">SpannableString spanString = new SpannableString(&quot;欢迎光临Harvic的博客&quot;);    
 Drawable d = getResources().getDrawable(R.drawable.ic_launcher);    
 d.setBounds(0, 0, d.getIntrinsicWidth(), d.getIntrinsicHeight());    
 ImageSpan span = new ImageSpan(d, ImageSpan.ALIGN_BASELINE);    
@@ -3976,7 +3976,7 @@ spanString.setSpan(span, 2, 4, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE);
 editText.setText(spanString);  
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981394222312.png" alt="20171105150981394222312.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981394222312.png" alt="20171105150981394222312.png"/><figcaption>20171105150981394222312.png</figcaption></figure></p>
 
 <p>这个函数的不同之处在于，前几都是在原来文字的基础上加上特效，而这里却是利用图片将文字替换。如果遇到不支持显示图片的函数，比如前一篇中的canvas绘图。就会退化成String，即以原来的String字符串来显示。</p>
 
@@ -4034,7 +4034,7 @@ editText.setText(spanString);
 
 <p>基于以上设计原则，我们可以看出APP架构图，最上层是应用层，应用层以下都属于基础框架层，基础框架层包括：组件层、基础层和跨平台层。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098088003059.png" alt="2017110415098088003059.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098088003059.png" alt="2017110415098088003059.png"/><figcaption>2017110415098088003059.png</figcaption></figure></p>
 
 <p>我们要讨论的重点是基础层，下面开始一步一步地阐述如何基于开源函数库搭建属于自己的一个基础技术堆栈。</p>
 
@@ -4066,7 +4066,7 @@ Logger 是基于系统Log类基础上进行的封装，但新增了如下超赞�
 
 <p>Logcat截图</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980887746260.png" alt="20171104150980887746260.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980887746260.png" alt="20171104150980887746260.png"/><figcaption>20171104150980887746260.png</figcaption></figure></p>
 
 <p>当然Logger也不是完备的，它虽然支持格式化输出JSON、XML，但并不支持诸如List、Set、Map和数组等常见Java集合类的格式化输出。如何解决呢？可以看下LogUtils 这个开源库，它实现了Logger缺失的上述特性。</p>
 
@@ -4108,7 +4108,7 @@ Logger 是基于系统Log类基础上进行的封装，但新增了如下超赞�
 
 <p>LoganSquare是近两年崛起的快速解析和序列化JSON的Android函数库，其底层基于jackson的streaming API，使用APT(Android Annotation Tool)实现编译时注解，从而提高JSON解析和序列化的性能。官网上可以看到LoganSquare和gson、jackson databind的性能对比。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980902729820.jpg" alt="20171104150980902729820.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980902729820.jpg" alt="20171104150980902729820.jpg"/><figcaption>20171104150980902729820.jpg</figcaption></figure></p>
 
 <p>从性能方面看，LoganSquare是完胜gson和jackson的。如果和fastjson相比较，两者应该是不相上下的。</p>
 
@@ -4148,7 +4148,7 @@ Logger 是基于系统Log类基础上进行的封装，但新增了如下超赞�
 
 <p>greenDAO是一个轻量级且快速的ORM框架，专门为Android高度优化和定制，它能够支持每秒数千条记录的CRUD操作。官网上给出一张性能对比图</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980910467767.png" alt="20171104150980910467767.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980910467767.png" alt="20171104150980910467767.png"/><figcaption>20171104150980910467767.png</figcaption></figure></p>
 
 <p>纵轴表示每秒执行的操作数。而且greenDAO处在高度活跃中，最新Release版本是在2017年3月份发布的</p>
 
@@ -4175,7 +4175,7 @@ Logger 是基于系统Log类基础上进行的封装，但新增了如下超赞�
 
 <p>可以看出，前三个还是正常范围，但Realm的大小一般项目可能无法接受。这是因为不同CPU架构平台的 .so 文件增加了整个包的大小，由于arm平台的so在其他平台上面能够以兼容模式运行的，虽然会损失性能，但是可以极大地减少函数库占用的空间。因此，可以选择只保留armeabi-v7a和x86两个平台的 .so 文件，直接删除无用的 .so 文件，或者通过工程的build.gradle文件中增加 ndk abi 过滤，语句如下：</p>
 
-<pre><code class="language-text">android {
+<pre class="line-numbers"><code class="language-text">android {
     ...
     defaultConfig {
         ...
@@ -4211,7 +4211,7 @@ Logger 是基于系统Log类基础上进行的封装，但新增了如下超赞�
 
 <p>但是在6.0之后，系统对开发者隐藏了HttpClient函数库，这显著增大了使用android-async-http的代价。 如果铁了心想继续使用HttpClient，官方推荐的做法是在编译期引入<code>org.apache.http.legacy</code> 这个库，库目录在Android SDK目录下的<code>platforms\android-23\optional</code>中找到，它的作用是确保在编译时不会出现找不到HttpClient相关API的错误，在应用运行时可以不依赖这个库，因为6.0以上的Android系统还没有真正移除HttpClient的代码，只不过API设置为对开发者不可见。我们查看<code>android-async-http</code>源码发现，需要使用下面这个函数库来替换之前的Apache的HttpClient。</p>
 
-<pre><code class="language-text">dependencies {
+<pre class="line-numbers"><code class="language-text">dependencies {
     compile &#39;cz.msebera.android:httpclient:4.3.6&#39;
 }
 </code></pre>
@@ -4391,7 +4391,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>而在新版上，推荐使用 <code>Palette.Builder</code> 来创建我们的 <code>Palette</code> 对象，我们可以通过 <code>from()</code> 方法使用它。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg" alt="20171104150979158539416.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg" alt="20171104150979158539416.jpg"/><figcaption>20171104150979158539416.jpg</figcaption></figure></p>
 
 <p>一般我们使用第一个方法即可，直接传递进去一个 Bitmap 对象。得到 Builder 之后，我们还可以配置一些规则，但是一般我们不需要进行额外的（后面会讲到）。再通过 <code>Builder.generate()</code> 即可得到我们需要的 Palette 对象了。</p>
 
@@ -4441,15 +4441,15 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>以下是获取 Swatch 的代码。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg" alt="20171104150979172574268.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg" alt="20171104150979172574268.jpg"/><figcaption>20171104150979172574268.jpg</figcaption></figure></p>
 
 <p>接下来通过 Swatch 提取我们需要的颜色。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg" alt="20171104150979175346480.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg" alt="20171104150979175346480.jpg"/><figcaption>20171104150979175346480.jpg</figcaption></figure></p>
 
 <p>这里分别获取了需要的颜色以及字体颜色，下面看看运行的效果：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif" alt="20171104150979178525822.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif" alt="20171104150979178525822.gif"/><figcaption>20171104150979178525822.gif</figcaption></figure></p>
 
 <p>可以看到，确实有一些颜色，被标记成了红色，说明当前图片有获取不到的对应颜色。</p>
 
@@ -4461,7 +4461,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>从 <code>Builder.generate()</code> 开始。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg" alt="20171104150979183575637.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg" alt="20171104150979183575637.jpg"/><figcaption>20171104150979183575637.jpg</figcaption></figure></p>
 
 <p>从代码中可以看到，在 <code>generate()</code> 中，主线逻辑：</p>
 
@@ -4475,7 +4475,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>接下来看看比较关键的 <code>ColorCutQuantizer</code> 中的实现逻辑。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg" alt="20171104150979200867081.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg" alt="20171104150979200867081.jpg"/><figcaption>20171104150979200867081.jpg</figcaption></figure></p>
 
 <p>从代码中可以看到，其中的逻辑还是很清晰的。</p>
 
@@ -4491,19 +4491,19 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>所有需要的 Swatch ，都是被 Target 对象所标记。不同的 Swatch 都是通过 Target 中标记的常量值，进行运算，得到行的颜色。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg" alt="2017110415097921282334.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg" alt="2017110415097921282334.jpg"/><figcaption>2017110415097921282334.jpg</figcaption></figure></p>
 
 <h3 id="toc_8">过滤掉不需要的颜色</h3>
 
 <p>Palette 可以设置一些我们不需要的颜色，让它们不参与运算。这里的过滤条件，通过 Filter 来设定，并且 Palette 也提供给了一个 DEFAULT_FALTER 来标记默认的过滤颜色。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg" alt="20171104150979216238491.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg" alt="20171104150979216238491.jpg"/><figcaption>20171104150979216238491.jpg</figcaption></figure></p>
 
 <p>可以看到，默认的 Filter 会过滤掉一些靠近黑和白的颜色。</p>
 
 <p>当然，我们也可以自己定义 Filter ，并通过 Palette 中的 <code>addFilter()</code>、<code>clearFilters()</code> 来管理它。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg" alt="2017110415097964327573.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg" alt="2017110415097964327573.jpg"/><figcaption>2017110415097964327573.jpg</figcaption></figure></p>
 
 <p>这里存储 Filter 的是一个 ArrayList ，所以我们是可以定义很多个 Filter 加入进去的，它们都会生效。</p>
 
@@ -4511,7 +4511,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>在 ColorCutQuantizer 中，被使用的 maxColor ，主要用于标记需要使用的颜色个数。它是可以通过 maximumColorCount() 方法，进行设置的，如果不对其进行设定，默认值为 16。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg" alt="20171104150979646212624.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg" alt="20171104150979646212624.jpg"/><figcaption>20171104150979646212624.jpg</figcaption></figure></p>
 
 <p>理论上来说，这里设置的maxColor 的值越大，运算花费的时间就越长。而越小，可以被选择的色值也就越少。</p>
 
@@ -4556,7 +4556,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 首先，在自定义 LayoutInflate 之前，我们要先分析一下 LayoutInflate 的源码，了解了源码的实现方式，才能定制嘛~~~~<br/>
 好了，怕你们无聊跑了，先放效果图出来镇贴</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978927436317.gif" alt="20171104150978927436317.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978927436317.gif" alt="20171104150978927436317.gif"/><figcaption>20171104150978927436317.gif</figcaption></figure></p>
 
 <p>好了，效果看完了，</p>
 
@@ -4564,7 +4564,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <h2 id="toc_0">LayoutInflate</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/><figcaption>201711041509789321695.jpg</figcaption></figure></p>
 
 <p>还是提取一下关键信息吧。</p>
 
@@ -4581,7 +4581,7 @@ Volley 官方源码托管在Google Source上面，使用时只能直接以Jar包
 
 <p>我们给 Activity 设置 布局 xml 都是调用这个方法，现在我们就来看看这个方法到底干了什么事。</p>
 
-<pre><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
+<pre class="line-numbers"><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
   getWindow().setContentView(layoutResID);
   initWindowDecorActionBar();
 }
@@ -4624,7 +4624,7 @@ public PhoneWindow(Context context) {
 
 <p>同样是调用了LayoutInflate.inflate()方法</p>
 
-<pre><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
+<pre class="line-numbers"><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
     LayoutInflater factory = LayoutInflater.from(context);
     return factory.inflate(resource, root);
 }
@@ -4639,7 +4639,7 @@ public PhoneWindow(Context context) {
 <p>我们再来看看怎么获取到 LayoutInflate 的实例。<br/>
 上面三个xml 解析成 view 的方法都是用LayoutInflate.from(context)来获取 LayoutInflate 实例的。</p>
 
-<pre><code class="language-java">public static LayoutInflater from(Context context) {
+<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -4659,7 +4659,7 @@ public PhoneWindow(Context context) {
 
 <p>通过 Resources 获取 xml 解析器XmlResourceParser。</p>
 
-<pre><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre class="line-numbers"><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
     final Resources res = getContext().getResources();
     if (DEBUG) {
         Log.d(TAG, &quot;INFLATING from resource: \&quot;&quot; + res.getResourceName(resource) + &quot;\&quot; (&quot;
@@ -4677,7 +4677,7 @@ public PhoneWindow(Context context) {
 
 <p>XmlResourceParser解析 xml，并且返回 view</p>
 
-<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
     synchronized (mConstructorArgs) {
         //写入跟踪信息，用于 Debug 相关，先不关心这个
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;inflate&quot;);
@@ -4783,7 +4783,7 @@ public PhoneWindow(Context context) {
 
 <p>我们先来看看 createViewFromTag</p>
 
-<pre><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
+<pre class="line-numbers"><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
     //获取命名空间
    if (name.equals(&quot;view&quot;)) {
         name = attrs.getAttributeValue(null, &quot;class&quot;);
@@ -4852,7 +4852,7 @@ public PhoneWindow(Context context) {
 
 <p>接下来继续去看子 View 的解析rInflateChildren</p>
 
-<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 //获取布局层级
     final int depth = parser.getDepth();
     int type;
@@ -4919,7 +4919,7 @@ public PhoneWindow(Context context) {
 
 <p>源码看了很久，我们再来重新看一遍动画吧</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979091135893.gif" alt="20171104150979091135893.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979091135893.gif" alt="20171104150979091135893.gif"/><figcaption>20171104150979091135893.gif</figcaption></figure></p>
 
 <ol>
 <li>翻页</li>
@@ -4971,7 +4971,7 @@ You can use this to customize the tag names available in your XML layout files.<
 
 <p>关键代码如下：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
  //创建一个 View
     View view = createViewOrFailQuietly(name, context, attrs);
@@ -4989,7 +4989,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>创建 view 的方法，这里注意一下，xml 标签里面系统的 view只有类名，自定义 view 是全路径。如：,而可以省略路径的 View 又分为 &quot;android.widget.&quot;和&quot;android.view.&quot;包下，所以对于只写缩写的 view，需要遍历这两个路径。</p>
 
-<pre><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
+<pre class="line-numbers"><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
                                      AttributeSet attrs) {
     //1.自定义控件标签名称带点，所以创建时不需要前缀
     if (name.contains(&quot;.&quot;)) {
@@ -5017,7 +5017,7 @@ private View createViewOrFailQuietly(String name, String prefix, Context context
 
 <p>读取 attrs 里面的属性，给含有特点 attrs 属性的 view设置 tag 并保存起来。</p>
 
-<pre><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
+<pre class="line-numbers"><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
     //所有自定义的属性
     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AnimationView);
     if (a != null &amp;&amp; a.length() &gt; 0) {
@@ -5037,7 +5037,7 @@ private View createViewOrFailQuietly(String name, String prefix, Context context
 
 <p>好了，我们自定义LayoutInflater.Factory已经结束了，so，我们可以直接调用 LayoutInflate.cloneInContext(context)获取一个新的 LayoutInflate，然后再setFactor(customFactor)就可以了。代码如下：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View onCreateView(LayoutInflater original, ViewGroup container,
                          Bundle savedInstanceState) {
     Bundle args = getArguments();

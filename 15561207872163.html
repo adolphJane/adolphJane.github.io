@@ -140,7 +140,7 @@
 
 <p>首先我们应该先把问题抛出，如果我们在xml把控件的宽度和高度写死，比如</p>
 
-<pre><code class="language-text"> &lt;TextView
+<pre class="line-numbers"><code class="language-text"> &lt;TextView
             android:layout_width=&quot;100dp&quot;
             android:layout_height=&quot;50dp&quot;
             android:gravity=&quot;center&quot;
@@ -153,7 +153,7 @@
 
 <p>我们写这样的一段代码，然后看一下xml的预览效果：</p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:orientation=&quot;vertical&quot;
@@ -165,17 +165,17 @@
 &lt;/LinearLayout&gt;
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007149290806.png" alt="20171108151007149290806.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007149290806.png" alt="20171108151007149290806.png"/><figcaption>20171108151007149290806.png</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007150182264.png" alt="20171108151007150182264.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007150182264.png" alt="20171108151007150182264.png"/><figcaption>20171108151007150182264.png</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007150657381.png" alt="20171108151007150657381.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151007150657381.png" alt="20171108151007150657381.png"/><figcaption>20171108151007150657381.png</figcaption></figure></p>
 
 <h2 id="toc_1">关于java动态写控件大小的思考</h2>
 
 <p>我们看到360dp在不同设备的所表现的占屏比是不同的。如果我们写数值比较小的dp相信直接写死的问题不大。但是如果设计稿上某个控件的宽度你换算完刚好是340dp怎么，肯定不能写340dp。其实我们可以用match_parent然后用padding margin之类的东西，在左右留一个小数值dp的距离，来实现效果。但是如果这个控件要求是高度和宽度的比例是固定的，比如展示一个广告浮层的图片，那么xml估计就无法锁定宽高比了，我们就必须借助java代码来决定这个控件高度：</p>
 
-<pre><code class="language-java">RelativeLayout.LayoutParams mLayoutParams = 
+<pre class="line-numbers"><code class="language-java">RelativeLayout.LayoutParams mLayoutParams = 
 new RelativeLayout.LayoutParams (mHeight,mWidth);
 mLayoutParams.addRule(RelativeLayout.ALIGN_TOP, R.id.supernatant);
 mLayoutParams.addRule(RelativeLayout.ALIGN_LEFT, R.id.supernatant);
@@ -186,7 +186,7 @@ bigImg.setLayoutParams(mLayoutParams);
 <p>类似这样宽度和高度都是活的，我们可以通过获取屏幕的实际宽高像素，来通过等比，相似等一些算法，转换出比例和UI设计图一样的UI，但是最大的弊端应该就是，这么书写会让java代码比较多，比较乱。因此会有一些百分百布局框架等，其实思路都类似，等比缩放就是很核心思路。 <br/>
 有个轻量的方法也就是写个工具类算出设计图到手机屏幕的转换关系：</p>
 
-<pre><code class="language-java">public static int getHeightByValue720(int mValue) {
+<pre class="line-numbers"><code class="language-java">public static int getHeightByValue720(int mValue) {
 return (int) ((float) (DPITools.getHeight() * nDesignValue) / (float) 1280);
     }
 
@@ -204,7 +204,7 @@ return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
 
 <p>如果按照上述方式我们在三星Galaxy S8上运行效果会是如何呢？结果是200X462。控件已经倍拉伸了，原因就是S8的屏幕比例不是16比9所以，按照原来的方式缩放，就会造成拉伸，为此市面上也有解决方案：</p>
 
-<pre><code class="language-java">public static int getValueByValue720(int mValue) {
+<pre class="line-numbers"><code class="language-java">public static int getValueByValue720(int mValue) {
 return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
     }
 </code></pre>
@@ -217,7 +217,7 @@ return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
 
 <p>这样面临一个问题，如果在16比10的手机上，其实每次计算出的高度都是大于手机比例的，因此cardview后面的几个控件可能无法正常显示，或被拉伸。在18.5比9的手机上，cardview下面可能有空余，或者根据不同layout方式，可能其他地方有空余。我认为这还是可以接受的，比较这种手机是少数，但是控件被挤压就难以接受了。归纳起来也就说，如果这种不能上下滑动的view，可以让它有空余，但是不能让它挤压。我们可以使用一个保守的方法，判断手机是否是大于16比9，如果大于就说明手机比较瘦高，如果小于就说明手机比较胖。我们就可以用相对充裕的方法计算控件宽高，来保证控件不被挤压。</p>
 
-<pre><code class="language-java">public static boolean bigThan169() {
+<pre class="line-numbers"><code class="language-java">public static boolean bigThan169() {
         float h = DPIUtil.getHeight();
         float w = DPIUtil.getWidth();
         if ((h / w) &gt; 1.78f) return true;
@@ -225,7 +225,7 @@ return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
     }
 </code></pre>
 
-<pre><code class="language-java">if (bigThan169())
+<pre class="line-numbers"><code class="language-java">if (bigThan169())
 newWidth = DPIUtil.getWidthByDesignValue720(DesignWidth);（以宽度为基准）
 else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为基准 从而保证控件上下高度够用）
 </code></pre>

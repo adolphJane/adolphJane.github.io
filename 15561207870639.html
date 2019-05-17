@@ -140,7 +140,7 @@
 
 <h2 id="toc_0">项目关系图</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797219986560.png" alt="20171014150797219986560.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797219986560.png" alt="20171014150797219986560.png"/><figcaption>20171014150797219986560.png</figcaption></figure></p>
 
 <ul>
 <li>sdk: 一些公用库，各种辅助类，和第三方view</li>
@@ -153,7 +153,7 @@
 
 <p>想必大家都知道了，定义一个isBuildModule=false，在组件的build.gradle中加入</p>
 
-<pre><code class="language-java">if (isBuildModule.toBoolean()) {
+<pre class="line-numbers"><code class="language-java">if (isBuildModule.toBoolean()) {
     apply plugin: &#39;com.android.application&#39;
 } else {
     apply plugin: &#39;com.android.library&#39;
@@ -180,7 +180,7 @@
 
 <p>我把所以的library都依赖在basic，每个组件都会依赖这个包，这样就不会存在library的版本问题，资源的问题就是</p>
 
-<pre><code class="language-text"> defaultConfig {
+<pre class="line-numbers"><code class="language-text"> defaultConfig {
 
         if (isBuildModule.toBoolean()) {
             applicationId &quot;com.wkw.archives&quot;
@@ -201,7 +201,7 @@
 
 <p>你可以选择阿里的<a href="https://github.com/alibaba/ARouter">ARouter</a>库，但是我的项目没有那么复杂，组件也就4个左右，所以没有使用阿里的库，我采用的是以下就是核心代码，</p>
 
-<pre><code class="language-java">Object result = null;
+<pre class="line-numbers"><code class="language-java">Object result = null;
 Class&lt;?&gt; c = Class.forName(className);
 if (c != null) {
     result = c.newInstance();
@@ -215,7 +215,7 @@ return result;
 
 <p><a href="https://github.com/android10/Android-CleanArchitecture">CleanArchitecture框架的github地址</a>，这里再介绍分享一篇文章小鄧子的<a href="http://www.jianshu.com/p/3edcf85539a6">Easy Clean architecture on Android</a>,我把data和domain会写在各自的业务模块中，自己的模块只要定义自己的就可以了，有个ApplicationModule会定义一些每个模块都需要的，</p>
 
-<pre><code class="language-java">public class ApplicationModule {
+<pre class="line-numbers"><code class="language-java">public class ApplicationModule {
 
     @Provides
     @Singleton
@@ -258,7 +258,7 @@ return result;
 <p>然后在module_archives模块中会有ArchivesDataRepositoryModule和ArchivesActivityModule<br/>
 其中KnowledgeDataRepositoryModule用于提供如下：</p>
 
-<pre><code class="language-java">@Module
+<pre class="line-numbers"><code class="language-java">@Module
 public class ArchivesDataRepositoryModule {
 
     @Provides
@@ -277,7 +277,7 @@ public class ArchivesDataRepositoryModule {
 
 <p>ArchivesActivityModule的代码如下：</p>
 
-<pre><code class="language-java">@Module
+<pre class="line-numbers"><code class="language-java">@Module
 public abstract class ArchivesActivityModule {
    @PerActivity
    @ContributesAndroidInjector()
@@ -287,7 +287,7 @@ public abstract class ArchivesActivityModule {
 
 <p>这样在主app的AppComponent类中加入：</p>
 
-<pre><code class="language-java">@Singleton
+<pre class="line-numbers"><code class="language-java">@Singleton
 @Component(modules = {
        AndroidInjectionModule.class, ApplicationModule.class,
        ArchivesDataRepositoryModule.class, ArchivesActivityModule.class,
@@ -306,7 +306,7 @@ public interface AppComponent {
 
 <p>在module_archives为debug模式下也会有个AppComponent</p>
 
-<pre><code class="language-java">@Singleton
+<pre class="line-numbers"><code class="language-java">@Singleton
 @Component(modules = {
         AndroidInjectionModule.class, ApplicationModule.class,
         ArchivesDataRepositoryModule.class, ArchivesActivityModule.class
@@ -324,7 +324,7 @@ public interface AppComponent {
 
 <p>各种模块初始化api和Repository，你要是嫌弃每个模块都要引入两个.class文件，你可以使用一个然后采用include的方式好比dagger中的AndroidSupportInjectionModule类方式</p>
 
-<pre><code class="language-java">@Beta
+<pre class="line-numbers"><code class="language-java">@Beta
 @Module(includes = AndroidInjectionModule.class)
 public abstract class AndroidSupportInjectionModule {
   @Multibinds
@@ -341,7 +341,7 @@ public abstract class AndroidSupportInjectionModule {
 
 <p>各种模块当为library是要打包成aar的，maven-release-kline-aar.gradle文件代码如下:</p>
 
-<pre><code class="language-java">apply plugin: &#39;maven&#39;
+<pre class="line-numbers"><code class="language-java">apply plugin: &#39;maven&#39;
 
 ext {// ext is a gradle closure allowing the declaration of global properties
     PUBLISH_GROUP_ID = &#39;com.wkw&#39;

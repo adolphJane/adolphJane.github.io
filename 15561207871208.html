@@ -136,13 +136,13 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929495953693.gif" alt="20171030150929495953693.gif"/></p>
+      <p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929495953693.gif" alt="20171030150929495953693.gif"/><figcaption>20171030150929495953693.gif</figcaption></figure></p>
 
 <h2 id="toc_0">创建通用的 CommonDialogFragment</h2>
 
 <p>这个类是 DialogFragment 的子类，对 DialogFragment 进行封装，依赖外部传入的 AlertDialog 来构建，同时也处理了 DialogFragment 中 AlertDialog 不能设置外部取消的问题</p>
 
-<pre><code class="language-text">public class CommonDialogFragment extends DialogFragment {
+<pre class="line-numbers"><code class="language-text">public class CommonDialogFragment extends DialogFragment {
 
     /**
      * 监听弹出窗是否被取消
@@ -218,7 +218,7 @@
 <p>最后便是封装我们的构造函数<br/>
 <code>newInstance(OnCallDialog call, boolean cancelable, OnDialogCancelListener cancelListener)</code>，当我们要使用这个 CommonDialogFragment 的时候，先 new 一个 OnCallDialog，将我们想要显示的 Dialog 传进去，<code>cancelable</code>，用于设置对话框是否能被取消，可以看到在 <code>onCancel()</code> 有这样一段代码</p>
 
-<pre><code class="language-text">if(mCancelListener != null){
+<pre class="line-numbers"><code class="language-text">if(mCancelListener != null){
   mCancelListener.onCancel();
 }
 </code></pre>
@@ -233,7 +233,7 @@
 
 <h3 id="toc_2">在 styles 文件中定义我们定义我们对话框的风格样式</h3>
 
-<pre><code class="language-text">&lt;style name=&quot;Base_AlertDialog&quot; parent=&quot;Base.Theme.AppCompat.Light.Dialog&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;style name=&quot;Base_AlertDialog&quot; parent=&quot;Base.Theme.AppCompat.Light.Dialog&quot;&gt;
 
         &lt;!--不设置在6.0以上会出现，宽度不充满屏幕的情况--&gt;
         &lt;item name=&quot;windowMinWidthMinor&quot;&gt;90%&lt;/item&gt;
@@ -265,14 +265,14 @@
 
 <h3 id="toc_3">写一个接口，用于 DialogFragmentHelper 与逻辑层之间进行数据监听</h3>
 
-<pre><code class="language-java">public interface IDialogResultListener&lt;T&gt; {
+<pre class="line-numbers"><code class="language-java">public interface IDialogResultListener&lt;T&gt; {
     void onDataResult(T result);
 }
 </code></pre>
 
 <p>准备工作做完了，就让我们开工撸 DialogFragmentHelper 吧，因为篇幅有限，我只是代表性的选了其中的一些效果来讲，具体的代码，可以参考下 DialogFragmentDemos</p>
 
-<pre><code class="language-java">public class DialogFragmentHelper {
+<pre class="line-numbers"><code class="language-java">public class DialogFragmentHelper {
 
     private static final String TAG_HEAD = DialogFragmentHelper.class.getSimpleName();
 
@@ -340,7 +340,7 @@
 
 <p>就以 加载中的弹出窗 为例，来看看我们是怎么实现的</p>
 
-<pre><code class="language-java">public static CommonDialogFragment showProgress(FragmentManager fragmentManager, final String message, boolean cancelable, CommonDialogFragment.OnDialogCancelListener cancelListener){
+<pre class="line-numbers"><code class="language-java">public static CommonDialogFragment showProgress(FragmentManager fragmentManager, final String message, boolean cancelable, CommonDialogFragment.OnDialogCancelListener cancelListener){
     CommonDialogFragment dialogFragment = CommonDialogFragment.newInstance(new CommonDialogFragment.OnCallDialog() {
         @Override
         public Dialog getDialog(Context context) {
@@ -358,7 +358,7 @@
 
 <p>应该还没忘了我们上面创建了一个 IDialogResultListener<T> 用于 DialogFragment 与逻辑层之间进行数据监听吧，为了能传入各种各样类型的数据，这里我使用了 泛型 来进行处理，就以 带输入框的弹出窗 为例来看看究竟要怎么使用吧</p>
 
-<pre><code class="language-java">public static void showInsertDialog(FragmentManager manager, final String title, final IDialogResultListener&lt;String&gt; resultListener, final boolean cancelable){
+<pre class="line-numbers"><code class="language-java">public static void showInsertDialog(FragmentManager manager, final String title, final IDialogResultListener&lt;String&gt; resultListener, final boolean cancelable){
 
     CommonDialogFragment dialogFragment = CommonDialogFragment.newInstance(new CommonDialogFragment.OnCallDialog() {
 
