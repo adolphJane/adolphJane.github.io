@@ -116,192 +116,6 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15561207872380.html">
-                
-                  <h1>Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>FloatingView-android能够让View执行漂亮的漂浮动画的库</p>
-
-<h2 id="toc_0">使用</h2>
-
-<h3 id="toc_1">Step 1</h3>
-
-<p>在 <code>build.gradle</code> 文件中添加库依赖</p>
-
-<pre class="line-numbers"><code class="language-text">dependencies {  
-    compile &#39;com.ufreedom.uikit:FloatingViewLib:1.0.2&#39;
-}
-</code></pre>
-
-<h3 id="toc_2">Step 2</h3>
-
-<p>使用 <code>FloatingBuilder</code> 创建一个 <code>FloatingElement</code></p>
-
-<pre class="line-numbers"><code class="language-java">FloatingElement builder = new FloatingBuilder()
-                            .anchorView(View)
-                            .targetView(View)
-                            .offsetX(int)
-                            .offsetY(int)
-                            .floatingTransition(FloatingTransition)
-                            .build();
-</code></pre>
-
-<p>使用 FloatingBuilder 可以设置的有</p>
-
-<ul>
-<li>anchorView ：锚点，也就是你想在哪个 View 上面进行漂浮动画</li>
-<li>target：目标，你想漂浮的 View</li>
-<li>offsetX：x 方向的偏移量，单位 px</li>
-<li>offsetY: y 方向的偏移量，单位 px</li>
-<li>floatingTransition : 漂浮效果，默认是 ScaleFloatingTransition，也可以自己实现漂浮效果</li>
-</ul>
-
-<h3 id="toc_3">Step 3</h3>
-
-<p>创建一个 <code>FloatingView</code> 作为 <code>FloatingElement</code> 的容器,然后让你的 View 飞起来</p>
-
-<pre class="line-numbers"><code class="language-java">Floating floating = new Floating(getActivity());
-    floating.startFloating(builder);
-</code></pre>
-
-<h2 id="toc_4">自定义</h2>
-
-<h3 id="toc_5">坐标系</h3>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015672071477.png" alt="20171108151015672071477.png"/><figcaption>20171108151015672071477.png</figcaption></figure></p>
-
-<h3 id="toc_6">图类</h3>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015676013276.png" alt="20171108151015676013276.png"/><figcaption>20171108151015676013276.png</figcaption></figure></p>
-
-<h3 id="toc_7">漂浮动画</h3>
-
-<p>实现漂浮动画很简单，你只需要实现 <code>FloatingTransition</code> 接口就可以</p>
-
-<pre class="line-numbers"><code class="language-text">public interface FloatingTransition {
-  public void applyFloating(YumFloating yumFloating);  
-}
-</code></pre>
-
-<p>在applyFloating方法，你可以使用 Android Animation 创建动画，然后使用 YumFloating 进行 Alpha,Scale,Translate,Rotate 等变换如果你想加入 <a href="http://facebook.github.io/rebound/">Facebook Rebound</a> 回弹动画效果，你可以使用 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/spring/SpringHelper.java">SpringHelper</a>,例如 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/effect/ScaleFloatingTransition.java">ScaleFloatingTransition</a>: </p>
-
-<pre class="line-numbers"><code class="language-text">public class ScaleFloatingTransition implements FloatingTransition {
-...
-
-@Override
-public void applyFloating(final YumFloating yumFloating) {
-
-    ValueAnimator alphaAnimator = ObjectAnimator.ofFloat(1.0f, 0.0f);
-    alphaAnimator.setDuration(duration);
-    alphaAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-        @Override
-        public void onAnimationUpdate(ValueAnimator valueAnimator) {
-            yumFloating.setAlpha((Float) valueAnimator.getAnimatedValue());
-        }
-    });
-    alphaAnimator.start();
-
-    SpringHelper.createWidthBouncinessAndSpeed(0.0f, 1.0f,bounciness, speed)
-            .reboundListener(new SimpleReboundListener(){
-                @Override
-                public void onReboundUpdate(double currentValue) {
-                    yumFloating.setScaleX((float) currentValue);
-                    yumFloating.setScaleY((float) currentValue);
-                }
-            }).start(yumFloating);
-}}
-</code></pre>
-
-<p>如果 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/spring/SpringHelper.java">SpringHelper</a> 无法满足你的需求，你可以直接使用 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/transition/YumFloating.java">YumFloating</a> 的createSpringByBouncinessAndSpeed(double bounciness, double speed)<br/>
-或者createSpringByTensionAndFriction(double tension, double friction)<br/>
-创建 Spring, 然后使用transition(double progress, float startValue, float endValue)<br/>
-进行数值转换</p>
-
-<h3 id="toc_8">路径漂浮动画</h3>
-
-<p>实现路径漂浮同样很简单，例如 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/effect/CurveFloatingPathTransition.java">CurveFloatingPathTransition</a> ,首先你需要继承 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/transition/BaseFloatingPathTransition.java">BaseFloatingPathTransition</a> 类.和继承 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/transition/FloatingTransition.java">FloatingTransition</a> 类不同的是，你需要再实现一个getFloatingPath()<br/>
-方法.在getFloatingPath()方法内使用Path创建你想漂浮的路径，然后调用FloatingPath.create(path, false)<br/>
-进行返回. 例如 <a href="https://github.com/UFreedom/FloatingView/blob/master/FloatingViewLib/src/main/java/com/ufreedom/floatingview/effect/CurveFloatingPathTransition.java">CurveFloatingPathTransition</a> 实现：</p>
-
-<pre class="line-numbers"><code class="language-java">public class CurveFloatingPathTransition extends BaseFloatingPathTransition {
-    ...
-
-    @Override
-    public FloatingPath getFloatingPath() {
-        if (path == null){
-            path = new Path();
-            path.moveTo(0, 0);
-            path.quadTo(-100, -200, 0, -300);
-            path.quadTo(200, -400, 0, -500);
-        }
-        return FloatingPath.create(path, false);
-    }
-
-    @Override
-    public void applyFloating(final YumFloating yumFloating) {
-        ValueAnimator translateAnimator;
-        ValueAnimator alphaAnimator;
-
-
-        translateAnimator = ObjectAnimator.ofFloat(getStartPathPosition(), getEndPathPosition());
-        translateAnimator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
-            @Override
-            public void onAnimationUpdate(ValueAnimator valueAnimator) {
-                float value = (float) valueAnimator.getAnimatedValue();
-                PathPosition floatingPosition = getFloatingPosition(value);
-                yumFloating.setTranslationX(floatingPosition.x);
-                yumFloating.setTranslationY(floatingPosition.y);
-
-            }
-        });
-
-       ...
-    }}
-</code></pre>
-
-<p>使用 Path 将你想要漂浮的路径的描绘出来，然后在 applyFloating(final YumFloating yumFloating) 方法中:</p>
-
-<ul>
-<li>使用 getStartPathPosition() 方法获取路径的开始位置</li>
-<li>使用 getEndPathPosition()方法获取路径的结束位置</li>
-<li>使用 getFloatingPosition(float progress) 获取当前进度的位置</li>
-</ul>
-
-<p>getFloatingPosition(float progress) 方法会返回一个 PathPosition 对象，其属性 x,y 分别代表当前路径动画的 x 坐标，和 y 坐标.</p>
-
-<h2 id="toc_9">设计思想</h2>
-
-<p>对于开源库来说，易用，扩展性强，非常重要， FloatingView 正在努力朝这方面发展</p>
-
-<p>项目地址为:<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FUFreedom%2FFloatingView">github.com/UFreedom/Fl…</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
                 <a class="clearlink" href="15561207872340.html">
                 
                   <h1>Android-RecyclerViewItemDecoration的进阶使用</h1>
@@ -316,506 +130,6 @@ public void applyFloating(final YumFloating yumFloating) {
 <li>ItemDecoration实现item的拖拽，平移等操作 </li>
 </ol>
 
-<h2 id="toc_0">ItemDecoration</h2>
-
-<p>ItemDecoration是RecyclerView内部的一个抽象类，要实现这个抽象类自然需要实现内部的抽象方法，除了deprecated的方法只有下面三个方法：</p>
-
-<pre class="line-numbers"><code class="language-text">//可以实现类似padding的效果
-public void onDraw(Canvas c, RecyclerView parent, State state) 
-//可以实现类似绘制背景的效果，内容在上面
-public void onDrawOver(Canvas c, RecyclerView parent, State state)  
-//可以绘制在内容的上面，覆盖内容
-public void getItemOffsets(Rect outRect, View view, RecyclerView parent, State state)
-</code></pre>
-
-<p>声明下：ItemDecoration的使用必须在setAdapter前，通过recyclerView.addItemDecoration()方法设置</p>
-
-<h2 id="toc_1">下面讲解ItemDecoration实现的功能</h2>
-
-<h3 id="toc_2">ItemDecoration实现padding</h3>
-
-<pre class="line-numbers"><code class="language-java">    public class PaddingDecoration extends RecyclerView.ItemDecoration{
-
-    private int padding;
-
-    public PaddingDecoration(Context context) {
-        //即你要设置的分割线的宽度 --这里设为10dp
-        padding = context.getResources().getDimensionPixelSize(R.dimen.padding);
-    }
-
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        //outRect就是你那个item条目的矩形
-        outRect.left = padding;  //相当于 设置 left padding
-        outRect.top = padding;   //相当于 设置 top padding
-        outRect.right = padding; //相当于 设置 right padding
-        outRect.bottom = padding;  //相当于 设置 bottom padding
-    }
-}
-</code></pre>
-
-<h3 id="toc_3">ItemDecoration实现下划线</h3>
-
-<pre class="line-numbers"><code class="language-java">    public class DeviderDecoration extends RecyclerView.ItemDecoration {
-
-    private int deviderHeight;
-    private Paint dividerPaint;
-
-    public DeviderDecoration(Context context) {
-        //设置画笔
-        dividerPaint = new Paint();
-        //设置分割线颜色
-        dividerPaint.setColor(context.getResources().getColor(R.color.colorAccent));
-        //设置分割线宽度
-        deviderHeight = context.getResources().getDimensionPixelSize(R.dimen.divider_height);
-    }
-
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        //改变宽度
-        outRect.bottom = deviderHeight;
-    }
-
-    @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        //得到列表所有的条目
-        int childCount = parent.getChildCount();
-        //得到条目的宽和高
-        int left = parent.getPaddingLeft();
-        int right = parent.getWidth() - parent.getPaddingRight();
-
-        for (int i = 0; i &lt; childCount - 1; i++) {
-            View view = parent.getChildAt(i);
-            //计算每一个条目的顶点和底部 float值
-            float top = view.getBottom();
-            float bottom = view.getBottom() + deviderHeight;
-            //重新绘制
-            c.drawRect(left, top, right, bottom, dividerPaint);
-        }
-    }
-}
-</code></pre>
-
-<h3 id="toc_4">ItemDecoration实现酷炫吸顶效果</h3>
-
-<pre class="line-numbers"><code class="language-java">    public class SectionDecoration extends RecyclerView.ItemDecoration {
-
-    private List&lt;String&gt; dataList;
-    private DecorationCallback callback;
-    private TextPaint textPaint;
-    private Paint paint;
-    private int topGap;
-    private int alignBottom;
-    private Paint.FontMetrics fontMetrics;
-
-
-    public SectionDecoration(List&lt;String&gt; dataList, Context context, DecorationCallback decorationCallback) {
-        Resources res = context.getResources();
-        this.dataList = dataList;
-        this.callback = decorationCallback;
-        //设置悬浮栏的画笔---paint
-        paint = new Paint();
-        paint.setColor(res.getColor(R.color.colorGray));
-
-        //设置悬浮栏中文本的画笔
-        textPaint = new TextPaint();
-        textPaint.setAntiAlias(true);
-        textPaint.setTextSize(DensityUtil.dip2px(context, 14));
-        textPaint.setColor(Color.DKGRAY);
-        textPaint.setTextAlign(Paint.Align.LEFT);
-        fontMetrics = new Paint.FontMetrics();
-
-        //决定悬浮栏的高度等
-        topGap = res.getDimensionPixelSize(R.dimen.sectioned_top);
-        //决定文本的显示位置等
-        alignBottom = res.getDimensionPixelSize(R.dimen.sectioned_alignBottom);
-    }
-
-    //图1：代表了getItemOffsets(),可以实现类似padding的效果
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        int pos = parent.getChildAdapterPosition(view);
-
-        String groupId = callback.getGroupId(pos);
-        if (groupId.equals(&quot;-1&quot;)) return;
-        //只有是同一组的第一个才显示悬浮栏
-        if (pos == 0 || isFirstInGroup(pos)) {
-            outRect.top = topGap;
-            if (dataList.get(pos) == &quot;&quot;) {
-                outRect.top = 0;
-            }
-        } else {
-            outRect.top = 0;
-        }
-    }
-
-    //图2：代表了onDraw(),可以实现类似绘制背景的效果，内容在上面
-    @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDraw(c, parent, state);
-        int left = parent.getPaddingLeft();
-        int right = parent.getWidth() - parent.getPaddingRight();
-        int childCount = parent.getChildCount();
-        for (int i = 0; i &lt; childCount; i++) {
-            View view = parent.getChildAt(i);
-            int position = parent.getChildAdapterPosition(view);
-            String groupId = callback.getGroupId(position);
-            if (groupId.equals(&quot;-1&quot;)) return;
-            String textLine = callback.getGroupFirstLine(position).toUpperCase();
-            if (textLine == &quot;&quot;) {
-                float top = view.getTop();
-                float bottom = view.getTop();
-                c.drawRect(left, top, right, bottom, paint);
-                return;
-            } else {
-                if (position == 0 || isFirstInGroup(position)) {
-                    float top = view.getTop() - topGap;
-                    float bottom = view.getTop();
-                    //绘制悬浮栏
-                    c.drawRect(left, top, right, bottom, paint);
-                    //绘制文本
-                    c.drawText(textLine, left, bottom, textPaint);
-                }
-            }
-        }
-    }
-
-    //图3：代表了onDrawOver()，可以绘制在内容的上面，覆盖内容
-    @Override
-    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDrawOver(c, parent, state);
-
-        int itemCount = state.getItemCount();
-        int childCount = parent.getChildCount();
-        int left = parent.getPaddingLeft();
-        int right = parent.getWidth() - parent.getPaddingRight();
-        float lineHeight = textPaint.getTextSize() + fontMetrics.descent;
-
-        String preGroupId = &quot;&quot;;
-        String groupId = &quot;-1&quot;;
-        for (int i = 0; i &lt; childCount; i++) {
-            View view = parent.getChildAt(i);
-            int position = parent.getChildAdapterPosition(view);
-
-            preGroupId = groupId;
-            groupId = callback.getGroupId(position);
-            if (groupId.equals(&quot;-1&quot;) || groupId.equals(preGroupId)) continue;
-
-            String textLine = callback.getGroupFirstLine(position).toUpperCase();
-            if (TextUtils.isEmpty(textLine)) continue;
-
-            int viewBottom = view.getBottom();
-            float textY = Math.max(topGap, view.getTop());
-            //下一个和当前不一样移动当前
-            if (position + 1 &lt; itemCount) {
-                String nextGroupId = callback.getGroupId(position + 1);
-                //组内最后一个view进入了header
-                if (nextGroupId != groupId &amp;&amp; viewBottom &lt; textY) {
-                    textY = viewBottom;
-                }
-            }
-            //textY - topGap决定了悬浮栏绘制的高度和位置
-            c.drawRect(left, textY - topGap, right, textY, paint);
-            //left+2*alignBottom 决定了文本往左偏移的多少（加--&gt;向左移）
-            //textY-alignBottom  决定了文本往右偏移的多少  (减--&gt;向上移)
-//            c.drawText(textLine, left + 2 * alignBottom, textY - alignBottom, textPaint);
-            c.drawText(textLine, left, textY - alignBottom, textPaint);
-        }
-    }
-
-
-    /**
-     * 判断是不是组中的第一个位置
-     *
-     * @param pos
-     * @return
-     */
-    private boolean isFirstInGroup(int pos) {
-        if (pos == 0) {
-            return true;
-        } else {
-            // 因为是根据 字符串内容的相同与否 来判断是不是同意组的，所以此处的标记id 要是String类型
-            // 如果你只是做联系人列表，悬浮框里显示的只是一个字母，则标记id直接用 int 类型就行了
-            String prevGroupId = callback.getGroupId(pos - 1);
-            String groupId = callback.getGroupId(pos);
-            //判断前一个字符串 与 当前字符串 是否相同
-            if (prevGroupId.equals(groupId)) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-
-    //定义一个借口方便外界的调用
-    public interface DecorationCallback {
-        String getGroupId(int position);
-
-        String getGroupFirstLine(int position);
-    }
-}
-</code></pre>
-
-<p><strong>使用</strong></p>
-
-<pre class="line-numbers"><code class="language-java">    textRecycler.addItemDecoration(new SectionDecoration(list, this, new SectionDecoration.DecorationCallback() {
-            @Override
-            public String getGroupId(int position) {
-                if(NameBean.get(position)!=null) {
-                    return NameBean.get(position);
-                }
-                return &quot;-1&quot;;
-            }
-
-            @Override
-            public String getGroupFirstLine(int position) {
-                if(NameBean.get(position)!=null) {
-                    return NameBean.get(position);
-                }
-                return &quot;&quot;;
-            }
-        }));
-</code></pre>
-
-<h3 id="toc_5">ItemDecoration实现item的拖拽，平移等操作</h3>
-
-<p>（穿插还通过OnItemTouchListener封装了列表的点击和长点击事件）</p>
-
-<p><strong>item的点击事件和长点击事件</strong></p>
-
-<p>该功能主要通过addOnItemTouchListener() 来实现。</p>
-
-<pre class="line-numbers"><code class="language-java">    textRecycler.addOnItemTouchListener(new OnRecyclerItemClickListener(textRecycler) {
-            @Override
-            public void onItemClick(RecyclerView.ViewHolder viewHolder) {
-                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
-            }
-
-            @Override
-            public void onLongClick(RecyclerView.ViewHolder viewHolder) {
-                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
-                //当 item 被长按且不是第一个时，开始拖曳这个 item
-                if (viewHolder.getLayoutPosition() != 0) {
-                    itemTouchHelper.startDrag(viewHolder);
-                }
-            }
-        });
-</code></pre>
-
-<p>其中 OnRecyclerItemClickListener 是自定义的一个触摸监听器，代码如下：</p>
-
-<pre class="line-numbers"><code class="language-java">    public abstract class OnRecyclerItemClickListener implements RecyclerView.OnItemTouchListener {
-
-    //手势探测器
-    private GestureDetectorCompat mGestureDetectorCompat;
-    private RecyclerView mRecyclerView;
-
-    public OnRecyclerItemClickListener(RecyclerView mRecyclerView) {
-        this.mRecyclerView = mRecyclerView;
-        mGestureDetectorCompat = new GestureDetectorCompat(mRecyclerView.getContext(),
-                new ItemTouchHelperGestureListener(mRecyclerView,this));
-    }
-
-    //第一个是拦截触摸事件的，第二个是处理触摸事件的，第三个是处理触摸冲突的。第三个这里我们用不到
-    @Override
-    public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
-        mGestureDetectorCompat.onTouchEvent(e);
-        return false;
-    }
-
-    @Override
-    public void onTouchEvent(RecyclerView rv, MotionEvent e) {
-        mGestureDetectorCompat.onTouchEvent(e);
-    }
-
-    @Override
-    public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-    }
-    //提供单机 长按的方法
-    public abstract void onItemClick(RecyclerView.ViewHolder viewHolder);
-    public abstract void onLongClick(RecyclerView.ViewHolder viewHolder);
-}
-</code></pre>
-
-<p>GestureDetectorCompat 中传入了一个 ItemTouchHelperGestureListener，代码如下：</p>
-
-<pre class="line-numbers"><code class="language-java">    public class ItemTouchHelperGestureListener extends GestureDetector.SimpleOnGestureListener {
-
-    private RecyclerView mRecyclerView;
-    private OnRecyclerItemClickListener onRecyclerItemClickListener;
-
-    public ItemTouchHelperGestureListener(RecyclerView mRecyclerView, OnRecyclerItemClickListener onRecyclerItemClickListener) {
-        this.mRecyclerView = mRecyclerView;
-        this.onRecyclerItemClickListener = onRecyclerItemClickListener;
-    }
-
-    //一次单独的轻触抬起手指操作，就是普通的点击事件
-    @Override
-    public boolean onSingleTapUp(MotionEvent e) {
-        //这个ChildHelper类，它会协助获取RecyclerView中的childVIew。 可点击看源码
-        View childViewUnder = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
-        if (childViewUnder != null) {
-            RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(childViewUnder);
-            onRecyclerItemClickListener.onItemClick(childViewHolder);
-        }
-        return true;
-    }
-
-    //长按屏幕超过一定时长，就会触发，就是长按事件
-    @Override
-    public void onLongPress(MotionEvent e) {
-        View childViewUnder = mRecyclerView.findChildViewUnder(e.getX(), e.getY());
-        if (childViewUnder != null) {
-            RecyclerView.ViewHolder childViewHolder = mRecyclerView.getChildViewHolder(childViewUnder);
-            onRecyclerItemClickListener.onLongClick(childViewHolder);
-        }
-    }
-</code></pre>
-
-<p>其实通过一个手势探测器 GestureDetectorCompat 来探测屏幕事件，然后通过手势监听器 SimpleOnGestureListener 来识别手势事件的种类，然后调用我们设置的对应的回调方法。 通过findChildViewUnder()可以知道我们点击的是哪个item，可看源码</p>
-
-<pre class="line-numbers"><code class="language-java">     public View findChildViewUnder(float x, float y) {
-        final int count = mChildHelper.getChildCount();
-        for (int i = count - 1; i &gt;= 0; i--) {
-            final View child = mChildHelper.getChildAt(i);
-            final float translationX = ViewCompat.getTranslationX(child);
-            final float translationY = ViewCompat.getTranslationY(child);
-            if (x &gt;= child.getLeft() + translationX &amp;&amp;
-                    x &lt;= child.getRight() + translationX &amp;&amp;
-                    y &gt;= child.getTop() + translationY &amp;&amp;
-                    y &lt;= child.getBottom() + translationY) {
-                return child;
-            }
-        }
-        return null;
-    }
-</code></pre>
-
-<p>同时我们调用 RecyclerView 的另一个方法 getChildViewHolder()，可以获得该 item 的 ViewHolder，最后再回调我们定义的虚方法 onItemClick() 就ok了，这样我们就可以在外部实现该方法来获得 item 的点击事件了。</p>
-
-<p><strong>ItemDecoration实现item的拖拽，平移等操作</strong></p>
-
-<p>ItemTouchHelper 一个帮助开发人员处理拖拽和滑动删除的实现类，它能够让你非常容易实现侧滑删除、拖拽的功能。</p>
-
-<pre class="line-numbers"><code class="language-java">    /**
- * Created by wen on 2017/8/8.
- * ItemTouchHelper 一个帮助开发人员处理拖拽和滑动删除的实现类，它能够让你非常容易实现侧滑删除、拖拽的功能。
- */
-
-public class MyItemTouchHelper extends ItemTouchHelper.Callback {
-
-    RecyclerAdapter adapter;
-
-    public MyItemTouchHelper(RecyclerAdapter adapter) {
-        this.adapter = adapter;
-    }
-
-    //通过返回值来设置是否处理某次拖曳或者滑动事件
-    //dragFlags 是拖拽标志，
-    //swipeFlags 是滑动标志，
-    //swipeFlags 都设置为0，暂时不考虑滑动相关操作。
-    //getMovementFlags() 用于设置是否处理拖拽事件和滑动事件，以及拖拽和滑动操作的方向，有以下两种情况：
-    //如果是列表类型的 RecyclerView，拖拽只有 UP、DOWN 两个方向
-    //如果是网格类型的则有 UP、DOWN、LEFT、RIGHT 四个方向
-    @Override
-    public int getMovementFlags(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        if (recyclerView.getLayoutManager() instanceof GridLayoutManager) {
-            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN | ItemTouchHelper.LEFT | ItemTouchHelper.RIGHT;
-            int swipeFlags = 0;
-            return makeMovementFlags(dragFlags, swipeFlags);
-        } else {
-            int dragFlags = ItemTouchHelper.UP | ItemTouchHelper.DOWN;
-            //注意：和拖曳的区别就是在这里
-            int swipeFlags = ItemTouchHelper.START | ItemTouchHelper.END;
-            return makeMovementFlags(dragFlags, swipeFlags);
-        }
-
-    }
-
-    //当长按并进入拖曳状态时，拖曳的过程中不断的回调此方法
-    @Override
-    public boolean onMove(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder, RecyclerView.ViewHolder target) {
-        //拖动的 item 的下标
-        int fromPosition = viewHolder.getAdapterPosition();
-        //目标 item 的下标，目标 item 就是当拖曳过程中，不断和拖动的 item 做位置交换的条目。
-        int toPosition = target.getAdapterPosition();
-        //对应某些需求，某一个item不能拖拽
-        if (toPosition == 0) {
-            return false;
-        }
-        if (fromPosition &lt; toPosition) {
-            for (int i = fromPosition; i &lt; toPosition; i++) {
-                //通过你传入的adapter得到你的数据 并进行交换
-                Collections.swap(((RecyclerAdapter) adapter).getDataList(), i, i + 1);
-            }
-        } else {
-            for (int i = fromPosition; i &gt; toPosition; i--) {
-                Collections.swap(((RecyclerAdapter) adapter).getDataList(), i, i - 1);
-            }
-        }
-        adapter.notifyItemMoved(fromPosition, toPosition);
-        return true;
-    }
-
-    //滑动删除的回调
-    @Override
-    public void onSwiped(RecyclerView.ViewHolder viewHolder, int direction) {
-        int adapterPosition = viewHolder.getAdapterPosition();
-        adapter.notifyItemRemoved(adapterPosition);
-        ((RecyclerAdapter)adapter).getDataList().remove(adapterPosition);
-    }
-
-    //当长按 item 刚开始拖曳的时候调用
-    @Override
-    public void onSelectedChanged(RecyclerView.ViewHolder viewHolder, int actionState) {
-        if (actionState != ItemTouchHelper.ACTION_STATE_IDLE) {
-            //给被拖曳的 item 设置一个深颜色背景
-            viewHolder.itemView.setBackgroundColor(Color.LTGRAY);
-        }
-        super.onSelectedChanged(viewHolder, actionState);
-    }
-
-    //当完成拖曳手指松开的时候调用
-    @Override
-    public void clearView(RecyclerView recyclerView, RecyclerView.ViewHolder viewHolder) {
-        super.clearView(recyclerView, viewHolder);
-        //给已经完成拖曳的 item 恢复开始的背景。
-        // 这里我们设置的颜色尽量和你 item 在 xml 中设置的颜色保持一致
-        viewHolder.itemView.setBackgroundColor(Color.WHITE);
-    }
-
-    //返回 false 让它控制所有的 item 都不能拖曳。
-    @Override
-    public boolean isLongPressDragEnabled() {
-        return false;
-    }
-}
-</code></pre>
-
-<p><strong>使用</strong></p>
-
-<pre class="line-numbers"><code class="language-java">    itemTouchHelper = new ItemTouchHelper(new MyItemTouchHelper(adapter));
-        itemTouchHelper.attachToRecyclerView(textRecycler);
-
-        textRecycler.addOnItemTouchListener(new OnRecyclerItemClickListener(textRecycler) {
-            @Override
-            public void onItemClick(RecyclerView.ViewHolder viewHolder) {
-                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
-            }
-
-            @Override
-            public void onLongClick(RecyclerView.ViewHolder viewHolder) {
-                ToastUtils.showToast(viewHolder.getAdapterPosition()+1+&quot;&quot;);
-                //当 item 被长按且不是第一个时，开始拖曳这个 item（这里只是一个特殊需求）
-                if (viewHolder.getLayoutPosition() != 0) {
-                    itemTouchHelper.startDrag(viewHolder);
-                }
-            }
-        });
-</code></pre>
 
                         
                       </div>
@@ -823,7 +137,7 @@ public class MyItemTouchHelper extends ItemTouchHelper.Callback {
                 </a>
                 <div class="read-more clearfix">
                   <div class="more-left left">
-                  
+                   <a href="15561207872340.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2017/10/29</span>
                     <span>posted in&nbsp;</span> 
           				  
@@ -856,1258 +170,6 @@ public class MyItemTouchHelper extends ItemTouchHelper.Callback {
 <li>今天，我将全面总结Android的事件分发机制，我能保证这是市面上的最全面、最清晰、最易懂的</li>
 </ul>
 
-<blockquote>
-<p>本文秉着“结论先行、详细分析在后”的原则，即先让大家感性认识，再通过理性分析从而理解问题；<br/>
-所以，请各位读者先记住结论，再往下继续看分析；</p>
-</blockquote>
-
-<h2 id="toc_1">目录</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014991957405.png" alt="20171108151014991957405.png"/><figcaption>20171108151014991957405.png</figcaption></figure></p>
-
-<h2 id="toc_2">基础认知</h2>
-
-<h3 id="toc_3">事件分发的对象是谁？</h3>
-
-<p><strong>答：事件</strong></p>
-
-<ul>
-<li>当用户触摸屏幕时（View或ViewGroup派生的控件），将产生点击事件（Touch事件）。</li>
-</ul>
-
-<blockquote>
-<p>Touch事件相关细节（发生触摸的位置、时间、历史记录、手势动作等）被封装成MotionEvent对象</p>
-</blockquote>
-
-<ul>
-<li>主要发生的Touch事件有如下四种：
-<ul>
-<li>MotionEvent.ACTION_DOWN：按下View（所有事件的开始）</li>
-<li>MotionEvent.ACTION_MOVE：滑动View</li>
-<li>MotionEvent.ACTION_CANCEL：非人为原因结束本次事件</li>
-<li>MotionEvent.ACTION_UP：抬起View（与DOWN对应）</li>
-</ul></li>
-<li>事件列：从手指接触屏幕至手指离开屏幕，这个过程产生的一系列事件<br/>
-任何事件列都是以DOWN事件开始，UP事件结束，中间有无数的MOVE事件，如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014998211742.png" alt="20171108151014998211742.png"/><figcaption>20171108151014998211742.png</figcaption></figure></p>
-
-<p>即当一个MotionEvent 产生后，系统需要把这个事件传递给一个具体的 View 去处理,</p>
-
-<h3 id="toc_4">事件分发的本质</h3>
-
-<p><strong>答：将点击事件（MotionEvent）向某个View进行传递并最终得到处理</strong></p>
-
-<blockquote>
-<p>即当一个点击事件发生后，系统需要将这个事件传递给一个具体的View去处理。这个事件传递的过程就是分发过程。</p>
-</blockquote>
-
-<h3 id="toc_5">事件在哪些对象之间进行传递？</h3>
-
-<p><strong>答：Activity、ViewGroup、View</strong></p>
-
-<blockquote>
-<p>一个点击事件产生后，传递顺序是：Activity（Window） -&gt; ViewGroup -&gt; View</p>
-</blockquote>
-
-<ul>
-<li>Android的UI界面是由Activity、ViewGroup、View及其派生类组合而成的</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015003038387.png" alt="20171108151015003038387.png"/><figcaption>20171108151015003038387.png</figcaption></figure></p>
-
-<ul>
-<li>View是所有UI组件的基类</li>
-</ul>
-
-<blockquote>
-<p>一般Button、ImageView、TextView等控件都是继承父类View</p>
-</blockquote>
-
-<ul>
-<li>ViewGroup是容纳UI组件的容器，即一组View的集合（包含很多子View和子VewGroup），</li>
-</ul>
-
-<blockquote>
-<ol>
-<li>其本身也是从View派生的，即ViewGroup是View的子类<br/></li>
-<li>是Android所有布局的父类或间接父类：项目用到的布局（LinearLayout、RelativeLayout等），都继承自ViewGroup，即属于ViewGroup子类。<br/></li>
-<li>与普通View的区别：ViewGroup实际上也是一个View，只不过比起View，它多了可以包含子View和定义布局参数的功能。<br/></li>
-</ol>
-</blockquote>
-
-<h3 id="toc_6">事件分发过程由哪些方法协作完成？</h3>
-
-<p><strong>答：dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">方法</th>
-<th style="text-align: center">作用</th>
-<th style="text-align: center">调用时刻</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">dispatchTouchEvent()</td>
-<td style="text-align: center">分发（传递）点击事件</td>
-<td style="text-align: center">当点击事件能够传递给当前View时，该方法就会被调用</td>
-</tr>
-<tr>
-<td style="text-align: center">onInterceptTouchEvent()</td>
-<td style="text-align: center">判断是否拦截了某个事件（只存在于ViewGroup，普通的View没有这个方法）</td>
-<td style="text-align: center">在dispatchTouchEvent()内存调用</td>
-</tr>
-<tr>
-<td style="text-align: center">onTouchEvent()</td>
-<td style="text-align: center">处理点击事件</td>
-<td style="text-align: center">在dispatchTouchEvent()内部调用</td>
-</tr>
-</tbody>
-</table>
-
-<blockquote>
-<p>下文会对这3个方法进行详细介绍</p>
-</blockquote>
-
-<h3 id="toc_7">总结</h3>
-
-<ul>
-<li>Android事件分发机制的本质是要解决：点击事件由哪个对象发出，经过哪些对象，最终达到哪个对象并最终得到处理。</li>
-</ul>
-
-<blockquote>
-<p>这里的对象是指Activity、ViewGroup、View</p>
-</blockquote>
-
-<ul>
-<li>Android中事件分发顺序：Activity（Window） -&gt; ViewGroup -&gt; View</li>
-<li>事件分发过程由dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()三个方法协助完成</li>
-</ul>
-
-<p>经过上述3个问题，相信大家已经对Android的事件分发有了感性的认知，接下来，我将详细介绍Android事件分发机制。</p>
-
-<h2 id="toc_8">事件分发机制方法&amp;流程介绍</h2>
-
-<ul>
-<li>事件分发过程由dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()三个方法协助完成，如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101507201948.png" alt="2017110815101507201948.png"/><figcaption>2017110815101507201948.png</figcaption></figure></p>
-
-<ul>
-<li>Android事件分发流程如下：（必须熟记）</li>
-</ul>
-
-<blockquote>
-<p>Android事件分发顺序：Activity（Window） -&gt; ViewGroup -&gt; View</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015083272246.png" alt="20171108151015083272246.png"/><figcaption>20171108151015083272246.png</figcaption></figure></p>
-
-<p>其中：</p>
-
-<ul>
-<li>super：调用父类方法</li>
-<li>true：消费事件，即事件不继续往下传递</li>
-<li>false：不消费事件，事件也不继续往下传递 / 交由给父控件onTouchEvent（）处理</li>
-</ul>
-
-<p>接下来，我将详细介绍这3个方法及相关流程。</p>
-
-<h3 id="toc_9">dispatchTouchEvent()</h3>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">属性</th>
-<th style="text-align: center">介绍</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">使用对象</td>
-<td style="text-align: center">Activity、ViewGroup、View</td>
-</tr>
-<tr>
-<td style="text-align: center">作用</td>
-<td style="text-align: center">分发点击事件</td>
-</tr>
-<tr>
-<td style="text-align: center">调用时刻</td>
-<td style="text-align: center">当点击事件能够传递给当前View时，该方法就会被调用</td>
-</tr>
-<tr>
-<td style="text-align: center">返回结果</td>
-<td style="text-align: center">是否消费当前事件，详细情况如下：</td>
-</tr>
-</tbody>
-</table>
-
-<p><strong>1. 默认情况：根据当前对象的不同而返回方法不同</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">对象</th>
-<th style="text-align: center">返回方法</th>
-<th style="text-align: center">备注</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">Activity</td>
-<td style="text-align: center">super.dispatchTouchEvent()</td>
-<td style="text-align: center">即调用父类ViewGroup的dispatchTouchEvent()</td>
-</tr>
-<tr>
-<td style="text-align: center">ViewGroup</td>
-<td style="text-align: center">onIntercepTouchEvent()</td>
-<td style="text-align: center">即调用自身的onIntercepTouchEvent()</td>
-</tr>
-<tr>
-<td style="text-align: center">View</td>
-<td style="text-align: center">onTouchEvent（）</td>
-<td style="text-align: center">即调用自身的onTouchEvent（）</td>
-</tr>
-</tbody>
-</table>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015093015508.png" alt="20171108151015093015508.png"/><figcaption>20171108151015093015508.png</figcaption></figure></p>
-
-<p><strong>2. 返回true</strong></p>
-
-<ul>
-<li>消费事件</li>
-<li>事件不会往下传递</li>
-<li>后续事件（Move、Up）会继续分发到该View</li>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015097713612.png" alt="20171108151015097713612.png"/><figcaption>20171108151015097713612.png</figcaption></figure></p>
-
-<p><strong>3. 返回false</strong></p>
-
-<ul>
-<li>不消费事件</li>
-<li>事件不会往下传递</li>
-<li>将事件回传给父控件的onTouchEvent()处理</li>
-</ul>
-
-<blockquote>
-<p>Activity例外：返回false=消费事件</p>
-</blockquote>
-
-<ul>
-<li>后续事件（Move、Up）会继续分发到该View(与onTouchEvent()区别）</li>
-<li>流程图如下</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015100669361.png" alt="20171108151015100669361.png"/><figcaption>20171108151015100669361.png</figcaption></figure></p>
-
-<h3 id="toc_10">onTouchEvent()</h3>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">属性</th>
-<th style="text-align: center">介绍</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">使用对象</td>
-<td style="text-align: center">Activity、ViewGroup、View</td>
-</tr>
-<tr>
-<td style="text-align: center">作用</td>
-<td style="text-align: center">处理点击事件</td>
-</tr>
-<tr>
-<td style="text-align: center">调用时刻</td>
-<td style="text-align: center">在dispatchTouchEvent()内部调用</td>
-</tr>
-<tr>
-<td style="text-align: center">返回结果</td>
-<td style="text-align: center">是否消费（处理）当前事件，详细情况如下：</td>
-</tr>
-</tbody>
-</table>
-
-<blockquote>
-<p>与dispatchTouchEvent()类似</p>
-</blockquote>
-
-<p><strong>1. 返回true</strong></p>
-
-<ul>
-<li>自己处理（消费）该事情</li>
-<li>事件停止传递</li>
-<li>该事件序列的后续事件（Move、Up）让其处理；</li>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015113258049.png" alt="20171108151015113258049.png"/><figcaption>20171108151015113258049.png</figcaption></figure></p>
-
-<p><strong>2. 返回false（同默认实现：调用父类onTouchEvent()）</strong></p>
-
-<ul>
-<li>不处理（消费）该事件</li>
-<li>事件往上传递给父控件的onTouchEvent()处理</li>
-<li>当前View不再接受此事件列的其他事件（Move、Up）；</li>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101512068918.png" alt="2017110815101512068918.png"/><figcaption>2017110815101512068918.png</figcaption></figure></p>
-
-<h3 id="toc_11">onInterceptTouchEvent()</h3>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">属性</th>
-<th style="text-align: center">介绍</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">使用对象</td>
-<td style="text-align: center">ViewGroup（注：Activity、View都没该方法）</td>
-</tr>
-<tr>
-<td style="text-align: center">作用</td>
-<td style="text-align: center">拦截事件，即自己处理该事件</td>
-</tr>
-<tr>
-<td style="text-align: center">调用时刻</td>
-<td style="text-align: center">在ViewGroup的dispatchTouchEvent()内部调用</td>
-</tr>
-<tr>
-<td style="text-align: center">返回结果</td>
-<td style="text-align: center">是否拦截当前事件，详细情况如下：</td>
-</tr>
-</tbody>
-</table>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015127727353.png" alt="20171108151015127727353.png"/><figcaption>20171108151015127727353.png</figcaption></figure></p>
-
-<ul>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101512935807.png" alt="2017110815101512935807.png"/><figcaption>2017110815101512935807.png</figcaption></figure></p>
-
-<h3 id="toc_12">三者关系</h3>
-
-<p>下面将用一段伪代码来阐述上述三个方法的关系和点击事件传递规则</p>
-
-<pre class="line-numbers"><code class="language-java">// 点击事件产生后，会直接调用dispatchTouchEvent（）方法
-public boolean dispatchTouchEvent(MotionEvent ev) {
-
-    //代表是否消耗事件
-    boolean consume = false;
-
-
-    if (onInterceptTouchEvent(ev)) {
-    //如果onInterceptTouchEvent()返回true则代表当前View拦截了点击事件
-    //则该点击事件则会交给当前View进行处理
-    //即调用onTouchEvent (）方法去处理点击事件
-      consume = onTouchEvent (ev) ;
-
-    } else {
-      //如果onInterceptTouchEvent()返回false则代表当前View不拦截点击事件
-      //则该点击事件则会继续传递给它的子元素
-      //子元素的dispatchTouchEvent（）就会被调用，重复上述过程
-      //直到点击事件被最终处理为止
-      consume = child.dispatchTouchEvent (ev) ;
-    }
-
-    return consume;
-   }
-</code></pre>
-
-<h3 id="toc_13">总结</h3>
-
-<p>对于事件分发的3个方法，你应该清楚了解<br/>
-接下来，我将开始介绍Android事件分发的常见流程</p>
-
-<h2 id="toc_14">事件分发场景介绍</h2>
-
-<p>下面我将利用例子来说明常见的点击事件传递情况</p>
-
-<h3 id="toc_15">背景描述</h3>
-
-<p>我们将要讨论的布局层次如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015134286239.png" alt="20171108151015134286239.png"/><figcaption>20171108151015134286239.png</figcaption></figure></p>
-
-<ul>
-<li>最外层：Activiy A，包含两个子View：ViewGroup B、View C</li>
-<li>中间层：ViewGroup B，包含一个子View：View C</li>
-<li>最内层：View C</li>
-</ul>
-
-<p>假设用户首先触摸到屏幕上View C上的某个点（如图中黄色区域），那么Action_DOWN事件就在该点产生，然后用户移动手指并最后离开屏幕。</p>
-
-<h3 id="toc_16">一般的事件传递情况</h3>
-
-<p>一般的事件传递场景有：</p>
-
-<ul>
-<li>默认情况</li>
-<li>处理事件</li>
-<li>拦截DOWN事件</li>
-<li>拦截后续事件（MOVE、UP）</li>
-</ul>
-
-<h4 id="toc_17">默认情况</h4>
-
-<ul>
-<li>即不对控件里的方法(dispatchTouchEvent()、onTouchEvent()、onInterceptTouchEvent())进行重写或更改返回值</li>
-<li>那么调用的是这3个方法的默认实现：调用父类的方法</li>
-<li>事件传递情况：（如图下所示）
-<ul>
-<li>从Activity A----&gt;ViewGroup B---&gt;View C，从上往下调用dispatchTouchEvent()</li>
-<li>再由View C---&gt;ViewGroup B ---&gt;Activity A，从下往上调用onTouchEvent()</li>
-</ul></li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015141723712.png" alt="20171108151015141723712.png"/><figcaption>20171108151015141723712.png</figcaption></figure></p>
-
-<p>注：虽然ViewGroup B的onInterceptTouchEvent方法对DOWN事件返回了false，后续的事件（MOVE、UP）依然会传递给它的onInterceptTouchEvent()</p>
-
-<blockquote>
-<p>这一点与onTouchEvent的行为是不一样的。</p>
-</blockquote>
-
-<h4 id="toc_18">处理事件</h4>
-
-<p>假设View C希望处理这个点击事件，即C被设置成可点击的（Clickable）或者覆写了C的onTouchEvent方法返回true。</p>
-
-<blockquote>
-<p>最常见的：设置Button按钮来响应点击事件</p>
-</blockquote>
-
-<p>事件传递情况：（如下图）</p>
-
-<ul>
-<li>DOWN事件被传递给C的onTouchEvent方法，该方法返回true，表示处理这个事件</li>
-<li>因为C正在处理这个事件，那么DOWN事件将不再往上传递给B和A的onTouchEvent()；</li>
-<li>该事件列的其他事件（Move、Up）也将传递给C的onTouchEvent()</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015145961494.png" alt="20171108151015145961494.png"/><figcaption>20171108151015145961494.png</figcaption></figure></p>
-
-<h4 id="toc_19">拦截DOWN事件</h4>
-
-<p>假设ViewGroup B希望处理这个点击事件，即B覆写了onInterceptTouchEvent()返回true、onTouchEvent()返回true。<br/>
-事件传递情况：（如下图）</p>
-
-<ul>
-<li>DOWN事件被传递给B的onInterceptTouchEvent()方法，该方法返回true，表示拦截这个事件，即自己处理这个事件（不再往下传递）</li>
-<li>调用onTouchEvent()处理事件（DOWN事件将不再往上传递给A的onTouchEvent()）</li>
-<li>该事件列的其他事件（Move、Up）将直接传递给B的onTouchEvent()</li>
-</ul>
-
-<blockquote>
-<p>该事件列的其他事件（Move、Up）将不会再传递给B的onInterceptTouchEvent方法，该方法一旦返回一次true，就再也不会被调用了。</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015149359935.png" alt="20171108151015149359935.png"/><figcaption>20171108151015149359935.png</figcaption></figure></p>
-
-<h4 id="toc_20">拦截DOWN的后续事件</h4>
-
-<p>假设ViewGroup B没有拦截DOWN事件（还是View C来处理DOWN事件），但它拦截了接下来的MOVE事件。</p>
-
-<ul>
-<li>DOWN事件传递到C的onTouchEvent方法，返回了true。</li>
-<li>在后续到来的MOVE事件，B的onInterceptTouchEvent方法返回true拦截该MOVE事件，但该事件并没有传递给B；这个MOVE事件将会被系统变成一个CANCEL事件传递给C的onTouchEvent方法</li>
-<li>后续又来了一个MOVE事件，该MOVE事件才会直接传递给B的onTouchEvent()</li>
-</ul>
-
-<blockquote>
-<ol>
-<li>后续事件将直接传递给B的onTouchEvent()处理<br/></li>
-<li>后续事件将不会再传递给B的onInterceptTouchEvent方法，该方法一旦返回一次true，就再也不会被调用了。</li>
-</ol>
-</blockquote>
-
-<ul>
-<li>C再也不会收到该事件列产生的后续事件。</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015153662988.png" alt="20171108151015153662988.png"/><figcaption>20171108151015153662988.png</figcaption></figure></p>
-
-<p>特别注意：</p>
-
-<ul>
-<li>如果ViewGroup A 拦截了一个半路的事件（如MOVE），这个事件将会被系统变成一个CANCEL事件并传递给之前处理该事件的子View；</li>
-<li>该事件不会再传递给ViewGroup A的onTouchEvent()</li>
-<li>只有再到来的事件才会传递到ViewGroup A的onTouchEvent()</li>
-</ul>
-
-<h3 id="toc_21">总结</h3>
-
-<ul>
-<li>对于Android的事件分发机制，你应该已经非常清楚了</li>
-<li>如果你只是希望了解Android事件分发机制而不想深入了解，那么你可以离开这篇文章了</li>
-<li>对于程序猿来说，知其然还需要知其所以然，接下来，我将通过源码分析来深入了解Android事件分发机制</li>
-</ul>
-
-<h2 id="toc_22">Android事件分发机制源码分析</h2>
-
-<ul>
-<li>Android中事件分发顺序：Activity（Window） -&gt; ViewGroup -&gt; View，再次贴出下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015158646492.png" alt="20171108151015158646492.png"/><figcaption>20171108151015158646492.png</figcaption></figure></p>
-
-<p>其中：</p>
-
-<ul>
-<li>super：调用父类方法</li>
-<li>true：消费事件，即事件不继续往下传递</li>
-<li>false：不消费事件，事件继续往下传递 / 交由给父控件onTouchEvent（）处理</li>
-</ul>
-
-<p>所以，要想充分理解Android分发机制，本质上是要理解：</p>
-
-<ul>
-<li>Activity对点击事件的分发机制</li>
-<li>ViewGroup对点击事件的分发机制</li>
-<li>View对点击事件的分发机制</li>
-</ul>
-
-<p>接下来，我将通过源码分析详细介绍Activity、View和ViewGroup的事件分发机制</p>
-
-<h3 id="toc_23">Activity的事件分发机制</h3>
-
-<h4 id="toc_24">源码分析</h4>
-
-<ul>
-<li>当一个点击事件发生时，事件最先传到Activity的dispatchTouchEvent()进行事件分发</li>
-</ul>
-
-<blockquote>
-<p>具体是由Activity的Window来完成</p>
-</blockquote>
-
-<ul>
-<li>我们来看下Activity的dispatchTouchEvent()的源码</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {
-        //关注点1
-        //一般事件列开始都是DOWN，所以这里基本是true
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            //关注点2
-            onUserInteraction();
-        }
-        //关注点3
-        if (getWindow().superDispatchTouchEvent(ev)) {
-            return true;
-        }
-        return onTouchEvent(ev);
-    }
-</code></pre>
-
-<p><strong>关注点1</strong><br/>
-一般事件列开始都是DOWN（按下按钮），所以这里返回true，执行onUserInteraction()</p>
-
-<p><strong>关注点2</strong><br/>
-先来看下onUserInteraction()源码</p>
-
-<pre class="line-numbers"><code class="language-java">  /**
-     * Called whenever a key, touch, or trackball event is dispatched to the
-     * activity.  Implement this method if you wish to know that the user has
-     * interacted with the device in some way while your activity is running.
-     * This callback and {@link #onUserLeaveHint} are intended to help
-     * activities manage status bar notifications intelligently; specifically,
-     * for helping activities determine the proper time to cancel a notfication.
-     *
-     * &lt;p&gt;All calls to your activity&#39;s {@link #onUserLeaveHint} callback will
-     * be accompanied by calls to {@link #onUserInteraction}.  This
-     * ensures that your activity will be told of relevant user activity such
-     * as pulling down the notification pane and touching an item there.
-     *
-     * &lt;p&gt;Note that this callback will be invoked for the touch down action
-     * that begins a touch gesture, but may not be invoked for the touch-moved
-     * and touch-up actions that follow.
-     *
-     * @see #onUserLeaveHint()
-     */
-public void onUserInteraction() { 
-}
-</code></pre>
-
-<p>从源码可以看出：</p>
-
-<ul>
-<li>该方法为空方法</li>
-<li>从注释得知：当此activity在栈顶时，触屏点击按home，back，menu键等都会触发此方法</li>
-<li>所以onUserInteraction()主要用于屏保</li>
-</ul>
-
-<p><strong>关注点3</strong></p>
-
-<ul>
-<li>Window类是抽象类，且PhoneWindow是Window类的唯一实现类</li>
-<li>superDispatchTouchEvent(ev)是抽象方法，返回的是一个Window对象</li>
-<li>通过PhoneWindow类中看一下superDispatchTouchEvent()的作用</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">@Override
-public boolean superDispatchTouchEvent(MotionEvent event) {
-  return mDecor.superDispatchTouchEvent(event);
-//mDecor是DecorView的实例
-//DecorView是视图的顶层view，继承自FrameLayout，是所有界面的父类
-}
-</code></pre>
-
-<ul>
-<li>接下来我们看mDecor.superDispatchTouchEvent(event)：</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public boolean superDispatchTouchEvent(MotionEvent event) {
-    return super.dispatchTouchEvent(event);
-//DecorView继承自FrameLayout
-//那么它的父类就是ViewGroup
-而super.dispatchTouchEvent(event)方法，其实就应该是ViewGroup的dispatchTouchEvent()
-
-}
-</code></pre>
-
-<p>所以：</p>
-
-<ul>
-<li>执行getWindow().superDispatchTouchEvent(ev)实际上是执行了ViewGroup.dispatchTouchEvent(event)</li>
-<li>再回到最初的代码：</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {
-
-      if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-          //关注点2
-          onUserInteraction();
-      }
-      //关注点3
-      if (getWindow().superDispatchTouchEvent(ev)) {
-          return true;
-      }
-      return onTouchEvent(ev);
-  }
-</code></pre>
-
-<p>由于一般事件列开始都是DOWN，所以这里返回true，基本上都会进入<code>getWindow().superDispatchTouchEvent(ev)</code>的判断</p>
-
-<ul>
-<li>所以，执行<code>Activity.dispatchTouchEvent(ev)</code>实际上是执行了<code>ViewGroup.dispatchTouchEvent(event)</code></li>
-<li>这样事件就从 Activity 传递到了 ViewGroup</li>
-</ul>
-
-<h4 id="toc_25">汇总</h4>
-
-<p>当一个点击事件发生时，调用顺序如下</p>
-
-<ol>
-<li>事件最先传到Activity的dispatchTouchEvent()进行事件分发</li>
-<li>调用Window类实现类PhoneWindow的superDispatchTouchEvent()</li>
-<li>调用DecorView的superDispatchTouchEvent()</li>
-<li>最终调用DecorView父类的dispatchTouchEvent()，即ViewGroup的dispatchTouchEvent()</li>
-</ol>
-
-<h4 id="toc_26">结论</h4>
-
-<ul>
-<li>当一个点击事件发生时，事件最先传到Activity的dispatchTouchEvent()进行事件分发，最终是调用了ViewGroup的dispatchTouchEvent()方法</li>
-</ul>
-
-<blockquote>
-<p>如果ViewGroup的dispatchTouchEvent()返回true就不执行Activity的onTouchEvent()方法；如果返回false，就执行。<br/>
-这样事件就从 Activity 传递到了 ViewGroup</p>
-</blockquote>
-
-<h4 id="toc_27">疑问</h4>
-
-<p>那么，ViewGroup的dispatchTouchEvent()什么时候返回true，什么时候返回false？<br/>
-答：请继续往下看ViewGroup事件的分发机制</p>
-
-<h3 id="toc_28">ViewGroup事件的分发机制</h3>
-
-<p>在讲解ViewGroup事件的分发机制之前我们先来看个Demo</p>
-
-<h4 id="toc_29">Demo讲解</h4>
-
-<p>布局如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015184560280.png" alt="20171108151015184560280.png"/><figcaption>20171108151015184560280.png</figcaption></figure></p>
-
-<p>结果测试：<br/><br/>
-只点击Button  </p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015186085331.png" alt="20171108151015186085331.png"/><figcaption>20171108151015186085331.png</figcaption></figure></p>
-
-<p>再点击空白处</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015186956039.png" alt="20171108151015186956039.png"/><figcaption>20171108151015186956039.png</figcaption></figure></p>
-
-<p>从上面的测试结果发现：</p>
-
-<ul>
-<li>当点击Button时，执行Button的onClick()，但ViewGroupLayout注册的onTouch（）不会执行</li>
-<li>只有点击空白区域时才会执行ViewGroupLayout的onTouch（）;</li>
-<li>结论：Button的onClick()将事件消费掉了，因此事件不会再继续向下传递。</li>
-</ul>
-
-<p>接下来，我们开始进行ViewGroup事件分发的源码分析</p>
-
-<h4 id="toc_30">源码分析</h4>
-
-<p>ViewGroup的dispatchTouchEvent()源码分析</p>
-
-<blockquote>
-<ol>
-<li>详情请看注释<br/></li>
-<li>Android 5.0后ViewGroup的dispatchTouchEvent()的源码发生了变化（更加复杂），但原理相同；<br/></li>
-<li>本文为了让读者更好理解dispatchTouchEvent()源码分析，所以采用Android 5.0前的版本<br/></li>
-</ol>
-</blockquote>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {  
-    final int action = ev.getAction();  
-    final float xf = ev.getX();  
-    final float yf = ev.getY();  
-    final float scrolledXFloat = xf + mScrollX;  
-    final float scrolledYFloat = yf + mScrollY;  
-    final Rect frame = mTempRect;  
-    boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;  
-    if (action == MotionEvent.ACTION_DOWN) {  
-        if (mMotionTarget != null) {  
-            mMotionTarget = null;  
-        }  
-
-//看这个If判断语句
-//第一个判断值disallowIntercept：是否禁用事件拦截的功能(默认是false)
-//可以通过调用requestDisallowInterceptTouchEvent方法对这个值进行修改。
-//第二个判断值： !onInterceptTouchEvent(ev)：对onInterceptTouchEvent()返回值取反
-
-//如果我们在onInterceptTouchEvent()中返回false，就会让第二个值为true，从而进入到条件判断的内部
-//如果我们在onInterceptTouchEvent()中返回true，就会让第二个值为false，从而跳出了这个条件判断。
-//关于onInterceptTouchEvent()请看下面分析（关注点1）
-        if (disallowIntercept || !onInterceptTouchEvent(ev)) {  
-            ev.setAction(MotionEvent.ACTION_DOWN);  
-            final int scrolledXInt = (int) scrolledXFloat;  
-            final int scrolledYInt = (int) scrolledYFloat;  
-            final View[] children = mChildren;  
-            final int count = mChildrenCount;  
-
-          //通过for循环，遍历了当前ViewGroup下的所有子View
-            for (int i = count - 1; i &gt;= 0; i--) {  
-                final View child = children[i];  
-                if ((child.mViewFlags &amp; VISIBILITY_MASK) == VISIBLE  
-                        || child.getAnimation() != null) {  
-                    child.getHitRect(frame);  
-
-                    //判断当前遍历的View是不是正在点击的View
-                    //如果是，则进入条件判断内部
-                    if (frame.contains(scrolledXInt, scrolledYInt)) {  
-                        final float xc = scrolledXFloat - child.mLeft;  
-                        final float yc = scrolledYFloat - child.mTop;  
-                        ev.setLocation(xc, yc);  
-                        child.mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-
-                    //关注点2
-
-                    //条件判断的内部调用了该View的dispatchTouchEvent()方法（具体请看下面的View事件分发机制）
-                    //实现了点击事件从ViewGroup到View的传递
-                        if (child.dispatchTouchEvent(ev))  { 
-
-        //调用子View的dispatchTouchEvent后是有返回值的
-        //如果这个控件是可点击的话，那么点击该控件时，dispatchTouchEvent的返回值必定是true
-        //因此会导致条件判断成立
-                            mMotionTarget = child;  
-        //于是给ViewGroup的dispatchTouchEvent方法直接返回了true，这样就导致后面的代码无法执行，直接跳出
-        //即把ViewGroup的touch事件拦截掉
-                            return true;  
-                        }  
-                    }  
-                }  
-            }  
-        }  
-    }  
-    boolean isUpOrCancel = (action == MotionEvent.ACTION_UP) ||  
-            (action == MotionEvent.ACTION_CANCEL);  
-    if (isUpOrCancel) {  
-        mGroupFlags &amp;= ~FLAG_DISALLOW_INTERCEPT;  
-    }  
-    final View target = mMotionTarget;  
-
-//关注点3
-//没有任何View接收事件的情况，即点击空白处情况
-    if (target == null) {  
-        ev.setLocation(xf, yf);  
-        if ((mPrivateFlags &amp; CANCEL_NEXT_UP_EVENT) != 0) {  
-            ev.setAction(MotionEvent.ACTION_CANCEL);  
-            mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-        }  
-//调用ViewGroup的父类View的dispatchTouchEvent()
-//因此会执行ViewGroup的onTouch()、onTouchEvent()
-//实现了点击事件从ViewGroup到View的传递
-        return super.dispatchTouchEvent(ev);  
-    }  
-
-
-//之后的代码在一般情况下是走不到的了，我们也就不再继续往下分析。
-    if (!disallowIntercept &amp;&amp; onInterceptTouchEvent(ev)) {  
-        final float xc = scrolledXFloat - (float) target.mLeft;  
-        final float yc = scrolledYFloat - (float) target.mTop;  
-        mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-        ev.setAction(MotionEvent.ACTION_CANCEL);  
-        ev.setLocation(xc, yc);  
-        if (!target.dispatchTouchEvent(ev)) {  
-        }  
-        mMotionTarget = null;  
-        return true;  
-    }  
-    if (isUpOrCancel) {  
-        mMotionTarget = null;  
-    }  
-    final float xc = scrolledXFloat - (float) target.mLeft;  
-    final float yc = scrolledYFloat - (float) target.mTop;  
-    ev.setLocation(xc, yc);  
-    if ((target.mPrivateFlags &amp; CANCEL_NEXT_UP_EVENT) != 0) {  
-        ev.setAction(MotionEvent.ACTION_CANCEL);  
-        target.mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-        mMotionTarget = null;  
-    }  
-    return target.dispatchTouchEvent(ev);  
-}
-</code></pre>
-
-<h5 id="toc_31">关注点1（onInterceptTouchEvent()源码分析）</h5>
-
-<p>ViewGroup每次在做分发时，需要调用onInterceptTouchEvent()是否拦截事件；源码分析如下：</p>
-
-<pre class="line-numbers"><code class="language-java">public boolean onInterceptTouchEvent(MotionEvent ev) {  
-    return false;  
-}
-</code></pre>
-
-<ul>
-<li>返回false =不拦截（默认），允许事件继续往下传递(向子View传递)；</li>
-</ul>
-
-<blockquote>
-<p>因为子View也需要该事件，所以onInterceptTouchEvent拦截器return super.onInterceptTouchEvent()和return false是一样的 = 不会拦截</p>
-</blockquote>
-
-<ul>
-<li>返回true = 拦截（手动设置），即自己处理该事件（执行自己的onTouchEvent()），事件不会继续往下传递</li>
-</ul>
-
-<h5 id="toc_32">关注点2</h5>
-
-<p>当点击了某个控件：</p>
-
-<ol>
-<li>调用该控件所在布局（ViewGroup）的dispatchTouchEvent()</li>
-<li>在布局的dispatchTouchEvent()中找到被点击的相应控件</li>
-<li>再去调用该控件的dispatchTouchEvent()</li>
-</ol>
-
-<blockquote>
-<ol>
-<li>实现了点击事件从ViewGroup到View的传递<br/></li>
-<li>此处是关于View.dispatchTouchEvent()的分析，详情请看下面的View事件分发机制。<br/></li>
-</ol>
-</blockquote>
-
-<h2 id="toc_33">结论</h2>
-
-<ul>
-<li>Android事件分发是先传递到ViewGroup，再由ViewGroup传递到View</li>
-<li>在ViewGroup中通过onInterceptTouchEvent()对事件传递进行拦截</li>
-</ul>
-
-<blockquote>
-<ol>
-<li>onInterceptTouchEvent方法返回true代表拦截事件，即不允许事件继续向子View传递；<br/></li>
-<li>返回false代表不拦截事件，即允许事件继续向子View传递；（默认返回false）<br/></li>
-<li>子View中如果将传递的事件消费掉，ViewGroup中将无法接收到任何事件。<br/></li>
-</ol>
-</blockquote>
-
-<h3 id="toc_34">View事件的分发机制</h3>
-
-<p>View中dispatchTouchEvent()的源码分析</p>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent event) {  
-    if (mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp;  
-            mOnTouchListener.onTouch(this, event)) {  
-        return true;  
-    }  
-    return onTouchEvent(event);  
-}
-</code></pre>
-
-<p>从上面可以看出：</p>
-
-<ul>
-<li>只有以下三个条件都为真，dispatchTouchEvent()才返回true；否则执行onTouchEvent(event)方法</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">第一个条件：mOnTouchListener != null；
-第二个条件：(mViewFlags &amp; ENABLED_MASK) == ENABLED；
-第三个条件：mOnTouchListener.onTouch(this, event)；
-</code></pre>
-
-<ul>
-<li>下面，我们来看看下这三个判断条件：</li>
-</ul>
-
-<p><strong>第一个条件：mOnTouchListener!= null</strong></p>
-
-<pre class="line-numbers"><code class="language-text">//mOnTouchListener是在View类下setOnTouchListener方法里赋值的
-public void setOnTouchListener(OnTouchListener l) { 
-
-//即只要我们给控件注册了Touch事件，mOnTouchListener就一定被赋值（不为空）
-    mOnTouchListener = l;  
-}
-</code></pre>
-
-<p><strong>第二个条件：(mViewFlags &amp; ENABLED_MASK) == ENABLED</strong></p>
-
-<ul>
-<li>该条件是判断当前点击的控件是否enable</li>
-<li>由于很多View默认是enable的，因此该条件恒定为true</li>
-</ul>
-
-<p><strong>第三个条件：mOnTouchListener.onTouch(this, event)</strong></p>
-
-<ul>
-<li>回调控件注册Touch事件时的onTouch方法</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">//手动调用设置
-button.setOnTouchListener(new OnTouchListener() {  
-
-  @Override  
-  public boolean onTouch(View v, MotionEvent event) {  
-
-      return false;  
-  }  
-});
-</code></pre>
-
-<ul>
-<li>如果在onTouch方法返回true，就会让上述三个条件全部成立，从而整个方法直接返回true。</li>
-<li>如果在onTouch方法里返回false，就会去执行onTouchEvent(event)方法。</li>
-</ul>
-
-<p>接下来，我们继续看：onTouchEvent(event)的源码分析</p>
-
-<blockquote>
-<ol>
-<li>详情请看注释<br/></li>
-<li>Android 5.0后View的onTouchEvent()的源码发生了变化（更加复杂），但原理相同；<br/></li>
-<li>本文为了让读者更好理解onTouchEvent()源码分析，所以采用Android 5.0前的版本<br/></li>
-</ol>
-</blockquote>
-
-<pre class="line-numbers"><code class="language-java">public boolean onTouchEvent(MotionEvent event) {  
-    final int viewFlags = mViewFlags;  
-    if ((viewFlags &amp; ENABLED_MASK) == DISABLED) {  
-        // A disabled view that is clickable still consumes the touch  
-        // events, it just doesn&#39;t respond to them.  
-        return (((viewFlags &amp; CLICKABLE) == CLICKABLE ||  
-                (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE));  
-    }  
-    if (mTouchDelegate != null) {  
-        if (mTouchDelegate.onTouchEvent(event)) {  
-            return true;  
-        }  
-    }  
-     //如果该控件是可以点击的就会进入到下两行的switch判断中去；
-
-    if (((viewFlags &amp; CLICKABLE) == CLICKABLE ||  
-            (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {  
-    //如果当前的事件是抬起手指，则会进入到MotionEvent.ACTION_UP这个case当中。
-
-        switch (event.getAction()) {  
-            case MotionEvent.ACTION_UP:  
-                boolean prepressed = (mPrivateFlags &amp; PREPRESSED) != 0;  
-               // 在经过种种判断之后，会执行到关注点1的performClick()方法。
-               //请往下看关注点1
-                if ((mPrivateFlags &amp; PRESSED) != 0 || prepressed) {  
-                    // take focus if we don&#39;t have it already and we should in  
-                    // touch mode.  
-                    boolean focusTaken = false;  
-                    if (isFocusable() &amp;&amp; isFocusableInTouchMode() &amp;&amp; !isFocused()) {  
-                        focusTaken = requestFocus();  
-                    }  
-                    if (!mHasPerformedLongPress) {  
-                        // This is a tap, so remove the longpress check  
-                        removeLongPressCallback();  
-                        // Only perform take click actions if we were in the pressed state  
-                        if (!focusTaken) {  
-                            // Use a Runnable and post this rather than calling  
-                            // performClick directly. This lets other visual state  
-                            // of the view update before click actions start.  
-                            if (mPerformClick == null) {  
-                                mPerformClick = new PerformClick();  
-                            }  
-                            if (!post(mPerformClick)) {  
-            //关注点1
-            //请往下看performClick()的源码分析
-                                performClick();  
-                            }  
-                        }  
-                    }  
-                    if (mUnsetPressedState == null) {  
-                        mUnsetPressedState = new UnsetPressedState();  
-                    }  
-                    if (prepressed) {  
-                        mPrivateFlags |= PRESSED;  
-                        refreshDrawableState();  
-                        postDelayed(mUnsetPressedState,  
-                                ViewConfiguration.getPressedStateDuration());  
-                    } else if (!post(mUnsetPressedState)) {  
-                        // If the post failed, unpress right now  
-                        mUnsetPressedState.run();  
-                    }  
-                    removeTapCallback();  
-                }  
-                break;  
-            case MotionEvent.ACTION_DOWN:  
-                if (mPendingCheckForTap == null) {  
-                    mPendingCheckForTap = new CheckForTap();  
-                }  
-                mPrivateFlags |= PREPRESSED;  
-                mHasPerformedLongPress = false;  
-                postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());  
-                break;  
-            case MotionEvent.ACTION_CANCEL:  
-                mPrivateFlags &amp;= ~PRESSED;  
-                refreshDrawableState();  
-                removeTapCallback();  
-                break;  
-            case MotionEvent.ACTION_MOVE:  
-                final int x = (int) event.getX();  
-                final int y = (int) event.getY();  
-                // Be lenient about moving outside of buttons  
-                int slop = mTouchSlop;  
-                if ((x &lt; 0 - slop) || (x &gt;= getWidth() + slop) ||  
-                        (y &lt; 0 - slop) || (y &gt;= getHeight() + slop)) {  
-                    // Outside button  
-                    removeTapCallback();  
-                    if ((mPrivateFlags &amp; PRESSED) != 0) {  
-                        // Remove any future long press/tap checks  
-                        removeLongPressCallback();  
-                        // Need to switch from pressed to not pressed  
-                        mPrivateFlags &amp;= ~PRESSED;  
-                        refreshDrawableState();  
-                    }  
-                }  
-                break;  
-        }  
-//如果该控件是可以点击的，就一定会返回true
-        return true;  
-    }  
-//如果该控件是可以点击的，就一定会返回false
-    return false;  
-}
-</code></pre>
-
-<p><strong>关注点1：</strong></p>
-
-<p>performClick()的源码分析</p>
-
-<pre class="line-numbers"><code class="language-java">public boolean performClick() {  
-    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);  
-
-    if (mOnClickListener != null) {  
-        playSoundEffect(SoundEffectConstants.CLICK);  
-        mOnClickListener.onClick(this);  
-        return true;  
-    }  
-    return false;  
-}
-</code></pre>
-
-<ul>
-<li>只要mOnClickListener不为null，就会去调用onClick方法；</li>
-<li>那么，mOnClickListener又是在哪里赋值的呢？请继续看：</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public void setOnClickListener(OnClickListener l) {  
-    if (!isClickable()) {  
-        setClickable(true);  
-    }  
-    mOnClickListener = l;  
-}
-</code></pre>
-
-<ul>
-<li>当我们通过调用setOnClickListener方法来给控件注册一个点击事件时，就会给mOnClickListener赋值（不为空），即会回调onClick（）。</li>
-</ul>
-
-<h2 id="toc_35">结论</h2>
-
-<ol>
-<li>onTouch（）的执行高于onClick（）</li>
-<li><p>每当控件被点击时：</p>
-<ul>
-<li>如果在回调onTouch()里返回false，就会让dispatchTouchEvent方法返回false，那么就会执行onTouchEvent()；如果回调了setOnClickListener()来给控件注册点击事件的话，最后会在performClick()方法里回调onClick()。</li>
-</ul>
-<blockquote>
-<p>onTouch()返回false（该事件没被onTouch()消费掉） = dispatchTouchEvent()返回false（继续向下传递） = 执行onTouchEvent() = 执行OnClick()</p>
-</blockquote>
-<ul>
-<li>如果在回调onTouch()里返回true，就会让dispatchTouchEvent方法返回true，那么将不会执行onTouchEvent()，即onClick()也不会执行；</li>
-</ul>
-<blockquote>
-<p>onTouch()返回true（该事件被onTouch()消费掉） = dispatchTouchEvent()返回true（不会再继续向下传递） = 不会执行onTouchEvent() = 不会执行OnClick()</p>
-</blockquote></li>
-</ol>
-
-<p><strong>下面我将用Demo验证上述的结论</strong></p>
-
-<h2 id="toc_36">Demo论证</h2>
-
-<p><strong>1. Demo1：在回调onTouch()里返回true</strong></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015406386889.png" alt="20171108151015406386889.png"/><figcaption>20171108151015406386889.png</figcaption></figure></p>
-
-<pre class="line-numbers"><code class="language-java">//设置OnTouchListener()
-   button.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                System.out.println(&quot;执行了onTouch(), 动作是:&quot; + event.getAction());
-
-                return true;
-            }
-        });
-
-//设置OnClickListener
-    button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println(&quot;执行了onClick()&quot;);
-            }
-        });
-</code></pre>
-
-<p>点击Button，测试结果如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015413223556.png" alt="20171108151015413223556.png"/><figcaption>20171108151015413223556.png</figcaption></figure></p>
-
-<p><strong>2. Demo2：在回调onTouch()里返回false</strong></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015417140463.png" alt="20171108151015417140463.png"/><figcaption>20171108151015417140463.png</figcaption></figure></p>
-
-<pre class="line-numbers"><code class="language-java">//设置OnTouchListener()
-   button.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                System.out.println(&quot;执行了onTouch(), 动作是:&quot; + event.getAction());
-
-                return false;
-            }
-        });
-
-//设置OnClickListener
-    button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println(&quot;执行了onClick()&quot;);
-            }
-        });
-</code></pre>
-
-<p>点击Button，测试结果如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015420062579.png" alt="20171108151015420062579.png"/><figcaption>20171108151015420062579.png</figcaption></figure></p>
-
-<p>总结：onTouch()返回true就认为该事件被onTouch()消费掉，因而不会再继续向下传递，即不会执行OnClick()。</p>
-
-<p>如果你看到此处，那么恭喜你，你已经能非常熟悉掌握Android的事件分发机制了（Activity、ViewGroup、View的事件分发机制）</p>
-
-<h2 id="toc_37">思考点</h2>
-
-<h3 id="toc_38">onTouch()和onTouchEvent()的区别</h3>
-
-<ul>
-<li>这两个方法都是在View的dispatchTouchEvent中调用，但onTouch优先于onTouchEvent执行。</li>
-<li><p>如果在onTouch方法中返回true将事件消费掉，onTouchEvent()将不会再执行。</p></li>
-<li><p>特别注意：请看下面代码</p></li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">//&amp;&amp;为短路与，即如果前面条件为false，将不再往下执行
-//所以，onTouch能够得到执行需要两个前提条件：
-//1. mOnTouchListener的值不能为空
-//2. 当前点击的控件必须是enable的。
-mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp;  
-          mOnTouchListener.onTouch(this, event)
-</code></pre>
-
-<ul>
-<li>因此如果你有一个控件是非enable的，那么给它注册onTouch事件将永远得不到执行。对于这一类控件，如果我们想要监听它的touch事件，就必须通过在该控件中重写onTouchEvent方法来实现。</li>
-</ul>
-
-<h3 id="toc_39">Touch事件的后续事件（MOVE、UP）层级传递</h3>
-
-<ul>
-<li>如果给控件注册了Touch事件，每次点击都会触发一系列action事件（ACTION_DOWN，ACTION_MOVE，ACTION_UP等）</li>
-<li>当dispatchTouchEvent在进行事件分发的时候，只有前一个事件（如ACTION_DOWN）返回true，才会收到后一个事件（ACTION_MOVE和ACTION_UP）</li>
-</ul>
-
-<blockquote>
-<p>即如果在执行ACTION_DOWN时返回false，后面一系列的ACTION_MOVE和ACTION_UP事件都不会执行</p>
-</blockquote>
-
-<p>从上面对事件分发机制分析知：</p>
-
-<ul>
-<li>dispatchTouchEvent()和 onTouchEvent()消费事件、终结事件传递（返回true）</li>
-<li>而onInterceptTouchEvent 并不能消费事件，它相当于是一个分叉口起到分流导流的作用，对后续的ACTION_MOVE和ACTION_UP事件接收起到非常大的作用</li>
-</ul>
-
-<blockquote>
-<p>请记住：接收了ACTION_DOWN事件的函数不一定能收到后续事件（ACTION_MOVE、ACTION_UP）</p>
-</blockquote>
-
-<p><strong>这里给出ACTION_MOVE和ACTION_UP事件的传递结论：</strong></p>
-
-<ul>
-<li>如果在某个对象（Activity、ViewGroup、View）的dispatchTouchEvent()消费事件（返回true），那么收到ACTION_DOWN的函数也能收到ACTION_MOVE和ACTION_UP</li>
-</ul>
-
-<blockquote>
-<p>黑线：ACTION_DOWN事件传递方向<br/>
-红线：ACTION_MOVE和ACTION_UP事件传递方向</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015430075078.png" alt="20171108151015430075078.png"/><figcaption>20171108151015430075078.png</figcaption></figure></p>
-
-<ul>
-<li>如果在某个对象（Activity、ViewGroup、View）的onTouchEvent()消费事件（返回true），那么ACTION_MOVE和ACTION_UP的事件从上往下传到这个View后就不再往下传递了，而直接传给自己的onTouchEvent()并结束本次事件传递过程。</li>
-</ul>
-
-<blockquote>
-<p>黑线：ACTION_DOWN事件传递方向<br/>
-红线：ACTION_MOVE和ACTION_UP事件传递方向</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015431870363.png" alt="20171108151015431870363.png"/><figcaption>20171108151015431870363.png</figcaption></figure></p>
 
                         
                       </div>
@@ -2115,7 +177,7 @@ mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &
                 </a>
                 <div class="read-more clearfix">
                   <div class="more-left left">
-                  
+                   <a href="15561207872300.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2017/10/28</span>
                     <span>posted in&nbsp;</span> 
           				  
@@ -2146,218 +208,6 @@ mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &
 
 <p>本文将介绍Android中实现消息推送的7种主流解决方案。</p>
 
-<h2 id="toc_1">目录</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014893328998.png" alt="20171108151014893328998.png"/><figcaption>20171108151014893328998.png</figcaption></figure></p>
-
-<h2 id="toc_2">定义</h2>
-
-<p>在用户未打开App时，App主动向用户推送服务器最新消息。如下图：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014897092874.png" alt="20171108151014897092874.png"/><figcaption>20171108151014897092874.png</figcaption></figure></p>
-
-<p>消息推送的本质是：App将服务器更新的信息推送给用户</p>
-
-<h2 id="toc_3">作用</h2>
-
-<ul>
-<li>产品的角度：功能需要，比如说资讯类产品的新闻推送、工具类产品的公告推送等等</li>
-<li>运营的角度：活动运营需要，比如说电商类产品的促销活动；召回用户 / 提高活跃度等等</li>
-</ul>
-
-<blockquote>
-<p>作为开发者，不要有需求就接，应该多思考、多理解用户 / 功能的使用场景，有助于我们更好地去选择合适的开发方式</p>
-</blockquote>
-
-<h2 id="toc_4">储备知识</h2>
-
-<h3 id="toc_5">操作系统有自身的消息推送功能（系统级别）</h3>
-
-<ul>
-<li>系统级别：任何时候都可以推送给用户，且不会被系统杀死</li>
-<li>Android的消息推送服务称为：C2DM（Cloudto Device Messaging）</li>
-</ul>
-
-<blockquote>
-<p>将在下面详细描述</p>
-</blockquote>
-
-<h3 id="toc_6">推送的本质与原理</h3>
-
-<ul>
-<li>消息推送的本质是：App将服务器更新的信息推送给用户，即App获取服务器信息，再推送给用户</li>
-<li>App从服务器获取最新消息的基本方式（原理）有3种：Push、Pull 和 SMS</li>
-<li>具体如下</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014908561018.png" alt="20171108151014908561018.png"/><figcaption>20171108151014908561018.png</figcaption></figure></p>
-
-<h2 id="toc_7">解决方案</h2>
-
-<p>经总结，Android中实现消息推送的有7种主流解决方案，接下来将一一介绍。</p>
-
-<h3 id="toc_8">C2DM</h3>
-
-<ul>
-<li>定义：Cloud to Device Messaging，云端推送</li>
-</ul>
-
-<blockquote>
-<p>Android系统级别的消息推送服务-Google出品</p>
-</blockquote>
-
-<ul>
-<li>原理：基于Push方式，C2DM服务负责处理诸如消息排队等事务，并向运行于目标设备上的应用程序分发这些消息。如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014911731014.png" alt="20171108151014911731014.png"/><figcaption>20171108151014911731014.png</figcaption></figure></p>
-
-<ul>
-<li>优点：C2DM提供了一个简单的、轻量级的机制，允许服务器可以通知移动应用程序直接与服务器进行通信，以便于从服务器获取应用程序更新和用户数据。</li>
-<li>缺点：
-<ol>
-<li>依赖于Google官方提供的C2DM服务器，但在国内使用Google服务需要翻墙，成本较大；</li>
-<li>需要用户手机安装Google服务。但由于Android机型、系统的碎片化 &amp; 国内环境，国内的Android系统都自动去除Google服务，假如要使用C2DM服务，这意味着用户还得去安装Google服务，成本较大。</li>
-</ol></li>
-</ul>
-
-<h3 id="toc_9">轮询</h3>
-
-<ul>
-<li>原理：基于Pull方式，应用程序隔固定时间主动与服务器进行连接并查询是否有新的消息</li>
-<li>缺点：
-<ol>
-<li>成本大，需要自己实现与服务器之间的通信，例如消息排队等；</li>
-<li>到达率不确定，考虑轮询的频率：太低可能导致消息的延迟；太高，更费客户端的资源（CPU资源、网络流量、系统电量）和服务器资源（网络带宽）</li>
-</ol></li>
-</ul>
-
-<h3 id="toc_10">SMS</h3>
-
-<ul>
-<li>定义：短信发送</li>
-<li>原理：基于Push方式，通过拦截SMS消息并且解析消息内容来了解服务器的意图，并获取其显示内容进行处理。</li>
-<li>优点：可实现完全的实时操作</li>
-<li>缺点：成本相对较高。因为目前来说，很难找到免费的短消息发送网关来实现这种方案，只能通过向运营商缴纳相应的短信费用</li>
-</ul>
-
-<h3 id="toc_11">MQTT协议</h3>
-
-<ul>
-<li>定义：轻量级的消息发布/订阅协议</li>
-<li>原理：基于Push方式，wmqtt.jar 是IBM提供的MQTT协议的实现，原理如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014921455838.png" alt="20171108151014921455838.png"/><figcaption>20171108151014921455838.png</figcaption></figure></p>
-
-<blockquote>
-<p>更多关于MQTT协议：  </p>
-
-<ol>
-<li><a href="https://github.com/tokudu/AndroidPushNotificationsDemo">项目实例源</a><br/></li>
-<li><a href="https://github.com/tokudu/PhpMQTTClient">一个采用PHP书写的服务器端</a><br/></li>
-<li><a href="http://www-01.ibm.com/support/docview.wss?rs=171&amp;uid=swg24006006">Jar包下载地址</a>，并加入自己的Android应用程序中。<br/></li>
-<li>拓展：RSMB是从MQTT协议引申出来的另外一种解决方案：简单的MQTT代理，详情<a href="http://www.alphaworks.ibm.com/tech/rsmb">请点击</a><br/></li>
-</ol>
-</blockquote>
-
-<h3 id="toc_12">XMPP协议</h3>
-
-<ul>
-<li>定义：Extensible Messageing and Presence Protocol，可扩展消息与存在协议，是基于可扩展标记语言（XML）的协议，是目前主流的四种IM协议之一</li>
-</ul>
-
-<blockquote>
-<p>其他三种：</p>
-</blockquote>
-
-<ul>
-<li>即时信息和空间协议（IMPP）</li>
-<li>空间和即时信息协议（PRIM）</li>
-<li>即时通讯和空间平衡扩充的进程开始协议SIP（SIMPLE）</li>
-<li>原理：XMPP中定义了三个角色，分别是客户端、服务器和网关</li>
-</ul>
-
-<p><strong>客户端</strong></p>
-
-<ol>
-<li>通过 TCP/IP与XMPP 服务器连接，然后在之上传输与即时通讯相关的指令（XML）；</li>
-<li>解析组织好的 XML 信息包；</li>
-<li>理解消息数据类型。</li>
-</ol>
-
-<blockquote>
-<p>XMPP的核心：XML流传输协议（在网络上分片断发送XML的流协议），也是即时通讯指令的传递基础，即XMPP用TCP传的是XML流<br/><br/>
-与即时通讯相关的指令，在以前要么用2进制的形式发送（比如QQ），要么用纯文本指令加空格加参数加换行符的方式发送（比如MSN）。<br/><br/>
-XMPP传输的即时通讯指令的逻辑与以往相仿，只是协议的形式变成了XML格式的纯文本。  </p>
-</blockquote>
-
-<p><strong>服务器</strong></p>
-
-<ol>
-<li>监听客户端连接，并直接与客户端应用程序通信（客户端信息记录）</li>
-<li>与其他 XMPP 服务器通信；</li>
-</ol>
-
-<p><strong>网关</strong>：与异构即时通信系统进行通信</p>
-
-<blockquote>
-<p>异构系统包括SMS（短信），MSN，ICQ等</p>
-</blockquote>
-
-<p>通信能够在这三者的任意两个之间双向发生。</p>
-
-<p><strong>原理流程</strong></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101494469135.png" alt="2017110815101494469135.png"/><figcaption>2017110815101494469135.png</figcaption></figure></p>
-
-<ul>
-<li>优点：
-<ol>
-<li>开源：可通过修改其源代码来适应我们的应用程序。</li>
-<li>简单：XML易于解析和阅读；将复杂性从客户端转移到了服务器端</li>
-<li>可拓展性强：继承了在XML环境中灵活的发展性，可进一步对协议进行扩展，实现更为完善的功能。</li>
-</ol></li>
-</ul>
-
-<blockquote>
-<p>GTalk、QQ、IM等都用这个协议</p>
-</blockquote>
-
-<ul>
-<li>缺点：如果将消息从服务器上推送出去，则不管消息是否成功到达客户端手机上。</li>
-<li>源码实例：有一个很棒的基于XMPP协议的java开源Android push notification：Androidpn<a href="http://sourceforge.net/projects/androidpn/">项目地址</a>，大家有兴趣可以去看看</li>
-</ul>
-
-<blockquote>
-<p>更多关于XMPP协议更加详细<a href="http://www.cnblogs.com/hanyonglu/archive/2012/03/04/2378956.html">请点击</a></p>
-</blockquote>
-
-<h3 id="toc_13">使用第三方平台</h3>
-
-<p>现今主流的推送平台分为</p>
-
-<ol>
-<li>手机厂商类：小米推送、华为推送。</li>
-<li>第三方平台类：友盟推送、极光推送、云巴（基于MQTT）</li>
-<li>BAT大厂的平台推送：阿里云移动推送、腾讯信鸽推送、百度云推送</li>
-</ol>
-
-<p>具体各推送平台的优缺点请看我写的文章：<a href="http://www.jianshu.com/p/d77eaca4e52a">Android推送：第三方消息推送平台详细解析</a></p>
-
-<h3 id="toc_14">自己搭建</h3>
-
-<p>如果你的产品对于消息推送具备较高的功能和性能要求，同时对安全性要求非常高的话，自己搭建可能是最好的方式，但这种方式无疑成本是最高的。</p>
-
-<h2 id="toc_15">总结</h2>
-
-<ul>
-<li>经过上面的详细讲解，相信大家现在对Android中消息推送的解决方案已经非常了解</li>
-<li>解决方案没有优劣，要具具体使用场景而定。但一般来说，个人建议使用第三方平台推送，成本低+抵达率高</li>
-<li>关于Android消息推送的其他知识，具体请看：<br/>
-<a href="http://www.jianshu.com/p/b1134bebc2d4">Android消息推送：手把手教你集成小米推送</a><br/>
-<a href="http://www.jianshu.com/p/d77eaca4e52a">Android推送：第三方消息推送平台详细解析</a></li>
-</ul>
 
                         
                       </div>
@@ -2365,7 +215,7 @@ XMPP传输的即时通讯指令的逻辑与以往相仿，只是协议的形式�
                 </a>
                 <div class="read-more clearfix">
                   <div class="more-left left">
-                  
+                   <a href="15561207872263.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2017/10/27</span>
                     <span>posted in&nbsp;</span> 
           				  
@@ -4071,6 +1921,444 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 <li>根据掌握的特征寻找稳定的复现的途径。一般需要做内存压力测试，这样比较容易达到OOM的临界值，只是简单的一些正常操作难以触发OOM。</li>
 <li>获取可分析的数据（内存dump文件）。利用MAT分析dump文件，MAT可以方便的按照大小排序实例，可以查看某些实例到GC ROOT的路径。</li>
 </ol>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207872019.html">
+                
+                  <h1>Android-全面解析 Application类</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>Applicaiton类在 Android开发中非常常见，可是你真的了解Applicaiton类吗？<br/><br/>
+本文将全面解析Applicaiton类，包括特点、方法介绍、应用场景和具体使用，希望你们会喜欢。</p>
+
+<h2 id="toc_1">目录</h2>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171106150989787899330.png" alt="20171106150989787899330.png"/><figcaption>20171106150989787899330.png</figcaption></figure></p>
+
+<h2 id="toc_2">定义</h2>
+
+<ul>
+<li>代表应用程序（即 Android App）的类，也属于Android中的一个系统组件</li>
+<li>继承关系：继承自 ContextWarpper 类</li>
+</ul>
+
+<h2 id="toc_3">特点</h2>
+
+<h3 id="toc_4">实例创建方式：单例模式</h3>
+
+<ul>
+<li>每个Android App运行时，会首先自动创建Application 类并实例化 Application 对象，且只有一个</li>
+</ul>
+
+<blockquote>
+<p>即 Application类 是单例模式（singleton）类</p>
+</blockquote>
+
+<ul>
+<li>也可通过 继承 Application 类自定义Application 类和实例</li>
+</ul>
+
+<h3 id="toc_5">实例形式：全局实例</h3>
+
+<p>即不同的组件（如Activity、Service）都可获得Application对象且都是同一个对象</p>
+
+<h3 id="toc_6">生命周期：等于 Android App 的生命周期</h3>
+
+<p>Application 对象的生命周期是整个程序中最长的，即等于Android App的生命周期</p>
+
+<h2 id="toc_7">方法介绍</h2>
+
+<p>那么，该 Application 类有什么作用呢？下面，我将介绍Application 类的方法使用</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171106150989812673960.png" alt="20171106150989812673960.png"/><figcaption>20171106150989812673960.png</figcaption></figure></p>
+
+<h3 id="toc_8">onCreate（）</h3>
+
+<ul>
+<li>调用时刻： Application 实例创建时调用</li>
+</ul>
+
+<blockquote>
+<p>Android系统的入口是Application类的 onCreate（），默认为空实现</p>
+</blockquote>
+
+<ul>
+<li>作用
+<ul>
+<li>初始化 应用程序级别 的资源，如全局对象、环境配置变量、图片资源初始化、推送服务的注册等<br/>
+&gt; 注：请不要执行耗时操作，否则会拖慢应用程序启动速度</li>
+<li>数据共享、数据缓存<br/>
+设置全局共享数据，如全局共享变量、方法等</li>
+</ul></li>
+</ul>
+
+<blockquote>
+<p>注：这些共享数据只在应用程序的生命周期内有效，当该应用程序被杀死，这些数据也会被清空，所以只能存储一些具备 临时性的共享数据</p>
+</blockquote>
+
+<ul>
+<li>具体使用</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">// 复写方法需要在Application子类里实现
+
+private static final String VALUE = &quot;Carson&quot;;
+    // 初始化全局变量
+    @Override
+    public void onCreate()
+    {
+        super.onCreate();  
+        VALUE = 1;
+    }
+}
+</code></pre>
+
+<h3 id="toc_9">registerComponentCallbacks（） &amp; unregisterComponentCallbacks（）</h3>
+
+<ul>
+<li>作用：注册和注销 ComponentCallbacks2回调接口</li>
+</ul>
+
+<blockquote>
+<p>本质上是复写 ComponentCallbacks2回调接口里的方法从而实现更多的操作，具体下面会详细介绍</p>
+</blockquote>
+
+<ul>
+<li>具体使用</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+// 接口里方法下面会继续介绍
+            @Override
+            public void onTrimMemory(int level) {
+
+            }
+
+            @Override
+            public void onLowMemory() {
+
+            }
+
+            @Override
+            public void onConfigurationChanged(Configuration newConfig) {
+
+            }
+        });
+</code></pre>
+
+<h3 id="toc_10">onTrimMemory（）</h3>
+
+<ul>
+<li>作用：通知 应用程序 当前内存使用情况（以内存级别进行识别）</li>
+</ul>
+
+<blockquote>
+<p>Android 4.0 后提供的一个API</p>
+</blockquote>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171106150989834178917.png" alt="20171106150989834178917.png"/><figcaption>20171106150989834178917.png</figcaption></figure></p>
+
+<ul>
+<li>应用场景：根据当前内存使用情况进行自身的内存资源的不同程度释放，以避免被系统直接杀掉 &amp; 优化应用程序的性能体验</li>
+</ul>
+
+<blockquote>
+<ol>
+<li>系统在内存不足时会按照LRU Cache中从低到高杀死进程；优先杀死占用内存较高的应用<br/></li>
+<li>若应用占用内存较小 = 被杀死几率降低，从而快速启动（即热启动 = 启动速度快）</li>
+<li>可回收的资源包括：
+<ol>
+<li>缓存，如文件缓存，图片缓存</li>
+<li>动态生成 &amp; 添加的View</li>
+</ol></li>
+</ol>
+</blockquote>
+
+<p>典型的应用场景有两个：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110615098984255098.png" alt="2017110615098984255098.png"/><figcaption>2017110615098984255098.png</figcaption></figure></p>
+
+<ul>
+<li>具体使用</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+
+@Override
+  public void onTrimMemory(int level) {
+
+  // Android系统会根据当前内存使用的情况，传入对应的级别
+  // 下面以清除缓存为例子介绍
+    super.onTrimMemory(level);
+  .   if (level &gt;= ComponentCallbacks2.TRIM_MEMORY_MODERATE) {
+
+        mPendingRequests.clear();
+        mBitmapHolderCache.evictAll();
+        mBitmapCache.evictAll();
+    }
+
+        });
+</code></pre>
+
+<ul>
+<li>可回调对象 &amp; 对应方法</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">Application.onTrimMemory()
+Activity.onTrimMemory()
+Fragment.OnTrimMemory()
+Service.onTrimMemory()
+ContentProvider.OnTrimMemory()
+</code></pre>
+
+<p><strong>特别注意</strong>：<code>onTrimMemory()</code>中的TRIM_MEMORY_UI_HIDDEN与onStop（）的关系</p>
+
+<ul>
+<li>onTrimMemory()中的TRIM_MEMORY_UI_HIDDEN的回调时刻：当应用程序中的所有UI组件全部不可见时</li>
+<li>Activity的onStop（）回调时刻：当一个Activity完全不可见的时候</li>
+<li>使用建议：
+<ul>
+<li>在 onStop（）中释放与 Activity相关的资源，如取消网络连接或者注销广播接收器等</li>
+<li>在onTrimMemory()中的TRIM_MEMORY_UI_HIDDEN中释放与UI相关的资源，从而保证用户在使用应用程序过程中，UI相关的资源不需要重新加载，从而提升响应速度</li>
+</ul></li>
+</ul>
+
+<blockquote>
+<p>注：onTrimMemory的TRIM_MEMORY_UI_HIDDEN等级是在onStop（）方法之前调用的</p>
+</blockquote>
+
+<h3 id="toc_11">onLowMemory（）</h3>
+
+<ul>
+<li>作用：监听 Android系统整体内存较低时刻</li>
+<li>调用时刻：Android系统整体内存较低时</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+
+  @Override
+            public void onLowMemory() {
+
+            }
+
+        });
+</code></pre>
+
+<ul>
+<li>应用场景：Android 4.0前 检测内存使用情况，从而避免被系统直接杀掉 &amp; 优化应用程序的性能体验</li>
+</ul>
+
+<blockquote>
+<p>类似于 OnTrimMemory（）</p>
+</blockquote>
+
+<ul>
+<li>特别注意：OnTrimMemory（） &amp; OnLowMemory（） 关系
+<ol>
+<li>OnTrimMemory（）是 OnLowMemory（） Android 4.0后的替代 API</li>
+<li>OnLowMemory（） = OnTrimMemory（）中的TRIM_MEMORY_COMPLETE级别</li>
+<li>若想兼容Android 4.0前，请使用OnLowMemory（）；否则直接使用OnTrimMemory（）即可</li>
+</ol></li>
+</ul>
+
+<h3 id="toc_12">onConfigurationChanged（）</h3>
+
+<ul>
+<li>作用：监听 应用程序 配置信息的改变，如屏幕旋转等</li>
+<li>调用时刻：应用程序配置信息 改变时调用</li>
+<li>具体使用</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+
+            @Override
+            public void onConfigurationChanged(Configuration newConfig) {
+              ...
+            }
+
+        });
+</code></pre>
+
+<ul>
+<li>该配置信息是指 ：Manifest.xml文件下的 Activity标签属性android:configChanges的值，如下：</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-text">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
+      android:configChanges=&quot;keyboardHidden|orientation|screenSize&quot;
+// 设置该配置属性会使 Activity在配置改变时不重启，只执行onConfigurationChanged（）
+// 上述语句表明，设置该配置属性可使 Activity 在屏幕旋转时不重启
+ &lt;/activity&gt;
+</code></pre>
+
+<h3 id="toc_13">registerActivityLifecycleCallbacks（） &amp; unregisterActivityLifecycleCallbacks（）</h3>
+
+<ul>
+<li>作用：注册 / 注销对 应用程序内 所有Activity的生命周期监听</li>
+<li>调用时刻：当应用程序内 Activity生命周期发生变化时就会调用</li>
+</ul>
+
+<blockquote>
+<p>实际上是调用registerActivityLifecycleCallbacks（）里 ActivityLifecycleCallbacks接口里的方法</p>
+</blockquote>
+
+<ul>
+<li>具体使用</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">// 实际上需要复写的是ActivityLifecycleCallbacks接口里的方法
+registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
+            @Override
+            public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
+                Log.d(TAG,&quot;onActivityCreated: &quot; + activity.getLocalClassName());
+            }
+
+            @Override
+            public void onActivityStarted(Activity activity) {
+                Log.d(TAG,&quot;onActivityStarted: &quot; + activity.getLocalClassName());
+            }
+
+            @Override
+            public void onActivityResumed(Activity activity) {
+                Log.d(TAG,&quot;onActivityResumed: &quot; + activity.getLocalClassName());
+            }
+
+            @Override
+            public void onActivityPaused(Activity activity) {
+                Log.d(TAG,&quot;onActivityPaused: &quot; + activity.getLocalClassName());
+            }
+
+            @Override
+            public void onActivityStopped(Activity activity) {
+                Log.d(TAG, &quot;onActivityStopped: &quot; + activity.getLocalClassName());
+            }
+
+            @Override
+            public void onActivitySaveInstanceState(Activity activity, Bundle outState) {
+            }
+
+            @Override
+            public void onActivityDestroyed(Activity activity) {
+                Log.d(TAG,&quot;onActivityDestroyed: &quot; + activity.getLocalClassName());
+            }
+        });
+
+&lt;-- 测试：把应用程序从前台切到后台再打开，看Activcity的变化 --&gt;
+ onActivityPaused: MainActivity
+ onActivityStopped: MainActivity
+ onActivityStarted: MainActivity
+ onActivityResumed: MainActivity
+</code></pre>
+
+<h3 id="toc_14">onTerminate（）</h3>
+
+<p>调用时刻：应用程序结束时调用</p>
+
+<blockquote>
+<p>但该方法只用于Android仿真机测试，在Android产品机是不会调用的</p>
+</blockquote>
+
+<h2 id="toc_15">应用场景</h2>
+
+<p>从Applicaiton类的方法可以看出，Applicaiton类的应用场景有：（已按优先级排序）</p>
+
+<ul>
+<li>初始化 应用程序级别 的资源，如全局对象、环境配置变量等</li>
+<li>数据共享、数据缓存，如设置全局共享变量、方法等</li>
+<li>获取应用程序当前的内存使用情况，及时释放资源，从而避免被系统杀死</li>
+<li>监听 应用程序 配置信息的改变，如屏幕旋转等</li>
+<li>监听应用程序内 所有Activity的生命周期</li>
+</ul>
+
+<h2 id="toc_16">具体使用</h2>
+
+<ul>
+<li>若需要复写实现上述方法，则需要自定义 Application类</li>
+<li>具体过程如下</li>
+</ul>
+
+<p><strong>步骤1：新建Application子类</strong></p>
+
+<p>即继承 Application 类</p>
+
+<pre class="line-numbers"><code class="language-java">public class CarsonApplication extends Application
+  {
+    ...
+    // 根据自身需求，并结合上述介绍的方法进行方法复写实现
+
+    // 下面以onCreate()为例
+  private static final String VALUE = &quot;Carson&quot;;
+    // 初始化全局变量
+    @Override
+    public void onCreate()
+    {
+        super.onCreate();
+
+        VALUE = 1;
+
+    }
+
+  }
+</code></pre>
+
+<p><strong>步骤2：配置自定义的Application子类</strong></p>
+
+<p>在Manifest.xml文件中 <application>标签里进行配置</p>
+
+<p>Manifest.xml</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;application
+
+        android:name=&quot;.CarsonApplication&quot;
+        // 此处自定义Application子类的名字 = CarsonApplication
+    
+&lt;/application&gt;
+</code></pre>
+
+<p><strong>步骤3：使用自定义的Application类实例</strong></p>
+
+<pre class="line-numbers"><code class="language-java">private CarsonApplicaiton app;
+
+// 只需要调用Activity.getApplication（） 或Context.getApplicationContext（）就可以获得一个Application对象
+app = (CarsonApplication) getApplication();
+
+// 然后再得到相应的成员变量 或方法 即可
+app.exitApp();
+</code></pre>
+
+<p>至此，关于 Applicaiton 类已经讲解完毕。</p>
+
+<h2 id="toc_17">总结</h2>
+
+<p>我用一张图总结上述文章</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171106150989846698587.png" alt="20171106150989846698587.png"/><figcaption>20171106150989846698587.png</figcaption></figure></p>
 
                         
                       </div>

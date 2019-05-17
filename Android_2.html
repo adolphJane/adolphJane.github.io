@@ -116,1298 +116,6 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15561207872300.html">
-                
-                  <h1>Android-事件分发机制详解：史上最全面、最易懂</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<ul>
-<li>Android事件分发机制是Android开发者必须了解的基础</li>
-<li>网上有大量关于Android事件分发机制的文章，但存在一些问题：内容不全、思路不清晰、无源码分析、简单问题复杂化等等</li>
-<li>今天，我将全面总结Android的事件分发机制，我能保证这是市面上的最全面、最清晰、最易懂的</li>
-</ul>
-
-<blockquote>
-<p>本文秉着“结论先行、详细分析在后”的原则，即先让大家感性认识，再通过理性分析从而理解问题；<br/>
-所以，请各位读者先记住结论，再往下继续看分析；</p>
-</blockquote>
-
-<h2 id="toc_1">目录</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014991957405.png" alt="20171108151014991957405.png"/><figcaption>20171108151014991957405.png</figcaption></figure></p>
-
-<h2 id="toc_2">基础认知</h2>
-
-<h3 id="toc_3">事件分发的对象是谁？</h3>
-
-<p><strong>答：事件</strong></p>
-
-<ul>
-<li>当用户触摸屏幕时（View或ViewGroup派生的控件），将产生点击事件（Touch事件）。</li>
-</ul>
-
-<blockquote>
-<p>Touch事件相关细节（发生触摸的位置、时间、历史记录、手势动作等）被封装成MotionEvent对象</p>
-</blockquote>
-
-<ul>
-<li>主要发生的Touch事件有如下四种：
-<ul>
-<li>MotionEvent.ACTION_DOWN：按下View（所有事件的开始）</li>
-<li>MotionEvent.ACTION_MOVE：滑动View</li>
-<li>MotionEvent.ACTION_CANCEL：非人为原因结束本次事件</li>
-<li>MotionEvent.ACTION_UP：抬起View（与DOWN对应）</li>
-</ul></li>
-<li>事件列：从手指接触屏幕至手指离开屏幕，这个过程产生的一系列事件<br/>
-任何事件列都是以DOWN事件开始，UP事件结束，中间有无数的MOVE事件，如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014998211742.png" alt="20171108151014998211742.png"/><figcaption>20171108151014998211742.png</figcaption></figure></p>
-
-<p>即当一个MotionEvent 产生后，系统需要把这个事件传递给一个具体的 View 去处理,</p>
-
-<h3 id="toc_4">事件分发的本质</h3>
-
-<p><strong>答：将点击事件（MotionEvent）向某个View进行传递并最终得到处理</strong></p>
-
-<blockquote>
-<p>即当一个点击事件发生后，系统需要将这个事件传递给一个具体的View去处理。这个事件传递的过程就是分发过程。</p>
-</blockquote>
-
-<h3 id="toc_5">事件在哪些对象之间进行传递？</h3>
-
-<p><strong>答：Activity、ViewGroup、View</strong></p>
-
-<blockquote>
-<p>一个点击事件产生后，传递顺序是：Activity（Window） -&gt; ViewGroup -&gt; View</p>
-</blockquote>
-
-<ul>
-<li>Android的UI界面是由Activity、ViewGroup、View及其派生类组合而成的</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015003038387.png" alt="20171108151015003038387.png"/><figcaption>20171108151015003038387.png</figcaption></figure></p>
-
-<ul>
-<li>View是所有UI组件的基类</li>
-</ul>
-
-<blockquote>
-<p>一般Button、ImageView、TextView等控件都是继承父类View</p>
-</blockquote>
-
-<ul>
-<li>ViewGroup是容纳UI组件的容器，即一组View的集合（包含很多子View和子VewGroup），</li>
-</ul>
-
-<blockquote>
-<ol>
-<li>其本身也是从View派生的，即ViewGroup是View的子类<br/></li>
-<li>是Android所有布局的父类或间接父类：项目用到的布局（LinearLayout、RelativeLayout等），都继承自ViewGroup，即属于ViewGroup子类。<br/></li>
-<li>与普通View的区别：ViewGroup实际上也是一个View，只不过比起View，它多了可以包含子View和定义布局参数的功能。<br/></li>
-</ol>
-</blockquote>
-
-<h3 id="toc_6">事件分发过程由哪些方法协作完成？</h3>
-
-<p><strong>答：dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">方法</th>
-<th style="text-align: center">作用</th>
-<th style="text-align: center">调用时刻</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">dispatchTouchEvent()</td>
-<td style="text-align: center">分发（传递）点击事件</td>
-<td style="text-align: center">当点击事件能够传递给当前View时，该方法就会被调用</td>
-</tr>
-<tr>
-<td style="text-align: center">onInterceptTouchEvent()</td>
-<td style="text-align: center">判断是否拦截了某个事件（只存在于ViewGroup，普通的View没有这个方法）</td>
-<td style="text-align: center">在dispatchTouchEvent()内存调用</td>
-</tr>
-<tr>
-<td style="text-align: center">onTouchEvent()</td>
-<td style="text-align: center">处理点击事件</td>
-<td style="text-align: center">在dispatchTouchEvent()内部调用</td>
-</tr>
-</tbody>
-</table>
-
-<blockquote>
-<p>下文会对这3个方法进行详细介绍</p>
-</blockquote>
-
-<h3 id="toc_7">总结</h3>
-
-<ul>
-<li>Android事件分发机制的本质是要解决：点击事件由哪个对象发出，经过哪些对象，最终达到哪个对象并最终得到处理。</li>
-</ul>
-
-<blockquote>
-<p>这里的对象是指Activity、ViewGroup、View</p>
-</blockquote>
-
-<ul>
-<li>Android中事件分发顺序：Activity（Window） -&gt; ViewGroup -&gt; View</li>
-<li>事件分发过程由dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()三个方法协助完成</li>
-</ul>
-
-<p>经过上述3个问题，相信大家已经对Android的事件分发有了感性的认知，接下来，我将详细介绍Android事件分发机制。</p>
-
-<h2 id="toc_8">事件分发机制方法&amp;流程介绍</h2>
-
-<ul>
-<li>事件分发过程由dispatchTouchEvent() 、onInterceptTouchEvent()和onTouchEvent()三个方法协助完成，如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101507201948.png" alt="2017110815101507201948.png"/><figcaption>2017110815101507201948.png</figcaption></figure></p>
-
-<ul>
-<li>Android事件分发流程如下：（必须熟记）</li>
-</ul>
-
-<blockquote>
-<p>Android事件分发顺序：Activity（Window） -&gt; ViewGroup -&gt; View</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015083272246.png" alt="20171108151015083272246.png"/><figcaption>20171108151015083272246.png</figcaption></figure></p>
-
-<p>其中：</p>
-
-<ul>
-<li>super：调用父类方法</li>
-<li>true：消费事件，即事件不继续往下传递</li>
-<li>false：不消费事件，事件也不继续往下传递 / 交由给父控件onTouchEvent（）处理</li>
-</ul>
-
-<p>接下来，我将详细介绍这3个方法及相关流程。</p>
-
-<h3 id="toc_9">dispatchTouchEvent()</h3>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">属性</th>
-<th style="text-align: center">介绍</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">使用对象</td>
-<td style="text-align: center">Activity、ViewGroup、View</td>
-</tr>
-<tr>
-<td style="text-align: center">作用</td>
-<td style="text-align: center">分发点击事件</td>
-</tr>
-<tr>
-<td style="text-align: center">调用时刻</td>
-<td style="text-align: center">当点击事件能够传递给当前View时，该方法就会被调用</td>
-</tr>
-<tr>
-<td style="text-align: center">返回结果</td>
-<td style="text-align: center">是否消费当前事件，详细情况如下：</td>
-</tr>
-</tbody>
-</table>
-
-<p><strong>1. 默认情况：根据当前对象的不同而返回方法不同</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">对象</th>
-<th style="text-align: center">返回方法</th>
-<th style="text-align: center">备注</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">Activity</td>
-<td style="text-align: center">super.dispatchTouchEvent()</td>
-<td style="text-align: center">即调用父类ViewGroup的dispatchTouchEvent()</td>
-</tr>
-<tr>
-<td style="text-align: center">ViewGroup</td>
-<td style="text-align: center">onIntercepTouchEvent()</td>
-<td style="text-align: center">即调用自身的onIntercepTouchEvent()</td>
-</tr>
-<tr>
-<td style="text-align: center">View</td>
-<td style="text-align: center">onTouchEvent（）</td>
-<td style="text-align: center">即调用自身的onTouchEvent（）</td>
-</tr>
-</tbody>
-</table>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015093015508.png" alt="20171108151015093015508.png"/><figcaption>20171108151015093015508.png</figcaption></figure></p>
-
-<p><strong>2. 返回true</strong></p>
-
-<ul>
-<li>消费事件</li>
-<li>事件不会往下传递</li>
-<li>后续事件（Move、Up）会继续分发到该View</li>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015097713612.png" alt="20171108151015097713612.png"/><figcaption>20171108151015097713612.png</figcaption></figure></p>
-
-<p><strong>3. 返回false</strong></p>
-
-<ul>
-<li>不消费事件</li>
-<li>事件不会往下传递</li>
-<li>将事件回传给父控件的onTouchEvent()处理</li>
-</ul>
-
-<blockquote>
-<p>Activity例外：返回false=消费事件</p>
-</blockquote>
-
-<ul>
-<li>后续事件（Move、Up）会继续分发到该View(与onTouchEvent()区别）</li>
-<li>流程图如下</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015100669361.png" alt="20171108151015100669361.png"/><figcaption>20171108151015100669361.png</figcaption></figure></p>
-
-<h3 id="toc_10">onTouchEvent()</h3>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">属性</th>
-<th style="text-align: center">介绍</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">使用对象</td>
-<td style="text-align: center">Activity、ViewGroup、View</td>
-</tr>
-<tr>
-<td style="text-align: center">作用</td>
-<td style="text-align: center">处理点击事件</td>
-</tr>
-<tr>
-<td style="text-align: center">调用时刻</td>
-<td style="text-align: center">在dispatchTouchEvent()内部调用</td>
-</tr>
-<tr>
-<td style="text-align: center">返回结果</td>
-<td style="text-align: center">是否消费（处理）当前事件，详细情况如下：</td>
-</tr>
-</tbody>
-</table>
-
-<blockquote>
-<p>与dispatchTouchEvent()类似</p>
-</blockquote>
-
-<p><strong>1. 返回true</strong></p>
-
-<ul>
-<li>自己处理（消费）该事情</li>
-<li>事件停止传递</li>
-<li>该事件序列的后续事件（Move、Up）让其处理；</li>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015113258049.png" alt="20171108151015113258049.png"/><figcaption>20171108151015113258049.png</figcaption></figure></p>
-
-<p><strong>2. 返回false（同默认实现：调用父类onTouchEvent()）</strong></p>
-
-<ul>
-<li>不处理（消费）该事件</li>
-<li>事件往上传递给父控件的onTouchEvent()处理</li>
-<li>当前View不再接受此事件列的其他事件（Move、Up）；</li>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101512068918.png" alt="2017110815101512068918.png"/><figcaption>2017110815101512068918.png</figcaption></figure></p>
-
-<h3 id="toc_11">onInterceptTouchEvent()</h3>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">属性</th>
-<th style="text-align: center">介绍</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">使用对象</td>
-<td style="text-align: center">ViewGroup（注：Activity、View都没该方法）</td>
-</tr>
-<tr>
-<td style="text-align: center">作用</td>
-<td style="text-align: center">拦截事件，即自己处理该事件</td>
-</tr>
-<tr>
-<td style="text-align: center">调用时刻</td>
-<td style="text-align: center">在ViewGroup的dispatchTouchEvent()内部调用</td>
-</tr>
-<tr>
-<td style="text-align: center">返回结果</td>
-<td style="text-align: center">是否拦截当前事件，详细情况如下：</td>
-</tr>
-</tbody>
-</table>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015127727353.png" alt="20171108151015127727353.png"/><figcaption>20171108151015127727353.png</figcaption></figure></p>
-
-<ul>
-<li>流程图如下：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101512935807.png" alt="2017110815101512935807.png"/><figcaption>2017110815101512935807.png</figcaption></figure></p>
-
-<h3 id="toc_12">三者关系</h3>
-
-<p>下面将用一段伪代码来阐述上述三个方法的关系和点击事件传递规则</p>
-
-<pre class="line-numbers"><code class="language-java">// 点击事件产生后，会直接调用dispatchTouchEvent（）方法
-public boolean dispatchTouchEvent(MotionEvent ev) {
-
-    //代表是否消耗事件
-    boolean consume = false;
-
-
-    if (onInterceptTouchEvent(ev)) {
-    //如果onInterceptTouchEvent()返回true则代表当前View拦截了点击事件
-    //则该点击事件则会交给当前View进行处理
-    //即调用onTouchEvent (）方法去处理点击事件
-      consume = onTouchEvent (ev) ;
-
-    } else {
-      //如果onInterceptTouchEvent()返回false则代表当前View不拦截点击事件
-      //则该点击事件则会继续传递给它的子元素
-      //子元素的dispatchTouchEvent（）就会被调用，重复上述过程
-      //直到点击事件被最终处理为止
-      consume = child.dispatchTouchEvent (ev) ;
-    }
-
-    return consume;
-   }
-</code></pre>
-
-<h3 id="toc_13">总结</h3>
-
-<p>对于事件分发的3个方法，你应该清楚了解<br/>
-接下来，我将开始介绍Android事件分发的常见流程</p>
-
-<h2 id="toc_14">事件分发场景介绍</h2>
-
-<p>下面我将利用例子来说明常见的点击事件传递情况</p>
-
-<h3 id="toc_15">背景描述</h3>
-
-<p>我们将要讨论的布局层次如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015134286239.png" alt="20171108151015134286239.png"/><figcaption>20171108151015134286239.png</figcaption></figure></p>
-
-<ul>
-<li>最外层：Activiy A，包含两个子View：ViewGroup B、View C</li>
-<li>中间层：ViewGroup B，包含一个子View：View C</li>
-<li>最内层：View C</li>
-</ul>
-
-<p>假设用户首先触摸到屏幕上View C上的某个点（如图中黄色区域），那么Action_DOWN事件就在该点产生，然后用户移动手指并最后离开屏幕。</p>
-
-<h3 id="toc_16">一般的事件传递情况</h3>
-
-<p>一般的事件传递场景有：</p>
-
-<ul>
-<li>默认情况</li>
-<li>处理事件</li>
-<li>拦截DOWN事件</li>
-<li>拦截后续事件（MOVE、UP）</li>
-</ul>
-
-<h4 id="toc_17">默认情况</h4>
-
-<ul>
-<li>即不对控件里的方法(dispatchTouchEvent()、onTouchEvent()、onInterceptTouchEvent())进行重写或更改返回值</li>
-<li>那么调用的是这3个方法的默认实现：调用父类的方法</li>
-<li>事件传递情况：（如图下所示）
-<ul>
-<li>从Activity A----&gt;ViewGroup B---&gt;View C，从上往下调用dispatchTouchEvent()</li>
-<li>再由View C---&gt;ViewGroup B ---&gt;Activity A，从下往上调用onTouchEvent()</li>
-</ul></li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015141723712.png" alt="20171108151015141723712.png"/><figcaption>20171108151015141723712.png</figcaption></figure></p>
-
-<p>注：虽然ViewGroup B的onInterceptTouchEvent方法对DOWN事件返回了false，后续的事件（MOVE、UP）依然会传递给它的onInterceptTouchEvent()</p>
-
-<blockquote>
-<p>这一点与onTouchEvent的行为是不一样的。</p>
-</blockquote>
-
-<h4 id="toc_18">处理事件</h4>
-
-<p>假设View C希望处理这个点击事件，即C被设置成可点击的（Clickable）或者覆写了C的onTouchEvent方法返回true。</p>
-
-<blockquote>
-<p>最常见的：设置Button按钮来响应点击事件</p>
-</blockquote>
-
-<p>事件传递情况：（如下图）</p>
-
-<ul>
-<li>DOWN事件被传递给C的onTouchEvent方法，该方法返回true，表示处理这个事件</li>
-<li>因为C正在处理这个事件，那么DOWN事件将不再往上传递给B和A的onTouchEvent()；</li>
-<li>该事件列的其他事件（Move、Up）也将传递给C的onTouchEvent()</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015145961494.png" alt="20171108151015145961494.png"/><figcaption>20171108151015145961494.png</figcaption></figure></p>
-
-<h4 id="toc_19">拦截DOWN事件</h4>
-
-<p>假设ViewGroup B希望处理这个点击事件，即B覆写了onInterceptTouchEvent()返回true、onTouchEvent()返回true。<br/>
-事件传递情况：（如下图）</p>
-
-<ul>
-<li>DOWN事件被传递给B的onInterceptTouchEvent()方法，该方法返回true，表示拦截这个事件，即自己处理这个事件（不再往下传递）</li>
-<li>调用onTouchEvent()处理事件（DOWN事件将不再往上传递给A的onTouchEvent()）</li>
-<li>该事件列的其他事件（Move、Up）将直接传递给B的onTouchEvent()</li>
-</ul>
-
-<blockquote>
-<p>该事件列的其他事件（Move、Up）将不会再传递给B的onInterceptTouchEvent方法，该方法一旦返回一次true，就再也不会被调用了。</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015149359935.png" alt="20171108151015149359935.png"/><figcaption>20171108151015149359935.png</figcaption></figure></p>
-
-<h4 id="toc_20">拦截DOWN的后续事件</h4>
-
-<p>假设ViewGroup B没有拦截DOWN事件（还是View C来处理DOWN事件），但它拦截了接下来的MOVE事件。</p>
-
-<ul>
-<li>DOWN事件传递到C的onTouchEvent方法，返回了true。</li>
-<li>在后续到来的MOVE事件，B的onInterceptTouchEvent方法返回true拦截该MOVE事件，但该事件并没有传递给B；这个MOVE事件将会被系统变成一个CANCEL事件传递给C的onTouchEvent方法</li>
-<li>后续又来了一个MOVE事件，该MOVE事件才会直接传递给B的onTouchEvent()</li>
-</ul>
-
-<blockquote>
-<ol>
-<li>后续事件将直接传递给B的onTouchEvent()处理<br/></li>
-<li>后续事件将不会再传递给B的onInterceptTouchEvent方法，该方法一旦返回一次true，就再也不会被调用了。</li>
-</ol>
-</blockquote>
-
-<ul>
-<li>C再也不会收到该事件列产生的后续事件。</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015153662988.png" alt="20171108151015153662988.png"/><figcaption>20171108151015153662988.png</figcaption></figure></p>
-
-<p>特别注意：</p>
-
-<ul>
-<li>如果ViewGroup A 拦截了一个半路的事件（如MOVE），这个事件将会被系统变成一个CANCEL事件并传递给之前处理该事件的子View；</li>
-<li>该事件不会再传递给ViewGroup A的onTouchEvent()</li>
-<li>只有再到来的事件才会传递到ViewGroup A的onTouchEvent()</li>
-</ul>
-
-<h3 id="toc_21">总结</h3>
-
-<ul>
-<li>对于Android的事件分发机制，你应该已经非常清楚了</li>
-<li>如果你只是希望了解Android事件分发机制而不想深入了解，那么你可以离开这篇文章了</li>
-<li>对于程序猿来说，知其然还需要知其所以然，接下来，我将通过源码分析来深入了解Android事件分发机制</li>
-</ul>
-
-<h2 id="toc_22">Android事件分发机制源码分析</h2>
-
-<ul>
-<li>Android中事件分发顺序：Activity（Window） -&gt; ViewGroup -&gt; View，再次贴出下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015158646492.png" alt="20171108151015158646492.png"/><figcaption>20171108151015158646492.png</figcaption></figure></p>
-
-<p>其中：</p>
-
-<ul>
-<li>super：调用父类方法</li>
-<li>true：消费事件，即事件不继续往下传递</li>
-<li>false：不消费事件，事件继续往下传递 / 交由给父控件onTouchEvent（）处理</li>
-</ul>
-
-<p>所以，要想充分理解Android分发机制，本质上是要理解：</p>
-
-<ul>
-<li>Activity对点击事件的分发机制</li>
-<li>ViewGroup对点击事件的分发机制</li>
-<li>View对点击事件的分发机制</li>
-</ul>
-
-<p>接下来，我将通过源码分析详细介绍Activity、View和ViewGroup的事件分发机制</p>
-
-<h3 id="toc_23">Activity的事件分发机制</h3>
-
-<h4 id="toc_24">源码分析</h4>
-
-<ul>
-<li>当一个点击事件发生时，事件最先传到Activity的dispatchTouchEvent()进行事件分发</li>
-</ul>
-
-<blockquote>
-<p>具体是由Activity的Window来完成</p>
-</blockquote>
-
-<ul>
-<li>我们来看下Activity的dispatchTouchEvent()的源码</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {
-        //关注点1
-        //一般事件列开始都是DOWN，所以这里基本是true
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            //关注点2
-            onUserInteraction();
-        }
-        //关注点3
-        if (getWindow().superDispatchTouchEvent(ev)) {
-            return true;
-        }
-        return onTouchEvent(ev);
-    }
-</code></pre>
-
-<p><strong>关注点1</strong><br/>
-一般事件列开始都是DOWN（按下按钮），所以这里返回true，执行onUserInteraction()</p>
-
-<p><strong>关注点2</strong><br/>
-先来看下onUserInteraction()源码</p>
-
-<pre class="line-numbers"><code class="language-java">  /**
-     * Called whenever a key, touch, or trackball event is dispatched to the
-     * activity.  Implement this method if you wish to know that the user has
-     * interacted with the device in some way while your activity is running.
-     * This callback and {@link #onUserLeaveHint} are intended to help
-     * activities manage status bar notifications intelligently; specifically,
-     * for helping activities determine the proper time to cancel a notfication.
-     *
-     * &lt;p&gt;All calls to your activity&#39;s {@link #onUserLeaveHint} callback will
-     * be accompanied by calls to {@link #onUserInteraction}.  This
-     * ensures that your activity will be told of relevant user activity such
-     * as pulling down the notification pane and touching an item there.
-     *
-     * &lt;p&gt;Note that this callback will be invoked for the touch down action
-     * that begins a touch gesture, but may not be invoked for the touch-moved
-     * and touch-up actions that follow.
-     *
-     * @see #onUserLeaveHint()
-     */
-public void onUserInteraction() { 
-}
-</code></pre>
-
-<p>从源码可以看出：</p>
-
-<ul>
-<li>该方法为空方法</li>
-<li>从注释得知：当此activity在栈顶时，触屏点击按home，back，menu键等都会触发此方法</li>
-<li>所以onUserInteraction()主要用于屏保</li>
-</ul>
-
-<p><strong>关注点3</strong></p>
-
-<ul>
-<li>Window类是抽象类，且PhoneWindow是Window类的唯一实现类</li>
-<li>superDispatchTouchEvent(ev)是抽象方法，返回的是一个Window对象</li>
-<li>通过PhoneWindow类中看一下superDispatchTouchEvent()的作用</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">@Override
-public boolean superDispatchTouchEvent(MotionEvent event) {
-  return mDecor.superDispatchTouchEvent(event);
-//mDecor是DecorView的实例
-//DecorView是视图的顶层view，继承自FrameLayout，是所有界面的父类
-}
-</code></pre>
-
-<ul>
-<li>接下来我们看mDecor.superDispatchTouchEvent(event)：</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public boolean superDispatchTouchEvent(MotionEvent event) {
-    return super.dispatchTouchEvent(event);
-//DecorView继承自FrameLayout
-//那么它的父类就是ViewGroup
-而super.dispatchTouchEvent(event)方法，其实就应该是ViewGroup的dispatchTouchEvent()
-
-}
-</code></pre>
-
-<p>所以：</p>
-
-<ul>
-<li>执行getWindow().superDispatchTouchEvent(ev)实际上是执行了ViewGroup.dispatchTouchEvent(event)</li>
-<li>再回到最初的代码：</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {
-
-      if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-          //关注点2
-          onUserInteraction();
-      }
-      //关注点3
-      if (getWindow().superDispatchTouchEvent(ev)) {
-          return true;
-      }
-      return onTouchEvent(ev);
-  }
-</code></pre>
-
-<p>由于一般事件列开始都是DOWN，所以这里返回true，基本上都会进入<code>getWindow().superDispatchTouchEvent(ev)</code>的判断</p>
-
-<ul>
-<li>所以，执行<code>Activity.dispatchTouchEvent(ev)</code>实际上是执行了<code>ViewGroup.dispatchTouchEvent(event)</code></li>
-<li>这样事件就从 Activity 传递到了 ViewGroup</li>
-</ul>
-
-<h4 id="toc_25">汇总</h4>
-
-<p>当一个点击事件发生时，调用顺序如下</p>
-
-<ol>
-<li>事件最先传到Activity的dispatchTouchEvent()进行事件分发</li>
-<li>调用Window类实现类PhoneWindow的superDispatchTouchEvent()</li>
-<li>调用DecorView的superDispatchTouchEvent()</li>
-<li>最终调用DecorView父类的dispatchTouchEvent()，即ViewGroup的dispatchTouchEvent()</li>
-</ol>
-
-<h4 id="toc_26">结论</h4>
-
-<ul>
-<li>当一个点击事件发生时，事件最先传到Activity的dispatchTouchEvent()进行事件分发，最终是调用了ViewGroup的dispatchTouchEvent()方法</li>
-</ul>
-
-<blockquote>
-<p>如果ViewGroup的dispatchTouchEvent()返回true就不执行Activity的onTouchEvent()方法；如果返回false，就执行。<br/>
-这样事件就从 Activity 传递到了 ViewGroup</p>
-</blockquote>
-
-<h4 id="toc_27">疑问</h4>
-
-<p>那么，ViewGroup的dispatchTouchEvent()什么时候返回true，什么时候返回false？<br/>
-答：请继续往下看ViewGroup事件的分发机制</p>
-
-<h3 id="toc_28">ViewGroup事件的分发机制</h3>
-
-<p>在讲解ViewGroup事件的分发机制之前我们先来看个Demo</p>
-
-<h4 id="toc_29">Demo讲解</h4>
-
-<p>布局如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015184560280.png" alt="20171108151015184560280.png"/><figcaption>20171108151015184560280.png</figcaption></figure></p>
-
-<p>结果测试：<br/><br/>
-只点击Button  </p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015186085331.png" alt="20171108151015186085331.png"/><figcaption>20171108151015186085331.png</figcaption></figure></p>
-
-<p>再点击空白处</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015186956039.png" alt="20171108151015186956039.png"/><figcaption>20171108151015186956039.png</figcaption></figure></p>
-
-<p>从上面的测试结果发现：</p>
-
-<ul>
-<li>当点击Button时，执行Button的onClick()，但ViewGroupLayout注册的onTouch（）不会执行</li>
-<li>只有点击空白区域时才会执行ViewGroupLayout的onTouch（）;</li>
-<li>结论：Button的onClick()将事件消费掉了，因此事件不会再继续向下传递。</li>
-</ul>
-
-<p>接下来，我们开始进行ViewGroup事件分发的源码分析</p>
-
-<h4 id="toc_30">源码分析</h4>
-
-<p>ViewGroup的dispatchTouchEvent()源码分析</p>
-
-<blockquote>
-<ol>
-<li>详情请看注释<br/></li>
-<li>Android 5.0后ViewGroup的dispatchTouchEvent()的源码发生了变化（更加复杂），但原理相同；<br/></li>
-<li>本文为了让读者更好理解dispatchTouchEvent()源码分析，所以采用Android 5.0前的版本<br/></li>
-</ol>
-</blockquote>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent ev) {  
-    final int action = ev.getAction();  
-    final float xf = ev.getX();  
-    final float yf = ev.getY();  
-    final float scrolledXFloat = xf + mScrollX;  
-    final float scrolledYFloat = yf + mScrollY;  
-    final Rect frame = mTempRect;  
-    boolean disallowIntercept = (mGroupFlags &amp; FLAG_DISALLOW_INTERCEPT) != 0;  
-    if (action == MotionEvent.ACTION_DOWN) {  
-        if (mMotionTarget != null) {  
-            mMotionTarget = null;  
-        }  
-
-//看这个If判断语句
-//第一个判断值disallowIntercept：是否禁用事件拦截的功能(默认是false)
-//可以通过调用requestDisallowInterceptTouchEvent方法对这个值进行修改。
-//第二个判断值： !onInterceptTouchEvent(ev)：对onInterceptTouchEvent()返回值取反
-
-//如果我们在onInterceptTouchEvent()中返回false，就会让第二个值为true，从而进入到条件判断的内部
-//如果我们在onInterceptTouchEvent()中返回true，就会让第二个值为false，从而跳出了这个条件判断。
-//关于onInterceptTouchEvent()请看下面分析（关注点1）
-        if (disallowIntercept || !onInterceptTouchEvent(ev)) {  
-            ev.setAction(MotionEvent.ACTION_DOWN);  
-            final int scrolledXInt = (int) scrolledXFloat;  
-            final int scrolledYInt = (int) scrolledYFloat;  
-            final View[] children = mChildren;  
-            final int count = mChildrenCount;  
-
-          //通过for循环，遍历了当前ViewGroup下的所有子View
-            for (int i = count - 1; i &gt;= 0; i--) {  
-                final View child = children[i];  
-                if ((child.mViewFlags &amp; VISIBILITY_MASK) == VISIBLE  
-                        || child.getAnimation() != null) {  
-                    child.getHitRect(frame);  
-
-                    //判断当前遍历的View是不是正在点击的View
-                    //如果是，则进入条件判断内部
-                    if (frame.contains(scrolledXInt, scrolledYInt)) {  
-                        final float xc = scrolledXFloat - child.mLeft;  
-                        final float yc = scrolledYFloat - child.mTop;  
-                        ev.setLocation(xc, yc);  
-                        child.mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-
-                    //关注点2
-
-                    //条件判断的内部调用了该View的dispatchTouchEvent()方法（具体请看下面的View事件分发机制）
-                    //实现了点击事件从ViewGroup到View的传递
-                        if (child.dispatchTouchEvent(ev))  { 
-
-        //调用子View的dispatchTouchEvent后是有返回值的
-        //如果这个控件是可点击的话，那么点击该控件时，dispatchTouchEvent的返回值必定是true
-        //因此会导致条件判断成立
-                            mMotionTarget = child;  
-        //于是给ViewGroup的dispatchTouchEvent方法直接返回了true，这样就导致后面的代码无法执行，直接跳出
-        //即把ViewGroup的touch事件拦截掉
-                            return true;  
-                        }  
-                    }  
-                }  
-            }  
-        }  
-    }  
-    boolean isUpOrCancel = (action == MotionEvent.ACTION_UP) ||  
-            (action == MotionEvent.ACTION_CANCEL);  
-    if (isUpOrCancel) {  
-        mGroupFlags &amp;= ~FLAG_DISALLOW_INTERCEPT;  
-    }  
-    final View target = mMotionTarget;  
-
-//关注点3
-//没有任何View接收事件的情况，即点击空白处情况
-    if (target == null) {  
-        ev.setLocation(xf, yf);  
-        if ((mPrivateFlags &amp; CANCEL_NEXT_UP_EVENT) != 0) {  
-            ev.setAction(MotionEvent.ACTION_CANCEL);  
-            mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-        }  
-//调用ViewGroup的父类View的dispatchTouchEvent()
-//因此会执行ViewGroup的onTouch()、onTouchEvent()
-//实现了点击事件从ViewGroup到View的传递
-        return super.dispatchTouchEvent(ev);  
-    }  
-
-
-//之后的代码在一般情况下是走不到的了，我们也就不再继续往下分析。
-    if (!disallowIntercept &amp;&amp; onInterceptTouchEvent(ev)) {  
-        final float xc = scrolledXFloat - (float) target.mLeft;  
-        final float yc = scrolledYFloat - (float) target.mTop;  
-        mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-        ev.setAction(MotionEvent.ACTION_CANCEL);  
-        ev.setLocation(xc, yc);  
-        if (!target.dispatchTouchEvent(ev)) {  
-        }  
-        mMotionTarget = null;  
-        return true;  
-    }  
-    if (isUpOrCancel) {  
-        mMotionTarget = null;  
-    }  
-    final float xc = scrolledXFloat - (float) target.mLeft;  
-    final float yc = scrolledYFloat - (float) target.mTop;  
-    ev.setLocation(xc, yc);  
-    if ((target.mPrivateFlags &amp; CANCEL_NEXT_UP_EVENT) != 0) {  
-        ev.setAction(MotionEvent.ACTION_CANCEL);  
-        target.mPrivateFlags &amp;= ~CANCEL_NEXT_UP_EVENT;  
-        mMotionTarget = null;  
-    }  
-    return target.dispatchTouchEvent(ev);  
-}
-</code></pre>
-
-<h5 id="toc_31">关注点1（onInterceptTouchEvent()源码分析）</h5>
-
-<p>ViewGroup每次在做分发时，需要调用onInterceptTouchEvent()是否拦截事件；源码分析如下：</p>
-
-<pre class="line-numbers"><code class="language-java">public boolean onInterceptTouchEvent(MotionEvent ev) {  
-    return false;  
-}
-</code></pre>
-
-<ul>
-<li>返回false =不拦截（默认），允许事件继续往下传递(向子View传递)；</li>
-</ul>
-
-<blockquote>
-<p>因为子View也需要该事件，所以onInterceptTouchEvent拦截器return super.onInterceptTouchEvent()和return false是一样的 = 不会拦截</p>
-</blockquote>
-
-<ul>
-<li>返回true = 拦截（手动设置），即自己处理该事件（执行自己的onTouchEvent()），事件不会继续往下传递</li>
-</ul>
-
-<h5 id="toc_32">关注点2</h5>
-
-<p>当点击了某个控件：</p>
-
-<ol>
-<li>调用该控件所在布局（ViewGroup）的dispatchTouchEvent()</li>
-<li>在布局的dispatchTouchEvent()中找到被点击的相应控件</li>
-<li>再去调用该控件的dispatchTouchEvent()</li>
-</ol>
-
-<blockquote>
-<ol>
-<li>实现了点击事件从ViewGroup到View的传递<br/></li>
-<li>此处是关于View.dispatchTouchEvent()的分析，详情请看下面的View事件分发机制。<br/></li>
-</ol>
-</blockquote>
-
-<h2 id="toc_33">结论</h2>
-
-<ul>
-<li>Android事件分发是先传递到ViewGroup，再由ViewGroup传递到View</li>
-<li>在ViewGroup中通过onInterceptTouchEvent()对事件传递进行拦截</li>
-</ul>
-
-<blockquote>
-<ol>
-<li>onInterceptTouchEvent方法返回true代表拦截事件，即不允许事件继续向子View传递；<br/></li>
-<li>返回false代表不拦截事件，即允许事件继续向子View传递；（默认返回false）<br/></li>
-<li>子View中如果将传递的事件消费掉，ViewGroup中将无法接收到任何事件。<br/></li>
-</ol>
-</blockquote>
-
-<h3 id="toc_34">View事件的分发机制</h3>
-
-<p>View中dispatchTouchEvent()的源码分析</p>
-
-<pre class="line-numbers"><code class="language-java">public boolean dispatchTouchEvent(MotionEvent event) {  
-    if (mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp;  
-            mOnTouchListener.onTouch(this, event)) {  
-        return true;  
-    }  
-    return onTouchEvent(event);  
-}
-</code></pre>
-
-<p>从上面可以看出：</p>
-
-<ul>
-<li>只有以下三个条件都为真，dispatchTouchEvent()才返回true；否则执行onTouchEvent(event)方法</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">第一个条件：mOnTouchListener != null；
-第二个条件：(mViewFlags &amp; ENABLED_MASK) == ENABLED；
-第三个条件：mOnTouchListener.onTouch(this, event)；
-</code></pre>
-
-<ul>
-<li>下面，我们来看看下这三个判断条件：</li>
-</ul>
-
-<p><strong>第一个条件：mOnTouchListener!= null</strong></p>
-
-<pre class="line-numbers"><code class="language-text">//mOnTouchListener是在View类下setOnTouchListener方法里赋值的
-public void setOnTouchListener(OnTouchListener l) { 
-
-//即只要我们给控件注册了Touch事件，mOnTouchListener就一定被赋值（不为空）
-    mOnTouchListener = l;  
-}
-</code></pre>
-
-<p><strong>第二个条件：(mViewFlags &amp; ENABLED_MASK) == ENABLED</strong></p>
-
-<ul>
-<li>该条件是判断当前点击的控件是否enable</li>
-<li>由于很多View默认是enable的，因此该条件恒定为true</li>
-</ul>
-
-<p><strong>第三个条件：mOnTouchListener.onTouch(this, event)</strong></p>
-
-<ul>
-<li>回调控件注册Touch事件时的onTouch方法</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">//手动调用设置
-button.setOnTouchListener(new OnTouchListener() {  
-
-  @Override  
-  public boolean onTouch(View v, MotionEvent event) {  
-
-      return false;  
-  }  
-});
-</code></pre>
-
-<ul>
-<li>如果在onTouch方法返回true，就会让上述三个条件全部成立，从而整个方法直接返回true。</li>
-<li>如果在onTouch方法里返回false，就会去执行onTouchEvent(event)方法。</li>
-</ul>
-
-<p>接下来，我们继续看：onTouchEvent(event)的源码分析</p>
-
-<blockquote>
-<ol>
-<li>详情请看注释<br/></li>
-<li>Android 5.0后View的onTouchEvent()的源码发生了变化（更加复杂），但原理相同；<br/></li>
-<li>本文为了让读者更好理解onTouchEvent()源码分析，所以采用Android 5.0前的版本<br/></li>
-</ol>
-</blockquote>
-
-<pre class="line-numbers"><code class="language-java">public boolean onTouchEvent(MotionEvent event) {  
-    final int viewFlags = mViewFlags;  
-    if ((viewFlags &amp; ENABLED_MASK) == DISABLED) {  
-        // A disabled view that is clickable still consumes the touch  
-        // events, it just doesn&#39;t respond to them.  
-        return (((viewFlags &amp; CLICKABLE) == CLICKABLE ||  
-                (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE));  
-    }  
-    if (mTouchDelegate != null) {  
-        if (mTouchDelegate.onTouchEvent(event)) {  
-            return true;  
-        }  
-    }  
-     //如果该控件是可以点击的就会进入到下两行的switch判断中去；
-
-    if (((viewFlags &amp; CLICKABLE) == CLICKABLE ||  
-            (viewFlags &amp; LONG_CLICKABLE) == LONG_CLICKABLE)) {  
-    //如果当前的事件是抬起手指，则会进入到MotionEvent.ACTION_UP这个case当中。
-
-        switch (event.getAction()) {  
-            case MotionEvent.ACTION_UP:  
-                boolean prepressed = (mPrivateFlags &amp; PREPRESSED) != 0;  
-               // 在经过种种判断之后，会执行到关注点1的performClick()方法。
-               //请往下看关注点1
-                if ((mPrivateFlags &amp; PRESSED) != 0 || prepressed) {  
-                    // take focus if we don&#39;t have it already and we should in  
-                    // touch mode.  
-                    boolean focusTaken = false;  
-                    if (isFocusable() &amp;&amp; isFocusableInTouchMode() &amp;&amp; !isFocused()) {  
-                        focusTaken = requestFocus();  
-                    }  
-                    if (!mHasPerformedLongPress) {  
-                        // This is a tap, so remove the longpress check  
-                        removeLongPressCallback();  
-                        // Only perform take click actions if we were in the pressed state  
-                        if (!focusTaken) {  
-                            // Use a Runnable and post this rather than calling  
-                            // performClick directly. This lets other visual state  
-                            // of the view update before click actions start.  
-                            if (mPerformClick == null) {  
-                                mPerformClick = new PerformClick();  
-                            }  
-                            if (!post(mPerformClick)) {  
-            //关注点1
-            //请往下看performClick()的源码分析
-                                performClick();  
-                            }  
-                        }  
-                    }  
-                    if (mUnsetPressedState == null) {  
-                        mUnsetPressedState = new UnsetPressedState();  
-                    }  
-                    if (prepressed) {  
-                        mPrivateFlags |= PRESSED;  
-                        refreshDrawableState();  
-                        postDelayed(mUnsetPressedState,  
-                                ViewConfiguration.getPressedStateDuration());  
-                    } else if (!post(mUnsetPressedState)) {  
-                        // If the post failed, unpress right now  
-                        mUnsetPressedState.run();  
-                    }  
-                    removeTapCallback();  
-                }  
-                break;  
-            case MotionEvent.ACTION_DOWN:  
-                if (mPendingCheckForTap == null) {  
-                    mPendingCheckForTap = new CheckForTap();  
-                }  
-                mPrivateFlags |= PREPRESSED;  
-                mHasPerformedLongPress = false;  
-                postDelayed(mPendingCheckForTap, ViewConfiguration.getTapTimeout());  
-                break;  
-            case MotionEvent.ACTION_CANCEL:  
-                mPrivateFlags &amp;= ~PRESSED;  
-                refreshDrawableState();  
-                removeTapCallback();  
-                break;  
-            case MotionEvent.ACTION_MOVE:  
-                final int x = (int) event.getX();  
-                final int y = (int) event.getY();  
-                // Be lenient about moving outside of buttons  
-                int slop = mTouchSlop;  
-                if ((x &lt; 0 - slop) || (x &gt;= getWidth() + slop) ||  
-                        (y &lt; 0 - slop) || (y &gt;= getHeight() + slop)) {  
-                    // Outside button  
-                    removeTapCallback();  
-                    if ((mPrivateFlags &amp; PRESSED) != 0) {  
-                        // Remove any future long press/tap checks  
-                        removeLongPressCallback();  
-                        // Need to switch from pressed to not pressed  
-                        mPrivateFlags &amp;= ~PRESSED;  
-                        refreshDrawableState();  
-                    }  
-                }  
-                break;  
-        }  
-//如果该控件是可以点击的，就一定会返回true
-        return true;  
-    }  
-//如果该控件是可以点击的，就一定会返回false
-    return false;  
-}
-</code></pre>
-
-<p><strong>关注点1：</strong></p>
-
-<p>performClick()的源码分析</p>
-
-<pre class="line-numbers"><code class="language-java">public boolean performClick() {  
-    sendAccessibilityEvent(AccessibilityEvent.TYPE_VIEW_CLICKED);  
-
-    if (mOnClickListener != null) {  
-        playSoundEffect(SoundEffectConstants.CLICK);  
-        mOnClickListener.onClick(this);  
-        return true;  
-    }  
-    return false;  
-}
-</code></pre>
-
-<ul>
-<li>只要mOnClickListener不为null，就会去调用onClick方法；</li>
-<li>那么，mOnClickListener又是在哪里赋值的呢？请继续看：</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public void setOnClickListener(OnClickListener l) {  
-    if (!isClickable()) {  
-        setClickable(true);  
-    }  
-    mOnClickListener = l;  
-}
-</code></pre>
-
-<ul>
-<li>当我们通过调用setOnClickListener方法来给控件注册一个点击事件时，就会给mOnClickListener赋值（不为空），即会回调onClick（）。</li>
-</ul>
-
-<h2 id="toc_35">结论</h2>
-
-<ol>
-<li>onTouch（）的执行高于onClick（）</li>
-<li><p>每当控件被点击时：</p>
-<ul>
-<li>如果在回调onTouch()里返回false，就会让dispatchTouchEvent方法返回false，那么就会执行onTouchEvent()；如果回调了setOnClickListener()来给控件注册点击事件的话，最后会在performClick()方法里回调onClick()。</li>
-</ul>
-<blockquote>
-<p>onTouch()返回false（该事件没被onTouch()消费掉） = dispatchTouchEvent()返回false（继续向下传递） = 执行onTouchEvent() = 执行OnClick()</p>
-</blockquote>
-<ul>
-<li>如果在回调onTouch()里返回true，就会让dispatchTouchEvent方法返回true，那么将不会执行onTouchEvent()，即onClick()也不会执行；</li>
-</ul>
-<blockquote>
-<p>onTouch()返回true（该事件被onTouch()消费掉） = dispatchTouchEvent()返回true（不会再继续向下传递） = 不会执行onTouchEvent() = 不会执行OnClick()</p>
-</blockquote></li>
-</ol>
-
-<p><strong>下面我将用Demo验证上述的结论</strong></p>
-
-<h2 id="toc_36">Demo论证</h2>
-
-<p><strong>1. Demo1：在回调onTouch()里返回true</strong></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015406386889.png" alt="20171108151015406386889.png"/><figcaption>20171108151015406386889.png</figcaption></figure></p>
-
-<pre class="line-numbers"><code class="language-java">//设置OnTouchListener()
-   button.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                System.out.println(&quot;执行了onTouch(), 动作是:&quot; + event.getAction());
-
-                return true;
-            }
-        });
-
-//设置OnClickListener
-    button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println(&quot;执行了onClick()&quot;);
-            }
-        });
-</code></pre>
-
-<p>点击Button，测试结果如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015413223556.png" alt="20171108151015413223556.png"/><figcaption>20171108151015413223556.png</figcaption></figure></p>
-
-<p><strong>2. Demo2：在回调onTouch()里返回false</strong></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015417140463.png" alt="20171108151015417140463.png"/><figcaption>20171108151015417140463.png</figcaption></figure></p>
-
-<pre class="line-numbers"><code class="language-java">//设置OnTouchListener()
-   button.setOnTouchListener(new View.OnTouchListener() {
-
-            @Override
-            public boolean onTouch(View v, MotionEvent event) {
-                System.out.println(&quot;执行了onTouch(), 动作是:&quot; + event.getAction());
-
-                return false;
-            }
-        });
-
-//设置OnClickListener
-    button.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                System.out.println(&quot;执行了onClick()&quot;);
-            }
-        });
-</code></pre>
-
-<p>点击Button，测试结果如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015420062579.png" alt="20171108151015420062579.png"/><figcaption>20171108151015420062579.png</figcaption></figure></p>
-
-<p>总结：onTouch()返回true就认为该事件被onTouch()消费掉，因而不会再继续向下传递，即不会执行OnClick()。</p>
-
-<p>如果你看到此处，那么恭喜你，你已经能非常熟悉掌握Android的事件分发机制了（Activity、ViewGroup、View的事件分发机制）</p>
-
-<h2 id="toc_37">思考点</h2>
-
-<h3 id="toc_38">onTouch()和onTouchEvent()的区别</h3>
-
-<ul>
-<li>这两个方法都是在View的dispatchTouchEvent中调用，但onTouch优先于onTouchEvent执行。</li>
-<li><p>如果在onTouch方法中返回true将事件消费掉，onTouchEvent()将不会再执行。</p></li>
-<li><p>特别注意：请看下面代码</p></li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">//&amp;&amp;为短路与，即如果前面条件为false，将不再往下执行
-//所以，onTouch能够得到执行需要两个前提条件：
-//1. mOnTouchListener的值不能为空
-//2. 当前点击的控件必须是enable的。
-mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &amp;&amp;  
-          mOnTouchListener.onTouch(this, event)
-</code></pre>
-
-<ul>
-<li>因此如果你有一个控件是非enable的，那么给它注册onTouch事件将永远得不到执行。对于这一类控件，如果我们想要监听它的touch事件，就必须通过在该控件中重写onTouchEvent方法来实现。</li>
-</ul>
-
-<h3 id="toc_39">Touch事件的后续事件（MOVE、UP）层级传递</h3>
-
-<ul>
-<li>如果给控件注册了Touch事件，每次点击都会触发一系列action事件（ACTION_DOWN，ACTION_MOVE，ACTION_UP等）</li>
-<li>当dispatchTouchEvent在进行事件分发的时候，只有前一个事件（如ACTION_DOWN）返回true，才会收到后一个事件（ACTION_MOVE和ACTION_UP）</li>
-</ul>
-
-<blockquote>
-<p>即如果在执行ACTION_DOWN时返回false，后面一系列的ACTION_MOVE和ACTION_UP事件都不会执行</p>
-</blockquote>
-
-<p>从上面对事件分发机制分析知：</p>
-
-<ul>
-<li>dispatchTouchEvent()和 onTouchEvent()消费事件、终结事件传递（返回true）</li>
-<li>而onInterceptTouchEvent 并不能消费事件，它相当于是一个分叉口起到分流导流的作用，对后续的ACTION_MOVE和ACTION_UP事件接收起到非常大的作用</li>
-</ul>
-
-<blockquote>
-<p>请记住：接收了ACTION_DOWN事件的函数不一定能收到后续事件（ACTION_MOVE、ACTION_UP）</p>
-</blockquote>
-
-<p><strong>这里给出ACTION_MOVE和ACTION_UP事件的传递结论：</strong></p>
-
-<ul>
-<li>如果在某个对象（Activity、ViewGroup、View）的dispatchTouchEvent()消费事件（返回true），那么收到ACTION_DOWN的函数也能收到ACTION_MOVE和ACTION_UP</li>
-</ul>
-
-<blockquote>
-<p>黑线：ACTION_DOWN事件传递方向<br/>
-红线：ACTION_MOVE和ACTION_UP事件传递方向</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015430075078.png" alt="20171108151015430075078.png"/><figcaption>20171108151015430075078.png</figcaption></figure></p>
-
-<ul>
-<li>如果在某个对象（Activity、ViewGroup、View）的onTouchEvent()消费事件（返回true），那么ACTION_MOVE和ACTION_UP的事件从上往下传到这个View后就不再往下传递了，而直接传给自己的onTouchEvent()并结束本次事件传递过程。</li>
-</ul>
-
-<blockquote>
-<p>黑线：ACTION_DOWN事件传递方向<br/>
-红线：ACTION_MOVE和ACTION_UP事件传递方向</p>
-</blockquote>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151015431870363.png" alt="20171108151015431870363.png"/><figcaption>20171108151015431870363.png</figcaption></figure></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
                 <a class="clearlink" href="15561207872263.html">
                 
                   <h1>Android-史上最全解析Android消息推送解决方案</h1>
@@ -1421,218 +129,6 @@ mOnTouchListener != null &amp;&amp; (mViewFlags &amp; ENABLED_MASK) == ENABLED &
 
 <p>本文将介绍Android中实现消息推送的7种主流解决方案。</p>
 
-<h2 id="toc_1">目录</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014893328998.png" alt="20171108151014893328998.png"/><figcaption>20171108151014893328998.png</figcaption></figure></p>
-
-<h2 id="toc_2">定义</h2>
-
-<p>在用户未打开App时，App主动向用户推送服务器最新消息。如下图：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014897092874.png" alt="20171108151014897092874.png"/><figcaption>20171108151014897092874.png</figcaption></figure></p>
-
-<p>消息推送的本质是：App将服务器更新的信息推送给用户</p>
-
-<h2 id="toc_3">作用</h2>
-
-<ul>
-<li>产品的角度：功能需要，比如说资讯类产品的新闻推送、工具类产品的公告推送等等</li>
-<li>运营的角度：活动运营需要，比如说电商类产品的促销活动；召回用户 / 提高活跃度等等</li>
-</ul>
-
-<blockquote>
-<p>作为开发者，不要有需求就接，应该多思考、多理解用户 / 功能的使用场景，有助于我们更好地去选择合适的开发方式</p>
-</blockquote>
-
-<h2 id="toc_4">储备知识</h2>
-
-<h3 id="toc_5">操作系统有自身的消息推送功能（系统级别）</h3>
-
-<ul>
-<li>系统级别：任何时候都可以推送给用户，且不会被系统杀死</li>
-<li>Android的消息推送服务称为：C2DM（Cloudto Device Messaging）</li>
-</ul>
-
-<blockquote>
-<p>将在下面详细描述</p>
-</blockquote>
-
-<h3 id="toc_6">推送的本质与原理</h3>
-
-<ul>
-<li>消息推送的本质是：App将服务器更新的信息推送给用户，即App获取服务器信息，再推送给用户</li>
-<li>App从服务器获取最新消息的基本方式（原理）有3种：Push、Pull 和 SMS</li>
-<li>具体如下</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014908561018.png" alt="20171108151014908561018.png"/><figcaption>20171108151014908561018.png</figcaption></figure></p>
-
-<h2 id="toc_7">解决方案</h2>
-
-<p>经总结，Android中实现消息推送的有7种主流解决方案，接下来将一一介绍。</p>
-
-<h3 id="toc_8">C2DM</h3>
-
-<ul>
-<li>定义：Cloud to Device Messaging，云端推送</li>
-</ul>
-
-<blockquote>
-<p>Android系统级别的消息推送服务-Google出品</p>
-</blockquote>
-
-<ul>
-<li>原理：基于Push方式，C2DM服务负责处理诸如消息排队等事务，并向运行于目标设备上的应用程序分发这些消息。如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014911731014.png" alt="20171108151014911731014.png"/><figcaption>20171108151014911731014.png</figcaption></figure></p>
-
-<ul>
-<li>优点：C2DM提供了一个简单的、轻量级的机制，允许服务器可以通知移动应用程序直接与服务器进行通信，以便于从服务器获取应用程序更新和用户数据。</li>
-<li>缺点：
-<ol>
-<li>依赖于Google官方提供的C2DM服务器，但在国内使用Google服务需要翻墙，成本较大；</li>
-<li>需要用户手机安装Google服务。但由于Android机型、系统的碎片化 &amp; 国内环境，国内的Android系统都自动去除Google服务，假如要使用C2DM服务，这意味着用户还得去安装Google服务，成本较大。</li>
-</ol></li>
-</ul>
-
-<h3 id="toc_9">轮询</h3>
-
-<ul>
-<li>原理：基于Pull方式，应用程序隔固定时间主动与服务器进行连接并查询是否有新的消息</li>
-<li>缺点：
-<ol>
-<li>成本大，需要自己实现与服务器之间的通信，例如消息排队等；</li>
-<li>到达率不确定，考虑轮询的频率：太低可能导致消息的延迟；太高，更费客户端的资源（CPU资源、网络流量、系统电量）和服务器资源（网络带宽）</li>
-</ol></li>
-</ul>
-
-<h3 id="toc_10">SMS</h3>
-
-<ul>
-<li>定义：短信发送</li>
-<li>原理：基于Push方式，通过拦截SMS消息并且解析消息内容来了解服务器的意图，并获取其显示内容进行处理。</li>
-<li>优点：可实现完全的实时操作</li>
-<li>缺点：成本相对较高。因为目前来说，很难找到免费的短消息发送网关来实现这种方案，只能通过向运营商缴纳相应的短信费用</li>
-</ul>
-
-<h3 id="toc_11">MQTT协议</h3>
-
-<ul>
-<li>定义：轻量级的消息发布/订阅协议</li>
-<li>原理：基于Push方式，wmqtt.jar 是IBM提供的MQTT协议的实现，原理如下图：</li>
-</ul>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171108151014921455838.png" alt="20171108151014921455838.png"/><figcaption>20171108151014921455838.png</figcaption></figure></p>
-
-<blockquote>
-<p>更多关于MQTT协议：  </p>
-
-<ol>
-<li><a href="https://github.com/tokudu/AndroidPushNotificationsDemo">项目实例源</a><br/></li>
-<li><a href="https://github.com/tokudu/PhpMQTTClient">一个采用PHP书写的服务器端</a><br/></li>
-<li><a href="http://www-01.ibm.com/support/docview.wss?rs=171&amp;uid=swg24006006">Jar包下载地址</a>，并加入自己的Android应用程序中。<br/></li>
-<li>拓展：RSMB是从MQTT协议引申出来的另外一种解决方案：简单的MQTT代理，详情<a href="http://www.alphaworks.ibm.com/tech/rsmb">请点击</a><br/></li>
-</ol>
-</blockquote>
-
-<h3 id="toc_12">XMPP协议</h3>
-
-<ul>
-<li>定义：Extensible Messageing and Presence Protocol，可扩展消息与存在协议，是基于可扩展标记语言（XML）的协议，是目前主流的四种IM协议之一</li>
-</ul>
-
-<blockquote>
-<p>其他三种：</p>
-</blockquote>
-
-<ul>
-<li>即时信息和空间协议（IMPP）</li>
-<li>空间和即时信息协议（PRIM）</li>
-<li>即时通讯和空间平衡扩充的进程开始协议SIP（SIMPLE）</li>
-<li>原理：XMPP中定义了三个角色，分别是客户端、服务器和网关</li>
-</ul>
-
-<p><strong>客户端</strong></p>
-
-<ol>
-<li>通过 TCP/IP与XMPP 服务器连接，然后在之上传输与即时通讯相关的指令（XML）；</li>
-<li>解析组织好的 XML 信息包；</li>
-<li>理解消息数据类型。</li>
-</ol>
-
-<blockquote>
-<p>XMPP的核心：XML流传输协议（在网络上分片断发送XML的流协议），也是即时通讯指令的传递基础，即XMPP用TCP传的是XML流<br/><br/>
-与即时通讯相关的指令，在以前要么用2进制的形式发送（比如QQ），要么用纯文本指令加空格加参数加换行符的方式发送（比如MSN）。<br/><br/>
-XMPP传输的即时通讯指令的逻辑与以往相仿，只是协议的形式变成了XML格式的纯文本。  </p>
-</blockquote>
-
-<p><strong>服务器</strong></p>
-
-<ol>
-<li>监听客户端连接，并直接与客户端应用程序通信（客户端信息记录）</li>
-<li>与其他 XMPP 服务器通信；</li>
-</ol>
-
-<p><strong>网关</strong>：与异构即时通信系统进行通信</p>
-
-<blockquote>
-<p>异构系统包括SMS（短信），MSN，ICQ等</p>
-</blockquote>
-
-<p>通信能够在这三者的任意两个之间双向发生。</p>
-
-<p><strong>原理流程</strong></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110815101494469135.png" alt="2017110815101494469135.png"/><figcaption>2017110815101494469135.png</figcaption></figure></p>
-
-<ul>
-<li>优点：
-<ol>
-<li>开源：可通过修改其源代码来适应我们的应用程序。</li>
-<li>简单：XML易于解析和阅读；将复杂性从客户端转移到了服务器端</li>
-<li>可拓展性强：继承了在XML环境中灵活的发展性，可进一步对协议进行扩展，实现更为完善的功能。</li>
-</ol></li>
-</ul>
-
-<blockquote>
-<p>GTalk、QQ、IM等都用这个协议</p>
-</blockquote>
-
-<ul>
-<li>缺点：如果将消息从服务器上推送出去，则不管消息是否成功到达客户端手机上。</li>
-<li>源码实例：有一个很棒的基于XMPP协议的java开源Android push notification：Androidpn<a href="http://sourceforge.net/projects/androidpn/">项目地址</a>，大家有兴趣可以去看看</li>
-</ul>
-
-<blockquote>
-<p>更多关于XMPP协议更加详细<a href="http://www.cnblogs.com/hanyonglu/archive/2012/03/04/2378956.html">请点击</a></p>
-</blockquote>
-
-<h3 id="toc_13">使用第三方平台</h3>
-
-<p>现今主流的推送平台分为</p>
-
-<ol>
-<li>手机厂商类：小米推送、华为推送。</li>
-<li>第三方平台类：友盟推送、极光推送、云巴（基于MQTT）</li>
-<li>BAT大厂的平台推送：阿里云移动推送、腾讯信鸽推送、百度云推送</li>
-</ol>
-
-<p>具体各推送平台的优缺点请看我写的文章：<a href="http://www.jianshu.com/p/d77eaca4e52a">Android推送：第三方消息推送平台详细解析</a></p>
-
-<h3 id="toc_14">自己搭建</h3>
-
-<p>如果你的产品对于消息推送具备较高的功能和性能要求，同时对安全性要求非常高的话，自己搭建可能是最好的方式，但这种方式无疑成本是最高的。</p>
-
-<h2 id="toc_15">总结</h2>
-
-<ul>
-<li>经过上面的详细讲解，相信大家现在对Android中消息推送的解决方案已经非常了解</li>
-<li>解决方案没有优劣，要具具体使用场景而定。但一般来说，个人建议使用第三方平台推送，成本低+抵达率高</li>
-<li>关于Android消息推送的其他知识，具体请看：<br/>
-<a href="http://www.jianshu.com/p/b1134bebc2d4">Android消息推送：手把手教你集成小米推送</a><br/>
-<a href="http://www.jianshu.com/p/d77eaca4e52a">Android推送：第三方消息推送平台详细解析</a></li>
-</ul>
 
                         
                       </div>
@@ -1640,7 +136,7 @@ XMPP传输的即时通讯指令的逻辑与以往相仿，只是协议的形式�
                 </a>
                 <div class="read-more clearfix">
                   <div class="more-left left">
-                  
+                   <a href="15561207872263.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2017/10/27</span>
                     <span>posted in&nbsp;</span> 
           				  
@@ -4198,6 +2694,665 @@ public class MainActivity extends FragmentActivity implements
     }
 
 }
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207871979.html">
+                
+                  <h1>Android-过渡动画学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">概述</h2>
+
+<p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989405862477.gif" alt="20171105150989405862477.gif"/><figcaption>20171105150989405862477.gif</figcaption></figure></p>
+
+<p>还有github上很火的plaid</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989409049352.gif" alt="20171105150989409049352.gif"/><figcaption>20171105150989409049352.gif</figcaption></figure></p>
+
+<p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。</p>
+
+<p>先看官网的一张关系图</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098941297532.png" alt="2017110515098941297532.png"/><figcaption>2017110515098941297532.png</figcaption></figure></p>
+
+<p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
+
+<h3 id="toc_1">Scene</h3>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989413916140.png" alt="20171105150989413916140.png"/><figcaption>20171105150989413916140.png</figcaption></figure></p>
+
+<p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法</p>
+
+<p>getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</p>
+
+<p>比如：</p>
+
+<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene0, getContext());
+mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene1, getContext());
+</code></pre>
+
+<p>也可以直接new Scene(ViewGroup sceneRoot, View layout)</p>
+
+<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0, container, false);
+View view1 = inflater.inflate(R.layout.scene1, container, false);
+mScene0 = new Scene(mSceneRoot, view0);
+mScene1 = new Scene(mSceneRoot, view1);
+</code></pre>
+
+<p>两种方式都需要传SceneRoot，即该场景的根节点。</p>
+
+<h3 id="toc_2">Transition</h3>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989419933684.png" alt="20171105150989419933684.png"/><figcaption>20171105150989419933684.png</figcaption></figure></p>
+
+<p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：</p>
+
+<p>res/transition/fade_transition.xml</p>
+
+<p><code>&lt;fade xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot; /&gt;</code></p>
+
+<p>然后在代码中：</p>
+
+<pre class="line-numbers"><code class="language-java">Transition mFadeTransition =
+        TransitionInflater.from(this).
+        inflateTransition(R.transition.fade_transition);
+</code></pre>
+
+<p>或者直接在代码中：</p>
+
+<p><code>Transition mFadeTransition = new Fade();</code></p>
+
+<h3 id="toc_3">TransitionManager</h3>
+
+<p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098942555933.gif" alt="2017110515098942555933.gif"/><figcaption>2017110515098942555933.gif</figcaption></figure></p>
+
+<p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
+
+<h2 id="toc_4">常用API</h2>
+
+<p>有时候我们只想改变当前已展示的视图层级中View的状态，可以通过beginDelayedTransition实现，下面列举系统内置的Transition的使用。</p>
+
+<h3 id="toc_5">AutoTransition</h3>
+
+<p>AutoTransition默认的动画效果，对应xml tag为autoTransition</p>
+
+<p>其实是以下几个动画组合顺序执行：</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:transitionOrdering=&quot;sequential&quot;&gt;
+    &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
+    &lt;changeBounds /&gt;
+    &lt;fade android:fadingMode=&quot;fade_in&quot; /&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>在代码中使用：</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new AutoTransition());
+        if (mTextView.getVisibility() != View.VISIBLE) {
+            mTextView.setVisibility(View.VISIBLE);
+        } else {
+            mTextView.setVisibility(View.GONE);
+        }
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989430739154.gif" alt="20171105150989430739154.gif"/><figcaption>20171105150989430739154.gif</figcaption></figure></p>
+
+<h3 id="toc_6">ChangeBounds</h3>
+
+<p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeBounds());
+FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
+if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
+    lp.gravity = Gravity.BOTTOM | Gravity.END;
+} else {
+    lp.gravity = Gravity.TOP | Gravity.START;
+}
+mTarget.setLayoutParams(lp);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098943515468.gif" alt="2017110515098943515468.gif"/><figcaption>2017110515098943515468.gif</figcaption></figure></p>
+
+<h3 id="toc_7">ChangeClipBounds</h3>
+
+<p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
+
+<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20, 20, 100, 100);
+TransitionManager.beginDelayedTransition(mRoot, new ChangeClipBounds());
+if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
+    ViewCompat.setClipBounds(mImageView, null);
+} else {
+    ViewCompat.setClipBounds(mImageView, BOUNDS);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989440946179.gif" alt="20171105150989440946179.gif"/><figcaption>20171105150989440946179.gif</figcaption></figure></p>
+
+<h3 id="toc_8">ChangeImageTransform</h3>
+
+<p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeImageTransform());
+mImageView.setScaleType(ImageView.ScaleType.XXX);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098944414343.gif" alt="2017110515098944414343.gif"/><figcaption>2017110515098944414343.gif</figcaption></figure></p>
+
+<h3 id="toc_9">ChangeScroll</h3>
+
+<p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeScroll());
+mTarget.scrollBy(-100, -100);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989447884273.gif" alt="20171105150989447884273.gif"/><figcaption>20171105150989447884273.gif</figcaption></figure></p>
+
+<h3 id="toc_10">ChangeTransform</h3>
+
+<p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeTransform());
+if (mContainer2.getChildCount() &gt; 0) {
+    mContainer2.removeAllViews();
+    showRedSquare(mContainer1);
+} else {
+    mContainer1.removeAllViews();
+    showRedSquare(mContainer2);
+    mContainer2.getChildAt(0).setRotation(45);
+}
+private void showRedSquare(FrameLayout container) {
+        final View view = LayoutInflater.from(getContext())
+                .inflate(R.layout.red_square, container, false);
+        container.addView(view);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989451859396.gif" alt="20171105150989451859396.gif"/><figcaption>20171105150989451859396.gif</figcaption></figure></p>
+
+<h3 id="toc_11">Explode</h3>
+
+<p>对应xml tag为explode，作用对象：View的Visibility</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Explode());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews) {
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989454127663.gif" alt="20171105150989454127663.gif"/><figcaption>20171105150989454127663.gif</figcaption></figure></p>
+
+<h3 id="toc_12">Fade</h3>
+
+<p>对应xml tag为fade，作用对象：View的Visibility</p>
+
+<p>可以在初始化时指定IN或者OUT分别对应淡入和淡出，也可以通过fade.setMode方法设置，若不指定默认为淡入淡出效果</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Fade());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews) {
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989462426664.gif" alt="20171105150989462426664.gif"/><figcaption>20171105150989462426664.gif</figcaption></figure></p>
+
+<h3 id="toc_13">Slide</h3>
+
+<p>对应xml tag为slide，作用对象：View的Visibility</p>
+
+<p>可以初始化时传入Gravity.XX，也可以通过slide.setSlideEdge方法设置，默认方向为Gravity.BOTTOM</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Slide());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews) {
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989465258549.gif" alt="20171105150989465258549.gif"/><figcaption>20171105150989465258549.gif</figcaption></figure></p>
+
+<h3 id="toc_14">TransitionSet</h3>
+
+<p>对应xml tag为transitionSet</p>
+
+<p>可以在代码中创建transitionSet如：</p>
+
+<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
+mTransition.addTransition(new ChangeImageTransform());
+mTransition.addTransition(new ChangeTransform());
+TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
+        if (mInnerFrame.getChildCount() &gt; 0) {
+            mInnerFrame.removeAllViews();
+            addImageView(mOuterFrame, ImageView.ScaleType.CENTER_CROP, mPhotoSize);
+        } else {
+            mOuterFrame.removeViewAt(1);
+            addImageView(mInnerFrame, ImageView.ScaleType.FIT_XY,
+                    FrameLayout.LayoutParams.MATCH_PARENT);
+        }
+</code></pre>
+
+<p>也可以通过加载xml布局创建transitionSet：</p>
+
+<p>xml布局长这样：</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:transitionOrdering=&quot;together&quot;&gt;
+    &lt;changeImageTransform/&gt;
+    &lt;changeTransform/&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>通过transitionOrdering属性设置动画执行的顺序，together表示同时执行，sequential表示顺序执行，在代码中可以调用TransitionSet的setOrdering(int)方法，属性值传ORDERING_SEQUENTIAL或者ORDERING_TOGETHER</p>
+
+<p>在代码中：</p>
+
+<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet) TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
+        if (mInnerFrame.getChildCount() &gt; 0) {
+            mInnerFrame.removeAllViews();
+            addImageView(mOuterFrame, ImageView.ScaleType.CENTER_CROP, mPhotoSize);
+        } else {
+            mOuterFrame.removeViewAt(1);
+            addImageView(mInnerFrame, ImageView.ScaleType.FIT_XY,
+                    FrameLayout.LayoutParams.MATCH_PARENT);
+        }
+</code></pre>
+
+<p>这里结合changeImageTransform和changeTransform，效果如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989470836625.gif" alt="20171105150989470836625.gif"/><figcaption>20171105150989470836625.gif</figcaption></figure></p>
+
+<h3 id="toc_15">PathMotion</h3>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989473563526.png" alt="20171105150989473563526.png"/><figcaption>20171105150989473563526.png</figcaption></figure></p>
+
+<p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
+
+<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
+mTransition.setPathMotion(new ArcMotion());
+TransitionManager.beginDelayedTransition(mRoot, mTransition);
+        FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
+        if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
+            lp.gravity = Gravity.END | Gravity.BOTTOM;
+        } else {
+            lp.gravity = Gravity.START | Gravity.TOP;
+        }
+        mTarget.setLayoutParams(lp);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989476785110.gif" alt="20171105150989476785110.gif"/><figcaption>20171105150989476785110.gif</figcaption></figure></p>
+
+<p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989479123778.png" alt="20171105150989479123778.png"/><figcaption>20171105150989479123778.png</figcaption></figure></p>
+
+<h3 id="toc_16">自定义Transition</h3>
+
+<p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
+
+<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
+    @Override
+    public void captureStartValues(TransitionValues values) {}
+    @Override
+    public void captureEndValues(TransitionValues values) {}
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot,
+                                   TransitionValues startValues,
+                                   TransitionValues endValues) {}
+}
+</code></pre>
+
+<p>其工作原理是在captureStartValues和captureEndValues中分别记录View的属性值，官网建议确保属性值不冲突，属性值的命名格式参考：</p>
+
+<p><code>package_name:transition_name:property_name</code></p>
+
+<p>在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989483061249.gif" alt="20171105150989483061249.gif"/><figcaption>20171105150989483061249.gif</figcaption></figure></p>
+
+<p>在两个Scene中使用自定义过渡动画，效果如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989484813223.gif" alt="20171105150989484813223.gif"/><figcaption>20171105150989484813223.gif</figcaption></figure></p>
+
+<h2 id="toc_17">Note</h2>
+
+<ol>
+<li><p>Android 版本在4.0(API Level 14)到4.4.2(API Level 19)使用Android Support Library’s</p></li>
+<li><p>对于 SurfaceView可能不起效果，因为SurfaceView的实例是在非UI线程更新的，因此会造成和其他视图动画不同步。</p></li>
+<li><p>某些特定的转换类型在应用到TextureView时可能不会产生所需的动画效果。</p></li>
+<li><p>继承自AdapterView的如ListView，与该框架不兼容。</p></li>
+<li><p>不要对包含文本的视图的大小进行动画</p></li>
+</ol>
+
+<h2 id="toc_18">示例过渡动画</h2>
+
+<p>在界面过渡上，Transition分为不带共享元素的Content Transition和带共享元素的ShareElement Transition。</p>
+
+<h3 id="toc_19">Content Transition</h3>
+
+<p>先看下content transition的一个例子，在Google Play Games上的应用：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989496665009.gif" alt="20171105150989496665009.gif"/><figcaption>20171105150989496665009.gif</figcaption></figure></p>
+
+<p>在经过学习后我们也可以设计出类似的效果，首先需要了解在界面过渡中涉及到的一些重要方法，从ActivtyA调用startActivity方法唤起ActivityB，到ActivityB按返回键返回ActivityA涉及到与Transition有关的方法</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098950616029.png" alt="2017110515098950616029.png"/><figcaption>2017110515098950616029.png</figcaption></figure></p>
+
+<ul>
+<li>ActivityA.exitTransition()</li>
+<li>ActivityB.enterTransition()</li>
+</ul>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989510757346.png" alt="20171105150989510757346.png"/><figcaption>20171105150989510757346.png</figcaption></figure></p>
+
+<ul>
+<li>ActivityB.returnTransition()</li>
+<li>ActivityA.reenterTransition()</li>
+</ul>
+
+<p>因此，只要我们在对应的方法中设置了Transition就可以了。在默认没有设置对应Transition的情况下，Material-theme应用的exitTransition为null，enterTransition为Fade，如果reenterTransition和returnTransition未设定，则分别对应exitTransition和enterTransition。</p>
+
+<h4 id="toc_20">使用</h4>
+
+<p>在style中添加<code>android:windowContentTransitions</code> 属性启用窗口内容转换(Material-theme应用默认为true)，指定该Activity的Transition</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;!-- Base application theme. --&gt;
+&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
+    &lt;!-- enable window content transitions --&gt;
+    &lt;item name=&quot;android:windowContentTransitions&quot;&gt;true&lt;/item&gt;
+
+    &lt;!-- specify enter and exit transitions --&gt;
+    &lt;!-- options are: explode, slide, fade --&gt;
+    &lt;item name=&quot;android:windowEnterTransition&quot;&gt;@transition/change_image_transform&lt;/item&gt;
+    &lt;item name=&quot;android:windowExitTransition&quot;&gt;@transition/change_image_transform&lt;/item&gt;
+&lt;/style&gt;
+</code></pre>
+
+<p>也可以在代码中指定</p>
+
+<pre class="line-numbers"><code class="language-text">// inside your activity (if you did not enable transitions in your theme)
+getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
+// set an enter transition
+getWindow().setEnterTransition(new Explode());
+// set an exit transition
+getWindow().setExitTransition(new Explode());
+</code></pre>
+
+<p>然后启动Acticity</p>
+
+<pre class="line-numbers"><code class="language-text">startActivity(intent,
+              ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
+</code></pre>
+
+<h4 id="toc_21">例子</h4>
+
+<p>这里在代码中指定ActivityA的exitTransition:</p>
+
+<pre class="line-numbers"><code class="language-text">private void setupTransition() {
+        Slide slide = new Slide(Gravity.LEFT);
+        slide.setDuration(1000);
+        slide.setInterpolator(new FastOutSlowInInterpolator());
+        getWindow().setExitTransition(slide);
+    }
+</code></pre>
+
+<p>使用xml方式指定ActivityB的enterTransition：</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;slide
+        android:duration=&quot;1000&quot;
+        android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;
+        android:slideEdge=&quot;bottom&quot;&gt;
+        &lt;targets&gt;
+            &lt;target android:targetId=&quot;@id/content_container&quot;/&gt;
+        &lt;/targets&gt;
+    &lt;/slide&gt;
+    &lt;slide
+        android:duration=&quot;1000&quot;
+        android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;
+        android:slideEdge=&quot;top&quot;&gt;
+        &lt;targets&gt;
+            &lt;target android:targetId=&quot;@id/image_container&quot;/&gt;
+        &lt;/targets&gt;
+    &lt;/slide&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>运行效果如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989524969946.gif" alt="20171105150989524969946.gif"/><figcaption>20171105150989524969946.gif</figcaption></figure></p>
+
+<p>上图动画有两个问题:</p>
+
+<ol>
+<li>ActivityA的exitTransition还没完全走完ActivityB的enterTransition就执行了，ActivityB的returnTransition还没完全走完ActivityA的reenterTransition就执行了；</li>
+<li>状态栏和导航栏的动画不太协调;</li>
+</ol>
+
+<p>问题1是因为默认情况下enter/return transition会比exit/reenter transition完全结束前稍微快一点运行，如果想让前者完全运行完后者再进来，可以在代码中调用Window的</p>
+
+<pre class="line-numbers"><code class="language-text">setWindowAllowEnterTransitionOverlap(false)
+setWindowAllowReturnTransitionOverlap(false)
+</code></pre>
+
+<p>或者在xml中设置</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt; 
+&lt;item name=&quot;android:windowAllowReturnTransitionOverlap&quot;&gt;false&lt;/item&gt;
+</code></pre>
+
+<p>运行如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989532889905.gif" alt="20171105150989532889905.gif"/><figcaption>20171105150989532889905.gif</figcaption></figure></p>
+
+<p>再看下问题2，默认情况下状态栏和标题栏也会参与动画(如果有导航栏也会，测试机默认木有导航栏)，当我们把xxxoverlap属性设为false后就看得比较明显了，如果不想让它们参与动画通过excludeTarget()将其排除，在代码中：</p>
+
+<pre class="line-numbers"><code class="language-java">private void setupTransition() {
+    Slide slide = new Slide(Gravity.LEFT);
+    slide.setDuration(1000);
+    slide.setInterpolator(new FastOutSlowInInterpolator());
+    slide.excludeTarget(android.R.id.statusBarBackground, true);
+    slide.excludeTarget(android.R.id.navigationBarBackground, true);
+    slide.excludeTarget(R.id.appbar,true);
+    getWindow().setExitTransition(slide);
+}
+</code></pre>
+
+<p>或者在xml中：</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:slideEdge=&quot;left&quot;
+    android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;
+    android:duration=&quot;1000&quot;&gt;
+
+    &lt;targets&gt;
+        &lt;!-- if using a custom Toolbar container, specify the ID of the AppBarLayout --&gt;
+        &lt;target android:excludeId=&quot;@id/appbar&quot; /&gt;
+        &lt;target android:excludeId=&quot;@android:id/statusBarBackground&quot;/&gt;
+        &lt;target android:excludeId=&quot;@android:id/navigationBarBackground&quot;/&gt;
+    &lt;/targets&gt;
+
+&lt;/slide&gt;
+</code></pre>
+
+<p>效果如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098956444650.gif" alt="2017110515098956444650.gif"/><figcaption>2017110515098956444650.gif</figcaption></figure></p>
+
+<h4 id="toc_22">具体流程</h4>
+
+<p>ActivityA startActivity()</p>
+
+<ol>
+<li>确定需要执行exit Transition的target View</li>
+<li>Transition的captureStartValues()获取target View Visibility的值(此时为VISIBLE)</li>
+<li>将target View Visibility的值设为INVISIBLE</li>
+<li>Transition的captureEndValues()获取target View Visibility的值(此时为INVISIBLE)</li>
+<li>Transition的createAnimator()根据前后Visibility的属性值变化创建动画</li>
+</ol>
+
+<p>ActivityB Activity 开始</p>
+
+<ol>
+<li>确定需要执行enter Transition的target View</li>
+<li>Transition的captureStartValues()获取获取target View Visibility的，初始化为INVISIBLE</li>
+<li>将target View Visibility的值设为VISIBLE</li>
+<li>Transition的captureEndValues()获取target View Visibility的值(此时为VISIBLE)</li>
+<li>Transition的createAnimator()根据前后Visibility的属性值变化创建动画</li>
+</ol>
+
+<h3 id="toc_23">ShareElement Transition</h3>
+
+<p>shareElement Transition的例子</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989573322645.gif" alt="20171105150989573322645.gif"/><figcaption>20171105150989573322645.gif</figcaption></figure></p>
+
+<p>shareElement Transition指的是共享元素从activity/fragment到其他activity/fragment时的动画</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989577752186.png" alt="20171105150989577752186.png"/><figcaption>20171105150989577752186.png</figcaption></figure></p>
+
+<p>有了上面的分析看名字应该也猜得出方法对应的功能了，如果没有设置exit/enter shared element transitions，默认为 @android:transition/move，上面的Content Transition是根据Visibility的变化创建动画，而shareElement Transition是根据大小，位置，和外观的变化创建动画，如chanageBounds、changeTransform、ChangeClipBounds、 ChangeImageTransform等，具体API使用和效果可以参考上篇。指定shareElement Transition可以通过代码形式：</p>
+
+<pre class="line-numbers"><code class="language-text">getWindow().setSharedElementEnterTransition();
+getWindow().setSharedElementExitTransition();
+getWindow().setSharedElementReturnTransition();
+getWindow().setSharedElementReenterTransition();
+</code></pre>
+
+<p>也可以通过xml形式：</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;!-- Base application theme. --&gt;
+&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
+    &lt;!-- specify shared element transitions --&gt;
+    &lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
+      @transition/change_image_transform&lt;/item&gt;
+    &lt;item name=&quot;android:windowSharedElementExitTransition&quot;&gt;
+      @transition/change_image_transform&lt;/item&gt;
+&lt;/style&gt;
+</code></pre>
+
+<p>然后启动Acticity</p>
+
+<pre class="line-numbers"><code class="language-text">Intent intent = new Intent(this, DetailsActivity.class);
+// Pass data object in the bundle and populate details activity.
+intent.putExtra(DetailsActivity.EXTRA_CONTACT, contact);
+ActivityOptionsCompat options = ActivityOptionsCompat.
+    makeSceneTransitionAnimation(this, (View)ivProfile, &quot;profile&quot;);
+startActivity(intent, options.toBundle());
+</code></pre>
+
+<p>在布局文件中对于要共享的View添加android:transitionName且保持一致，如果要共享的View有点多，可以通过Pair，Pair<View,String> 存储着共享View和View的名称，使用如下</p>
+
+<pre class="line-numbers"><code class="language-text">Intent intent = new Intent(context, DetailsActivity.class);
+intent.putExtra(DetailsActivity.EXTRA_CONTACT, contact);
+Pair&lt;View, String&gt; p1 = Pair.create((View)ivProfile, &quot;profile&quot;);
+Pair&lt;View, String&gt; p2 = Pair.create(vPalette, &quot;palette&quot;);
+Pair&lt;View, String&gt; p3 = Pair.create((View)tvName, &quot;text&quot;);
+ActivityOptionsCompat options = ActivityOptionsCompat.
+    makeSceneTransitionAnimation(this, p1, p2, p3);
+startActivity(intent, options.toBundle());
+</code></pre>
+
+<h4 id="toc_24">例子</h4>
+
+<p>在ActivityB的theme中添加SharedElementEnterTransition</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
+@transition/change_image_transform
+&lt;/item&gt;
+</code></pre>
+
+<p>change_image_transform.xml</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+    &lt;changeBounds
+        android:duration=&quot;1000&quot;
+        android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;/&gt;
+    &lt;changeImageTransform
+        android:duration=&quot;1000&quot;
+        android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;/&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>执行效果：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989590151493.gif" alt="20171105150989590151493.gif"/><figcaption>20171105150989590151493.gif</figcaption></figure></p>
+
+<h3 id="toc_25">具体流程</h3>
+
+<p>从图上看，好像图片是从一个ActivityA&quot;传递&quot;到另一个ActivityB，实际上真正负责绘制都发生在ActivityB上：</p>
+
+<ol>
+<li>ActivityA调用startActivity()后ActivityB处于透明状态</li>
+<li>Transition收集ActivityA中共享View的初识状态，并传递给ActivityB</li>
+<li>Transition收集ActivityB中共享View的最终状态</li>
+<li>Transition根据状态改变创建动画</li>
+<li>Transition隐藏ActivityA，随着ActivityB的共享View运动到指定位置，ActivityB的背景在ActivityA上淡入，并随着动画完成而完全可见。</li>
+</ol>
+
+<p>我们可以通过修改Activity背景淡入淡出时间来验证，在ActivityB中加入</p>
+
+<p><code>getWindow().setTransitionBackgroundFadeDuration(2000);</code></p>
+
+<p>为了更直观，把ActivityA的exitTransition先注释掉，运行效果：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989597967932.gif" alt="20171105150989597967932.gif"/><figcaption>20171105150989597967932.gif</figcaption></figure></p>
+
+<p>可以看到，ActivityB确实像盖在ActivityA上，这里用到了 ViewOverlay，原理简单来说就是在其他View上draw，共享View利用该技术可以实现画在其他View上。我们可以通过Window的setSharedElementsUseOverlay(false)来关闭该功能，不过这样一来会使最终结果和你预想的不一致，默认该值为true。</p>
+
+<h3 id="toc_26">延迟加载</h3>
+
+<p>上面分析Transition会获取共享视图前后的状态值来创建动画，如果我们的图片是网上下载的，那么很有可能图片的准确大小需要下载下来才能确定，Activity Transitions API提供了一对方法暂时推迟过渡，直到我们确切地知道共享元素已经被适当的渲染和放置。在onCreate中调用postponeEnterTransition()(API &gt;= 21)或者supportPostponeEnterTransition()（API &lt; 21）延迟过渡；当图片的状态确定后，调用startPostponedEnterTransition()（API &gt;= 21）或supportStartPostponedEnterTransition()（API &lt; 21）恢复过渡，常见处理：</p>
+
+<pre class="line-numbers"><code class="language-text">// ... load remote image with Glide/Picasso here
+
+supportPostponeEnterTransition();
+ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
+    new ViewTreeObserver.OnPreDrawListener() {
+        @Override
+        public boolean onPreDraw() {
+            ivBackdrop.getViewTreeObserver().removeOnPreDrawListener(this);
+            supportStartPostponedEnterTransition();
+            return true;
+        }
+    }
+);
 </code></pre>
 
                         

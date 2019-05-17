@@ -116,91 +116,6 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15561207870461.html">
-                
-                  <h1>Android-Paint详细学习</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>的确平时开发中，用到画笔的地方还是不多的。但是一遇到自定义View，就会发现这玩意还真是不能不好好掌握，毕竟绘出我们想要的图形界面就靠它了。很多开发人员对画笔Paint的了解知之甚少，包括我自己在内，所以在今天在这里总结一下Paint的在 android图像处理中起到的作用和用法。</p>
-
-<h2 id="toc_1">Paint的简单了解</h2>
-
-<p>同样，我们学习Paint之前，首先查看一下Paint类的API，其中，我们最需要关注的地方就是Paint类给我们提供了很多的setter方法，可以通过调用setter方法来设置自己的偏好。下面是在Android Studio中查到的Paint类的部分setter：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781677410193.png" alt="20171012150781677410193.png"/><figcaption>20171012150781677410193.png</figcaption></figure></p>
-
-<ul>
-<li><code>Paint(int flags)</code>：构建Paint实例，常用的flags是ANTI_ALIAS_FLAG，消除锯齿。</li>
-<li><code>set(Paint src)</code>：将另一个Paint复制给当前Paint实例，不多说了。</li>
-<li><code>setColor(int color)</code>：设置画笔的颜色。</li>
-<li><code>setColorFilter(ColorFilter filter)</code>：设置色彩过滤器，很重要，后面还会有一些总结。</li>
-<li><code>setStyle(Paint.Style style)</code>：设置Paint的风格。 画笔样式分三种：1.Paint.Style.STROKE：描边 。2.Paint.Style.FILL_AND_STROKE：描边并填充 。3.Paint.Style.FILL：填充 。</li>
-<li><code>setAlpha(int a)</code> : 设置绘制图形的透明度。</li>
-<li><code>setAntiAlias(boolean aa)</code>：是否消除锯齿。</li>
-<li><code>setARGB(int a,int r,int g,int b)</code> : 设置绘制的颜色，a代表透明度，r，g，b代表颜色值。</li>
-<li><code>setStrokeWidth(float width)</code>：设置Paint划线的宽度。</li>
-<li><code>setDither(boolean dither)</code> : 设定是否使用图像抖动处理，会使绘制出来的图片颜色更加平滑和饱满，图像更加清晰</li>
-<li><code>setElegantTextHeight(boolean elegant)</code> : //设置优雅的文字高度，这个设置可能会对FontMetrics产生影响</li>
-<li><code>setFakeBoldText(boolean fakeBoldText)</code> : //设置文本粗体</li>
-<li><code>setFilterBitmap(boolean filter)</code> : //对位图进行滤波处理，如果该项设置为true，则图像在动画进行中会滤掉对Bitmap图像的优化操作，加快显示</li>
-<li><code>setFlags(int flags)</code> : //设置一些标志，比如抗锯齿，下划线等等。</li>
-<li><code>setFontFeatureSettings(String settings)</code> : //设置字体样式，可以设置CSS样式</li>
-<li><code>setHinting(int mode)</code> : 设置画笔的隐藏模式。可以是 <code>HINTING_OFF</code> or <code>HINTING_ON</code>之一。</li>
-<li><code>setLetterSpacing(float letterSpacing)</code> : //设置行的间距，默认值是0，负值行间距会收缩</li>
-<li><code>setLinearText(boolean linearText)</code> : //这个是文本缓存，设置线性文本，如果设置为true就不需要缓存</li>
-<li><code>setMaskFilter(MaskFilter maskfilter)</code> : //对图像进行一定的处理，实现滤镜的效果，如滤化，立体等,有BlurMaskFilter，EmbossMaskFilter几种</li>
-<li><code>setPathEffect(PathEffect effect)</code> : //设置绘制路径的效果，有ComposePathEffect，CornerPathEffect，DashPathEffect，DiscretePathEffect，PathDashPathEffect，SumPathEffect几种</li>
-<li><code>setShader(Shader shader)</code> : //设置着色器，用来给图像着色的，绘制出各种渐变效果，有BitmapShader，ComposeShader，LinearGradient，RadialGradient，SweepGradient几种</li>
-<li><code>setShadowLayer(float radius, float dx, float dy, int shadowColor)</code> : //设置阴影效果，radius为阴影角度，dx和dy为阴影在x轴和y轴上的距离，color为阴影的颜色 ，看一下演示效果，其中第一个是没有阴影的，第二个设置了黑色的阴影</li>
-<li><code>setStrikeThruText(boolean strikeThruText)</code> : //设置文本的删除线</li>
-<li><code>setStrokeCap(Cap cap)</code> : //设置线条末端形状<code>Paint.Cap.BUTT</code>、<code>Paint.Cap.ROUND</code>、<code>Paint.Cap.SQUARE</code></li>
-<li><code>setStrokeJoin(Join join)</code> : //设置矩形连接时的效果<code>Paint.Join.BEVEL</code>、<code>Paint.Join.MITER</code>、<code>Paint.Join.ROUND</code></li>
-<li><code>setStrokeMiter(float miter)</code> : //当style为Stroke或StrokeAndFill时设置连接处的倾斜度，这个值必须大于0</li>
-<li><code>setSubpixelText(boolean subpixelText)</code> : //设置亚像素，是对文本的一种优化设置，可以让文字看起来更加清晰明显，可以参考一下PC端的控制面板-外观和个性化-调整ClearType文本</li>
-<li><code>setTextAlign(Align align)</code> : //设置文本对齐<code>Paint.Align.CENTER</code>、<code>Paint.Align.LEFT</code>、<code>Paint.Align.RIGHT</code></li>
-<li><code>setTextLocale(Locale locale)</code> ： //设置地理位置，比如显示中文，日文，韩文等，默认的显示Locale.getDefault()即可</li>
-<li><code>setTextScaleX(float scaleX)</code> : //设置字体的水平方向的缩放因子，默认值为1，大于1时会沿X轴水平放大，小于1时会沿X轴水平缩小</li>
-<li><code>setTextSize(float textSize)</code> : //设置字体大小</li>
-<li><code>setTextSkewX(float skewX)</code> : //设置文本在水平方向上的倾斜，默认值为0，推荐的值为-0.25</li>
-<li><code>setTypeface(Typeface typeface)</code> : //设置字体样式，可以是Typeface设置的样式，也可以通过Typeface的createFromAsset(AssetManager mgr, String path)方法加载样式</li>
-<li><code>setUnderlineText(boolean underlineText)</code> : //设置文本的下划线</li>
-<li><code>setXfermode(Xfermode xfermode)</code>：设置Paint的模式，后面有详细点的说明，很重要。</li>
-<li><code>reset()</code> : //重置Paint</li>
-<li><code>measureText(char[] text, int index, int count)</code>，<code>measureText(String text, int start, int end)</code>，<code>measureText(String text)</code>，<code>measureText(CharSequence text, int start, int end)</code> : //测量字体的长度</li>
-<li><code>breakText(char[] text, int index, int count,float maxWidth, float[] measuredWidth)</code>，<code>breakText(CharSequence text, int start, int end,boolean measureForwards,  floatmaxWidth, float[] measuredWidth)</code>，<code>breakText(String text, boolean measureForwards,float maxWidth, float[] measuredWidth)</code> : //剪切显示，就是大于maxWidth的时候只截取指定长度的显示</li>
-<li><code>getTextWidths(char[] text, int index, int count,float[] widths)</code>，<code>getTextWidths(CharSequence text, int start, int end, float[] widths)</code>，<code>getTextWidths(String text, int start, int end, float[] widths)</code>，<code>getTextWidths(String text, float[] widths)</code> : //提取指定范围内的字符串，保存到widths中</li>
-<li><code>getTextPath(char[] text, int index, int count, float x, float y, Path path)</code>，<code>getTextPath(String text, int start, int end, float x, float y, Path path)</code> : //获取文本绘制的路径，提取到Path中</li>
-<li><code>getTextBounds(String text, int start, int end, Rect bounds)</code>，<code>getTextBounds(char[] text, int index, int count, Rect bounds)</code> : //得到文本的边界，上下左右，提取到bounds中，可以通过这计算文本的宽和高</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
                 <a class="clearlink" href="15561207870430.html">
                 
                   <h1>Android-ColorFilter详细学习</h1>
@@ -6002,6 +5917,250 @@ RxView.clickEvents(button) // 以 Observable 形式来反馈点击事件
                   <div class="more-left left">
                   
                     <span class="date">2017/7/17</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207870085.html">
+                
+                  <h1>Android-Fresco详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Android Fresco网络图片加载库</h2>
+
+<p>Fresco是Facebook最新推出的一款用于Android应用中展示图片的强大图片库，可以从网络、本地存储和本地资源中加载图片。相对于ImageLoader，拥有更快的图片下载速度以及可以加载和显示gif图等诸多优势，是个很好的图片框架。</p>
+
+<p><strong>github地址</strong>： <a href="https://github.com/facebook/fresco">https://github.com/facebook/fresco</a></p>
+
+<h2 id="toc_1">基本的用法：</h2>
+
+<ol>
+<li>导入 Android Studio 或者 Gradle
+<code>
+dependencies {<br/>
+compile &#39;com.facebook.fresco:fresco:0.9.0+&#39;<br/>
+}
+</code></li>
+<li>在xml中引入SimpleDraweeView
+<code>SQL
+&lt;com.facebook.drawee.view.SimpleDraweeView<br/>
+android:id=&quot;@+id/image_view&quot;<br/>
+android:layout_width=&quot;20dp&quot;<br/>
+android:layout_height=&quot;20dp&quot;<br/>
+fresco:placeholderImage=&quot;@drawable/my_drawable&quot;<br/>
+/&gt;
+</code>
+<strong>注意：1、在SimpleDraweeView的父控件或者根节点中配置xmlns:fresco=&quot;<a href="http://schemas.android.com/apk/res-auto">http://schemas.android.com/apk/res-auto</a>&quot;;</strong></li>
+<li>配置网络权限</li>
+<li>在Java代码中开始加载图片
+<code>
+Uri uri = Uri.parse(&quot;https://raw.githubusercontent.com/facebook/fresco/gh-pages/static/fresco-logo.png&quot;);<br/>
+SimpleDraweeView draweeView = (SimpleDraweeView) findViewById(R.id.my_image_view);<br/>
+draweeView.setImageURI(uri);
+</code></li>
+</ol>
+
+<h2 id="toc_2">URIs的使用</h2>
+
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>Scheme</th>
+<th>示例</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>远程图片</td>
+<td>http:// 和 https://</td>
+<td>HttpURLConnection 或者参考  <a href="http://fresco-cn.org/docs/using-other-network-layers.html">使用其他网络加载方案</a></td>
+</tr>
+<tr>
+<td>本地文件</td>
+<td>file://</td>
+<td>FileInputStream</td>
+</tr>
+<tr>
+<td>Content Provider</td>
+<td>content://</td>
+<td>ContentResolver</td>
+</tr>
+<tr>
+<td>asset目录下的资源</td>
+<td>asset://</td>
+<td>AssetManager</td>
+</tr>
+<tr>
+<td>res目录下的资源</td>
+<td>res://</td>
+<td>Resources.openRawResource</td>
+</tr>
+</tbody>
+</table>
+
+<p><strong>res 示例:Uri uri = Uri.parse(&quot;res://包名(实际可以是任何字符串甚至留空)/&quot; + R.drawable.ic_launcher);*<br/>
+*注意：Fresco 不支持 相对路径的URI. 所有的URI都必须是绝对路径，并且带上该URI的scheme。</strong></p>
+
+<h2 id="toc_3">在XML中使用SimpleDraweeView</h2>
+
+<pre class="line-numbers"><code class="language-markup">&lt;com.facebook.drawee.view.SimpleDraweeView
+    android:id=&quot;@+id/my_image_view&quot;
+    android:layout_width=&quot;20dp&quot;
+    android:layout_height=&quot;20dp&quot;
+    fresco:fadeDuration=&quot;300&quot; // 淡入淡出的持续时间  
+    fresco:actualImageScaleType=&quot;focusCrop&quot;  // 实际图像的缩放类型  
+    fresco:placeholderImage=&quot;@color/wait_color&quot;  //占位图  
+    fresco:placeholderImageScaleType=&quot;fitCenter&quot; //占位图的缩放类型  
+    fresco:failureImage=&quot;@drawable/error&quot; //下载失败显示的图片  
+    fresco:failureImageScaleType=&quot;centerInside&quot; //失败图的缩放类型  
+    fresco:retryImage=&quot;@drawable/retrying&quot; //图片加载失败时显示，提示用户点击重新加载，重复加载4次还是没有加载出来的时候才会显示failureImage的图片  
+    fresco:retryImageScaleType=&quot;centerCrop&quot; //重新加载的图片缩放类型  
+    fresco:progressBarImage=&quot;@drawable/progress_bar&quot; //进度条图片  
+    fresco:progressBarImageScaleType=&quot;centerInside&quot;  
+    fresco:progressBarAutoRotateInterval=&quot;1000&quot; //进度图自动旋转间隔时间(单位：毫秒ms)  
+    fresco:backgroundImage=&quot;@color/blue&quot;  //背景图片，这里的背景图片首先被绘制  
+    fresco:overlayImage=&quot;@drawable/watermark&quot;  // 设置叠加图，在xml中只能设置一张叠加图片，如果需要多张图片的话，需要在java代码中设置哦  
+    fresco:pressedStateOverlayImage=&quot;@color/red&quot;  // 设置点击状态下的叠加图  
+    fresco:roundAsCircle=&quot;false&quot; //设置为圆形图  
+    fresco:roundedCornerRadius=&quot;1dp&quot; // 圆角半径  
+    fresco:roundTopLeft=&quot;true&quot; // 左上角是否为圆角  
+    fresco:roundTopRight=&quot;false&quot;  
+    fresco:roundBottomLeft=&quot;false&quot;  
+    fresco:roundBottomRight=&quot;true&quot;  
+    fresco:roundWithOverlayColor=&quot;@color/corner_color&quot;  
+    fresco:roundingBorderWidth=&quot;2dp&quot; //边框的宽度  
+    fresco:roundingBorderColor=&quot;@color/border_color&quot; //边框颜色
+  /&gt;
+</code></pre>
+
+<p>说明：必须声明 android:layout_width 和 android:layout_height，否则将无法正确加载图像，另外不支持 wrap_content 属性，但也有例外的时候，如果想固定控件的宽高比，则可以使用wrap_content,并通过在xml代码中设置fresco:viewAspectRatio=&quot;小数&quot;或者在Java代码中设置mSimpleDraweeView.setAspectRatio(1.33f);即可。</p>
+
+<table>
+<thead>
+<tr>
+<th>类型</th>
+<th>描述</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>center</td>
+<td>居中，无缩放</td>
+</tr>
+<tr>
+<td>centerCrop</td>
+<td>保持宽高比缩小或放大，是的两边都大于或等于边界，且宽和高契合显示边界，居中显示</td>
+</tr>
+<tr>
+<td>focusCrop</td>
+<td>同centerCrop，但居中点不是中点，而是指定的某个点</td>
+</tr>
+<tr>
+<td>centerInside</td>
+<td>缩放图片使两边都在显示边界内，居中显示。和fitCenter不同，不会对图片进行放大。如果尺寸大于显示边界，则保持宽高比例缩小图片。</td>
+</tr>
+<tr>
+<td>fitCenter</td>
+<td>保持宽高比，缩小或者放大，使得图片完全显示在显示边界内，且宽或高契合显示边界，居中显示。</td>
+</tr>
+<tr>
+<td>fitStart</td>
+<td>同上，但不居中，和显示边界左上对齐。</td>
+</tr>
+<tr>
+<td>fitEnd</td>
+<td>同fitCenter，但不居中，和显示边界右下对齐。</td>
+</tr>
+<tr>
+<td>fitXY</td>
+<td>不保存宽高比，填充满显示边界。</td>
+</tr>
+<tr>
+<td>none</td>
+<td>如果要使用tile mode显示，则需要设置为none</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_4">在Java中自定义显示图</h2>
+
+<p>一般情况下，在XML设置显示效果即可, 如果想更多定制化，可以这样:<br/>
+创建一个 builder 然后设置给 SimpleDraweeView:</p>
+
+<pre class="line-numbers"><code class="language-java">List&lt;Drawable&gt; backgroundsList;
+List&lt;Drawable&gt; overlaysList;
+GenericDraweeHierarchyBuilder builder =
+    new GenericDraweeHierarchyBuilder(getResources());
+GenericDraweeHierarchy hierarchy = builder
+    .setFadeDuration(300)
+    .setPlaceholderImage(new MyCustomDrawable())
+    .setBackgrounds(backgroundList)
+    .setOverlays(overlaysList)
+    .build();
+mSimpleDraweeView.setHierarchy(hierarchy);
+</code></pre>
+
+<p>注意：请不要多次调用setHierarchy，即使这个View是可回收的。创建 DraweeHierarchy 的较为耗时的一个过程，应该多次利用。</p>
+
+<h2 id="toc_5">修改 DraweeHierarchy</h2>
+
+<p>DraweeHierarchy 的一些属性可以在运行时改变。<br/>
+要改变这些属性，首先获取一个引用:<br/>
+<code>GenericDraweeHierarchy hierarchy = mSimpleDraweeView.getHierarchy();</code></p>
+
+<h2 id="toc_6">修改占位图</h2>
+
+<p>修改占位图为资源id:<code>hierarchy.setPlaceholderImage(R.drawable.placeholderId);</code><br/>
+或者修改为一个 <code>Drawable:Drawable drawable;</code><br/><br/>
+<code>hierarchy.setPlaceholderImage(drawable);</code></p>
+
+<h2 id="toc_7">改变图像的显示</h2>
+
+<p>修改缩放类型:<br/>
+<code>hierarchy.setActualImageScaleType(ScalingUtils.ScaleType.CENTER_INSIDE);</code><br/><br/>
+如果你选择缩放类型为 focusCrop，需要指定一个居中点:<code>hierarchy.setActualImageFocusPoint(point);</code><br/>
+你可以为图像添加一个 color filter:</p>
+
+<pre class="line-numbers"><code class="language-java">ColorFilter filter;
+// 创建filter
+hierarchy.setActualImageColorFilter(filter);
+</code></pre>
+
+<h2 id="toc_8">圆角</h2>
+
+<p>除了圆角显示方式（原来为圆角的不能修改为圆圈，反之亦然），其他圆角相关的呈现参数, 具体参见这里 是可以动态修改的。<br/>
+如下: 获取DraweeHierarchy的圆角显示参数，修改圆角半径为10。</p>
+
+<pre class="line-numbers"><code class="language-java">RoundingParams roundingParams = hierarchy.getRoundingParams();
+roundingParams.setCornersRadius(10);
+hierarchy.setRoundingParams(roundingParams);
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/7/10</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>

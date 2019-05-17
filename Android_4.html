@@ -116,373 +116,6 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15561207871543.html">
-                
-                  <h1>Android 用贝塞尔曲线绘制酷炫轮廓背景</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978726172356.png" alt="20171104150978726172356.png"/><figcaption>20171104150978726172356.png</figcaption></figure></p>
-
-<p>Github地址：<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FOCNYang%2FContourView">github.com/OCNYang/Con…</a></p>
-
-<p>今天就借助这个开源控件，来为大家梳理一下自定义 View 的整个流程：</p>
-
-<ol>
-<li>分析需求、功能，确定实现方法；</li>
-<li>总结所需的参数属性以满足可定制性，较明确的属性归纳为自定义属性，不适合自定义属性的（比如传入数据，对象等）提供方法来设置；</li>
-<li>有时自定义 View 会提供一种或几种默认及内置的样式，（这时可以根据内置的样式种类补充到自定义属性中），同时分析，使用内置样式或用户定制拓展时的流程；</li>
-<li>开始根据分析，按流程依次重写： <code>构造函数（获取自定义属性，设置画笔等）</code> --&gt; <code>onMeasure()(测量大小)</code> --&gt; <code>onSizeChanged()(确定大小，一般我们在这里获取大小)</code> --&gt; <code>（onLayout()自定义View，因为没有子控件，这一步是不需要的）</code> --&gt; <code>onDraw()(按照需求和根据属性绘制实际内容)</code> --&gt; <code>其他</code></li>
-</ol>
-
-<p>如果有事件的需求，添加事件相关逻辑。<br/><br/>
-那么现在我们就根据上面这个流程一步步来实现 ContourView。  </p>
-
-<h2 id="toc_0">分析</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978739369275.png" alt="20171104150978739369275.png"/><figcaption>20171104150978739369275.png</figcaption></figure></p>
-
-<p>根据上面的分析，实现的思路大概都有了。那么我们就开始寻找具体实现方法。<br/>
-首先，我们选用三阶贝塞尔曲线，我们都知道三阶曲线的计算公式是：</p>
-
-<pre class="line-numbers"><code class="language-text">path.moveTo(start.x, start.y);
-path.cubicTo(control1.x, control1.y, control2.x,control2.y, end.x, end.y);
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978744638463.gif" alt="20171104150978744638463.gif"/><figcaption>20171104150978744638463.gif</figcaption></figure></p>
-
-<p>也就是说绘制一段曲线，我们需要知道两个锚点的坐标以及两个控制点的坐标，为了保证曲线的弯曲度能够达到理想的状态，控制点的坐标也不能是随意取的，这就要求我们必须通过一种计算方法合理的得出控制点的坐标。Google 了一下，发现先驱们已经找到了很多种方法供我们选择。</p>
-
-<p>最终经过对比我们选用了这样一种方法：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978747068083.png" alt="20171104150978747068083.png"/><figcaption>20171104150978747068083.png</figcaption></figure></p>
-
-<p>这种方法大概的形式如上图，利用锚点集合，连续的4个锚点坐标Pi-1、Pi、Pi+1、Pi+2，通过具体公式来计算出中间两个锚点之间曲线的两个控制点坐标。</p>
-
-<blockquote>
-<p>详细的计算方法介绍请看 ContourView 的 WiKi：<br/>
-<strong>Bézier-求贝塞尔曲线控制点</strong></p>
-</blockquote>
-
-<h2 id="toc_1">归纳自定义属性</h2>
-
-<p>通过上面的分析，其实我们大概能总结出需要自定义的属性有哪些了。这里不着急，我们先总结一下自定义属性相关的内容和步骤？</p>
-
-<ul>
-<li><strong>创建自定义属性文件</strong></li>
-</ul>
-
-<p>在 res/values/ 下新建 attrs.xml 文件（默认新建项目没有这个文件）。文件内容类似如下：</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;resources&gt;
-    &lt;attr name=&quot;custom_color&quot; format=&quot;color&quot;/&gt;
-
-    &lt;declare-styleable name=&quot;ContourView&quot;&gt;
-        &lt;attr name=&quot;shader_color&quot; format=&quot;color&quot;/&gt;
-        &lt;attr name=&quot;smoothness&quot; format=&quot;float&quot;/&gt;
-    &lt;/declare-styleable&gt;
-&lt;/resources&gt;
-</code></pre>
-
-<p>其中 attr 和 declare-styleable 节点分别代表的意思如下：</p>
-
-<p><strong>attr</strong>： 定义了一个属性，属性名为 custom_color 这个是可以随意起的，但是要注意不要和其他控件所冲突， format 所定义的是属性的格式，其中格式又分为好多种，下面会细说，这里定义的是颜色 color。</p>
-
-<p><strong>declare-styleable</strong>：定义了一个属性组，在里面我们可以单独写 attr 属性，也可以引用直接在 resources 下定义的 attr，其中的区别就是引用的不用写 format。</p>
-
-<p>需要注意的是，attr 并不依赖与 declare-styleable，declare-styleable 只是方便了 attr 的使用，使属性的使用更加明确。两者在代码中的获取方式并不相同，下面会细说。</p>
-
-<p>在实际开发中，我们一般是采用 declare-styleable 方式，直接定义一组自己所编写的自定义控件需要用到的属性。</p>
-
-<ul>
-<li><strong>自定义属性的可以设置哪些属性</strong></li>
-</ul>
-
-<p>我们根据需要可以设置的自定义属性的格式一共有一下几种：</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">format=&quot;格式&quot;</th>
-<th style="text-align: center">说明</th>
-<th style="text-align: center">app:myattr=&quot;使用值&quot;</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">reference</td>
-<td style="text-align: center">参考某一资源ID</td>
-<td style="text-align: center">&quot;@drawable/图片ID&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">color</td>
-<td style="text-align: center">颜色值</td>
-<td style="text-align: center">&quot;#FFFFFFFF&quot; or &quot;@color/颜色ID&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">boolean</td>
-<td style="text-align: center">布尔值</td>
-<td style="text-align: center">&quot;true&quot; or &quot;false&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">dimension</td>
-<td style="text-align: center">尺寸值</td>
-<td style="text-align: center">&quot;0dp&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">float</td>
-<td style="text-align: center">浮点型</td>
-<td style="text-align: center">&quot;1.2&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">integer</td>
-<td style="text-align: center">整型值</td>
-<td style="text-align: center">&quot;10&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">fraction</td>
-<td style="text-align: center">百分数值</td>
-<td style="text-align: center">&quot;50%&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">string</td>
-<td style="text-align: center">字符串</td>
-<td style="text-align: center">&quot;OCN.Yang&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">enum</td>
-<td style="text-align: center">枚举值（详见下）</td>
-<td style="text-align: center">&quot;自定义类型名称&quot;</td>
-</tr>
-<tr>
-<td style="text-align: center">flag</td>
-<td style="text-align: center">位或运算</td>
-<td style="text-align: center">&quot;center</td>
-</tr>
-</tbody>
-</table>
-
-<blockquote>
-<p>附：<br/><br/>
-enum 枚举型定义：<br/>
-<code>&lt;attr name=&quot;handsomeBoy&quot;&gt;</code><br/><br/>
-    <code>&lt;enum name=&quot;OCNYang&quot; value=&quot;0x01&quot;/&gt;</code><br/><br/>
-    <code>&lt;enum name=&quot;TFBOYS&quot; value=&quot;0x10&quot;/&gt;</code><br/><br/>
-<code>&lt;/attr&gt;</code><br/><br/>
-enum 使用：<br/><br/>
-<code>app:handsomeBoy=&quot;OCNYang&quot;</code><br/><br/>
-flag 定义：<br/><br/>
-<code>&lt;attr name=&quot;gravity&quot;&gt;</code><br/><br/>
-    <code>&lt;flag name=&quot;top&quot; value=&quot;0&quot;/&gt;</code><br/><br/>
-    <code>&lt;flag name=&quot;center&quot; value=&quot;1&quot;/&gt;</code><br/><br/>
-    <code>&lt;flag name=&quot;bottom&quot; value=&quot;2&quot;/&gt;</code><br/><br/>
-<code>&lt;/attr&gt;</code><br/><br/>
-flag 使用：<br/><br/>
-<code>app:gravity=&quot;center|bottom&quot;</code><br/><br/>
-混搭使用<br/><br/>
-<code>&lt;attr name=&quot;background&quot; format=&quot;reference|color&quot;/&gt;</code><br/><br/>
-这样，你传入资源ID或颜色值都是可以的了。</p>
-</blockquote>
-
-<ul>
-<li><strong>获取自定义属性</strong></li>
-</ul>
-
-<p>那怎么获取这些自定义的属性呢，只需要在自定义 View 的构造方法（两个参数或两个以上的参数）里通过一下方式就能获取到了：</p>
-
-<pre class="line-numbers"><code class="language-java">public ContourView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
-    super(context, attrs, defStyleAttr);
-
-    TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ContourView);
-    //注意：获取时自定义的属性名有变动，例如：定义名：contour_style -&gt; 获取名：ContourView_contour_style（即：自定义属性组名_属性名）
-    mStyle = typedArray.getInt(R.styleable.ContourView_contour_style, STYLE_SAND);
-}
-</code></pre>
-
-<p>当然获取时，不同格式的属性需要通过 TypedArray 对应的不同的方法获取，那 TypedArray 都有哪些获取方法呢？如下图：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978824371174.png" alt="20171104150978824371174.png"/><figcaption>20171104150978824371174.png</figcaption></figure></p>
-
-<p>通过方法名称，相信你能很轻易的知道，需要哪个对应方法获取了。</p>
-
-<blockquote>
-<p>如果你想更详细的了解每个方法的详细介绍，可以点击下面链接查看：<br/>
-<a href="https://link.juejin.im/?target=https%3A%2F%2Fdeveloper.android.com%2Freference%2Fandroid%2Fcontent%2Fres%2FTypedArray.html">developer.android.com/reference/a…</a><br/>
-另外，比较特殊的 enum 的获取方法：<br/>
-由于 enum 的 value 值只能设置 int 型，所以，获取enum的方式是 getInt()。</p>
-</blockquote>
-
-<p>好了，关于自定义属性的介绍大概就是这么多内容了，那么回到原题，我们的 ContourView 需要哪几种 自定义属性呢？其实通过分析模块中我们就基本知道我们需要的属性有哪些了：</p>
-
-<ul>
-<li>内置轮廓样式： enum 类型，内置多少个 enum 就有多少类型；</li>
-<li>绘制颜色：纯色绘制时，我们需要一个颜色值，Color 属性</li>
-<li>Shader 相关：
-<ol>
-<li>采用哪种 Shader，enum 类型，有RadialGradient、SweepGradient、LinearGradient；</li>
-<li>Shader 的颜色，Color 类型，需要两个一个startColor，一个endColor；</li>
-<li>Shader 填充的控制，enum 类型，我们提供几种填充的方向，比如左上角到右下角，从上到下，然后我们再通过这个方向和传入的秒点集来动态计算起点和终点的坐标</li>
-</ol></li>
-</ul>
-
-<p>具体如下：</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;resources&gt;
-    &lt;declare-styleable name=&quot;ContourView&quot;&gt;
-        &lt;attr name=&quot;shader_mode&quot;&gt;
-            &lt;enum name=&quot;RadialGradient&quot; value=&quot;0x01&quot;/&gt;
-            &lt;enum name=&quot;SweepGradient&quot; value=&quot;0x02&quot;/&gt;
-            &lt;enum name=&quot;LinearGradient&quot; value=&quot;0x03&quot;/&gt;
-        &lt;/attr&gt;
-        &lt;attr name=&quot;shader_startcolor&quot; format=&quot;color&quot;/&gt;
-        &lt;attr name=&quot;shader_endcolor&quot; format=&quot;color&quot;/&gt;
-        &lt;attr name=&quot;shader_style&quot;&gt;
-            &lt;enum name=&quot;LeftToBottom&quot; value=&quot;0x00&quot;/&gt;
-            &lt;enum name=&quot;RightToBottom&quot; value=&quot;0x11&quot;/&gt;
-            &lt;enum name=&quot;TopToBottom&quot; value=&quot;0x12&quot;/&gt;
-            &lt;enum name=&quot;Center&quot; value=&quot;0x13&quot;/&gt;
-        &lt;/attr&gt;
-        &lt;attr name=&quot;contour_style&quot;&gt;
-            &lt;enum name=&quot;Beach&quot; value=&quot;0x23&quot;/&gt;
-            &lt;enum name=&quot;Ripples&quot; value=&quot;0x22&quot;/&gt;
-            &lt;enum name=&quot;Clouds&quot; value=&quot;0x21&quot;/&gt;
-            &lt;enum name=&quot;Sand&quot; value=&quot;0x00&quot;/&gt;
-            &lt;enum name=&quot;Shell&quot; value=&quot;0x25&quot;/&gt;
-        &lt;/attr&gt;
-        &lt;attr name=&quot;shader_color&quot; format=&quot;color&quot;/&gt;
-        &lt;!--弯曲系数，在通过贝塞尔曲线绘制曲线时，来控制弯曲度--&gt;
-        &lt;attr name=&quot;smoothness&quot; format=&quot;float&quot;/&gt;
-    &lt;/declare-styleable&gt;
-&lt;/resources&gt;
-</code></pre>
-
-<h2 id="toc_2">内置样式</h2>
-
-<p>既然自定义 View，那我们一定会为它提供一种或几种内置好的样式呀。这样别人在偷懒不想自己定制样式时，可以也有不错的显示效果呀！<br/><br/>
-通过上面知道，ContourView 的轮廓样式主要是通过给出的锚点集控制的，所有的锚点围成的闭合曲线就是轮廓的大概样式了。<br/><br/>
-所以，这里我们想内置几种样式，就等于内置几个锚点集就行了，这里的我们内置的锚点坐标为了使得不同大小显示效果相同，我们先在 onSizeChanged() 获得了 View 的宽高，然后根据宽高按照百分比来设置坐标。  </p>
-
-<p>设置的内置轮廓有以下几种（丑爆了），只是轮廓，颜色是自己设置的：</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">样式（contuor_style）</th>
-<th style="text-align: center">效果</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">Sand(默认)</td>
-<td style="text-align: center"><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978839852514.png" alt="20171104150978839852514.png"/><figcaption>20171104150978839852514.png</figcaption></figure></td>
-</tr>
-<tr>
-<td style="text-align: center">Clouds</td>
-<td style="text-align: center"><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978842981180.png" alt="20171104150978842981180.png"/><figcaption>20171104150978842981180.png</figcaption></figure></td>
-</tr>
-<tr>
-<td style="text-align: center">Beach</td>
-<td style="text-align: center"><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097884696641.png" alt="2017110415097884696641.png"/><figcaption>2017110415097884696641.png</figcaption></figure></td>
-</tr>
-<tr>
-<td style="text-align: center">Ripples</td>
-<td style="text-align: center"><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978853494460.png" alt="20171104150978853494460.png"/><figcaption>20171104150978853494460.png</figcaption></figure></td>
-</tr>
-<tr>
-<td style="text-align: center">Shell</td>
-<td style="text-align: center"><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978856557867.png" alt="20171104150978856557867.png"/><figcaption>20171104150978856557867.png</figcaption></figure></td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="toc_3">重写各方法</h2>
-
-<p>关于自定义 View 重写各方法的介绍，网上已经有太多太多，这里就不再啰嗦了。</p>
-
-<blockquote>
-<p>这里推荐一个关于自定义 View 尤其关于绘制方面讲解特别详细的系列博客：<br/>
-<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FGcsSloop%2FAndroidNote">github.com/GcsSloop/An…</a><br/>
-另外厚脸皮的放上一篇自己的关于讲解“自定义组合控件”的博客地址：<br/>
-<a href="https://link.juejin.im/?target=http%3A%2F%2Fwww.jianshu.com%2Fp%2F4bbc967214c9">www.jianshu.com/p/4bbc96721…</a></p>
-</blockquote>
-
-<p>我们知道，在自定义 View 时，必须要有构造函数的，对于4个构造函数，有时可能大家不确定到底该重写哪个，也不知道每个构造函数有什么区别，这里对常用的做法做下说明。</p>
-
-<pre class="line-numbers"><code class="language-java">//在代码中直接 new 一个 Custom View 实例时,会调用第一个构造函数.这个没有任何争议.
-public View(Context context);  
-//在 xml 布局文件中使用自定义 View 时,会调用第二个构造函数.这个也没有争议.
-public View(Context context, AttributeSet attrs);  
-//关于这个构造函数的调用，网上真是众说纷纭，我也不说哪种说法正确，下面提供详解
-public View(Context context, AttributeSet attrs, int defStyle);
-//4个参数的构造函数这里不做考虑
-</code></pre>
-
-<p>关于内部这4个构造函数是怎么调用的，这里直接放源码图片，自己一目了然：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978864534553.png" alt="20171104150978864534553.png"/><figcaption>20171104150978864534553.png</figcaption></figure></p>
-
-<p>大家在自定义 View 时，如果没有特别的需求，只要重写前两个构造函数就可以了，我习惯性的写成下面的形式：</p>
-
-<pre class="line-numbers"><code class="language-java">public class MyView extends View {
-
-    public MyView(Context context) {
-        this(context, null);
-    }
-
-    public MyView(Context context, AttributeSet attrs) {
-        this(context, attrs, 0);
-    }
-
-    public MyView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-        //初始化画笔，做一些属性的默认赋值等；
-        //获取自定义的属性等；
-    }
-}
-</code></pre>
-
-<p>那，说了这么多还是没有提第3个参数到底是干什么的有什么用呀，这里我就不再为大家详细讲解了，这里找到了一片文章，讲解了第3个参数在什么时候怎么使用，大家可以看一下：</p>
-
-<p><a href="https://link.juejin.im/?target=http%3A%2F%2Fwww.cnblogs.com%2Fangeldevil%2Fp%2F3479431.html">www.cnblogs.com/angeldevil/…</a></p>
-
-<p>回归到 ContourView，其实 ContourView 内部很简单，只对 onDraw() 进行了重写，毕竟 ContourView 的主要部分就是绘制。绘制的逻辑，就是遍历锚点集，然后利用上面 WiKi 里提到的公式求出各段曲线的控制点，然后用三阶贝塞尔曲线画出路径。当遍历完锚点集时，闭合曲线的轮廓基本上就得到了，然后就用Shader对路径进行绘制就行。</p>
-
-<p>好了，本次的梳理内容就到这了，感兴趣的可以查看 ContourView 的源码进行分析，同时 ContourView 的这种背景效果还是不错的，需要的时候大家真的可以用到呢!</p>
-
-<p><strong>ContourView GitHub</strong>:<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FOCNYang%2FContourView">github.com/OCNYang/Con…</a></p>
-
-<p>如果大家想看一些高级的自定义 View 的例子可以查看上次开源的 App 的天气模块，其中的天气页面以及天气折线图等等控件都是通过自定义 ViewGroup 或自定义 View 实现的。地址是:<br/>
-Qbox Github:<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FOCNYang%2FQBox">github.com/OCNYang/QBo…</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
                 <a class="clearlink" href="15561207871499.html">
                 
                   <h1>Android 带滑动效果的bottomBar</h1>
@@ -2426,6 +2059,81 @@ package_name:transition_name:property_name<br/><br/>
                   <div class="more-left left">
                   
                     <span class="date">2017/9/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207871172.html">
+                
+                  <h1>程序员开源协议</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">自由软件</h2>
+
+<p>自由软件是一种可以不受限制地自由使用、复制、研究、修改和分发的软件。注意，自由并不代表着免费。正是这种开放、开源的精神，计算机软件才得以如此飞快地发展。</p>
+
+<h2 id="toc_1">开源协议</h2>
+
+<p>为保护自由软件原作者的相关知识产权，在作者与用户之间设立的一种虚拟合同，或者称之为授权方式。其中的条款内容，就是用来限制软件使用者的使用方式等。他人如有违反协议，作者有权利发起诉讼，维护自身权益。</p>
+
+<p>开源届定义有几百种不同的开源协议，宽松程度不一，用以满足开源项目的各种使用场景。比如，是否允许商用，是否允许修改，修改后是否需要继续开源，开源是否必须继续使用相同协议授权等。</p>
+
+<p>不过，作为普通用户，无论你是作为开源作者造轮子，还是作为普通用户借轮子，我们只需要知道比较流行的那几种，并能够加以区分即可。否则，上百种协议真要细分的话，绝非易事。</p>
+
+<p>早期一名乌克兰程序员画有一张分析图，简单明了地描述出六种流行开源协议的使用区分。阮一峰老师翻译如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929343199353.png" alt="20171030150929343199353.png"/><figcaption>20171030150929343199353.png</figcaption></figure></p>
+
+<p>更简单点的话，也可以参考这张图，更加通俗易懂：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929351771005.png" alt="20171030150929351771005.png"/><figcaption>20171030150929351771005.png</figcaption></figure></p>
+
+<p>更多的开源协议，我们还可以参考这张图（目前只发现英文版）：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929356264898.png" alt="20171030150929356264898.png"/><figcaption>20171030150929356264898.png</figcaption></figure></p>
+
+<p>至于使用的话，不妨借助 GcsSloop 制作的开源协议网站：</p>
+
+<p><a href="https://link.juejin.im/?target=http%3A%2F%2Fchoosealicense.online">choosealicense.online</a></p>
+
+<p>如图所示：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929362375011.png" alt="20171030150929362375011.png"/><figcaption>20171030150929362375011.png</figcaption></figure></p>
+
+<p>选择所需要的协议，一键复制即可。</p>
+
+<p>说完这些，回过头来想想，估计很多人都会有疑惑：开源协议与我何干？但是，作为一名程序员，开源协议还真与你我关系紧密。</p>
+
+<p>如果你是 GitHub 重度依赖者，如果你稍作留意，不难发现，基本上出名的开源项目根目录中都有一个协议文件：<strong>LICENSE.txt</strong>，而在 <strong>README.me</strong> 说明文件底部伴随着 License 内容。这就是你需要留意的地方，使用任意开源项目之前，记得阅读一下该项目的开源协议。</p>
+
+<blockquote>
+<p>市场上部分 App 也会在应用中增加第三方开源项目时的使用版权说明，比如支付宝安卓版。这也是一种查看优秀 App 都使用哪些开源项目的途径之一。</p>
+</blockquote>
+
+<p>如果你也是一个作者，准备开源自己的项目时，那就更得注意，想想自己需要选择哪一个开源协议更加合适。比如，大名鼎鼎的 Linux 系统采用便是 GPL 协议；作为安卓程序员，我们当然知道，我们赖以生存的 Android 开源系统，其内核采用的就是 Linux 内核。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/18</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
