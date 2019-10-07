@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -152,7 +154,7 @@
 
 <h2 id="toc_1">Timer的运行机制</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978406359625.jpg" alt="20171104150978406359625.jpg"/><figcaption>20171104150978406359625.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978406359625.jpg" alt="20171104150978406359625.jpg"/></p>
 
 <ul>
 <li>TimerTask：任务类。内部持有<code>nextExecutionTime</code>变量，表示任务实际执行时间点，单位为毫秒，使用<code>System.currentTimeMillis()</code> + <code>delay</code>计算得出。</li>
@@ -172,7 +174,7 @@
 
 <p>ScheduledThreadPoolExecutor的实现比Timer要复杂一些，不过要是理解了线程池的运行原理，其实也不难。它只不过是在ThreadPoolExecutor的基础上使用自定义的阻塞队列DelayedWorkQueue来实现任务定时功能。所以ScheduledThreadPoolExecutor的运行流程其实和ThreadPoolExecutor是差不多的。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978425468906.jpg" alt="20171104150978425468906.jpg"/><figcaption>20171104150978425468906.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978425468906.jpg" alt="20171104150978425468906.jpg"/></p>
 
 <ul>
 <li><strong>ScheduledFutureTask</strong>：任务类。内部持有time变量，单位为纳秒，通过<code>System.nanoTime()</code> + <code>delay</code>计算得出。</li>
@@ -188,7 +190,7 @@
 
 <p>在多线程网络编程中，我们一般使用一个线程监听端口，在接收到事件后再使用其他的线程去完成操作。这种情况下，在两个线程之间的上下文切换开销其实是很大的，于是我们有了Leader/Follower模式：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978440726061.png" alt="20171104150978440726061.png"/><figcaption>20171104150978440726061.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978440726061.png" alt="20171104150978440726061.png"/></p>
 
 <p>在Leader/Follower模式中，不存在一个专门用来监听的线程，所有的线程都是等价的，而这些线程会不断在Leader、Follower和Processor这三个状态之间来回切换。</p>
 
@@ -211,7 +213,7 @@
 这就是Timer与ScheduledThreadPoolExecutor一个是基于绝对时间而另一个是基于相对时间的原因。下面我们写个例子来测试一下：</p>
 </blockquote>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t&quot; + new Date());
 
     Executors.newSingleThreadScheduledExecutor().schedule(() -&gt; {
@@ -229,7 +231,7 @@
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:    Sun Oct 08 10:51:44 CST 2017
+<pre><code class="language-text">Start:    Sun Oct 08 10:51:44 CST 2017
 Executor:    Sun Oct 08 10:51:41 CST 2017
 Timer:    Sun Oct 08 10:52:45 CST 2017
 </code></pre>
@@ -240,7 +242,7 @@ Timer:    Sun Oct 08 10:52:45 CST 2017
 
 <p>Timer的第二个缺陷是，由于它使用的是单线程，所以长时间执行的任务会对其他任务产生影响。</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t\t\t&quot; + new Date());
 
     ScheduledExecutorService service = Executors.newScheduledThreadPool(3);
@@ -291,7 +293,7 @@ Timer:    Sun Oct 08 10:52:45 CST 2017
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:10:34 CST 2017
+<pre><code class="language-text">Start:            Sun Oct 08 11:10:34 CST 2017
 Executor 任务1:    Sun Oct 08 11:11:34 CST 2017
 Executor 任务2:    Sun Oct 08 11:11:34 CST 2017
 Timer 任务1:        Sun Oct 08 11:11:34 CST 2017
@@ -308,7 +310,7 @@ Timer 任务2:        Sun Oct 08 11:12:04 CST 2017
 
 <p>Timer内部没有对异常做任何处理，如果任务执行发生运行时异常，整个TimerThread都会崩溃：</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t\t\t&quot; + new Date());
 
     Timer timer = new Timer();
@@ -335,7 +337,7 @@ Timer 任务2:        Sun Oct 08 11:12:04 CST 2017
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:53:05 CST 2017
+<pre><code class="language-text">Start:            Sun Oct 08 11:53:05 CST 2017
 Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务1
     at main.Main$1.run(Main.java:32)
     at java.util.TimerThread.mainLoop(Timer.java:555)
@@ -348,7 +350,7 @@ Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务
 
 <p>ScheduledThreadPoolExecutor中对异常的处理实际上是ThreadPoolExecutor类完成的，ThreadPoolExecutor在任务运行时对异常做了捕获，并且将异常传入了afterExecute()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">public class ThreadPoolExecutor extends AbstractExecutorService {
+<pre><code class="language-java">public class ThreadPoolExecutor extends AbstractExecutorService {
     final void runWorker(Worker w) {
         ...
         Throwable thrown = null;
@@ -370,7 +372,7 @@ Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务
 
 <p>我们来验证一下：</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t\t\t&quot; + new Date());
 
     ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
@@ -391,7 +393,7 @@ Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:33:35 CST 2017
+<pre><code class="language-text">Start:            Sun Oct 08 11:33:35 CST 2017
 Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 </code></pre>
 
@@ -486,6 +488,8 @@ Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -502,31 +506,31 @@ Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

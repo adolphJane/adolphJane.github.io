@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -116,6 +118,530 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207870849.html">
+                
+                  <h1>Android-酷炫的Activity切换动画</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>毫无疑问，动画效果能提高用户体验。我们平时使用最多的动画基本上是属性动画和补间动画了，属性动画很强，基本能定制我们想要的动画，但是你是否知道，API 21（5.0）后系统内置了Activity之间的切换动画，而且非常酷炫，今天我跟大家一起分享一下。我们知道，在两个Activity之间切换，我们一般会写出类似下面的代码：</p>
+
+<pre><code class="language-java">Intent intent=new Intent(this,SecondActivity.class);
+startActivity(intent);
+overridePendingTransition(R.anim.enter_anim,R.anim.exit_anim);
+</code></pre>
+
+<p>在API 21以后，我们可以使用内置的Activity切换动画啦。但是这样也就意味着只能兼容5.0之后的系统，我们先看一个效果图来压压惊：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799839139489.gif" alt="20171015150799839139489.gif"/></p>
+
+<p>先看看第一个Activity，退出时用的是Explode效果，第二个Activity进入时用的是Slide效果。这些效果无需我们自己去实现，都是内置的效果，我们所编写的代码几乎为零，接下来我们一一看看内置了哪些效果。</p>
+
+<h2 id="toc_1">使用内置Activity之间切换动画代码步骤</h2>
+
+<p>Activity之间的切换期间，对于某个Activity来说，无非就是“进入”和“退出”两种情景下的动画。而“进入”分为“第一次进入Activity”和“返回当前Activity”这两种情况。另外系统还提供了一种动画，即共享元素，这是让两个Activity中的View有个过渡切换的效果。执行动画的状态如下所示：</p>
+
+<blockquote>
+<p><strong>enter</strong>：用于决定第一次打开当前Activity时的动画<br/><br/>
+<strong>exit</strong> : 用于决定退出当前Activity时的动画<br/><br/>
+<strong>reenter</strong>: 用于决定如果当前Activity已经打开过，并且再次打开该Activity时的动画<br/><br/>
+<strong>shared elements</strong>:用于决定在两个Activity之间切换时，指定两个Activity中对应的View的过渡效果  </p>
+</blockquote>
+
+<p>那么应该怎么去使用Activity切换动画呢？我们看看使用步骤：</p>
+
+<ul>
+<li>首先在setContentView()之前执行，用于告诉Window页面切换需要使用动画<br/>
+<code>getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);</code></li>
+<li>接下来就是加载切换动画<br/>
+其中R.transition.explode就是要执行的动画，是在res/transition目录下的xml文件，我们使用的是系统内置的Explode效果动画，关于怎么去写explode.xml，我们接下来小节去讲解。<br/>
+<code>Transition explode = TransitionInflater.from(this).inflateTransition(R.transition.explode);</code></li>
+<li>告诉Window，当前的Activity在什么情况下使用上面的动画<br/>
+上面我们创建好了切换动画，接下来就是要告诉当前窗口，在什么情况下去使用动画效果啦，你可以根据你的需求在不同的切换情景中选择不同的效果:<br/></li>
+</ul>
+
+<pre><code class="language-java">//退出时使用
+getWindow().setExitTransition(explode);
+//第一次进入时使用
+getWindow().setEnterTransition(explode);
+//再次进入时使用
+getWindow().setReenterTransition(explode);
+</code></pre>
+
+<p>当然了，你也可以不使用代码的方式，直接在你使用的主题<style>标签里添加类似如下代码：</p>
+
+<pre><code class="language-markup">&lt;item name=&quot;android:windowExitTransition&quot;&gt;@transition/explode&lt;/item&gt;
+&lt;item name=&quot;android:windowEnterAnimation&quot;&gt;@transition/explode&lt;/item&gt;
+&lt;item name=&quot;android:windowReenterTransition&quot;&gt;@transition/explode&lt;/item&gt;
+</code></pre>
+
+<ul>
+<li>调用startActivity<br/>
+跟我们之前使用的<code>startActivity(Intent intent);</code>不同，这里多了一个参数<code>Bundle</code>，我们是先通过<code>makeSceneTransitionAnimation</code>函数创建一个<code>ActivityOptions</code>对象，再将其转为<code>Bundle</code>对象:<br/>
+<code>startActivity(intent,ActivityOptions.makeSceneTransitionAnimation(this).toBundle());</code><br/>
+整体使用步骤就是以上这些，是不是很简单？接下来我们去学习如何使用内置动画~</li>
+</ul>
+
+<h2 id="toc_2">Explode效果</h2>
+
+<p>Explode即爆炸效果，使用Explode效果很简单，在<code>res/transition</code>目录下新建一个xml文件(如<code>explode.xml</code>)，内容如下：</p>
+
+<pre><code class="language-markup">&lt;explode xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:duration=&quot;300&quot; /&gt;
+</code></pre>
+
+<p>其中<code>duration</code>表示Explode动画持续时间，由于是Activity之间的切换，最好不要把动画时间设置过大，一般取200~500毫秒比较合适。<br/>
+我们看看效果吧~</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799868975358.gif" alt="20171015150799868975358.gif"/></p>
+
+<h2 id="toc_3">Slide效果</h2>
+
+<p>即滑动效果，使用Slide跟Explode类似，都是在res/transition目录下新建一个xml文件(如<code>slide.xml</code>)，内容如下：</p>
+
+<pre><code class="language-markup">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:interpolator=&quot;@android:interpolator/decelerate_cubic&quot;
+    android:slideEdge=&quot;end&quot;/&gt;
+</code></pre>
+
+<p>其中，slideEdge表示起始滑动的侧边位置，end表示右侧，start表示左侧，top表示顶部，bottom表示底侧，各种效果你可以亲自试试~，一起看看滑动效果吧</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799873587032.gif" alt="20171015150799873587032.gif"/></p>
+
+<p>GIF 效果看的比较死板，可以下载我的源码实际运行一下~</p>
+
+<p>如果你不希望顶部的状态栏以及底部的导航栏一起执行动画，可以在xml中指定：</p>
+
+<pre><code class="language-markup">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:interpolator=&quot;@android:interpolator/decelerate_cubic&quot;
+    android:slideEdge=&quot;end&quot;&gt;
+    &lt;targets&gt;
+        &lt;target android:excludeId=&quot;@android:id/navigationBarBackground&quot; /&gt;
+        &lt;target android:excludeId=&quot;@android:id/statusBarBackground&quot; /&gt;
+    &lt;/targets&gt;
+&lt;/slide&gt;
+</code></pre>
+
+<h2 id="toc_4">Fade效果</h2>
+
+<p>Fade效果即淡化效果，使用淡化效果依然是很简单，在<code>res/transition</code>目录下新建一个xml文件(如<code>fade.xml</code>)，内容如下：</p>
+
+<pre><code class="language-markup">&lt;fade xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:duration=&quot;300&quot; /&gt;
+</code></pre>
+
+<p>Fade效果就是将View逐步淡化，这里不再贴效果啦，想看效果的可以下载我的源码运行看看~</p>
+
+<h2 id="toc_5">Shared Element效果</h2>
+
+<p>即共享元素效果，与前面几种效果不同的是，共享元素效果是将前面一个Activity的某个子View与后面一个Activity的某个子View之间有过渡效果，我们先看看动态图感受一下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799880319943.gif" alt="20171015150799880319943.gif"/></p>
+
+<p>从动态图中看到，第一个Activity的小绿色方块到第二个Activity大绿色方块有个过渡效果~</p>
+
+<p>接下来我们看看如何实现这个效果：</p>
+
+<p><strong>1.将两个Activity中需要过渡的View加上<code>android:transitionName</code>属性</strong></p>
+
+<p>两个View的<code>android:transitionName</code>属性取值要一致，比如：<br/><br/>
+第一个Activity布局：</p>
+
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;View
+        android:id=&quot;@+id/firstSharedView&quot;
+        android:layout_width=&quot;100dp&quot;
+        android:layout_height=&quot;100dp&quot;
+        android:background=&quot;#00cc00&quot;
+        android:onClick=&quot;onClick&quot;
+        android:transitionName=&quot;sharedView&quot; /&gt;
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<p>第二个Activity布局：</p>
+
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;View
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;300dp&quot;
+        android:layout_alignParentBottom=&quot;true&quot;
+        android:background=&quot;#00cc00&quot;
+        android:onClick=&quot;onClick&quot;
+        android:transitionName=&quot;sharedView&quot; /&gt;
+
+&lt;/RelativeLayout&gt;
+</code></pre>
+
+<p>两个绿色的View都添加<code>android:transitionName</code>属性，并且取名一致。</p>
+
+<p><strong>2.调用startActivity</strong><br/><br/>
+<code>ActivityOptions</code>的<code>makeSceneTransitionAnimation</code>函数第一个参数<code>Activity</code>没啥解释的，第二个参数就是第一个<code>Activity</code>中的<code>View</code>对象，第三个参数就是两个Activity的View的 <code>android:transitionName</code>属性的值。</p>
+
+<p><code>startActivity(intent, ActivityOptions.makeSceneTransitionAnimation(this, firstSharedView,&quot;sharedView&quot;).toBundle());</code></p>
+
+<p>现在就可以实现这种<code>Shared Element</code>效果啦，但是可能你会想实现同时让两个View有这样的效果，可是<code>makeSceneTransitionAnimation</code>函数却只能让我们设置一个<code>View</code>和一个<code>transitionName</code>属性。如何添加多个呢？接下来我们一起学习让多个View同时有切换效果。</p>
+
+<p>除了需要将两个<code>Activity</code>中需要过渡的<code>View</code>对应取相同的名称外，还需将需要过渡的<code>View</code>和<code>transitionName</code>取值对应的String这两个对象封装到一个Pair对象中：</p>
+
+<pre><code class="language-java">Pair first = new Pair&lt;&gt;(firstSharedView, ViewCompat.getTransitionName(firstSharedView));
+Pair second = new Pair&lt;&gt;(secondSharedView, ViewCompat.getTransitionName(secondSharedView));
+</code></pre>
+
+<p>然后调用<code>ActivityOptionsCompat</code>类的<code>makeSceneTransitionAnimation</code>的另一个重载函数<code>makeSceneTransitionAnimation(Activity activity,Pair&lt;View, String&gt;... sharedElements)</code>，第一个参数不解释，后面参数为不定长度的形参，即你可以传递任意多个Pair对象。</p>
+
+<pre><code class="language-java"> ActivityOptionsCompat transitionActivityOptions = ActivityOptionsCompat.makeSceneTransitionAnimation(this, first, second);
+</code></pre>
+
+<p>最后调用startActivity</p>
+
+<pre><code class="language-java"> ActivityCompat.startActivity(this,intent, transitionActivityOptions.toBundle());
+</code></pre>
+
+<p>说了这么多步骤，我们来看看效果吧~</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799903533027.gif" alt="20171015150799903533027.gif"/></p>
+
+<h3 id="toc_6">1 自定义 Shared Element切换动画</h3>
+
+<p>如果你对内置的 Shared Element还不够满意，你还可以定制View的过渡切换效果。步骤如下：</p>
+
+<h4 id="toc_7">创建一个View的过渡移动的轨迹路径PathMotion类</h4>
+
+<p>我们可以创建ArcMotion对象，ArcMotion是PathMotion子类，是个曲线路径。想要了解更多ArcMotion可以查看<a href="https://developer.android.com/reference/android/transition/ArcMotion.html">【ArcMotion官方文档】</a></p>
+
+<pre><code class="language-java">ArcMotion arcMotion = new ArcMotion();
+arcMotion.setMinimumHorizontalAngle(50f);
+arcMotion.setMinimumVerticalAngle(50f);
+</code></pre>
+
+<h4 id="toc_8">定义ChangeBounds类</h4>
+
+<p>我们自定义一个继承ChangeBounds的类，主要重写createAnimator函数，即创建你要执行的动画。这个函数由3个参数：</p>
+
+<blockquote>
+<p>1.<code>ViewGroup  sceneRoot</code>：屏幕根View，即DecorView，第二个Activity的DecorView。<br/>
+2.<code>TransitionValues  startValues</code>：属性动画的起始属性值，TransitionValues 对象内部有各Map类型的属性values，用于保存需要执行属性动画的属性。这个里面的属性值是在函数<code>captureStartValues</code>里放置，因此你可以重写<code>captureStartValues</code>函数，并把你自定义的属性动画中的属性放进去。<br/>
+3.<code>TransitionValues endValues</code> ：与<code>startValues</code>类似，表示属性动画结束时的属性值。可以通过重写<code>captureEndValues</code>函数，并把你自定义的属性动画里面的最终属性值放进去。</p>
+</blockquote>
+
+<p>我们先看一个最简单的示例：</p>
+
+<pre><code class="language-java">package com.hc.util;
+
+import android.animation.Animator;
+import android.transition.ChangeBounds;
+import android.transition.TransitionValues;
+import android.view.ViewGroup;
+import android.view.animation.AnimationUtils;
+
+
+public class CustomChangeBounds extends ChangeBounds {
+
+ @Override
+  public Animator createAnimator(final ViewGroup sceneRoot,
+                                 TransitionValues startValues,
+                                 final TransitionValues endValues) {
+      Animator changeBounds = super.createAnimator(sceneRoot, startValues, endValues);
+      if (startValues == null || endValues == null || changeBounds == null) 
+          return null;
+
+      changeBounds.setDuration(300);
+      changeBounds.setInterpolator(AnimationUtils.loadInterpolator(sceneRoot.getContext(),
+              android.R.interpolator.fast_out_slow_in));
+      return changeBounds;
+  }
+}
+</code></pre>
+
+<p>看看效果吧~</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799918618986.gif" alt="20171015150799918618986.gif"/></p>
+
+<p>最后，再献上<a href="http://download.csdn.net/detail/huachao1001/9550440">源码</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207870815.html">
+                
+                  <h1>Android-smali文件格式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">HelloWorld</h2>
+
+<p>首先写一个 HelloWorld 类：</p>
+
+<pre><code class="language-java">package jiuyou.hello.info;
+
+public class HelloWorld {
+    public static void main(String[] args){
+        System.out.println(&quot;hello world&quot;);
+    }
+}
+</code></pre>
+
+<p>然后生成 apk 再用 apktool 工具转成 smali 文件：</p>
+
+<pre><code class="language-text">.class public Ljiuyou/hello/info/HelloWorld;    #定义类名
+.super Ljava/lang/Object;                       #定义父类
+.source &quot;HelloWorld.java&quot;                       #源文件名
+
+# direct methods      #直接方法  （# virtual methods 为虚方法）
+.method public constructor &lt;init&gt;()V      #构造函数
+    .locals 0     #方法中使用到的局部变量个数
+
+    .prologue     #代码起始指令
+    .line 8       #源代码所在行数
+    invoke-direct {p0}, Ljava/lang/Object;-&gt;&lt;init&gt;()V         #调用父类构造方法
+
+    return-void     #返回空
+.end method         #方法结束
+
+.method public static main([Ljava/lang/String;)V      #对应 main 方法
+    .locals 2       #方法包含两个局部 v0,v1
+    .param p0, &quot;args&quot;    # [Ljava/lang/String;   # main 方法的参数 agrs 标记为 p0
+
+    .prologue       #代码起始指令
+    .line 10
+    sget-object v0, Ljava/lang/System;-&gt;out:Ljava/io/PrintStream;  #将 System.out 这个静态变量赋给 v0
+
+    const-string v1, &quot;hello world&quot;    #构造字符串
+
+    #方法调用（调用 v0 的方法 println ，v1 是参数）
+    invoke-virtual {v0, v1}, Ljava/io/PrintStream;-&gt;println(Ljava/lang/String;)V    
+
+    .line 11
+    return-void
+.end method
+</code></pre>
+
+<h2 id="toc_1">字段</h2>
+
+<p>静态字段格式如下：</p>
+
+<pre><code class="language-text"># static fields
+.field &lt;访问权限&gt; static [修饰关键字] &lt;字段名&gt;:&lt;字段类型&gt;
+</code></pre>
+
+<p>实例字段格式如下：</p>
+
+<pre><code class="language-text"># instance fields
+.field &lt;访问权限&gt; [修饰关键字] &lt;字段名&gt;:&lt;字段类型&gt;
+</code></pre>
+
+<p>举个栗子</p>
+
+<p><strong>java</strong> ：</p>
+
+<pre><code class="language-java">private String name;
+
+private final String sex=&quot;男&quot;;
+
+public static int age;
+</code></pre>
+
+<p><strong>smali</strong> :</p>
+
+<pre><code class="language-text"># static fields
+.field public static age:I
+
+# instance fields
+.field private name:Ljava/lang/String;
+
+.field private final sex:Ljava/lang/String;
+</code></pre>
+
+<h2 id="toc_2">方法</h2>
+
+<p>方法有直接方法和虚方法两种，两者格式基本相同：</p>
+
+<pre><code class="language-text"># direct methods  (virtual methods)
+.method &lt;访问权限&gt; [修饰关键字] &lt;方法原型&gt;
+    &lt;.locals&gt;
+    [.parameter] or [.param]
+    [.prologue]
+    [.line]
+    &lt;代码体&gt;
+.end method
+</code></pre>
+
+<p><strong>.locals</strong>：局部变量个数<br/><br/>
+<strong>.parameter or .param</strong>：指定每个参数<br/><br/>
+<strong>.prologue</strong>：代码的开始处，混淆过的代码可能没有该指令<br/><br/>
+<strong>.line</strong>：指定了该处指令在源代码中的行号，混淆过的代码可能没有该指令</p>
+
+<p>举个栗子：<br/><br/>
+<strong>java</strong></p>
+
+<pre><code class="language-java">public String test(int a){
+    int b=a+10;
+    return &quot;test&quot;;
+}
+</code></pre>
+
+<p><strong>smali</strong></p>
+
+<pre><code class="language-text"># virtual methods
+.method public test(I)Ljava/lang/String;
+    .locals 2
+    .param p1, &quot;a&quot;    # I
+
+    .prologue
+    .line 11
+    add-int/lit8 v0, p1, 0xa
+
+    .line 12
+    .local v0, &quot;b&quot;:I
+    const-string v1, &quot;test&quot;
+
+    return-object v1
+.end method
+</code></pre>
+
+<h2 id="toc_3">接口</h2>
+
+<p>interface 格式如下：</p>
+
+<pre><code class="language-text"># interfaces
+.implements &lt;接口名&gt;
+</code></pre>
+
+<p>举个例子：<br/><br/>
+<strong>java</strong></p>
+
+<pre><code class="language-java">public interface If {
+    int demo(String s);
+}
+
+public class InterfaceTest implements If {
+    @Override
+    public int demo(String s) {
+        return 0;
+    }
+}
+</code></pre>
+
+<p><strong>smali</strong> ：</p>
+
+<p>If.smali</p>
+
+<pre><code class="language-text"># virtual methods
+.method public abstract demo(Ljava/lang/String;)I
+.end method
+</code></pre>
+
+<p>InterfaceTest.smali</p>
+
+<pre><code class="language-text"># interfaces
+.implements Ljiuyou/hello/info/If;
+
+# virtual methods
+.method public demo(Ljava/lang/String;)I
+    .locals 1
+    .param p1, &quot;s&quot;    # Ljava/lang/String;
+
+    .prologue
+    .line 11
+    const/4 v0, 0x0
+
+    return v0
+.end method
+</code></pre>
+
+<h2 id="toc_4">注解</h2>
+
+<p>格式如下：</p>
+
+<pre><code class="language-text">.annotation [注解属性] &lt;注解类名&gt;
+    [注解字段 = 值]
+.end annotation
+</code></pre>
+
+<p>如果注解的作用范围是类， <strong>.annotation</strong> 指令会直接定义在 smali 文件中，如果作用范围是方法或者字段，则会包含在方法或字段定义中。  </p>
+
+<p>举个栗子：<br/><br/>
+<strong>java</strong>  </p>
+
+<pre><code class="language-java">@Deprecated
+public class AnnotationTest {
+    @At(value = &quot;tom&quot;)
+    public String name;
+}
+</code></pre>
+
+<p><strong>smali</strong></p>
+
+<pre><code class="language-text"># annotations
+.annotation runtime Ljava/lang/Deprecated;
+.end annotation
+
+
+# instance fields
+.field public name:Ljava/lang/String;
+    .annotation runtime Ljiuyou/hello/info/At;
+        value = &quot;tom&quot;
+    .end annotation
+.end field
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207870745.html">
                 
                   <h1>Android-CoordinatorLayout详细学习</h1>
@@ -129,7 +655,7 @@
 
 <p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子View的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子View的布局。我们先看一组动画图~</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799569357936.gif" alt="20171014150799569357936.gif"/><figcaption>20171014150799569357936.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799569357936.gif" alt="20171014150799569357936.gif"/></p>
 
 <p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色Button查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。</p>
 
@@ -143,7 +669,7 @@
 
 <p>怎么使用<code>Behavior</code>呢，首先，我们定义一个类，继承<code>CoordinatorLayout.Behavior&lt;T&gt;</code>,其中，泛型参数T是我们要执行动作的<code>View</code>类，也就是<code>Child</code>。然后就是去实现<code>Behavior</code>的两个方法：</p>
 
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
 * 判断child的布局是否依赖dependency
 */
    @Override
@@ -171,7 +697,7 @@ public boolean onDependentViewChanged(CoordinatorLayout parent, T child, View de
 
 <p>我们看看<code>Behavior</code>的使用：</p>
 
-<pre class="line-numbers"><code class="language-java">package com.hc.studyCoordinatorLayout;
+<pre><code class="language-java">package com.hc.studyCoordinatorLayout;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
@@ -226,7 +752,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>OK，现在我们为<code>Button</code>类指定了<code>Dependency</code>，并且定义好了跟随<code>Dependency</code>一直变化的动作（<code>Behavior</code>），接下来我们就要指定好为哪个具体的<code>Button</code>实例来绑定这些。方法很简单，直接在布局文件指定就好：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
@@ -294,7 +820,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>在Android Studio中安装CMake非常简单，打开Tools-&gt;Android-&gt;SDK Manager，选择SDK Tools标签页，勾选CMake、LLDB、NDK，OK自动安装即可。其中LLDB可以使我们在Android Studio中调试C/C++程序。NDK为原生开发工具包，必不可少。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799632916996.png" alt="20171014150799632916996.png"/><figcaption>20171014150799632916996.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799632916996.png" alt="20171014150799632916996.png"/></p>
 
 <h2 id="toc_1">为什么要做JNI/NDK开发</h2>
 
@@ -313,7 +839,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <h3 id="toc_4">配置C++支持</h3>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799640481339.png" alt="20171014150799640481339.png"/><figcaption>20171014150799640481339.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799640481339.png" alt="20171014150799640481339.png"/></p>
 
 <p>在Customize C++ Support界面默认即可,意为CMake/C++11环境</p>
 
@@ -321,7 +847,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>工程创建完毕之后Android Studio会在app目录下生成CMakeLists.txt文件。CMakeLists.txt是CMake的配置文件，用于表明版本、依赖、等信息，以下为Android Studio生成的CMakeLists（过滤注释）</p>
 
-<pre class="line-numbers"><code class="language-text">cmake_minimum_required(VERSION 3.4.1)
+<pre><code class="language-text">cmake_minimum_required(VERSION 3.4.1)
 
 add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
 
@@ -561,7 +1087,7 @@ CMake最小版本使用的是3.4.1。</li>
 
 <p>先来看看Android Studio为我们生成的示例</p>
 
-<pre class="line-numbers"><code class="language-java">JNIEXPORT jstring JNICALL
+<pre><code class="language-java">JNIEXPORT jstring JNICALL
 Java_com_glee_myapplication_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
@@ -617,7 +1143,7 @@ JNIEXPORT和JNICALL这两个宏（被定义在jni.h）确保这个函数在本�
 
 <p>请看注释</p>
 
-<pre class="line-numbers"><code class="language-java">JNIEXPORT void JNICALL
+<pre><code class="language-java">JNIEXPORT void JNICALL
 Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */, jobject bmp) {
     AndroidBitmapInfo info = {0};//初始化BitmapInfo结构体
     int *data=NULL;//初始化Bitmap图像数据指针
@@ -637,7 +1163,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>请看注释</p>
 
-<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
+<pre><code class="language-java">public class MainActivity extends AppCompatActivity {
 
     static {
         //通过静态代码块加载so库
@@ -669,11 +1195,11 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>上方的ImageView是没有进行高斯模糊处理的，下方的ImageView调用了JNI方法进行高斯模糊处理。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799728682414.png" alt="20171015150799728682414.png"/><figcaption>20171015150799728682414.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799728682414.png" alt="20171015150799728682414.png"/></p>
 
 <h3 id="toc_18">高斯模糊算法</h3>
 
-<pre class="line-numbers"><code class="language-c">void gaussBlur1(int* pix, int w, int h, int radius)
+<pre><code class="language-c">void gaussBlur1(int* pix, int w, int h, int radius)
 {
     float sigma = (float) (1.0 * radius / 2.57);
     float deno  = (float) (1.0 / (sigma * sqrt(2.0 * PI)));
@@ -792,7 +1318,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
+<pre><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
 &lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
 </code></pre>
 
@@ -800,7 +1326,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
 
-<pre class="line-numbers"><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
+<pre><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
         android:id=&quot;@+id/toolbar&quot;
         android:layout_width=&quot;match_parent&quot;
         android:background=&quot;?attr/colorPrimary&quot;
@@ -809,7 +1335,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>最后将Toobar作为“ActionBar”来用</p>
 
-<pre class="line-numbers"><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+<pre><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(&quot;这里是Title&quot;);
         toolbar.setSubtitle(&quot;这里是子标题&quot;);
         toolbar.setLogo(R.drawable.icon); 
@@ -842,11 +1368,11 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>一张gif足以说明：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799488071606.gif" alt="20171014150799488071606.gif"/><figcaption>20171014150799488071606.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799488071606.gif" alt="20171014150799488071606.gif"/></p>
 
 <p>对应的布局文件</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
+<pre><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;&gt;
 
@@ -865,7 +1391,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>看个动画片（Y(<sup>o<sup>)Y）（ToolBar高度设为：<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code>）：</sup></sup></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799493830006.gif" alt="20171014150799493830006.gif"/><figcaption>20171014150799493830006.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799493830006.gif" alt="20171014150799493830006.gif"/></p>
 
 <blockquote>
 <p>（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</p>
@@ -873,14 +1399,14 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code>）：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799499853731.gif" alt="20171014150799499853731.gif"/><figcaption>20171014150799499853731.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799499853731.gif" alt="20171014150799499853731.gif"/></p>
 
 <blockquote>
 <p>（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。<br/>
 来个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code>）：</p>
 </blockquote>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799505696205.gif" alt="20171014150799505696205.gif"/><figcaption>20171014150799505696205.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799505696205.gif" alt="20171014150799505696205.gif"/></p>
 
 <h3 id="toc_3">将AppBarLayout与ScrollView关联起来</h3>
 
@@ -888,7 +1414,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
 
-<pre class="line-numbers"><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
+<pre><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
 
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;
@@ -921,7 +1447,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>了解这些概念后，我们来看看布局吧~</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -977,7 +1503,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799532425417.gif" alt="20171014150799532425417.gif"/><figcaption>20171014150799532425417.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150799532425417.gif" alt="20171014150799532425417.gif"/></p>
 
 <p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>&quot;，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
 
@@ -998,7 +1524,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
 
-<pre class="line-numbers"><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
+<pre><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
 AppBarLayout.LayoutParams params = 
     (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
 params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
@@ -1017,7 +1543,7 @@ params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 
 <p>示例XML代码：</p>
 
-<pre class="line-numbers"><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
+<pre><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
         android:id=&quot;@+id/appbar&quot;
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;
@@ -1040,7 +1566,7 @@ params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 
 <p>对应效果图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842247229844.gif" alt="20171019150842247229844.gif"/><figcaption>20171019150842247229844.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842247229844.gif" alt="20171019150842247229844.gif"/></p>
 
 <h3 id="toc_7">enterAlways</h3>
 
@@ -1052,7 +1578,7 @@ params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 
 <p>示例XML代码：</p>
 
-<pre class="line-numbers"><code class="language-java">...
+<pre><code class="language-java">...
 app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
 ...
 
@@ -1060,7 +1586,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
 
 <p>对应效果图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842251698266.gif" alt="20171019150842251698266.gif"/><figcaption>20171019150842251698266.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842251698266.gif" alt="20171019150842251698266.gif"/></p>
 
 <h3 id="toc_8">enterAlwaysCollapsed</h3>
 
@@ -1072,7 +1598,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
 
 <p>示例XML代码：</p>
 
-<pre class="line-numbers"><code class="language-markup">...
+<pre><code class="language-markup">...
 android:layout_height=&quot;@dimen/dp_200&quot;
 android:minHeight=&quot;@dimen/dp_56&quot;
 ...
@@ -1082,7 +1608,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
 
 <p>对应效果图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842256217688.gif" alt="20171019150842256217688.gif"/><figcaption>20171019150842256217688.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842256217688.gif" alt="20171019150842256217688.gif"/></p>
 
 <h3 id="toc_9">exitUntilCollapsed</h3>
 
@@ -1094,7 +1620,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
 
 <p>示例SML代码：</p>
 
-<pre class="line-numbers"><code class="language-markup">...
+<pre><code class="language-markup">...
 android:layout_height=&quot;@dimen/dp_200&quot;
 android:minHeight=&quot;@dimen/dp_56&quot;
 ...
@@ -1104,7 +1630,7 @@ app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
 
 <p>对应效果图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842260265572.gif" alt="20171019150842260265572.gif"/><figcaption>20171019150842260265572.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842260265572.gif" alt="20171019150842260265572.gif"/></p>
 
 <h3 id="toc_10">snap</h3>
 
@@ -1116,7 +1642,7 @@ app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
 
 <p>示例XML代码：</p>
 
-<pre class="line-numbers"><code class="language-markup">...
+<pre><code class="language-markup">...
 android:layout_height=&quot;@dimen/dp_200&quot;
 ...
 app:layout_scrollFlags=&quot;scroll|snap&quot;
@@ -1125,7 +1651,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>对应效果图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842265497458.gif" alt="20171019150842265497458.gif"/><figcaption>20171019150842265497458.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150842265497458.gif" alt="20171019150842265497458.gif"/></p>
 
 <h3 id="toc_11">示例源码</h3>
 
@@ -1168,11 +1694,11 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>第一种是点击运行按钮旁边的“绿色甲虫”(debug app)开始以调试模式编译运行。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797278068907.png" alt="20171014150797278068907.png"/><figcaption>20171014150797278068907.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797278068907.png" alt="20171014150797278068907.png"/></p>
 
 <p>这个方式的特点是，一开始就进入了调试模式。适合希望尽早进入调试模式的场景，比如你想从头开始追踪问题，或者断点在启动页或首页之类的。它的弊端是每次需要从头跑一遍，且由于调试模式下应用程序略卡顿，等你到达调试页面时会觉得老费劲。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797280245394.png" alt="20171014150797280245394.png"/><figcaption>20171014150797280245394.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797280245394.png" alt="20171014150797280245394.png"/></p>
 
 <p>第二种方式是在手机或模拟器已经跑起来应用程序后点击 <code>Run</code> -&gt; <code>Attach debugger to Android process</code>，选择应用程序主进程，即可进入调试模式。</p>
 
@@ -1195,7 +1721,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>以上是最常规的 debug 场景，下面介绍下调试界面。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797289056229.png" alt="20171014150797289056229.png"/><figcaption>20171014150797289056229.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797289056229.png" alt="20171014150797289056229.png"/></p>
 
 <p>在 Android Studio 的 debug 标签（假如一开始没有，等触发断点后自然会出现）中有两个面板 debugger 和 console。debugger 又分为 Frames、Threads 和 Variables 三块，分别是堆栈内容、线程、变量区。</p>
 
@@ -1205,7 +1731,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>断点有多种类型，我们这里先只谈普通断点。在每行的最前端单击一下即可<strong>添加断点</strong>，在断点上单击一下是<strong>取消断点</strong>。普通模式下断点只是一个普通的红点，但假如是在调试模式下，则红点上会有一个“√”或“✘”表示该行是否会被运行，例如，注释行前的断点会是“✘”。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797294991936.png" alt="20171014150797294991936.png"/><figcaption>20171014150797294991936.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797294991936.png" alt="20171014150797294991936.png"/></p>
 
 <p>不管怎样，触发断点肯定是调试的起点。只有触发了断点，才会开始阻塞线程（注意是只会阻塞当前线程，这个后面会扩展一下详细介绍），此时当前代码行会被蓝色高亮，观察面板上的变量也会显示当前环境下的值。</p>
 
@@ -1235,7 +1761,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>添加条件断点：先在需要的行前左键单击添加普通断点，右键点击该断点出现对话框，在“Condition”处填入条件即可，条件语法同 Java，如 i == 98。点击 Done，完成添加。这样当条件未满足时，不会阻塞程序运行；当条件满足时断点被触发。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797301917622.png" alt="20171014150797301917622.png"/><figcaption>20171014150797301917622.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797301917622.png" alt="20171014150797301917622.png"/></p>
 
 <h3 id="toc_10">2 不会阻塞应用程序的日志断点</h3>
 
@@ -1251,7 +1777,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>在条件断点弹出的对话框里，将“suspend”设置为未选中状态，断点触发时就不会被阻塞。此时对话框会多出一些选项。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079730545598.png" alt="2017101415079730545598.png"/><figcaption>2017101415079730545598.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079730545598.png" alt="2017101415079730545598.png"/></p>
 
 <p>我们选中“Evaluated and log”，并在里面填写希望输出的日志，点击 Done 即可。注意，日志将输出到 Console 而非 LogCat。</p>
 
@@ -1267,7 +1793,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>假如只想被某种异常触发，我们可以点击“+”，选中“Java Exception Breakpoints”，然后输出该种异常即可。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797308856387.png" alt="20171014150797308856387.png"/><figcaption>20171014150797308856387.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797308856387.png" alt="20171014150797308856387.png"/></p>
 
 <p>有朋友可能注意到除了 “Java Exception Breakpoints” 外还有一个 “Exception Breakpoints”，两者区别主要是前者只支持 Java 本身的异常，后者可以支持自定义异常。</p>
 
@@ -1281,7 +1807,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>添加方式：在字段那行、在方法声明的那行单击即可。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797311954451.png" alt="20171014150797311954451.png"/><figcaption>20171014150797311954451.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797311954451.png" alt="20171014150797311954451.png"/></p>
 
 <h3 id="toc_13">5 注意事项</h3>
 
@@ -1303,7 +1829,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>这里需要特别指出的是，当需要追踪某一个特定变量时，字段断点是一大利器。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797315866815.png" alt="20171014150797315866815.png"/><figcaption>20171014150797315866815.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797315866815.png" alt="20171014150797315866815.png"/></p>
 
 <p>如上图所示，变量观察面板会列出所有当前能访问到的成员变量和局部变量。</p>
 
@@ -1325,7 +1851,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>在示例中输入<code>toolbar.getChildAt(0).getMeasuredHeight()</code>，可得到如图的结果。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797320181952.png" alt="20171014150797320181952.png"/><figcaption>20171014150797320181952.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797320181952.png" alt="20171014150797320181952.png"/></p>
 
 <h3 id="toc_17">3 设置变量的值</h3>
 
@@ -1333,7 +1859,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>设置变量的值有两种方式：方式一是在变量观测区右键单击变量，在菜单中选中“set value”；方式二是鼠标悬浮在代码区中的某个可访问的变量上，在弹出的浮层里更改值。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797323062129.png" alt="20171014150797323062129.png"/><figcaption>20171014150797323062129.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797323062129.png" alt="20171014150797323062129.png"/></p>
 
 <h2 id="toc_18">五 犀利的小功能</h2>
 
@@ -1359,7 +1885,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>在 Android Studio 的 Android Device Monitor 里有一个 “Dump View Hierarchy for UI Automator” 功能，可以看到当前手机上应用的具体布局情况 —— 甚至布局元素的属性都会一一给出（仅可用于可调试的应用）。对 UI 调试非常有帮助。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797328687524.png" alt="20171014150797328687524.png"/><figcaption>20171014150797328687524.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797328687524.png" alt="20171014150797328687524.png"/></p>
 
                         
                       </div>
@@ -1396,7 +1922,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <h2 id="toc_0">项目关系图</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797219986560.png" alt="20171014150797219986560.png"/><figcaption>20171014150797219986560.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797219986560.png" alt="20171014150797219986560.png"/></p>
 
 <ul>
 <li>sdk: 一些公用库，各种辅助类，和第三方view</li>
@@ -1409,7 +1935,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>想必大家都知道了，定义一个isBuildModule=false，在组件的build.gradle中加入</p>
 
-<pre class="line-numbers"><code class="language-java">if (isBuildModule.toBoolean()) {
+<pre><code class="language-java">if (isBuildModule.toBoolean()) {
     apply plugin: &#39;com.android.application&#39;
 } else {
     apply plugin: &#39;com.android.library&#39;
@@ -1436,7 +1962,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>我把所以的library都依赖在basic，每个组件都会依赖这个包，这样就不会存在library的版本问题，资源的问题就是</p>
 
-<pre class="line-numbers"><code class="language-text"> defaultConfig {
+<pre><code class="language-text"> defaultConfig {
 
         if (isBuildModule.toBoolean()) {
             applicationId &quot;com.wkw.archives&quot;
@@ -1457,7 +1983,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>你可以选择阿里的<a href="https://github.com/alibaba/ARouter">ARouter</a>库，但是我的项目没有那么复杂，组件也就4个左右，所以没有使用阿里的库，我采用的是以下就是核心代码，</p>
 
-<pre class="line-numbers"><code class="language-java">Object result = null;
+<pre><code class="language-java">Object result = null;
 Class&lt;?&gt; c = Class.forName(className);
 if (c != null) {
     result = c.newInstance();
@@ -1471,7 +1997,7 @@ return result;
 
 <p><a href="https://github.com/android10/Android-CleanArchitecture">CleanArchitecture框架的github地址</a>，这里再介绍分享一篇文章小鄧子的<a href="http://www.jianshu.com/p/3edcf85539a6">Easy Clean architecture on Android</a>,我把data和domain会写在各自的业务模块中，自己的模块只要定义自己的就可以了，有个ApplicationModule会定义一些每个模块都需要的，</p>
 
-<pre class="line-numbers"><code class="language-java">public class ApplicationModule {
+<pre><code class="language-java">public class ApplicationModule {
 
     @Provides
     @Singleton
@@ -1514,7 +2040,7 @@ return result;
 <p>然后在module_archives模块中会有ArchivesDataRepositoryModule和ArchivesActivityModule<br/>
 其中KnowledgeDataRepositoryModule用于提供如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@Module
+<pre><code class="language-java">@Module
 public class ArchivesDataRepositoryModule {
 
     @Provides
@@ -1533,7 +2059,7 @@ public class ArchivesDataRepositoryModule {
 
 <p>ArchivesActivityModule的代码如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@Module
+<pre><code class="language-java">@Module
 public abstract class ArchivesActivityModule {
    @PerActivity
    @ContributesAndroidInjector()
@@ -1543,7 +2069,7 @@ public abstract class ArchivesActivityModule {
 
 <p>这样在主app的AppComponent类中加入：</p>
 
-<pre class="line-numbers"><code class="language-java">@Singleton
+<pre><code class="language-java">@Singleton
 @Component(modules = {
        AndroidInjectionModule.class, ApplicationModule.class,
        ArchivesDataRepositoryModule.class, ArchivesActivityModule.class,
@@ -1562,7 +2088,7 @@ public interface AppComponent {
 
 <p>在module_archives为debug模式下也会有个AppComponent</p>
 
-<pre class="line-numbers"><code class="language-java">@Singleton
+<pre><code class="language-java">@Singleton
 @Component(modules = {
         AndroidInjectionModule.class, ApplicationModule.class,
         ArchivesDataRepositoryModule.class, ArchivesActivityModule.class
@@ -1580,7 +2106,7 @@ public interface AppComponent {
 
 <p>各种模块初始化api和Repository，你要是嫌弃每个模块都要引入两个.class文件，你可以使用一个然后采用include的方式好比dagger中的AndroidSupportInjectionModule类方式</p>
 
-<pre class="line-numbers"><code class="language-java">@Beta
+<pre><code class="language-java">@Beta
 @Module(includes = AndroidInjectionModule.class)
 public abstract class AndroidSupportInjectionModule {
   @Multibinds
@@ -1597,7 +2123,7 @@ public abstract class AndroidSupportInjectionModule {
 
 <p>各种模块当为library是要打包成aar的，maven-release-kline-aar.gradle文件代码如下:</p>
 
-<pre class="line-numbers"><code class="language-java">apply plugin: &#39;maven&#39;
+<pre><code class="language-java">apply plugin: &#39;maven&#39;
 
 ext {// ext is a gradle closure allowing the declaration of global properties
     PUBLISH_GROUP_ID = &#39;com.wkw&#39;
@@ -1670,7 +2196,7 @@ artifacts {
   一个Style是一系列属性的集合，用来指定View或者Window的外观和格式。它可以指定的属性包括高度, Padding, 文字颜色，文字尺寸，背景颜色等等。<br/><br/>
   Style是在Xml资源文件中定义的，比如：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;style name=&quot;ListItemTitleStyle&quot; parent=&quot;TextAppearance.AppCompat.Body1&quot;&gt;
+<pre><code class="language-markup">&lt;style name=&quot;ListItemTitleStyle&quot; parent=&quot;TextAppearance.AppCompat.Body1&quot;&gt;
     &lt;item name=&quot;android:singleLine&quot;&gt;true&lt;/item&gt;
     &lt;item name=&quot;android:ellipsize&quot;&gt;end&lt;/item&gt;
     &lt;item name=&quot;android:textColor&quot;&gt;?android:attr/textColorPrimary&lt;/item&gt;
@@ -1679,7 +2205,7 @@ artifacts {
 
 <p>  在布局文件中是这样使用的：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView
+<pre><code class="language-markup">&lt;TextView
     android:id=&quot;@+id/text_item_title&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;wrap_content&quot;
@@ -1689,7 +2215,7 @@ artifacts {
 <p>  这样一个Style就可以运用在多个地方，既可以统一样式，又可以减少代码量。<br/><br/>
   而Theme，其实就是一个Style，不同于我们上面提到对单一View的应用，Theme是应用于整个Activity或Application的。各位Android开发同学一定不陌生，在Manifest的Activity声明中就会经常看到。  </p>
 
-<pre class="line-numbers"><code class="language-java">&lt;activity android:theme=&quot;@style/AppLightTheme.NoActionBar&quot;/&gt;
+<pre><code class="language-java">&lt;activity android:theme=&quot;@style/AppLightTheme.NoActionBar&quot;/&gt;
 </code></pre>
 
 <p>  这样，AppLightTheme.NoActionBar中的所有属性都会应用在整个Activity中。</p>
@@ -1707,7 +2233,7 @@ artifacts {
 <p>  我们这里，就是写两个Style ，然后各自有一套对应的颜色值。<br/>
   简单介绍一下几个主要的颜色值：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797106845044.png" alt="20171014150797106845044.png"/><figcaption>20171014150797106845044.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797106845044.png" alt="20171014150797106845044.png"/></p>
 
 <ul>
 <li>colorPrimary: 主题色</li>
@@ -1719,7 +2245,7 @@ artifacts {
   我们在资源文件中写对应的两套Style:</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-markup">&lt;style name=&quot;AppLightTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
+<pre><code class="language-markup">&lt;style name=&quot;AppLightTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
     &lt;item name=&quot;colorPrimary&quot;&gt;@color/colorPrimary&lt;/item&gt;
     &lt;item name=&quot;colorAccent&quot;&gt;@color/colorAccent&lt;/item&gt;
     &lt;item name=&quot;android:textColorPrimary&quot;&gt;@color/colorPrimaryTextBlack&lt;/item&gt;
@@ -1739,7 +2265,7 @@ artifacts {
 <p>  细心的同学会发现，Style里的属性，有的前面会以“android:”开头，如<code>android:textColorPrimary</code>，有的则没有，如<code>colorPrimary</code>。<br/>
   以“android:”开头的属性，是系统的属性。而另一种属于自定义的属性，在资源文件中声明如下：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;attr name=&quot;minibar_background&quot; format=&quot;color&quot; /&gt;
+<pre><code class="language-markup">&lt;attr name=&quot;minibar_background&quot; format=&quot;color&quot; /&gt;
 </code></pre>
 
 <p>  format包括boolean, color, dimension, enum, flag, float, fraction, integer, reference, string。 在此就不赘述了，这是它们的一个相当灵活的使用方式。</p>
@@ -1748,13 +2274,13 @@ artifacts {
 
 <p>  比如，colorAccent是在design包中定义的，属于自定义属性，在使用的时候，直接“?attr/”+属性名就可以了。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;ImageView
+<pre><code class="language-markup">&lt;ImageView
     android:tint=&quot;?attr/colorAccent&quot; /&gt;
 </code></pre>
 
 <p>  系统属性要多加一个”android:”, 是”?android:attr/“+属性名。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView
+<pre><code class="language-markup">&lt;TextView
     android:textColor=&quot;?android:attr/textColorPrimary&quot;/&gt;
 </code></pre>
 
@@ -1768,7 +2294,7 @@ artifacts {
 
 <p>  不过为了实现模式的切换，我们是在Activity的onCreate中进行的设置</p>
 
-<pre class="line-numbers"><code class="language-java">protected void initTheme() {
+<pre><code class="language-java">protected void initTheme() {
     if (MusicPreferences.getInstance().isNightMode()) {
         setTheme(R.style.AppDarkTheme_NoActionBar);
     } else {
@@ -1789,17 +2315,17 @@ artifacts {
   同时，有一个强调色，即colorAccent，是用在Checkbox或下划线等需要给人以提示作用的地方，起辅助的作用。<br/><br/>
   还有一个颜色是colorPrimaryDark，就是比colorPrimary稍微深一些，主要用在状态栏。  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797127564468.png" alt="20171014150797127564468.png"/><figcaption>20171014150797127564468.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797127564468.png" alt="20171014150797127564468.png"/></p>
 
 <p>  比如上图中，“蓝色”就是主题色，“红”色就是强调色。<br/><br/>
   主题色和强调色的色值可以不一样，也可以一样。在一般的设计中都是不同的。在轻听的设计中，为了突出品牌色，将强调色跟主题色统一设计成了一个颜色，所以你会看到，到处都是“绿”色。  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797135079962.png" alt="20171014150797135079962.png"/><figcaption>20171014150797135079962.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797135079962.png" alt="20171014150797135079962.png"/></p>
 
 <p>  在强调色跟主题色统一的情况下，6个主题色，6套Style，似乎还可以接受。<br/><br/>
   但是，万一以后设计同学良心发现了呢？6在6套主题色的基础之上再出6套强调色，那可就是36个Style。如果以后的调色方式再更为灵活，如：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079715404497.png" alt="2017101415079715404497.png"/><figcaption>2017101415079715404497.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079715404497.png" alt="2017101415079715404497.png"/></p>
 
 <p>  我数学不好，谁帮我算算，别忘了加上强调色还得再平方一下……<br/><br/>
   如果给每一个主题色都写一套Style，工作量会很大，而且不灵活。这个时候Style就玩不转了。<br/><br/>
@@ -1809,7 +2335,7 @@ artifacts {
 
 <p>  动态配置主题色是借鉴了github开源控件app-theme-engine。在gradle中引入方式是:</p>
 
-<pre class="line-numbers"><code class="language-text">compile(&#39;com.github.naman14:app-theme-engine:0.5.1@aar&#39;) {
+<pre><code class="language-text">compile(&#39;com.github.naman14:app-theme-engine:0.5.1@aar&#39;) {
     transitive = true
 }
 </code></pre>
@@ -1833,7 +2359,7 @@ artifacts {
 <p>  颜色处理器Processor主要负责对每一个View的各种颜色进行设置。<br/><br/>
   首先，定义一个接口</p>
 
-<pre class="line-numbers"><code class="language-java">public interface Processor&lt;T extends View, E&gt; {
+<pre><code class="language-java">public interface Processor&lt;T extends View, E&gt; {
     void process(@NonNull Context context, @Nullable String key, @Nullable T target, @Nullable E extra);
 }
 </code></pre>
@@ -1842,7 +2368,7 @@ artifacts {
   其中target就是要传入的视图，这里使用泛型，在各个派生的Processor中具体实现。<br/><br/>
   以下是几个主要的Processor。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079716547714.png" alt="2017101415079716547714.png"/><figcaption>2017101415079716547714.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079716547714.png" alt="2017101415079716547714.png"/></p>
 
 <p>  其中DefaultProcessor是默认Processor，可以处理绝大部分的变色情况。其他几种，如他们的名字一样，会额外再处理他们特定的情况。</p>
 
@@ -1857,14 +2383,14 @@ artifacts {
   首先，给View设置一个tag，”text_accent_color”。如果有多个tag，以逗号分隔。</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView
+<pre><code class="language-markup">&lt;TextView
     android:tag=&quot;text_accent_color&quot;
     /&gt;
 </code></pre>
 
 <p>  然后在process方法中将tag解析出来</p>
 
-<pre class="line-numbers"><code class="language-java">public void process(@NonNull Context context, @Nullable String key, @Nullable View view, @Nullable Void extra) {
+<pre><code class="language-java">public void process(@NonNull Context context, @Nullable String key, @Nullable View view, @Nullable Void extra) {
     if(view != null &amp;&amp; view.getTag() != null &amp;&amp; view.getTag() instanceof String) {
         String tag = (String)view.getTag();
         if(tag.contains(&quot;,&quot;)) {
@@ -1886,7 +2412,7 @@ artifacts {
 <p>  这里会根据分隔符（逗号）来对tag的数量进行解析，然后依次根据每个tag依次处理。<br/><br/>
   在处理方法processTagPart中，会找到”text_accent_color”相对应的处理逻辑</p>
 
-<pre class="line-numbers"><code class="language-java">if (view instanceof  TextView) {
+<pre><code class="language-java">if (view instanceof  TextView) {
     ((TextView) view).setTextColor(Config.accentColor(context, key));
 }
 </code></pre>
@@ -1895,11 +2421,11 @@ artifacts {
   其他一些稍微复杂一点的情况，则可以使用相对应的Processor去进行特殊的处理。<br/><br/>
   例如，ViewPagerProcessor。ViewPager在滑动边界的时候会有一个边界反馈的效果，如下图：  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797172826663.png" alt="20171014150797172826663.png"/><figcaption>20171014150797172826663.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797172826663.png" alt="20171014150797172826663.png"/></p>
 
 <p>  这里需要特殊处理一下。ViewPager中，负责两个边缘效果的是EdgeEffectCompat。</p>
 
-<pre class="line-numbers"><code class="language-java">private EdgeEffectCompat mLeftEdge;
+<pre><code class="language-java">private EdgeEffectCompat mLeftEdge;
 private EdgeEffectCompat mRightEdge;
   EdgeEffectCompat是一个对系统版本做兼容性处理的类，里面有真正的边缘效果模块EdgeEffect
 
@@ -1911,7 +2437,7 @@ public final class EdgeEffectCompat {
 <p>  注意到，这两处都是私有的，所以我们必须通过两次反射来获取EdgeEffect，然后更改颜色。<br/><br/>
   首先，通过反射获取ViewPager的左右EdgeEffectCompat。</p>
 
-<pre class="line-numbers"><code class="language-java">public static void setEdgeGlowColor(@NonNull ViewPager viewPager, @ColorInt int color) {
+<pre><code class="language-java">public static void setEdgeGlowColor(@NonNull ViewPager viewPager, @ColorInt int color) {
     if(Build.VERSION.SDK_INT &gt;= 21) {
         try {
             Field edgeLeft = ViewPager.class.getDeclaredField(&quot;mLeftEdge&quot;);
@@ -1935,7 +2461,7 @@ public final class EdgeEffectCompat {
 
 <p>  然后再获取真正的EdgeEffect，并更改颜色。</p>
 
-<pre class="line-numbers"><code class="language-java">private static void setEdgeGlowColor(@NonNull EdgeEffectCompat edgeEffect, @ColorInt int color) throws Exception {
+<pre><code class="language-java">private static void setEdgeGlowColor(@NonNull EdgeEffectCompat edgeEffect, @ColorInt int color) throws Exception {
     if(Build.VERSION.SDK_INT &gt;= 21) {
         Field field = EdgeEffectCompat.class.getDeclaredField(&quot;mEdgeEffect&quot;);
         field.setAccessible(true);
@@ -1954,13 +2480,13 @@ public final class EdgeEffectCompat {
 <p>  遍历逻辑控制器主要负责对整个页面的所有View进行遍历，并进行颜色处理。<br/>
   以下是遍历逻辑：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797182427607.png" alt="20171014150797182427607.png"/><figcaption>20171014150797182427607.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150797182427607.png" alt="20171014150797182427607.png"/></p>
 
 <ul>
 <li>初始化Processor</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">private static void initProcessors() {
+<pre><code class="language-java">private static void initProcessors() {
     mProcessors = new HashMap();
     mProcessors.put(&quot;[default]&quot;, new DefaultProcessor());
     mProcessors.put(ScrollView.class.getName(), new MusicScrollViewProcessor());
@@ -1988,7 +2514,7 @@ ContentView就是我们用setContentView设置的布局，它上面还有Content
   我们看setContentView的代码：  </p></li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public void setContentView(int resId) {
     ensureSubDecor();
     ViewGroup contentParent = (ViewGroup) mSubDecor.findViewById(android.R.id.content);
@@ -2003,7 +2529,7 @@ public void setContentView(int resId) {
   那么我们就可以根据android.R.id.content先找到ContentParent，进而找到ContentView<br/><br/>
   </p>
 
-<pre class="line-numbers"><code class="language-java">ViewGroup contentView = (ViewGroup) ((ViewGroup) activity.findViewById(android.R.id.content)).getChildAt(0);
+<pre><code class="language-java">ViewGroup contentView = (ViewGroup) ((ViewGroup) activity.findViewById(android.R.id.content)).getChildAt(0);
 </code></pre>
 
 <ul>
@@ -2012,7 +2538,7 @@ public void setContentView(int resId) {
 
 <p>  根据View的类名获取Processor</p>
 
-<pre class="line-numbers"><code class="language-java">Processor processor = mProcessors.get(viewClass.getName());
+<pre><code class="language-java">Processor processor = mProcessors.get(viewClass.getName());
 if(processor != null) {
     return processor;
 } else {
@@ -2105,7 +2631,7 @@ if(processor != null) {
 <p>　　然而，要实现一个自定义锁屏是一件繁琐的事情，因为系统有100种方法让这个非本地的锁屏待不下去。但是，人类的智慧是无限的，程序员需要逆流而上。<br/><br/>
 　　Android系统实现自定义锁屏页的思路很简单，即在App启动时开启一个service，在Service中时刻监听系统SCREEN_OFF的广播，当屏幕熄灭时，Service监听到广播，开启一个锁屏页Activity在屏幕最上层显示，该Activity创建的同时会去掉系统锁屏（当然如果有密码是禁不掉的）。示意图如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795013363128.png" alt="20171014150795013363128.png"/><figcaption>20171014150795013363128.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795013363128.png" alt="20171014150795013363128.png"/></p>
 
 <p>道理很简单，我们这里需要讨论的是细节。</p>
 
@@ -2113,14 +2639,14 @@ if(processor != null) {
 
 <p>　　Service是普通的Service，在应用启动时直接startService，与应用同一个进程即可。此外，SCREEN_OFF广播监听必须是动态注册的，如果在AndroidManifest.xml中静态注册将无法接收到SCREEN_OFF广播，这点在Android官方文档中有明确说明，即需要通过如下代码注册：</p>
 
-<pre class="line-numbers"><code class="language-java">IntentFilter mSereenOffFilter = new IntentFilter();
+<pre><code class="language-java">IntentFilter mSereenOffFilter = new IntentFilter();
 mScreenOffFilter.addAction(Intent.ACTION_SCREEN_OFF);
 registerReceiver(mScreenOffReveiver,mScreenOffFilter);
 </code></pre>
 
 <p>　　对应的BroadcastReceiver定义如下：</p>
 
-<pre class="line-numbers"><code class="language-java">private BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver(){
+<pre><code class="language-java">private BroadcastReceiver mScreenOffReceiver = new BroadcastReceiver(){
     @SuppressWarnings(&quot;deprecation&quot;)
     @Override
     public void onReceive(Context context,Intent intent){
@@ -2142,7 +2668,7 @@ registerReceiver(mScreenOffReveiver,mScreenOffFilter);
 　　典型的去掉系统锁屏页的方法是使用KeyguardManager，具体代码如下：<br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">KeyguardManager mKeyguardManager = (KeyguardManager)getSystemService(Context.KEYGUARD_SERVICE);
+<pre><code class="language-java">KeyguardManager mKeyguardManager = (KeyguardManager)getSystemService(Context.KEYGUARD_SERVICE);
 KeyguardManager.KeyguardLock mKeyguardLock = mKeyguardManager.newKeyguardLock(&quot;CustomLockScreen&quot;);
 mKeyguardLock.disableKeyguard();
 </code></pre>
@@ -2150,13 +2676,13 @@ mKeyguardLock.disableKeyguard();
 <p>　　其中，KeyguardManager是锁屏管理类，我们通过getSystemService()的方式获取实例对象mKeyguardManager，调用该对象的newKeyguardLock()方法获取KeyguardManager的内部类KeyguardLock的实例mKeyguardLock，该方法传入的字符串参数用于标识是谁隐藏了系统锁屏，最后调用mKeyguardLock的disableKeyguard()方法可以取消系统锁屏。<br/><br/>
 　　上述方法已经不推荐使用，可以使用更好的方法来替代。我们在自定义锁屏Activity的onCreate()方法里设定以下标志位就能完全实现相同的功能：</p>
 
-<pre class="line-numbers"><code class="language-java"> getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
+<pre><code class="language-java"> getWindow().addFlags(WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD);
  getWindow().addFlags(WindowManager.LayoutParams.FLAG_OW_WHEN_LOCKED);
 </code></pre>
 
 <p>　　FLAG_DISMISS_KEYGUARD用于去掉系统锁屏页，FLAG_SHOW_WHEN_LOCKED使Activity在锁屏时仍然能够显示。当然，不要忘记在Manifest中加入适当的权限：</p>
 
-<pre class="line-numbers"><code class="language-java">&lt;uses-permission android:name=&quot;android.permission.DISABLE_KEYGUARD&quot;/&gt;
+<pre><code class="language-java">&lt;uses-permission android:name=&quot;android.permission.DISABLE_KEYGUARD&quot;/&gt;
 </code></pre>
 
 <h3 id="toc_4">屏蔽按键</h3>
@@ -2165,7 +2691,7 @@ mKeyguardLock.disableKeyguard();
 　　Back键和Menu键可以通过重写onKeyDown()方法进行屏蔽：<br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">public boolean onKeyDown(int keyCode, KeyEvent event){
+<pre><code class="language-java">public boolean onKeyDown(int keyCode, KeyEvent event){
     int key = event.getKeyCode();
     switch(key){
         case KeyEvent.KEYCODE_BACK:{
@@ -2187,11 +2713,11 @@ mKeyguardLock.disableKeyguard();
 　　划瓶解锁的基本思路很简单，当手指在屏幕上滑动时，拦截并处理滑动事件，使锁屏页面随着手指运动，当运动到达一定的阀值时，用户手指松开手指，锁屏页自动滑动到屏幕边界消失，如果没有达到运动阀值，就会自动滑动到起始位置，重新覆盖屏幕。<br/><br/>
 　　为了将划屏逻辑与页面内容隔离开来，我们在锁屏页面布局中添加一个自定义的UnderView，这个UnderView填充整个屏幕，位于锁屏内容View（将其引用称之为mMoveView,并传入到UnderView中）的下方，所有划屏相关的事件都在这里拦截并处理。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795122322931.png" alt="20171014150795122322931.png"/><figcaption>20171014150795122322931.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795122322931.png" alt="20171014150795122322931.png"/></p>
 
 <p>mMoveView是锁屏页的显示内容，除了处理一些简单的点击事件，其他非点击事件序列都由底层的UnderView进行处理。只需要重写UnderView的onTouchEvent方法就能够实现：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public boolean onTouchEvent(MotionEvent event){
     final int action = event.getAction();
     final float nx = event.getX();
@@ -2214,7 +2740,7 @@ public boolean onTouchEvent(MotionEvent event){
 <p>　　其中，mStartX记录滑动操作起始的x坐标，handleMoveView方法控制mMoveView随手指的移动，doTriggerEvent处理手指离开后mMoveView的移动动画。两个方法的定义如下：<br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">private void handleMoveView(float x){
+<pre><code class="language-java">private void handleMoveView(float x){
     float movex = x - mStartX;
     if(movex &lt; 0)
         movex = 0;
@@ -2230,7 +2756,7 @@ public boolean onTouchEvent(MotionEvent event){
 <p>　　在handleMoveView()中，首先计算当前触点x坐标与初始x坐标mStartX的差值movex，然后调用mMoveView的setTranslationX方法移动。值得注意的是，目前setTranslationX方法只能在Android 3.0以上版本使用，如果采用动画兼容库nineoldandroid中ViewHelper类提供的setTranslation方法，则没有这个问题。scrollTo与scrollBy也可以实现移动，但是只是移动View的内容，并不能移动View本身。另外就是通过修改布局参数LayoutParams实现移动，虽然没有版本的限制，用起来相对复杂。这里我们采用setTranslationX，为了简洁，也是为了能够与后续使用的属性动画相统一。<br/><br/>
 　　此外，我们可以通过getBackground()获取UnderView的背景，并根据已划开屏幕占整个屏幕的百分比调用setAlpha方法改变背景的透明度，做出抽屉拉开时的光影变化效果。</p>
 
-<pre class="line-numbers"><code class="language-java">private void doTriggerEvent(float x){
+<pre><code class="language-java">private void doTriggerEvent(float x){
     float movex = x - mStartX;
     if(movex &gt; (mWidth * 0.4)){
         moveMoveView(mWidth - mMoveView.getLeft(),true);//自动移动到屏幕右边界之外，并finish掉
@@ -2276,17 +2802,17 @@ private void moveMoveView(float to,boolean exit){
 　　而第二个标记的问题在于，Google 认为导航栏对于用户来说是十分重要的，所以只会短暂隐藏导航栏。一旦用户做其他操作，例如点击一次屏幕，导航栏就会马上被重新调出。这样的设定对于看图软件，视频软件等等没什么大问题，但是对于游戏之类用户需要经常点击屏幕的 App，那就几乎是悲剧了——这也是为什么你在 Android 4.4 之前找不到什么全屏模式会自动隐藏导航栏的应用。<br/><br/>
 　　Android 4.4 之后加入的Immersive Full-Screen Mode 允许用户在应用全屏的情况下，通过在原有的状态栏/导航栏区域内做向内滑动的手势来实现短暂调出状态栏和导航栏的操作，且不会影响应用的正常全屏，短暂调出的状态栏和导航栏会呈半透明状态，并且在一段时间内或者用户与应用内元素进行互动的情况下自动隐藏，沉浸模式的四种状态如下图。（<a href="http://www.jcodecraeer.com/a/anzhuokaifa/androidkaifa/2015/0616/3047.html">参考</a>）</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795293493925.png" alt="20171014150795293493925.png"/><figcaption>20171014150795293493925.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795293493925.png" alt="20171014150795293493925.png"/></p>
 
 <p>　　状态1代表没有进入沉浸模式时页面的状态，仍然可以看到Status Bar和Navigation Bar；状态2代表用户第一次进入沉浸模式时，系统的提示弹窗，告诉用户如何在沉浸模式下呼出Status Bar和Navigation Bar；状态3代表沉浸模式，可以看到Status Bar和Navigation Bar都被隐藏；状态4代表用户在Sticky沉浸模式下呼出Status Bar和Navigation Bar，可以看到两个Bar重新出现，但是过一段时间能够自动隐藏。<br/><br/>
 　　一般来说，沉浸模式的标记与其他Full Screen相关的Flag搭配起来才能达到我们想要的效果，即通过沉浸模式标记规定状态栏status bar和导航栏navigation bar显示和隐藏的运转逻辑，通过其他标签设定状态栏和导航栏显示或隐藏，以及显示或隐藏的样子。这些常见的Flag及相应功能如下表：<br/><br/>
 　　<br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795296598206.png" alt="20171014150795296598206.png"/><figcaption>20171014150795296598206.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795296598206.png" alt="20171014150795296598206.png"/></p>
 
 <p>　　如此多的标签，看起来非常乱，但用起来却非常简单和明确，感兴趣的开发者可以自由搭配来测试一下。下面，我们通过一个例子，将这些标签应用于锁屏页，实现对Navigation Bar的自动隐藏，同时保留Status Bar。代码非常简单，在Activity的onCreate()方法中使用：<br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">getWindow().getDecorView().getSystemUiVisibility(
+<pre><code class="language-java">getWindow().getDecorView().getSystemUiVisibility(
     View.SYSTEM_UI_FLAG_LAYOUT_STABLE
     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
     | View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
@@ -2299,7 +2825,7 @@ private void moveMoveView(float to,boolean exit){
 　　需要注意的是，这段代码除了需要加在Activity的OnCreate()方法中，也要加在重写的onWindowFocusChanged()方法中，在窗口获取焦点时再将Flag设置一遍，否则可能导致无法达到预想的效果。<br/><br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public void onWindowFocusChanged(boolean hasFocus){
     super.onWindowFocusChanged(hasFocus);
     if(hasFocus){
@@ -2316,7 +2842,7 @@ public void onWindowFocusChanged(boolean hasFocus){
 
 <p>　　此外，有个部份要稍微留意一下，如果不希望界面的内容被上拉到状态栏(Status bar)的话，要记得在界面(Layout)XML文件中，在最外层Layout中将fitsSystemWindows属性设置为true。如下：</p>
 
-<pre class="line-numbers"><code class="language-java">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre><code class="language-java">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;
@@ -2331,18 +2857,18 @@ public void onWindowFocusChanged(boolean hasFocus){
 
 <p>　　什么是透明栏？Google 在 Android 4.4 的 API 描述页面里提到了“Translucent system UI styling”，即半透明化的系统UI风格。这个“半透明化”包括了状态栏和通知栏，当开发者让应用支持这个新特性的时候，状态栏和导航栏可以单独/同时变为渐变的半透明样式，如下图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079538614391.png" alt="2017101415079538614391.png"/><figcaption>2017101415079538614391.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079538614391.png" alt="2017101415079538614391.png"/></p>
 
 <p>　　在 Android 5.0 之后引入了 Material Design，状态栏和导航栏也玩出了更多花样。现在除了原有的“半透明”模式以外，还有“全透明”以及“变色”模式，一种会完全隐藏背景，另一种可以取色作为背景颜色，多种样式的透明栏如下图（上图为透明状态栏，下图为透明导航栏）：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795389627420.png" alt="20171014150795389627420.png"/><figcaption>20171014150795389627420.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795389627420.png" alt="20171014150795389627420.png"/></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079539225975.png" alt="2017101415079539225975.png"/><figcaption>2017101415079539225975.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079539225975.png" alt="2017101415079539225975.png"/></p>
 
 <p>　　所以，<strong>透明栏只是能够改变状态栏和导航栏的颜色，并不像沉浸模式那样隐藏状态栏和导航栏，两者是有本质区别的。</strong><br/><br/>
 　　对于Android 4.4以上5.0以下的版本，设置透明状态栏的方式如下：</p>
 
-<pre class="line-numbers"><code class="language-java">if(Build.VERSION&gt;SDK_INT &gt;= Build.VERSION_CODES.KITKAT){
+<pre><code class="language-java">if(Build.VERSION&gt;SDK_INT &gt;= Build.VERSION_CODES.KITKAT){
     Window window = getWindow();
     window.addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS);
 }
@@ -2350,7 +2876,7 @@ public void onWindowFocusChanged(boolean hasFocus){
 
 <p>　　对于Android 5.0及以上版本，设置透明状态栏的方法如下：</p>
 
-<pre class="line-numbers"><code class="language-java">if(Build.VERSION.SDK_INT &gt;= Build.VERSION.LOLLIPOP){
+<pre><code class="language-java">if(Build.VERSION.SDK_INT &gt;= Build.VERSION.LOLLIPOP){
     Window window = getWindow();
     window.clearFlags(WindowManager.LayoutParams.FLAG_TrANSLUCENT_STATUS);
     window.getDecorView().setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN | View.SYSTEM_UI_FLAG_LAYOUT_STABLE);
@@ -2371,7 +2897,7 @@ public void onWindowFocusChanged(boolean hasFocus){
 　　解决这一问题的方案是一种取巧的方法，那就是在锁屏页的service中监听ACTION_USER_PRESENT广播。ACTION_USER_PRESENT广播是系统锁屏解锁广播，当系统锁屏页解锁时就会触发。如果在接收到这一广播时，将自定义锁屏页finish掉，就能避免在指纹解锁成功后自定义锁屏页仍然显示的问题。但是细心的读者会发现这种解法在逻辑上还存在问题，因为在用户没有设置锁屏密码的情况下，前文自定义锁屏页在onCreate()时设置的FLAG_DISMISS_KEYGUARD标志位能够轻易解锁系统的锁屏页，并触发ACTION_USER_PRESENT广播，此时自定义锁屏页的Service接收到这一广播后，发finish广播给自定义锁屏页，导致自定义锁屏页刚create就finish掉了，永远不可能出现。<br/><br/>
 　　因此，我们必须对场景进行区分，只在有锁屏密码的情况下，才对接收到的ACTION_USER_PRESENT广播进行处理，finish自定义锁屏页。即在BroadcastReceiver的onReceive()方法中加入如下代码:</p>
 
-<pre class="line-numbers"><code class="language-java">if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
+<pre><code class="language-java">if(intent.getAction().equals(Intent.ACTION_USER_PRESENT)){
     if(VERSION.SDK_INT &gt;= Build.VERSION_CODES.JELLY_BEAN){
         if(km.isKeyguardSecure()){
             MLog.d(TAG,&quot;KeyguardSecure!&quot;);
@@ -2389,7 +2915,7 @@ public void onWindowFocusChanged(boolean hasFocus){
 
 <p>　　此外，有些手机型号，比如小米，在自定义锁屏页罩在系统锁屏页之上时（设置有锁屏密码），指纹解锁是无效的，也就是必须要划开自定义锁屏页，在系统锁屏页上才能进行指纹解锁。为了改善这种体验，我们可以在Activity中引入指纹解锁API，识别指纹并解锁，具体代码如下：</p>
 
-<pre class="line-numbers"><code class="language-java">private void startFingerPrintListening(){
+<pre><code class="language-java">private void startFingerPrintListening(){
     if(!isFingerprintAuthAvailable()){
         return;
     } else {
@@ -2418,7 +2944,7 @@ public void onWindowFocusChanged(boolean hasFocus){
 }
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">public boolean isFingerprintAuthAvailable(){
+<pre><code class="language-java">public boolean isFingerprintAuthAvailable(){
     if(Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M){
         mKeyguardManager = (KeyguardManager) getSystemService(Activity.KEYGUARD_SERVICE);
         if(!mKeyguardManager.isKeyguardSecure()){
@@ -2441,14 +2967,14 @@ public void onWindowFocusChanged(boolean hasFocus){
 <p>　　当然，不要忘记在Manifest中加入适当的权限：<br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">&lt;uses-permission android:name=&quot;android.permission.USEFINGERPRINT&quot;/&gt;
+<pre><code class="language-java">&lt;uses-permission android:name=&quot;android.permission.USEFINGERPRINT&quot;/&gt;
 </code></pre>
 
 <p>　　在调用指纹识别功能之前，我们需要判断指纹识别功能是否可用，以及APP是否有相应的权限。这一过程体现在isFingerprintAuthAvailable()中，第一步是获取KeyguardManager对象，调用isKeyguardSecure()判断是否设置有锁屏密码，如果有，则需进一步判断。checkSelfPermission用来判断APP是否有指纹识别的权限(SDK 23要求)，如果有则获取FingerprintManager对象，调用该对象的isHardwareDetected()方法判断指纹识别硬件是否可用，调用hasEnrolledFingerprints()判断是否有事先录入好的指纹，只有以上条件都满足，接下来才能调用指纹识别功能。<br/><br/>
 　　指纹识别的调用体现在startFingerPrintListening()方法中，主要就是调用FingerprintManager的方法<br/>
 　　</p>
 
-<pre class="line-numbers"><code class="language-java">authenticate(FingerprintManager.CryptoObject crypto,CancellationSignal cancel,int flags,FingerprintManager.AuthenticationCallback callback,Handler handler)
+<pre><code class="language-java">authenticate(FingerprintManager.CryptoObject crypto,CancellationSignal cancel,int flags,FingerprintManager.AuthenticationCallback callback,Handler handler)
 </code></pre>
 
 <p>　　其中，crypto参数代表Android6.0中crypto objects的wrapper class，可以通过该对象使authenticate过程更加安全，也可以不使用，这里我们将其设为null；cancel用来取消anthenticate(),我们new出一个对象传入就可以；flags是标志位，设置为0；callback为指纹识别回调，包含指纹识别的核心方法：onAuthenticationError()是指纹匹配连续失败后的回调（几十秒后才能继续匹配），onAuthenticationSucceeded()是指纹匹配成功的回调，onAuthenticationFailed()是指纹匹配失败时的回调。我们在这几个方法中做相应的处理即可，在onAuthenticationSucceeded()方法中调用finish()，就能够在指纹识别成功后关闭Activity。</p>
@@ -2547,482 +3073,6 @@ public void onWindowFocusChanged(boolean hasFocus){
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207870497.html">
-                
-                  <h1>Android-Xfermode详细学习</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">Xfermode</h2>
-
-<p>Xfermode具体怎么翻译，说实话，我也不知道，我习惯叫它图片混合模式，随便了，管它叫什么，不妨碍我们使用它。关于Xfermode的说明，可以在Google文档中找到这样的描述：Xfermode是在绘图通道中自定义“传输模式”的基类。静态函数创建可以调用或者返回任意作为模式枚举指定的预定义子类实例。当Xfermode分配给Paint，然后绘制对象与Paint就具备了所添加的xfermode。读起来比较拗口，下面直接看Xfermode的源码：</p>
-
-<pre class="line-numbers"><code class="language-java">public class Xfermode {  
-    protected void finalize() throws Throwable {  
-        try {  
-            finalizer(native_instance);  
-        } finally {  
-            super.finalize();  
-        }  
-    }  
-    private static native void finalizer(long native_instance);  
-    long native_instance;  
-}  
-</code></pre>
-
-<p>看，Xfermode就这么点代码，经验告诉我们，其下必有子类，擦，变元芳了~~~</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781708859076.png" alt="20171012150781708859076.png"/><figcaption>20171012150781708859076.png</figcaption></figure></p>
-
-<p>查看一下文档发现Xfermode确实有AvoidXfermode、PixelXorXfermode、PorterDuffXfermode，下面来继续学习一下3个子类的用法。</p>
-
-<h2 id="toc_1">AvoidXfermode</h2>
-
-<p>看这个子类之前告诉大家一个不幸的消息，AvoidXfermode不支持硬件加速，在高于API16的机器上不会适用，如果想测试这个子类。</p>
-
-<ul>
-<li>1，可以关闭手机的硬件加速模块；</li>
-<li>2，在AndroidManifest.xml中Application节点上设置硬件加速为false。
-<code>android:hardwareAccelerated=&quot;false&quot;</code></li>
-</ul>
-
-<p>在Android Studio下点击查看一下AvoidXfermode的构造方法：<br/>
-<code>public AvoidXfermode(int opColor, int tolerance, Mode mode)</code></p>
-
-<p><code>AvoidXfermode</code>的构造方法也特别简单，一共接收3个参数：第一个参数opColor是一个16进制的带透明度通道的颜色值，如0X12345678。第二个参数<code>tolerance</code>表示容差值，什么是容差值呢？可以理解成一个表示“精确”和“模糊”的概念，下面会解释一下。第三个参数是<code>AvoidXfermode</code>的模式，<code>AvoidXfermode</code>的模式一共有两种：<code>AvoidXfermode.Mode.TARGET</code>和<code>AvoidXfermode.Mode.AVOID</code>。</p>
-
-<h2 id="toc_2">AvoidXfermode.Mode.TARGET</h2>
-
-<p>在该模式下Android会判断画布上的颜色是否会有跟opColor不一样的颜色，比如我opColor是红色，那么在TARGET模式下就会去判断我们的画布上是否有存在红色的地方，如果有，则把该区域“染”上一层我们画笔定义的颜色，否则不“染”色，而tolerance容差值则表示画布上的像素和我们定义的红色之间的差别该是多少的时候才去“染”的，比如当前画布有一个像素的色值是(200, 20, 13)，而我们的红色值为(255, 0, 0)，当tolerance容差值为255时，即便(200, 20, 13)并不等于红色值也会被“染”色，容差值越大“染”色范围越广反之则反，空说无凭我们来看看具体的实现和效果：</p>
-
-<pre class="line-numbers"><code class="language-java">public class CustomView3 extends View {  
-  
-    private Paint mPaint;  
-    private Bitmap mBitmap;  
-    private Context mContext;  
-    private int x, y, w, h;  
-    private AvoidXfermode avoidXfermode;  
-  
-    public CustomView3(Context context) {  
-        this(context, null);  
-    }  
-  
-    public CustomView3(Context context, AttributeSet attrs) {  
-        super(context, attrs);  
-        mContext = context;  
-        initRes();  
-        initPaint();  
-  
-    }  
-  
-    private void initRes() {  
-        //加载bitmap  
-        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.image);  
-        //获取bitmap的展示起始布局  
-        x = ScreenUtil.getScreenW(mContext) / 2 - mBitmap.getWidth() / 2;  
-        y = ScreenUtil.getScreenH(mContext) / 2 - mBitmap.getHeight() / 2;  
-        w = ScreenUtil.getScreenW(mContext) / 2 + mBitmap.getWidth() / 2;  
-        h = ScreenUtil.getScreenH(mContext) / 2 + mBitmap.getHeight() / 2;  
-    }  
-  
-    private void initPaint() {  
-        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);  
-        avoidXfermode = new AvoidXfermode(0XFFFFFFFF, 0, AvoidXfermode.Mode.TARGET);  
-    }  
-  
-    @Override  
-    protected void onDraw(Canvas canvas) {  
-        canvas.drawBitmap(mBitmap, x, y, mPaint);  
-        mPaint.setARGB(255, 211, 53, 243);  
-        mPaint.setXfermode(avoidXfermode);  
-        canvas.drawRect(x, y, w, h, mPaint);  
-    }  
-}  
-</code></pre>
-
-<p>下面来运行看效果，首先确定一下开启的模拟器是API16以下的，或者Application节点下设置了关闭“硬件加速”：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781712590760.png" alt="20171012150781712590760.png"/><figcaption>20171012150781712590760.png</figcaption></figure></p>
-
-<p><code>AvoidXfermode(0XFFFFFFFF, 0, AvoidXfermode.Mode.TARGET)：</code><br/>
-大家可以看到，在我们的模式为TARGET容差值为0的时候此时只有当图片中像色颜色值为0XFFFFFFFF的地方才会被染色，而其他地方不会有改变</p>
-
-<p>下面我们来修改一下容差值，将容差值改成255：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101215078171413544.png" alt="2017101215078171413544.png"/><figcaption>2017101215078171413544.png</figcaption></figure></p>
-
-<p><code>AvoidXfermode(0XFFFFFFFF, 255, AvoidXfermode.Mode.TARGET)</code><br/>
-而当容差值为255的时候只要是跟0XFFFFFFFF有点接近的地方都会被染色</p>
-
-<h2 id="toc_3">AvoidXfermode.Mode.AVOID</h2>
-
-<p>则与TARGET恰恰相反，TARGET是我们指定的颜色是否与画布的颜色一样，而AVOID是我们指定的颜色是否与画布不一样，其他的都与TARGET类似<code>AvoidXfermode(0XFFFFFFFF, 0, AvoidXfermode.Mode.AVOID)：</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781717380140.png" alt="20171012150781717380140.png"/><figcaption>20171012150781717380140.png</figcaption></figure></p>
-
-<p>当模式为AVOID容差值为0时，只有当图片中像素颜色值与0XFFFFFFFF完全不一样的地方才会被染色<code>AvoidXfermode(0XFFFFFFFF, 255, AvoidXfermode.Mode.AVOID)：</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781719055648.png" alt="20171012150781719055648.png"/><figcaption>20171012150781719055648.png</figcaption></figure></p>
-
-<p>当容差值为255时，只要与0XFFFFFFFF稍微有点不一样的地方就会被染色</p>
-
-<p>那么这玩意究竟有什么用呢？比如说当我们只想在白色的区域画点东西或者想把白色区域的地方替换为另一张图片的时候就可以采取这种方式！</p>
-
-<h2 id="toc_4">PixelXorXfermode</h2>
-
-<p>PixelXorXfermode是Xfermode下的另外一种图像混排模式，该类特别简单，不过呢，也很不幸的，在API16中已经过时了。我们来做一个简单的了解，先看PixelXorXfermode的构造方法：<br/>
-<code>public PixelXorXfermode(int opColor)   </code></p>
-
-<p>构造方法很简单，只要传递一个16进制带透明通道的颜色值即可，那么这个参数有什么用呢？我在Google文档中，找到了这样的一个算法：实际上PixelXorXfermode内部是按照“opColor ^ src ^ dst”这个异或算法运算的，得到一个不透明的(alpha = 255)的色彩值，设置到图像中，下面我们接着上面用到的图片Demo写个PixelXorXfermode的Demo：</p>
-
-<pre class="line-numbers"><code class="language-java">public class CustomView3 extends View {  
-  
-    private Paint mPaint;  
-    private Bitmap mBitmap;  
-    private Context mContext;  
-    private int x, y, w, h;  
-    private PixelXorXfermode pixelXorXfermode;  
-  
-    public CustomView3(Context context) {  
-        this(context, null);  
-    }  
-  
-    public CustomView3(Context context, AttributeSet attrs) {  
-        super(context, attrs);  
-        mContext = context;  
-        initRes();  
-        initPaint();  
-  
-    }  
-  
-    private void initRes() {  
-        //加载bitmap  
-        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.image);  
-        //获取bitmap的展示起始布局  
-        x = ScreenUtil.getScreenW(mContext) / 2 - mBitmap.getWidth() / 2;  
-        y = ScreenUtil.getScreenH(mContext) / 2 - mBitmap.getHeight() / 2;  
-        w = ScreenUtil.getScreenW(mContext) / 2 + mBitmap.getWidth() / 2;  
-        h = ScreenUtil.getScreenH(mContext) / 2 + mBitmap.getHeight() / 2;  
-    }  
-  
-    private void initPaint() {  
-        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);  
-        pixelXorXfermode = new PixelXorXfermode(0XFFFF0000);  
-    }  
-  
-    @Override  
-    protected void onDraw(Canvas canvas) {  
-        //先绘制Bitmap，src  
-        canvas.drawBitmap(mBitmap, x, y, mPaint);  
-        //随便设置一个纯色测试  
-        mPaint.setARGB(255, 211, 53, 243);  
-        //设置Xfermode  
-        mPaint.setXfermode(pixelXorXfermode);  
-        //在bitmap上混排一个纯色的矩形（dst）  
-        canvas.drawRect(x, y, w, h, mPaint);  
-    }  
-}  
-</code></pre>
-
-<p>混排后的图像是：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101215078172262468.png" alt="2017101215078172262468.png"/><figcaption>2017101215078172262468.png</figcaption></figure></p>
-
-<p>PixelXorXfermode在底层已经取出src，dst每个像素点与opColor进行了opColor ^ src ^ dst运算了，结果输出就是上图所示的那样！好了，我只学这么多了，因为它已经过时了，同样上面的AvoidXfermode也是，过时了，了解即可。下面是对Xfermode的第三个子类，也是唯一一个还没有过时的，非常重要的子类PorterDuffXfermode的学习。</p>
-
-<h2 id="toc_5">PorterDuffXfermode</h2>
-
-<p>同样PorterDuffXfermode也是Xfermode的子类，我们先看看它的构造方法：<code>public PorterDuffXfermode(PorterDuff.Mode mode)</code></p>
-
-<p><code>PorterDuffXfermode</code>的构造方法很简单，构造方法中需要传递一个<code>PorterDuff.Mode</code>参数，关于<code>PorterDuff.Mode</code>，我们在上篇博客中已经学习完了，其实跟<code>ColorFilter</code>的子类<code>PorterDuffColorFilter</code>的混排模式是一样的。Android系统一共提供了18种混排模式，在模拟器的<code>ApiDemos/Graphics/XferModes</code>，有张效果图：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781665919671.png" alt="20171012150781665919671.png"/><figcaption>20171012150781665919671.png</figcaption></figure></p>
-
-<p>这张图可以很形象的说明图片各种混排模式下的效果。其中Src代表原图，Dst代表目标图，两张图片使用不同的混排方式后，得到的图像是如上图所示的。  PorterDuff.Mode也提供了18种混排模式已经算法，其中比上图多了ADD和OVERLAY两种模式： </p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781667837297.png" alt="20171012150781667837297.png"/><figcaption>20171012150781667837297.png</figcaption></figure></p>
-
-<p>Source alpha表示源图的Alpha通道；Sc全称为Source color表示源图的颜色；Da全称为Destination alpha表示目标图的Alpha通道；Dc全称为Destination color表示目标图的颜色，[...,..]前半部分计算的是结果图像的Alpha通道值，“,”后半部分计算的是结果图像的颜色值。图像混排后是依靠这两个值来重新计算ARGB值的，具体计算算法，抱歉，我也不知道，不过不要紧，不了解计算算法也不影响我们程序员写程序的。我们只要对照上面的apiDemo中提供的图片就能推测出混排后的结果的，下面将会对照ApiDemos/Graphics/XferModes的程序进行修改，来测试各个模块的效果，测试程序如下：</p>
-
-<pre class="line-numbers"><code class="language-java">public class XfermodeView extends View {  
-  
-    //PorterDuff模式常量 可以在此更改不同的模式测试  
-    private static final PorterDuff.Mode MODE = PorterDuff.Mode.CLEAR;  
-    private PorterDuffXfermode porterDuffXfermode;  
-    private int screenW, screenH; //屏幕宽高  
-    private Bitmap srcBitmap, dstBitmap;  
-    //源图和目标图宽高  
-    private int width = 120;  
-    private int height = 120;  
-  
-    public XfermodeView(Context context) {  
-        this(context, null);  
-    }  
-  
-    public XfermodeView(Context context, AttributeSet attrs) {  
-        super(context, attrs);  
-        screenW = ScreenUtil.getScreenW((Activity) context);  
-        screenH = ScreenUtil.getScreenH((Activity) context);  
-        //创建一个PorterDuffXfermode对象  
-        porterDuffXfermode = new PorterDuffXfermode(MODE);  
-        //创建原图和目标图  
-        srcBitmap = makeSrc(width, height);  
-        dstBitmap = makeDst(width, height);  
-    }  
-  
-    //创建一个圆形bitmap，作为dst图  
-    private Bitmap makeDst(int w, int h) {  
-        Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);  
-        Canvas c = new Canvas(bm);  
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);  
-        p.setColor(0xFFFFCC44);  
-        c.drawOval(new RectF(0, 0, w  3 / 4, h  3 / 4), p);  
-        return bm;  
-    }  
-  
-    // 创建一个矩形bitmap，作为src图  
-    private Bitmap makeSrc(int w, int h) {  
-        Bitmap bm = Bitmap.createBitmap(w, h, Bitmap.Config.ARGB_8888);  
-        Canvas c = new Canvas(bm);  
-        Paint p = new Paint(Paint.ANTI_ALIAS_FLAG);  
-        p.setColor(0xFF66AAFF);  
-        c.drawRect(w / 3, h / 3, w  19 / 20, h  19 / 20, p);  
-        return bm;  
-    }  
-  
-    @Override  
-    protected void onDraw(Canvas canvas) {  
-        Paint paint = new Paint();  
-        paint.setFilterBitmap(false);  
-        paint.setStyle(Paint.Style.FILL);  
-        //绘制“src”蓝色矩形原图  
-        canvas.drawBitmap(srcBitmap, screenW / 8 - width / 4, screenH / 12 - height / 4, paint);  
-        //绘制“dst”黄色圆形原图  
-        canvas.drawBitmap(dstBitmap, screenW / 2, screenH / 12, paint);  
-  
-        //创建一个图层，在图层上演示图形混合后的效果  
-        int sc = canvas.saveLayer(0, 0, screenW, screenH, null, Canvas.MATRIX_SAVE_FLAG |  
-                Canvas.CLIP_SAVE_FLAG |  
-                Canvas.HAS_ALPHA_LAYER_SAVE_FLAG |  
-                Canvas.FULL_COLOR_LAYER_SAVE_FLAG |  
-                Canvas.CLIP_TO_LAYER_SAVE_FLAG);  
-  
-        //先绘制“dst”黄色圆形  
-        canvas.drawBitmap(dstBitmap, screenW / 4, screenH / 3, paint);  
-        //设置Paint的Xfermode  
-        paint.setXfermode(porterDuffXfermode);  
-        canvas.drawBitmap(srcBitmap, screenW / 4, screenH / 3, paint);  
-        paint.setXfermode(null);  
-        // 还原画布  
-        canvas.restoreToCount(sc);  
-    }  
-}  
-</code></pre>
-
-<p>为了方便观察，需要将Activity_main.xml的背景色设置为黑色。</p>
-
-<p><strong>1.PorterDuff.Mode.CLEAR</strong>。中文描述：所绘制源图像不会提交到画布上。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.CLEAR;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781738618202.png" alt="20171012150781738618202.png"/><figcaption>20171012150781738618202.png</figcaption></figure></p>
-
-<p><strong>2.PorterDuff.Mode.SRC</strong>。中文描述：只显示源图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.SRC;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781741288096.png" alt="20171012150781741288096.png"/><figcaption>20171012150781741288096.png</figcaption></figure></p>
-
-<p><strong>3.PorterDuff.Mode.DST</strong>。中文描述：只显示目标图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.DST;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781743260843.png" alt="20171012150781743260843.png"/><figcaption>20171012150781743260843.png</figcaption></figure></p>
-
-<p><strong>4.PorterDuff.Mode.SRC_OVER</strong>。中文描述：正常绘制显示，源图像居上显示。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.SRC_OVER;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781745710454.png" alt="20171012150781745710454.png"/><figcaption>20171012150781745710454.png</figcaption></figure></p>
-
-<p><strong>5.PorterDuff.Mode.DST_OVER</strong>。中文描述： 上下层都显示。目标图像居上显示。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.DST_OVER;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781747937193.png" alt="20171012150781747937193.png"/><figcaption>20171012150781747937193.png</figcaption></figure></p>
-
-<p><strong>6.PorterDuff.Mode.SRC_IN</strong>。中文描述： 取两层绘制交集中的源图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.SRC_IN;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781749959273.png" alt="20171012150781749959273.png"/><figcaption>20171012150781749959273.png</figcaption></figure></p>
-
-<p><strong>7.PorterDuff.Mode.DST_IN</strong>。中文描述：取两层绘制交集中的目标图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.DST_IN;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781751720575.png" alt="20171012150781751720575.png"/><figcaption>20171012150781751720575.png</figcaption></figure></p>
-
-<p><strong>8.PorterDuff.Mode.SRC_OUT</strong>。中文描述：只在源图像和目标图像不相交的地方绘制源图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.SRC_OUT;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781754797222.png" alt="20171012150781754797222.png"/><figcaption>20171012150781754797222.png</figcaption></figure></p>
-
-<p><strong>9.PorterDuff.Mode.DST_OUT</strong>。中文描述：只在源图像和目标图像不相交的地方绘制目标图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.DST_OUT;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781757188938.png" alt="20171012150781757188938.png"/><figcaption>20171012150781757188938.png</figcaption></figure></p>
-
-<p><strong>10.PorterDuff.Mode.SRC_ATOP</strong>。中文描述：在源图像和目标图像相交的地方绘制源图像，在不相交的地方绘制目标图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.SRC_ATOP;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781759284842.png" alt="20171012150781759284842.png"/><figcaption>20171012150781759284842.png</figcaption></figure></p>
-
-<p><strong>11.PorterDuff.Mode.DST_ATOP</strong>。中文描述：在源图像和目标图像相交的地方绘制目标图像而在不相交的地方绘制源图像。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.DST_ATOP;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781760731461.png" alt="20171012150781760731461.png"/><figcaption>20171012150781760731461.png</figcaption></figure></p>
-
-<p><strong>12.PorterDuff.Mode.XOR</strong>。中文描述：异或：去除两图层交集部分<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.XOR;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781763121426.png" alt="20171012150781763121426.png"/><figcaption>20171012150781763121426.png</figcaption></figure></p>
-
-<p><strong>13.PorterDuff.Mode.DARKEN</strong>。中文描述：取两图层全部区域，交集部分颜色加深<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.DARKEN;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781764964832.png" alt="20171012150781764964832.png"/><figcaption>20171012150781764964832.png</figcaption></figure></p>
-
-<p><strong>14.PorterDuff.Mode.LIGHTEN</strong>。中文描述：取两图层全部，点亮交集部分颜色<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.LIGHTEN;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781767494634.png" alt="20171012150781767494634.png"/><figcaption>20171012150781767494634.png</figcaption></figure></p>
-
-<p><strong>15.PorterDuff.Mode.MULTIPLY</strong>。中文描述：取两图层交集部分叠加后颜色<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.MULTIPLY;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781769541182.png" alt="20171012150781769541182.png"/><figcaption>20171012150781769541182.png</figcaption></figure></p>
-
-<p><strong>16.PorterDuff.Mode.SCREEN</strong>。中文描述：滤色。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.SCREEN;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781776874733.png" alt="20171012150781776874733.png"/><figcaption>20171012150781776874733.png</figcaption></figure></p>
-
-<p>以下是<a href="http://lib.csdn.net/base/android">android</a>中新加的两种模式：</p>
-
-<p><strong>17.ADD</strong>。中文描述：饱和度相加。<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.ADD;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781785445313.png" alt="20171012150781785445313.png"/><figcaption>20171012150781785445313.png</figcaption></figure></p>
-
-<p><strong>18.OVERLAY</strong>。中文描述：叠加<br/>
-<code>private static final PorterDuff.Mode MODE = PorterDuff.Mode.OVERLAY;</code></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781786831311.png" alt="20171012150781786831311.png"/><figcaption>20171012150781786831311.png</figcaption></figure></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207870461.html">
-                
-                  <h1>Android-Paint详细学习</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>的确平时开发中，用到画笔的地方还是不多的。但是一遇到自定义View，就会发现这玩意还真是不能不好好掌握，毕竟绘出我们想要的图形界面就靠它了。很多开发人员对画笔Paint的了解知之甚少，包括我自己在内，所以在今天在这里总结一下Paint的在 android图像处理中起到的作用和用法。</p>
-
-<h2 id="toc_1">Paint的简单了解</h2>
-
-<p>同样，我们学习Paint之前，首先查看一下Paint类的API，其中，我们最需要关注的地方就是Paint类给我们提供了很多的setter方法，可以通过调用setter方法来设置自己的偏好。下面是在Android Studio中查到的Paint类的部分setter：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781677410193.png" alt="20171012150781677410193.png"/><figcaption>20171012150781677410193.png</figcaption></figure></p>
-
-<ul>
-<li><code>Paint(int flags)</code>：构建Paint实例，常用的flags是ANTI_ALIAS_FLAG，消除锯齿。</li>
-<li><code>set(Paint src)</code>：将另一个Paint复制给当前Paint实例，不多说了。</li>
-<li><code>setColor(int color)</code>：设置画笔的颜色。</li>
-<li><code>setColorFilter(ColorFilter filter)</code>：设置色彩过滤器，很重要，后面还会有一些总结。</li>
-<li><code>setStyle(Paint.Style style)</code>：设置Paint的风格。 画笔样式分三种：1.Paint.Style.STROKE：描边 。2.Paint.Style.FILL_AND_STROKE：描边并填充 。3.Paint.Style.FILL：填充 。</li>
-<li><code>setAlpha(int a)</code> : 设置绘制图形的透明度。</li>
-<li><code>setAntiAlias(boolean aa)</code>：是否消除锯齿。</li>
-<li><code>setARGB(int a,int r,int g,int b)</code> : 设置绘制的颜色，a代表透明度，r，g，b代表颜色值。</li>
-<li><code>setStrokeWidth(float width)</code>：设置Paint划线的宽度。</li>
-<li><code>setDither(boolean dither)</code> : 设定是否使用图像抖动处理，会使绘制出来的图片颜色更加平滑和饱满，图像更加清晰</li>
-<li><code>setElegantTextHeight(boolean elegant)</code> : //设置优雅的文字高度，这个设置可能会对FontMetrics产生影响</li>
-<li><code>setFakeBoldText(boolean fakeBoldText)</code> : //设置文本粗体</li>
-<li><code>setFilterBitmap(boolean filter)</code> : //对位图进行滤波处理，如果该项设置为true，则图像在动画进行中会滤掉对Bitmap图像的优化操作，加快显示</li>
-<li><code>setFlags(int flags)</code> : //设置一些标志，比如抗锯齿，下划线等等。</li>
-<li><code>setFontFeatureSettings(String settings)</code> : //设置字体样式，可以设置CSS样式</li>
-<li><code>setHinting(int mode)</code> : 设置画笔的隐藏模式。可以是 <code>HINTING_OFF</code> or <code>HINTING_ON</code>之一。</li>
-<li><code>setLetterSpacing(float letterSpacing)</code> : //设置行的间距，默认值是0，负值行间距会收缩</li>
-<li><code>setLinearText(boolean linearText)</code> : //这个是文本缓存，设置线性文本，如果设置为true就不需要缓存</li>
-<li><code>setMaskFilter(MaskFilter maskfilter)</code> : //对图像进行一定的处理，实现滤镜的效果，如滤化，立体等,有BlurMaskFilter，EmbossMaskFilter几种</li>
-<li><code>setPathEffect(PathEffect effect)</code> : //设置绘制路径的效果，有ComposePathEffect，CornerPathEffect，DashPathEffect，DiscretePathEffect，PathDashPathEffect，SumPathEffect几种</li>
-<li><code>setShader(Shader shader)</code> : //设置着色器，用来给图像着色的，绘制出各种渐变效果，有BitmapShader，ComposeShader，LinearGradient，RadialGradient，SweepGradient几种</li>
-<li><code>setShadowLayer(float radius, float dx, float dy, int shadowColor)</code> : //设置阴影效果，radius为阴影角度，dx和dy为阴影在x轴和y轴上的距离，color为阴影的颜色 ，看一下演示效果，其中第一个是没有阴影的，第二个设置了黑色的阴影</li>
-<li><code>setStrikeThruText(boolean strikeThruText)</code> : //设置文本的删除线</li>
-<li><code>setStrokeCap(Cap cap)</code> : //设置线条末端形状<code>Paint.Cap.BUTT</code>、<code>Paint.Cap.ROUND</code>、<code>Paint.Cap.SQUARE</code></li>
-<li><code>setStrokeJoin(Join join)</code> : //设置矩形连接时的效果<code>Paint.Join.BEVEL</code>、<code>Paint.Join.MITER</code>、<code>Paint.Join.ROUND</code></li>
-<li><code>setStrokeMiter(float miter)</code> : //当style为Stroke或StrokeAndFill时设置连接处的倾斜度，这个值必须大于0</li>
-<li><code>setSubpixelText(boolean subpixelText)</code> : //设置亚像素，是对文本的一种优化设置，可以让文字看起来更加清晰明显，可以参考一下PC端的控制面板-外观和个性化-调整ClearType文本</li>
-<li><code>setTextAlign(Align align)</code> : //设置文本对齐<code>Paint.Align.CENTER</code>、<code>Paint.Align.LEFT</code>、<code>Paint.Align.RIGHT</code></li>
-<li><code>setTextLocale(Locale locale)</code> ： //设置地理位置，比如显示中文，日文，韩文等，默认的显示Locale.getDefault()即可</li>
-<li><code>setTextScaleX(float scaleX)</code> : //设置字体的水平方向的缩放因子，默认值为1，大于1时会沿X轴水平放大，小于1时会沿X轴水平缩小</li>
-<li><code>setTextSize(float textSize)</code> : //设置字体大小</li>
-<li><code>setTextSkewX(float skewX)</code> : //设置文本在水平方向上的倾斜，默认值为0，推荐的值为-0.25</li>
-<li><code>setTypeface(Typeface typeface)</code> : //设置字体样式，可以是Typeface设置的样式，也可以通过Typeface的createFromAsset(AssetManager mgr, String path)方法加载样式</li>
-<li><code>setUnderlineText(boolean underlineText)</code> : //设置文本的下划线</li>
-<li><code>setXfermode(Xfermode xfermode)</code>：设置Paint的模式，后面有详细点的说明，很重要。</li>
-<li><code>reset()</code> : //重置Paint</li>
-<li><code>measureText(char[] text, int index, int count)</code>，<code>measureText(String text, int start, int end)</code>，<code>measureText(String text)</code>，<code>measureText(CharSequence text, int start, int end)</code> : //测量字体的长度</li>
-<li><code>breakText(char[] text, int index, int count,float maxWidth, float[] measuredWidth)</code>，<code>breakText(CharSequence text, int start, int end,boolean measureForwards,  floatmaxWidth, float[] measuredWidth)</code>，<code>breakText(String text, boolean measureForwards,float maxWidth, float[] measuredWidth)</code> : //剪切显示，就是大于maxWidth的时候只截取指定长度的显示</li>
-<li><code>getTextWidths(char[] text, int index, int count,float[] widths)</code>，<code>getTextWidths(CharSequence text, int start, int end, float[] widths)</code>，<code>getTextWidths(String text, int start, int end, float[] widths)</code>，<code>getTextWidths(String text, float[] widths)</code> : //提取指定范围内的字符串，保存到widths中</li>
-<li><code>getTextPath(char[] text, int index, int count, float x, float y, Path path)</code>，<code>getTextPath(String text, int start, int end, float x, float y, Path path)</code> : //获取文本绘制的路径，提取到Path中</li>
-<li><code>getTextBounds(String text, int start, int end, Rect bounds)</code>，<code>getTextBounds(char[] text, int index, int count, Rect bounds)</code> : //得到文本的边界，上下左右，提取到bounds中，可以通过这计算文本的宽和高</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/14</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -3092,6 +3142,8 @@ public void onWindowFocusChanged(boolean hasFocus){
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -3108,31 +3160,31 @@ public void onWindowFocusChanged(boolean hasFocus){
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

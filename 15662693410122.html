@@ -1,0 +1,441 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Docker搭建Maven私服 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Docker搭建Maven私服</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/8/20</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>由于Gradle和Maven依赖方式不一样，没法进行本地项目依赖，所以需要把Gradle项目打包发布到Maven仓库。发布到公共仓库又不太好，所以决定搭建个私有仓库，刚好家里有群辉Synology DS918+，可以通过Docker来搭建Maven私服。</p>
+
+<h2 id="toc_0">安装Nexus</h2>
+
+<p>群辉上的Docker通过图形化的界面进行操控，所以不需要进行命令行操作。</p>
+
+<ul>
+<li><p>在注册表中搜索Nexus，对sonatype/nexus3项目进行双击下载映像。<br/>
+<img src="media/15662693410122/66FBF341-A2A8-43AC-8920-82E09879443C.png" alt=""/></p></li>
+<li><p>在映像中双击sonatype/nexus3创建容器，编辑nexus设置，启用自动重新启动和创建桌面快捷方式<img src="media/15662693410122/07013229-CA0A-45AB-9035-DF3A95145BE2.png" alt=""/></p></li>
+<li><p>在卷中添加映射文件夹 本地文件路径 / 装载路径(/var/nexus-data)<br/>
+<img src="media/15662693410122/3E47DC7A-E1E8-4E8B-8325-5E482631797E.png" alt=""/></p></li>
+<li><p>进行端口映射,将本地端口映射到容器端口.<img src="media/15662693410122/96660F1B-0E55-4DEB-AF78-BC29526F79E8.png" alt=""/></p></li>
+<li><p>启动Nexus，点击桌面的Nexus快捷启动或者通过<code>http://ip:8081</code>，打开Nexus网址。<br/>
+<img src="media/15662693410122/15662707547156.png" alt=""/></p></li>
+<li><p>点击右上方的Sign in进行登录，初始账号为admin，初始密码通过容器的详情里终端查看admin.password里的密码.登录后修改密码<br/>
+<img src="media/15662693410122/15662707441848.jpg" alt=""/></p></li>
+<li><p>可以看到默认情况下<code>Nexus</code>会帮我们创建了几个仓库，仔细观察红色框住的地方，里面有几种仓库的类型，解释如下：</p>
+<ul>
+<li><code>proxy</code>远程仓库的代理，比如说<code>nexus</code>配置了一个<code>central repository</code>的<code>proxy</code>,当用户向这个proxy请求一个<code>artifact</code>的时候，会现在本地查找，如果找不到，则会从远程仓库下载，然后返回给用户。</li>
+<li><code>hosted</code>宿主仓库，用户可以把自己的一些仓库<code>deploy</code>到这个仓库中</li>
+<li><code>group</code>仓库组，是<code>nexus</code>特有的概念，目的是将多个仓库整合，对用户暴露统一的地址，这样就不需要配置多个仓库地址。</li>
+</ul></li>
+<li><p>下面我们仔细看一下里面的一些仓库。点击<code>maven-central</code>仓库: <br/>
+<img src="media/15662693410122/15662710138140.jpg" alt=""/><br/>
+可以看到是一个<code>proxy</code>类型的仓库，他代理的远程仓库地址是<code>https://repo1.maven.org/maven2/</code>。</p></li>
+<li><p>后退，在进入<code>maven-public</code>查看: <br/>
+<img src="media/15662693410122/15662710448726.png" alt=""/><br/>
+可以看到这是一个<code>group</code>类型的仓库，里面包含了<code>maven-releases/maven-snapshots/maven-central</code>仓库，意思是我们只需要在本地添加这个仓库，则可以依赖到上述3个仓库中的库了。</p></li>
+</ul>
+
+<h2 id="toc_1">创建仓库</h2>
+
+<ul>
+<li><p><strong>创建仓库</strong><br/>
+点击<code>Create repository</code>,然后选择<code>maven2(hosted)</code>然后输入仓库名称<code>（test-release）</code>。在<code>version policy</code>中选择这个仓库的类型，这里选择<code>release</code>,在<code>Deployment policy</code>中选择<code>Allow redeploy</code><br/>
+<img src="media/15662693410122/15662711396304.png" alt=""/></p></li>
+<li><p><strong>创建用户</strong><br/>
+点击左侧菜单栏的Users菜单，然后点击Create local user.我这里创建了一个用户，账号密码都是：wangjianfeng <br/>
+<img src="media/15662693410122/15662712072619.jpg" alt=""/></p></li>
+</ul>
+
+<h2 id="toc_2">Java Gradle项目上传</h2>
+
+<p>在build.gradle中添加<code>maven-publish</code>插件</p>
+
+<pre><code class="language-groovy">plugins {
+    id &quot;maven-publish&quot;
+}
+</code></pre>
+
+<p>设置插件参数</p>
+
+<pre><code class="language-groovy">//打包源码
+task sourceJar(type: Jar) {
+    from sourceSets.main.allSource
+}
+
+publishing {
+    publications {
+        maven(MavenPublication) {
+            //指定group/artifact/version信息，可以不填。默认使用项目group/name/version作为groupId/artifactId/version
+            groupId project.group
+            artifactId project.name
+            version project.version
+            //如果是war包填写components.web，如果是jar包填写components.java
+            from components.java
+
+            //配置上传源码
+            artifact sourceJar {
+                classifier &quot;sources&quot;
+            }
+
+        }
+    }
+    repositories {
+        maven {
+            //指定要上传的maven私服仓库
+            url = &quot;http://你的maven私服地址/repository/maxrocky/&quot;
+            //认证用户和密码
+            credentials {
+                username &#39;admin&#39;
+                password &#39;admin123&#39;
+            }
+        }
+    }
+}
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15662718181666.html" 
+          title="Previous Post: Android GRPC接入">&laquo; Android GRPC接入</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15639522586909.html" 
+          title="Next Post: Kotlin为序列化类生成serialVersionUID">Kotlin为序列化类生成serialVersionUID &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15663678647312.html">Docker学习</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15662718181666.html">Android GRPC接入</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15620327900428.html">Xposed开发</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

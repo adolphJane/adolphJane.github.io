@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -116,6 +118,348 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15662718181666.html">
+                
+                  <h1>Android GRPC接入</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">安装Protobuf插件</h2>
+
+<p>Protobuf Support插件可以支持Protobuf文件高亮语法显示</p>
+
+<p><img src="media/15662718181666/15662727464652.png" alt="" style="width:582px;"/></p>
+
+<h2 id="toc_1">添加Grpc依赖</h2>
+
+<ul>
+<li>项目根目录build.gradle添加</li>
+</ul>
+
+<pre><code class="language-groovy">buildscript {
+    ext.kotlin_version = &#39;1.3.41&#39;
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath &#39;com.android.tools.build:gradle:3.4.2&#39;
+        classpath &quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;
+        //添加这句
+        classpath &quot;com.google.protobuf:protobuf-gradle-plugin:0.8.10&quot;
+    }
+}
+</code></pre>
+
+<ul>
+<li>在Module下build.gradle添加<code>apply plugin: &#39;com.google.protobuf&#39;</code></li>
+<li>设置proto文件位置(src/main/proto):</li>
+</ul>
+
+<pre><code class="language-groovy">android {
+    sourceSets {
+        main {
+            proto {
+                srcDir &#39;src/main/proto&#39;
+            }
+            java {
+                srcDir &#39;src/main/java&#39;
+            }
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>自定义Protobuf编译项</li>
+</ul>
+
+<pre><code class="language-groovy">protobuf {
+    protoc { artifact = &#39;com.google.protobuf:protoc:3.9.1&#39; }
+    plugins {
+        javalite { artifact = &quot;com.google.protobuf:protoc-gen-javalite:3.0.0&quot; }
+        grpc { artifact = &#39;io.grpc:protoc-gen-grpc-java:1.22.1&#39; }
+    }
+    generateProtoTasks {
+        all().each { task -&gt;
+            task.plugins {
+                javalite {}
+                grpc { option &#39;lite&#39; }
+            }
+        }
+    }
+    generatedFilesBaseDir = &quot;$projectDir/src/generated&quot;
+}
+
+clean {
+    delete &quot;${projectDir}/src/main/generated-proto&quot;
+}
+</code></pre>
+
+<ul>
+<li>加入grpc依赖</li>
+</ul>
+
+<pre><code class="language-groovy">implementation &#39;io.grpc:grpc-okhttp:1.22.1&#39;
+implementation &#39;io.grpc:grpc-protobuf-lite:1.22.1&#39;
+implementation &#39;io.grpc:grpc-stub:1.22.1&#39;
+implementation &#39;javax.annotation:javax.annotation-api:1.3.2&#39;
+</code></pre>
+
+<ul>
+<li>Rebuild Project之后就会自动生成代码</li>
+</ul>
+
+<h2 id="toc_2">Protobuf语法</h2>
+
+<h3 id="toc_3">关键字</h3>
+
+<ul>
+<li>syntax：声明版本。例如上面syntax=&quot;proto3&quot;，如果没有声明，则默认是proto2。</li>
+<li>package：声明包名.</li>
+<li>import：导入包。类似于java，例如上面导入了timestamp.proto包。</li>
+<li>java_package：指定生成的类应该放在什么Java包名下。如果你没有显式地指定这个值，则它简单地匹配由package 声明给出的Java包名，但这些名字通常都不是合适的Java包名 (由于它们通常不以一个域名打头)。</li>
+<li>java_outer_classname：定义应该包含这个文件中所有类的类名。如果你没有显式地给定java_outer_classname ，则将通过把文件名转换为首字母大写来生成。例如上面例子编译生成的文件名和类名是AddressBookProtos。</li>
+<li>message：类似于java中的class关键字。</li>
+<li>repeated：用于修饰属性，表示对应的属性是个array。</li>
+</ul>
+
+<h3 id="toc_4">Android中使用</h3>
+
+<p>创建Proto文件</p>
+
+<pre><code class="language-protobuf">syntax = &quot;proto3&quot;;
+
+option java_multiple_files = true;
+option java_package = &quot;com.ifantastic.helloworld&quot;;
+option java_outer_classname = &quot;HelloWorldProto&quot;;
+
+package helloworld;
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}
+
+service Greeter {
+    rpc SayHello(HelloRequest) returns (HelloReply);
+}
+</code></pre>
+
+<p>Rebuild之后开始调用</p>
+
+<ul>
+<li><p>创建连接通道</p>
+<pre><code class="language-kotlin">val connectionChannel: ManagedChannel by lazy {
+    OkHttpChannelBuilder.forAddress(&quot;192.168.6.104&quot;, 9090)<br/>
+        .usePlaintext()<br/>
+        .build()<br/>
+}
+</code></pre></li>
+<li><p>声明Service</p>
+<pre><code class="language-kotlin">val service = GreeterGrpc.newBlockingStub(connectionChannel)
+</code></pre></li>
+<li><p>Grpc请求</p>
+<pre><code class="language-kotlin">val requestMessage = HelloRequest.newBuilder()
+        .setName(name)<br/>
+        .build()      <br/>
+val response = service.sayHello(requestMessage)
+</code></pre></li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/8/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15620327900428.html">
+                
+                  <h1>Xposed开发</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Xposed SDK下载</h2>
+
+<p><a href="http://dl-xda.xposed.info/framework/sdk21/x86/">地址</a></p>
+
+<h2 id="toc_1">Xposed API</h2>
+
+<p><a href="https://api.xposed.info/reference/de/robv/android/xposed/XposedHelpers.html">地址</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/7/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15620314685082.html">
+                
+                  <h1>Genymotion-ARM-Translation.zip各安卓版本合集</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<table>
+<thead>
+<tr>
+<th style="text-align: left">安卓版本</th>
+<th style="text-align: left">代号</th>
+<th style="text-align: left">Genymotion-ARM-Translation</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: left">8.0 – 8.1</td>
+<td style="text-align: left">Oreo奥利奥</td>
+<td style="text-align: left"><a href="https://github.com/adolphJane/GenymotionARMTranslations/blob/master/Oreo8.0-8.1/ARM_Translation_Oreo.zip">ARM_Translation_Oreo.zip</a></td>
+</tr>
+<tr>
+<td style="text-align: left">7.0 – 7.1.2</td>
+<td style="text-align: left">Nougat牛轧糖</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6.0 – 6.0.1</td>
+<td style="text-align: left">Marshmallow棉花糖</td>
+<td style="text-align: left"><a href="https://github.com/adolphJane/GenymotionARMTranslations/blob/master/Marshmallow6.0-6.0.1/ARM_Translation_Marshmallow.zip">ARM_Translation_Marshmallow.zip</a></td>
+</tr>
+<tr>
+<td style="text-align: left">5.0 – 5.1.1</td>
+<td style="text-align: left">Lollipop棒棒糖</td>
+<td style="text-align: left"><a href="https://github.com/adolphJane/GenymotionARMTranslations/blob/master/Lollipop5.0-5.1.1/ARM_Translation_Lollipop_20160402.zip">ARM_Translation_Lollipop_20160402.zip</a></td>
+</tr>
+<tr>
+<td style="text-align: left">5.0 – 5.1.1</td>
+<td style="text-align: left">Lollipop棒棒糖</td>
+<td style="text-align: left"><a href="https://github.com/adolphJane/GenymotionARMTranslations/blob/master/Lollipop5.0-5.1.1/ARM_Translation_Lollipop.zip">ARM_Translation_Lollipop.zip</a></td>
+</tr>
+<tr>
+<td style="text-align: left">4.4 – 4.4.4</td>
+<td style="text-align: left">KitKat奇巧巧克力</td>
+<td style="text-align: left"><a href="https://github.com/adolphJane/GenymotionARMTranslations/blob/master/KitKat4.4-4.4.4/ARM-4.4-libhoudini.zip">ARM-4.4-libhoudini.zip</a></td>
+</tr>
+<tr>
+<td style="text-align: left">4.1 – 4.3.1</td>
+<td style="text-align: left">Jelly Bean果冻豆</td>
+<td style="text-align: left"><a href="https://github.com/adolphJane/GenymotionARMTranslations/blob/master/JellyBean4.1-4.3.1/Genymotion-ARM-Translation_v1.1.zip">Genymotion-ARM-Translation_v1.1.zip</a></td>
+</tr>
+</tbody>
+</table>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/7/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15597152983017.html">
+                
+                  <h1>Android 开发小记</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">应用签名查看</h2>
+
+<h3 id="toc_1">查询keystore的MD5</h3>
+
+<pre><code class="language-text">keytool -list -v -keystore ***.jks
+</code></pre>
+
+<p><img src="media/15597152983017/15597154233468.jpg" alt="" style="width:570px;"/><br/>
+MD5值就是所要的应用签名，只是比下面提到的签名生成工具生成的多出了中间的冒号</p>
+
+<h3 id="toc_2">通过APK工具进行查看</h3>
+
+<p><a href="media/15597152983017/GenSignature.apk">GenSignature</a><br/>
+在该手机上安装正式打包的APK并运行，通过签名生成工具输入包名get signature获取应用签名，copy to clipboard即可。<br/>
+<img src="media/15597152983017/15597160146245.jpg" alt=""/></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/6/5</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15580646892750.html">
                 
                   <h1>发布Android库至JCenter仓库</h1>
@@ -137,86 +481,6 @@
                   <div class="more-left left">
                    <a href="15580646892750.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2019/5/17</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15576631048737.html">
-                
-                  <h1>单例模式</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">单例模式的意义</h2>
-
-<p>单例模式是最简单的设计模式之一，属于创建模式，它提供了一种创建对象的方式，确保只有单个对象被创建。这种设计模式主要目的是使整个系统中只能出现一个类的实例，即一个类只有一个对象。</p>
-
-<ul>
-<li>优点
-<ul>
-<li>由于频繁使用对象，可以省略创建对象所花费的时间，尤其是对于重量级的对象而言，是很重要的。</li>
-<li>由于不需要频繁的创建对象，所以GC的压力变轻了，不需要频繁的分配资源和释放资源。</li>
-</ul></li>
-<li>缺点
-<ul>
-<li>简单的单例模式设计都很简单，但是复杂的单例模式需要考虑线程安全等并发问题，引入了部分复杂度</li>
-</ul></li>
-</ul>
-
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15576631048737.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2019/5/12</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15576630121534.html">
-                
-                  <h1>23种设计模式全面解析</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15576630121534.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2019/5/12</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -415,80 +679,6 @@
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207872754.html">
-                
-                  <h1>Android-性能优化</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>性能检测与分析，一直在 APP 开发中相当重要，但又被我们常常忽略。很多 APP 或者开发者总是急功近利，总想着快速充实 APP 的相关功能，把开发进度放在首位没有问题，可很多时候就没有然后了，这在整个开发界屡见不鲜。<br/>
-在这样的大背景下，加之我之前写的 RxJava 2.0 系列 收到较好的反馈，诱导我想出这么一个性能优化系列。</p>
-
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872754.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/11/3</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872718.html">
-                
-                  <h1>Android-自定义View播放Gif动画</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>GIF是一种很常见的动态图片格式，在Android中它的使用场景非常多，大到启动页动画、小到一个Loading展示，都可以用GIF动画来完成，使用也很方便，直接从美工那边拿过来用就成。如果项目赶时间或者自定义原生动画太麻烦，GIF都是一个很好的选择，相比于最新的WEBP格式的动画，也有更好的兼容性（毕竟已经出现很多年了）。<br/><br/>
-关于图片加载我一直用的是Google推荐的Glide，图片加载和缓存都做的很好，同样也支持GIF动画。不过Glide默认就是循环播放Gif，没有开放相关的接口来控制Gif。这就使的我们不能很好地控制Gif的播放，比如控制播放开始时间、播放次数，播放暂停、播放开始、结束事件的监听，虽然用Glide可能做到（网上说可以，但我没找到方法），但操作也会很麻烦。  </p>
-
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872718.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/11/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -558,6 +748,8 @@
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -574,31 +766,31 @@
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

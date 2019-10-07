@@ -1,0 +1,498 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android GRPC接入 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android GRPC接入</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/8/20</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">安装Protobuf插件</h2>
+
+<p>Protobuf Support插件可以支持Protobuf文件高亮语法显示</p>
+
+<p><img src="media/15662718181666/15662727464652.png" alt="" style="width:582px;"/></p>
+
+<h2 id="toc_1">添加Grpc依赖</h2>
+
+<ul>
+<li>项目根目录build.gradle添加</li>
+</ul>
+
+<pre><code class="language-groovy">buildscript {
+    ext.kotlin_version = &#39;1.3.41&#39;
+    repositories {
+        google()
+        jcenter()
+    }
+    dependencies {
+        classpath &#39;com.android.tools.build:gradle:3.4.2&#39;
+        classpath &quot;org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version&quot;
+        //添加这句
+        classpath &quot;com.google.protobuf:protobuf-gradle-plugin:0.8.10&quot;
+    }
+}
+</code></pre>
+
+<ul>
+<li>在Module下build.gradle添加<code>apply plugin: &#39;com.google.protobuf&#39;</code></li>
+<li>设置proto文件位置(src/main/proto):</li>
+</ul>
+
+<pre><code class="language-groovy">android {
+    sourceSets {
+        main {
+            proto {
+                srcDir &#39;src/main/proto&#39;
+            }
+            java {
+                srcDir &#39;src/main/java&#39;
+            }
+        }
+    }
+}
+</code></pre>
+
+<ul>
+<li>自定义Protobuf编译项</li>
+</ul>
+
+<pre><code class="language-groovy">protobuf {
+    protoc { artifact = &#39;com.google.protobuf:protoc:3.9.1&#39; }
+    plugins {
+        javalite { artifact = &quot;com.google.protobuf:protoc-gen-javalite:3.0.0&quot; }
+        grpc { artifact = &#39;io.grpc:protoc-gen-grpc-java:1.22.1&#39; }
+    }
+    generateProtoTasks {
+        all().each { task -&gt;
+            task.plugins {
+                javalite {}
+                grpc { option &#39;lite&#39; }
+            }
+        }
+    }
+    generatedFilesBaseDir = &quot;$projectDir/src/generated&quot;
+}
+
+clean {
+    delete &quot;${projectDir}/src/main/generated-proto&quot;
+}
+</code></pre>
+
+<ul>
+<li>加入grpc依赖</li>
+</ul>
+
+<pre><code class="language-groovy">implementation &#39;io.grpc:grpc-okhttp:1.22.1&#39;
+implementation &#39;io.grpc:grpc-protobuf-lite:1.22.1&#39;
+implementation &#39;io.grpc:grpc-stub:1.22.1&#39;
+implementation &#39;javax.annotation:javax.annotation-api:1.3.2&#39;
+</code></pre>
+
+<ul>
+<li>Rebuild Project之后就会自动生成代码</li>
+</ul>
+
+<h2 id="toc_2">Protobuf语法</h2>
+
+<h3 id="toc_3">关键字</h3>
+
+<ul>
+<li>syntax：声明版本。例如上面syntax=&quot;proto3&quot;，如果没有声明，则默认是proto2。</li>
+<li>package：声明包名.</li>
+<li>import：导入包。类似于java，例如上面导入了timestamp.proto包。</li>
+<li>java_package：指定生成的类应该放在什么Java包名下。如果你没有显式地指定这个值，则它简单地匹配由package 声明给出的Java包名，但这些名字通常都不是合适的Java包名 (由于它们通常不以一个域名打头)。</li>
+<li>java_outer_classname：定义应该包含这个文件中所有类的类名。如果你没有显式地给定java_outer_classname ，则将通过把文件名转换为首字母大写来生成。例如上面例子编译生成的文件名和类名是AddressBookProtos。</li>
+<li>message：类似于java中的class关键字。</li>
+<li>repeated：用于修饰属性，表示对应的属性是个array。</li>
+</ul>
+
+<h3 id="toc_4">Android中使用</h3>
+
+<p>创建Proto文件</p>
+
+<pre><code class="language-protobuf">syntax = &quot;proto3&quot;;
+
+option java_multiple_files = true;
+option java_package = &quot;com.ifantastic.helloworld&quot;;
+option java_outer_classname = &quot;HelloWorldProto&quot;;
+
+package helloworld;
+
+message HelloRequest {
+    string name = 1;
+}
+
+message HelloReply {
+    string message = 1;
+}
+
+service Greeter {
+    rpc SayHello(HelloRequest) returns (HelloReply);
+}
+</code></pre>
+
+<p>Rebuild之后开始调用</p>
+
+<ul>
+<li><p>创建连接通道</p>
+<pre><code class="language-kotlin">val connectionChannel: ManagedChannel by lazy {
+    OkHttpChannelBuilder.forAddress(&quot;192.168.6.104&quot;, 9090)<br/>
+        .usePlaintext()<br/>
+        .build()<br/>
+}
+</code></pre></li>
+<li><p>声明Service</p>
+<pre><code class="language-kotlin">val service = GreeterGrpc.newBlockingStub(connectionChannel)
+</code></pre></li>
+<li><p>Grpc请求</p>
+<pre><code class="language-kotlin">val requestMessage = HelloRequest.newBuilder()
+        .setName(name)<br/>
+        .build()      <br/>
+val response = service.sayHello(requestMessage)
+</code></pre></li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15663678647312.html" 
+          title="Previous Post: Docker学习">&laquo; Docker学习</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15662693410122.html" 
+          title="Next Post: Docker搭建Maven私服">Docker搭建Maven私服 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15663678647312.html">Docker学习</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15662718181666.html">Android GRPC接入</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15620327900428.html">Xposed开发</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

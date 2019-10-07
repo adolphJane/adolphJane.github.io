@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -146,7 +148,7 @@
 
 <p>Android 的 Gradle 插件版本不低于 1.5.0-alpha1：classpath &#39;com.android.tools.build:gradle:1.5.0&#39;然后修改对应模块（Module）的 build.grade：</p>
 
-<pre class="line-numbers"><code class="language-java">android {
+<pre><code class="language-java">android {
     ....
     dataBinding {
         enabled = true
@@ -162,7 +164,7 @@
 <p>我们在具体的讲解之前，先用一个简单的小例子来学习一下基础并展现一下DataBinding的巨大魅力，估计你会被其简单的特性所吸引哦。<br/><br/>
 首先我们先建立一个java bean，就是一个非常简单的用户类吧。</p>
 
-<pre class="line-numbers"><code class="language-java">package loonggg.net.databinding.bean;
+<pre><code class="language-java">package loonggg.net.databinding.bean;
 /**
  * Created by loongggdroid on 2016/3/14.
  */
@@ -190,7 +192,7 @@ public class User {
 
 <p>其次，来看看使用了DataBinding之后的布局文件是什么样子的呢？主要的变化是在layout布局文件之中。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
 
     &lt;data&gt;
@@ -219,7 +221,7 @@ public class User {
 
 <p>看到这里，可能有的人就开始有点迷糊了，没有给控件定义id，而是用了@{ }的方法，到底是怎么回事？先不忙，一会再给你解释，我们再来看看怎么把值传进去的，在Activity中是如何使用的。</p>
 
-<pre class="line-numbers"><code class="language-java">package loonggg.net.databinding;
+<pre><code class="language-java">package loonggg.net.databinding;
 
 import android.app.Activity;
 import android.databinding.DataBindingUtil;
@@ -248,7 +250,7 @@ public class MainActivity extends Activity {
 
 <p>例子我们介绍完了，对于例子中出现的一些新东西，有必要解释一下，java bean那里就不解释了，大家肯定都懂，我们就从布局文件讲起。相比以前使用的xml，根节点由具体的某个layout（比如LinearLayout ）变成了layout，里面包括了data节点和传统的视图。这里的data节点就像是连接 View 和 Modle 的桥梁。在这个data节点中声明一个variable变量，那值就可以轻松传到布局文件中来了。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
 
 &lt;!--type中声明的就是我们的用户实体类User，一定要写全，带着包名，我们给这个实体类命名为user--&gt;
@@ -271,7 +273,7 @@ public class MainActivity extends Activity {
 
 <p>虽然在布局文件中对应上了，但是值是怎么传进去的呢？这就是我们要将的Activity中的那两行代码了，它把实体类和布局文件进行了绑定。修改MainActivity中的onCreate，用 DatabindingUtil.setContentView() 来替换掉 setContentView()，然后创建一个 user 对象，通过 binding.setUser(user) 与 variable 进行绑定。</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -282,7 +284,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>ActivityLayoutDetailBinding这个类是自动生成的和你的布局文件名字一样，如果你想要去改变名字的话</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+<pre><code class="language-markup">&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
     xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;&gt;  
   
     &lt;!--这里你也可以为Binding类进行命名，有三种形式  
@@ -300,7 +302,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>其实data节点也是支持import用法的，比如：</p>
 
-<pre class="line-numbers"><code class="language-java">&lt;data&gt;
+<pre><code class="language-java">&lt;data&gt;
      &lt;import type=&quot;loonggg.net.databinding.bean.User &quot;/&gt;
      &lt;variablename=&quot;user&quot;type=&quot;User&quot; /&gt;
 &lt;/data&gt;
@@ -312,7 +314,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>到这里你可能会问如果import了两个相同名称的类咋办？别怕，人家想的很周到，可以起个别名或者昵称嘛！例如：</p>
 
-<pre class="line-numbers"><code class="language-java">···
+<pre><code class="language-java">···
 &lt;data&gt; 
   &lt;import type=&quot;xxx.User&quot; alias=&quot;MyUser&quot;&gt; 
   &lt;import type=&quot;xxx.xx.User&quot;&gt; 
@@ -333,7 +335,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>在上面，我们学会了如何去在xml中定义一些简单的变量。我们没有定义像List、Map等这样的集合变量。那这种集合变量该如何定义呢？其实定义的方式和我们上面的基本一致，区别就在于我们还需要为它定义key的变量，例如：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt; 
+<pre><code class="language-markup">&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt; 
     &lt;data&gt; 
         &lt;import type=&quot;android.graphics.Bitmap&quot; /&gt; 
         &lt;import type=&quot;java.util.ArrayList&quot; /&gt; 
@@ -400,7 +402,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>在引用的同时也可以加上简单的逻辑运算</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;!--数据绑定将自动检测null异常，如果你的表达式为null，它将会给它赋值为(null)  
+<pre><code class="language-markup">&lt;!--数据绑定将自动检测null异常，如果你的表达式为null，它将会给它赋值为(null)  
  如果为int类型则默认为0--&gt;  
  &lt;!--之前都是写三元运算符的形式，当然在数据绑定中也能够使用，但更推荐下面那种--&gt;  
  &lt;TextView  
@@ -416,7 +418,7 @@ protected void onCreate(Bundle savedInstanceState) {
      android:textSize=&quot;18sp&quot; /&gt;  
 </code></pre>
 
-<pre class="line-numbers"><code class="language-markup">&lt;!--引用资源文件--&gt;  
+<pre><code class="language-markup">&lt;!--引用资源文件--&gt;  
 &lt;ImageView  
     android:layout_width=&quot;wrap_content&quot;  
     android:layout_height=&quot;wrap_content&quot;  
@@ -424,7 +426,7 @@ protected void onCreate(Bundle savedInstanceState) {
     android:src=&quot;@{image}&quot; /&gt; 
 </code></pre>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView  
+<pre><code class="language-markup">&lt;TextView  
     android:layout_width=&quot;match_parent&quot;  
     android:layout_height=&quot;wrap_content&quot;  
     android:text=&#39;@{String.valueOf(map[`one`])}&#39;/&gt;  
@@ -437,7 +439,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p><strong>布局文件</strong></p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
 &lt;layout&gt;
     &lt;data&gt;
         &lt;import type=&quot;www.zhang.com.databinding.model.Person&quot; /&gt;
@@ -473,7 +475,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p><strong>Person类</strong></p>
 
-<pre class="line-numbers"><code class="language-java">package www.zhang.com.databinding.model;
+<pre><code class="language-java">package www.zhang.com.databinding.model;
 
 import android.databinding.BaseObservable;
 import android.databinding.Bindable;
@@ -522,7 +524,7 @@ notifyPropertyChanged(BR.参数名)通知更新这一个参数，需要与@Binda
 
 <p><strong>SecondActivity</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public class SecondActivity extends AppCompatActivity {
+<pre><code class="language-java">public class SecondActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -546,7 +548,7 @@ notifyPropertyChanged(BR.参数名)通知更新这一个参数，需要与@Binda
 
 <h4 id="toc_11">示例</h4>
 
-<pre class="line-numbers"><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+<pre><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
 &lt;layout&gt;
     &lt;data&gt;
         &lt;import type=&quot;www.zhang.com.databinding.model.Animal&quot;/&gt;
@@ -601,7 +603,7 @@ notifyPropertyChanged(BR.参数名)通知更新这一个参数，需要与@Binda
 
 <p><strong>Animal类</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public class Animal {
+<pre><code class="language-java">public class Animal {
     public final ObservableField&lt;String&gt; field = new ObservableField&lt;&gt;();
     public final ObservableInt age = new ObservableInt();
 }
@@ -609,7 +611,7 @@ notifyPropertyChanged(BR.参数名)通知更新这一个参数，需要与@Binda
 
 <p><strong>FourActivity</strong></p>
 
-<pre class="line-numbers"><code class="language-java">package www.zhang.com.databinding;
+<pre><code class="language-java">package www.zhang.com.databinding;
 
 public class FourActivity extends AppCompatActivity {
     @Override
@@ -652,7 +654,7 @@ public class FourActivity extends AppCompatActivity {
 
 <h3 id="toc_12">事件的绑定</h3>
 
-<pre class="line-numbers"><code class="language-markup">&lt;!--  
+<pre><code class="language-markup">&lt;!--  
     绑定事件的格式有两种：    
     1、方法引用：直接用handle.Click或者handle::Click  推荐后者  
 --&gt;  
@@ -663,7 +665,7 @@ public class FourActivity extends AppCompatActivity {
     android:onClick=&quot;@{handle::Click}&quot;/&gt;  
 </code></pre>
 
-<pre class="line-numbers"><code class="language-markup">&lt;!--  
+<pre><code class="language-markup">&lt;!--  
      2、监听绑定：使用()组，括号里面所填的是你为参数起的名字，这样你就可以在后面的括号进行引用  
         如果你监听的事件需要返回值，那么你的方法也要返回一个相同类型  
  --&gt;  
@@ -700,7 +702,7 @@ public class FourActivity extends AppCompatActivity {
 
 <p>实现监听方法，保证参数个数、类型、返回值都要保证和你使用set时监听一样，不然就出报错。</p>
 
-<pre class="line-numbers"><code class="language-java">public void checkChanged(View view, boolean isCheck) {  
+<pre><code class="language-java">public void checkChanged(View view, boolean isCheck) {  
     System.out.println(&quot;checkChanged:&quot; + view + &quot;    &quot; + isCheck);  
 }  
   
@@ -712,7 +714,7 @@ public boolean longClick(View view) {
 
 <p>可以直接在 xml 导入android.view.View.OnClickListener，并制定其点击事件。</p>
 
-<pre class="line-numbers"><code class="language-java">&lt;variable
+<pre><code class="language-java">&lt;variable
     name=&quot;clickListener&quot;
     type=&quot;android.view.View.OnClickListener&quot; /&gt;
 ...
@@ -720,7 +722,7 @@ public boolean longClick(View view) {
 ...
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">holder.binding.setClickListener(new View.OnClickListener() {
+<pre><code class="language-java">holder.binding.setClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                //do something
@@ -731,7 +733,7 @@ public boolean longClick(View view) {
 
 <p>其实在xml文件中还是支持表达式的，比如说如下：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView
+<pre><code class="language-markup">&lt;TextView
     android:layout_width=&quot;wrap_content&quot;
     android:layout_height=&quot;wrap_content&quot;
     android:text=&#39;@{error ? &quot;error&quot; : &quot;ok&quot;}&#39;/&gt;
@@ -772,7 +774,7 @@ public boolean longClick(View view) {
 
 <p>如果你需要用到从xml传过来的数据需要去使用bind:user属性，这里的user是你定义的实体类名</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;!--当你使用include的时候，你可以使用命名空间和属性中的变量名  
+<pre><code class="language-markup">&lt;!--当你使用include的时候，你可以使用命名空间和属性中的变量名  
 来将数据传送到另一个布局中去,值得注意的是当include的父节点为merge时将不支持--&gt;  
 &lt;include  
     layout=&quot;@layout/detail_include&quot;  
@@ -785,7 +787,7 @@ public boolean longClick(View view) {
 
 <p><strong>activity_five.xml</strong></p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
 &lt;layout&gt;
 
     &lt;data &gt;
@@ -817,7 +819,7 @@ public boolean longClick(View view) {
 
 <p><strong>toolbar.xml</strong></p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;layout &gt;
     &lt;data&gt;
         &lt;import type=&quot;www.zhang.com.databinding.model.Content&quot;/&gt;
@@ -843,7 +845,7 @@ public boolean longClick(View view) {
 <p>在activity_five.xml中的include属性中定义了一个id,同时又在toolbar.xml中的Toolbar标签中又定义了一个id,其作用是通过binding.toolbar.toolbar等同于Toolbar控件，可以方便做一些操作等(不加id，同样能将变量参数传进去)<br/>
 FiveActivity中</p>
 
-<pre class="line-numbers"><code class="language-java">public class FiveActivity extends AppCompatActivity {
+<pre><code class="language-java">public class FiveActivity extends AppCompatActivity {
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -873,7 +875,7 @@ FiveActivity中</p>
 
 <p><strong>Content</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public class Content extends BaseObservable {
+<pre><code class="language-java">public class Content extends BaseObservable {
     private String title;
     private String subTitle;
 
@@ -906,7 +908,7 @@ FiveActivity中</p>
 
 <p>对于xml文件中控件的赋值，其实也是可以在java文件中，用java来实现的。我就以最上面那个简单的小例子来说，假如给一个TextView设置的id如下：</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView
+<pre><code class="language-markup">&lt;TextView
     android:id=&quot;@+id/name&quot;
     android:layout_width=&quot;wrap_content&quot;
     android:layout_height=&quot;wrap_content&quot;
@@ -915,7 +917,7 @@ FiveActivity中</p>
 
 <p>在Activity中这样赋值：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
@@ -925,7 +927,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <h3 id="toc_17">在布局中使用ViewStub</h3>
 
-<pre class="line-numbers"><code class="language-java">/** 
+<pre><code class="language-java">/** 
  * 为ViewStub设置监听，当显示的时候为它绑定数据，因为当不显示的ViewStub会在视图中消失 
  */  
 vs = (ViewStub) findViewById(R.id.viewstub);  
@@ -950,7 +952,7 @@ public void toggleViewStub(View view) {
 
 <h4 id="toc_19">1、添加RecycleView控件</h4>
 
-<pre class="line-numbers"><code class="language-markup">&lt;!--  
+<pre><code class="language-markup">&lt;!--  
     这里使用到了自定义属性，因为RecycleView里面有setAdapter方法，所以这里可以直接用app:adapter  
 --&gt;  
 &lt;android.support.v7.widget.RecyclerView  
@@ -962,7 +964,7 @@ public void toggleViewStub(View view) {
 
 <h4 id="toc_20">2、为RecycleView定义适配器</h4>
 
-<pre class="line-numbers"><code class="language-java">@Override  
+<pre><code class="language-java">@Override  
 public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {  
     ViewDataBinding viewDataBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), layoutId, parent, false);  
     return new ViewHolder(viewDataBinding);  
@@ -991,7 +993,7 @@ class ViewHolder extends RecyclerView.ViewHolder {
 
 <h4 id="toc_21">3、为RecycleView设置Adapter</h4>
 
-<pre class="line-numbers"><code class="language-java">//这里注意的是一定要是BR.dataInfo不能是其它的常数  
+<pre><code class="language-java">//这里注意的是一定要是BR.dataInfo不能是其它的常数  
 MyAdapter adapter = new MyAdapter(list, R.layout.rv_item, BR.dataInfo);  
 binding.setAdapter(adapter);  
 binding.rv.setLayoutManager(new LinearLayoutManager(this));
@@ -999,14 +1001,14 @@ binding.rv.setLayoutManager(new LinearLayoutManager(this));
 
 <p>这样就大功告成，然而在很多情况我们都需要去对每个Item进行处理，如显示网络图片等等，这里我们就需要使用数据绑定自定义属性的功能，看代码</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;ImageView  
+<pre><code class="language-markup">&lt;ImageView  
     android:layout_width=&quot;150dp&quot;  
     android:layout_height=&quot;90dp&quot;  
     app:imageError=&quot;@{@drawable/android}&quot;  
     app:imagePath=&quot;@{dataInfo.imageUrl}&quot; /&gt;  
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">//当你在一个方法只需要一个参数的时候可以使用@BindingAdapter(&quot;imageUrlStr&quot;)，加上之后就可以在布局文件中直接使用imageUrlStr  
+<pre><code class="language-java">//当你在一个方法只需要一个参数的时候可以使用@BindingAdapter(&quot;imageUrlStr&quot;)，加上之后就可以在布局文件中直接使用imageUrlStr  
 //运行之后就会调用loadImage方法  
 @BindingAdapter(&quot;imageUrlStr&quot;)  
 public static void loadImage(ImageView iv, String url) {  
@@ -1023,7 +1025,7 @@ public static void downloadImage(ImageView iv, String url, Drawable error) {
 
 <p>上面的方法使用的是静态方法，如果你不想使用静态方法你需要重写一个数据绑定组件类去实现DataBindingComponent</p>
 
-<pre class="line-numbers"><code class="language-java">public class MyComponent implements android.databinding.DataBindingComponent {  
+<pre><code class="language-java">public class MyComponent implements android.databinding.DataBindingComponent {  
     private Utils utils;  
     @Override  
     public Utils getUtils() {  
@@ -1037,7 +1039,7 @@ public static void downloadImage(ImageView iv, String url, Drawable error) {
 
 <p>然后你需要在Activity为其进行设置</p>
 
-<pre class="line-numbers"><code class="language-java">//第一种方式  
+<pre><code class="language-java">//第一种方式  
 DataBindingUtil.setDefaultComponent(new MyComponent());  
 //第二种方式  
 ActivityMyListViewBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_my_list_view,new MyComponent());  
@@ -1051,7 +1053,7 @@ DataBindingUtil.bind(root,new MyComponent());
 
 <p><strong>activity_five.xml</strong></p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
 &lt;layout&gt;
 
     &lt;data &gt;
@@ -1083,7 +1085,7 @@ DataBindingUtil.bind(root,new MyComponent());
 
 <p><strong>recycler_item.xml</strong></p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;layout&gt;
     &lt;data&gt;
         &lt;variable
@@ -1110,7 +1112,7 @@ DataBindingUtil.bind(root,new MyComponent());
 
 <p><strong>FiveActivity</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public class FiveActivity extends AppCompatActivity {
+<pre><code class="language-java">public class FiveActivity extends AppCompatActivity {
 
     private ActivityFiveBinding binding;
 
@@ -1156,7 +1158,7 @@ DataBindingUtil.bind(root,new MyComponent());
 
 <p><strong>MyAdapter</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.MyViewHolder&gt; {
+<pre><code class="language-java">public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.MyViewHolder&gt; {
 
     private Context mContext;
     String[] datas;
@@ -1215,7 +1217,7 @@ DataBindingUtil.bind(root,new MyComponent());
 一些属性需要定制绑定逻辑，一个用@BindingAdapter修饰的静态方法可以自定义属性的setter操作。<br/><br/>
 android自身实现了大量的Adapter，你可以在项目module的android.databinding.adapters包下找到这些代码。</p>
 
-<pre class="line-numbers"><code class="language-java">public class CardViewBindingAdapter {
+<pre><code class="language-java">public class CardViewBindingAdapter {
     @BindingAdapter(&quot;contentPadding&quot;)
     public static void setContentPadding(CardView view, int padding) {
         view.setContentPadding(padding, padding, padding, padding);
@@ -1229,14 +1231,14 @@ android自身实现了大量的Adapter，你可以在项目module的android.data
 <li>1、默认的你的自定义的命名空间，在匹配时会被忽略。</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-text">@BindingAdapter(&quot;contentPadding&quot;)
+<pre><code class="language-text">@BindingAdapter(&quot;contentPadding&quot;)
 </code></pre>
 
 <ul>
 <li>2、允许重写android的命名空间。</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-text"> @BindingAdapter(&quot;android:contentPadding&quot;)
+<pre><code class="language-text"> @BindingAdapter(&quot;android:contentPadding&quot;)
 </code></pre>
 
 <p><code>app:contentPadding</code>与<code>android:contentPadding</code>处理行为可以不一样。<br/>
@@ -1244,7 +1246,7 @@ android自身实现了大量的Adapter，你可以在项目module的android.data
 
 <h4 id="toc_24">示例</h4>
 
-<pre class="line-numbers"><code class="language-java">@BindingAdapter({&quot;imageUrl&quot;, &quot;type&quot;, &quot;position&quot;, &quot;debrisfly&quot;, &quot;width&quot;, &quot;height&quot;})
+<pre><code class="language-java">@BindingAdapter({&quot;imageUrl&quot;, &quot;type&quot;, &quot;position&quot;, &quot;debrisfly&quot;, &quot;width&quot;, &quot;height&quot;})
 public static void setImageUrl(SimpleDraweeView view, String url, int type, int position, boolean debrisfly, int width, int height) {
     if (url == null) {
         url = &quot;&quot;;
@@ -1305,7 +1307,7 @@ public static void setImageUrl(SimpleDraweeView view, String url, int type, int 
 <p>需要注意，当你创建的适配器属性与系统默认的产生冲突时，你的自定义适配器将会覆盖掉系统原先定义的注解，这将会产生一些意外的问题。<br/>
 假设需要对下面接口，做适配。</p>
 
-<pre class="line-numbers"><code class="language-java">public interface ILogAction{
+<pre><code class="language-java">public interface ILogAction{
       void login();
       void logout();
 }
@@ -1321,7 +1323,7 @@ public static void setImageUrl(SimpleDraweeView view, String url, int type, int 
 
 <h3 id="toc_25">@BindingBuildInfo</h3>
 
-<pre class="line-numbers"><code class="language-java">@BindingBuildInfo(
+<pre><code class="language-java">@BindingBuildInfo(
 buildId=&quot;3fefc6ba-1e95-4dcf-8ffa-278fe0f449bd&quot;,
 modulePackage=&quot;com.ipudong.library&quot;,
 sdkRoot=&quot;/Users/robert/Library/Android/sdk&quot;,
@@ -1344,7 +1346,7 @@ public class DataBindingInfo {}
 有时候会遇到类型不匹配的问题，比如<code>R.color.white</code>是<code>int</code>，但是通过Data Binding赋值给<code>android:background</code>属性后，需要把<code>int</code>转换为<code>ColorDrawable</code>。</p>
 </blockquote>
 
-<pre class="line-numbers"><code class="language-java">@BindingConversion
+<pre><code class="language-java">@BindingConversion
 public static Drawable convertColorToDrawable(int drawable) {
   return new ColorDrawable(drawable);
 }
@@ -1360,7 +1362,7 @@ public static Drawable convertColorToDrawable(int drawable) {
 
 <p>一些属性虽然拥有setters但是并不与名字相匹配，这些方法的属性可以通过 @BindingMethod &amp;&amp; @BindingMethods 注释 setters。</p>
 
-<pre class="line-numbers"><code class="language-java">@BindingMethods({
+<pre><code class="language-java">@BindingMethods({
        @BindingMethod(type = &quot;android.widget.ImageView&quot;,
                       attribute = &quot;android:tint&quot;,
                       method = &quot;setImageTintList&quot;),
@@ -1371,7 +1373,7 @@ public static Drawable convertColorToDrawable(int drawable) {
 事件的默认值是带有<code>AttrChanged</code>的属性名称。在上面的例子中，默认值是<code>android:textAttrChanged</code>，即使它没有提供。<br/><br/>
 事件属性用于通知数据绑定系统值已更改。开发人员通常会创建一个<code>BindingAdapter</code>来分配事件。比如：  </p>
 
-<pre class="line-numbers"><code class="language-java">@BindingAdapter(value = {&quot;android:beforeTextChanged&quot;, &quot;android:onTextChanged&quot;,
+<pre><code class="language-java">@BindingAdapter(value = {&quot;android:beforeTextChanged&quot;, &quot;android:onTextChanged&quot;,
                           &quot;android:afterTextChanged&quot;, &quot;android:textAttrChanged&quot;},
                           requireAll = false)
  public static void setTextWatcher(TextView view, final BeforeTextChanged before,
@@ -1406,7 +1408,7 @@ public static Drawable convertColorToDrawable(int drawable) {
 
 <p><code>InverseBindingMethod</code>用于标识如何监听对<code>View</code>属性的更改以及要调用的<code>getter</code>方法。<code>InverseBindingMethod</code> 应该与<code>InverseBindingMethods</code>的部分方法相关联。  </p>
 
-<pre class="line-numbers"><code class="language-java">@InverseBindingMethods({@InverseBindingMethod(
+<pre><code class="language-java">@InverseBindingMethods({@InverseBindingMethod(
      type = android.widget.TextView.class,
      attribute = &quot;android:text&quot;,
      event = &quot;android:textAttrChanged&quot;,
@@ -1428,7 +1430,7 @@ public static Drawable convertColorToDrawable(int drawable) {
 
 <p>这个事件也需要配置相关的<code>@BindingAdapter</code>，如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@BindingAdapter(value = {&quot;android:beforeTextChanged&quot;, &quot;android:onTextChanged&quot;,
+<pre><code class="language-java">@BindingAdapter(value = {&quot;android:beforeTextChanged&quot;, &quot;android:onTextChanged&quot;,
                           &quot;android:afterTextChanged&quot;, &quot;android:textAttrChanged&quot;},
                           requireAll = false)
  public static void setTextWatcher(TextView view, final BeforeTextChanged before,
@@ -1480,7 +1482,7 @@ public static Drawable convertColorToDrawable(int drawable) {
 <p><code>addOnPropertyChangedCallback： Model</code>属性改变时回调发生 <br/>
 <code>OnRebindCallback: view</code>发生改变重复绑定时触发</p>
 
-<pre class="line-numbers"><code class="language-java">mModel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+<pre><code class="language-java">mModel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
     @Override
     public void onPropertyChanged(Observable observable, int i) {
         if (i == BR.name) {
@@ -1499,7 +1501,7 @@ public static Drawable convertColorToDrawable(int drawable) {
 <p>通过<code>DataBindingUtil.setDefaultComponent</code>来设置不同环境下不同的<code>Component</code>， <br/>
 设置之后就可以使用该<code>Component</code>提供的<code>Adapter</code>方法，默认不设置是全局使用，可以理解为作用域。</p>
 
-<pre class="line-numbers"><code class="language-java">public interface TestableAdapter {
+<pre><code class="language-java">public interface TestableAdapter {
     @BindingAdapter(&quot;android:src&quot;)
     void setImageUrl(ImageView imageView, String url);
 }
@@ -1539,7 +1541,7 @@ binding = MyLayoutBinding.inflate(layoutInflater, myComponent);
 
 <p>不允许使用混合类型</p>
 
-<pre class="line-numbers"><code class="language-java">&lt;!--值得注意的是  
+<pre><code class="language-java">&lt;!--值得注意的是  
     android:background=&quot;@{boo?@color/red:@drawable/background}&quot;  
     这么写将会发生错误，因为在BindingConversion默认实现为：  
     @BindingConversion  
@@ -1643,6 +1645,8 @@ binding = MyLayoutBinding.inflate(layoutInflater, myComponent);
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -1659,31 +1663,31 @@ binding = MyLayoutBinding.inflate(layoutInflater, myComponent);
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

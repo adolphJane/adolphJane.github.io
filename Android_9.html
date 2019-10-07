@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -115,6 +117,787 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
+			<div class="article">
+                <a class="clearlink" href="15561207869720.html">
+                
+                  <h1>Android-ViewConfiguration解析</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>ViewConfiguration这个类主要定义了UI中所使用到的标准常量，像超时、尺寸、距离，如果我们需要得到这些常量的数据，我们就可以通过这个类来获取，具体方法如下： </p>
+
+<ul>
+<li>获取ViewConfiguration对象，由于ViewConfiguration的构造方法为私有的，只能通过这个静态方法来获取到该对象。 ViewConfiguration configure = ViewConfiguration.get(context); </li>
+<li>通过该对象调用相关的函数，将返回相关的常量数据。</li>
+</ul>
+
+<p>最后附上一些这个类文件源码，这里面所有的方法基本都是用来获取常量数据的，没有什么业务操作。</p>
+
+<pre><code class="language-java">import android.app.AppGlobals;
+import android.content.Context;
+import android.content.res.Configuration;
+import android.content.res.Resources;
+import android.graphics.Point;
+import android.os.RemoteException;
+import android.provider.Settings;
+import android.util.DisplayMetrics;
+import android.util.SparseArray;
+
+/**
+ * 主要用来获取一些在UI中所使用到的标准常量，像超时、尺寸、距离
+ */
+public class ViewConfiguration {
+    /**
+     * 定义了水平滚动条的宽度和垂直滚动条的高度，单位是dip
+     */
+    private static final int SCROLL_BAR_SIZE = 10;
+
+    /**
+     * 滚动条褪去所需要经历的时间，单位：milliseconds
+     */
+    private static final int SCROLL_BAR_FADE_DURATION = 250;
+
+    /**
+     * 滚动条褪去之前的默认时间延迟，单位：milliseconds
+     */
+    private static final int SCROLL_BAR_DEFAULT_DELAY = 300;
+
+    /**
+     * 定义褪去边缘的长度，单位：dip
+     */
+    private static final int FADING_EDGE_LENGTH = 12;
+
+    /**
+     * 按下状态在子控件上的持续时间，单位：milliseconds
+     */
+    private static final int PRESSED_STATE_DURATION = 64;
+
+    /**
+     * 定义一个按下状态转变成长按状态所需要持续的时间，单位：milliseconds
+     */
+    private static final int DEFAULT_LONG_PRESS_TIMEOUT = 500;
+
+    /**
+     * 定义连续重复按键间的时间延迟，单位：milliseconds
+     */
+    private static final int KEY_REPEAT_DELAY = 50;
+
+    /**
+     * 如果用户需要触发全局对话框，例如：关机，锁屏等，需要按下按钮所持续的事件，单位：milliseconds
+     */
+    private static final int GLOBAL_ACTIONS_KEY_TIMEOUT = 500;
+
+    /**
+     * 定义一个触摸事件是点击还是滚动的事件间隔，如果在这个事件内没有移动，就认为这是一个点击，否则就是滚动，单位：milliseconds
+     */
+    private static final int TAP_TIMEOUT = 180;
+
+    /**
+     * Defines the duration in milliseconds we will wait to see if a touch event
+     * is a jump tap. If the user does not complete the jump tap within this interval, it is
+     * considered to be a tap.
+     */
+    private static final int JUMP_TAP_TIMEOUT = 500;
+
+    /**
+     * 定义双击的时间间隔，如果在这个时间内，就认为是双击
+     */
+    private static final int DOUBLE_TAP_TIMEOUT = 300;
+
+    /**
+     * 定义双击最小的时间间隔
+     */
+    private static final int DOUBLE_TAP_MIN_TIME = 40;
+
+    /**
+     * 定义一个触摸板触摸到释放可认为是一个点击事件而不是一个触摸移动手势的最大时间，
+     * 也就是说在这个时间内进行一次触摸和释放操作就可以认为是一次点击事件，单位：milliseconds
+     */
+    private static final int HOVER_TAP_TIMEOUT = 150;
+
+    /**
+     * 定义一个触摸板在触摸释放之前可以移动的最大距离，
+     * 如果在这个距离之内就可以认为是一个点击事件，否则就是一个移动手势，单位：pixels
+     */
+    private static final int HOVER_TAP_SLOP = 20;
+
+    /**
+     * 定义响应显示缩放控制的时间
+     */
+    private static final int ZOOM_CONTROLS_TIMEOUT = 3000;
+
+    /**
+     * Inset in dips to look for touchable content when the user touches the edge of the screen
+     */
+    private static final int EDGE_SLOP = 12;
+
+    /**
+     * 如果我们认为用户正在滚动，这里定义一个触摸事件可以滚动的距离，单位：dips
+     * 注意：这个值在这里定义只是作为那些没有提供上下文Context来决定密度和配置相关值的应用程序的一个备用值。
+     */
+    private static final int TOUCH_SLOP = 8;
+
+    /**
+     * 定义双击事件之间可以移动的距离，单位：dips
+     */
+    private static final int DOUBLE_TAP_TOUCH_SLOP = TOUCH_SLOP;
+
+    /**
+     * 定义用户尝试翻页滚动的触摸移动距离，单位：dips
+     *
+     * 注意：这个值在这里定义只是作为那些没有提供上下文Context来决定密度和配置相关值的应用程序的一个备用值。
+     *
+     */
+    private static final int PAGING_TOUCH_SLOP = TOUCH_SLOP * 2;
+
+    /**
+     * 定义第一次点击和第二次点击可以认为是一次双击之间的距离。单位：dips
+     */
+    private static final int DOUBLE_TAP_SLOP = 100;
+
+    /**
+     * Distance in dips a touch needs to be outside of a window&#39;s bounds for it to
+     * count as outside for purposes of dismissing the window.
+     */
+    private static final int WINDOW_TOUCH_SLOP = 16;
+
+    /**
+     * 一个fling最小的速度，单位：dips/s
+     */
+    private static final int MINIMUM_FLING_VELOCITY = 50;
+
+    /**
+     * 一个fling最大的速度，单位：dips/s
+     */
+    private static final int MAXIMUM_FLING_VELOCITY = 8000;
+
+    /**
+     * 分发一个重复访问事件的延迟事件，单位：milliseconds
+     */
+    private static final long SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS = 100;
+
+    /**
+     * The maximum size of View&#39;s drawing cache, expressed in bytes. This size
+     * should be at least equal to the size of the screen in ARGB888 format.
+     */
+    @Deprecated
+    private static final int MAXIMUM_DRAWING_CACHE_SIZE = 480 * 800 * 4; // ARGB8888
+
+    /**
+     * 滚动和滑动的摩擦系数
+     */
+    private static final float SCROLL_FRICTION = 0.015f;
+
+    /**
+     * Max distance in dips to overscroll for edge effects
+     */
+    private static final int OVERSCROLL_DISTANCE = 0;
+
+    /**
+     * Max distance in dips to overfling for edge effects
+     */
+    private static final int OVERFLING_DISTANCE = 6;
+
+    private final int mEdgeSlop;
+    private final int mFadingEdgeLength;
+    private final int mMinimumFlingVelocity;
+    private final int mMaximumFlingVelocity;
+    private final int mScrollbarSize;
+    private final int mTouchSlop;
+    private final int mDoubleTapTouchSlop;
+    private final int mPagingTouchSlop;
+    private final int mDoubleTapSlop;
+    private final int mWindowTouchSlop;
+    private final int mMaximumDrawingCacheSize;
+    private final int mOverscrollDistance;
+    private final int mOverflingDistance;
+    private final boolean mFadingMarqueeEnabled;
+
+    private boolean sHasPermanentMenuKey;
+    private boolean sHasPermanentMenuKeySet;
+
+    static final SparseArray&lt;ViewConfiguration&gt; sConfigurations =
+            new SparseArray&lt;ViewConfiguration&gt;(2);
+
+    /**
+     * 这个方法被废除了，使用ViewConfiguration.get(Context)}替代
+     */
+    @Deprecated
+    public ViewConfiguration() {
+        mEdgeSlop = EDGE_SLOP;
+        mFadingEdgeLength = FADING_EDGE_LENGTH;
+        mMinimumFlingVelocity = MINIMUM_FLING_VELOCITY;
+        mMaximumFlingVelocity = MAXIMUM_FLING_VELOCITY;
+        mScrollbarSize = SCROLL_BAR_SIZE;
+        mTouchSlop = TOUCH_SLOP;
+        mDoubleTapTouchSlop = DOUBLE_TAP_TOUCH_SLOP;
+        mPagingTouchSlop = PAGING_TOUCH_SLOP;
+        mDoubleTapSlop = DOUBLE_TAP_SLOP;
+        mWindowTouchSlop = WINDOW_TOUCH_SLOP;
+        //noinspection deprecation
+        mMaximumDrawingCacheSize = MAXIMUM_DRAWING_CACHE_SIZE;
+        mOverscrollDistance = OVERSCROLL_DISTANCE;
+        mOverflingDistance = OVERFLING_DISTANCE;
+        mFadingMarqueeEnabled = true;
+    }
+
+    /**
+     * 使用给定的context来创建一个新的配置。这个配置依赖于context里面不同的参数，例如显示的尺寸或者密度
+     * @param context 用来初始化这个view配置的应用上下文环境
+     *
+     * @see #get(android.content.Context)
+     * @see android.util.DisplayMetrics
+     */
+    private ViewConfiguration(Context context) {
+        final Resources res = context.getResources();
+        final DisplayMetrics metrics = res.getDisplayMetrics();
+        final Configuration config = res.getConfiguration();
+        final float density = metrics.density;
+        final float sizeAndDensity;
+        if (config.isLayoutSizeAtLeast(Configuration.SCREENLAYOUT_SIZE_XLARGE)) {
+            sizeAndDensity = density * 1.5f;
+        } else {
+            sizeAndDensity = density;
+        }
+
+        mEdgeSlop = (int) (sizeAndDensity * EDGE_SLOP + 0.5f);
+        mFadingEdgeLength = (int) (sizeAndDensity * FADING_EDGE_LENGTH + 0.5f);
+        mMinimumFlingVelocity = (int) (density * MINIMUM_FLING_VELOCITY + 0.5f);
+        mMaximumFlingVelocity = (int) (density * MAXIMUM_FLING_VELOCITY + 0.5f);
+        mScrollbarSize = (int) (density * SCROLL_BAR_SIZE + 0.5f);
+        mDoubleTapSlop = (int) (sizeAndDensity * DOUBLE_TAP_SLOP + 0.5f);
+        mWindowTouchSlop = (int) (sizeAndDensity * WINDOW_TOUCH_SLOP + 0.5f);
+
+        // Size of the screen in bytes, in ARGB_8888 format
+        final WindowManager win = (WindowManager)context.getSystemService(Context.WINDOW_SERVICE);
+        final Display display = win.getDefaultDisplay();
+        final Point size = new Point();
+        display.getRealSize(size);
+        mMaximumDrawingCacheSize = 4 * size.x * size.y;
+
+        mOverscrollDistance = (int) (sizeAndDensity * OVERSCROLL_DISTANCE + 0.5f);
+        mOverflingDistance = (int) (sizeAndDensity * OVERFLING_DISTANCE + 0.5f);
+
+        if (!sHasPermanentMenuKeySet) {
+            IWindowManager wm = WindowManagerGlobal.getWindowManagerService();
+            try {
+                sHasPermanentMenuKey = !wm.hasNavigationBar();
+                sHasPermanentMenuKeySet = true;
+            } catch (RemoteException ex) {
+                sHasPermanentMenuKey = false;
+            }
+        }
+
+        mFadingMarqueeEnabled = res.getBoolean(
+                com.android.internal.R.bool.config_ui_enableFadingMarquee);
+        mTouchSlop = res.getDimensionPixelSize(
+                com.android.internal.R.dimen.config_viewConfigurationTouchSlop);
+        mPagingTouchSlop = mTouchSlop * 2;
+
+        mDoubleTapTouchSlop = mTouchSlop;
+    }
+
+    /**
+     * 跟上面一个函数一样，只不过上面一个是创建一个ViewConfiguration对象，这里是直接通过这个静态方法返回一个对象
+     */
+    public static ViewConfiguration get(Context context) {
+        final DisplayMetrics metrics = context.getResources().getDisplayMetrics();
+        final int density = (int) (100.0f * metrics.density);
+
+        ViewConfiguration configuration = sConfigurations.get(density);
+        if (configuration == null) {
+            configuration = new ViewConfiguration(context);
+            sConfigurations.put(density, configuration);
+        }
+
+        return configuration;
+    }
+
+    /**
+     * @return 获取水平滚动条的宽带和垂直滚动条的高度
+     *
+     * 这个函数被废除，使用getScaledScrollBarSize()来代替
+     */
+    @Deprecated
+    public static int getScrollBarSize() {
+        return SCROLL_BAR_SIZE;
+    }
+
+    /**
+     * @return 获取水平滚动条的宽带和垂直滚动条的高度
+     */
+    public int getScaledScrollBarSize() {
+        return mScrollbarSize;
+    }
+
+    /**
+     * @return 滚动条褪去的持续时间
+     */
+    public static int getScrollBarFadeDuration() {
+        return SCROLL_BAR_FADE_DURATION;
+    }
+
+    /**
+     * @return 滚动条褪去的延迟时间
+     */
+    public static int getScrollDefaultDelay() {
+        return SCROLL_BAR_DEFAULT_DELAY;
+    }
+
+    /**
+     * @return 褪去边缘的长度
+     *
+     * 这个方法已经废弃，用getScaledFadingEdgeLength()替代.
+     */
+    @Deprecated
+    public static int getFadingEdgeLength() {
+        return FADING_EDGE_LENGTH;
+    }
+
+    /**
+     * @return 褪去边缘的长度，单位：pixels
+     */
+    public int getScaledFadingEdgeLength() {
+        return mFadingEdgeLength;
+    }
+
+    /**
+     * @return 在子控件上按住状态的持续时间
+     */
+    public static int getPressedStateDuration() {
+        return PRESSED_STATE_DURATION;
+    }
+
+    /**
+     * @return 按住状态转变为长按状态需要的时间
+     */
+    public static int getLongPressTimeout() {
+        return AppGlobals.getIntCoreSetting(Settings.Secure.LONG_PRESS_TIMEOUT,
+                DEFAULT_LONG_PRESS_TIMEOUT);
+    }
+
+    /**
+     * @return 重新按键时间
+     */
+    public static int getKeyRepeatTimeout() {
+        return getLongPressTimeout();
+    }
+
+    /**
+     * @return 重复按键延迟时间
+     */
+    public static int getKeyRepeatDelay() {
+        return KEY_REPEAT_DELAY;
+    }
+
+    /**
+     * @return 判断用户是单击还是滚动的时间，在这个时间内没有移动则是单击，否则是滚动
+     */
+    public static int getTapTimeout() {
+        return TAP_TIMEOUT;
+    }
+
+    /**
+     * @return the duration in milliseconds we will wait to see if a touch event
+     * is a jump tap. If the user does not move within this interval, it is
+     * considered to be a tap.
+     */
+    public static int getJumpTapTimeout() {
+        return JUMP_TAP_TIMEOUT;
+    }
+
+    /**
+     * @return 得到双击间隔时间，在这个时间内，则是双击，否则就是单击
+     */
+    public static int getDoubleTapTimeout() {
+        return DOUBLE_TAP_TIMEOUT;
+    }
+
+    /**
+     * @return the minimum duration in milliseconds between the first tap&#39;s
+     * up event and the second tap&#39;s down event for an interaction to be considered a
+     * double-tap.
+     *
+     * @hide
+     */
+    public static int getDoubleTapMinTime() {
+        return DOUBLE_TAP_MIN_TIME;
+    }
+
+    /**
+     * @return the maximum duration in milliseconds between a touch pad
+     * touch and release for a given touch to be considered a tap (click) as
+     * opposed to a hover movement gesture.
+     * @hide
+     */
+    public static int getHoverTapTimeout() {
+        return HOVER_TAP_TIMEOUT;
+    }
+
+    /**
+     * @return the maximum distance in pixels that a touch pad touch can move
+     * before being released for it to be considered a tap (click) as opposed
+     * to a hover movement gesture.
+     * @hide
+     */
+    public static int getHoverTapSlop() {
+        return HOVER_TAP_SLOP;
+    }
+
+    /**
+     * @return Inset in dips to look for touchable content when the user touches the edge of the
+     *         screen
+     *
+     * @deprecated Use {@link #getScaledEdgeSlop()} instead.
+     */
+    @Deprecated
+    public static int getEdgeSlop() {
+        return EDGE_SLOP;
+    }
+
+    /**
+     * @return Inset in pixels to look for touchable content when the user touches the edge of the
+     *         screen
+     */
+    public int getScaledEdgeSlop() {
+        return mEdgeSlop;
+    }
+
+    /**
+     * @return Distance in dips a touch can wander before we think the user is scrolling
+     *
+     * @deprecated Use {@link #getScaledTouchSlop()} instead.
+     */
+    @Deprecated
+    public static int getTouchSlop() {
+        return TOUCH_SLOP;
+    }
+
+    /**
+     * @return Distance in pixels a touch can wander before we think the user is scrolling
+     */
+    public int getScaledTouchSlop() {
+        return mTouchSlop;
+    }
+
+    /**
+     * @return Distance in pixels the first touch can wander before we do not consider this a
+     * potential double tap event
+     * @hide
+     */
+    public int getScaledDoubleTapTouchSlop() {
+        return mDoubleTapTouchSlop;
+    }
+
+    /**
+     * @return Distance in pixels a touch can wander before we think the user is scrolling a full
+     * page
+     */
+    public int getScaledPagingTouchSlop() {
+        return mPagingTouchSlop;
+    }
+
+    /**
+     * @return Distance in dips between the first touch and second touch to still be
+     *         considered a double tap
+     * @deprecated Use {@link #getScaledDoubleTapSlop()} instead.
+     * @hide The only client of this should be GestureDetector, which needs this
+     *       for clients that still use its deprecated constructor.
+     */
+    @Deprecated
+    public static int getDoubleTapSlop() {
+        return DOUBLE_TAP_SLOP;
+    }
+
+    /**
+     * @return Distance in pixels between the first touch and second touch to still be
+     *         considered a double tap
+     */
+    public int getScaledDoubleTapSlop() {
+        return mDoubleTapSlop;
+    }
+
+    /**
+     * Interval for dispatching a recurring accessibility event in milliseconds.
+     * This interval guarantees that a recurring event will be send at most once
+     * during the {@link #getSendRecurringAccessibilityEventsInterval()} time frame.
+     *
+     * @return The delay in milliseconds.
+     *
+     * @hide
+     */
+    public static long getSendRecurringAccessibilityEventsInterval() {
+        return SEND_RECURRING_ACCESSIBILITY_EVENTS_INTERVAL_MILLIS;
+    }
+
+    /**
+     * @return Distance in dips a touch must be outside the bounds of a window for it
+     * to be counted as outside the window for purposes of dismissing that
+     * window.
+     *
+     * @deprecated Use {@link #getScaledWindowTouchSlop()} instead.
+     */
+    @Deprecated
+    public static int getWindowTouchSlop() {
+        return WINDOW_TOUCH_SLOP;
+    }
+
+    /**
+     * @return Distance in pixels a touch must be outside the bounds of a window for it
+     * to be counted as outside the window for purposes of dismissing that window.
+     */
+    public int getScaledWindowTouchSlop() {
+        return mWindowTouchSlop;
+    }
+
+    /**
+     * @return Minimum velocity to initiate a fling, as measured in dips per second.
+     *
+     * @deprecated Use {@link #getScaledMinimumFlingVelocity()} instead.
+     */
+    @Deprecated
+    public static int getMinimumFlingVelocity() {
+        return MINIMUM_FLING_VELOCITY;
+    }
+
+    /**
+     * @return 得到滑动的最小速度, 以像素/每秒来进行计算
+     */
+    public int getScaledMinimumFlingVelocity() {
+        return mMinimumFlingVelocity;
+    }
+
+    /**
+     * @return Maximum velocity to initiate a fling, as measured in dips per second.
+     *
+     * @deprecated Use {@link #getScaledMaximumFlingVelocity()} instead.
+     */
+    @Deprecated
+    public static int getMaximumFlingVelocity() {
+        return MAXIMUM_FLING_VELOCITY;
+    }
+
+    /**
+     * @return 得到滑动的最大速度, 以像素/每秒来进行计算
+     */
+    public int getScaledMaximumFlingVelocity() {
+        return mMaximumFlingVelocity;
+    }
+
+    /**
+     * The maximum drawing cache size expressed in bytes.
+     *
+     * @return the maximum size of View&#39;s drawing cache expressed in bytes
+     *
+     * @deprecated Use {@link #getScaledMaximumDrawingCacheSize()} instead.
+     */
+    @Deprecated
+    public static int getMaximumDrawingCacheSize() {
+        //noinspection deprecation
+        return MAXIMUM_DRAWING_CACHE_SIZE;
+    }
+
+    /**
+     * The maximum drawing cache size expressed in bytes.
+     *
+     * @return the maximum size of View&#39;s drawing cache expressed in bytes
+     */
+    public int getScaledMaximumDrawingCacheSize() {
+        return mMaximumDrawingCacheSize;
+    }
+
+    /**
+     * @return The maximum distance a View should overscroll by when showing edge effects (in
+     * pixels).
+     */
+    public int getScaledOverscrollDistance() {
+        return mOverscrollDistance;
+    }
+
+    /**
+     * @return The maximum distance a View should overfling by when showing edge effects (in
+     * pixels).
+     */
+    public int getScaledOverflingDistance() {
+        return mOverflingDistance;
+    }
+
+    /**
+     * The amount of time that the zoom controls should be
+     * displayed on the screen expressed in milliseconds.
+     *
+     * @return the time the zoom controls should be visible expressed
+     * in milliseconds.
+     */
+    public static long getZoomControlsTimeout() {
+        return ZOOM_CONTROLS_TIMEOUT;
+    }
+
+    /**
+     * The amount of time a user needs to press the relevant key to bring up
+     * the global actions dialog.
+     *
+     * @return how long a user needs to press the relevant key to bring up
+     *   the global actions dialog.
+     */
+    public static long getGlobalActionKeyTimeout() {
+        return GLOBAL_ACTIONS_KEY_TIMEOUT;
+    }
+
+    /**
+     * The amount of friction applied to scrolls and flings.
+     *
+     * @return A scalar dimensionless value representing the coefficient of
+     *         friction.
+     */
+    public static float getScrollFriction() {
+        return SCROLL_FRICTION;
+    }
+
+    /**
+     * Report if the device has a permanent menu key available to the user.
+     *
+     * &lt;p&gt;As of Android 3.0, devices may not have a permanent menu key available.
+     * Apps should use the action bar to present menu options to users.
+     * However, there are some apps where the action bar is inappropriate
+     * or undesirable. This method may be used to detect if a menu key is present.
+     * If not, applications should provide another on-screen affordance to access
+     * functionality.
+     *
+     * @return true if a permanent menu key is present, false otherwise.
+     */
+    public boolean hasPermanentMenuKey() {
+        return sHasPermanentMenuKey;
+    }
+
+    /**
+     * @hide
+     * @return Whether or not marquee should use fading edges.
+     */
+    public boolean isFadingMarqueeEnabled() {
+        return mFadingMarqueeEnabled;
+    }
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/7</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207869675.html">
+                
+                  <h1>Android-Scroller详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>Scroller是一个专门用于处理滚动效果的工具类，可能在大多数情况下，我们直接使用Scroller的场景并不多，但是很多大家所熟知的控件在内部都是使用Scroller来实现的，如ViewPager、ListView等。先撇开Scroller类不谈，其实任何一个控件都是可以滚动的，因为在View类当中有scrollTo()和scrollBy()这两个方法。这两个方法都是用于对View进行滚动的，那么它们之间有什么区别呢？简单点讲，scrollBy()方法是让View相对于当前的位置滚动某段距离，而scrollTo()方法则是让View相对于初始的位置滚动某段距离。<strong>注意，不管是scrollTo()还是scrollBy()方法，滚动的都是该View内部的内容</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017092315061662718986.jpg" alt="2017092315061662718986.jpg"/></p>
+
+<p>第一个参数x表示相对于当前位置横向移动的距离，正值向左移动，负值向右移动，单位是像素。第二个参数y表示相对于当前位置纵向移动的距离，正值向上移动，负值向下移动，单位是像素。</p>
+
+<h2 id="toc_1">scrollBy()</h2>
+
+<p><code>scrollBy()</code>方法则是让View相对于当前的位置滚动某段距离，那每当我们点击一次scrollBy按钮，View的当前位置都进行了变动，因此不停点击会一直向右下方移动。</p>
+
+<h2 id="toc_2">scrollTo()</h2>
+
+<p><code>scrollTo()</code>方法是让View相对于初始的位置滚动某段距离，由于View的初始位置是不变的，因此不管我们点击多少次scrollTo按钮滚动到的都将是同一个位置。</p>
+
+<h2 id="toc_3">Scroller</h2>
+
+<p>目前使用这两个方法完成的滚动效果是跳跃式的，没有任何平滑滚动的效果。没错，只靠scrollTo()和scrollBy()这两个方法是很难完成ViewPager这样的效果的，因此我们还需要借助另外一个关键性的工具，也就我们今天的主角Scroller。<br/>
+Scroller的基本用法其实还是比较简单的，主要可以分为以下几个步骤：</p>
+
+<ul>
+<li>创建Scroller的实例</li>
+<li>调用startScroll()方法来初始化滚动数据并刷新界面 </li>
+<li>重写computeScroll()方法，并在其内部完成平滑滚动的逻辑</li>
+</ul>
+
+<h2 id="toc_4">startScroll(int startX,int startY,int dx,int dy)</h2>
+
+<ul>
+<li>第一个参数是滚动开始时X的坐标</li>
+<li>第二个参数是滚动开始时Y的坐标</li>
+<li>第三个参数是横向滚动的距离,正值表示向左滚动</li>
+<li>第四个参数是纵向滚动的距离，正值表示向上滚动。</li>
+<li>紧接着调用invalidate()方法来刷新界面。</li>
+</ul>
+
+<h2 id="toc_5">startScroll (int startX,  int startY, int dx, int dy, int duration)</h2>
+
+<p>同上</p>
+
+<ul>
+<li>第五个参数是滑动时间</li>
+</ul>
+
+<h2 id="toc_6">computeScroll()</h2>
+
+<p>在其内部完成平滑滚动的逻辑 。在整个后续的平滑滚动过程中，computeScroll()方法是会一直被调用的，因此我们需要不断调用Scroller的computeScrollOffset()方法来进行判断滚动操作是否已经完成了，如果还没完成的话，那就继续调用scrollTo()方法，并把Scroller的curX和curY坐标传入，然后刷新界面从而完成平滑滚动的操作。</p>
+
+<pre><code class="language-java">@Override
+public void computeScroll() {
+    // 第三步，重写computeScroll()方法，并在其内部完成平滑滚动的逻辑
+    if (mScroller.computeScrollOffset()) {
+        scrollTo(mScroller.getCurrX(), mScroller.getCurrY());
+        invalidate();
+    }
+}
+</code></pre>
+
+<h2 id="toc_7">getScrollX() | getScrollY()</h2>
+
+<p>返回当前view在x或者y方向上的滚动距离</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/6/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
 			<div class="article">
                 <a class="clearlink" href="15561207869629.html">
                 
@@ -248,7 +1031,7 @@
 
 <h3 id="toc_2">实现一个最基本的PagerAdapter,必须实现四个方法，在代码里有注释</h3>
 
-<pre class="line-numbers"><code class="language-java">public class AdapterViewpager extends PagerAdapter {
+<pre><code class="language-java">public class AdapterViewpager extends PagerAdapter {
     private List&lt;View&gt; mViewList;
 
     public AdapterViewpager(List&lt;View&gt; mViewList) {
@@ -280,7 +1063,7 @@
 
 <h3 id="toc_3">实现一个最基本的FragmentPagerAdapter</h3>
 
-<pre class="line-numbers"><code class="language-java">public class AdapterFragment extends FragmentPagerAdapter {
+<pre><code class="language-java">public class AdapterFragment extends FragmentPagerAdapter {
     private List&lt;Fragment&gt; mFragments;
 
     public AdapterFragment(FragmentManager fm, List&lt;Fragment&gt; mFragments) {
@@ -317,7 +1100,7 @@
 
 <h3 id="toc_5">例一</h3>
 
-<pre class="line-numbers"><code class="language-java"> public class DepthPageTransformer implements ViewPager.PageTransformer {
+<pre><code class="language-java"> public class DepthPageTransformer implements ViewPager.PageTransformer {
     private static final float MIN_SCALE = 0.75f;
 
     public void transformPage(View view, float position) {
@@ -358,7 +1141,7 @@
 
 <h3 id="toc_6">例二</h3>
 
-<pre class="line-numbers"><code class="language-java"> public class ZoomOutPageTransformer implements ViewPager.PageTransformer {
+<pre><code class="language-java"> public class ZoomOutPageTransformer implements ViewPager.PageTransformer {
     private static final float MIN_SCALE = 0.85f;
     private static final float MIN_ALPHA = 0.5f;
 
@@ -425,7 +1208,7 @@
 <li>PagerAdapter简化</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">public class QuickPageAdapter&lt;T extends View&gt; extends PagerAdapter {
+<pre><code class="language-java">public class QuickPageAdapter&lt;T extends View&gt; extends PagerAdapter {
   private List&lt;T&gt; mList;
 
   public QuickPageAdapter(List&lt;T&gt; mList) {
@@ -461,7 +1244,7 @@
 <li>FragmentPagerAdapter简化</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">public class QuickFragmentPageAdapter&lt;T extends Fragment&gt; extends FragmentPagerAdapter {
+<pre><code class="language-java">public class QuickFragmentPageAdapter&lt;T extends Fragment&gt; extends FragmentPagerAdapter {
   private List&lt;T&gt; mList;
   private String[] mStrings;
 
@@ -578,13 +1361,13 @@
 
 <p><a href="https://github.com/ongakuer/CircleIndicator">https://github.com/ongakuer/CircleIndicator</a></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170221497391480849-687604baae5b6559.gif" alt="20170221497391480849-687604baae5b6559.gif"/><figcaption>20170221497391480849-687604baae5b6559.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170221497391480849-687604baae5b6559.gif" alt="20170221497391480849-687604baae5b6559.gif"/></p>
 
 <p>使用看官方文档很简单。</p>
 
 <p><strong>看一下实现思路</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public void setViewPager(ViewPager viewPager) {
+<pre><code class="language-java">public void setViewPager(ViewPager viewPager) {
         mViewpager = viewPager;
         if (mViewpager != null &amp;&amp; mViewpager.getAdapter() != null) {
             mLastPosition = -1;
@@ -642,7 +1425,7 @@
 
 <p>在design库中有个TabLayout可以为viewPager加上Tab标题头</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -671,11 +1454,11 @@ mTabLayout.setupWithViewPager(mViewPager);//一行代码完成绑定
 
 <p><a href="https://github.com/daimajia/AndroidImageSlider">https://github.com/daimajia/AndroidImageSlider</a></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222397961480849-687604baae5b6559.gif" alt="20170222397961480849-687604baae5b6559.gif"/><figcaption>20170222397961480849-687604baae5b6559.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222397961480849-687604baae5b6559.gif" alt="20170222397961480849-687604baae5b6559.gif"/></p>
 
 <p><strong>源码分析，省略了部分代码</strong>：</p>
 
-<pre class="line-numbers"><code class="language-java">public class SliderLayout extends RelativeLayout{
+<pre><code class="language-java">public class SliderLayout extends RelativeLayout{
 
     private InfiniteViewPager mViewPager;//这个ViewPager只是修改了setPageTransformer方法去掉了if (Build.VERSION.SDK_INT &gt;= 11) 的限制，结合NineOldDroid库让动画兼容低版本
 
@@ -819,7 +1602,7 @@ mTabLayout.setupWithViewPager(mViewPager);//一行代码完成绑定
 
 <p>ViewPager使用时间长了，他的切换效果容易觉得枯燥，形成一种审美疲劳<del>我们需要改变，学习学习改变ViewPager切换时的效果，实现个性化的图片切换</del></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222778011406001554_7159.gif" alt="20170222778011406001554_7159.gif"/><figcaption>20170222778011406001554_7159.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222778011406001554_7159.gif" alt="20170222778011406001554_7159.gif"/></p>
 
 <p>是不是比传统的效果个性很多，嘿嘿<del>其实很简单，学习完这篇博客，保证你可以自定义切换效果，做出各种丧心病狂的切换</del></p>
 
@@ -858,7 +1641,7 @@ positionOffsetPixels这个和positionOffset很像：滑动到下一页，[0,宽�
 
 <p><strong>MainActivity</strong>  </p>
 
-<pre class="line-numbers"><code class="language-java">package com.example.zhy_jazzyviewpager;  
+<pre><code class="language-java">package com.example.zhy_jazzyviewpager;  
   
 import android.app.Activity;  
 import android.os.Bundle;  
@@ -926,7 +1709,7 @@ public class MainActivity extends Activity
 
 <p><strong>主要看自定义的ViewPager</strong>  </p>
 
-<pre class="line-numbers"><code class="language-java">package com.example.zhy_jazzyviewpager;  
+<pre><code class="language-java">package com.example.zhy_jazzyviewpager;  
   
 import java.util.HashMap;  
 import java.util.LinkedHashMap;  
@@ -1037,7 +1820,7 @@ public class MyJazzyViewPager extends ViewPager
 好了，这样就实现了<del>你可以随便写自己喜欢的动画效果，比如在默认上面加个淡入淡出或者神马，随便</del>是不是很随意~~<br/><br/>
 我们的布局文件：  </p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+<pre><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;  
     android:layout_width=&quot;match_parent&quot;  
     android:layout_height=&quot;match_parent&quot;  
@@ -1058,7 +1841,7 @@ public class MyJazzyViewPager extends ViewPager
 
 <p><strong>MainActivity</strong>  </p>
 
-<pre class="line-numbers"><code class="language-java">package com.jfeinstein.jazzyviewpager;  
+<pre><code class="language-java">package com.jfeinstein.jazzyviewpager;  
   
 import com.jfeinstein.jazzyviewpager.JazzyViewPager.TransitionEffect;  
   
@@ -1132,7 +1915,7 @@ mViewPager.setTransitionEffect(TransitionEffect.Stack);<br/><br/>
 它有12中可选的切换效果，其实就是写了12个切换的动画~~~<br/><br/>
 好了，最后附上一个我比较喜欢的效果：Tablet  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201702229727320140722145522928.gif" alt="201702229727320140722145522928.gif"/><figcaption>201702229727320140722145522928.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201702229727320140722145522928.gif" alt="201702229727320140722145522928.gif"/></p>
 
 <h2 id="toc_25">实现个性的ViewPager切换动画 实战PageTransformer（兼容Android3.0以下）</h2>
 
@@ -1153,7 +1936,7 @@ mViewPager.setTransitionEffect(TransitionEffect.Stack);<br/><br/>
 
 <h4 id="toc_28">布局文件</h4>
 
-<pre class="line-numbers"><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+<pre><code class="language-markup">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;  
     android:layout_width=&quot;match_parent&quot;  
     android:layout_height=&quot;match_parent&quot; &gt;  
@@ -1168,7 +1951,7 @@ mViewPager.setTransitionEffect(TransitionEffect.Stack);<br/><br/>
 
 <h4 id="toc_29">MainActivity</h4>
 
-<pre class="line-numbers"><code class="language-java">package com.zhy.demo_zhy_08_viewpageranim;  
+<pre><code class="language-java">package com.zhy.demo_zhy_08_viewpageranim;  
   
 import java.util.ArrayList;  
 import java.util.List;  
@@ -1260,7 +2043,7 @@ public class MainActivity extends Activity
 
 <h5 id="toc_31">DepthPageTransformer</h5>
 
-<pre class="line-numbers"><code class="language-java">
+<pre><code class="language-java">
 public class DepthPageTransformer implements ViewPager.PageTransformer {  
     private static final float MIN_SCALE = 0.75f;  
   
@@ -1302,11 +2085,11 @@ public class DepthPageTransformer implements ViewPager.PageTransformer {
 <p>调用代码：<br/><br/>
 <code>mViewPager.setPageTransformer(true, new DepthPageTransformer());</code><br/><br/>
 效果：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201702227053520141028231742399.gif" alt="201702227053520141028231742399.gif"/><figcaption>201702227053520141028231742399.gif</figcaption></figure>  </p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/201702227053520141028231742399.gif" alt="201702227053520141028231742399.gif"/>  </p>
 
 <h5 id="toc_32">ZoomOutPageTransformer</h5>
 
-<pre class="line-numbers"><code class="language-java">package com.zhy.view;  
+<pre><code class="language-java">package com.zhy.view;  
   
 import android.annotation.SuppressLint;  
 import android.support.v4.view.ViewPager;  
@@ -1366,7 +2149,7 @@ public class ZoomOutPageTransformer implements ViewPager.PageTransformer
 <code>mViewPager.setPageTransformer(true, new ZoomOutPageTransformer());</code>  </p>
 
 <p>效果：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201702224016820141028231715785.gif" alt="201702224016820141028231715785.gif"/><figcaption>201702224016820141028231715785.gif</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/201702224016820141028231715785.gif" alt="201702224016820141028231715785.gif"/></p>
 
 <p>效果图都是google官网上的，我们的测试图会在兼容3.0以下贴出来，不然就重复了~~<br/><br/>
 为ViewPager添加切换就一行代码是不是很happy，可惜是不兼容3.0以下的版本的，该方法的注释上写到：<br/><br/>
@@ -1381,7 +2164,7 @@ setting a PageTransformer prior to Android 3.0 (API 11) will have no effect 在3
 那么我们首先引入nineoldandroids，让动画先能在3.0以下跑再说：<br/><br/>
 修改DepthPageTransformer  </p>
 
-<pre class="line-numbers"><code class="language-java">package com.zhy.view;  
+<pre><code class="language-java">package com.zhy.view;  
   
 import com.nineoldandroids.view.ViewHelper;  
   
@@ -1445,7 +2228,7 @@ public class DepthPageTransformer implements ViewPager.PageTransformer
 为什么呢？<br/><br/>
 我们再去看看setPageTransformer的源码：  </p>
 
-<pre class="line-numbers"><code class="language-java">public void setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer) {  
+<pre><code class="language-java">public void setPageTransformer(boolean reverseDrawingOrder, PageTransformer transformer) {  
        if (Build.VERSION.SDK_INT &gt;= 11) {  
            final boolean hasTransformer = transformer != null;  
            final boolean needsPopulate = hasTransformer != (mPageTransformer != null);  
@@ -1468,7 +2251,7 @@ public class DepthPageTransformer implements ViewPager.PageTransformer
 
 <p>我们将ViewPager的源码拷贝一份至我们的项目中，修改名称为ViewPagerCompat；然后注释掉SDK版本判断那一句  </p>
 
-<pre class="line-numbers"><code class="language-java">public class ViewPagerCompat extends ViewGroup {  
+<pre><code class="language-java">public class ViewPagerCompat extends ViewGroup {  
     public void setPageTransformer(boolean reverseDrawingOrder, ViewPager.PageTransformer transformer) {  
 //        if (Build.VERSION.SDK_INT &gt;= 11)   
         {  
@@ -1527,7 +2310,7 @@ B页的position变化就是[ 1 , 0 ]<br/><br/>
 官方给的例子，有变化透明度、偏移量、缩放的，我们准备来个不一样的，我们变化角度，即rotation;<br/><br/>
 大概的效果是这样的：  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222949151414293422_1593.gif" alt="20170222949151414293422_1593.gif"/><figcaption>20170222949151414293422_1593.gif</figcaption></figure>  </p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170222949151414293422_1593.gif" alt="20170222949151414293422_1593.gif"/>  </p>
 
 <p>下面我们分析代码：<br/><br/>
 我们设置View的旋转中心为：<br/><br/>
@@ -1543,7 +2326,7 @@ B页的position变化就是[ 1 , 0 ]<br/><br/>
 
 <p><strong>完整代码</strong>：  </p>
 
-<pre class="line-numbers"><code class="language-java">package com.zhy.view;  
+<pre><code class="language-java">package com.zhy.view;  
   
 import com.nineoldandroids.view.ViewHelper;  
   
@@ -1691,13 +2474,13 @@ public class RotateDownPageTransformer implements ViewPager.PageTransformer
 
 <p>作为一门静态类型语言， <a href="http://lib.csdn.net/base/java">Java</a> 是有一定的类型推导能力的；那么你是否经常书写:</p>
 
-<pre class="line-numbers"><code class="language-java">String testStr = &quot;testStr&quot;;
+<pre><code class="language-java">String testStr = &quot;testStr&quot;;
 List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </code></pre>
 
 <p>其实大可不必写那些恼火的类型声明的，一看就知道</p>
 
-<pre class="line-numbers"><code class="language-text">testStr, testStrings
+<pre><code class="language-text">testStr, testStrings
 </code></pre>
 
 <p>就知道是什么类型，再这么干不就是废话么！好在IDEA给了我们这个能力。尝试一下这个快捷键吧，会给你惊喜。</p>
@@ -2057,7 +2840,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：当你为某个书签指定了标记，你可以使用快捷键 <code>Ctrl + 标记</code> 来快速跳转到标记处，比如输入<code>Ctrl + 1</code>，跳到标记为1的书签处</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980563110691.gif" alt="20171104150980563110691.gif"/><figcaption>20171104150980563110691.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980563110691.gif" alt="20171104150980563110691.gif"/></p>
 
 <h3 id="toc_58">折叠/展开代码块（Collapse Expand Code Block） </h3>
 
@@ -2071,7 +2854,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：可以在Settig → Editor → General → Code Folding 中设置折叠规则。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980566925324.gif" alt="20171104150980566925324.gif"/><figcaption>20171104150980566925324.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980566925324.gif" alt="20171104150980566925324.gif"/></p>
 
 <h3 id="toc_59">与分支比对（Compare With Branch (Git)）</h3>
 
@@ -2080,7 +2863,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>调用</strong>：Menu → VCS → Git → Compare With Branch</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980569269725.gif" alt="20171104150980569269725.gif"/><figcaption>20171104150980569269725.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980569269725.gif" alt="20171104150980569269725.gif"/></p>
 
 <h3 id="toc_60">与剪切板比对（Compare With Clipboard）</h3>
 
@@ -2089,7 +2872,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>调用</strong>：右键选中的部分，在右键菜单中选择“Compare With Clipboard”。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980574818952.gif" alt="20171104150980574818952.gif"/><figcaption>20171104150980574818952.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980574818952.gif" alt="20171104150980574818952.gif"/></p>
 
 <h3 id="toc_61">上下文信息（Context Info）</h3>
 
@@ -2100,7 +2883,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：个人认为，这个功能更好的用法是快速查看当前类继承的父类或者实现的接口。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980576930267.gif" alt="20171104150980576930267.gif"/><figcaption>20171104150980576930267.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980576930267.gif" alt="20171104150980576930267.gif"/></p>
 
 <h3 id="toc_62">查找操作（Find Action）</h3>
 
@@ -2114,7 +2897,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：当某个操作是有快捷键的，会显示在旁边。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980579558685.gif" alt="20171104150980579558685.gif"/><figcaption>20171104150980579558685.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980579558685.gif" alt="20171104150980579558685.gif"/></p>
 
 <h3 id="toc_63">查找补全（Find Complection）</h3>
 
@@ -2127,7 +2910,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980582766335.gif" alt="20171104150980582766335.gif"/><figcaption>20171104150980582766335.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980582766335.gif" alt="20171104150980582766335.gif"/></p>
 
 <h3 id="toc_64">隐藏所有面板（Hide All Panels）</h3>
 
@@ -2141,7 +2924,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980590796229.gif" alt="20171104150980590796229.gif"/><figcaption>20171104150980590796229.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980590796229.gif" alt="20171104150980590796229.gif"/></p>
 
 <h3 id="toc_65">高亮一切（Hightlight All the Things）</h3>
 
@@ -2159,7 +2942,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980592566371.gif" alt="20171104150980592566371.gif"/><figcaption>20171104150980592566371.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980592566371.gif" alt="20171104150980592566371.gif"/></p>
 
 <h3 id="toc_66">回到上一个工具窗口（Jump to Last Tool Window）</h3>
 
@@ -2168,7 +2951,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：F12</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980594942504.gif" alt="20171104150980594942504.gif"/><figcaption>20171104150980594942504.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980594942504.gif" alt="20171104150980594942504.gif"/></p>
 
 <h3 id="toc_67">上一个编辑位置（Last Edit Location）</h3>
 
@@ -2181,7 +2964,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980596825126.gif" alt="20171104150980596825126.gif"/><figcaption>20171104150980596825126.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980596825126.gif" alt="20171104150980596825126.gif"/></p>
 
 <h3 id="toc_68">在方法和内部类之间跳转（Move Between Methods and Inner Classes）</h3>
 
@@ -2195,7 +2978,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980599666524.gif" alt="20171104150980599666524.gif"/><figcaption>20171104150980599666524.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980599666524.gif" alt="20171104150980599666524.gif"/></p>
 
 <h3 id="toc_69">定位到嵌套文件（Navigate to Nested File）</h3>
 
@@ -2208,7 +2991,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980603928163.gif" alt="20171104150980603928163.gif"/><figcaption>20171104150980603928163.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980603928163.gif" alt="20171104150980603928163.gif"/></p>
 
 <h3 id="toc_70">定位到父类（Navigate to parent）</h3>
 
@@ -2222,7 +3005,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098060573045.gif" alt="2017110415098060573045.gif"/><figcaption>2017110415098060573045.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098060573045.gif" alt="2017110415098060573045.gif"/></p>
 
 <h3 id="toc_71">根据编号打开面板（Open a Panel by Its Number）</h3>
 
@@ -2235,7 +3018,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980607694073.gif" alt="20171104150980607694073.gif"/><figcaption>20171104150980607694073.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980607694073.gif" alt="20171104150980607694073.gif"/></p>
 
 <h3 id="toc_72">在外部打开文件（Open File Externally）</h3>
 
@@ -2248,7 +3031,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980611657644.gif" alt="20171104150980611657644.gif"/><figcaption>20171104150980611657644.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980611657644.gif" alt="20171104150980611657644.gif"/></p>
 
 <h3 id="toc_73">参数信息（Parameter Info）</h3>
 
@@ -2261,7 +3044,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980616259965.gif" alt="20171104150980616259965.gif"/><figcaption>20171104150980616259965.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980616259965.gif" alt="20171104150980616259965.gif"/></p>
 
 <h3 id="toc_74">快速查看定义（Quick Definition Lookup）</h3>
 
@@ -2274,7 +3057,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980618467849.gif" alt="20171104150980618467849.gif"/><figcaption>20171104150980618467849.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980618467849.gif" alt="20171104150980618467849.gif"/></p>
 
 <h3 id="toc_75">最近修改的文件（Recently Changed Files）</h3>
 
@@ -2287,7 +3070,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980621570214.gif" alt="20171104150980621570214.gif"/><figcaption>20171104150980621570214.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980621570214.gif" alt="20171104150980621570214.gif"/></p>
 
 <h3 id="toc_76">最近访问（Recents）</h3>
 
@@ -2300,7 +3083,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980623538307.gif" alt="20171104150980623538307.gif"/><figcaption>20171104150980623538307.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980623538307.gif" alt="20171104150980623538307.gif"/></p>
 
 <h3 id="toc_77">相关文件（Related File）</h3>
 
@@ -2313,7 +3096,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980626239846.gif" alt="20171104150980626239846.gif"/><figcaption>20171104150980626239846.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980626239846.gif" alt="20171104150980626239846.gif"/></p>
 
 <h3 id="toc_78">返回到编辑器（Return to the Editor）</h3>
 
@@ -2330,7 +3113,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980627917706.gif" alt="20171104150980627917706.gif"/><figcaption>20171104150980627917706.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980627917706.gif" alt="20171104150980627917706.gif"/></p>
 
 <h3 id="toc_79">Select In</h3>
 
@@ -2339,7 +3122,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：<code>Alt + F1</code></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980629875328.gif" alt="20171104150980629875328.gif"/><figcaption>20171104150980629875328.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980629875328.gif" alt="20171104150980629875328.gif"/></p>
 
 <h3 id="toc_80">扩大/缩小选择（Extend/Shrink Selection）</h3>
 
@@ -2352,7 +3135,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980631814449.gif" alt="20171104150980631814449.gif"/><figcaption>20171104150980631814449.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980631814449.gif" alt="20171104150980631814449.gif"/></p>
 
 <h3 id="toc_81">Sublime Text式的多处选择（Sublime Text Multi Selection）</h3>
 
@@ -2365,7 +3148,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980633994665.gif" alt="20171104150980633994665.gif"/><figcaption>20171104150980633994665.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980633994665.gif" alt="20171104150980633994665.gif"/></p>
 
 <h3 id="toc_82">文件结构弹窗（The File Structure Popup）</h3>
 
@@ -2384,7 +3167,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>调用</strong>：Menu → Navigate → File Structure</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980637886260.gif" alt="20171104150980637886260.gif"/><figcaption>20171104150980637886260.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980637886260.gif" alt="20171104150980637886260.gif"/></p>
 
 <h3 id="toc_83">切换器（The Switcher）</h3>
 
@@ -2393,7 +3176,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：<code>Ctrl + Tab</code></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980639938168.gif" alt="20171104150980639938168.gif"/><figcaption>20171104150980639938168.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980639938168.gif" alt="20171104150980639938168.gif"/></p>
 
 <h3 id="toc_84">版本控制操作弹窗（VCS Operations Popup）</h3>
 
@@ -2406,7 +3189,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980642462619.gif" alt="20171104150980642462619.gif"/><figcaption>20171104150980642462619.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980642462619.gif" alt="20171104150980642462619.gif"/></p>
 
 <h2 id="toc_85">编码技巧</h2>
 
@@ -2423,7 +3206,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098064433401.gif" alt="2017110415098064433401.gif"/><figcaption>2017110415098064433401.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098064433401.gif" alt="2017110415098064433401.gif"/></p>
 
 <h3 id="toc_87">语句补全（Complete Statement）</h3>
 
@@ -2443,7 +3226,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：如果一个语句已经补全，当你执行该操作时，则会直接跳到下一行，即使光标不在当前行的行末。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980646813298.gif" alt="20171104150980646813298.gif"/><figcaption>20171104150980646813298.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980646813298.gif" alt="20171104150980646813298.gif"/></p>
 
 <h3 id="toc_88">删除行（Delete Line）</h3>
 
@@ -2456,7 +3239,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980648262822.gif" alt="20171104150980648262822.gif"/><figcaption>20171104150980648262822.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980648262822.gif" alt="20171104150980648262822.gif"/></p>
 
 <h3 id="toc_89">行复制（Duplicate Line）</h3>
 
@@ -2469,7 +3252,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980649696731.gif" alt="20171104150980649696731.gif"/><figcaption>20171104150980649696731.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980649696731.gif" alt="20171104150980649696731.gif"/></p>
 
 <h3 id="toc_90">编写正则表达式（Edit Regex）</h3>
 
@@ -2488,7 +3271,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：Alt + Enter → check regexp</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980651186804.gif" alt="20171104150980651186804.gif"/><figcaption>20171104150980651186804.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980651186804.gif" alt="20171104150980651186804.gif"/></p>
 
 <h3 id="toc_91">使用Enter和Tab进行代码补全的差别（Enter vs Tab for Code Completion）</h3>
 
@@ -2498,7 +3281,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>使用Tab时</strong>：从光标处插入补全的代码，并删除后面的代码，直到遇到点号、圆括号、分号或空格为止。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980653180946.gif" alt="20171104150980653180946.gif"/><figcaption>20171104150980653180946.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980653180946.gif" alt="20171104150980653180946.gif"/></p>
 
 <h3 id="toc_92">提取方法（Extract Method）</h3>
 
@@ -2513,7 +3296,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：在提取代码的对话框，你可以更改方法的修饰符和参数的变量名。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980654825229.gif" alt="20171104150980654825229.gif"/><figcaption>20171104150980654825229.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980654825229.gif" alt="20171104150980654825229.gif"/></p>
 
 <h3 id="toc_93">提取参数（Extract Parameter）</h3>
 
@@ -2528,7 +3311,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：通过勾选“delegate”，可以保持旧的方法，重载生成一个新方法。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980656810471.gif" alt="20171104150980656810471.gif"/><figcaption>20171104150980656810471.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980656810471.gif" alt="20171104150980656810471.gif"/></p>
 
 <h3 id="toc_94">提取变量（Extract Variable）</h3>
 
@@ -2543,7 +3326,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：当你需要改变变量声明的类型，例如使用 List 替代 ArrayList，可以按下Shift + Tab，就会显示所有可用的变量类型。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098065961111.gif" alt="2017110415098065961111.gif"/><figcaption>2017110415098065961111.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098065961111.gif" alt="2017110415098065961111.gif"/></p>
 
 <h3 id="toc_95">内置（Inline）</h3>
 
@@ -2557,7 +3340,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980663164666.gif" alt="20171104150980663164666.gif"/><figcaption>20171104150980663164666.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980663164666.gif" alt="20171104150980663164666.gif"/></p>
 
 <h3 id="toc_96">合并行和文本（Join Lines and Literals）</h3>
 
@@ -2571,7 +3354,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：<code>Ctrl + Shift + J</code></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980665059689.gif" alt="20171104150980665059689.gif"/><figcaption>20171104150980665059689.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980665059689.gif" alt="20171104150980665059689.gif"/></p>
 
 <h3 id="toc_97">动态模板（Live Templates）</h3>
 
@@ -2585,7 +3368,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980666912326.gif" alt="20171104150980666912326.gif"/><figcaption>20171104150980666912326.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980666912326.gif" alt="20171104150980666912326.gif"/></p>
 
 <h3 id="toc_98">上下移动行（Move Lines Up Down）</h3>
 
@@ -2594,7 +3377,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：<code>Alt + Shift + Up/Down﻿</code></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980669255942.gif" alt="20171104150980669255942.gif"/><figcaption>20171104150980669255942.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980669255942.gif" alt="20171104150980669255942.gif"/></p>
 
 <h3 id="toc_99">移动方法（Move Methods）</h3>
 
@@ -2607,7 +3390,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980671139565.gif" alt="20171104150980671139565.gif"/><figcaption>20171104150980671139565.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980671139565.gif" alt="20171104150980671139565.gif"/></p>
 
 <h3 id="toc_100">取反补全（Negation Completion）</h3>
 
@@ -2616,7 +3399,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：代码补全的时候，按下!即可（有时需要上下键选中候选项）；</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980672883680.gif" alt="20171104150980672883680.gif"/><figcaption>20171104150980672883680.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980672883680.gif" alt="20171104150980672883680.gif"/></p>
 
 <h3 id="toc_101">后缀补全（Postfix Completion）</h3>
 
@@ -2636,7 +3419,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980676555014.gif" alt="20171104150980676555014.gif"/><figcaption>20171104150980676555014.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980676555014.gif" alt="20171104150980676555014.gif"/></p>
 
 <h3 id="toc_102">重构（Refactor This）</h3>
 
@@ -2645,7 +3428,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：Ctrl + T(OS X)、Ctrl + Alt + Shift + T(Windows/Linux)</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980678781403.gif" alt="20171104150980678781403.gif"/><figcaption>20171104150980678781403.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980678781403.gif" alt="20171104150980678781403.gif"/></p>
 
 <h3 id="toc_103">重命名（Rename）</h3>
 
@@ -2655,7 +3438,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：如果你忘记了这个快捷键，你可以使用快速修复（Quick Fix）的快捷键，它通常包含重命名选项。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980681031115.gif" alt="20171104150980681031115.gif"/><figcaption>20171104150980681031115.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980681031115.gif" alt="20171104150980681031115.gif"/></p>
 
 <h3 id="toc_104">分号/点 补全（Semicolon Dot Completion）</h3>
 
@@ -2665,7 +3448,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：<code>Autocomplete + “.” 或者 “;”</code></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980682566602.gif" alt="20171104150980682566602.gif"/><figcaption>20171104150980682566602.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980682566602.gif" alt="20171104150980682566602.gif"/></p>
 
 <h3 id="toc_105">包裹代码（Surround With）</h3>
 
@@ -2678,7 +3461,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980684453567.gif" alt="20171104150980684453567.gif"/><figcaption>20171104150980684453567.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980684453567.gif" alt="20171104150980684453567.gif"/></p>
 
 <h3 id="toc_106">移除包裹代码（Unwrap Remove）</h3>
 
@@ -2691,7 +3474,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980686388604.gif" alt="20171104150980686388604.gif"/><figcaption>20171104150980686388604.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980686388604.gif" alt="20171104150980686388604.gif"/></p>
 
 <h3 id="toc_107">手动唤出自动补全（Class Name Completion）</h3>
 
@@ -2703,7 +3486,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980688325290.gif" alt="20171104150980688325290.gif"/><figcaption>20171104150980688325290.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980688325290.gif" alt="20171104150980688325290.gif"/></p>
 
 <h2 id="toc_108">调试技巧</h2>
 
@@ -2716,7 +3499,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>相反的操作</strong>：分析传出数据流（Analyze data flow from here），这个将会分析当前选中的变量往下传递的路径，直到结束。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098069615710.gif" alt="2017110415098069615710.gif"/><figcaption>2017110415098069615710.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098069615710.gif" alt="2017110415098069615710.gif"/></p>
 
 <h3 id="toc_110">堆栈追踪分析（Analyze Stacktrace）</h3>
 
@@ -2727,7 +3510,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>更多</strong>：通过使用“ProGuard Unscramble Plugin”插件，也可以分析混淆过的堆栈追踪。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098070105942.gif" alt="2017110415098070105942.gif"/><figcaption>2017110415098070105942.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098070105942.gif" alt="2017110415098070105942.gif"/></p>
 
 <h3 id="toc_111">关联调试程序（Attach Debugger）</h3>
 
@@ -2737,7 +3520,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：无，可以在设置中指定，或者点击工具栏对应的图标。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980702475158.gif" alt="20171104150980702475158.gif"/><figcaption>20171104150980702475158.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980702475158.gif" alt="20171104150980702475158.gif"/></p>
 
 <h3 id="toc_112">条件断点（Conditional Breakpoints）</h3>
 
@@ -2746,7 +3529,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>调用</strong>：右键需要填写表达式的断点，然后输入布尔表达式。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980704751679.gif" alt="20171104150980704751679.gif"/><figcaption>20171104150980704751679.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980704751679.gif" alt="20171104150980704751679.gif"/></p>
 
 <h3 id="toc_113">禁用断点（Disable Breakpoints）</h3>
 
@@ -2755,7 +3538,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>调用</strong>：按住Alt，然后单击断点即可。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980707081458.gif" alt="20171104150980707081458.gif"/><figcaption>20171104150980707081458.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980707081458.gif" alt="20171104150980707081458.gif"/></p>
 
 <h3 id="toc_114">计算表达式（Evaluate Expression）</h3>
 
@@ -2764,7 +3547,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：处在断点状态时，光标放在变量处，按Alt + F8，即可显示计算表达式对话框。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980709720976.gif" alt="20171104150980709720976.gif"/><figcaption>20171104150980709720976.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980709720976.gif" alt="20171104150980709720976.gif"/></p>
 
 <h3 id="toc_115">审查变量（Inspect Variable）</h3>
 
@@ -2773,7 +3556,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：调试状态下，按住Alt键，然后单击表达式即可。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098071175665.gif" alt="2017110415098071175665.gif"/><figcaption>2017110415098071175665.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415098071175665.gif" alt="2017110415098071175665.gif"/></p>
 
 <h3 id="toc_116">日志断点（Logging Breakpoints）</h3>
 
@@ -2782,7 +3565,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>调用</strong>：在断点上右键，取消Suspend的勾选，然后勾选上Log evaluated Expression，并在输入框中输入你要打印的日志信息。</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980717148789.gif" alt="20171104150980717148789.gif"/><figcaption>20171104150980717148789.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980717148789.gif" alt="20171104150980717148789.gif"/></p>
 
 <h3 id="toc_117">标记对象（Mark Object）</h3>
 
@@ -2796,7 +3579,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980728765306.gif" alt="20171104150980728765306.gif"/><figcaption>20171104150980728765306.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980728765306.gif" alt="20171104150980728765306.gif"/></p>
 
 <h3 id="toc_118">显示当前运行点（Show Execution Point）</h3>
 
@@ -2816,7 +3599,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li>快捷键：（Debug时) <code>Alt + F10</code>；</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980726232579.gif" alt="20171104150980726232579.gif"/><figcaption>20171104150980726232579.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980726232579.gif" alt="20171104150980726232579.gif"/></p>
 
 <h3 id="toc_119">终止进程（Stop Process）</h3>
 
@@ -2829,7 +3612,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980743452167.gif" alt="20171104150980743452167.gif"/><figcaption>20171104150980743452167.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980743452167.gif" alt="20171104150980743452167.gif"/></p>
 
 <h3 id="toc_120">临时断点（Temporary Breakpoints）</h3>
 
@@ -2843,7 +3626,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 </ul></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980746471135.gif" alt="20171104150980746471135.gif"/><figcaption>20171104150980746471135.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980746471135.gif" alt="20171104150980746471135.gif"/></p>
 
 <h3 id="toc_121">调用层级树弹窗（The Call Hierarchy Popup）</h3>
 
@@ -2852,7 +3635,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 <li><strong>快捷键</strong>：<code>Ctrl + Alt + H</code></li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980748531704.gif" alt="20171104150980748531704.gif"/><figcaption>20171104150980748531704.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150980748531704.gif" alt="20171104150980748531704.gif"/></p>
 
                         
                       </div>
@@ -2947,7 +3730,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 
 <p><strong>ExecutorService</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public interface ExecutorService extends Executor{
+<pre><code class="language-java">public interface ExecutorService extends Executor{
     void shutdown();//顺次地关闭ExecutorService,停止接收新的任务，等待所有已经提交的任务执行完毕之后，关闭ExecutorService
 
     List&lt;Runnable&gt; shutdownNow();//阻止等待任务启动并试图停止当前正在执行的任务，停止接收新的任务，返回处于等待的任务列表
@@ -2985,7 +3768,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 
 <p><strong>Executor接口</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public interface Executor {
+<pre><code class="language-java">public interface Executor {
 
     void execute(Runnable command);//执行已提交的 Runnable 任务对象。此接口提供一种将任务提交与每个任务将如何运行的机制（包括线程使用的细节、调度等）分离开来的方法
 }
@@ -3006,7 +3789,7 @@ List&lt;String&gt; testStrings = new ArrayList&lt;String&gt;();
 
 <h3 id="toc_8">1.ThreadPoolExecutor构造函数</h3>
 
-<pre class="line-numbers"><code class="language-java">ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue);
+<pre><code class="language-java">ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue);
 ThreadPoolExecutor(int corePoolSize, int maximumPoolSize,long keepAliveTime, TimeUnit unit,BlockingQueue workQueue,RejectedExecutionHandler handler);
 ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue,RejectedExecutionHandler handler) ;
 ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue,ThreadFactory threadFactory, RejectedExecutionHandler handler);
@@ -3127,7 +3910,7 @@ activity中保存数据有两种方式onPause()，onSaveInstance(bundle),  恢�
 
 <ul>
 <li><p>首先在drawable文件夹中添加drawable文件checkbox_style.xml。</p>
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
 &lt;selector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;  <br/>
 &lt;item android:drawable=&quot;@drawable/checkbox_pressed&quot; android:state_checked=&quot;true&quot;/&gt;  <br/>
 &lt;item android:drawable=&quot;@drawable/checkbox_normal&quot; android:state_checked=&quot;false&quot;/&gt;  <br/>
@@ -3137,7 +3920,7 @@ activity中保存数据有两种方式onPause()，onSaveInstance(bundle),  恢�
 <li><p>在values文件夹下的styles.xml文件中添加CustomCheckboxTheme样式。</p></li>
 </ul>
 
-<pre class="line-numbers"><code class="language-markup">&lt;style name=&quot;CustomCheckboxTheme&quot; parent=&quot;@android:style/Widget.CompoundButton.CheckBox&quot;&gt;  
+<pre><code class="language-markup">&lt;style name=&quot;CustomCheckboxTheme&quot; parent=&quot;@android:style/Widget.CompoundButton.CheckBox&quot;&gt;  
     &lt;item name=&quot;android:button&quot;&gt;@drawable/checkbox_style&lt;/item&gt;  
 &lt;/style&gt;
 </code></pre>
@@ -3159,7 +3942,7 @@ style=&quot;@style/CustomCheckboxTheme&quot; /&gt;
 
 <p>RecyclerView的刷新分为内容变化和结构变化，结构变化比如remove和insert等并不会导致viewholder的更新，所以有时候我们使用<code>notifyItemRemoved(position);</code>或者使用<code>notifyItemInserted(position);</code>item的位置并没有发生改变，或者位置发生错乱，很是奇怪诡异，需要重新调用<code>notifyDataSetChanged();</code>才能刷新整个List每个Item的位置，但这样做会使得RecyclerView增加和删除的动画效果没有了。那么要既想没有Bug的插入删除，又想有动画怎么搞呢，只需要刷新删除位置以下的List的Item位置即可，那么幸亏RecyclerView有一个局部刷新的方法：<code>notifyItemRangeChanged(int positionStart, int itemCount)</code>怎么使用呢？ 我们只需要在删除或插入时同时,刷新改变位置item下方的所有Item的位置： 插入动作：</p>
 
-<pre class="line-numbers"><code class="language-java">notifyItemInserted(position);
+<pre><code class="language-java">notifyItemInserted(position);
 if (position != mData.size()) {
    otifyItemRangeChanged(position, mData.size() - position);
  }
@@ -3167,7 +3950,7 @@ if (position != mData.size()) {
 
 <p>删除动作：</p>
 
-<pre class="line-numbers"><code class="language-java"> notifyItemRemoved(position);
+<pre><code class="language-java"> notifyItemRemoved(position);
 if (position != mData.size()) {
    otifyItemRangeChanged(position, mData.size() - position);
  }
@@ -3177,7 +3960,7 @@ if (position != mData.size()) {
 
 <p>在<code>onCreateViewHolder</code>中获取View的时候不指定<code>ViewGroup</code></p>
 
-<pre class="line-numbers"><code class="language-java">@Override  
+<pre><code class="language-java">@Override  
 public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {  
     LayoutInflater layoutInflater = LayoutInflater.from(parent.getContext());  
     View convertView = layoutInflater.inflate(R.layout.item, null, false); // if use parent, only first line will show up  
@@ -3195,7 +3978,7 @@ public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {  
 
 <p>自定义属性一般在<code>onMeasure()</code>方法后才能将XML文件中的自定义设置的属性数值传递进来，无法在<code>setBackground()</code>方法和<code>setText()</code>方法直接调用。如果是想要在代码中设置变量属性，还是直接在自定义控件扩展类中添加新方法进行使用。自定义控件的三个构造类</p>
 
-<pre class="line-numbers"><code class="language-java">public GuideTextView(Context context) //在代码中直接使用
+<pre><code class="language-java">public GuideTextView(Context context) //在代码中直接使用
 public GuideTextView(Context context, AttributeSet attrs) //在xml文件中直接使用时调用
 public GuideTextView(Context context, AttributeSet attrs, int defStyleAttr) //xml文件中使用默认主题时调用
 </code></pre>
@@ -3237,7 +4020,7 @@ public GuideTextView(Context context, AttributeSet attrs, int defStyleAttr) //xm
 
 <p>在根布局中添加ScrollView来存放背景显示内容，中间必须添加一个RelativeLayout或者LinearLayout(如果添加RelativeLayout则ScrollView必须设置属性<code>android:fillViewport=&quot;true&quot;</code>)，在ScrollView控件底下添加EditText所在布局，设置AndroidManifest.xml中<code>android:windowSoftInputMode=&quot;adjustResize|stateHidden&quot;</code>，在代码中设置RelativeLayout中的显示布局的布局属性。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -3297,7 +4080,7 @@ public GuideTextView(Context context, AttributeSet attrs, int defStyleAttr) //xm
 &lt;/RelativeLayout&gt;
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">Rect outRect = new Rect();
+<pre><code class="language-java">Rect outRect = new Rect();
 getWindow().getDecorView().getWindowVisibleDisplayFrame(outRect);
 RelativeLayout.LayoutParams params = (RelativeLayout.LayoutParams) layout.getLayoutParams();
 params.height = outRect.bottom - outRect.top;
@@ -3308,7 +4091,7 @@ layout.setLayoutParams(params);
 
 <p>设置好press、enable属性的对应图片，点击按钮图片形态不响应。必须把默认的按钮图片样式放在最底下，才能实现。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;selector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+<pre><code class="language-markup">&lt;selector xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;item android:drawable=&quot;@drawable/lucky_turntable_pressed_btn&quot; android:state_pressed=&quot;true&quot;/&gt;
     &lt;item android:drawable=&quot;@drawable/lucky_turntable_unable_btn&quot; android:state_enabled=&quot;false&quot;/&gt;
     &lt;item android:drawable=&quot;@drawable/lucky_turntable_focusable_btn&quot;/&gt;
@@ -3320,7 +4103,7 @@ layout.setLayoutParams(params);
 <p>重写dispatchTouchEvent的时候，无论你是return true，亦或是return false都会导致child接受不到事件。<br/>
 <code>return true</code> ： 告诉parent，这个事件我消费了。如果这个是down事件，那么我就会作为一个target或者说handle(事件持有者)，后续的move事件或者up事件等，都会直接分发到我这里，不继续往下分发。 <br/>
 <code>return false</code>：告诉parent，这个事件我不需要，那么会交回给parent的onTouchEvnet处理。只有return <code>super.dispatchTouchEvent</code>的时候才会将事件继续往下传递。<br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170923150616205533627.jpg" alt="20170923150616205533627.jpg"/><figcaption>20170923150616205533627.jpg</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170923150616205533627.jpg" alt="20170923150616205533627.jpg"/></p>
 
 <h2 id="toc_26">五、Android类库使用问题</h2>
 
@@ -3330,7 +4113,7 @@ layout.setLayoutParams(params);
 
 <p>include布局中同样用layout标签包裹，将父布局中的变量以</p>
 
-<pre class="line-numbers"><code class="language-text">app:XXX=&quot;@{XXX}&quot;
+<pre><code class="language-text">app:XXX=&quot;@{XXX}&quot;
 </code></pre>
 
 <p>自定义属性的形式传进去,并在include布局中同样申明XXX相同的变量名以及变量类型，即可进行使用。注意使用在表达式中使用View.VISIBLE设置可视化的时候导入View类，否则会报错。</p>
@@ -3528,7 +4311,7 @@ layout.setLayoutParams(params);
 
 <p>举个例子，你需要在一个activity中注册eventbus事件，然后定义接收方法，这和Android的广播机制很像，你需要首先注册广播，然后需要编写内部类，实现接收广播，然后操作UI,在EventBus中，你同样需要这么做。</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setContentView(R.layout.activity_main);
@@ -3547,7 +4330,7 @@ protected void onDestroy() {
 
 <p>类似广播，但是有别于2.4版本，你不必再去约定OnEvent方法开头了:</p>
 
-<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
 public void helloEventBus(String message){
     mText.setText(message);
 }
@@ -3560,7 +4343,7 @@ public void helloEventBus(String message){
 
 <p>既然你在某个地方订阅了内容，当然就会在某个地方发布消息。举个例子，你的这个activity需要http请求，而http请求你肯定是在异步线程中操作，其返回结果后，你可以这么写：</p>
 
-<pre class="line-numbers"><code class="language-java">String json=&quot;&quot;;
+<pre><code class="language-java">String json=&quot;&quot;;
 EventBus.getDefault().post(json);
 </code></pre>
 
@@ -3574,7 +4357,7 @@ EventBus.getDefault().post(json);
 
 <p>首先你需要定义一个类似pojo类：</p>
 
-<pre class="line-numbers"><code class="language-java">public class MessageEvent {
+<pre><code class="language-java">public class MessageEvent {
   public final String name;
   public final String password;
   public MessageEvent(String name,String password) {
@@ -3590,7 +4373,7 @@ EventBus.getDefault().post(json);
 
 <h3 id="toc_9">当然，你接收的方法也需要改为：</h3>
 
-<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
 public void helloEventBus(MessageEvent message){
     mText.setText(message.name);
 }
@@ -3612,7 +4395,7 @@ Async：发送事件方不需要等待事件处理完毕。这种方式适用于
 
 <p>EventBus除了普通事件也支持粘性事件，这个有点类似广播分类中的粘性广播。本身粘性广播用的就比较少，为了方便理解成订阅在发布事件之后，但同样可以收到事件。订阅/解除订阅和普通事件一样，但是处理订阅函数有所不同，需要注解中添加<code>sticky = true</code></p>
 
-<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,sticky = true) //在ui线程执行
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,sticky = true) //在ui线程执行
     public void onDataSynEvent(DataSynEvent event) {
         Log.e(TAG, &quot;event----&gt;&quot; + event.getCount());
 }
@@ -3637,7 +4420,7 @@ Async：发送事件方不需要等待事件处理完毕。这种方式适用于
 
 <p>事件的优先级类似广播的优先级，优先级越高优先获得消息</p>
 
-<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,priority = 100) //在ui线程执行 优先级100
+<pre><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,priority = 100) //在ui线程执行 优先级100
     public void onDataSynEvent(DataSynEvent event) {
         Log.e(TAG, &quot;event----&gt;&quot; + event.getCount());
 }
@@ -3652,7 +4435,7 @@ Async：发送事件方不需要等待事件处理完毕。这种方式适用于
 
 <p>推荐大家在使用EventBus的时候，创建一个事件类，把你的每一个参数（或者可能发生冲突的参数），封装成一个类：</p>
 
-<pre class="line-numbers"><code class="language-java">public class Event  {  
+<pre><code class="language-java">public class Event  {  
     public static class UserListEvent {  
         public List&lt;User&gt; users ;  
     }
@@ -3667,11 +4450,11 @@ Async：发送事件方不需要等待事件处理完毕。这种方式适用于
 <p>按照Markus Junginger的说法（EventBus创作者），在3.0中，如果你想进一步提升你的app的性能.<br/>
 EventBus提供了一个EventBusAnnotationProcessor注解处理器来在编译期通过读取@Subscribe()注解并解析,处理其中所包含的信息,然后生成java类来保存所有订阅者关于订阅的信息,这样就比在运行时使用反射来获得这些订阅者的信息速度要快.<br/><br/>
 其在编译的时候为注册类构建了一个索引，而不是在运行时，这样的结果是其让EventBus 3.0的性能提升了一倍，相比2.4来说，其会是它的3到6倍。大家可以感受下：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149145841588866.png" alt="20170406149145841588866.png"/><figcaption>20170406149145841588866.png</figcaption></figure>  </p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149145841588866.png" alt="20170406149145841588866.png"/>  </p>
 
 <h3 id="toc_19">具体使用：在build.gradle中添加如下配置</h3>
 
-<pre class="line-numbers"><code class="language-text">buildscript {
+<pre><code class="language-text">buildscript {
     dependencies {
         classpath &#39;com.neenbedankt.gradle.plugins:android-apt:1.8&#39;
     }
@@ -3693,7 +4476,7 @@ apt {
 
 <p>此时编译一次，自动生成生成索引类。在\build\generated\source\apt\PakageName\下看到通过注解分析生成的索引类，这样我们便可以在初始化EventBus时应用我们生成的索引了。自动生成的代码。</p>
 
-<pre class="line-numbers"><code class="language-java">/** This class is generated by EventBus, do not edit. */
+<pre><code class="language-java">/** This class is generated by EventBus, do not edit. */
 public class MyEventBusIndex implements SubscriberInfoIndex {
     private static final Map&lt;Class&lt;?&gt;, SubscriberInfo&gt; SUBSCRIBER_INDEX;
 
@@ -3771,7 +4554,7 @@ public class MyEventBusIndex implements SubscriberInfoIndex {
                         	<h2 id="toc_0">前言</h2>
 
 <p>我相信，在平时的开发过程中，大家一定会或多或少地接触到SQLite。然而在使用它时，我们往往需要做许多额外的工作，像编写 SQL语句与解析查询结果等。所以，适用于Android ORM框架也就孕育而生了，现在市面上主流的框架有OrmLite、SugarORM、Active Android、Realm与greenDAO。但是使用数量最多的还是Realm与greenDAO，所以为了目前的项目需要写个文档记录一下greenDAO的使用。简单的讲，greenDAO是一个将对象映射到SQLite 数据库中的轻量且快速的ORM解决方案。（greenDAO is a light &amp; fast ORM solution that maps objects to SQLite databases.）。<br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144616018213.png" alt="20170406149144616018213.png"/><figcaption>20170406149144616018213.png</figcaption></figure><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144616018213.png" alt="20170406149144616018213.png"/><br/>
 这个图对于理解greenDAO是必不可少的。</p>
 
 <h2 id="toc_1">greenDAO特点</h2>
@@ -3791,14 +4574,14 @@ public class MyEventBusIndex implements SubscriberInfoIndex {
 
 <p><code>apply plugin: &#39;org.greenrobot.greendao&#39;</code>  </p>
 
-<pre class="line-numbers"><code class="language-text">dependencies {
+<pre><code class="language-text">dependencies {
         compile &#39;org.greenrobot:greendao:3.2.0&#39;
 }
 </code></pre>
 
 <h3 id="toc_4">在<code>project</code>的Gradle中配置：</h3>
 
-<pre class="line-numbers"><code class="language-text">buildscript {
+<pre><code class="language-text">buildscript {
     repositories {
         jcenter()
         mavenCentral()
@@ -3811,7 +4594,7 @@ public class MyEventBusIndex implements SubscriberInfoIndex {
 
 <h3 id="toc_5">在app的Gradle配置数据库版本等信息</h3>
 
-<pre class="line-numbers"><code class="language-text">greendao {
+<pre><code class="language-text">greendao {
     schemaVersion 1                         //对应当前数据库版本c
     daoPackage &#39;com.koma.greendao.gen&#39;  //由GreenDao自动生成代码所在的包名，默认的是在项目包下面新建一个gen。
     targetGenDir &#39;src/main/java&#39;        //设置自动生成代码的目录
@@ -3823,16 +4606,16 @@ public class MyEventBusIndex implements SubscriberInfoIndex {
 <h3 id="toc_7">使用流程</h3>
 
 <p>在项目中新建一个表字段的实体类，不需要自己写get和set方法，在生成表的时候会自动生成。不要忘了在类名上标记@Entity注解如图：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144836199963.png" alt="20170406149144836199963.png"/><figcaption>20170406149144836199963.png</figcaption></figure>  </p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144836199963.png" alt="20170406149144836199963.png"/>  </p>
 
 <p>选择build ——Make Project 一切顺利的话则会在包名下生成数据库的操作类，如下图：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144839868744.png" alt="20170406149144839868744.png"/><figcaption>20170406149144839868744.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144839868744.png" alt="20170406149144839868744.png"/></p>
 
 <p>Ps:新建一个实体类，对项目进行<code>Make Project</code>，成功之后会在daoPackage目录下自动生成代码</p>
 
 <h3 id="toc_8">在项目中定义实体类</h3>
 
-<pre class="line-numbers"><code class="language-java">@Entity
+<pre><code class="language-java">@Entity
 public class User  {
     @Id(autoincrement = true)
     private Long id;
@@ -3886,7 +4669,7 @@ public class User  {
 
 <p>一般建议在Application中初始化数据库  </p>
 
-<pre class="line-numbers"><code class="language-java">private void setupDataBase(Context context){
+<pre><code class="language-java">private void setupDataBase(Context context){
     DaoMaster.DevOpenHelper openHelper = new DaoMaster.DevOpenHelper(context,DATA_BASE_NAME);
     Database db = openHelper.getWritableDb();
     DaoMaster daoMaster = new DaoMaster(db);
@@ -3914,7 +4697,7 @@ public static DaoSession getDaoSession(){
 
 <h4 id="toc_13">增：</h4>
 
-<pre class="line-numbers"><code class="language-java">User user = new User(null, name, age, studentId);
+<pre><code class="language-java">User user = new User(null, name, age, studentId);
 userDao.insert(user);
 insert(T entity)       当指定主键在表中存在时会发生异常
 insertOrReplace(T entity)      当指定主键在表中存在时会覆盖数据
@@ -3923,7 +4706,7 @@ insertInTx(Iterable&lt;T&gt; entities)      批量插入数据
 
 <h4 id="toc_14">删：</h4>
 
-<pre class="line-numbers"><code class="language-java">User user = new User(null, name, age, studentId);    
+<pre><code class="language-java">User user = new User(null, name, age, studentId);    
 userDao.delete(user)
  
 delete(T entity)       删除数据
@@ -3935,7 +4718,7 @@ deleteAll()    删除所有数据
 
 <h4 id="toc_15">改：</h4>
 
-<pre class="line-numbers"><code class="language-java">User user = new User(id, name, age, studentId);
+<pre><code class="language-java">User user = new User(id, name, age, studentId);
 userDao.update(user);
  
 update(T entity)       修改数据，主键需相同
@@ -3944,7 +4727,7 @@ updateInTx(Iterable&lt;T&gt; entities)      批量更新数据
 
 <h4 id="toc_16">查：</h4>
 
-<pre class="line-numbers"><code class="language-java">userDao.load(id)
+<pre><code class="language-java">userDao.load(id)
  
 load(K key)    根据id查找数据
 loadByRowId(long rowId)        根据行号查找数据
@@ -3954,14 +4737,14 @@ loadAll()      查找全部数据
 <h5 id="toc_17">查询功能</h5>
 
 <p>GreeDAO提供了各种各种的查询API，参见<a href="http://greenrobot.org/greendao/documentation/queries/">http://greenrobot.org/greendao/documentation/queries/</a><br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144856315135.png" alt="20170406149144856315135.png"/><figcaption>20170406149144856315135.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144856315135.png" alt="20170406149144856315135.png"/></p>
 
 <p>如果需要在控制台查看GreenDao是怎么拼装SQL语句的，在OnCreate()方法中打开下面的开关：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144860095322.png" alt="20170406149144860095322.png"/><figcaption>20170406149144860095322.png</figcaption></figure>  </p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144860095322.png" alt="20170406149144860095322.png"/>  </p>
 
 <h5 id="toc_18">条件查询</h5>
 
-<pre class="line-numbers"><code class="language-java">//查询所有数据  
+<pre><code class="language-java">//查询所有数据  
 public void queryAll() {  
     List&lt;Person&gt; persons = mPersonDao.queryBuilder().list();  
 }  
@@ -4021,23 +4804,23 @@ public void queryLikeDesc() {
 </code></pre>
 
 <p>当上述查询满足不了业务逻辑时，可以自定义查询语句：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144866729492.png" alt="20170406149144866729492.png"/><figcaption>20170406149144866729492.png</figcaption></figure>  </p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144866729492.png" alt="20170406149144866729492.png"/>  </p>
 
 <h5 id="toc_19">多线程查询</h5>
 
 <p>首先来看错误的方法：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017040614914487051050.png" alt="2017040614914487051050.png"/><figcaption>2017040614914487051050.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/2017040614914487051050.png" alt="2017040614914487051050.png"/></p>
 
 <p>错误截图：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017040614914487315508.png" alt="2017040614914487315508.png"/><figcaption>2017040614914487315508.png</figcaption></figure>  </p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/2017040614914487315508.png" alt="2017040614914487315508.png"/>  </p>
 
 <p>从上面可以看出，只能在创建Query对象的线程中调用查询方法！<br/><br/>
 解决方法：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144875721207.png" alt="20170406149144875721207.png"/><figcaption>20170406149144875721207.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144875721207.png" alt="20170406149144875721207.png"/></p>
 
 <h5 id="toc_20">一对一查询</h5>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144879034921.png" alt="20170406149144879034921.png"/><figcaption>20170406149144879034921.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144879034921.png" alt="20170406149144879034921.png"/></p>
 
 <h4 id="toc_21">一对一、一对多关系</h4>
 
@@ -4045,12 +4828,12 @@ public void queryLikeDesc() {
 
 <h5 id="toc_22">一对一：</h5>
 
-<pre class="line-numbers"><code class="language-java">private Long studentId;
+<pre><code class="language-java">private Long studentId;
 @ToOne(joinProperty = &quot;studentId&quot;)
 private Studentstudent;
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">@Generated(hash = 313494093)
+<pre><code class="language-java">@Generated(hash = 313494093)
 public Student getStudent() {
     Long __key = this.studentId;
     if (student__resolvedKey == null || !student__resolvedKey.equals(__key)) {
@@ -4073,13 +4856,13 @@ public Student getStudent() {
 
 <h5 id="toc_23">一对多（有三种映射形式）</h5>
 
-<pre class="line-numbers"><code class="language-java">@ToMany(referencedJoinProperty = &quot;teacherId&quot;)
+<pre><code class="language-java">@ToMany(referencedJoinProperty = &quot;teacherId&quot;)
 private List&lt;Teacher&gt; teacherList;
 </code></pre>
 
 <p><code>referencedJoinProperty</code>：指定目标实体中与源实体相对应的外键。</p>
 
-<pre class="line-numbers"><code class="language-java">@ToMany(joinProperties = {
+<pre><code class="language-java">@ToMany(joinProperties = {
         @JoinProperty(name=&quot;studentTag&quot;,referencedName = &quot;teacherTag&quot;)
 })
 private List&lt;Teacher&gt; teacherList;
@@ -4087,7 +4870,7 @@ private List&lt;Teacher&gt; teacherList;
 
 <p><code>JoinProperty</code>: 对于复杂一点的关系可以定义一组<code>@JoinProperty</code>注解。每个<code>@JoinProperty</code>注解都需要有源实体中的源属性和对应实体中的引用属性。</p>
 
-<pre class="line-numbers"><code class="language-java">@ToMany
+<pre><code class="language-java">@ToMany
 @JoinEntity(
         entity = Teacher.class,
         sourceProperty = &quot;teacherId&quot;,
@@ -4102,7 +4885,7 @@ private List&lt;Teacher&gt; teacherList;
 
 <p>数据库升级最麻烦的就是数据保存的问题，下面是数据库升级时执行的代码。</p>
 
-<pre class="line-numbers"><code class="language-java">/** WARNING: Drops all table on Upgrade! Use only during development. */
+<pre><code class="language-java">/** WARNING: Drops all table on Upgrade! Use only during development. */
 public static class DevOpenHelper extends OpenHelper {
     public DevOpenHelper(Context context, String name) {
         super(context, name);
@@ -4125,7 +4908,7 @@ public static class DevOpenHelper extends OpenHelper {
 
 <h5 id="toc_25">在project的gradle添加</h5>
 
-<pre class="line-numbers"><code class="language-java">allprojects {
+<pre><code class="language-java">allprojects {
     repositories {
         jcenter()
         maven { url &quot;https://jitpack.io&quot; }
@@ -4139,7 +4922,7 @@ public static class DevOpenHelper extends OpenHelper {
 
 <h5 id="toc_27">新建一个类</h5>
 
-<pre class="line-numbers"><code class="language-java">public class MySQLiteOpenHelper extends DaoMaster.OpenHelper{
+<pre><code class="language-java">public class MySQLiteOpenHelper extends DaoMaster.OpenHelper{
     public MySQLiteOpenHelper(Contextcontext,Stringname){
         super(context,name);
     }
@@ -4159,14 +4942,14 @@ public static class DevOpenHelper extends OpenHelper {
 <h2 id="toc_28">实战</h2>
 
 <p>下面就以购物车的实战来使用GreenDao，这里的购物车展示图如下<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144890188892.jpg" alt="20170406149144890188892.jpg"/><figcaption>20170406149144890188892.jpg</figcaption></figure><br/><br/>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170406149144890188892.jpg" alt="20170406149144890188892.jpg"/><br/><br/>
 我们所知道的数据库操作需要：数据库名、表名、字段名，缺一不可，下面就是这三项的创建  </p>
 
 <h3 id="toc_29">一、创建Bean对象（表名和字段名）</h3>
 
 <p>GreenDao需要创建Bean对象之后，该Bean对象就是表名，而它的属性值就是字段名，其 实现是通过注释的方式来实现的，下面是购物车的Bean对象（每个Bean对象对应一张表）  </p>
 
-<pre class="line-numbers"><code class="language-java">@Entity
+<pre><code class="language-java">@Entity
 public class Shop{
 
     //表示为购物车列表
@@ -4199,7 +4982,7 @@ public class Shop{
 
 <h3 id="toc_30">二、创建数据库</h3>
 
-<pre class="line-numbers"><code class="language-java">public class BaseApplication extends Application {
+<pre><code class="language-java">public class BaseApplication extends Application {
 
     private static DaoSession daoSession;
 
@@ -4244,7 +5027,7 @@ public class Shop{
 
 <h3 id="toc_31">三、数据库的增删改查</h3>
 
-<pre class="line-numbers"><code class="language-java">public class LoveDao {
+<pre><code class="language-java">public class LoveDao {
 
     /**
      * 添加数据，如果有重复则覆盖
@@ -4377,1956 +5160,6 @@ public class Shop{
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207869044.html">
-                
-                  <h1>Android ADB 命令</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">查看设备</h2>
-
-<pre class="line-numbers"><code class="language-text">adb devices
-</code></pre>
-
-<p>这个命令是查看当前连接的设备, 连接到计算机的android设备或者模拟器将会列出显示</p>
-
-<h2 id="toc_1">安装软件</h2>
-
-<pre class="line-numbers"><code class="language-text">adb install &lt;apk文件路径&gt;
-</code></pre>
-
-<p>这个命令将指定的apk文件安装到设备上</p>
-
-<h2 id="toc_2">卸载软件</h2>
-
-<pre class="line-numbers"><code class="language-text">adb uninstall &lt;软件名&gt;
-adb uninstall -k &lt;软件名&gt;
-</code></pre>
-
-<p>如果加 -k 参数,为卸载软件但是保留配置和缓存文件.</p>
-
-<h2 id="toc_3">进入设备或模拟器的shell</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell
-</code></pre>
-
-<p>通过上面的命令，就可以进入设备或模拟器的shell环境中，在这个Linux Shell中，你可以执行各种Linux的命令，另外如果只想执行一条shell命令，可以采用以下的方式：</p>
-
-<pre class="line-numbers"><code class="language-text">adb shell [command]
-</code></pre>
-
-<p>如：adb shell dmesg会打印出内核的调试信息。</p>
-
-<h2 id="toc_4">发布端口</h2>
-
-<pre class="line-numbers"><code class="language-text">adb forward tcp:5555 tcp:8000
-</code></pre>
-
-<p>可以设置任意的端口号，做为主机向模拟器或设备的请求端口。如：</p>
-
-<h2 id="toc_5">从电脑上发送文件到设备</h2>
-
-<pre class="line-numbers"><code class="language-text">adb push &lt;本地路径&gt; &lt;远程路径&gt;
-</code></pre>
-
-<p>用push命令可以把本机电脑上的文件或者文件夹复制到设备(手机)</p>
-
-<h2 id="toc_6">从设备上下载文件到电脑</h2>
-
-<pre class="line-numbers"><code class="language-text">adb pull &lt;远程路径&gt; &lt;本地路径&gt;
-</code></pre>
-
-<p>用pull命令可以把设备(手机)上的文件或者文件夹复制到本机电脑</p>
-
-<h2 id="toc_7">查看bug报告</h2>
-
-<pre class="line-numbers"><code class="language-text">adb bugreport
-</code></pre>
-
-<h2 id="toc_8">记录无线通讯日志</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell
-logcat -b radio
-</code></pre>
-
-<p>一般来说，无线通讯的日志非常多，在运行时没必要去记录，但我们还是可以通过命令，设置记录</p>
-
-<h2 id="toc_9">获取设备的ID和序列号</h2>
-
-<pre class="line-numbers"><code class="language-text">adb get-product
-adb get-serialno
-adb shell
-sqlite3 
-</code></pre>
-
-<h2 id="toc_10">adb shell后面跟的命令主要来自</h2>
-
-<pre class="line-numbers"><code class="language-text">源码\system\core\toolbox目录和源码\frameworks\base\cmds目录
-</code></pre>
-
-<h2 id="toc_11">删除系统应用</h2>
-
-<pre class="line-numbers"><code class="language-text">adb remount （重新挂载系统分区，使系统分区重新可写）。
-adb shell
-cd system/app
-rm *.apk
-</code></pre>
-
-<h2 id="toc_12">获取管理员权限</h2>
-
-<pre class="line-numbers"><code class="language-text">adb root
-</code></pre>
-
-<h2 id="toc_13">启动Activity</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell am start -n 包名/包名＋类名（-n 类名,-a action,-d date,-m MIME-TYPE,-c category,-e 扩展数据,等）。
-</code></pre>
-
-<h2 id="toc_14">复制文件</h2>
-
-<pre class="line-numbers"><code class="language-text">你可向一个设备或从一个设备中复制文件,复制一个文件或目录到设备或模拟器上： 
-adb push &lt;source&gt; &lt;destination&gt;&lt;/destination&gt;&lt;/source&gt; 
-如：adb push test.txt /tmp/test.txt 
-从设备或模拟器上复制一个文件或目录： 
-adb pull &lt;source&gt; &lt;destination&gt;&lt;/destination&gt;&lt;/source&gt; 
-如：adb pull /addroid/lib/libwebcore.so .
-</code></pre>
-
-<h2 id="toc_15">搜索模拟器/设备的实例</h2>
-
-<pre class="line-numbers"><code class="language-text">取得当前运行的模拟器/设备的实例的列表及每个实例的状态： 
-adb devices
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/3/5</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869006.html">
-                
-                  <h1>Mac安装配置appium</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>因为公司需求，需要安装Appium来实现对手机APP的自动化测试，提升工作效率。所以来学习并记录一下Appium的安装以及使用的步骤，方便自己以后对App测试环境搭建的操作。</p>
-
-<h2 id="toc_1">一、安装Appium</h2>
-
-<h3 id="toc_2">(二) 安装Homebrew</h3>
-
-<ul>
-<li><code>$ /usr/bin/ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;  #下载</code></li>
-<li><code>$ brew update #更新</code></li>
-<li><code>$ brew -v #查看是否安装好，以及其版本号</code></li>
-</ul>
-
-<h3 id="toc_3">(三) 安装Node.js</h3>
-
-<p>使用homebrew来安装Node.js </p>
-
-<ul>
-<li><code>$ brew install node #安装</code></li>
-<li><code>$ node -v #查看是否安装好，以及其版本号</code></li>
-</ul>
-
-<h3 id="toc_4">(四) 安装npm</h3>
-
-<ul>
-<li><code>$ brew install npm</code></li>
-</ul>
-
-<h3 id="toc_5">(五) 安装appium服务端</h3>
-
-<p>推荐使用cnpm来安装：<a href="https://npm.taobao.org/">淘宝 NPM 镜像</a> 10分钟同步npmjs.org镜像，使用方式和npm完全一致</p>
-
-<ul>
-<li><code>$ npm install cnpm -g --registry=https://registry.npm.taobao.org</code></li>
-<li><code>$ npm view appium versions #查看appium所有的版本号</code></li>
-<li><code>$ cnpm install -g appium --no-cache $ cnpm install -g appium $ cnpm install -g appium-doctor</code></li>
-</ul>
-
-<h3 id="toc_6">(六) 检查appium环境检测</h3>
-
-<p>在环境监测中打叉的就是没安装成功或者环境没有配置完全的</p>
-
-<ul>
-<li><code>appium-doctor</code></li>
-</ul>
-
-<h4 id="toc_7">1、appium环境常见问题解决</h4>
-
-<h5 id="toc_8">(1) Xcode Command Line Tools are NOT installed!</h5>
-
-<pre class="line-numbers"><code class="language-text">- `xcode-select --install   #按照提示安装即可`
-</code></pre>
-
-<h5 id="toc_9">(2) Carthage was NOT found</h5>
-
-<pre class="line-numbers"><code class="language-text">- `$ brew install carthage       #carthage：类似cocoapods管理第三方代码，自动将工程编译为动态库，所以仅支持iOS8以上`
-</code></pre>
-
-<h5 id="toc_10">(3) ANDROID_HOME is NOT set!</h5>
-
-<pre class="line-numbers"><code class="language-text">- 使用最新版本Java
-- 修改Mac的开发环境
-- `vi .bash_profile`
-- `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_111.jdk(版本记得改)/Contents/Home`
-- `export ANDROID_HOME=/Users/YourMacName/Library/Android/sdk`
-- `export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:${JAVA_HOME}/bin`
-- 修改完配置文件记得保存退出，然后`source .bash_profile`
-- 如果有问题记得修改在终端的Shall打开方式，调整为命令
-</code></pre>
-
-<h3 id="toc_11">(七) 安装appium客户端（Python为例）</h3>
-
-<ul>
-<li><code>brew search python   #查看可安装的python版本</code></li>
-<li><code>brew install python3     #安装python3</code></li>
-<li><code>pip install Appium-Python-Client   #安装python客户端</code>  </li>
-</ul>
-
-<h3 id="toc_12">(八) 安装支持iOS测试的插件</h3>
-
-<ul>
-<li><code>$ brew install libimobiledevice --HEAD  # install from HEAD to get important updates</code></li>
-<li><code>$ brew install ideviceinstaller         # 只是对iOS9有用</code></li>
-<li><code>$ npm install -g ios-deploy                # iOS10 以后的版本安装ios-deploy</code></li>
-<li><code>$ sudo gem install xcpretty            # 真机需要安装 xcpretty</code></li>
-</ul>
-
-<h2 id="toc_13">二、Appium测试</h2>
-
-<h3 id="toc_14">(一) iOS模拟器测试</h3>
-
-<ul>
-<li><code>xcodebuild -sdk iphonesimulator   #在xcodeproj项目工程目录下执行，编译生成build文件夹，并在其中生成app文件</code></li>
-<li><code>npm install -g authorize-ios   #安装iOS模拟器启动器</code> </li>
-<li><code>sudo authorize-ios   #启动iOS模拟器</code> </li>
-<li><code>appium &amp;    #启动appium服务器</code> </li>
-<li><code>python ***.py     #另开一个终端执行python脚本</code> </li>
-<li>iOS模拟器自动开启，安装应用并开始执行测试脚本</li>
-</ul>
-
-<h3 id="toc_15">(二) Android模拟器测试</h3>
-
-<ul>
-<li><code>appium -a 127.0.0.1 -p 4723 -U db3489d --no-reset</code></li>
-</ul>
-
-<h2 id="toc_16">三、Appium命令</h2>
-
-<h3 id="toc_17">(一) 服务端启动命令</h3>
-
-<p><strong>服务器标志</strong><br/>
-所有的标志都是可选的，但是有一些标志需要组合在一起才能生效。</p>
-
-<table>
-<thead>
-<tr>
-<th>标志</th>
-<th>默认值</th>
-<th>描述</th>
-<th>例子</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>--shell</td>
-<td>null</td>
-<td>进入 REPL 模式</td>
-<td></td>
-</tr>
-<tr>
-<td>--localizable-strings-dir</td>
-<td>en.lproj</td>
-<td>IOS only: 定位 .strings所在目录的相对路径</td>
-<td>--localizable-strings-dir en.lproj</td>
-</tr>
-<tr>
-<td>--app</td>
-<td>null</td>
-<td>iOS: 基于模拟器编译的 app 的绝对路径或者设备目标的 bundle_id； Android: apk 文件的绝对路径--app /abs/path/to/my.app</td>
-<td></td>
-</tr>
-<tr>
-<td>--ipa</td>
-<td>null</td>
-<td>(IOS-only) .ipa 文件的绝对路径</td>
-<td>--ipa /abs/path/to/my.ipa</td>
-</tr>
-<tr>
-<td>-U, --udid</td>
-<td>null</td>
-<td>连接物理设备的唯一设备标识符</td>
-<td>--udid 1adsf-sdfas-asdf-123sdf</td>
-</tr>
-<tr>
-<td>-a, --address</td>
-<td>0.0.0.0</td>
-<td>监听的 ip 地址</td>
-<td>--address 0.0.0.0</td>
-</tr>
-<tr>
-<td>-p, --port</td>
-<td>4723</td>
-<td>监听的端口</td>
-<td>--port 4723</td>
-</tr>
-<tr>
-<td>-ca, --callback-address</td>
-<td>null</td>
-<td>回调IP地址 (默认: 相同的IP地址)</td>
-<td>--callback-address 127.0.0.1</td>
-</tr>
-<tr>
-<td>-cp, --callback-port</td>
-<td>null</td>
-<td>回调端口号 (默认: 相同的端口号)</td>
-<td>--callback-port 4723</td>
-</tr>
-<tr>
-<td>-bp, --bootstrap-port</td>
-<td>4724</td>
-<td>(Android-only) 连接设备的端口号</td>
-<td>--bootstrap-port 4724</td>
-</tr>
-<tr>
-<td>-k, --keep-artifacts</td>
-<td>false</td>
-<td>弃用，无效。trace信息现在保留tmp目录下，每次运行前会清除该目录中的信息。 也可以参考 –trace-dir 。</td>
-<td></td>
-</tr>
-<tr>
-<td>-r, --backend-retries</td>
-<td>3</td>
-<td>(iOS-only) 遇到 crash 或者 超时，Instrument 重新启动的次数。</td>
-<td>--backend-retries 3</td>
-</tr>
-<tr>
-<td>--session-override</td>
-<td>false</td>
-<td>允许 session 被覆盖 (冲突的话)</td>
-<td></td>
-</tr>
-<tr>
-<td>--full-reset</td>
-<td>false</td>
-<td>(iOS) 删除整个模拟器目录。 (Android) 通过卸载应用（而不是清除数据）重置应用状态。在 Android 上，session 完成后也会删除应用。</td>
-<td></td>
-</tr>
-<tr>
-<td>--no-reset</td>
-<td>false</td>
-<td>session 之间不重置应用状态 (iOS: 不删除应用的 plist 文件； Android: 在创建一个新的 session 前不删除应用。)</td>
-<td></td>
-</tr>
-<tr>
-<td>-l, --pre-launch</td>
-<td>false</td>
-<td>在第一个 session 前，预启动应用 (iOS 需要 –app 参数，Android 需要 –app-pkg 和 –app-activity)</td>
-<td></td>
-</tr>
-<tr>
-<td>-lt, --launch-timeout  90000   (iOS-only) 等待 Instruments 启动的时间</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>-g, --log</td>
-<td>null</td>
-<td>将日志输出到指定文件</td>
-<td>--log /path/to/appium.log</td>
-</tr>
-<tr>
-<td>--log-level</td>
-<td>debug</td>
-<td>日志级别; 默认 (console[:file]): debug[:debug]</td>
-<td>--log-level debug</td>
-</tr>
-<tr>
-<td>--log-timestamp</td>
-<td>false</td>
-<td>在终端输出里显示时间戳</td>
-<td></td>
-</tr>
-<tr>
-<td>--local-timezone</td>
-<td>false</td>
-<td>使用本地时间戳</td>
-<td></td>
-</tr>
-<tr>
-<td>--log-no-colors</td>
-<td>false</td>
-<td>不在终端输出中显示颜色</td>
-<td></td>
-</tr>
-<tr>
-<td>-G, --webhook</td>
-<td>null</td>
-<td>同时发送日志到 HTTP 监听器</td>
-<td>--webhook localhost:9876</td>
-</tr>
-<tr>
-<td>--native-instruments-lib</td>
-<td>false</td>
-<td>(IOS-only) iOS 内建了一个怪异的不可能避免的延迟。我们在 Appium 里修复了它。如果你想用原来的，你可以使用这个参数。</td>
-<td></td>
-</tr>
-<tr>
-<td>--app-pkg</td>
-<td>null</td>
-<td>(Android-only) 你要运行的apk的java包。 (例如， com.example.android.myApp)</td>
-<td>--app-pkg com.example.android.myApp</td>
-</tr>
-<tr>
-<td>--app-activity</td>
-<td>null</td>
-<td>(Android-only) 打开应用时，启动的 Activity 的名字(比如， MainActivity)</td>
-<td>--app-activity MainActivity</td>
-</tr>
-<tr>
-<td>--app-wait-package</td>
-<td>false</td>
-<td>(Android-only) 你想等待的 Activity 的包名。(比如， com.example.android.myApp)</td>
-<td>--app-wait-package com.example.android.myApp</td>
-</tr>
-<tr>
-<td>--app-wait-activity</td>
-<td>false</td>
-<td>(Android-only) 你想等待的 Activity 名字(比如， SplashActivity)</td>
-<td>--app-wait-activity SplashActivity</td>
-</tr>
-<tr>
-<td>--android-coverage</td>
-<td>false</td>
-<td>(Android-only) 完全符合条件的 instrumentation 类。 作为命令 adb shell am instrument -e coverage true -w 的 -w 的参数</td>
-<td>--android-coverage com.my.Pkg/com.my.Pkg.instrumentation.MyInstrumentation</td>
-</tr>
-<tr>
-<td>--avd</td>
-<td>null</td>
-<td>(Android-only) 要启动的 avd 的名字</td>
-<td></td>
-</tr>
-<tr>
-<td>--avd-args</td>
-<td>null</td>
-<td>(Android-only) 添加额外的参数给要启动avd</td>
-<td>--avd-args -no-snapshot-load</td>
-</tr>
-<tr>
-<td>--device-ready-timeout</td>
-<td>5</td>
-<td>(Android-only) 等待设备准备好的时间，以秒为单位</td>
-<td>--device-ready-timeout 5</td>
-</tr>
-<tr>
-<td>--safari</td>
-<td>false</td>
-<td>(IOS-Only) 使用 Safari 应用</td>
-<td></td>
-</tr>
-<tr>
-<td>--device-name</td>
-<td>null</td>
-<td>待使用的移动设备名字</td>
-<td>--device-name iPhone Retina (4-inch), Android Emulator</td>
-</tr>
-<tr>
-<td>--platform-name</td>
-<td>null</td>
-<td>移动平台的名称: iOS, Android, or FirefoxOS</td>
-<td>--platform-name iOS</td>
-</tr>
-<tr>
-<td>--platform-version</td>
-<td>null</td>
-<td>移动平台的版本</td>
-<td>--platform-version 7.1</td>
-</tr>
-<tr>
-<td>--automation-name</td>
-<td>null</td>
-<td>自动化工具的名称: Appium or Selendroid</td>
-<td>--automation-name Appium</td>
-</tr>
-<tr>
-<td>--browser-name</td>
-<td>null</td>
-<td>移动浏览器的名称: Safari or Chrome</td>
-<td>--browser-name Safari</td>
-</tr>
-<tr>
-<td>--default-device, -dd</td>
-<td>false</td>
-<td>(IOS-Simulator-only) 使用instruments自己启动的默认模拟器</td>
-<td></td>
-</tr>
-<tr>
-<td>--force-iphone</td>
-<td>false</td>
-<td>(IOS-only) 无论应用要用什么模拟器，强制使用 iPhone 模拟器</td>
-<td></td>
-</tr>
-<tr>
-<td>--force-ipad</td>
-<td>false</td>
-<td>(IOS-only) 无论应用要用什么模拟器，强制使用 iPad 模拟器</td>
-<td></td>
-</tr>
-<tr>
-<td>--language</td>
-<td>null</td>
-<td>iOS / Android 模拟器的语言</td>
-<td>--language en</td>
-</tr>
-<tr>
-<td>--locale</td>
-<td>null</td>
-<td>Locale for the iOS simulator / Android Emulator</td>
-<td>--locale en_US</td>
-</tr>
-<tr>
-<td>--calendar-format</td>
-<td>null</td>
-<td>(IOS-only) iOS 模拟器的日历格式</td>
-<td>--calendar-format gregorian</td>
-</tr>
-<tr>
-<td>--orientation</td>
-<td>null</td>
-<td>(IOS-only) 初始化请求时，使用 LANDSCAPE (横屏) 或者 PORTRAIT (竖屏)</td>
-<td>--orientation LANDSCAPE</td>
-</tr>
-<tr>
-<td>--tracetemplate</td>
-<td>null</td>
-<td>(IOS-only) 指定 Instruments 使用的 tracetemplate 文件</td>
-<td>--tracetemplate /Users/me/Automation.tracetemplate</td>
-</tr>
-<tr>
-<td>--show-sim-log</td>
-<td>false</td>
-<td>(IOS-only) 如果设置了， iOS 模拟器的日志会写到终端上来</td>
-<td></td>
-</tr>
-<tr>
-<td>--show-ios-log</td>
-<td>false</td>
-<td>(IOS-only) 如果设置了， iOS 系统的日志会写到终端上来</td>
-<td></td>
-</tr>
-<tr>
-<td>--nodeconfig</td>
-<td>null</td>
-<td>指定 JSON 格式的配置文件 ，用来在 selenium grid 里注册 appiumd</td>
-<td>--nodeconfig /abs/path/to/nodeconfig.json</td>
-</tr>
-<tr>
-<td>-ra, --robot-address</td>
-<td>0.0.0.0</td>
-<td>robot 的 ip 地址</td>
-<td>--robot-address 0.0.0.0</td>
-</tr>
-<tr>
-<td>-rp, --robot-port</td>
-<td>-1</td>
-<td>robot 的端口地址</td>
-<td>--robot-port 4242</td>
-</tr>
-<tr>
-<td>--selendroid-port</td>
-<td>8080</td>
-<td>用来和 Selendroid 交互的本地端口</td>
-<td>--selendroid-port 8080</td>
-</tr>
-<tr>
-<td>--chromedriver-port</td>
-<td>9515</td>
-<td>ChromeDriver运行的端口</td>
-<td>--chromedriver-port 9515</td>
-</tr>
-<tr>
-<td>--chromedriver-executable</td>
-<td>null</td>
-<td>ChromeDriver 可执行文件的完整路径</td>
-<td></td>
-</tr>
-<tr>
-<td>--use-keystore</td>
-<td>false</td>
-<td>(Android-only) 设置签名 apk 的 keystore</td>
-<td></td>
-</tr>
-<tr>
-<td>--keystore-path</td>
-<td>(Android-only) keystore 的路径</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>--keystore-password</td>
-<td>android</td>
-<td>(Android-only) keystore 的密码</td>
-<td></td>
-</tr>
-<tr>
-<td>--key-alias</td>
-<td>androiddebugkey</td>
-<td>(Android-only) Key 的别名</td>
-<td></td>
-</tr>
-<tr>
-<td>--key-password</td>
-<td>android</td>
-<td>(Android-only) Key 的密码</td>
-<td></td>
-</tr>
-<tr>
-<td>--show-config</td>
-<td>false</td>
-<td>打印 Appium 服务器的配置信息，然后退出</td>
-<td></td>
-</tr>
-<tr>
-<td>--no-perms-check</td>
-<td>false</td>
-<td>跳过Appium对是否可以读/写必要文件的检查</td>
-<td></td>
-</tr>
-<tr>
-<td>--command-timeout</td>
-<td>60</td>
-<td>默认所有会话的接收命令超时时间 (在超时时间内没有接收到新命令，自动关闭会话)。 会被新的超时时间覆盖</td>
-<td></td>
-</tr>
-<tr>
-<td>--keep-keychains</td>
-<td>false</td>
-<td>(iOS) 当 Appium 启动或者关闭的时候，是否保留 keychains (Library/Keychains)</td>
-<td></td>
-</tr>
-<tr>
-<td>--strict-caps</td>
-<td>false</td>
-<td>如果所选设备是appium不承认的有效设备，会导致会话失败</td>
-<td></td>
-</tr>
-<tr>
-<td>--isolate-sim-device</td>
-<td>false  Xcode 6存在一个bug，那就是一些平台上如果其他模拟器设备先被删除时某个特定的模拟器只能在没有任何错误的情况下被建立。这个选项导致了Appium不得不删除除了正在使用设备以外其他所有的设备。请注意这是永久性删除，你可以使用simctl或xcode管理被Appium使用的设备类别。</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>--tmp</td>
-<td>null</td>
-<td>可以被Appium用来管理临时文件的目录（绝对路径），比如存放需要移动的内置iOS应用程序。 默认的变量为 APPIUM_TMP_DIR ，在 *nix/Mac 为 /tmp 在windows上使用环境便令 TEMP 设定的目录。</td>
-<td></td>
-</tr>
-<tr>
-<td>--trace-dir</td>
-<td>null</td>
-<td>用于保存iOS instruments trace的 appium 目录，是绝对路径， 默认为 /appium-instruments</td>
-<td></td>
-</tr>
-<tr>
-<td>--intent-action</td>
-<td>android.intent.action.MAIN</td>
-<td>(Android-only) 用于启动 activity 的intent action</td>
-<td>--intent-action android.intent.action.MAIN</td>
-</tr>
-<tr>
-<td>--intent-category</td>
-<td>android.intent.category.LAUNCHER</td>
-<td>(Android-only) 用于启动 activity 的intent category</td>
-<td>--intent-category android.intent.category.APP_CONTACTS</td>
-</tr>
-<tr>
-<td>--intent-flags</td>
-<td>0x10200000</td>
-<td>(Android-only) 启动 activity 的标志</td>
-<td>--intent-flags 0x10200000</td>
-</tr>
-<tr>
-<td>--intent-args</td>
-<td>null</td>
-<td>(Android-only) 启动 activity 时附带额外的 intent 参数</td>
-<td>--intent-args 0x10200000</td>
-</tr>
-<tr>
-<td>--suppress-adb-kill-server</td>
-<td>false</td>
-<td>(Android-only) 如果被设定，阻止Appium杀掉adb实例。</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="toc_18">(二) Android测试用例编写</h3>
-
-<h4 id="toc_19">1、例子:</h4>
-
-<pre class="line-numbers"><code class="language-python">import os
-
-import unittest
-from appium import webdriver
-from time import sleep
-
-PATH = lambda p: os.path.abspath(
-    os.path.join(os.path.dirname(__file__),p)
-)
-
-class XingQiuAndroidTests(unittest.TestCase):
-
-    def setUp(self):
-        desired_caps = {}
-        desired_caps[&#39;deviceName&#39;] = &#39;emulator-5554&#39;  #adb devices查到的设备名
-        desired_caps[&#39;platformName&#39;] = &#39;Android&#39;
-        desired_caps[&#39;platformVersion&#39;] = &#39;4.4&#39;
-        desired_caps[&#39;app&#39;] = PATH(
-            &#39;../../../Users/jiangruoming/Desktop/***.apk&#39;
-        )
-        desired_caps[&#39;appPackage&#39;] = &#39;com.***.***&#39;  #被测App的包名
-        desired_caps[&#39;appActivity&#39;] = &#39;.****&#39; #启动时的Activity
-
-        self.driver = webdriver.Remote(&#39;http://localhost:4723/wd/hub&#39;, desired_caps)
-
-    #earDown 方法在每个测试方法执行后调用，这个地方做所有清理工作，如退出
-    def tearDown(self):
-        self.driver.quit()
-
-    #放置的就是我们的测试脚本了，这部分我们并不陌生；因为我们执行的脚本就在这里。
-    def test_add_contacts(self):
-        el = self.driver.find_element_by_id(&quot;com.***.***:id/sign_phone&quot;)
-        el.click()
-
-        phone_number = self.driver.find_element_by_id(&quot;com.***.***:id/et_user_phone&quot;)
-        code = self.driver.find_element_by_id(&quot;com.***.***:id/et_smscode&quot;)
-        phone_number.send_keys(&quot;*********&quot;)
-        code.send_keys(&quot;****&quot;)
-
-        btn = self.driver.find_element_by_id(&quot;com.***.***:id/btn_finish&quot;)
-        btn.click()
-
-if __name__ == &#39;__main__&#39;:
-    suite = unittest.TestLoader().loadTestsFromTestCase(XingQiuAndroidTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-</code></pre>
-
-<h4 id="toc_20">2、测试流程</h4>
-
-<h5 id="toc_21">(1) 启动Appium</h5>
-
-<p><code>appium -a 127.0.0.1 -p 4723 --log /path/to/appium.log</code></p>
-
-<h5 id="toc_22">(2) 启动Android模拟器</h5>
-
-<p>由于测试apk不支持X86平台，所以Genymotion无法支持运行，原生arm模拟器运行过慢(胃都等疼了)。试过多个模拟器后，最终选定了夜神模拟器，效果还是不错的。但是由于其主要用于PC平台运行Android游戏，所以用于开发平台还是需要进行配置。</p>
-
-<h6 id="toc_23">a、adb配置</h6>
-
-<p>在Mac环境中加入adb的环境变量<br/><br/>
-<code>vi .bash_profile</code><br/><br/>
-<code>export PATH=/Users/Path/To/Android/sdk/platform-tools/:$PATH</code><br/><br/>
-<code>source .bash_profile</code>  </p>
-
-<h6 id="toc_24">b、adb连接</h6>
-
-<p>之后进入夜神的包内容中在adb所在文件夹运行adb连接命令<br/><br/>
-<code>adb connect 127.0.0.1:62001</code><br/>
-这样<code>adb devices</code>就能显示夜神模拟器的Device ID</p>
-
-<h5 id="toc_25">(3) 运行脚本</h5>
-
-<h3 id="toc_26">(三) iOS测试用例编写</h3>
-
-<h4 id="toc_27">1、例子:</h4>
-
-<pre class="line-numbers"><code class="language-python">import unittest
-import os
-from appium import webdriver
-from time import sleep
-
-
-PATH = lambda p: os.path.abspath(
-    os.path.join(os.path.dirname(__file__),p)
-)
-
-class XingQiuiOSTests(unittest.TestCase):
-
-    def setUp(self):
-        desired_caps = {}
-        desired_caps[&#39;platformName&#39;] = &#39;iOS&#39;
-        desired_caps[&#39;platformVersion&#39;] = &#39;10.2&#39;
-        desired_caps[&#39;deviceName&#39;] = &#39;iPhone Simulator&#39;
-        desired_caps[&#39;app&#39;] = PATH(&#39;../../../Users/jiangruoming/Desktop/***.app&#39;)
-
-        self.driver = webdriver.Remote(&#39;http://localhost:4723/wd/hub&#39;, desired_caps)
-
-    #def tearDown(self):
-        #self.driver.quit()
-
-    def test_add_contacts(self):
-
-        el2 = self.driver.find_elements_by_accessibility_id(&#39;Allow&#39;)
-
-        if el2:
-            el2[0].click()
-
-        el3 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeButton&#39;)[0]
-        el3.click()
-
-        el4 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeTextField&#39;)[0]
-        el4.send_keys(&quot;15088678313&quot;)
-
-        el5 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeTextField&#39;)[1]
-        el5.send_keys(&quot;1234&quot;)
-
-        el6 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeButton&#39;)[0]
-        el6.click()
-
-if __name__ == &#39;__main__&#39;:
-    suite = unittest.TestLoader().loadTestsFromTestCase(XingQiuiOSTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-</code></pre>
-
-<h4 id="toc_28">2、XCUIElementType</h4>
-
-<pre class="line-numbers"><code class="language-python">XCUIElementTypeAny,
-    XCUIElementTypeUnknown,
-    XCUIElementTypeApplication,
-    XCUIElementTypeGroup,
-    XCUIElementTypeWindow,
-    XCUIElementTypeSheet,
-    XCUIElementTypeDrawer,
-    XCUIElementTypeAlert,
-    XCUIElementTypeDialog,
-    XCUIElementTypeButton,
-    XCUIElementTypeRadioButton,
-    XCUIElementTypeRadioGroup,
-    XCUIElementTypeCheckBox,
-    XCUIElementTypeDisclosureTriangle,
-    XCUIElementTypePopUpButton,
-    XCUIElementTypeComboBox,
-    XCUIElementTypeMenuButton,
-    XCUIElementTypeToolbarButton,
-    XCUIElementTypePopover,
-    XCUIElementTypeKeyboard,
-    XCUIElementTypeKey,
-    XCUIElementTypeNavigationBar,
-    XCUIElementTypeTabBar,
-    XCUIElementTypeTabGroup,
-    XCUIElementTypeToolbar,
-    XCUIElementTypeStatusBar,
-    XCUIElementTypeTable,
-    XCUIElementTypeTableRow,
-    XCUIElementTypeTableColumn,
-    XCUIElementTypeOutline,
-    XCUIElementTypeOutlineRow,
-    XCUIElementTypeBrowser,
-    XCUIElementTypeCollectionView,
-    XCUIElementTypeSlider,
-    XCUIElementTypePageIndicator,
-    XCUIElementTypeProgressIndicator,
-    XCUIElementTypeActivityIndicator,
-    XCUIElementTypeSegmentedControl,
-    XCUIElementTypePicker,
-    XCUIElementTypePickerWheel,
-    XCUIElementTypeSwitch,
-    XCUIElementTypeToggle,
-    XCUIElementTypeLink,
-    XCUIElementTypeImage,
-    XCUIElementTypeIcon,
-    XCUIElementTypeSearchField,
-    XCUIElementTypeScrollView,
-    XCUIElementTypeScrollBar,
-    XCUIElementTypeStaticText,
-    XCUIElementTypeTextField,
-    XCUIElementTypeDateField,
-    XCUIElementTypeTimeField,
-    XCUIElementTypeTextView,
-    XCUIElementTypeMenu,
-    XCUIElementTypeMenuItem,
-    XCUIElementTypeMenuBar,
-    XCUIElementTypeMenuBarItem,
-    XCUIElementTypeMap,
-    XCUIElementTypeWebView,
-    XCUIElementTypeIncrementArrow,
-    XCUIElementTypeDecrementArrow,
-    XCUIElementTypeTimeline,
-    XCUIElementTypeRatingIndicator,
-    XCUIElementTypeValueIndicator,
-    XCUIElementTypeSplitGroup,
-    XCUIElementTypeSplitter,
-    XCUIElementTypeRelevanceIndicator,
-    XCUIElementTypeColorWell,
-    XCUIElementTypeHelpTag,
-    XCUIElementTypeMatte,
-    XCUIElementTypeDockItem,
-    XCUIElementTypeRuler,
-    XCUIElementTypeRulerMarker,
-    XCUIElementTypeGrid,
-    XCUIElementTypeLevelIndicator,
-    XCUIElementTypeCell,
-    XCUIElementTypeLayoutArea,
-    XCUIElementTypeLayoutItem,
-    XCUIElementTypeHandle,
-</code></pre>
-
-<h4 id="toc_29">3、Appium Python API</h4>
-
-<h5 id="toc_30">(1) contexts</h5>
-
-<p><code>contexts(self)</code>:<br/><br/>
-Returns the contexts within the current session.<br/>
-返回当前会话中的上下文，使用后可以识别H5页面的控件<br/>
-Usage:<br/><br/>
-    <code>driver.contexts</code><br/><br/>
-用法:<br/><br/>
-    <code>driver.contexts</code></p>
-
-<h5 id="toc_31">(2) current_context</h5>
-
-<p><code>current_context(self)</code>:<br/><br/>
-Returns the current context of the current session.<br/><br/>
-返回当前会话的当前上下文<br/><br/>
-Usage:<br/><br/>
-    <code>driver.current_context</code><br/><br/>
-用法:<br/><br/>
-    <code>driver. current_context</code></p>
-
-<h5 id="toc_32">(3) context</h5>
-
-<p><code>context(self)</code>:<br/><br/>
-Returns the current context of the current session.<br/><br/>
-返回当前会话的当前上下文。<br/><br/>
-Usage:<br/><br/>
-    <code>driver.context</code><br/><br/>
-用法:<br/><br/>
-    <code>driver. Context</code></p>
-
-<h5 id="toc_33">(4) find_element_by_ios_uiautomation</h5>
-
-<p><code>find_element_by_ios_uiautomation(self, uia_string)</code>:<br/><br/>
-Finds an element by uiautomation in iOS.<br/><br/>
-通过iOS uiautomation查找元素<br/><br/>
-Args:  </p>
-
-<ul>
-<li>uia_string - The element name in the iOS UIAutomation library<br/>
-Usage:<br/>
-<code>driver.find_element_by_ios_uiautomation(&#39;.elements()[1].cells()[2]&#39;)</code>
-用法:<br/>
-<code>dr. find_element_by_ios_uiautomation(‘elements’)</code></li>
-</ul>
-
-<h5 id="toc_34">(5) find_element_by_accessibility_id</h5>
-
-<p><code>find_element_by_accessibility_id(self, id)</code>:<br/><br/>
-Finds an element by accessibility id.<br/><br/>
-通过accessibility id查找元素<br/><br/>
-Args:<br/><br/>
-    - id - a string corresponding to a recursive element search using the Id/Name that the native Accessibility options utilize<br/><br/>
-Usage:<br/><br/>
-    <code>driver.find_element_by_accessibility_id()</code><br/><br/>
-用法:<br/><br/>
-    <code>driver.find_element_by_accessibility_id(‘id’)</code></p>
-
-<h5 id="toc_35">(6) scroll</h5>
-
-<p><code>scroll(self, origin_el, destination_el)</code>:<br/>
-Scrolls from one element to another<br/><br/>
-从元素origin_el滚动至元素destination_el<br/><br/>
-Args:  </p>
-
-<ul>
-<li>originalEl - the element from which to being scrolling</li>
-<li>destinationEl - the element to scroll to<br/>
-Usage:<br/>
-<code>driver.scroll(el1, el2)</code>
-用法:<br/>
-<code>driver.scroll(el1,el2)</code></li>
-</ul>
-
-<h5 id="toc_36">(7) drag_and_drop</h5>
-
-<p><code>drag_and_drop(self, origin_el, destination_el)</code>:<br/><br/>
-Drag the origin element to the destination element<br/><br/>
-将元素origin_el拖到目标元素destination_el<br/><br/>
-Args:  </p>
-
-<ul>
-<li>originEl - the element to drag</li>
-<li>destinationEl - the element to drag to<br/>
-用法:<br/>
-<code>driver.drag_and_drop(el1,el2)</code></li>
-</ul>
-
-<h5 id="toc_37">(8) tap</h5>
-
-<p><code>tap(self, positions, duration=None)</code>:<br/><br/>
-Taps on an particular place with up to five fingers, holding for a certain time<br/><br/>
-模拟手指点击（最多五个手指），可设置按住时间长度（毫秒）<br/><br/>
-Args:</p>
-
-<ul>
-<li>positions - an array of tuples representing the x/y coordinates of the fingers to tap. Length can be up to five.</li>
-<li>duration - (optional) length of time to tap, in ms<br/>
-Usage:<br/>
-<code>driver.tap([(100, 20), (100, 60), (100, 100)], 500)</code>
-用法:<br/>
-<code>driver.tap([(x,y),(x1,y1)],500)</code></li>
-</ul>
-
-<h5 id="toc_38">(9) swipe</h5>
-
-<p><code>swipe(self, start_x, start_y, end_x, end_y, duration=None)</code>:<br/><br/>
-Swipe from one point to another point, for an optional duration.<br/><br/>
-从A点滑动至B点，滑动时间为毫秒<br/><br/>
-Args:<br/><br/>
-    - start_x - x-coordinate at which to start<br/>
-    - start_y - y-coordinate at which to start<br/>
-    - end_x - x-coordinate at which to stop<br/>
-    - end_y - y-coordinate at which to stop<br/>
-    - duration - (optional) time to take the swipe, in ms.  </p>
-
-<p>Usage:<br/><br/>
-    <code>driver.swipe(100, 100, 100, 400)</code><br/>
-用法:<br/><br/>
-    <code>driver.swipe(x1,y1,x2,y2,500)</code></p>
-
-<h5 id="toc_39">(10) flick</h5>
-
-<p><code>flick(self, start_x, start_y, end_x, end_y)</code>:<br/><br/>
-Flick from one point to another point.<br/><br/>
-按住A点后快速滑动至B点<br/><br/>
-Args:<br/><br/>
-    - start_x - x-coordinate at which to start<br/>
-    - start_y - y-coordinate at which to start<br/>
-    - end_x - x-coordinate at which to stop<br/>
-    - end_y - y-coordinate at which to stop<br/><br/>
-Usage:<br/><br/>
-    <code>driver.flick(100, 100, 100, 400)</code><br/>
-用法:<br/><br/>
-    <code>driver.flick(x1,y1,x2,y2)</code></p>
-
-<h5 id="toc_40">(11) pinch</h5>
-
-<p><code>pinch(self, element=None, percent=200, steps=50)</code>:<br/><br/>
-Pinch on an element a certain amount<br/><br/>
-在元素上执行模拟双指捏（缩小操作）<br/><br/>
-Args:  </p>
-
-<ul>
-<li>element - the element to pinch</li>
-<li>percent - (optional) amount to pinch. Defaults to 200%</li>
-<li>steps - (optional) number of steps in the pinch action</li>
-</ul>
-
-<p>Usage:<br/><br/>
-    <code>driver.pinch(element)</code><br/>
-用法:<br/>
-    <code>driver.pinch(element)</code></p>
-
-<h5 id="toc_41">(12) zoom</h5>
-
-<p><code>zoom(self, element=None, percent=200, steps=50)</code>:<br/>
-Zooms in on an element a certain amount<br/><br/>
-在元素上执行放大操作<br/><br/>
-Args:  </p>
-
-<ul>
-<li>element - the element to zoom</li>
-<li>percent - (optional) amount to zoom. Defaults to 200%</li>
-<li>steps - (optional) number of steps in the zoom action</li>
-</ul>
-
-<p>Usage:<br/>
-    <code>driver.zoom(element)</code><br/>
-用法: <br/>
-    <code>driver.zoom(element)</code></p>
-
-<h5 id="toc_42">(13) reset</h5>
-
-<p><code>reset(self)</code>:<br/><br/>
-Resets the current application on the device.<br/><br/>
-重置应用(类似删除应用数据)<br/><br/>
-用法:<br/>
-<code>driver.reset()</code></p>
-
-<h5 id="toc_43">(14) hide_keyboard</h5>
-
-<p><code>hide_keyboard(self, key_name=None, key=None, strategy=None)</code>:<br/>
-Hides the software keyboard on the device. In iOS, use <code>key_name</code> to press a particular key, or <code>strategy</code>. In Android, no parameters are used.<br/>
-隐藏键盘,iOS使用key_name隐藏，安卓不使用参数<br/>
-Args:  </p>
-
-<ul>
-<li>key_name - key to press</li>
-<li>strategy - strategy for closing the keyboard (e.g., <code>tapOutside</code>)</li>
-</ul>
-
-<p><code>driver.hide_keyboard()</code></p>
-
-<h5 id="toc_44">(15) keyevent</h5>
-
-<p><code>keyevent(self, keycode, metastate=None)</code>:<br/><br/>
-Sends a keycode to the device. Android only. Possible keycodes can be found in <a href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a>.<br/><br/>
-发送按键码（安卓仅有），按键码可以上网址中找到<br/><br/>
-Args:  </p>
-
-<ul>
-<li>keycode - the keycode to be sent to the device</li>
-<li>metastate - meta information about the keycode being sent</li>
-</ul>
-
-<p>用法:<br/>
-<code>dr.keyevent(‘4’)</code></p>
-
-<h5 id="toc_45">(16) press_keycode</h5>
-
-<p><code>press_keycode(self, keycode, metastate=None)</code>:<br/><br/>
-Sends a keycode to the device. Android only. Possible keycodes can be found in <a href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a>.<br/><br/>
-发送按键码（安卓仅有），按键码可以上网址中找到<br/>
-Args:   </p>
-
-<ul>
-<li>keycode - the keycode to be sent to the device</li>
-<li>metastate - meta information about the keycode being sent</li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.press_ keycode(‘4’)</code>  </p>
-
-<p>dr.keyevent(‘4’)与driver.press_ keycode(‘4’) 功能实现上一样的，都是按了返回键</p>
-
-<h5 id="toc_46">(17) long_press_keycode</h5>
-
-<p><code>long_press_keycode(self, keycode, metastate=None)</code>:<br/><br/>
-Sends a long press of keycode to the device. Android only. Possible keycodes can be found in <a href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a>.<br/><br/>
-发送一个长按的按键码（长按某键）<br/><br/>
-Args:   </p>
-
-<ul>
-<li>keycode - the keycode to be sent to the device</li>
-<li>metastate - meta information about the keycode being sent<br/>
-用法:<br/>
-<code>driver.long_press_keycode(‘4’)</code></li>
-</ul>
-
-<h5 id="toc_47">(18) current_activity</h5>
-
-<p><code>current_activity(self)</code>:<br/><br/>
-Retrieves the current activity on the device.<br/><br/>
-获取当前的activity<br/><br/>
-用法:<br/>
-<code>print(driver.current_activity())</code></p>
-
-<h5 id="toc_48">(19) wait_activity</h5>
-
-<p><code>wait_activity(self, activity, timeout, interval=1)</code>:<br/><br/>
-Wait for an activity: block until target activity presents or time out.<br/><br/>
-This is an Android-only method.<br/><br/>
-等待指定的activity出现直到超时，interval为扫描间隔1秒<br/><br/>
-即每隔几秒获取一次当前的activity<br/><br/>
-返回的True 或 False<br/><br/>
-Agrs:</p>
-
-<ul>
-<li>activity - target activity</li>
-<li>timeout - max wait time, in seconds</li>
-<li>interval - sleep interval between retries, in seconds</li>
-</ul>
-
-<p>用法:<br/>
-    <code>driver.wait_activity(‘.activity.xxx’,5,2)</code></p>
-
-<h5 id="toc_49">(20) background_app</h5>
-
-<p><code>background_app(self, seconds)</code>:<br/>
-Puts the application in the background on the device for a certain duration.<br/><br/>
-后台运行app多少秒<br/><br/>
-Args:  </p>
-
-<ul>
-<li>seconds - the duration for the application to remain in the background<br/>
-用法:
-<code>driver.background_app(5)</code><br/>
-置后台5秒后再运行</li>
-</ul>
-
-<h5 id="toc_50">(21) is_app_installed</h5>
-
-<p><code>is_app_installed(self, bundle_id)</code>:<br/><br/>
-Checks whether the application specified by <code>bundle_id</code> is installed on the device.<br/><br/>
-检查app是否有安装<br/><br/>
-返回 True or False<br/><br/>
-Args:  </p>
-
-<ul>
-<li>bundle_id - the id of the application to query<br/></li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.is_app_installed(“com.xxxx”)</code></p>
-
-<h5 id="toc_51">(22) install_app</h5>
-
-<p><code>install_app(self, app_path)</code>:<br/><br/>
-Install the application found at <code>app_path</code> on the device.<br/><br/>
-安装app,app_path为安装包路径<br/><br/>
-Args:  </p>
-
-<ul>
-<li>app_path - the local or remote path to the application to install</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.install_app(app_path)</code></p>
-
-<h5 id="toc_52">(23) remove_app</h5>
-
-<p><code>remove_app(self, app_id)</code>:<br/><br/>
-Remove the specified application from the device.<br/><br/>
-删除app<br/><br/>
-Args:  </p>
-
-<ul>
-<li>app_id - the application id to be removed<br/></li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.remove_app(“com.xxx.”)</code></p>
-
-<h5 id="toc_53">(24) launch_app</h5>
-
-<p><code>launch_app(self)</code>:<br/><br/>
-Start on the device the application specified in the desired capabilities.<br/><br/>
-启动app<br/><br/>
-用法:<br/><br/>
-<code>driver.launch_app()</code></p>
-
-<h5 id="toc_54">(25) close_app</h5>
-
-<p><code>close_app(self)</code>:<br/><br/>
-Stop the running application, specified in the desired capabilities, on the device.<br/><br/>
-关闭app<br/><br/>
-用法:<br/><br/>
-<code>driver.close_app()</code><br/><br/>
-启动和关闭app运行好像会出错</p>
-
-<h5 id="toc_55">(26) start_activity</h5>
-
-<p><code>start_activity(self, app_package, app_activity, **opts)</code>:<br/><br/>
-Opens an arbitrary activity during a test. If the activity belongs to another application, that application is started and the activity is opened.<br/><br/>
-This is an Android-only method.<br/><br/>
-在测试过程中打开任意活动。如果活动属于另一个应用程序，该应用程序的启动和活动被打开。<br/><br/>
-这是一个安卓的方法<br/><br/>
-Args:</p>
-
-<ul>
-<li>app_package - The package containing the activity to start.</li>
-<li>app_activity - The activity to start.</li>
-<li>app_wait_package - Begin automation after this package starts (optional).</li>
-<li>app_wait_activity - Begin automation after this activity starts (optional).</li>
-<li>intent_action - Intent to start (optional).</li>
-<li>intent_category - Intent category to start (optional).</li>
-<li>intent_flags - Flags to send to the intent (optional).</li>
-<li>optional_intent_arguments - Optional arguments to the intent (optional).</li>
-<li>stop_app_on_reset - Should the app be stopped on reset (optional)?</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.start_activity(app_package, app_activity)</code></p>
-
-<h5 id="toc_56">(27) lock</h5>
-
-<p><code>lock(self, seconds)</code>:<br/><br/>
-Lock the device for a certain period of time. iOS only.<br/><br/>
-锁屏一段时间  iOS专有<br/><br/>
-Args:  </p>
-
-<ul>
-<li>the duration to lock the device, in seconds</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.lock()</code></p>
-
-<h5 id="toc_57">(28) shake</h5>
-
-<p><code>shake(self)</code>:<br/><br/>
-Shake the device.<br/><br/>
-摇一摇手机<br/><br/>
-用法:<br/><br/>
-<code>driver.shake()</code></p>
-
-<h5 id="toc_58">(29) open_notifications</h5>
-
-<p><code>open_notifications(self)</code>:<br/><br/>
-Open notification shade in Android (API Level 18 and above)<br/><br/>
-打系统通知栏（仅支持API 18 以上的安卓系统）<br/><br/>
-用法:<br/><br/>
-<code>driver.open_notifications()</code></p>
-
-<h5 id="toc_59">(30) network_connection</h5>
-
-<p><code>network_connection(self)</code>:<br/><br/>
-Returns an integer bitmask specifying the network connection type.<br/><br/>
-Android only.<br/><br/>
-返回网络类型  数值<br/><br/>
-Possible values are available through the enumeration <code>appium.webdriver.ConnectionType</code><br/><br/>
-用法:<br/><br/>
-<code>driver.network_connection</code>  </p>
-
-<h5 id="toc_60">(31) set_network_connection</h5>
-
-<p><code>set_network_connection(self, connectionType)</code>:<br/><br/>
-Sets the network connection type. Android only.<br/><br/>
-Possible values:  </p>
-
-<table>
-<thead>
-<tr>
-<th>Value (Alias)</th>
-<th>Data</th>
-<th>Wifi</th>
-<th>Airplane Mode</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>0 (None)</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>1 (Airplane Mode)</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-</tr>
-<tr>
-<td>2 (Wifi only)</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>4 (Data only)</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>6 (All network on)</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-</tr>
-</tbody>
-</table>
-
-<p>These are available through the enumeration appium.webdriver.ConnectionType`</p>
-
-<p>设置网络类型<br/><br/>
-Args:  </p>
-
-<ul>
-<li>connectionType - a member of the enum appium.webdriver.ConnectionType</li>
-</ul>
-
-<p>用法:<br/><br/>
-先加载from appium.webdriver.connectiontype import ConnectionType<br/><br/>
-<code>dr.set_network_connection(ConnectionType.WIFI_ONLY)</code><br/><br/>
-ConnectionType的类型有<br/><br/>
-NO_CONNECTION = 0<br/><br/>
-AIRPLANE_MODE = 1<br/><br/>
-WIFI_ONLY = 2<br/><br/>
-DATA_ONLY = 4<br/><br/>
-ALL_NETWORK_ON = 6  </p>
-
-<h5 id="toc_61">(32) available_ime_engines</h5>
-
-<p><code>available_ime_engines(self)</code>:<br/><br/>
-Get the available input methods for an Android device. Package and activity are returned (e.g., [&#39;com.android.inputmethod.latin/.LatinIME&#39;])<br/><br/>
-Android only.<br/><br/>
-返回安卓设备可用的输入法<br/><br/>
-用法:<br/><br/>
-<code>print(driver.available_ime_engines)</code></p>
-
-<h5 id="toc_62">(33) is_ime_active</h5>
-
-<p><code>is_ime_active(self)</code>:<br/><br/>
-Checks whether the device has IME service active. Returns True/False.<br/><br/>
-Android only.<br/><br/>
-检查设备是否有输入法服务活动。返回真/假。<br/><br/>
-安卓<br/><br/>
-用法: <br/>
-    <code>print(driver.is_ime_active())</code></p>
-
-<h5 id="toc_63">(34) activate_ime_engine</h5>
-
-<p><code>activate_ime_engine(self, engine)</code>:<br/><br/>
-Activates the given IME engine on the device.<br/><br/>
-Android only.<br/><br/>
-激活安卓设备中的指定输入法，设备可用输入法可以从“available_ime_engines”获取<br/><br/>
-Args:  </p>
-
-<ul>
-<li>engine - the package and activity of the IME engine to activate (e.g.,&#39;com.android.inputmethod.latin/.LatinIME&#39;)<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-    <code>driver.activate_ime_engine(“com.android.inputmethod.latin/.LatinIME”)</code></p>
-
-<h5 id="toc_64">(35) deactivate_ime_engine</h5>
-
-<p><code>deactivate_ime_engine(self)</code>:<br/><br/>
-Deactivates the currently active IME engine on the device.<br/><br/>
-Android only.<br/><br/>
-关闭安卓设备当前的输入法<br/><br/>
-用法:<br/>
-    <code>driver.deactivate_ime_engine()</code></p>
-
-<h5 id="toc_65">(36) active_ime_engine</h5>
-
-<p><code>active_ime_engine(self)</code>:<br/><br/>
-Returns the activity and package of the currently active IME engine (e.g.,&#39;com.android.inputmethod.latin/.LatinIME&#39;).<br/><br/>
-Android only.<br/><br/>
-返回当前输入法的包名<br/><br/>
-用法:<br/><br/>
-<code>driver.active_ime_engine</code>  </p>
-
-<h5 id="toc_66">(37) toggle_location_services</h5>
-
-<p><code>toggle_location_services(self)</code>:<br/><br/>
-Toggle the location services on the device. Android only.<br/><br/>
-打开安卓设备上的位置定位设置<br/><br/>
-用法:<br/>
-<code>driver.toggle_location_services()</code></p>
-
-<h5 id="toc_67">(38) set_location</h5>
-
-<p><code>set_location(self, latitude, longitude, altitude)</code>:<br/><br/>
-Set the location of the device<br/><br/>
-设置设备的经纬度<br/><br/>
-Args:  </p>
-
-<ul>
-<li>latitude纬度 - String or numeric value between -90.0 and 90.00</li>
-<li>longitude经度 - String or numeric value between -180.0 and 180.0</li>
-<li>altitude海拔高度- String or numeric value</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.set_location(纬度，经度，高度)</code></p>
-
-<h5 id="toc_68">(39) tag_name</h5>
-
-<p><code>tag_name(self)</code>:<br/><br/>
-This element&#39;s <code>tagName</code> property.<br/><br/>
-返回元素的tagName属性<br/><br/>
-经实践返回的是class name<br/><br/>
-用法:<br/><br/>
-<code>element.tag_name()</code></p>
-
-<h5 id="toc_69">(40) text</h5>
-
-<p><code>text(self)</code>:<br/><br/>
-The text of the element.<br/><br/>
-返回元素的文本值<br/><br/>
-用法:<br/><br/>
-<code>element.text()</code></p>
-
-<h5 id="toc_70">(41) click</h5>
-
-<p><code>click(self)</code>:<br/><br/>
-Clicks the element.<br/><br/>
-点击元素<br/><br/>
-用法:<br/><br/>
-<code>element.click()</code></p>
-
-<h5 id="toc_71">(42) submit</h5>
-
-<p><code>submit(self)</code>:<br/><br/>
-Submits a form.<br/><br/>
-提交表单<br/><br/>
-用法:<br/><br/>
-暂无</p>
-
-<h5 id="toc_72">(43) clear</h5>
-
-<p><code>clear(self)</code>:<br/><br/>
-Clears the text if it&#39;s a text entry element.<br/><br/>
-清除输入的内容<br/><br/>
-用法:<br/><br/>
-<code>element.clear()</code></p>
-
-<h5 id="toc_73">(44) get_attribute</h5>
-
-<p><code>get_attribute(self, name)</code>:<br/><br/>
-详见@chenhengjie123 的超级链接<br/><br/>
-Gets the given attribute or property of the element.  </p>
-
-<pre class="line-numbers"><code class="language-text">1. 获取 content-desc 的方法为 get_attribute(&quot;name&quot;) ，而且还不能保证返回的一定是 content-desc （content-desc 为空时会返回 text 属性值）  
-2. get_attribute 方法不是我们在 uiautomatorviewer 看到的所有属性都能获取的（此处的名称均为使用 get_attribute 时使用的属性名称)
-可获取的：
-字符串类型：
-    `name(返回 content-desc 或 text)`
-    `text(返回 text)`
-    `className(返回 class，只有 API=&gt;18 才能支持)`
-    `resourceId(返回 resource-id，只有 API=&gt;18 才能支持)`
-</code></pre>
-
-<p>This method will first try to return the value of a property with the given name. If a property with that name doesn&#39;t exist, it returns the value of the attribute with the same name. If there&#39;s no attribute with that name, <code>None</code> is returned.Values which are considered truthy, that is equals &quot;true&quot; or &quot;false&quot;,are returned as booleans.  All other non-<code>None</code> values are returned as strings.  For attributes or properties which do not exist, <code>None</code> is returned.</p>
-
-<p>Args:</p>
-
-<ul>
-<li>name - Name of the attribute/property to retrieve.</li>
-</ul>
-
-<p>Example:<br/>
-    # Check if the &quot;active&quot; CSS class is applied to an element.</p>
-
-<p><code>is_active = &quot;active&quot; in target_element.get_attribute(&quot;class&quot;)</code></p>
-
-<p>用法:<br/><br/>
-暂无</p>
-
-<h5 id="toc_74">(45) is_selected</h5>
-
-<p><code>is_selected(self)</code>:<br/><br/>
-Returns whether the element is selected.<br/><br/>
-Can be used to check if a checkbox or radio button is selected.<br/><br/>
-返回元素是否选择。<br/><br/>
-可以用来检查一个复选框或单选按钮被选中。<br/><br/>
-用法:<br/><br/>
-<code>element.is_slected()</code></p>
-
-<h5 id="toc_75">(46) is_enabled</h5>
-
-<p><code>is_enabled(self)</code>:<br/><br/>
-Returns whether the element is enabled.<br/><br/>
-返回元素是否可用True of False<br/><br/>
-用法:<br/><br/>
-<code>element.is_enabled()</code></p>
-
-<h5 id="toc_76">(47) find_element_by_id</h5>
-
-<p><code>find_element_by_id(self, id_)</code>:<br/><br/>
-Finds element within this element&#39;s children by ID.<br/><br/>
-通过元素的ID定位元素<br/><br/>
-Args:  </p>
-
-<ul>
-<li>id_ - ID of child element to locate.<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_element_by_id(“id”)</code></p>
-
-<h5 id="toc_77">(48) find_elements_by_id</h5>
-
-<p><code>find_elements_by_id(self, id_)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by ID.<br/><br/>
-通过元素ID定位,含有该属性的所有元素<br/><br/>
-Args:   </p>
-
-<ul>
-<li>id_ - Id of child element to find.</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_elements_by_id(“id”)</code></p>
-
-<h5 id="toc_78">(49) find_element_by_name</h5>
-
-<p><code>find_element_by_name(self, name)</code>:<br/><br/>
-Finds element within this element&#39;s children by name.<br/><br/>
-通过元素Name定位（元素的名称属性text）. <br/>
-Args:  </p>
-
-<ul>
-<li>name - name property of the element to find.<br/></li>
-</ul>
-
-<p>用法:<br/>
-<code>driver.find_element_by_name(“name”)</code></p>
-
-<h5 id="toc_79">(50) find_elements_by_name</h5>
-
-<p><code>find_elements_by_name(self, name)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by name.<br/><br/>
-通过元素Name定位（元素的名称属性text），含有该属性的所有元素. <br/>
-Args:  </p>
-
-<ul>
-<li>name - name property to search for.<br/></li>
-</ul>
-
-<p>用法:<br/>
-<code>driver.find_element_by_name(“name”)</code></p>
-
-<h5 id="toc_80">(51) find_element_by_link_text</h5>
-
-<p><code>find_element_by_link_text(self, link_text)</code>:<br/><br/>
-Finds element within this element&#39;s children by visible link text.<br/><br/>
-通过元素可见链接文本定位. <br/>
-Args:  </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p>用法:<br/>
-<code>driver.find_element_by_link_text(“text”)</code></p>
-
-<h5 id="toc_81">(52) find_elements_by_link_text</h5>
-
-<p><code>find_element_by_link_text(self, link_text)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by visible link text. <br/>
-通过元素可见链接文本定位,含有该属性的所有元素. <br/>
-Args:    </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.find_elements_by_link_text(“text”)</code></p>
-
-<h5 id="toc_82">(53) find_element_by_partial_link_text</h5>
-
-<p><code>find_element_by_partial_link_text(self, link_text)</code>:<br/><br/>
-Finds element within this element&#39;s children by partially visible link text.<br/><br/>
-通过元素部分可见链接文本定位. <br/>
-Args:  </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p><code>driver. find_element_by_partial_link_text(“text”)</code></p>
-
-<h5 id="toc_83">(54) find_elements_by_partial_link_text</h5>
-
-<p><code>find_elements_by_partial_link_text(self, link_text)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by link text.<br/><br/>
-通过元素部分可见链接文本定位,含有该属性的所有元素. <br/>
-Args:  </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p><code>driver. find_elements_by_partial_link_text(“text”)</code></p>
-
-<h5 id="toc_84">(55) find_element_by_tag_name</h5>
-
-<p><code>find_element_by_tag_name(self, name)</code>:<br/>
-Finds element within this element&#39;s children by tag name.<br/><br/>
-通过查找html的标签名称定位元素<br/><br/>
-Args:</p>
-
-<ul>
-<li>name - name of html tag (eg: h1, a, span)</li>
-</ul>
-
-<p>用法:<br/><br/>
-    <code>driver.find_element_by_tag_name(“name”)</code></p>
-
-<h5 id="toc_85">(56) find_elements_by_tag_name</h5>
-
-<p><code>find_elements_by_tag_name(self, name)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by tag name.<br/>
-通过查找html的标签名称定位所有元素<br/><br/>
-Args:  </p>
-
-<ul>
-<li>name - name of html tag (eg: h1, a, span). </li>
-</ul>
-
-<p>用法:<br/>
-    <code>driver.find_elements_by_tag_name(“name”)</code></p>
-
-<h5 id="toc_86">(57) find_element_by_xpath</h5>
-
-<p><code>find_element_by_xpath(self, xpath)</code>:<br/><br/>
-Finds element by xpath.<br/><br/>
-通过Xpath定位元素，详细方法可参阅<a href="http://www.w3school.com.cn/xpath/">http://www.w3school.com.cn/xpath/</a><br/>
-Args:<br/>
-    xpath - xpath of element to locate.  &quot;//input[@class=&#39;myelement&#39;]&quot;<br/>
-    Note: The base path will be relative to this element&#39;s location.<br/>
-    This will select the first link under this element.<br/>
-    <code>myelement.find_elements_by_xpath(&quot;.//a&quot;)</code><br/>
-    However, this will select the first link on the page.<br/>
-    <code>myelement.find_elements_by_xpath(&quot;//a&quot;)</code>  </p>
-
-<p>用法 <code>find_element_by_xpath(“//*”)</code></p>
-
-<h5 id="toc_87">(58) find_elements_by_xpath</h5>
-
-<p><code>find_elements_by_xpath(self, xpath)</code>:<br/>
-Finds elements within the element by xpath.<br/><br/>
-Args:</p>
-
-<ul>
-<li>xpath - xpath locator string.</li>
-</ul>
-
-<p>Note: The base path will be relative to this element&#39;s location.<br/><br/>
-This will select all links under this element.<br/><br/>
-<code>myelement.find_elements_by_xpath(&quot;.//a&quot;)</code>. <br/>
-However, this will select all links in the page itself.<br/><br/>
-<code>myelement.find_elements_by_xpath(&quot;//a&quot;)</code>. </p>
-
-<p>用法:<br/><br/>
-<code>find_elements_by_xpath(“//*”)</code></p>
-
-<h5 id="toc_88">(59) find_element_by_class_name</h5>
-
-<p><code>find_element_by_class_name(self, name)</code>:<br/><br/>
-Finds element within this element&#39;s children by class name.<br/><br/>
-通过元素class name属性定位元素.<br/><br/>
-Args:  </p>
-
-<ul>
-<li>name - class name to search for.<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_element_by_class_name(“android.widget.LinearLayout”)</code></p>
-
-<h5 id="toc_89">(60) find_elements_by_class_name</h5>
-
-<p><code>find_elements_by_class_name(self, name)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by class name.<br/><br/>
-通过元素class name属性定位所有含有该属性的元素. <br/>
-Args:  </p>
-
-<ul>
-<li>name - class name to search for.<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_elements_by_class_name(“android.widget.LinearLayout”)</code>. </p>
-
-<h5 id="toc_90">(61) find_element_by_css_selector</h5>
-
-<p><code>find_element_by_css_selector(self, css_selector)</code>:<br/><br/>
-Finds element within this element&#39;s children by CSS selector.<br/><br/>
-通过CSS选择器定位元素. <br/>
-Args:  </p>
-
-<ul>
-<li>css_selector - CSS selctor string, ex: &#39;a.nav#home&#39;</li>
-</ul>
-
-<h5 id="toc_91">(62) send_keys</h5>
-
-<p><code>send_keys(self, *value)</code>:<br/><br/>
-Simulates typing into the element.<br/><br/>
-在元素中模拟输入（开启appium自带的输入法并配置了appium输入法后，可以输入中英文）. <br/>
-Args:</p>
-
-<ul>
-<li>value - A string for typing, or setting form fields.  For setting file inputs, this could be a local file path.Use this to send simple key events or to fill out form fields:<br/>
-<code>form_textfield = driver.find_element_by_name(&#39;username&#39;)</code><br/>
-<code>form_textfield.send_keys(&quot;admin&quot;)</code><br/>
-This can also be used to set file inputs.<br/>
-<code>file_input = driver.find_element_by_name(&#39;profilePic&#39;)</code><br/>
-<code>file_input.send_keys(&quot;path/to/profilepic.gif&quot;)</code><br/>
-<code># Generally it&#39;s better to wrap the file path in one of the methods</code><br/>
-<code># in os.path to return the actual path to support cross OS testing.</code><br/>
-<code># file_input.send_keys(os.path.abspath(&quot;path/to/profilepic.gif&quot;))</code><br/>
-<code>driver.element.send_keys(“中英”)</code></li>
-</ul>
-
-<h5 id="toc_92">(63) is_displayed</h5>
-
-<p><code>is_displayed(self)</code>:<br/><br/>
-Whether the element is visible to a user.<br/><br/>
-此元素用户是否可见。简单地说就是隐藏元素和被控件挡住无法操作的元素（仅限 Selenium，appium是否实现了类似功能不是太确定）这一项都会返回 False. <br/>
-用法:<br/><br/>
-<code>driver.element.is_displayed()</code></p>
-
-<h5 id="toc_93">(64) location_once_scrolled_into_view</h5>
-
-<p><code>location_once_scrolled_into_view(self)</code>:<br/><br/>
- &quot;&quot;&quot;THIS PROPERTY MAY CHANGE WITHOUT WARNING. Use this to discover. where on the screen an element is so that we can click it. This method should cause the element to be scrolled into view.Returns the top lefthand corner location on the screen, or <code>None</code> if the element is not visible.</p>
-
-<p>暂不知道用法</p>
-
-<h5 id="toc_94">(65) size</h5>
-
-<p><code>size(self)</code>:<br/><br/>
-The size of the element.<br/><br/>
-获取元素的大小（高和宽）.<br/><br/>
-<code>new_size[&quot;height&quot;] = size[&quot;height&quot;]</code><br/><br/>
-<code>new_size[&quot;width&quot;] = size[&quot;width&quot;]</code>   </p>
-
-<p>用法:<br/><br/>
-<code>driver.element.size</code></p>
-
-<h5 id="toc_95">(66) value_of_css_property</h5>
-
-<p><code>value_of_css_property(self, property_name)</code>:<br/><br/>
-The value of a CSS property.<br/><br/>
-CSS属性<br/><br/>
-用法 暂不知  </p>
-
-<h5 id="toc_96">(67) location</h5>
-
-<p><code>location(self)</code>:<br/><br/>
-The location of the element in the renderable canvas.<br/><br/>
-获取元素左上角的坐标<br/><br/>
-用法:<br/><br/>
-<code>driver.element.location</code><br/><br/>
-返回element的x坐标, int类型<br/><br/>
-<code>driver.element.location.get(&#39;x&#39;)</code><br/><br/>
-返回element的y坐标, int类型<br/><br/>
-<code>driver.element.location.get(&#39;y&#39;)</code></p>
-
-<h5 id="toc_97">(68) rect</h5>
-
-<p><code>rect(self)</code>:<br/><br/>
-A dictionary with the size and location of the element.<br/><br/>
-元素的大小和位置的字典  </p>
-
-<h5 id="toc_98">(69) screenshot_as_base64</h5>
-
-<p><code>screenshot_as_base64(self)</code>:<br/><br/>
-Gets the screenshot of the current element as a base64 encoded string.<br/><br/>
-获取当前元素的截图为Base64编码的字符串<br/><br/>
-Usage:<br/><br/>
-<code>img_b64 = element.screenshot_as_base64</code></p>
-
-<h5 id="toc_99">(70) execute_script</h5>
-
-<p><code>execute_script(self, script, *args)</code>:<br/><br/>
-Synchronously Executes JavaScript in the current window/frame.<br/><br/>
-在当前窗口/框架（特指 Html 的 iframe ）同步执行 javascript 代码。你可以理解为如果这段代码是睡眠5秒，这五秒内主线程的 javascript 不会执行<br/><br/>
-Args:  </p>
-
-<ul>
-<li>script: The JavaScript to execute.</li>
-<li>*args: Any applicable arguments for your JavaScript.<br/>
-Usage:<br/>
-<code>driver.execute_script(&#39;document.title&#39;)</code></li>
-</ul>
-
-<h5 id="toc_100">(71) execute_async_script</h5>
-
-<p><code>execute_async_script(self, script, *args)</code>:<br/><br/>
-Asynchronously Executes JavaScript in the current window/frame.<br/><br/>
-插入 javascript 代码，只是这个是异步的，也就是如果你的代码是睡眠5秒，那么你只是自己在睡，页面的其他 javascript 代码还是照常执行<br/><br/>
-Args:  </p>
-
-<ul>
-<li>script: The JavaScript to execute.</li>
-<li>*args: Any applicable arguments for your JavaScript.</li>
-</ul>
-
-<p>Usage:<br/><br/>
-<code>driver.execute_async_script(&#39;document.title&#39;)</code></p>
-
-<h5 id="toc_101">(72) current_url</h5>
-
-<p><code>current_url(self)</code>:<br/><br/>
-Gets the URL of the current page.<br/><br/>
-获取当前页面的网址。<br/><br/>
-Usage:<br/><br/>
-<code>driver.current_url</code><br/>
-用法<br/><br/>
-<code>driver.current_url</code></p>
-
-<h5 id="toc_102">(73) page_source</h5>
-
-<p><code>page_source(self)</code>:<br/><br/>
-Gets the source of the current page.<br/><br/>
-获取当前页面的源<br/><br/>
-Usage:<br/><br/>
-<code>driver.page_source</code></p>
-
-<h5 id="toc_103">(74) close</h5>
-
-<p><code>close(self)</code>:<br/>
-Closes the current window.<br/><br/>
-关闭当前窗口<br/><br/>
-Usage:<br/><br/>
-<code>driver.close()</code></p>
-
-<h5 id="toc_104">(75) quit</h5>
-
-<p><code>quit(self)</code>:<br/><br/>
-Quits the driver and closes every associated window.<br/><br/>
-退出脚本运行并关闭每个相关的窗口连接<br/><br/>
-Usage:<br/><br/>
-<code>driver.quit()</code></p>
-
-<p>参考资料:<br/><br/>
-<a href="http://debugtalk.com/post/build-ideal-app-automation-test-framework/">打造心目中理想的自动化测试框(AppiumBooster)</a>   </p>
-
-<p><a href="http://debugtalk.com/post/build-app-automated-test-platform-from-0-to-1-Appium-inspector-iOS-simulator/">从0到1搭建移动App功能自动化测试平台（1）：模拟器中运行iOS应用</a>  </p>
-
-<p><a href="https://github.com/appium/python-client">Python-Client的github文档地址</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/2/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -6396,6 +5229,8 @@ Usage:<br/><br/>
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -6412,31 +5247,31 @@ Usage:<br/><br/>
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

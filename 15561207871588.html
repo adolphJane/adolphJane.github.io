@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -140,7 +142,7 @@
 首先，在自定义 LayoutInflate 之前，我们要先分析一下 LayoutInflate 的源码，了解了源码的实现方式，才能定制嘛~~~~<br/>
 好了，怕你们无聊跑了，先放效果图出来镇贴</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978927436317.gif" alt="20171104150978927436317.gif"/><figcaption>20171104150978927436317.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978927436317.gif" alt="20171104150978927436317.gif"/></p>
 
 <p>好了，效果看完了，</p>
 
@@ -148,7 +150,7 @@
 
 <h2 id="toc_0">LayoutInflate</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/><figcaption>201711041509789321695.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/></p>
 
 <p>还是提取一下关键信息吧。</p>
 
@@ -165,7 +167,7 @@
 
 <p>我们给 Activity 设置 布局 xml 都是调用这个方法，现在我们就来看看这个方法到底干了什么事。</p>
 
-<pre class="line-numbers"><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
+<pre><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
   getWindow().setContentView(layoutResID);
   initWindowDecorActionBar();
 }
@@ -208,7 +210,7 @@ public PhoneWindow(Context context) {
 
 <p>同样是调用了LayoutInflate.inflate()方法</p>
 
-<pre class="line-numbers"><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
+<pre><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
     LayoutInflater factory = LayoutInflater.from(context);
     return factory.inflate(resource, root);
 }
@@ -223,7 +225,7 @@ public PhoneWindow(Context context) {
 <p>我们再来看看怎么获取到 LayoutInflate 的实例。<br/>
 上面三个xml 解析成 view 的方法都是用LayoutInflate.from(context)来获取 LayoutInflate 实例的。</p>
 
-<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
+<pre><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -243,7 +245,7 @@ public PhoneWindow(Context context) {
 
 <p>通过 Resources 获取 xml 解析器XmlResourceParser。</p>
 
-<pre class="line-numbers"><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
     final Resources res = getContext().getResources();
     if (DEBUG) {
         Log.d(TAG, &quot;INFLATING from resource: \&quot;&quot; + res.getResourceName(resource) + &quot;\&quot; (&quot;
@@ -261,7 +263,7 @@ public PhoneWindow(Context context) {
 
 <p>XmlResourceParser解析 xml，并且返回 view</p>
 
-<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
     synchronized (mConstructorArgs) {
         //写入跟踪信息，用于 Debug 相关，先不关心这个
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;inflate&quot;);
@@ -367,7 +369,7 @@ public PhoneWindow(Context context) {
 
 <p>我们先来看看 createViewFromTag</p>
 
-<pre class="line-numbers"><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
+<pre><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
     //获取命名空间
    if (name.equals(&quot;view&quot;)) {
         name = attrs.getAttributeValue(null, &quot;class&quot;);
@@ -436,7 +438,7 @@ public PhoneWindow(Context context) {
 
 <p>接下来继续去看子 View 的解析rInflateChildren</p>
 
-<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 //获取布局层级
     final int depth = parser.getDepth();
     int type;
@@ -503,7 +505,7 @@ public PhoneWindow(Context context) {
 
 <p>源码看了很久，我们再来重新看一遍动画吧</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979091135893.gif" alt="20171104150979091135893.gif"/><figcaption>20171104150979091135893.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979091135893.gif" alt="20171104150979091135893.gif"/></p>
 
 <ol>
 <li>翻页</li>
@@ -555,7 +557,7 @@ You can use this to customize the tag names available in your XML layout files.<
 
 <p>关键代码如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
  //创建一个 View
     View view = createViewOrFailQuietly(name, context, attrs);
@@ -573,7 +575,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>创建 view 的方法，这里注意一下，xml 标签里面系统的 view只有类名，自定义 view 是全路径。如：,而可以省略路径的 View 又分为 &quot;android.widget.&quot;和&quot;android.view.&quot;包下，所以对于只写缩写的 view，需要遍历这两个路径。</p>
 
-<pre class="line-numbers"><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
+<pre><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
                                      AttributeSet attrs) {
     //1.自定义控件标签名称带点，所以创建时不需要前缀
     if (name.contains(&quot;.&quot;)) {
@@ -601,7 +603,7 @@ private View createViewOrFailQuietly(String name, String prefix, Context context
 
 <p>读取 attrs 里面的属性，给含有特点 attrs 属性的 view设置 tag 并保存起来。</p>
 
-<pre class="line-numbers"><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
+<pre><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
     //所有自定义的属性
     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AnimationView);
     if (a != null &amp;&amp; a.length() &gt; 0) {
@@ -621,7 +623,7 @@ private View createViewOrFailQuietly(String name, String prefix, Context context
 
 <p>好了，我们自定义LayoutInflater.Factory已经结束了，so，我们可以直接调用 LayoutInflate.cloneInContext(context)获取一个新的 LayoutInflate，然后再setFactor(customFactor)就可以了。代码如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public View onCreateView(LayoutInflater original, ViewGroup container,
                          Bundle savedInstanceState) {
     Bundle args = getArguments();
@@ -735,6 +737,8 @@ public View onCreateView(LayoutInflater original, ViewGroup container,
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -751,31 +755,31 @@ public View onCreateView(LayoutInflater original, ViewGroup container,
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

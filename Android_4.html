@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -116,6 +118,914 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207871588.html">
+                
+                  <h1>Android 自定义 LayoutInflate 实现酷炫引导页</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>今天，我们来搞点事情，自定义一个 LayoutInflate，搞点有意思的东西，实现一个酷炫的动画。<br/><br/>
+首先，在自定义 LayoutInflate 之前，我们要先分析一下 LayoutInflate 的源码，了解了源码的实现方式，才能定制嘛~~~~<br/>
+好了，怕你们无聊跑了，先放效果图出来镇贴</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978927436317.gif" alt="20171104150978927436317.gif"/></p>
+
+<p>好了，效果看完了，</p>
+
+<p>那就先从LayoutInflate的源码开始吧。</p>
+
+<h2 id="toc_0">LayoutInflate</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/></p>
+
+<p>还是提取一下关键信息吧。</p>
+
+<ol>
+<li><p>LayoutInflate 可以将 xml 文件解析成 View 对象。获取方式有两种getLayoutInflater()和getSystemService(Class)。</p></li>
+<li><p>如果要创建一个新的 LayoutInflate去解析你自己的 xml，可以使用 cloneInContext，然后调用 setFactor()。</p></li>
+</ol>
+
+<p>好了，我们先来回顾一下平时我们是怎么把 xml 转换成 View 的吧。</p>
+
+<ul>
+<li>setContentView（）</li>
+</ul>
+
+<p>我们给 Activity 设置 布局 xml 都是调用这个方法，现在我们就来看看这个方法到底干了什么事。</p>
+
+<pre><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
+  getWindow().setContentView(layoutResID);
+  initWindowDecorActionBar();
+}
+-----以上是 Activity 的方法，调用了 Window 的 steContentView
+----手机上的 window 都是 PhoneWindow,就不饶弯了，直接看 PhoneWindow
+----的setContentView方法。
+public void setContentView(int layoutResID) {
+    // Note: FEATURE_CONTENT_TRANSITIONS may be set in the process of installing the window
+    // decor, when theme attributes and the like are crystalized. Do not check the feature
+    // before this happens.
+    if (mContentParent == null) {
+        installDecor();
+    } else if (!hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        mContentParent.removeAllViews();
+    }
+
+    if (hasFeature(FEATURE_CONTENT_TRANSITIONS)) {
+        final Scene newScene = Scene.getSceneForLayout(mContentParent, layoutResID,
+                getContext());
+        transitionTo(newScene);
+    } else {
+        mLayoutInflater.inflate(layoutResID, mContentParent);
+    }
+    mContentParent.requestApplyInsets();
+    final Callback cb = getCallback();
+    if (cb != null &amp;&amp; !isDestroyed()) {
+        cb.onContentChanged();
+    }
+}
+----在构造方法里面找到了mLayoutInflater 的赋值
+public PhoneWindow(Context context) {
+    super(context);
+    mLayoutInflater = LayoutInflater.from(context);
+}
+</code></pre>
+
+<ul>
+<li>View.inflate()</li>
+</ul>
+
+<p>同样是调用了LayoutInflate.inflate()方法</p>
+
+<pre><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
+    LayoutInflater factory = LayoutInflater.from(context);
+    return factory.inflate(resource, root);
+}
+</code></pre>
+
+<ul>
+<li>LayoutInflate.from(context).inflate()  同上</li>
+</ul>
+
+<p>我们项目中所有的 Xml 转 View 都离不开这三个方法吧，这三个方法最终调用的都还是 LayoutInflate 的 inflate 方法。</p>
+
+<p>我们再来看看怎么获取到 LayoutInflate 的实例。<br/>
+上面三个xml 解析成 view 的方法都是用LayoutInflate.from(context)来获取 LayoutInflate 实例的。</p>
+
+<pre><code class="language-java">public static LayoutInflater from(Context context) {
+    LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+   if (LayoutInflater == null) {
+        throw new AssertionError(&quot;LayoutInflater not found.&quot;);
+   }
+   return LayoutInflater;
+}
+</code></pre>
+
+<p>看到这个代码有木有觉得很眼熟啊，我们的 ActivityService、WindowService、NotificationService等等各种 Service 是不是都这样获取的。而我们都知道这些系统服务都是单例的，并且在应用启动的时候系统为其初始化的。好了，撤远了~~</p>
+
+<p>回过头来，我们继续看 LayoutInflate 源码。</p>
+
+<ul>
+<li>inflate(@LayoutRes int resource, @Nullable ViewGroup root)<br/>
+这个方法就是将xml 文件转换成 View 的方法，我们项目中所有的 xml 解析调用的都是这个方法。第一个参数是 xml 资源 id，第二个方法是解析后的 View 是否要添加到 root view里面去。</li>
+</ul>
+
+<p>通过 Resources 获取 xml 解析器XmlResourceParser。</p>
+
+<pre><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+    final Resources res = getContext().getResources();
+    if (DEBUG) {
+        Log.d(TAG, &quot;INFLATING from resource: \&quot;&quot; + res.getResourceName(resource) + &quot;\&quot; (&quot;
+                + Integer.toHexString(resource) + &quot;)&quot;);
+    }
+
+    final XmlResourceParser parser = res.getLayout(resource);
+    try {
+        return inflate(parser, root, attachToRoot);
+    } finally {
+        parser.close();
+    }
+}
+</code></pre>
+
+<p>XmlResourceParser解析 xml，并且返回 view</p>
+
+<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
+    synchronized (mConstructorArgs) {
+        //写入跟踪信息，用于 Debug 相关，先不关心这个
+        Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;inflate&quot;);
+
+        final Context inflaterContext = mContext;
+        //用于读取 xml 节点
+        final AttributeSet attrs = Xml.asAttributeSet(parser);
+        Context lastContext = (Context) mConstructorArgs[0];
+        mConstructorArgs[0] = inflaterContext;
+        View result = root;
+
+        try {
+          // Look for the root node.
+          int type;
+          //空信息直接跳过
+            while ((type = parser.next()) != XmlPullParser.START_TAG &amp;&amp; type != XmlPullParser.END_DOCUMENT) {
+                // Empty
+            }
+            //防错判断
+            if (type != XmlPullParser.START_TAG) {
+                throw new InflateException(parser.getPositionDescription() + &quot;: No start tag found!&quot;);
+            }
+            //获取类名，比如说 TextView
+          final String name = parser.getName();
+
+          if (DEBUG) {
+                System.out.println(&quot;**************************&quot;);
+                System.out.println(&quot;Creating root view: &quot; + name);
+                System.out.println(&quot;**************************&quot;);
+            }
+            //如果标签是merge
+            if (TAG_MERGE.equals(name)) {
+                if (root == null || !attachToRoot) {
+                //merge作为顶级节点的时候必须添加的 rootview
+                throw new InflateException(&quot;&lt;merge /&gt; can be used only with a valid &quot; + &quot;ViewGroup root and attachToRoot=true&quot;);
+                }
+                //递归方法去掉不必要的节点，为什么 merge 可以优化布局
+                rInflate(parser, root, inflaterContext, attrs, false);
+            } else {
+                // Temp 是根节点
+                final View temp = createViewFromTag(root, name, inflaterContext, attrs);
+
+                ViewGroup.LayoutParams params = null;
+               //如果不添加到 rootView 切 rootView 不等于空，则生成 LayoutParams
+                if (root != null) {
+                    if (DEBUG) {
+                        System.out.println(&quot;Creating params from root: &quot; + root);
+                    }
+                    // Create layout params that match root, if supplied
+                    params = root.generateLayoutParams(attrs);
+                    if (!attachToRoot) {
+                        // Set the layout params for temp if we are not
+                        // attaching. (If we are, we use addView, below)
+                        temp.setLayoutParams(params);
+                    }
+                }
+
+             if (DEBUG) {
+                    System.out.println(&quot;-----&gt; start inflating children&quot;);
+                }
+
+                // 解析子节点
+                rInflateChildren(parser, temp, attrs, true);
+
+                if (DEBUG) {
+                    System.out.println(&quot;-----&gt; done inflating children&quot;);
+                }
+
+                // 如果要添加到 rootview。。
+                // to root. Do that now.
+                if (root != null &amp;&amp; attachToRoot) {
+                    root.addView(temp, params);
+                }
+
+                // Decide whether to return the root that was passed in or the
+                // top view found in xml.
+                if (root == null || !attachToRoot) {
+                    result = temp;
+                }
+            }
+        } catch (XmlPullParserException e) {
+            InflateException ex = new InflateException(e.getMessage());
+          ex.initCause(e);
+          throw ex;
+       } catch (Exception e) {
+            InflateException ex = new InflateException(parser.getPositionDescription() + &quot;: &quot; + e.getMessage());
+            ex.initCause(e);
+            throw ex;
+       } finally {
+            // Don&#39;t retain static reference on context.
+            mConstructorArgs[0] = lastContext;
+            mConstructorArgs[1] = null;
+        }
+
+        Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+        //返回解析结果
+        return result;
+    }
+}
+</code></pre>
+
+<p>在这个方法中，判断了是否使用 merge 优化布局，然后通过createViewFromTag解析的顶级 xml 节点的 view，并且处理了是否添加解析的布局到 rootView。调用rInflateChildren方法去解析子 View 并且添加到顶级节点 temp 里面。最后返回解析结果。</p>
+
+<p>我们先来看看 createViewFromTag</p>
+
+<pre><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
+    //获取命名空间
+   if (name.equals(&quot;view&quot;)) {
+        name = attrs.getAttributeValue(null, &quot;class&quot;);
+   }
+   // 给 view 设置主题。现在知道为什么colorPrimary等 theme 属性会影响控件颜色了吧
+   if (!ignoreThemeAttr) {
+        final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
+        final int themeResId = ta.getResourceId(0, 0);
+        if (themeResId != 0) {
+            context = new ContextThemeWrapper(context, themeResId);
+        }
+        ta.recycle();
+   }
+    //让 view 闪烁，可以参考http://blog.csdn.net/qq_22644219/article/details/69367150
+    if (name.equals(TAG_1995)) {
+        // Let&#39;s party like it&#39;s 1995!
+        return new BlinkLayout(context, attrs);
+    }
+
+   try {
+        View view;
+        //优先调用了mFactory2的 oncreateView 方法，创建了 temp View
+        if (mFactory2 != null) {
+            view = mFactory2.onCreateView(parent, name, context, attrs);
+        } else if (mFactory != null) {
+            view = mFactory.onCreateView(name, context, attrs);
+        } else {
+            view = null;
+        }
+
+        if (view == null &amp;&amp; mPrivateFactory != null) {
+            view = mPrivateFactory.onCreateView(parent, name, context, attrs);
+        }
+
+        if (view == null) {
+            final Object lastContext = mConstructorArgs[0];
+            mConstructorArgs[0] = context;
+            try {
+                if (-1 == name.indexOf(&#39;.&#39;)) {
+                    view = onCreateView(parent, name, attrs);
+                } else {
+                    view = createView(name, null, attrs);
+                }
+            } finally {
+                mConstructorArgs[0] = lastContext;
+            }
+        }
+
+        return view;
+    } catch (InflateException e) {
+        throw e;
+
+    } catch (ClassNotFoundException e) {
+        final InflateException ie = new InflateException(attrs.getPositionDescription() + &quot;: Error inflating class &quot; + name);
+        ie.initCause(e);
+        throw ie;
+    } catch (Exception e) {
+        final InflateException ie = new InflateException(attrs.getPositionDescription() + &quot;: Error inflating class &quot; + name);
+        ie.initCause(e);
+        throw ie;
+    }
+}
+</code></pre>
+
+<p>这里我们可以知道，mFactor或者 mFactor 不为 null，则调用mFactor来创建 View，如果mFactor为 null 或者mFactor创建是失败，则最终调用LayoutInflate 的createView方法 来创建 View 的，它传入了 view 的 parent、name、context、 attrs。</p>
+
+<p>接下来继续去看子 View 的解析rInflateChildren</p>
+
+<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+//获取布局层级
+    final int depth = parser.getDepth();
+    int type;
+    //没看懂没事，我们不是来纠结 xml 解析的
+    while (((type = parser.next()) != XmlPullParser.END_TAG || parser.getDepth() &gt; depth) &amp;&amp; type != XmlPullParser.END_DOCUMENT) {
+        if (type != XmlPullParser.START_TAG) {
+            continue;
+        }
+
+        final String name = parser.getName();
+        //requestFocus标签，http://blog.csdn.net/ouyang_peng/article/details/46957281
+        if (TAG_REQUEST_FOCUS.equals(name)) {
+            parseRequestFocus(parser, parent);
+        } else if (TAG_TAG.equals(name)) {
+        //tag标签，只能用于 api21以上，给父view 设置一个 tag
+            parseViewTag(parser, parent, attrs);
+       } else if (TAG_INCLUDE.equals(name)) {
+       //include 节点
+            if (parser.getDepth() == 0) {
+                throw new InflateException(&quot;&lt;include /&gt; cannot be the root element&quot;);
+            }
+            parseInclude(parser, context, parent, attrs);
+        } else if (TAG_MERGE.equals(name)) {
+        //merge 节点
+            throw new InflateException(&quot;&lt;merge /&gt; must be the root element&quot;);
+        } else {
+        //走了刚刚的那个方法，创建 view 设置 LayoutParams
+            final View view = createViewFromTag(parent, name, context, attrs);
+            final ViewGroup viewGroup = (ViewGroup) parent;
+            final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
+            rInflateChildren(parser, view, attrs, true);
+            //添加到付 view
+            viewGroup.addView(view, params);
+        }
+    }
+
+    if (finishInflate) {
+        parent.onFinishInflate();
+    }
+}
+</code></pre>
+
+<p>我们来整理一下思路吧，调用步骤</p>
+
+<ol>
+<li>LayoutInflater 的静态方法 form 获取LayoutInflater实力</li>
+<li>inflate解析 xml 资源</li>
+<li>inflate 调用createViewFromTag创建了顶级view</li>
+<li>inflate 调用rInflateChildren 创建所有子 view</li>
+<li>rInflateChildren递归调用rInflate创建所有子 view。</li>
+<li>rInflate通过调用createViewFromTag真正创建一个 view。</li>
+<li>createViewFromTag优先使用 mFactory2、mFactory、mPrivateFactory来创建 View，如果创建失败，则最终调用createView方法来创建。创建的过程中用了parent,name,context,attrs等参数，然后运用反射的方法，创建出 View，</li>
+</ol>
+
+<p>因此，我们所有的 View 的构造方法都是被 <code>LayoutInflate</code> 的Factory调用创建出来的。<br/>
+如果要自定义 <code>LayoutInflate</code> 解析，只需要给调用<code>LayoutInflate</code>的 <code>setFactory</code>设置我们自定义的 <code>Factory</code> 即可。<br/>
+但是问题来了，LayoutInflate是系统服务，而且是单例，我们直接调用LayoutInflate的 setFactory 方法，会影响后期所有 view 的创建。</p>
+
+<p>所以我们需要用到<code>LayoutInflate</code>的<code>cloneInContext</code>方法<code>clone</code>一个新的 <code>LayoutInflate</code>，然后再设置自己的 <code>Factory</code>。至于<code>LayoutInflate</code>是一个抽象类，<code>cloneInContext</code>是一个抽象方法，我们根本不用关心，因为我们直接用系统创建好的<code>LayoutInflate</code>即可。</p>
+
+<p>好了，<code>LayoutInflate</code>的源码分析完了，接下来我们来分析动画了。</p>
+
+<h2 id="toc_1">动画分析</h2>
+
+<p>源码看了很久，我们再来重新看一遍动画吧</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979091135893.gif" alt="20171104150979091135893.gif"/></p>
+
+<ol>
+<li>翻页</li>
+<li>翻页的时候天上的云，地上的建筑物移动速度和翻页速度不一样</li>
+<li>不同的背景物移动速度不一样，最后一页背景物上下扩散</li>
+<li>翻页的过程中，人一直在走路</li>
+<li>最后一页人要消失。</li>
+</ol>
+
+<p>解决方案：</p>
+
+<ol>
+<li>ViewPager</li>
+<li>给 viewPage设置PageChangeListener，在滚动的时候给各种 背景物体设置setTranslation。</li>
+<li>不同的背景物设置不同的setTranslation系数。</li>
+<li>人物走路用帧动画即可，在viewPage滑动处于SCROLL_STATE_DRAGGING状态的时候开启帧动画。</li>
+<li>这个简单，监听onPageSelected，然后再设置人为 View.GONE即可。</li>
+</ol>
+
+<p>解决方案的问题：<br/><br/>
+粗略数了一下，6个页面大概有50个左右的背景物。如果要一个一个去获取 id，然后再根据不同的 id，设置不同的滑动速度滑动方向，可能你会疯掉。</p>
+
+<p>因此，我们需要想一个办法，去解决这个问题。可能有的童鞋会说，我写一个自定义 View，设置滑动速度系数属性就行了呀。这个方法可以实现，but，你还是需要一个一个去 <code>findViewbyid</code>。</p>
+
+<p>那么，我们是不是可以给 xml 添加自定义标签，然后自定义解析。比如说，天上的云，滑进来的阻尼系数是0.4，滑出去的阻尼系数是0.6，只需要在 xml 里面设置好这两个参数，然后我们再在合适的时使用这两个参数即可啊。</p>
+
+<h2 id="toc_2">自定义LayoutInflater.Factory</h2>
+
+<p>咦，怎么变成自定义<code>LayoutInflater.Factory</code>了，哈哈哈，还记得刚刚<code>LayoutInflater</code>的源码分析么，View 的创建全部在<code>createViewFromTag</code>里面，而<code>createViewFromTag</code>优先使用 Factory 来 创建。然后我们来看看Factory到底是干嘛的。</p>
+
+<p>Hook you can supply that is called when inflating from a LayoutInflater.<br/>
+You can use this to customize the tag names available in your XML layout files.</p>
+
+<ul>
+<li>当LayoutInflater在解析布局的时候会被调用</li>
+<li>可以用来读取 xml 中的自定义标签。</li>
+</ul>
+
+<p>这下迷惑都解开了吧，啊哈哈哈哈~~<br/><br/>
+现在，我们就来定义这个 Factory<br/><br/>
+思路很简单。  </p>
+
+<ol>
+<li>继承LayoutInflater.Factory2</li>
+<li>实现抽象方法onCreateView</li>
+<li>在onCreateView里面使用 LayoutInflate 的 createView方法创建View</li>
+<li>创建成功之后，读取 view 的 attrs 属性，作为 tag 保持到 viewTag。</li>
+</ol>
+
+<p>关键代码如下：</p>
+
+<pre><code class="language-java">@Override
+public View onCreateView(String name, Context context, AttributeSet attrs) {
+ //创建一个 View
+    View view = createViewOrFailQuietly(name, context, attrs);
+
+    //实例化完成
+    if (view != null) {
+        //获取自定义属性，通过标签关联到视图上
+        setViewTag(view, context, attrs);
+        //所有带有自定义属性的 View 保存起来，供动画切换的时候调用
+        mParallaxView.getParallaxViews().add(view);
+    }
+    return view;
+}
+</code></pre>
+
+<p>创建 view 的方法，这里注意一下，xml 标签里面系统的 view只有类名，自定义 view 是全路径。如：,而可以省略路径的 View 又分为 &quot;android.widget.&quot;和&quot;android.view.&quot;包下，所以对于只写缩写的 view，需要遍历这两个路径。</p>
+
+<pre><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
+                                     AttributeSet attrs) {
+    //1.自定义控件标签名称带点，所以创建时不需要前缀
+    if (name.contains(&quot;.&quot;)) {
+        createViewOrFailQuietly(name, null, context, attrs);
+    }
+    //2.系统视图需要加上前缀
+    for (String prefix : sClassPrefix) {
+        View view = createViewOrFailQuietly(name, prefix, context, attrs);
+        if (view != null) {
+            return view;
+        }
+    }
+    return null;
+}
+private View createViewOrFailQuietly(String name, String prefix, Context context,
+                                     AttributeSet attrs) {
+    try {
+        //通过系统的inflater创建视图，读取系统的属性
+        return inflater.createView(name, prefix, attrs);
+    } catch (Exception e) {
+        return null;
+    }
+}
+</code></pre>
+
+<p>读取 attrs 里面的属性，给含有特点 attrs 属性的 view设置 tag 并保存起来。</p>
+
+<pre><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
+    //所有自定义的属性
+    TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AnimationView);
+    if (a != null &amp;&amp; a.length() &gt; 0) {
+        //获取自定义属性的值
+        ParallaxViewTag tag = new ParallaxViewTag();
+       tag.xIn = a.getFloat(R.styleable.AnimationView_x_in, 0f);
+       tag.xOut = a.getFloat(R.styleable.AnimationView_x_out, 0f);
+       tag.yIn = a.getFloat(R.styleable.AnimationView_y_in, 0f);
+       tag.yOut = a.getFloat(R.styleable.AnimationView_y_in, 0f);
+
+       //index
+       view.setTag(view.getId(), tag);
+       a.recycle();
+   }
+}
+</code></pre>
+
+<p>好了，我们自定义LayoutInflater.Factory已经结束了，so，我们可以直接调用 LayoutInflate.cloneInContext(context)获取一个新的 LayoutInflate，然后再setFactor(customFactor)就可以了。代码如下：</p>
+
+<pre><code class="language-java">@Override
+public View onCreateView(LayoutInflater original, ViewGroup container,
+                         Bundle savedInstanceState) {
+    Bundle args = getArguments();
+    int layoutId = args.getInt(&quot;layoutId&quot;);
+    LayoutInflater layoutInflater = original.cloneInContext(getActivity());
+    layoutInflater.setFactory(new ParallaxFactory(layoutInflater, this));
+    return layoutInflater.inflate(layoutId, null);
+}
+</code></pre>
+
+<p>接下来的代码就不写了吧，就是监听 ViewPager 的滑动事件，获取当前滑出滑进页面的自定义了 attrs 属性的 View 列表，然后再根据滑出屏幕的比例*属性参数做 view 的 TranslationY/TranslationX 操作。<br/><br/>
+这里我贴一下代码仓库地址吧，有兴趣的小伙伴可以把代码跑起来看一下  </p>
+
+<p><a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Fdiamondlin2016%2FParallaxlayoutinflater">github传送门</a></p>
+
+<p>看起来好像并没有什么卵用，就是秀了一波骚操作。写一个自定义 view，继承 ImageView，设置几个自定义 attrs 属性，再在构造方法里面把属性读出来保存到类变量，对外提供读取方法，然后同样监听 viewpager 的滑动就行了。</p>
+
+<p>哈哈哈哈~~分享这篇文章的最终目的不是为了实现这个动画，就是想看一下 LayoutInflate 的源码，了解一下 xml 文件是怎么解析成 view的过程。。。。</p>
+
+<h2 id="toc_3">已知 bug：</h2>
+
+<p>v4的版本升级到19.1.0之后动画会失效<br/><br/>
+引入appcompat包会报 xml 解析错误。  </p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/4</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207871543.html">
+                
+                  <h1>Android 用贝塞尔曲线绘制酷炫轮廓背景</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978726172356.png" alt="20171104150978726172356.png"/></p>
+
+<p>Github地址：<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FOCNYang%2FContourView">github.com/OCNYang/Con…</a></p>
+
+<p>今天就借助这个开源控件，来为大家梳理一下自定义 View 的整个流程：</p>
+
+<ol>
+<li>分析需求、功能，确定实现方法；</li>
+<li>总结所需的参数属性以满足可定制性，较明确的属性归纳为自定义属性，不适合自定义属性的（比如传入数据，对象等）提供方法来设置；</li>
+<li>有时自定义 View 会提供一种或几种默认及内置的样式，（这时可以根据内置的样式种类补充到自定义属性中），同时分析，使用内置样式或用户定制拓展时的流程；</li>
+<li>开始根据分析，按流程依次重写： <code>构造函数（获取自定义属性，设置画笔等）</code> --&gt; <code>onMeasure()(测量大小)</code> --&gt; <code>onSizeChanged()(确定大小，一般我们在这里获取大小)</code> --&gt; <code>（onLayout()自定义View，因为没有子控件，这一步是不需要的）</code> --&gt; <code>onDraw()(按照需求和根据属性绘制实际内容)</code> --&gt; <code>其他</code></li>
+</ol>
+
+<p>如果有事件的需求，添加事件相关逻辑。<br/><br/>
+那么现在我们就根据上面这个流程一步步来实现 ContourView。  </p>
+
+<h2 id="toc_0">分析</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978739369275.png" alt="20171104150978739369275.png"/></p>
+
+<p>根据上面的分析，实现的思路大概都有了。那么我们就开始寻找具体实现方法。<br/>
+首先，我们选用三阶贝塞尔曲线，我们都知道三阶曲线的计算公式是：</p>
+
+<pre><code class="language-text">path.moveTo(start.x, start.y);
+path.cubicTo(control1.x, control1.y, control2.x,control2.y, end.x, end.y);
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978744638463.gif" alt="20171104150978744638463.gif"/></p>
+
+<p>也就是说绘制一段曲线，我们需要知道两个锚点的坐标以及两个控制点的坐标，为了保证曲线的弯曲度能够达到理想的状态，控制点的坐标也不能是随意取的，这就要求我们必须通过一种计算方法合理的得出控制点的坐标。Google 了一下，发现先驱们已经找到了很多种方法供我们选择。</p>
+
+<p>最终经过对比我们选用了这样一种方法：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978747068083.png" alt="20171104150978747068083.png"/></p>
+
+<p>这种方法大概的形式如上图，利用锚点集合，连续的4个锚点坐标Pi-1、Pi、Pi+1、Pi+2，通过具体公式来计算出中间两个锚点之间曲线的两个控制点坐标。</p>
+
+<blockquote>
+<p>详细的计算方法介绍请看 ContourView 的 WiKi：<br/>
+<strong>Bézier-求贝塞尔曲线控制点</strong></p>
+</blockquote>
+
+<h2 id="toc_1">归纳自定义属性</h2>
+
+<p>通过上面的分析，其实我们大概能总结出需要自定义的属性有哪些了。这里不着急，我们先总结一下自定义属性相关的内容和步骤？</p>
+
+<ul>
+<li><strong>创建自定义属性文件</strong></li>
+</ul>
+
+<p>在 res/values/ 下新建 attrs.xml 文件（默认新建项目没有这个文件）。文件内容类似如下：</p>
+
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+    &lt;attr name=&quot;custom_color&quot; format=&quot;color&quot;/&gt;
+
+    &lt;declare-styleable name=&quot;ContourView&quot;&gt;
+        &lt;attr name=&quot;shader_color&quot; format=&quot;color&quot;/&gt;
+        &lt;attr name=&quot;smoothness&quot; format=&quot;float&quot;/&gt;
+    &lt;/declare-styleable&gt;
+&lt;/resources&gt;
+</code></pre>
+
+<p>其中 attr 和 declare-styleable 节点分别代表的意思如下：</p>
+
+<p><strong>attr</strong>： 定义了一个属性，属性名为 custom_color 这个是可以随意起的，但是要注意不要和其他控件所冲突， format 所定义的是属性的格式，其中格式又分为好多种，下面会细说，这里定义的是颜色 color。</p>
+
+<p><strong>declare-styleable</strong>：定义了一个属性组，在里面我们可以单独写 attr 属性，也可以引用直接在 resources 下定义的 attr，其中的区别就是引用的不用写 format。</p>
+
+<p>需要注意的是，attr 并不依赖与 declare-styleable，declare-styleable 只是方便了 attr 的使用，使属性的使用更加明确。两者在代码中的获取方式并不相同，下面会细说。</p>
+
+<p>在实际开发中，我们一般是采用 declare-styleable 方式，直接定义一组自己所编写的自定义控件需要用到的属性。</p>
+
+<ul>
+<li><strong>自定义属性的可以设置哪些属性</strong></li>
+</ul>
+
+<p>我们根据需要可以设置的自定义属性的格式一共有一下几种：</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center">format=&quot;格式&quot;</th>
+<th style="text-align: center">说明</th>
+<th style="text-align: center">app:myattr=&quot;使用值&quot;</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: center">reference</td>
+<td style="text-align: center">参考某一资源ID</td>
+<td style="text-align: center">&quot;@drawable/图片ID&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">color</td>
+<td style="text-align: center">颜色值</td>
+<td style="text-align: center">&quot;#FFFFFFFF&quot; or &quot;@color/颜色ID&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">boolean</td>
+<td style="text-align: center">布尔值</td>
+<td style="text-align: center">&quot;true&quot; or &quot;false&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">dimension</td>
+<td style="text-align: center">尺寸值</td>
+<td style="text-align: center">&quot;0dp&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">float</td>
+<td style="text-align: center">浮点型</td>
+<td style="text-align: center">&quot;1.2&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">integer</td>
+<td style="text-align: center">整型值</td>
+<td style="text-align: center">&quot;10&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">fraction</td>
+<td style="text-align: center">百分数值</td>
+<td style="text-align: center">&quot;50%&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">string</td>
+<td style="text-align: center">字符串</td>
+<td style="text-align: center">&quot;OCN.Yang&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">enum</td>
+<td style="text-align: center">枚举值（详见下）</td>
+<td style="text-align: center">&quot;自定义类型名称&quot;</td>
+</tr>
+<tr>
+<td style="text-align: center">flag</td>
+<td style="text-align: center">位或运算</td>
+<td style="text-align: center">&quot;center</td>
+</tr>
+</tbody>
+</table>
+
+<blockquote>
+<p>附：<br/><br/>
+enum 枚举型定义：<br/>
+<code>&lt;attr name=&quot;handsomeBoy&quot;&gt;</code><br/><br/>
+    <code>&lt;enum name=&quot;OCNYang&quot; value=&quot;0x01&quot;/&gt;</code><br/><br/>
+    <code>&lt;enum name=&quot;TFBOYS&quot; value=&quot;0x10&quot;/&gt;</code><br/><br/>
+<code>&lt;/attr&gt;</code><br/><br/>
+enum 使用：<br/><br/>
+<code>app:handsomeBoy=&quot;OCNYang&quot;</code><br/><br/>
+flag 定义：<br/><br/>
+<code>&lt;attr name=&quot;gravity&quot;&gt;</code><br/><br/>
+    <code>&lt;flag name=&quot;top&quot; value=&quot;0&quot;/&gt;</code><br/><br/>
+    <code>&lt;flag name=&quot;center&quot; value=&quot;1&quot;/&gt;</code><br/><br/>
+    <code>&lt;flag name=&quot;bottom&quot; value=&quot;2&quot;/&gt;</code><br/><br/>
+<code>&lt;/attr&gt;</code><br/><br/>
+flag 使用：<br/><br/>
+<code>app:gravity=&quot;center|bottom&quot;</code><br/><br/>
+混搭使用<br/><br/>
+<code>&lt;attr name=&quot;background&quot; format=&quot;reference|color&quot;/&gt;</code><br/><br/>
+这样，你传入资源ID或颜色值都是可以的了。</p>
+</blockquote>
+
+<ul>
+<li><strong>获取自定义属性</strong></li>
+</ul>
+
+<p>那怎么获取这些自定义的属性呢，只需要在自定义 View 的构造方法（两个参数或两个以上的参数）里通过一下方式就能获取到了：</p>
+
+<pre><code class="language-java">public ContourView(Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+    super(context, attrs, defStyleAttr);
+
+    TypedArray typedArray = context.obtainStyledAttributes(attrs, R.styleable.ContourView);
+    //注意：获取时自定义的属性名有变动，例如：定义名：contour_style -&gt; 获取名：ContourView_contour_style（即：自定义属性组名_属性名）
+    mStyle = typedArray.getInt(R.styleable.ContourView_contour_style, STYLE_SAND);
+}
+</code></pre>
+
+<p>当然获取时，不同格式的属性需要通过 TypedArray 对应的不同的方法获取，那 TypedArray 都有哪些获取方法呢？如下图：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978824371174.png" alt="20171104150978824371174.png"/></p>
+
+<p>通过方法名称，相信你能很轻易的知道，需要哪个对应方法获取了。</p>
+
+<blockquote>
+<p>如果你想更详细的了解每个方法的详细介绍，可以点击下面链接查看：<br/>
+<a href="https://link.juejin.im/?target=https%3A%2F%2Fdeveloper.android.com%2Freference%2Fandroid%2Fcontent%2Fres%2FTypedArray.html">developer.android.com/reference/a…</a><br/>
+另外，比较特殊的 enum 的获取方法：<br/>
+由于 enum 的 value 值只能设置 int 型，所以，获取enum的方式是 getInt()。</p>
+</blockquote>
+
+<p>好了，关于自定义属性的介绍大概就是这么多内容了，那么回到原题，我们的 ContourView 需要哪几种 自定义属性呢？其实通过分析模块中我们就基本知道我们需要的属性有哪些了：</p>
+
+<ul>
+<li>内置轮廓样式： enum 类型，内置多少个 enum 就有多少类型；</li>
+<li>绘制颜色：纯色绘制时，我们需要一个颜色值，Color 属性</li>
+<li>Shader 相关：
+<ol>
+<li>采用哪种 Shader，enum 类型，有RadialGradient、SweepGradient、LinearGradient；</li>
+<li>Shader 的颜色，Color 类型，需要两个一个startColor，一个endColor；</li>
+<li>Shader 填充的控制，enum 类型，我们提供几种填充的方向，比如左上角到右下角，从上到下，然后我们再通过这个方向和传入的秒点集来动态计算起点和终点的坐标</li>
+</ol></li>
+</ul>
+
+<p>具体如下：</p>
+
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;resources&gt;
+    &lt;declare-styleable name=&quot;ContourView&quot;&gt;
+        &lt;attr name=&quot;shader_mode&quot;&gt;
+            &lt;enum name=&quot;RadialGradient&quot; value=&quot;0x01&quot;/&gt;
+            &lt;enum name=&quot;SweepGradient&quot; value=&quot;0x02&quot;/&gt;
+            &lt;enum name=&quot;LinearGradient&quot; value=&quot;0x03&quot;/&gt;
+        &lt;/attr&gt;
+        &lt;attr name=&quot;shader_startcolor&quot; format=&quot;color&quot;/&gt;
+        &lt;attr name=&quot;shader_endcolor&quot; format=&quot;color&quot;/&gt;
+        &lt;attr name=&quot;shader_style&quot;&gt;
+            &lt;enum name=&quot;LeftToBottom&quot; value=&quot;0x00&quot;/&gt;
+            &lt;enum name=&quot;RightToBottom&quot; value=&quot;0x11&quot;/&gt;
+            &lt;enum name=&quot;TopToBottom&quot; value=&quot;0x12&quot;/&gt;
+            &lt;enum name=&quot;Center&quot; value=&quot;0x13&quot;/&gt;
+        &lt;/attr&gt;
+        &lt;attr name=&quot;contour_style&quot;&gt;
+            &lt;enum name=&quot;Beach&quot; value=&quot;0x23&quot;/&gt;
+            &lt;enum name=&quot;Ripples&quot; value=&quot;0x22&quot;/&gt;
+            &lt;enum name=&quot;Clouds&quot; value=&quot;0x21&quot;/&gt;
+            &lt;enum name=&quot;Sand&quot; value=&quot;0x00&quot;/&gt;
+            &lt;enum name=&quot;Shell&quot; value=&quot;0x25&quot;/&gt;
+        &lt;/attr&gt;
+        &lt;attr name=&quot;shader_color&quot; format=&quot;color&quot;/&gt;
+        &lt;!--弯曲系数，在通过贝塞尔曲线绘制曲线时，来控制弯曲度--&gt;
+        &lt;attr name=&quot;smoothness&quot; format=&quot;float&quot;/&gt;
+    &lt;/declare-styleable&gt;
+&lt;/resources&gt;
+</code></pre>
+
+<h2 id="toc_2">内置样式</h2>
+
+<p>既然自定义 View，那我们一定会为它提供一种或几种内置好的样式呀。这样别人在偷懒不想自己定制样式时，可以也有不错的显示效果呀！<br/><br/>
+通过上面知道，ContourView 的轮廓样式主要是通过给出的锚点集控制的，所有的锚点围成的闭合曲线就是轮廓的大概样式了。<br/><br/>
+所以，这里我们想内置几种样式，就等于内置几个锚点集就行了，这里的我们内置的锚点坐标为了使得不同大小显示效果相同，我们先在 onSizeChanged() 获得了 View 的宽高，然后根据宽高按照百分比来设置坐标。  </p>
+
+<p>设置的内置轮廓有以下几种（丑爆了），只是轮廓，颜色是自己设置的：</p>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center">样式（contuor_style）</th>
+<th style="text-align: center">效果</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: center">Sand(默认)</td>
+<td style="text-align: center"><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978839852514.png" alt="20171104150978839852514.png"/></td>
+</tr>
+<tr>
+<td style="text-align: center">Clouds</td>
+<td style="text-align: center"><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978842981180.png" alt="20171104150978842981180.png"/></td>
+</tr>
+<tr>
+<td style="text-align: center">Beach</td>
+<td style="text-align: center"><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097884696641.png" alt="2017110415097884696641.png"/></td>
+</tr>
+<tr>
+<td style="text-align: center">Ripples</td>
+<td style="text-align: center"><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978853494460.png" alt="20171104150978853494460.png"/></td>
+</tr>
+<tr>
+<td style="text-align: center">Shell</td>
+<td style="text-align: center"><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978856557867.png" alt="20171104150978856557867.png"/></td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_3">重写各方法</h2>
+
+<p>关于自定义 View 重写各方法的介绍，网上已经有太多太多，这里就不再啰嗦了。</p>
+
+<blockquote>
+<p>这里推荐一个关于自定义 View 尤其关于绘制方面讲解特别详细的系列博客：<br/>
+<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FGcsSloop%2FAndroidNote">github.com/GcsSloop/An…</a><br/>
+另外厚脸皮的放上一篇自己的关于讲解“自定义组合控件”的博客地址：<br/>
+<a href="https://link.juejin.im/?target=http%3A%2F%2Fwww.jianshu.com%2Fp%2F4bbc967214c9">www.jianshu.com/p/4bbc96721…</a></p>
+</blockquote>
+
+<p>我们知道，在自定义 View 时，必须要有构造函数的，对于4个构造函数，有时可能大家不确定到底该重写哪个，也不知道每个构造函数有什么区别，这里对常用的做法做下说明。</p>
+
+<pre><code class="language-java">//在代码中直接 new 一个 Custom View 实例时,会调用第一个构造函数.这个没有任何争议.
+public View(Context context);  
+//在 xml 布局文件中使用自定义 View 时,会调用第二个构造函数.这个也没有争议.
+public View(Context context, AttributeSet attrs);  
+//关于这个构造函数的调用，网上真是众说纷纭，我也不说哪种说法正确，下面提供详解
+public View(Context context, AttributeSet attrs, int defStyle);
+//4个参数的构造函数这里不做考虑
+</code></pre>
+
+<p>关于内部这4个构造函数是怎么调用的，这里直接放源码图片，自己一目了然：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978864534553.png" alt="20171104150978864534553.png"/></p>
+
+<p>大家在自定义 View 时，如果没有特别的需求，只要重写前两个构造函数就可以了，我习惯性的写成下面的形式：</p>
+
+<pre><code class="language-java">public class MyView extends View {
+
+    public MyView(Context context) {
+        this(context, null);
+    }
+
+    public MyView(Context context, AttributeSet attrs) {
+        this(context, attrs, 0);
+    }
+
+    public MyView(Context context, AttributeSet attrs, int defStyleAttr) {
+        super(context, attrs, defStyleAttr);
+        //初始化画笔，做一些属性的默认赋值等；
+        //获取自定义的属性等；
+    }
+}
+</code></pre>
+
+<p>那，说了这么多还是没有提第3个参数到底是干什么的有什么用呀，这里我就不再为大家详细讲解了，这里找到了一片文章，讲解了第3个参数在什么时候怎么使用，大家可以看一下：</p>
+
+<p><a href="https://link.juejin.im/?target=http%3A%2F%2Fwww.cnblogs.com%2Fangeldevil%2Fp%2F3479431.html">www.cnblogs.com/angeldevil/…</a></p>
+
+<p>回归到 ContourView，其实 ContourView 内部很简单，只对 onDraw() 进行了重写，毕竟 ContourView 的主要部分就是绘制。绘制的逻辑，就是遍历锚点集，然后利用上面 WiKi 里提到的公式求出各段曲线的控制点，然后用三阶贝塞尔曲线画出路径。当遍历完锚点集时，闭合曲线的轮廓基本上就得到了，然后就用Shader对路径进行绘制就行。</p>
+
+<p>好了，本次的梳理内容就到这了，感兴趣的可以查看 ContourView 的源码进行分析，同时 ContourView 的这种背景效果还是不错的，需要的时候大家真的可以用到呢!</p>
+
+<p><strong>ContourView GitHub</strong>:<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FOCNYang%2FContourView">github.com/OCNYang/Con…</a></p>
+
+<p>如果大家想看一些高级的自定义 View 的例子可以查看上次开源的 App 的天气模块，其中的天气页面以及天气折线图等等控件都是通过自定义 ViewGroup 或自定义 View 实现的。地址是:<br/>
+Qbox Github:<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FOCNYang%2FQBox">github.com/OCNYang/QBo…</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/3</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207871499.html">
                 
                   <h1>Android 带滑动效果的bottomBar</h1>
@@ -125,7 +1035,7 @@
                         
                         	<p>看到一个bottomBar的设计,感觉很好看,于是把它实现了出来</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978644456283.gif" alt="20171104150978644456283.gif"/><figcaption>20171104150978644456283.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978644456283.gif" alt="20171104150978644456283.gif"/></p>
 
 <p>可以看到这是一个常见的bottomBar<br/>
 把它分解一下</p>
@@ -140,7 +1050,7 @@
 <p>根据我们的分解,一步一步解决问题<br/><br/>
 考虑到这是一个bottomBar,我选择了自定义ViewGroup来实现.因为用ViewGroup添加item会比较方便.</p>
 
-<pre class="line-numbers"><code class="language-java">public class AnimationBottomBar extends ViewGroup {
+<pre><code class="language-java">public class AnimationBottomBar extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {        
     super.onDraw(canvas);
@@ -166,7 +1076,7 @@
 添加item的时候要足够方便,使用代码添加是个不错的选择,类似于这样<code>mAnimationBottomBar.addItem(item)</code>.<br/><br/>
 我创建了一个简单的BottomItem类来包装item  </p>
 
-<pre class="line-numbers"><code class="language-java">public class BottomItem {
+<pre><code class="language-java">public class BottomItem {
     int drawableRes;//图标资源
     String title;//标题
     public BottomItem(@DrawableRes int drawableRes,String title){
@@ -178,7 +1088,7 @@
 
 <p>添加item之后,我将添加的BottomItem保存到一个list里</p>
 
-<pre class="line-numbers"><code class="language-java">public AnimationBottomBar addItem(BottomItem bottomItem) {
+<pre><code class="language-java">public AnimationBottomBar addItem(BottomItem bottomItem) {
     mBottomItemArrayList.add(bottomItem);
     return this;
 }
@@ -186,7 +1096,7 @@
 
 <p>添加item之后会返会对象本身,就可以继续<code>.addItem()</code>了,就像这样</p>
 
-<pre class="line-numbers"><code class="language-java">mAnimationBottomBar.addItem(new BottomItem(R.drawable.h, &quot;zero&quot;))
+<pre><code class="language-java">mAnimationBottomBar.addItem(new BottomItem(R.drawable.h, &quot;zero&quot;))
                     .addItem(new BottomItem(R.drawable.h, &quot;one&quot;))
                     .addItem(new BottomItem(R.drawable.h, &quot;two&quot;))
                     .addItem(new BottomItem(R.drawable.h, &quot;four&quot;))
@@ -195,7 +1105,7 @@
 
 <p>好了,现在已经添加了item,嗯?球都没得.运行没有显示出来,当然啦添加了之后需要添加到ViewGroup里,在经过onMeasure和onLayout之后才会显示出来</p>
 
-<pre class="line-numbers"><code class="language-java">public void build()  {
+<pre><code class="language-java">public void build()  {
     itemCount = mBottomItemArrayList.size();
     itemWidth=getLayoutParams().width/itemCount;/*获得平均一个item的宽度,这里有个问题,因为这个时候还没有经过OnMeaSure(),width获取不到,在onMeasure里可以再次进行调整*/
     for (BottomItem bottomItem : mBottomItemArrayList) {/*添加图标*/
@@ -216,7 +1126,7 @@
 
 <p>onMeasure(),遍历刚刚所有添加子View,通知它们测量自己的长宽</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     childCount = getChildCount();/*获得所有子View的数量*/
@@ -232,7 +1142,7 @@ protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 <p>onLayout(),确定所有的子View应该在的位置</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onLayout(boolean changed, int l, int t, int r, int b) {
   
     for (int i = 0; i &lt; itemCount; i++) {/*遍历每一个item,放置item的位置*/
@@ -247,7 +1157,7 @@ protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
 <p>此时的样子应该是这样的</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978671165751.png" alt="20171104150978671165751.png"/><figcaption>20171104150978671165751.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978671165751.png" alt="20171104150978671165751.png"/></p>
 
 <h2 id="toc_1">添加背景颜色</h2>
 
@@ -261,7 +1171,7 @@ protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
 <p>我选择了第二个方法,因为我们要自己实现背景.</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onDraw(Canvas canvas) {
     /*绘制item颜色*/
     for (int i = 0; i &lt; 5; i++) {
@@ -282,7 +1192,7 @@ protected void onDraw(Canvas canvas) {
 <p>这里我分了两部分来画,一是每个item的背景颜色,二是整体的背景颜色,注意画的先后顺序哦,我为了实现item的移动,把item部分画在下层,把背景画在了上层,通过改变背景来实现item的移动效果.<br/>
 这时候的效果是这样的</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978685438558.png" alt="20171104150978685438558.png"/><figcaption>20171104150978685438558.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978685438558.png" alt="20171104150978685438558.png"/></p>
 
 <h2 id="toc_2">实现动画</h2>
 
@@ -293,7 +1203,7 @@ protected void onDraw(Canvas canvas) {
 <li>item的缩放动画</li>
 </ol>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onDraw(Canvas canvas) {
     /绘制item颜色*/
     for (int i = 0; i &lt; 5; i++) {
@@ -330,7 +1240,7 @@ protected void onDraw(Canvas canvas) {
 缩放系数这里,默认的未选中item的缩放系数是0.5,选中的item的缩放系数就是1.0,移动的时候,越靠近选中的item就这个系数就越大.<br/>
 既然是动画我们肯定要让她动起来,我继承了Animation类实现了自己的BottomAnimation类</p>
 
-<pre class="line-numbers"><code class="language-java">private class BottomAnimation extends Animation {
+<pre><code class="language-java">private class BottomAnimation extends Animation {
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         super.applyTransformation(interpolatedTime, t);
@@ -356,7 +1266,7 @@ protected void onDraw(Canvas canvas) {
 
 <p>在判断到有点击事件之后,启动这个动画就ok了</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public boolean dispatchTouchEvent(MotionEvent ev) {
     int action = ev.getAction();
     switch (action) {
@@ -377,7 +1287,7 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 
 <p>最后的效果是这个样子的</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978699755982.gif" alt="20171104150978699755982.gif"/><figcaption>20171104150978699755982.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978699755982.gif" alt="20171104150978699755982.gif"/></p>
 
 <p>最后完整的的代码在<a href="https://github.com/Mran/AnimationBottomBar">我的github</a></p>
 
@@ -412,19 +1322,19 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
                       
                       <div class="a-content-text">
                         
-                        	<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097859584759.gif" alt="2017110415097859584759.gif"/><figcaption>2017110415097859584759.gif</figcaption></figure></p>
+                        	<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097859584759.gif" alt="2017110415097859584759.gif"/></p>
 
 <blockquote>
 <p>自行复制粘贴在<code>Settings</code>&gt;<code>Editor</code>&gt;<code>File and Code Templates</code>新建一个</p>
 </blockquote>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978590123238.png" alt="20171104150978590123238.png"/><figcaption>20171104150978590123238.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978590123238.png" alt="20171104150978590123238.png"/></p>
 
 <h2 id="toc_0">Activity</h2>
 
 <p>可以自行将AppCompatActivity换成自己的BaseActivity，不要忘记更改import哦</p>
 
-<pre class="line-numbers"><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME}
+<pre><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME}
 
 #end
 import android.os.Bundle
@@ -443,7 +1353,7 @@ class ${NAME} : AppCompatActivity() {
 
 <h2 id="toc_1">Fragment</h2>
 
-<pre class="line-numbers"><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME}
+<pre><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME}
 
 #end
 import android.os.Bundle
@@ -512,7 +1422,7 @@ class ${NAME} : Fragment() {
 
 <h2 id="toc_1">Timer的运行机制</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978406359625.jpg" alt="20171104150978406359625.jpg"/><figcaption>20171104150978406359625.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978406359625.jpg" alt="20171104150978406359625.jpg"/></p>
 
 <ul>
 <li>TimerTask：任务类。内部持有<code>nextExecutionTime</code>变量，表示任务实际执行时间点，单位为毫秒，使用<code>System.currentTimeMillis()</code> + <code>delay</code>计算得出。</li>
@@ -532,7 +1442,7 @@ class ${NAME} : Fragment() {
 
 <p>ScheduledThreadPoolExecutor的实现比Timer要复杂一些，不过要是理解了线程池的运行原理，其实也不难。它只不过是在ThreadPoolExecutor的基础上使用自定义的阻塞队列DelayedWorkQueue来实现任务定时功能。所以ScheduledThreadPoolExecutor的运行流程其实和ThreadPoolExecutor是差不多的。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978425468906.jpg" alt="20171104150978425468906.jpg"/><figcaption>20171104150978425468906.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978425468906.jpg" alt="20171104150978425468906.jpg"/></p>
 
 <ul>
 <li><strong>ScheduledFutureTask</strong>：任务类。内部持有time变量，单位为纳秒，通过<code>System.nanoTime()</code> + <code>delay</code>计算得出。</li>
@@ -548,7 +1458,7 @@ class ${NAME} : Fragment() {
 
 <p>在多线程网络编程中，我们一般使用一个线程监听端口，在接收到事件后再使用其他的线程去完成操作。这种情况下，在两个线程之间的上下文切换开销其实是很大的，于是我们有了Leader/Follower模式：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978440726061.png" alt="20171104150978440726061.png"/><figcaption>20171104150978440726061.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978440726061.png" alt="20171104150978440726061.png"/></p>
 
 <p>在Leader/Follower模式中，不存在一个专门用来监听的线程，所有的线程都是等价的，而这些线程会不断在Leader、Follower和Processor这三个状态之间来回切换。</p>
 
@@ -571,7 +1481,7 @@ class ${NAME} : Fragment() {
 这就是Timer与ScheduledThreadPoolExecutor一个是基于绝对时间而另一个是基于相对时间的原因。下面我们写个例子来测试一下：</p>
 </blockquote>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t&quot; + new Date());
 
     Executors.newSingleThreadScheduledExecutor().schedule(() -&gt; {
@@ -589,7 +1499,7 @@ class ${NAME} : Fragment() {
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:    Sun Oct 08 10:51:44 CST 2017
+<pre><code class="language-text">Start:    Sun Oct 08 10:51:44 CST 2017
 Executor:    Sun Oct 08 10:51:41 CST 2017
 Timer:    Sun Oct 08 10:52:45 CST 2017
 </code></pre>
@@ -600,7 +1510,7 @@ Timer:    Sun Oct 08 10:52:45 CST 2017
 
 <p>Timer的第二个缺陷是，由于它使用的是单线程，所以长时间执行的任务会对其他任务产生影响。</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t\t\t&quot; + new Date());
 
     ScheduledExecutorService service = Executors.newScheduledThreadPool(3);
@@ -651,7 +1561,7 @@ Timer:    Sun Oct 08 10:52:45 CST 2017
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:10:34 CST 2017
+<pre><code class="language-text">Start:            Sun Oct 08 11:10:34 CST 2017
 Executor 任务1:    Sun Oct 08 11:11:34 CST 2017
 Executor 任务2:    Sun Oct 08 11:11:34 CST 2017
 Timer 任务1:        Sun Oct 08 11:11:34 CST 2017
@@ -668,7 +1578,7 @@ Timer 任务2:        Sun Oct 08 11:12:04 CST 2017
 
 <p>Timer内部没有对异常做任何处理，如果任务执行发生运行时异常，整个TimerThread都会崩溃：</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t\t\t&quot; + new Date());
 
     Timer timer = new Timer();
@@ -695,7 +1605,7 @@ Timer 任务2:        Sun Oct 08 11:12:04 CST 2017
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:53:05 CST 2017
+<pre><code class="language-text">Start:            Sun Oct 08 11:53:05 CST 2017
 Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务1
     at main.Main$1.run(Main.java:32)
     at java.util.TimerThread.mainLoop(Timer.java:555)
@@ -708,7 +1618,7 @@ Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务
 
 <p>ScheduledThreadPoolExecutor中对异常的处理实际上是ThreadPoolExecutor类完成的，ThreadPoolExecutor在任务运行时对异常做了捕获，并且将异常传入了afterExecute()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">public class ThreadPoolExecutor extends AbstractExecutorService {
+<pre><code class="language-java">public class ThreadPoolExecutor extends AbstractExecutorService {
     final void runWorker(Worker w) {
         ...
         Throwable thrown = null;
@@ -730,7 +1640,7 @@ Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务
 
 <p>我们来验证一下：</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
     System.out.println(&quot;Start:\t\t\t&quot; + new Date());
 
     ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
@@ -751,7 +1661,7 @@ Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务
 
 <p>输出：</p>
 
-<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:33:35 CST 2017
+<pre><code class="language-text">Start:            Sun Oct 08 11:33:35 CST 2017
 Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 </code></pre>
 
@@ -796,7 +1706,7 @@ Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 
 <p>首先，在介绍之前，我们需要有一个返回栈的概念。栈，是一种数据结构，遵循的是先进后出的规则，而无论是什么APP，里面的N个Activity最终都会被压入栈（或弹出栈中），而与我们进行交互的就是处于栈顶的Activity，在这里就需要介绍一个返回栈的概念。上一张图。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978353486802.png" alt="20171104150978353486802.png"/><figcaption>20171104150978353486802.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978353486802.png" alt="20171104150978353486802.png"/></p>
 
 <p>相信这张图片很清楚的说明，入栈的方式，所谓先进后出就是现在我们假设栈里面已经有abcd四个Activity了，并且都市默认的standard方式启动的。所谓先进后出就是，当我们不断按下back（返回键）的时候，后进去的d反而是最先谈栈的，a最后弹栈。</p>
 
@@ -814,7 +1724,7 @@ Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 
 <p><strong>(1) standard</strong>: 标准的方式，也是系统默认的方式，每次启动一个activity，都会去创建一个新的activity的实例，并让该实例出于activity的栈顶位置，与用户交互，不管该实例存在不存在。</p>
 
-<pre class="line-numbers"><code class="language-java">button.setOnClickListener(new View.OnClickListener() {
+<pre><code class="language-java">button.setOnClickListener(new View.OnClickListener() {
     @Override
     public void onClick(View view) {
         Intent intent= new Intent(FirstActivity.this,FirstActivity.class);
@@ -845,7 +1755,7 @@ Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 
 <p><strong>第一种：Xml文件中配置</strong></p>
 
-<pre class="line-numbers"><code class="language-text">&lt;activity
+<pre><code class="language-text">&lt;activity
     android:name=&quot;.FirstActivity&quot;
     android:label=&quot;hello My First Activity&quot;
     android:launchMode=&quot;singleTop&quot;/&gt;
@@ -853,7 +1763,7 @@ Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
 
 <p><strong>第二种：设置intent标志位的时候配置</strong></p>
 
-<pre class="line-numbers"><code class="language-text">Intent intent= new Intent();
+<pre><code class="language-text">Intent intent= new Intent();
 intent.setClass(FirstActivity.this,FirstActivity.class);
 intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 </code></pre>
@@ -864,14 +1774,14 @@ intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
 
 <p>指定栈就是在设置activity的时候指定taskAffinity的属性，要求一个字符串，用.来分包，如果不写，栈就是默认的包名。在这里我指定为了，yanshui.site.task01配合上singleTask使用</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;activity
+<pre><code class="language-text">&lt;activity
     android:name=&quot;.FirstActivity&quot;
     android:label=&quot;hello My First Activity&quot;
     android:launchMode=&quot;singleTask&quot;
     android:taskAffinity=&quot;yanshui.site.task01&quot;/&gt;
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">//当你想要知道你当前的activity处于栈的id的时候直接在该activity中调用此方法即可。
+<pre><code class="language-java">//当你想要知道你当前的activity处于栈的id的时候直接在该activity中调用此方法即可。
 Log.d(TAG, &quot;task id is &quot;+getTaskId());
 </code></pre>
 
@@ -968,7 +1878,7 @@ singleInstance：完全独立的，类似闹钟的提示  </p>
 
 <p>这里还有两个图标，所以我们再增加两个<activity-alias>标签，这个标签是在AndroidManifest.xml的<application>标签内的，和<activity>标签同一级，其中一个代码如下：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;activity-alias
+<pre><code class="language-text">&lt;activity-alias
     android:name=&quot;.MainActivity1&quot;
     android:enabled=&quot;false&quot;
     android:icon=&quot;@mipmap/icon_1&quot;
@@ -1027,7 +1937,7 @@ singleInstance：完全独立的，类似闹钟的提示  </p>
 
 <p>这一步其实也就是调用PackageManager中的一个方法即可，方法如下：</p>
 
-<pre class="line-numbers"><code class="language-java">private void changeLauncher(String name) {
+<pre><code class="language-java">private void changeLauncher(String name) {
     PackageManager pm = getPackageManager();
     //隐藏之前显示的桌面组件
     pm.setComponentEnabledSetting(getComponentName(),
@@ -1253,7 +2163,7 @@ singleInstance：完全独立的，类似闹钟的提示  </p>
 <li>在最右边的输入框中就可以输入我们想要设置的注释模板了。比如我们输入：</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-text"> /**  
+<pre><code class="language-text"> /**  
   * Created by OCN.Yang on ${DATE}. ${HOUR}:${MINUTE}  
   * mail:yangocn@163.com  
   */  
@@ -1313,7 +2223,7 @@ Preference -&gt; Appearance &amp; Behavior -&gt; System Settings -&gt; Startup/s
 
 <p>Lambda 允许我们把行为传到函数里。之前把行为传到函数里我们采用的是匿名内部类，该方法导致行为最重要的方法夹杂在中间，不够突出，详见举例中代码。</p>
 
-<pre class="line-numbers"><code class="language-java">//以前点击事件，使用了匿名内部类
+<pre><code class="language-java">//以前点击事件，使用了匿名内部类
 mButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
@@ -1332,7 +2242,7 @@ mButton.setOnClickListener(view -&gt; Toast.makeText(MainActivity.this, &quot;to
 
 <p>有下面三种具体表达：</p>
 
-<pre class="line-numbers"><code class="language-text">//(params) -&gt; expression
+<pre><code class="language-text">//(params) -&gt; expression
 //接收 x 和 y 这两个整形参数并返回它们的和； 
 (int x, int y) -&gt; x + y
 
@@ -1361,7 +2271,7 @@ mButton.setOnClickListener(view -&gt; Toast.makeText(MainActivity.this, &quot;to
 
 <p>Lambda 表达式也会经常出现在嵌套环境中，比如说作为方法的参数。为了使 lambda 表达式在这些场景下尽可能简洁，我们去除了不必要的分隔符。不过在某些情况下我们也可以把它分为多行，然后用括号包起来，就像其它普通表达式一样。</p>
 
-<pre class="line-numbers"><code class="language-java">FileFilter java = (File f) -&gt; f.getName().endsWith(&quot;*.java&quot;);
+<pre><code class="language-java">FileFilter java = (File f) -&gt; f.getName().endsWith(&quot;*.java&quot;);
 String user = doPrivileged(() -&gt; System.getProperty(&quot;user.name&quot;));
 new Thread(() -&gt; {
   connectToService();
@@ -1371,7 +2281,7 @@ new Thread(() -&gt; {
 
 <h2 id="toc_3">具体案例</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929646040242.png" alt="20171030150929646040242.png"/><figcaption>20171030150929646040242.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929646040242.png" alt="20171030150929646040242.png"/></p>
 
 <h2 id="toc_4">方法引用（关键字 ::）</h2>
 
@@ -1381,7 +2291,7 @@ new Thread(() -&gt; {
 
 <p>做一个简单的解释，对集合进行排序，使用了Comparator的匿名内部类写法</p>
 
-<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+<pre><code class="language-java">public static void main(String[] args) {
         List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
         list.add(2);
         list.add(1);
@@ -1461,34 +2371,34 @@ Collections.sort(list, Integer::compare);
 
 <p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/><figcaption>20171031150938495136462.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/></p>
 
 <p>还有github上很火的<a href="https://github.com/nickbutcher/plaid">plaid</a></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/><figcaption>20171031150938501024243.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/></p>
 
 <p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。<br/>
 先看官网的一张关系图</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/><figcaption>20171031150938504260266.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/></p>
 
 <p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
 
 <h2 id="toc_1">Scene</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/><figcaption>20171031150938508078450.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/></p>
 
 <p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法<br/>
 <code>getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code><br/><br/>
 比如：  </p>
 
-<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
+<pre><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
 mScene1 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene1,getContext());
 </code></pre>
 
 <p>也可以直接<code>new Scene(ViewGroup sceneRoot, View layout)</code></p>
 
-<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
+<pre><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
 View view1 = inflater.inflate(R.layout.scene1,container,false);
 mScene0 = new Scene(mSceneRoot,view0);
 mScene1 = new Scene(mSceneRoot,view1);
@@ -1498,7 +2408,7 @@ mScene1 = new Scene(mSceneRoot,view1);
 
 <h2 id="toc_2">Transition</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/><figcaption>20171031150938533375766.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/></p>
 
 <p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：<br/>
 res/transition/fade_transition.xml</p>
@@ -1507,7 +2417,7 @@ res/transition/fade_transition.xml</p>
 
 <p>然后在代码中：</p>
 
-<pre class="line-numbers"><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
+<pre><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
 </code></pre>
 
 <p>或者直接在代码中：</p>
@@ -1518,7 +2428,7 @@ res/transition/fade_transition.xml</p>
 
 <p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/><figcaption>20171031150938549730496.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/></p>
 
 <p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
 
@@ -1531,7 +2441,7 @@ res/transition/fade_transition.xml</p>
 <p>AutoTransition默认的动画效果，对应xml tag为autoTransition<br/>
 其实是以下几个动画组合顺序执行：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;sequential&quot;&gt;
     &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
     &lt;changeBounds/&gt;
@@ -1541,7 +2451,7 @@ res/transition/fade_transition.xml</p>
 
 <p>在代码中使用：</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
 if (mTextView.getVisibility() != View.VISIBLE){
     mTextView.setVisibility(View.VISIBLE);
 } else {
@@ -1549,13 +2459,13 @@ if (mTextView.getVisibility() != View.VISIBLE){
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/><figcaption>20171031150938579060510.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/></p>
 
 <h3 id="toc_6">ChangeBounds</h3>
 
 <p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画。</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
 FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)mTarget.getLayoutParams();
 if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
     lp.gravity = Gravity.BOTTOM | Gravity.END;
@@ -1565,13 +2475,13 @@ if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
 mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/><figcaption>20171031150938627779470.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/></p>
 
 <h3 id="toc_7">ChangeClipBounds</h3>
 
 <p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
 
-<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
+<pre><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
 TransitionManager.beginDelayedTransition(mRoot,new ChangeClipBounds());
 if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
     ViewCompat.setClipBounds(mImageView,null);
@@ -1580,33 +2490,33 @@ if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/><figcaption>20171031150938645594705.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/></p>
 
 <h3 id="toc_8">ChangeImageTransform</h3>
 
 <p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
 mImageView.setScaleType(ImageView.ScaleType.xxx);
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/><figcaption>20171031150938655679728.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/></p>
 
 <h3 id="toc_9">ChangeScroll</h3>
 
 <p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
 mTarget.scrollBy(-100,-100);
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/><figcaption>20171031150938665356244.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/></p>
 
 <h3 id="toc_10">ChangeTransform</h3>
 
 <p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
 if (mContainer2.getChildCount() &gt; 0){
     mContainer2.removeAllViews();
     showRedSquare(mContainer1);
@@ -1623,54 +2533,54 @@ private void showRedSquare(FrameLayout container){
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/><figcaption>20171031150938690499587.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/></p>
 
 <h3 id="toc_11">Explode</h3>
 
 <p>对应xml tag为explode，作用对象：View的Visibility</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews){
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/><figcaption>20171031150938702666553.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/></p>
 
 <h3 id="toc_12">Fade</h3>
 
 <p>对应xml tag为fade，作用对象：View的Visibility<br/><br/>
 可以在初始化是指定IN或者OUT分别对应淡入和淡出，若不指定默认为淡入淡出效果</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews){
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/><figcaption>20171031150938727625794.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/></p>
 
 <h3 id="toc_13">Slide</h3>
 
 <p>对应xml tag为slide，作用对象：View的Visibility</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews){
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/><figcaption>20171031150938732543238.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/></p>
 
 <h3 id="toc_14">TransitionSet</h3>
 
 <p>对应xml tag为transitionSet<br/><br/>
 可以在代码中创建transitionSet如：  </p>
 
-<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
+<pre><code class="language-java">mTransition = new TransitionSet();
 mTransition.addTransition(new ChangeImageTransform());
 mTransition.addTransition(new ChangeTransform());
 TransitionManager.beginDelayedTransition(mOUterFrame,mTransition);
@@ -1686,7 +2596,7 @@ if (mInnerFrame.getChildCount() &gt; 0){
 <p>也可以通过加载xml布局创建transitionSet：<br/><br/>
 xml布局长这样：  </p>
 
-<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;together&quot;&gt;
     &lt;changeImageTransform/&gt;
     &lt;changeTransform/&gt;
@@ -1696,7 +2606,7 @@ xml布局长这样：  </p>
 <p>通过transitionOrdering属性设置动画执行的顺序，together表示同时执行，sequential表示顺序执行，在代码中可以调用TransitionSet的<code>setOrdering(int)</code>方法，属性值传ORDERING_SEQUENTIAL或者ORDERING_TOGETHER<br/><br/>
 在代码中：  </p>
 
-<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+<pre><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
 TransitionManager.beginDelayedTransition(mOuterFrame,mTransition);
 if (mInnerFrame.getChildCount() &gt; 0){
     mInnerFrame.removeAllViews();
@@ -1709,15 +2619,15 @@ if (mInnerFrame.getChildCount() &gt; 0){
 
 <p>这里结合changeImageTransform和changeTransform，效果如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/><figcaption>20171031150938791428154.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/></p>
 
 <h3 id="toc_15">PathMotion</h3>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/><figcaption>2017103115093879453435.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/></p>
 
 <p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
 
-<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
+<pre><code class="language-java">mTransition = new AutoTransition();
 TransitionManager.beginDelayedTransition(mRoot,mTransition);
 FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
 if ((lp.gravity &amp; Gravity.START) == START) {
@@ -1728,17 +2638,17 @@ if ((lp.gravity &amp; Gravity.START) == START) {
 mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/><figcaption>20171031150938816788360.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/></p>
 
 <p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/><figcaption>20171031150938819673207.jpg</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/></p>
 
 <h3 id="toc_16">自定义Transition</h3>
 
 <p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
 
-<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
+<pre><code class="language-java">public class CustomTransition extends Transition {
     @Override
     public void captureStartValues(TransitionValues values){}
     @Override
@@ -1752,11 +2662,11 @@ mTarget.setLayoutParams(lp);
 package_name:transition_name:property_name<br/><br/>
 在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/><figcaption>2017103115093883857329.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/></p>
 
 <p>在两个Scene中使用自定义过渡动画，效果如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/><figcaption>20171031150938841128073.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/></p>
 
 <h2 id="toc_17">Note</h2>
 
@@ -1776,364 +2686,6 @@ package_name:transition_name:property_name<br/><br/>
                   <div class="more-left left">
                   
                     <span class="date">2017/9/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207871208.html">
-                
-                  <h1>Android-自己封装DialogFragment</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929495953693.gif" alt="20171030150929495953693.gif"/><figcaption>20171030150929495953693.gif</figcaption></figure></p>
-
-<h2 id="toc_0">创建通用的 CommonDialogFragment</h2>
-
-<p>这个类是 DialogFragment 的子类，对 DialogFragment 进行封装，依赖外部传入的 AlertDialog 来构建，同时也处理了 DialogFragment 中 AlertDialog 不能设置外部取消的问题</p>
-
-<pre class="line-numbers"><code class="language-text">public class CommonDialogFragment extends DialogFragment {
-
-    /**
-     * 监听弹出窗是否被取消
-     */
-    private OnDialogCancelListener mCancelListener;
-
-    /**
-     * 回调获得需要显示的dialog
-     */
-    private OnCallDialog mOnCallDialog;
-
-    public interface OnDialogCancelListener {
-        void onCancel();
-    }
-
-    public interface OnCallDialog {
-        Dialog getDialog(Context context);
-    }
-
-    public static CommonDialogFragment newInstance(OnCallDialog call, boolean cancelable) {
-        return newInstance(call, cancelable, null);
-    }
-
-    public static CommonDialogFragment newInstance(OnCallDialog call, boolean cancelable, OnDialogCancelListener cancelListener) {
-        CommonDialogFragment instance = new CommonDialogFragment();
-        instance.setCancelable(cancelable);
-        instance.mCancelListener = cancelListener;
-        instance.mOnCallDialog = call;
-        return instance;
-    }
-
-    @Override
-    public Dialog onCreateDialog(Bundle savedInstanceState) {
-        if (null == mOnCallDialog) {
-            super.onCreateDialog(savedInstanceState);
-        }
-        return mOnCallDialog.getDialog(getActivity());
-    }
-
-    @Override
-    public void onStart() {
-        super.onStart();
-        Dialog dialog = getDialog();
-        if (dialog != null) {
-            //在5.0以下的版本会出现白色背景边框，若在5.0以上设置则会造成文字部分的背景也变成透明
-            if(Build.VERSION.SDK_INT &lt;= Build.VERSION_CODES.KITKAT) {
-                //目前只有这两个dialog会出现边框
-                if(dialog instanceof ProgressDialog || dialog instanceof DatePickerDialog) {
-                    getDialog().getWindow().setBackgroundDrawable(new ColorDrawable(Color.TRANSPARENT));
-                }
-            }
-            Window window = getDialog().getWindow();
-            WindowManager.LayoutParams windowParams = window.getAttributes();
-            windowParams.dimAmount = 0.0f;
-            window.setAttributes(windowParams);
-        }
-    }
-
-    @Override
-    public void onCancel(DialogInterface dialog) {
-        super.onCancel(dialog);
-        if (mCancelListener != null) {
-            mCancelListener.onCancel();
-        }
-    }
-}
-</code></pre>
-
-<p>可以看到这个类的代码量也是很少的，先定义了两个接口 <code>OnDialogCancelListener</code>，<code>OnCallDialog</code>，前者用于监听弹出窗是否被取消，后者则可以让我们回调获得想要显示的 Dialog，可以看到在 onCreateDialog() 中我们返回的 是 <code>mOnCallDialog.getDialog(getActivity)</code>;，当我们在传入 Dialog 的时候，便会回调到此处，让 <code>onCreateDialog()</code> 返回我们传入的 Dialog。</p>
-
-<p>接着在 <code>onStart()</code> 中进行了一些特殊性的处理，因为在 5.0 以下的版本，ProgressDialog 和 DatePickerDialog 会出现白色的边框，这使得用户体验非常不好，所以我们要在此处进行相应的处理</p>
-
-<p>最后便是封装我们的构造函数<br/>
-<code>newInstance(OnCallDialog call, boolean cancelable, OnDialogCancelListener cancelListener)</code>，当我们要使用这个 CommonDialogFragment 的时候，先 new 一个 OnCallDialog，将我们想要显示的 Dialog 传进去，<code>cancelable</code>，用于设置对话框是否能被取消，可以看到在 <code>onCancel()</code> 有这样一段代码</p>
-
-<pre class="line-numbers"><code class="language-text">if(mCancelListener != null){
-  mCancelListener.onCancel();
-}
-</code></pre>
-
-<p>这便是我们在构造函数中传入 OnCancelListener 的原因，当我们想要做一些取消对话框后的处理时，只要在构造函数中传入 OnCancelListener，实现 onCancel() 方法就行了</p>
-
-<h2 id="toc_1">实现各种类型的 DialogFragment</h2>
-
-<p>既然前面我们创建了 CommonFragment 作为所有 DialogFragment 的基类，那么接下来我们当然要好好地来实现各种类型的 DialogFragment 了，我的思路是创建一个 DialogFragmentHelper 作为实现提示框的帮助类，帮我们把代码都封装起来，使用的时候只需要关注与 AlertDialog 的交互，Helper 会帮助我们用 DialogFragment 来进行显示，这样既能统一整个应用的 Dialog 风格，又能让我们实现各种各样的对话框变得相当的简单</p>
-
-<p>在实现 DialogFragmentHelper 之前我们有两件事先要做一下</p>
-
-<h3 id="toc_2">在 styles 文件中定义我们定义我们对话框的风格样式</h3>
-
-<pre class="line-numbers"><code class="language-text">&lt;style name=&quot;Base_AlertDialog&quot; parent=&quot;Base.Theme.AppCompat.Light.Dialog&quot;&gt;
-
-        &lt;!--不设置在6.0以上会出现，宽度不充满屏幕的情况--&gt;
-        &lt;item name=&quot;windowMinWidthMinor&quot;&gt;90%&lt;/item&gt;
-
-        &lt;!-- 取消标题栏，如果在代码中settitle的话会无效 --&gt;
-        &lt;item name=&quot;android:windowNoTitle&quot;&gt;true&lt;/item&gt;
-
-        &lt;!-- 标题的和Message的文字颜色 --&gt;
-        &lt;!--&lt;item name=&quot;android:textColorPrimary&quot;&gt;@color/black&lt;/item&gt;--&gt;
-
-        &lt;!-- 修改顶部标题背景颜色，具体颜色自己定，可以是图片 --&gt;
-        &lt;item name=&quot;android:topDark&quot;&gt;@color/app_main_color_deep&lt;/item&gt;
-
-        &lt;!--&lt;item name=&quot;android:background&quot;&gt;@color/white&lt;/item&gt;--&gt;
-
-        &lt;!-- 在某些系统上面设置背景颜色之后出现奇怪的背景，处这里设置背景为透明，为了隐藏边框 --&gt;
-        &lt;!--&lt;item name=&quot;android:windowBackground&quot;&gt;@android:color/transparent&lt;/item&gt;--&gt;
-        &lt;!--&lt;item name=&quot;android:windowFrame&quot;&gt;@null&lt;/item&gt;--&gt;
-
-        &lt;!-- 进入和退出动画，左进右出（系统自带） --&gt;
-        &lt;!--&lt;item name=&quot;android:windowAnimationStyle&quot;&gt;@android:style/Animation.Translucent&lt;/item&gt;--&gt;
-
-        &lt;!-- 按钮字体颜色,全部一起改，单个改需要在Java代码中修改 --&gt;
-        &lt;item name=&quot;colorAccent&quot;&gt;@color/app_main_color&lt;/item&gt;
-    &lt;/style&gt;
-</code></pre>
-
-<p>我已经打上了详细的注释，相信应该很容易理解</p>
-
-<h3 id="toc_3">写一个接口，用于 DialogFragmentHelper 与逻辑层之间进行数据监听</h3>
-
-<pre class="line-numbers"><code class="language-java">public interface IDialogResultListener&lt;T&gt; {
-    void onDataResult(T result);
-}
-</code></pre>
-
-<p>准备工作做完了，就让我们开工撸 DialogFragmentHelper 吧，因为篇幅有限，我只是代表性的选了其中的一些效果来讲，具体的代码，可以参考下 DialogFragmentDemos</p>
-
-<pre class="line-numbers"><code class="language-java">public class DialogFragmentHelper {
-
-    private static final String TAG_HEAD = DialogFragmentHelper.class.getSimpleName();
-
-    /**
-     * 加载中的弹出窗
-     */
-    private static final int PROGRESS_THEME = R.style.Base_AlertDialog;
-    private static final String PROGRESS_TAG = TAG_HEAD + &quot;:progress&quot;;
-
-
-    public static CommonDialogFragment showProgress(FragmentManager fragmentManager, String message){
-        return showProgress(fragmentManager, message, true, null);
-    }
-
-    public static CommonDialogFragment showProgress(FragmentManager fragmentManager, String message, boolean cancelable){
-        return showProgress(fragmentManager, message, cancelable, null);
-    }
-
-    public static CommonDialogFragment showProgress(FragmentManager fragmentManager, final String message, boolean cancelable
-            , CommonDialogFragment.OnDialogCancelListener cancelListener){
-
-        CommonDialogFragment dialogFragment = CommonDialogFragment.newInstance(new CommonDialogFragment.OnCallDialog() {
-            @Override
-            public Dialog getDialog(Context context) {
-                ProgressDialog progressDialog = new ProgressDialog(context, PROGRESS_THEME);
-                progressDialog.setMessage(message);
-                return progressDialog;
-            }
-        }, cancelable, cancelListener);
-        dialogFragment.show(fragmentManager, PROGRESS_TAG);
-        return dialogFragment;
-    }
-
-    /**
-     * 带输入框的弹出窗
-     */
-    private static final int INSERT_THEME = R.style.Base_AlertDialog;
-    private static final String INSERT_TAG  = TAG_HEAD + &quot;:insert&quot;;
-
-    public static void showInsertDialog(FragmentManager manager, final String title, final IDialogResultListener&lt;String&gt; resultListener, final boolean cancelable){
-
-        CommonDialogFragment dialogFragment = CommonDialogFragment.newInstance(new CommonDialogFragment.OnCallDialog() {
-            @Override
-            public Dialog getDialog(Context context) {
-                // ...
-                AlertDialog.Builder builder = new AlertDialog.Builder(context, INSERT_THEME);
-                builder.setPositiveButton(DIALOG_POSITIVE, new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface dialog, int which) {
-                        if(resultListener != null){
-                            resultListener.onDataResult(editText.getText().toString());
-                        }
-                    }
-                });
-                builder.setNegativeButton(DIALOG_NEGATIVE, null);
-                return builder.create();
-            }
-        }, cancelable, null);
-        dialogFragment.show(manager, INSERT_TAG);
-    }
-}
-</code></pre>
-
-<p>可以看到因为我们实现封装了 CommonFragment，所有这些效果的实现都变得相当的简单吗，这便是封装给我们带来的便利和好处。</p>
-
-<p>就以 加载中的弹出窗 为例，来看看我们是怎么实现的</p>
-
-<pre class="line-numbers"><code class="language-java">public static CommonDialogFragment showProgress(FragmentManager fragmentManager, final String message, boolean cancelable, CommonDialogFragment.OnDialogCancelListener cancelListener){
-    CommonDialogFragment dialogFragment = CommonDialogFragment.newInstance(new CommonDialogFragment.OnCallDialog() {
-        @Override
-        public Dialog getDialog(Context context) {
-            ProgressDialog progressDialog = new ProgressDialog(context, PROGRESS_THEME);
-            progressDialog.setMessage(message);
-            return progressDialog;
-        }
-    }, cancelable, cancelListener);
-    dialogFragment.show(fragmentManager, PROGRESS_TAG);
-    return dialogFragment;
-}
-</code></pre>
-
-<p>我们先调用了 CommonDialogFragment 的构造函数，将一个 ProgressDialog 传进去，然后依次传入 cancelable 和 cancelListener，最后调用 show() 函数，将 DialogFragment 显示出来，因为我们使用了构造函数的重载，可以看到最简单的构造函数只需要传入两个参数就行了，是不是相当的简洁啊。</p>
-
-<p>应该还没忘了我们上面创建了一个 IDialogResultListener<T> 用于 DialogFragment 与逻辑层之间进行数据监听吧，为了能传入各种各样类型的数据，这里我使用了 泛型 来进行处理，就以 带输入框的弹出窗 为例来看看究竟要怎么使用吧</p>
-
-<pre class="line-numbers"><code class="language-java">public static void showInsertDialog(FragmentManager manager, final String title, final IDialogResultListener&lt;String&gt; resultListener, final boolean cancelable){
-
-    CommonDialogFragment dialogFragment = CommonDialogFragment.newInstance(new CommonDialogFragment.OnCallDialog() {
-
-        @Override
-        public Dialog getDialog(Context context) {
-
-            // ... 这里省略一部分代码
-            AlertDialog.Builder builder = new AlertDialog.Builder(context, INSERT_THEME);
-            builder.setPositiveButton(DIALOG_POSITIVE, new DialogInterface.OnClickListener() {
-                @Override
-                public void onClick(DialogInterface dialog, int which) {
-                    if(resultListener != null){
-                        resultListener.onDataResult(editText.getText().toString());
-                    }
-                }
-            });
-            builder.setNegativeButton(DIALOG_NEGATIVE, null);
-            return builder.create();
-
-            }
-    }, cancelable, null);
-    dialogFragment.show(manager, INSERT_TAG);
-}
-</code></pre>
-
-<p>可以看到我们在 showInsertDialog() 方法中传入了IDialogResultListener<String> resultListener，当我们想要处理输入的内容的时候，只要在外部调用的时候，new 一个 IDialogResultListener 传进去，然后实现 onDataResult() 方法就行了</p>
-
-<p><a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2FdeveloperHaoz%2FDialogFragmentDemos">DialogFragmentDemos</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/19</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207871172.html">
-                
-                  <h1>程序员开源协议</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">自由软件</h2>
-
-<p>自由软件是一种可以不受限制地自由使用、复制、研究、修改和分发的软件。注意，自由并不代表着免费。正是这种开放、开源的精神，计算机软件才得以如此飞快地发展。</p>
-
-<h2 id="toc_1">开源协议</h2>
-
-<p>为保护自由软件原作者的相关知识产权，在作者与用户之间设立的一种虚拟合同，或者称之为授权方式。其中的条款内容，就是用来限制软件使用者的使用方式等。他人如有违反协议，作者有权利发起诉讼，维护自身权益。</p>
-
-<p>开源届定义有几百种不同的开源协议，宽松程度不一，用以满足开源项目的各种使用场景。比如，是否允许商用，是否允许修改，修改后是否需要继续开源，开源是否必须继续使用相同协议授权等。</p>
-
-<p>不过，作为普通用户，无论你是作为开源作者造轮子，还是作为普通用户借轮子，我们只需要知道比较流行的那几种，并能够加以区分即可。否则，上百种协议真要细分的话，绝非易事。</p>
-
-<p>早期一名乌克兰程序员画有一张分析图，简单明了地描述出六种流行开源协议的使用区分。阮一峰老师翻译如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929343199353.png" alt="20171030150929343199353.png"/><figcaption>20171030150929343199353.png</figcaption></figure></p>
-
-<p>更简单点的话，也可以参考这张图，更加通俗易懂：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929351771005.png" alt="20171030150929351771005.png"/><figcaption>20171030150929351771005.png</figcaption></figure></p>
-
-<p>更多的开源协议，我们还可以参考这张图（目前只发现英文版）：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929356264898.png" alt="20171030150929356264898.png"/><figcaption>20171030150929356264898.png</figcaption></figure></p>
-
-<p>至于使用的话，不妨借助 GcsSloop 制作的开源协议网站：</p>
-
-<p><a href="https://link.juejin.im/?target=http%3A%2F%2Fchoosealicense.online">choosealicense.online</a></p>
-
-<p>如图所示：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929362375011.png" alt="20171030150929362375011.png"/><figcaption>20171030150929362375011.png</figcaption></figure></p>
-
-<p>选择所需要的协议，一键复制即可。</p>
-
-<p>说完这些，回过头来想想，估计很多人都会有疑惑：开源协议与我何干？但是，作为一名程序员，开源协议还真与你我关系紧密。</p>
-
-<p>如果你是 GitHub 重度依赖者，如果你稍作留意，不难发现，基本上出名的开源项目根目录中都有一个协议文件：<strong>LICENSE.txt</strong>，而在 <strong>README.me</strong> 说明文件底部伴随着 License 内容。这就是你需要留意的地方，使用任意开源项目之前，记得阅读一下该项目的开源协议。</p>
-
-<blockquote>
-<p>市场上部分 App 也会在应用中增加第三方开源项目时的使用版权说明，比如支付宝安卓版。这也是一种查看优秀 App 都使用哪些开源项目的途径之一。</p>
-</blockquote>
-
-<p>如果你也是一个作者，准备开源自己的项目时，那就更得注意，想想自己需要选择哪一个开源协议更加合适。比如，大名鼎鼎的 Linux 系统采用便是 GPL 协议；作为安卓程序员，我们当然知道，我们赖以生存的 Android 开源系统，其内核采用的就是 Linux 内核。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/18</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -2218,6 +2770,8 @@ package_name:transition_name:property_name<br/><br/>
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -2234,31 +2788,31 @@ package_name:transition_name:property_name<br/><br/>
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

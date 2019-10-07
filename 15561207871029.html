@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -140,7 +142,7 @@
 
 <p>手机桌面也是一个App，每一个应用的icon都罗列在Launcher上，点击icon触发onItemClick事件，下面例如我们要启动「淘宝」这个App，首先我们要在清单文件定义默认启动的Activity信息。</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
+<pre><code class="language-markup">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
     &lt;intent-filter&gt;
         &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
         &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
@@ -150,7 +152,7 @@
 
 <p>然后Launcher获取到该信息之后，启动淘宝App</p>
 
-<pre class="line-numbers"><code class="language-java">//该应用的包名
+<pre><code class="language-java">//该应用的包名
 String pkg = info.activityInfo.packageName;
 //应用的主activity类
 String cls = info.activityInfo.name;
@@ -186,7 +188,7 @@ startActivity(i);
 <p>我们从Activity的startActivity方法开始分析。<br/><br/>
 <code>startActivity</code>方法有好几种重载方式，但它们最终都会调用<code>startActivityForResult</code>方法。</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public void startActivity(Intent intent, @Nullable Bundle options) {
     if (options != null) {
         startActivityForResult(intent, -1, options);
@@ -200,7 +202,7 @@ public void startActivity(Intent intent, @Nullable Bundle options) {
 
 <p>在<code>startActivityForResult</code>方法内，会调用<code>Instrumentation</code>的<code>execStartActivity</code>方法。</p>
 
-<pre class="line-numbers"><code class="language-java">public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,@Nullable Bundle options) {
+<pre><code class="language-java">public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,@Nullable Bundle options) {
     ......
     Instrumentation.ActivityResult ar =mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
@@ -215,7 +217,7 @@ public void startActivity(Intent intent, @Nullable Bundle options) {
 <p>Instrumentation从字面上来看是仪器盘的意思，具体到程序中是管理activity的一个工具类，包括创建和启动Activity，activity的生命周期方法都是由Instrumentation这个仪器来控制，一个进程中只用一个Instrumentation实例。</p>
 </blockquote>
 
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
  *
  *
  * @param who The Context from which the activity is being started.
@@ -264,7 +266,7 @@ public ActivityResult execStartActivity(Context who, IBinder contextThread, IBin
 <p>我们找到<code>ActivityThread</code>文件，其实这个<code>getApplicationThread</code>方法获取的是内部类<code>ApplicationThread</code>对象 <br/>
 而且<code>ApplicationThread</code>继承<code>ApplicationThreadNative</code></p>
 
-<pre class="line-numbers"><code class="language-java">public final class ActivityThread {//没有继承或者实现其他类。
+<pre><code class="language-java">public final class ActivityThread {//没有继承或者实现其他类。
 
     final ApplicationThread mAppThread = new ApplicationThread();
 
@@ -285,7 +287,7 @@ public ActivityResult execStartActivity(Context who, IBinder contextThread, IBin
 通过构造方法我们就很清晰的可以得知原来这个<code>ApplicationThreadNative</code>就是相当于AIDL通讯中的Stub，也就是服务端，<code>ApplicationThreadProxy</code>即AIDL通讯中的Proxy，也就是客户端。所以ApplicationThread是通讯的具体实现类。<br/><br/>
 上面的介绍中我们也说过，Activity的启动实际上是多次进程间通讯的成果，看到这里我们就可以得出结论：<strong>ActivityThread通过内部类ApplicationThread来进行进程间通讯</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public abstract class ApplicationThreadNative extends Binder implements IApplicationThread {
+<pre><code class="language-java">public abstract class ApplicationThreadNative extends Binder implements IApplicationThread {
 
     static public IApplicationThread asInterface(IBinder obj) {...}
 
@@ -315,7 +317,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 <p>追溯到参数起源，这个<code>token</code>对象，是在<code>Activity</code>的<code>attach</code>方法中传入的，也就是<code>Activity</code>的创建与关联时候(下面的内容会提到)传入的<code>Activity</code>信息。<br/><br/>
 这也是个<code>Binder</code>对象，它代表了<code>Launcher</code>这个<code>Activity</code>，这里也通过<code>Instrumentation</code>传给AMS，AMS查询后，就知道是谁向AMS发起请求了。</p>
 
-<pre class="line-numbers"><code class="language-java">//Activity
+<pre><code class="language-java">//Activity
 
     private IBinder mToken;
 
@@ -339,7 +341,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 
 <p>在<code>Instrumentation</code>中，启动<code>Activity</code>真正的实现是由<code>ActivityManagerNative.getDefault()</code>的<code>startActivity</code>方法来完成。</p>
 
-<pre class="line-numbers"><code class="language-java">int result = ActivityManagerNative.getDefault()
+<pre><code class="language-java">int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
@@ -352,7 +354,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 
 <p>我们先看代码，捋一捋上述所说的关系。</p>
 
-<pre class="line-numbers"><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
+<pre><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
 
 public abstract class ActivityManagerNative extends Binder implements IActivityManager{...}
 
@@ -361,7 +363,7 @@ public interface IActivityManager extends IInterface {...}
 
 <p>首先我们来看这个命名方式，xxxNative，我们知道Stub持有Binder本地对象，Proxy持有的是Binder的代理对象。所以系统命名也是依据此因素（Native：本地的，土著的）作为命名规范。</p>
 
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
  * Retrieve the system&#39;s default/global activity manager.
  */
 static public IActivityManager getDefault() {
@@ -398,7 +400,7 @@ AMN通过getDefault方法，从ServiceManager中获取AMS中Binder的引用对�
 
 <p>类似AIDL中客户端的绑定代码，此时我们就可以通过ActivityManagerProxy（asInterface返回值为 IActivityManager），与AMS进行通讯。</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityManagerProxy
+<pre><code class="language-java">//ActivityManagerProxy
 
 public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,String resolvedType, IBinder resultTo, String resultWho, int requestCode,int startFlags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException {
 
@@ -431,7 +433,7 @@ public int startActivity(IApplicationThread caller, String callingPackage, Inten
 }
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101915083468801232.png" alt="2017101915083468801232.png"/><figcaption>2017101915083468801232.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101915083468801232.png" alt="2017101915083468801232.png"/></p>
 
 <p>从上面的分析可以知道，Activity是由<code>AMN.getDefault()</code>来启动的，而<code>AMN.getDefault()</code>实际上是AMS，因此Activity的启动过程又转移到了AMS中，为了继续分析这个过程，只需要查看AMS的startActivity方法即可。</p>
 
@@ -439,19 +441,19 @@ public int startActivity(IApplicationThread caller, String callingPackage, Inten
 <p>Launcher通知AMS启动淘宝APP的MainActivity，也就是清单文件设置启动的Activity。</p>
 </blockquote>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834692326696.png" alt="20171019150834692326696.png"/><figcaption>20171019150834692326696.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834692326696.png" alt="20171019150834692326696.png"/></p>
 
 <h2 id="toc_7">AMS</h2>
 
 <p>上个图，先通俗易懂的总结一下Activity启动的整体流程，对整体框架有一个大概认识。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834695813386.png" alt="20171019150834695813386.png"/><figcaption>20171019150834695813386.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834695813386.png" alt="20171019150834695813386.png"/></p>
 
 <h3 id="toc_8">AMS分析</h3>
 
 <p>再回顾一遍，通过对AMS 类的查看，我们可以知道AMS 也是一个Binder，并且它是<code>IActivityManager</code>的具体实现。</p>
 
-<pre class="line-numbers"><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
+<pre><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
 
 public abstract class ActivityManagerNative extends Binder implements IActivityManager{...}
 
@@ -460,7 +462,7 @@ public interface IActivityManager extends IInterface {...}
 
 <p>接着我们继续分析AMS的<code>startActivity</code>方法，这个阶段比较复杂和繁琐，一不小心就绕晕了，我们了解大致过程，不深入代码细节，对整体流程建立足够认识即可。</p>
 
-<pre class="line-numbers"><code class="language-java">//AMS
+<pre><code class="language-java">//AMS
 
 @Override
 public final int startActivity(IApplicationThread caller, String callingPackage,Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,int startFlags, ProfilerInfo profilerInfo, Bundle bOptions) {
@@ -481,7 +483,7 @@ public final int startActivityAsUser(IApplicationThread caller, String callingPa
 
 <h3 id="toc_9">ActivityStarter</h3>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStarter
+<pre><code class="language-java">//ActivityStarter
 
 final int startActivityMayWait(IApplicationThread caller, int callingUid,String callingPackage, Intent intent, String resolvedType,IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,IBinder resultTo, String resultWho, int requestCode, int startFlags,ProfilerInfo profilerInfo, IActivityManager.WaitResult outResult, Configuration config,Bundle bOptions, boolean ignoreTargetSecurity, int userId,IActivityContainer iContainer, TaskRecord inTask) {
 
@@ -532,7 +534,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>接下来调用ActivityStack的startActivityLocked将ActivityRecord加入到回退栈里</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStarter
+<pre><code class="language-java">//ActivityStarter
 
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
@@ -568,7 +570,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <h3 id="toc_10">ActivityStackSupervisor</h3>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
+<pre><code class="language-java">//ActivityStackSupervisor
 
     boolean resumeFocusedStackTopActivityLocked() {
         return resumeFocusedStackTopActivityLocked(null, null, null);
@@ -593,7 +595,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>接着跟进ActivityStack</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStack
+<pre><code class="language-java">//ActivityStack
 
 
     boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
@@ -663,7 +665,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>接下来的操作就比较重要了，创建进程，启动Activity。</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
+<pre><code class="language-java">//ActivityStackSupervisor
 
 
     void startSpecificActivityLocked(ActivityRecord r,
@@ -708,7 +710,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 <p>4.淘宝App未开启过，所以AMS启动新的进程，并且在新进程中创建ActivityThread对象，执行其中的main函数方法。</p>
 </blockquote>
 
-<pre class="line-numbers"><code class="language-java">//ActivityServiceManager
+<pre><code class="language-java">//ActivityServiceManager
 
         //Process.java的start函数，将通过socket发送消息给zygote
         //zygote将派生出一个子进程，子进程将通过反射调用ActivityThread的main函数
@@ -720,7 +722,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>Zygote进程孵化出新的应用进程后，通过反射执行ActivityThread类的main方法。在该方法里会先准备好Looper和消息队列，然后调用attach方法将应用进程绑定到AMS，然后进入loop循环，不断地读取消息队列里的消息，并分发消息。</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread
+<pre><code class="language-java">//ActivityThread
 
 public static void main(String[] args) {
     ``````
@@ -773,7 +775,7 @@ private void attach(boolean system) {
 <p>至此通过下图总结一下在AMS启动Activity的大致流程，各个方法函数像一台机器上的不同零件，各尽其责，分工明确。 <br/>
 虽然错综复杂，但是耦合性低，比如说启动模式需要优化，重新完善startActivityUnchecked方法函数即可。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834779685560.png" alt="20171019150834779685560.png"/><figcaption>20171019150834779685560.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834779685560.png" alt="20171019150834779685560.png"/></p>
 
 <h3 id="toc_14">关联Activity</h3>
 
@@ -782,7 +784,7 @@ private void attach(boolean system) {
 
 <p>因为主线程main入口通过attach方法将 ApplicationThread 发送给 AMS ，所以通过applicationThread这个桥梁来通知ActivityThread创建/关联和启动Activity。</p>
 
-<pre class="line-numbers"><code class="language-java">//AMS
+<pre><code class="language-java">//AMS
 
 
     @Override
@@ -799,7 +801,7 @@ private void attach(boolean system) {
 
 <p>通过Binder获取proxy（ApplicationThread ）方的进程id，也就是获取目标(淘宝)进程的Pid。</p>
 
-<pre class="line-numbers"><code class="language-java">//Binder
+<pre><code class="language-java">//Binder
 
 
     /**
@@ -814,7 +816,7 @@ private void attach(boolean system) {
 
 <p>接下来重点分析attachApplicationLocked方法</p>
 
-<pre class="line-numbers"><code class="language-java">//AMS
+<pre><code class="language-java">//AMS
 
 
     private final boolean attachApplicationLocked(IApplicationThread thread,
@@ -918,7 +920,7 @@ private void attach(boolean system) {
 <p>在上面我们说道，ActivityThread通过ApplicationThread与AMS进行通讯，所以上面的thread.bindApplication（...）方法，就应该是通过ApplicationThread进行传达。<br/><br/>
 在ActivityThread的内部类ApplicationThread中，我们找到bindApplication方法</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread
+<pre><code class="language-java">//ActivityThread
 
     //内部类ApplicationThread
     private class ApplicationThread extends ApplicationThreadNative {
@@ -942,7 +944,7 @@ private void attach(boolean system) {
 
 <p>发送消息是通过H的<code>Handler</code>类来完成的，这个命名贼个性，很令人印象深刻。PS : 我怀疑是编写这个类的工程师词穷了…</p>
 
-<pre class="line-numbers"><code class="language-java">    private class H extends Handler {
+<pre><code class="language-java">    private class H extends Handler {
         public static final int LAUNCH_ACTIVITY         = 100;
         public static final int PAUSE_ACTIVITY          = 101;
         ``````
@@ -996,7 +998,7 @@ private void attach(boolean system) {
 
 <p>言归正传，上面ApplicationThread给H发送BIND_APPLICATION标识，在H中，通过handleBindApplication处理application的绑定事务。</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread
+<pre><code class="language-java">//ActivityThread
 
 
 
@@ -1097,7 +1099,7 @@ private void attach(boolean system) {
 
 <p>绑定了Application之后，我们就可以启动Activity(淘宝MainActivity)。 </p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
+<pre><code class="language-java">//ActivityStackSupervisor
 
 
     boolean attachApplicationLocked(ProcessRecord app) throws RemoteException {
@@ -1140,7 +1142,7 @@ private void attach(boolean system) {
 <p>大概系统工程师也觉得这个启动过程贼鸡儿绕了，最终启动的方法命名为realStartActivityLocked，意味着告诉你，大伙儿不要搞晕了，这个就是最后启动Activity的方法了。<br/><br/>
 最后我们直捣黄龙，在<code>ActivityStackSupervisor</code>方法中，我们找到如下代码</p>
 
-<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
+<pre><code class="language-java">//ActivityStackSupervisor
 
 
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
@@ -1156,7 +1158,7 @@ ApplicationThread—&gt; H—&gt; ActivityThread—&gt; 最终启动Activity的�
 
 <h3 id="toc_18">ActivityThread</h3>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread
+<pre><code class="language-java">//ActivityThread
 
 
     //内部类ApplicationThread
@@ -1203,7 +1205,7 @@ ApplicationThread—&gt; H—&gt; ActivityThread—&gt; 最终启动Activity的�
     }
 </code></pre>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread
+<pre><code class="language-java">//ActivityThread
 
 
 private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
@@ -1238,7 +1240,7 @@ private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
 
 <h4 id="toc_20">从ActivityClientRecord中获取待启动的Activity的组件信息。</h4>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread的performLaunchActivity方法
+<pre><code class="language-java">//ActivityThread的performLaunchActivity方法
 
 
         ActivityInfo aInfo = r.activityInfo;
@@ -1262,7 +1264,7 @@ private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
 
 <h4 id="toc_21">通过Instrumentation的newActivity方法使用类加载器创建Activity对象。</h4>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread的performLaunchActivity方法
+<pre><code class="language-java">//ActivityThread的performLaunchActivity方法
 
 
         Activity activity = null;
@@ -1283,7 +1285,7 @@ private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
 
 <h4 id="toc_22">通过LoadedApk的makeApplication方法来创建Application对象。</h4>
 
-<pre class="line-numbers"><code class="language-java">//ActivityThread的performLaunchActivity方法
+<pre><code class="language-java">//ActivityThread的performLaunchActivity方法
 
 
 Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.packageInfo为LoadedApk对象
@@ -1291,7 +1293,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 
 <p>其实在我们上面的bindApplication中，我们就有介绍到通过<code>LoadedApk</code>创建Application，并且创建完毕后，通过<code>Instrumentation的callApplicationOnCreate</code>来调用<code>Application</code>的onCreate方法</p>
 
-<pre class="line-numbers"><code class="language-java"> Application app = data.info.makeApplication(data.restrictedBackupMode, null);
+<pre><code class="language-java"> Application app = data.info.makeApplication(data.restrictedBackupMode, null);
 
     ``````
  mInstrumentation.callApplicationOnCreate(app);
@@ -1301,7 +1303,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 
 <h4 id="toc_23">创建ContextImpl对象，并通过Activity的attach方法来完成一些重要数据的初始化。</h4>
 
-<pre class="line-numbers"><code class="language-java">
+<pre><code class="language-java">
                 Context appContext = createBaseContextForActivity(r, activity);//创建ContextImpl对象
 
                 ``````
@@ -1329,7 +1331,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 
 <h4 id="toc_25">调用Activity的onStart,onResotreInstanceState方法</h4>
 
-<pre class="line-numbers"><code class="language-java">        mInstrumentation.callActivityOnCreate(activity, r.state);
+<pre><code class="language-java">        mInstrumentation.callActivityOnCreate(activity, r.state);
 
         ``````
         mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state);
@@ -1348,7 +1350,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 <p>如果是淘宝MainActivity启动LoginActivity呢？<br/><br/>
 其实原理和上述过程大体一致，只是在<code>ActivityStackSupervisor</code>的<code>startSpecificActivityLocked</code>方法中，发现进程已经启动，直接调用<code>realStartActivityLocked</code>启动Activity。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834785338133.png" alt="20171019150834785338133.png"/><figcaption>20171019150834785338133.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171019150834785338133.png" alt="20171019150834785338133.png"/></p>
 
 
     
@@ -1439,6 +1441,8 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -1455,31 +1459,31 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

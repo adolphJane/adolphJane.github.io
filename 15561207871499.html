@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -138,7 +140,7 @@
       <div class="article-content">
       <p>看到一个bottomBar的设计,感觉很好看,于是把它实现了出来</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978644456283.gif" alt="20171104150978644456283.gif"/><figcaption>20171104150978644456283.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978644456283.gif" alt="20171104150978644456283.gif"/></p>
 
 <p>可以看到这是一个常见的bottomBar<br/>
 把它分解一下</p>
@@ -153,7 +155,7 @@
 <p>根据我们的分解,一步一步解决问题<br/><br/>
 考虑到这是一个bottomBar,我选择了自定义ViewGroup来实现.因为用ViewGroup添加item会比较方便.</p>
 
-<pre class="line-numbers"><code class="language-java">public class AnimationBottomBar extends ViewGroup {
+<pre><code class="language-java">public class AnimationBottomBar extends ViewGroup {
     @Override
     protected void onDraw(Canvas canvas) {        
     super.onDraw(canvas);
@@ -179,7 +181,7 @@
 添加item的时候要足够方便,使用代码添加是个不错的选择,类似于这样<code>mAnimationBottomBar.addItem(item)</code>.<br/><br/>
 我创建了一个简单的BottomItem类来包装item  </p>
 
-<pre class="line-numbers"><code class="language-java">public class BottomItem {
+<pre><code class="language-java">public class BottomItem {
     int drawableRes;//图标资源
     String title;//标题
     public BottomItem(@DrawableRes int drawableRes,String title){
@@ -191,7 +193,7 @@
 
 <p>添加item之后,我将添加的BottomItem保存到一个list里</p>
 
-<pre class="line-numbers"><code class="language-java">public AnimationBottomBar addItem(BottomItem bottomItem) {
+<pre><code class="language-java">public AnimationBottomBar addItem(BottomItem bottomItem) {
     mBottomItemArrayList.add(bottomItem);
     return this;
 }
@@ -199,7 +201,7 @@
 
 <p>添加item之后会返会对象本身,就可以继续<code>.addItem()</code>了,就像这样</p>
 
-<pre class="line-numbers"><code class="language-java">mAnimationBottomBar.addItem(new BottomItem(R.drawable.h, &quot;zero&quot;))
+<pre><code class="language-java">mAnimationBottomBar.addItem(new BottomItem(R.drawable.h, &quot;zero&quot;))
                     .addItem(new BottomItem(R.drawable.h, &quot;one&quot;))
                     .addItem(new BottomItem(R.drawable.h, &quot;two&quot;))
                     .addItem(new BottomItem(R.drawable.h, &quot;four&quot;))
@@ -208,7 +210,7 @@
 
 <p>好了,现在已经添加了item,嗯?球都没得.运行没有显示出来,当然啦添加了之后需要添加到ViewGroup里,在经过onMeasure和onLayout之后才会显示出来</p>
 
-<pre class="line-numbers"><code class="language-java">public void build()  {
+<pre><code class="language-java">public void build()  {
     itemCount = mBottomItemArrayList.size();
     itemWidth=getLayoutParams().width/itemCount;/*获得平均一个item的宽度,这里有个问题,因为这个时候还没有经过OnMeaSure(),width获取不到,在onMeasure里可以再次进行调整*/
     for (BottomItem bottomItem : mBottomItemArrayList) {/*添加图标*/
@@ -229,7 +231,7 @@
 
 <p>onMeasure(),遍历刚刚所有添加子View,通知它们测量自己的长宽</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
     super.onMeasure(widthMeasureSpec, heightMeasureSpec);
     childCount = getChildCount();/*获得所有子View的数量*/
@@ -245,7 +247,7 @@ protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
 
 <p>onLayout(),确定所有的子View应该在的位置</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onLayout(boolean changed, int l, int t, int r, int b) {
   
     for (int i = 0; i &lt; itemCount; i++) {/*遍历每一个item,放置item的位置*/
@@ -260,7 +262,7 @@ protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
 <p>此时的样子应该是这样的</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978671165751.png" alt="20171104150978671165751.png"/><figcaption>20171104150978671165751.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978671165751.png" alt="20171104150978671165751.png"/></p>
 
 <h2 id="toc_1">添加背景颜色</h2>
 
@@ -274,7 +276,7 @@ protected void onLayout(boolean changed, int l, int t, int r, int b) {
 
 <p>我选择了第二个方法,因为我们要自己实现背景.</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onDraw(Canvas canvas) {
     /*绘制item颜色*/
     for (int i = 0; i &lt; 5; i++) {
@@ -295,7 +297,7 @@ protected void onDraw(Canvas canvas) {
 <p>这里我分了两部分来画,一是每个item的背景颜色,二是整体的背景颜色,注意画的先后顺序哦,我为了实现item的移动,把item部分画在下层,把背景画在了上层,通过改变背景来实现item的移动效果.<br/>
 这时候的效果是这样的</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978685438558.png" alt="20171104150978685438558.png"/><figcaption>20171104150978685438558.png</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978685438558.png" alt="20171104150978685438558.png"/></p>
 
 <h2 id="toc_2">实现动画</h2>
 
@@ -306,7 +308,7 @@ protected void onDraw(Canvas canvas) {
 <li>item的缩放动画</li>
 </ol>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onDraw(Canvas canvas) {
     /绘制item颜色*/
     for (int i = 0; i &lt; 5; i++) {
@@ -343,7 +345,7 @@ protected void onDraw(Canvas canvas) {
 缩放系数这里,默认的未选中item的缩放系数是0.5,选中的item的缩放系数就是1.0,移动的时候,越靠近选中的item就这个系数就越大.<br/>
 既然是动画我们肯定要让她动起来,我继承了Animation类实现了自己的BottomAnimation类</p>
 
-<pre class="line-numbers"><code class="language-java">private class BottomAnimation extends Animation {
+<pre><code class="language-java">private class BottomAnimation extends Animation {
     @Override
     protected void applyTransformation(float interpolatedTime, Transformation t) {
         super.applyTransformation(interpolatedTime, t);
@@ -369,7 +371,7 @@ protected void onDraw(Canvas canvas) {
 
 <p>在判断到有点击事件之后,启动这个动画就ok了</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public boolean dispatchTouchEvent(MotionEvent ev) {
     int action = ev.getAction();
     switch (action) {
@@ -390,7 +392,7 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 
 <p>最后的效果是这个样子的</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978699755982.gif" alt="20171104150978699755982.gif"/><figcaption>20171104150978699755982.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150978699755982.gif" alt="20171104150978699755982.gif"/></p>
 
 <p>最后完整的的代码在<a href="https://github.com/Mran/AnimationBottomBar">我的github</a></p>
 
@@ -483,6 +485,8 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -499,31 +503,31 @@ public boolean dispatchTouchEvent(MotionEvent ev) {
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

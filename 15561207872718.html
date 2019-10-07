@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -165,7 +167,7 @@
 
 <p>首先定义一些需要的属性，用于在布局文件中设置gif</p>
 
-<pre class="line-numbers"><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
+<pre><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
         &lt;!--gif文件引用--&gt;
         &lt;attr name=&quot;gifSrc&quot; format=&quot;reference&quot;  /&gt;
         &lt;!--是否加载完自动播放--&gt;
@@ -177,7 +179,7 @@
 
 <p>然后定义Gif的播放监听器,来监听各个时段的事件，命名的含义都很简单就不再介绍了：</p>
 
-<pre class="line-numbers"><code class="language-java">public interface OnPlayListener {
+<pre><code class="language-java">public interface OnPlayListener {
         void onPlayStart();
 
         void onPlaying(int percent);
@@ -192,7 +194,7 @@
 
 <p>声明类，直接继承ImageView，这样我们不仅可以显示Gif动画，也可以显示普通图片：public class GifImageView extends AppCompatImageView然后加载Gif图片资源</p>
 
-<pre class="line-numbers"><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
+<pre><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
         mOnPlayListener = onPlayListener;
         movie = Movie.decodeStream(getResources().openRawResource(movieResourceId));
         if (movie == null) {
@@ -210,7 +212,7 @@
 
 <p>调用requestLayout重新计算View大小，并重新绘制。如果是gif格式则View宽高等于movie的宽高，不是则调用父类的测量方法。</p>
 
-<pre class="line-numbers"><code class="language-text">   @Override
+<pre><code class="language-text">   @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (movie != null) {
             int movieWidth = movie.width();
@@ -224,7 +226,7 @@
 
 <p>开始播放，其实就是调用invalidate从而调用onDraw方法就行UI绘制：</p>
 
-<pre class="line-numbers"><code class="language-text">    public void play(int counts) {
+<pre><code class="language-text">    public void play(int counts) {
         this.counts = counts;
         reset();
         if (mOnPlayListener != null) {
@@ -236,7 +238,7 @@
 
 <p>不断调用onDraw方法来绘制Gif当前时间的图片帧（同样需要判断是否是gif格式，不是则调用父类的绘制方法）：</p>
 
-<pre class="line-numbers"><code class="language-text"> @Override
+<pre><code class="language-text"> @Override
     protected void onDraw(Canvas canvas) {
         if (movie != null) {
             if (!mPaused &amp;&amp; hasStart) {
@@ -260,7 +262,7 @@
 
 <p>最核心的方法就是计算当前时间需要绘制处于movie中的对应时间的图片帧。</p>
 
-<pre class="line-numbers"><code class="language-text"> private int getCurrentFrameTime() {
+<pre><code class="language-text"> private int getCurrentFrameTime() {
         if (movieDuration == 0)
             return 0;
             //因为有暂停，所以需要减去暂停时间
@@ -283,7 +285,7 @@
 
 <p>暂停Gif播放：</p>
 
-<pre class="line-numbers"><code class="language-text">   public void pause() {
+<pre><code class="language-text">   public void pause() {
         if (movie != null &amp;&amp; !mPaused &amp;&amp; hasStart) {
             mPaused = true;
             invalidate();
@@ -301,7 +303,7 @@
 
 <p>继续Gif播放：</p>
 
-<pre class="line-numbers"><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
+<pre><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
                 mPaused = false;
                 dealyTime = dealyTime + SystemClock.uptimeMillis() - mMoviePauseTime;
                 invalidate();
@@ -319,7 +321,7 @@
 
 <p>相信看了上面GifImageView的实现原理后，倒叙播放的实现也是很容易的。</p>
 
-<pre class="line-numbers"><code class="language-text">    public void playReserver() {
+<pre><code class="language-text">    public void playReserver() {
         if (movie != null) {
             reset();
             reverse = true;
@@ -337,12 +339,12 @@
 
 <p>如下图，狗子的头已经从原来的左边转到右边变成了现在的右边转到左边（ಠᴗಠ）。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041826167420.gif" alt="20171112151041826167420.gif"/><figcaption>20171112151041826167420.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041826167420.gif" alt="20171112151041826167420.gif"/></p>
 
 <p>像播放视频一样播放Gif动画<br/>
 这部分是我在写完GifView后想到的一点进阶功能，既然我们已经实现了播放和暂停，即能控制在某个时间点播放指定的Gif图片帧，如果再加入进度条，快进等功能，那么不就能做到和视频播放器一样的功能了吗？限于篇幅，我只简单实现了进度条功能，更多功能实现请移步Github，地址：<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Frenjianan%2FGifView">GifView</a></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041830828970.gif" alt="20171112151041830828970.gif"/><figcaption>20171112151041830828970.gif</figcaption></figure></p>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041830828970.gif" alt="20171112151041830828970.gif"/></p>
 
 
     
@@ -433,6 +435,8 @@
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -449,31 +453,31 @@
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  

@@ -94,6 +94,8 @@
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
          
 
       </ul>
@@ -145,7 +147,7 @@
 
 <p>ViewRoot对应ViewRootImpl类，实现了ViewParent接口，它是连接WindowManager和DecorView的桥梁，WindowManager的实现类是WindowManagerImpl类:</p>
 
-<pre class="line-numbers"><code class="language-java">public final class WindowManagerImpl implements WindowManager {
+<pre><code class="language-java">public final class WindowManagerImpl implements WindowManager {
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     private final Context mContext;
     private final Window mParentWindow;
@@ -155,7 +157,7 @@
 
 <p>其中WindowManagerGlobal相当与一个代理类，WindowManagerImpl 中的实现的方法都是通过WindowManagerGlobal来具体实现的，我们来看看WindowManagerImpl 中的addView()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
         mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
@@ -164,7 +166,7 @@
 
 <p>可以看出确实是通过WindowManagerGlobal的addView()方法来具体实现的，进入WindowManagerGlobal的addView()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">    public void addView(View view, ViewGroup.LayoutParams params,
+<pre><code class="language-java">    public void addView(View view, ViewGroup.LayoutParams params,
             Display display, Window parentWindow) {
       ...
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
@@ -223,13 +225,13 @@
 
 <p>DecorView是FrameLayout的子类，它可以被认为是Android视图树的根节点视图。DecorView作为顶级View，一般情况下它内部包含一个竖直方向的LinearLayout，在这个LinearLayout里面有上下两个部分（具体情况和Android版本及主体有关），上面的是标题栏，下面的是内容栏。在Activity中通过setContentView所设置的布局文件其实就是被加到内容栏之中的，而内容栏的id是content，在代码中可以通过ViewGroup content = （ViewGroup)findViewById(R.android.id.content)来得到content对应的layout。 <br/>
 DecorView的结构图： <br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"/><figcaption>20170224148789775483537.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"/></p>
 
 <h2 id="toc_2">View的绘制流程</h2>
 
 <p>View的绘制流程是从ViewRootImpl的performTraversals()方法开始的，它经过measure、layout和draw三个流程才能最终将view绘制出来，其中measure测量view的宽高，layout确定view在父容器中的位置，draw负责将view绘制在屏幕上。<br/><br/>
 view的绘制流程图：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"/><figcaption>20170224148789782350211.png</figcaption></figure></p>
+<img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"/></p>
 
 <p><strong>performTraversals()</strong>方法源码比较长，就不贴出来了，有兴趣可以去查看一下，从上面的流程图可以看出<strong>performTraversals</strong>会依次调用 <strong>performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);</strong> -  <strong>performLayout(lp, mWidth, mHeight);</strong> - <strong>performDraw();</strong>三个方法，这三个方法顶级view的三个流程，在 <strong>performMeasure()</strong>中会调用<strong>mView.measure()</strong>方法，<strong>mView.measure()</strong>又会调用<strong>onMeasure()</strong>方法对所有子元素进行测量，这个时候measure流程就从父容器传递到了子元素中，这样就完成了依次measure过程，<strong>performLayout()</strong>和<strong>performDraw()</strong>与<strong>performMeasure()</strong>过程是类似的，唯一的不同是<strong>performDraw()</strong>过程在draw方法中是通过<strong>dispatchDraw(canvas)</strong>方法来完成绘制的;</p>
 
@@ -238,7 +240,7 @@ view的绘制流程图：<br/><br/>
 <p>MeasureSpec是一个32位的int值，高2位代表SpecMode,低30位代表SpecSize，SpecMode是指测量模式，SpecSize是指某种测量模式下的规格大小； <br/>
 MeasureSpec内部的一些常量：</p>
 
-<pre class="line-numbers"><code class="language-java">        private static final int MODE_SHIFT = 30;
+<pre><code class="language-java">        private static final int MODE_SHIFT = 30;
         private static final int MODE_MASK  = 0x3 &lt;&lt; MODE_SHIFT;      
         public static final int UNSPECIFIED = 0 &lt;&lt; MODE_SHIFT;       
         public static final int EXACTLY     = 1 &lt;&lt; MODE_SHIFT;        
@@ -276,14 +278,14 @@ SpecMode有三种类型：</p>
 <p>measureSpec 与LayoutParams有什么关系呢？当我们给view设置了LayoutParams后，系统会将LayoutParams在父容器的约束下转换成对应的measureSpec ；<br/><br/>
 对于DecorView来说，在ViewRootImpl中的measureHierarchy方法中进行了measureSpec 的创建过程，desiredWindowWidth为屏幕宽度，desiredWindowHeight为屏幕高度；  </p>
 
-<pre class="line-numbers"><code class="language-java"> childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
+<pre><code class="language-java"> childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
             childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
             performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
 </code></pre>
 
 <p>进入getRootMeasureSpec方法：</p>
 
-<pre class="line-numbers"><code class="language-java">    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
+<pre><code class="language-java">    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
         int measureSpec;
         switch (rootDimension) {
 
@@ -307,7 +309,7 @@ SpecMode有三种类型：</p>
 <p>这个方法是根据DecorView自身的LayoutParams来计算出对应的measureSpec ； <br/>
 对于普通view的measure过程是有viewgroup传递下来的，先看看viewgroup的measureChildWithMargins方法：</p>
 
-<pre class="line-numbers"><code class="language-java">    protected void measureChildWithMargins(View child,
+<pre><code class="language-java">    protected void measureChildWithMargins(View child,
             int parentWidthMeasureSpec, int widthUsed,
             int parentHeightMeasureSpec, int heightUsed) {
         final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
@@ -325,7 +327,7 @@ SpecMode有三种类型：</p>
 
 <p>measureChildWithMargins方法会通过getChildMeasureSpec方法计算出子元素的MeasureSpec然后子元素进行measure，从代码可以看出子元素的MeasureSpec与父容器的MeasureSpec与自身的LayoutParams有关，此外，还与view的margin和padding有关，下面进入getChildMeasureSpec方法：  </p>
 
-<pre class="line-numbers"><code class="language-java">    public static int getChildMeasureSpec(int spec, int padding, int childDimension) {
+<pre><code class="language-java">    public static int getChildMeasureSpec(int spec, int padding, int childDimension) {
         int specMode = MeasureSpec.getMode(spec);
         int specSize = MeasureSpec.getSize(spec);
 
@@ -406,7 +408,7 @@ SpecMode有三种类型：</p>
 <ul>
 <li><p>1.view的measure <br/>
 view的measure方法是一个final类型的方法，意味着不能重写这个方法，在这个方法中调用了onMeasure方法，我们可以重写onMeasure方法。</p>
-<pre class="line-numbers"><code class="language-java">public final void measure(int widthMeasureSpec, int heightMeasureSpec) {
+<pre><code class="language-java">public final void measure(int widthMeasureSpec, int heightMeasureSpec) {
   ...<br/>
         if (cacheIndex &lt; 0 || sIgnoreMeasureCache) {<br/>
             // measure ourselves, this should set the measured dimension flag back<br/>
@@ -425,7 +427,7 @@ view的measure方法是一个final类型的方法，意味着不能重写这个�
 
 <p>看看onMeasure方法的实现：</p>
 
-<pre class="line-numbers"><code class="language-java">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+<pre><code class="language-java">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
                 getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
     }
@@ -433,7 +435,7 @@ view的measure方法是一个final类型的方法，意味着不能重写这个�
 
 <p>调用setMeasuredDimension方法设置view的测量值，其中getSuggestedMinimumWidth()是系统默认提供的值，这里就不深究了，下面看看getDefaultSize方法：</p>
 
-<pre class="line-numbers"><code class="language-java">    public static int getDefaultSize(int size, int measureSpec) {
+<pre><code class="language-java">    public static int getDefaultSize(int size, int measureSpec) {
         int result = size;
         int specMode = MeasureSpec.getMode(measureSpec);
         int specSize = MeasureSpec.getSize(measureSpec);
@@ -453,7 +455,7 @@ view的measure方法是一个final类型的方法，意味着不能重写这个�
 
 <p>在UNSPECIFIED模式下，返回系统默认值，EXACTLY和AT_MOST模式下，返回measureSpec中的值；这里也可以得到一个结论：当我们直接继承一个view的自定义控件需要重写onMeasure方法去设置wrap_content时的自身大小，否则在布局中使用wrap_content的效果与match_parent一样，原因是当view设置为wrap_content时，模式是AT_MOST，通过前一篇文章中的getChildMeasureSpec方法可以知道，view的specSize就是parentSize；重写onMeasure的代码思路如下：</p>
 
-<pre class="line-numbers"><code class="language-java">         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+<pre><code class="language-java">         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
@@ -491,7 +493,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>从以上代码可以看出，确实是会通过measureChild方法对每一个子view进行measure，</p>
 
-<pre class="line-numbers"><code class="language-java">    protected void measureChild(View child, int parentWidthMeasureSpec,
+<pre><code class="language-java">    protected void measureChild(View child, int parentWidthMeasureSpec,
             int parentHeightMeasureSpec) {
         final LayoutParams lp = child.getLayoutParams();
 
@@ -513,7 +515,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 <p>layout过程的作用是viewgroup来确定子元素的位置，当viewgroup的位置确定后，会遍历所有子元素并调用其layout方法，在layout方法中又会调用onLayout方法。<br/><br/>
 先看viewgroup的layout方法：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
     public final void layout(int l, int t, int r, int b) {
         if (!mSuppressLayout &amp;&amp; (mTransition == null || !mTransition.isChangingLayout())) {
             if (mTransition != null) {
@@ -529,7 +531,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>可以看出是调用父类的layout方法：</p>
 
-<pre class="line-numbers"><code class="language-java">public void layout(int l, int t, int r, int b) {
+<pre><code class="language-java">public void layout(int l, int t, int r, int b) {
     if ((mPrivateFlags3 &amp; PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != 0) {
         onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);
         mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
@@ -590,7 +592,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>看看draw源码：</p>
 
-<pre class="line-numbers"><code class="language-java">    public void draw(Canvas canvas) {
+<pre><code class="language-java">    public void draw(Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         final boolean dirtyOpaque = (privateFlags &amp; PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &amp;&amp;
                 (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
@@ -644,7 +646,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>view绘制过程的传递是通过 dispatchDraw(canvas)来实现的， dispatchDraw(canvas);会遍历所有的子元素的draw方法，view有一个特殊的方法：setWillNotDraw，先看一下源码;</p>
 
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
      * If this view doesn&#39;t do any drawing on its own, set this flag to
      * allow further optimizations. By default, this flag is not set on
      * View, but could be set on some View subclasses such as ViewGroup.
@@ -750,6 +752,8 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
          
         </p>
 
@@ -766,31 +770,31 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 	      
 		      
 			      <li class="post">
-			        <a href="15580646892750.html">发布Android库至JCenter仓库</a>
+			        <a href="15663678647312.html">Docker学习</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576631048737.html">单例模式</a>
+			        <a href="15662718181666.html">Android GRPC接入</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15576630121534.html">23种设计模式全面解析</a>
+			        <a href="15662693410122.html">Docker搭建Maven私服</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873148.html">Android RecyclerView性能优化</a>
+			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15561207873102.html">Android 基础复习</a>
+			        <a href="15620327900428.html">Xposed开发</a>
 			      </li>
 		     
 		  
