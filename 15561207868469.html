@@ -1,144 +1,126 @@
-<!doctype html>
-<html class="no-js" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-    
-  Android View的工作流程 - MagicalRice的Blog
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>  
+	  
+  	Android View的工作流程 - MagicalRice的Blog
+  	
+	</title>
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+
+	<link href="asset/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="asset/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<script src="asset/javascripts/jquery.min.js"></script>
+	<script src="asset/highlightjs/highlight.pack.js"></script>
+	<link href="asset/highlightjs/styles/solarized_dark.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script>hljs.initHighlightingOnLoad();</script>
+
+	<!--[if lt IE 9]><script src="asset/javascripts/html5.js"></script><![endif]-->
+	<!-- <link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'> -->
+	<style type="text/css">
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Nunito-Light'), url(asset/font/1TiHc9yag0wq3lDO9cw0voX0hVgzZQUfRDuZrPvH3D8.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Nunito-Regular'), url(asset/font/6TbRXKWJjpj6V2v_WyRbMX-_kf6ByYO6CLYdB4HQE-Y.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Nunito-Bold'), url(asset/font/TttUCfJ272GBgSKaOaD7KoX0hVgzZQUfRDuZrPvH3D8.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+	</style>
+	
+	<style type="text/css">
+	.container .left-col{ opacity: 1;}
+	#pagenavi a{ font-size: 1.3em;}
+	#pagenavi .next:before{ top: 3px;}
+	#pagenavi .prev:before{ top: 3px;}
+	.container .mid-col .mid-col-container #content .archives .title{ font-size: 1.5em;}
+	.container .mid-col .mid-col-container #content article{ padding: 15px 0px;}
+	#header .subtitle {
+		line-height: 1.2em;
+		padding-top: 8px;
+	}
+	article pre{ background: none; border: none; padding: 0;}
+	article .entry-content{text-align: left;}
+	.share-comment{ padding: 25px 0px; clear: both;}
+	hr{ margin: 20px 0px;border: 0; border-top:solid 1px #ddd;}
+	</style>
   
-  </title>
-  
-  
-  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
-    <link rel="stylesheet" href="asset/css/foundation.min.css" />
-    <link rel="stylesheet" href="asset/css/docs.css" />
-    <script src="asset/js/vendor/modernizr.js"></script>
-    <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
-<script type="text/javascript">
-  function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
-    document.getElementById('search_q').value = searchVal;
-    return true;
-  }
-</script>
-  </head>
-  <body class="antialiased hide-extras">
-    
-    <div class="marketing off-canvas-wrap" data-offcanvas>
-      <div class="inner-wrap">
+
+</head>
 
 
-<nav class="top-bar docs-bar hide-for-small" data-topbar>
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+				<header id="header" class="inner">
+				 
+					
+					<h1><a href="index.html">MagicalRice的Blog</a></h1>
+					<p class="subtitle">技术博客</p>
+					<nav id="main-nav">
+						<ul class="main">
+						
+						  <li id=""><a target="self" href="index.html">Home</a></li>
+						
+						  <li id=""><a target="_self" href="archives.html">Archives</a></li>
+						
+						</ul>
+					</nav>
+
+					<nav id="sub-nav">
+						<div class="social">
 
 
-  <section class="top-bar-section">
-  <div class="row">
-      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
-        <ul id="main-menu" class="left">
-        
-        <li id=""><a target="self" href="index.html">Home</a></li>
-        
-        <li id=""><a target="_self" href="archives.html">Archives</a></li>
-        
-        </ul>
-
-        <ul class="right" id="search-wrap">
-          <li>
-<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
-    <input type="hidden" id="search_q" name="q" value="" />
-    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
-</form>
-</li>
-          </ul>
-      </div></div>
-  </div>
-  </section>
-
-</nav>
-
-        <nav class="tab-bar show-for-small">
-  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
-    <span> &nbsp; MagicalRice的Blog</span>
-  </a>
-</nav>
-
-<aside class="left-off-canvas-menu">
-      <ul class="off-canvas-list">
-        
-        <li><a target="self" href="index.html">Home</a></li>
-        
-        <li><a target="_self" href="archives.html">Archives</a></li>
-        
-
-    <li><label>Categories</label></li>
-
-        
-            <li><a href="Android.html">Android</a></li>
-        
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
-            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
-        
-            <li><a href="C++.html">C++</a></li>
-        
-            <li><a href="UI.html">UI</a></li>
-        
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
-        
-            <li><a href="Game.html">Game</a></li>
-        
-            <li><a href="Python.html">Python</a></li>
-        
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-         
-
-      </ul>
-    </aside>
-
-<a class="exit-off-canvas" href="#"></a>
 
 
-        <section id="main-content" role="main" class="scroll-container">
-        
-       
 
- <script type="text/javascript">
-  $(function(){
-    $('#menu_item_index').addClass('is_active');
-  });
-</script>
-<div class="row">
-  <div class="large-8 medium-8 columns">
-      <div class="markdown-body article-wrap">
-       <div class="article">
-          
-          <h1>Android View的工作流程</h1>
-     
-        <div class="read-more clearfix">
-          <span class="date">2017/1/8</span>
 
-          <span>posted in&nbsp;</span> 
-          
-              <span class="posted-in"><a href='Android.html'>Android</a></span>
-           
-         
-          <span class="comments">
-            
 
-            
-          </span>
 
-        </div>
-      </div><!-- article -->
 
-      <div class="article-content">
-      <h2 id="toc_0">前言</h2>
+
+
+
+
+								
+
+								<a class="rss" href="atom.xml" title="RSS">RSS</a>
+							
+						</div>
+					</nav>
+				</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			<div class="mid-col-container"> <div id="content" class="inner">
+
+	<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+		<h1 class="title" itemprop="name">Android View的工作流程</h1>
+		<div class="entry-content" itemprop="articleBody">
+			<h2 id="toc_0">前言</h2>
 
 <p>写了那么多自定义View，但是对于其中的原理以及工作流程还不是很了解，所以这篇博文来总结和回顾一下Android开发中的View的工作流程，view的工作流程主要包含measure、layout和draw三大流程，在进入主题之前，先要理解一下几个概念，以便更好的理解view的三大流程。<br/><br/>
 <strong>转载自<a href="http://blog.csdn.net/lin_t_s/article/details/56668085">《安卓复习之旅——View的工作流程》</a></strong></p>
@@ -147,7 +129,7 @@
 
 <p>ViewRoot对应ViewRootImpl类，实现了ViewParent接口，它是连接WindowManager和DecorView的桥梁，WindowManager的实现类是WindowManagerImpl类:</p>
 
-<pre><code class="language-java">public final class WindowManagerImpl implements WindowManager {
+<pre class="line-numbers"><code class="language-java">public final class WindowManagerImpl implements WindowManager {
     private final WindowManagerGlobal mGlobal = WindowManagerGlobal.getInstance();
     private final Context mContext;
     private final Window mParentWindow;
@@ -157,7 +139,7 @@
 
 <p>其中WindowManagerGlobal相当与一个代理类，WindowManagerImpl 中的实现的方法都是通过WindowManagerGlobal来具体实现的，我们来看看WindowManagerImpl 中的addView()方法：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public void addView(@NonNull View view, @NonNull ViewGroup.LayoutParams params) {
         applyDefaultToken(params);
         mGlobal.addView(view, params, mContext.getDisplay(), mParentWindow);
@@ -166,7 +148,7 @@
 
 <p>可以看出确实是通过WindowManagerGlobal的addView()方法来具体实现的，进入WindowManagerGlobal的addView()方法：</p>
 
-<pre><code class="language-java">    public void addView(View view, ViewGroup.LayoutParams params,
+<pre class="line-numbers"><code class="language-java">    public void addView(View view, ViewGroup.LayoutParams params,
             Display display, Window parentWindow) {
       ...
         final WindowManager.LayoutParams wparams = (WindowManager.LayoutParams) params;
@@ -225,13 +207,13 @@
 
 <p>DecorView是FrameLayout的子类，它可以被认为是Android视图树的根节点视图。DecorView作为顶级View，一般情况下它内部包含一个竖直方向的LinearLayout，在这个LinearLayout里面有上下两个部分（具体情况和Android版本及主体有关），上面的是标题栏，下面的是内容栏。在Activity中通过setContentView所设置的布局文件其实就是被加到内容栏之中的，而内容栏的id是content，在代码中可以通过ViewGroup content = （ViewGroup)findViewById(R.android.id.content)来得到content对应的layout。 <br/>
 DecorView的结构图： <br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"/><figcaption>20170224148789775483537.png</figcaption></figure></p>
 
 <h2 id="toc_2">View的绘制流程</h2>
 
 <p>View的绘制流程是从ViewRootImpl的performTraversals()方法开始的，它经过measure、layout和draw三个流程才能最终将view绘制出来，其中measure测量view的宽高，layout确定view在父容器中的位置，draw负责将view绘制在屏幕上。<br/><br/>
 view的绘制流程图：<br/><br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"/><figcaption>20170224148789782350211.png</figcaption></figure></p>
 
 <p><strong>performTraversals()</strong>方法源码比较长，就不贴出来了，有兴趣可以去查看一下，从上面的流程图可以看出<strong>performTraversals</strong>会依次调用 <strong>performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);</strong> -  <strong>performLayout(lp, mWidth, mHeight);</strong> - <strong>performDraw();</strong>三个方法，这三个方法顶级view的三个流程，在 <strong>performMeasure()</strong>中会调用<strong>mView.measure()</strong>方法，<strong>mView.measure()</strong>又会调用<strong>onMeasure()</strong>方法对所有子元素进行测量，这个时候measure流程就从父容器传递到了子元素中，这样就完成了依次measure过程，<strong>performLayout()</strong>和<strong>performDraw()</strong>与<strong>performMeasure()</strong>过程是类似的，唯一的不同是<strong>performDraw()</strong>过程在draw方法中是通过<strong>dispatchDraw(canvas)</strong>方法来完成绘制的;</p>
 
@@ -240,7 +222,7 @@ view的绘制流程图：<br/><br/>
 <p>MeasureSpec是一个32位的int值，高2位代表SpecMode,低30位代表SpecSize，SpecMode是指测量模式，SpecSize是指某种测量模式下的规格大小； <br/>
 MeasureSpec内部的一些常量：</p>
 
-<pre><code class="language-java">        private static final int MODE_SHIFT = 30;
+<pre class="line-numbers"><code class="language-java">        private static final int MODE_SHIFT = 30;
         private static final int MODE_MASK  = 0x3 &lt;&lt; MODE_SHIFT;      
         public static final int UNSPECIFIED = 0 &lt;&lt; MODE_SHIFT;       
         public static final int EXACTLY     = 1 &lt;&lt; MODE_SHIFT;        
@@ -278,14 +260,14 @@ SpecMode有三种类型：</p>
 <p>measureSpec 与LayoutParams有什么关系呢？当我们给view设置了LayoutParams后，系统会将LayoutParams在父容器的约束下转换成对应的measureSpec ；<br/><br/>
 对于DecorView来说，在ViewRootImpl中的measureHierarchy方法中进行了measureSpec 的创建过程，desiredWindowWidth为屏幕宽度，desiredWindowHeight为屏幕高度；  </p>
 
-<pre><code class="language-java"> childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
+<pre class="line-numbers"><code class="language-java"> childWidthMeasureSpec = getRootMeasureSpec(desiredWindowWidth, lp.width);
             childHeightMeasureSpec = getRootMeasureSpec(desiredWindowHeight, lp.height);
             performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);
 </code></pre>
 
 <p>进入getRootMeasureSpec方法：</p>
 
-<pre><code class="language-java">    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
+<pre class="line-numbers"><code class="language-java">    private static int getRootMeasureSpec(int windowSize, int rootDimension) {
         int measureSpec;
         switch (rootDimension) {
 
@@ -309,7 +291,7 @@ SpecMode有三种类型：</p>
 <p>这个方法是根据DecorView自身的LayoutParams来计算出对应的measureSpec ； <br/>
 对于普通view的measure过程是有viewgroup传递下来的，先看看viewgroup的measureChildWithMargins方法：</p>
 
-<pre><code class="language-java">    protected void measureChildWithMargins(View child,
+<pre class="line-numbers"><code class="language-java">    protected void measureChildWithMargins(View child,
             int parentWidthMeasureSpec, int widthUsed,
             int parentHeightMeasureSpec, int heightUsed) {
         final MarginLayoutParams lp = (MarginLayoutParams) child.getLayoutParams();
@@ -327,7 +309,7 @@ SpecMode有三种类型：</p>
 
 <p>measureChildWithMargins方法会通过getChildMeasureSpec方法计算出子元素的MeasureSpec然后子元素进行measure，从代码可以看出子元素的MeasureSpec与父容器的MeasureSpec与自身的LayoutParams有关，此外，还与view的margin和padding有关，下面进入getChildMeasureSpec方法：  </p>
 
-<pre><code class="language-java">    public static int getChildMeasureSpec(int spec, int padding, int childDimension) {
+<pre class="line-numbers"><code class="language-java">    public static int getChildMeasureSpec(int spec, int padding, int childDimension) {
         int specMode = MeasureSpec.getMode(spec);
         int specSize = MeasureSpec.getSize(spec);
 
@@ -408,7 +390,7 @@ SpecMode有三种类型：</p>
 <ul>
 <li><p>1.view的measure <br/>
 view的measure方法是一个final类型的方法，意味着不能重写这个方法，在这个方法中调用了onMeasure方法，我们可以重写onMeasure方法。</p>
-<pre><code class="language-java">public final void measure(int widthMeasureSpec, int heightMeasureSpec) {
+<pre class="line-numbers"><code class="language-java">public final void measure(int widthMeasureSpec, int heightMeasureSpec) {
   ...<br/>
         if (cacheIndex &lt; 0 || sIgnoreMeasureCache) {<br/>
             // measure ourselves, this should set the measured dimension flag back<br/>
@@ -427,7 +409,7 @@ view的measure方法是一个final类型的方法，意味着不能重写这个�
 
 <p>看看onMeasure方法的实现：</p>
 
-<pre><code class="language-java">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
+<pre class="line-numbers"><code class="language-java">    protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         setMeasuredDimension(getDefaultSize(getSuggestedMinimumWidth(), widthMeasureSpec),
                 getDefaultSize(getSuggestedMinimumHeight(), heightMeasureSpec));
     }
@@ -435,7 +417,7 @@ view的measure方法是一个final类型的方法，意味着不能重写这个�
 
 <p>调用setMeasuredDimension方法设置view的测量值，其中getSuggestedMinimumWidth()是系统默认提供的值，这里就不深究了，下面看看getDefaultSize方法：</p>
 
-<pre><code class="language-java">    public static int getDefaultSize(int size, int measureSpec) {
+<pre class="line-numbers"><code class="language-java">    public static int getDefaultSize(int size, int measureSpec) {
         int result = size;
         int specMode = MeasureSpec.getMode(measureSpec);
         int specSize = MeasureSpec.getSize(measureSpec);
@@ -455,7 +437,7 @@ view的measure方法是一个final类型的方法，意味着不能重写这个�
 
 <p>在UNSPECIFIED模式下，返回系统默认值，EXACTLY和AT_MOST模式下，返回measureSpec中的值；这里也可以得到一个结论：当我们直接继承一个view的自定义控件需要重写onMeasure方法去设置wrap_content时的自身大小，否则在布局中使用wrap_content的效果与match_parent一样，原因是当view设置为wrap_content时，模式是AT_MOST，通过前一篇文章中的getChildMeasureSpec方法可以知道，view的specSize就是parentSize；重写onMeasure的代码思路如下：</p>
 
-<pre><code class="language-java">         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
+<pre class="line-numbers"><code class="language-java">         int widthMode = MeasureSpec.getMode(widthMeasureSpec);
         int widthSize = MeasureSpec.getSize(widthMeasureSpec);
         int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         int heightSize = MeasureSpec.getSize(heightMeasureSpec);
@@ -493,7 +475,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>从以上代码可以看出，确实是会通过measureChild方法对每一个子view进行measure，</p>
 
-<pre><code class="language-java">    protected void measureChild(View child, int parentWidthMeasureSpec,
+<pre class="line-numbers"><code class="language-java">    protected void measureChild(View child, int parentWidthMeasureSpec,
             int parentHeightMeasureSpec) {
         final LayoutParams lp = child.getLayoutParams();
 
@@ -515,7 +497,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 <p>layout过程的作用是viewgroup来确定子元素的位置，当viewgroup的位置确定后，会遍历所有子元素并调用其layout方法，在layout方法中又会调用onLayout方法。<br/><br/>
 先看viewgroup的layout方法：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public final void layout(int l, int t, int r, int b) {
         if (!mSuppressLayout &amp;&amp; (mTransition == null || !mTransition.isChangingLayout())) {
             if (mTransition != null) {
@@ -531,7 +513,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>可以看出是调用父类的layout方法：</p>
 
-<pre><code class="language-java">public void layout(int l, int t, int r, int b) {
+<pre class="line-numbers"><code class="language-java">public void layout(int l, int t, int r, int b) {
     if ((mPrivateFlags3 &amp; PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT) != 0) {
         onMeasure(mOldWidthMeasureSpec, mOldHeightMeasureSpec);
         mPrivateFlags3 &amp;= ~PFLAG3_MEASURE_NEEDED_BEFORE_LAYOUT;
@@ -592,7 +574,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>看看draw源码：</p>
 
-<pre><code class="language-java">    public void draw(Canvas canvas) {
+<pre class="line-numbers"><code class="language-java">    public void draw(Canvas canvas) {
         final int privateFlags = mPrivateFlags;
         final boolean dirtyOpaque = (privateFlags &amp; PFLAG_DIRTY_MASK) == PFLAG_DIRTY_OPAQUE &amp;&amp;
                 (mAttachInfo == null || !mAttachInfo.mIgnoreDirtyState);
@@ -646,7 +628,7 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>view绘制过程的传递是通过 dispatchDraw(canvas)来实现的， dispatchDraw(canvas);会遍历所有的子元素的draw方法，view有一个特殊的方法：setWillNotDraw，先看一下源码;</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
      * If this view doesn&#39;t do any drawing on its own, set this flag to
      * allow further optimizations. By default, this flag is not set on
      * View, but could be set on some View subclasses such as ViewGroup.
@@ -663,215 +645,28 @@ protected void measureChildren(int widthMeasureSpec, int heightMeasureSpec) {<br
 
 <p>意思是如果一个view不需要绘制任何内容，那么设置这个标记位为TRUE后，系统会进行优化，默认情况下标记位为FALSE。</p>
 
+		</div>
+	</article>
+	<div class="share-comment">
+	 
 
-    
+	  
 
-      </div>
+	  
 
-      <div class="row">
-        <div class="large-6 columns">
-        <p class="text-left" style="padding:15px 0px;">
-      
-          <a href="15561207868504.html" 
-          title="Previous Post: Android 快速开发框架">&laquo; Android 快速开发框架</a>
-      
-        </p>
-        </div>
-        <div class="large-6 columns">
-      <p class="text-right" style="padding:15px 0px;">
-      
-          <a  href="15561207868433.html" 
-          title="Next Post: Android 高效开发工具库">Android 高效开发工具库 &raquo;</a>
-      
-      </p>
-        </div>
-      </div>
-      <div class="comments-wrap">
-        <div class="share-comments">
-          
-
-          
-
-          
-        </div>
-      </div>
-    </div><!-- article-wrap -->
-  </div><!-- large 8 -->
-
-
-
-
- <div class="large-4 medium-4 columns">
-  <div class="hide-for-small">
-    <div id="sidebar" class="sidebar">
-          <div id="site-info" class="site-info">
-            
-                <h1>MagicalRice的Blog</h1>
-                <div class="site-des">技术博客</div>
-                <div class="social">
-
-
-
-
-
-
-
-
-
-
-
-  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
-                
-              	 </div>
-          	</div>
-
-             
-
-              <div id="site-categories" class="side-item ">
-                <div class="side-header">
-                  <h2>Categories</h2>
-                </div>
-                <div class="side-content">
-
-      	<p class="cat-list">
-        
-            <a href="Android.html"><strong>Android</strong></a>
-        
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
-            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
-        
-            <a href="C++.html"><strong>C++</strong></a>
-        
-            <a href="UI.html"><strong>UI</strong></a>
-        
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
-        
-            <a href="Game.html"><strong>Game</strong></a>
-        
-            <a href="Python.html"><strong>Python</strong></a>
-        
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-         
-        </p>
-
-
-                </div>
-              </div>
-
-              <div id="site-categories" class="side-item">
-                <div class="side-header">
-                  <h2>Recent Posts</h2>
-                </div>
-                <div class="side-content">
-                <ul class="posts-list">
-	      
-		      
-			      <li class="post">
-			        <a href="15663678647312.html">Docker学习</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15662718181666.html">Android GRPC接入</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15662693410122.html">Docker搭建Maven私服</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15620327900428.html">Xposed开发</a>
-			      </li>
-		     
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		   
-		  		</ul>
-                </div>
-              </div>
-        </div><!-- sidebar -->
-      </div><!-- hide for small -->
-</div><!-- large 4 -->
-
-</div><!-- row -->
-
- <div class="page-bottom clearfix">
-  <div class="row">
-   <p class="copyright">Copyright &copy; 2015
-Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
-Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
-  </div>
-</div>
-
-        </section>
-      </div>
-    </div>
+	</div>
+</div>        </div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a> &nbsp;&nbsp; 
+Theme by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+      </footer>
+		</div>
+	</div>
 
   
     
 
-    <script src="asset/js/foundation.min.js"></script>
-    <script>
-      $(document).foundation();
-      function fixSidebarHeight(){
-        var w1 = $('.markdown-body').height();
-          var w2 = $('#sidebar').height();
-          if (w1 > w2) { $('#sidebar').height(w1); };
-      }
-      $(function(){
-        fixSidebarHeight();
-      })
-      $(window).load(function(){
-          fixSidebarHeight();
-      });
-     
-    </script>
-
-    
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
-
-  </body>
+</body>
 </html>

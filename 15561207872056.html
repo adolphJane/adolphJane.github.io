@@ -1,150 +1,132 @@
-<!doctype html>
-<html class="no-js" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-    
-  Android-OOM案例分析 - MagicalRice的Blog
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>  
+	  
+  	Android-OOM案例分析 - MagicalRice的Blog
+  	
+	</title>
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+
+	<link href="asset/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="asset/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<script src="asset/javascripts/jquery.min.js"></script>
+	<script src="asset/highlightjs/highlight.pack.js"></script>
+	<link href="asset/highlightjs/styles/solarized_dark.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script>hljs.initHighlightingOnLoad();</script>
+
+	<!--[if lt IE 9]><script src="asset/javascripts/html5.js"></script><![endif]-->
+	<!-- <link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'> -->
+	<style type="text/css">
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Nunito-Light'), url(asset/font/1TiHc9yag0wq3lDO9cw0voX0hVgzZQUfRDuZrPvH3D8.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Nunito-Regular'), url(asset/font/6TbRXKWJjpj6V2v_WyRbMX-_kf6ByYO6CLYdB4HQE-Y.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Nunito-Bold'), url(asset/font/TttUCfJ272GBgSKaOaD7KoX0hVgzZQUfRDuZrPvH3D8.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+	</style>
+	
+	<style type="text/css">
+	.container .left-col{ opacity: 1;}
+	#pagenavi a{ font-size: 1.3em;}
+	#pagenavi .next:before{ top: 3px;}
+	#pagenavi .prev:before{ top: 3px;}
+	.container .mid-col .mid-col-container #content .archives .title{ font-size: 1.5em;}
+	.container .mid-col .mid-col-container #content article{ padding: 15px 0px;}
+	#header .subtitle {
+		line-height: 1.2em;
+		padding-top: 8px;
+	}
+	article pre{ background: none; border: none; padding: 0;}
+	article .entry-content{text-align: left;}
+	.share-comment{ padding: 25px 0px; clear: both;}
+	hr{ margin: 20px 0px;border: 0; border-top:solid 1px #ddd;}
+	</style>
   
-  </title>
-  
-  
-  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
-    <link rel="stylesheet" href="asset/css/foundation.min.css" />
-    <link rel="stylesheet" href="asset/css/docs.css" />
-    <script src="asset/js/vendor/modernizr.js"></script>
-    <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
-<script type="text/javascript">
-  function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
-    document.getElementById('search_q').value = searchVal;
-    return true;
-  }
-</script>
-  </head>
-  <body class="antialiased hide-extras">
-    
-    <div class="marketing off-canvas-wrap" data-offcanvas>
-      <div class="inner-wrap">
+
+</head>
 
 
-<nav class="top-bar docs-bar hide-for-small" data-topbar>
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+				<header id="header" class="inner">
+				 
+					
+					<h1><a href="index.html">MagicalRice的Blog</a></h1>
+					<p class="subtitle">技术博客</p>
+					<nav id="main-nav">
+						<ul class="main">
+						
+						  <li id=""><a target="self" href="index.html">Home</a></li>
+						
+						  <li id=""><a target="_self" href="archives.html">Archives</a></li>
+						
+						</ul>
+					</nav>
+
+					<nav id="sub-nav">
+						<div class="social">
 
 
-  <section class="top-bar-section">
-  <div class="row">
-      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
-        <ul id="main-menu" class="left">
-        
-        <li id=""><a target="self" href="index.html">Home</a></li>
-        
-        <li id=""><a target="_self" href="archives.html">Archives</a></li>
-        
-        </ul>
-
-        <ul class="right" id="search-wrap">
-          <li>
-<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
-    <input type="hidden" id="search_q" name="q" value="" />
-    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
-</form>
-</li>
-          </ul>
-      </div></div>
-  </div>
-  </section>
-
-</nav>
-
-        <nav class="tab-bar show-for-small">
-  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
-    <span> &nbsp; MagicalRice的Blog</span>
-  </a>
-</nav>
-
-<aside class="left-off-canvas-menu">
-      <ul class="off-canvas-list">
-        
-        <li><a target="self" href="index.html">Home</a></li>
-        
-        <li><a target="_self" href="archives.html">Archives</a></li>
-        
-
-    <li><label>Categories</label></li>
-
-        
-            <li><a href="Android.html">Android</a></li>
-        
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
-            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
-        
-            <li><a href="C++.html">C++</a></li>
-        
-            <li><a href="UI.html">UI</a></li>
-        
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
-        
-            <li><a href="Game.html">Game</a></li>
-        
-            <li><a href="Python.html">Python</a></li>
-        
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-         
-
-      </ul>
-    </aside>
-
-<a class="exit-off-canvas" href="#"></a>
 
 
-        <section id="main-content" role="main" class="scroll-container">
-        
-       
 
- <script type="text/javascript">
-  $(function(){
-    $('#menu_item_index').addClass('is_active');
-  });
-</script>
-<div class="row">
-  <div class="large-8 medium-8 columns">
-      <div class="markdown-body article-wrap">
-       <div class="article">
-          
-          <h1>Android-OOM案例分析</h1>
-     
-        <div class="read-more clearfix">
-          <span class="date">2017/10/20</span>
 
-          <span>posted in&nbsp;</span> 
-          
-              <span class="posted-in"><a href='Android.html'>Android</a></span>
-           
-         
-          <span class="comments">
-            
 
-            
-          </span>
 
-        </div>
-      </div><!-- article -->
 
-      <div class="article-content">
-      <p>在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具的使用。</p>
+
+
+
+
+								
+
+								<a class="rss" href="atom.xml" title="RSS">RSS</a>
+							
+						</div>
+					</nav>
+				</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			<div class="mid-col-container"> <div id="content" class="inner">
+
+	<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+		<h1 class="title" itemprop="name">Android-OOM案例分析</h1>
+		<div class="entry-content" itemprop="articleBody">
+			<p>在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具的使用。</p>
 
 <h2 id="toc_0">案例背景</h2>
 
 <p>在美团App 7.4~7.7版本期间，美食业务的OOM数量居高不下，远高于历史水平，主要都是DECODE本地的资源出错。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006844360459.png" alt="20171107151006844360459.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006844360459.png" alt="20171107151006844360459.png"/><figcaption>20171107151006844360459.png</figcaption></figure></p>
 
 <p>图中OOM数量为各版本发版后第一个月的统计量，包含新发版本及历史版本。对比了同时期其他业务的情况，也有类似OOM。由于美食业务的访问量占美团App的比重较大，因此，OOM的数量相对其他业务也多一些。</p>
 
@@ -297,21 +279,21 @@ OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二�
 
 <p>选取byte数组，右击-&gt;list objects-&gt;with incoming references，降序排列可以看到有很多大小一致的byte[]实例。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006883926615.png" alt="20171107151006883926615.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006883926615.png" alt="20171107151006883926615.png"/><figcaption>20171107151006883926615.png</figcaption></figure></p>
 
 <p>右击其中一个数组-&gt;Path to GC Roots-&gt; exclude xxx references</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006888292386.png" alt="20171107151006888292386.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006888292386.png" alt="20171107151006888292386.png"/><figcaption>20171107151006888292386.png</figcaption></figure></p>
 
 <p>如上图所示，这些byte[]都是系统的EdgeEffect的drawable所持有，drawable对应的bitmap占用的空间为1566 * 406 * 4 = 2543184，与byte数组的大小一致。</p>
 
 <p>再看另外一个：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006892587007.png" alt="20171107151006892587007.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006892587007.png" alt="20171107151006892587007.png"/><figcaption>20171107151006892587007.png</figcaption></figure></p>
 
 <p>这些byte[]是被App的一个背景图所持有，如下图：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006895888632.png" alt="20171107151006895888632.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006895888632.png" alt="20171107151006895888632.png"/><figcaption>20171107151006895888632.png</figcaption></figure></p>
 
 <p>通过ImageView的ID（如图）及build目录下的R.txt反查可知该ImageView的ID名称，即可知其设置的背景图的大小为720 * 200（xhdpi），加载到内存并考虑density，size刚好是1080 * 300 * 4 = 1296000，与byte数组大小一致。</p>
 
@@ -319,7 +301,7 @@ OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二�
 
 <p>为什么会出现这些大小一致的byte数组，或者说，为什么会创建多份EdgeEffect的drawable？查看EdgeEffect的源码（4.2.2）可知，其drawable成员也是通过<code>Resources.getDrawable</code>系统调用获取的。</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * Construct a new EdgeEffect with a theme appropriate for the provided context.
  * @param context Context used to provide theming and resource information for the EdgeEffect
  */
@@ -337,7 +319,7 @@ public EdgeEffect(Context context) {
 
 <p>ImageView(View)获取background对应的drawable的过程类似。</p>
 
-<pre><code class="language-text">for (int i = 0; i &lt; N; i++) {
+<pre class="line-numbers"><code class="language-text">for (int i = 0; i &lt; N; i++) {
     int attr = a.getIndex(i);
     switch (attr) {
         case com.android.internal.R.styleable.View_background:
@@ -352,14 +334,14 @@ public EdgeEffect(Context context) {
 
 <p>既然drawable的加载机制并没有问题，那么drawable所在的缓存实例或者获取drawable的Resources实例是否是同一个呢？通过下面的代码，打印出每个Activity的Resources实例及Resources实例的drawable cache。</p>
 
-<pre><code class="language-java">//noinspection unchecked
+<pre class="line-numbers"><code class="language-java">//noinspection unchecked
 LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt; cache = (LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt;) Hack.into(Resources.class).field(&quot;mDrawableCache&quot;).get(getResources());
 Object appCache = Hack.into(Resources.class).field(&quot;mDrawableCache&quot;).get(getApplication().getResources());
 Log.e(&quot;oom&quot;, &quot;Resources: {application=&quot; + getApplication().getResources() + &quot;, activity=&quot; + getResources() + &quot;}&quot;);
 Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + appCache + &quot;, activity=&quot; + cache + &quot;}&quot;);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006910770075.png" alt="20171107151006910770075.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006910770075.png" alt="20171107151006910770075.png"/><figcaption>20171107151006910770075.png</figcaption></figure></p>
 
 <p>这也进一步解释了另外一个现象，即这些大小相同的数组的个数基本和启动Activity的数量成正比。</p>
 
@@ -368,7 +350,7 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 
 <p>7.8版本关闭了此标志，发版后第一个月的OOM数量（包含历史版本）为153，如下图。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006915714253.png" alt="20171107151006915714253.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171107151006915714253.png" alt="20171107151006915714253.png"/><figcaption>20171107151006915714253.png</figcaption></figure></p>
 
 <p>其中新版本发生的OOM数量为22。</p>
 
@@ -382,215 +364,28 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 <li>获取可分析的数据（内存dump文件）。利用MAT分析dump文件，MAT可以方便的按照大小排序实例，可以查看某些实例到GC ROOT的路径。</li>
 </ol>
 
+		</div>
+	</article>
+	<div class="share-comment">
+	 
 
-    
+	  
 
-      </div>
+	  
 
-      <div class="row">
-        <div class="large-6 columns">
-        <p class="text-left" style="padding:15px 0px;">
-      
-          <a href="15561207872129.html" 
-          title="Previous Post: Android-轻松自制flyme悬浮球">&laquo; Android-轻松自制flyme悬浮球</a>
-      
-        </p>
-        </div>
-        <div class="large-6 columns">
-      <p class="text-right" style="padding:15px 0px;">
-      
-          <a  href="15561207872019.html" 
-          title="Next Post: Android-全面解析 Application类">Android-全面解析 Application类 &raquo;</a>
-      
-      </p>
-        </div>
-      </div>
-      <div class="comments-wrap">
-        <div class="share-comments">
-          
-
-          
-
-          
-        </div>
-      </div>
-    </div><!-- article-wrap -->
-  </div><!-- large 8 -->
-
-
-
-
- <div class="large-4 medium-4 columns">
-  <div class="hide-for-small">
-    <div id="sidebar" class="sidebar">
-          <div id="site-info" class="site-info">
-            
-                <h1>MagicalRice的Blog</h1>
-                <div class="site-des">技术博客</div>
-                <div class="social">
-
-
-
-
-
-
-
-
-
-
-
-  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
-                
-              	 </div>
-          	</div>
-
-             
-
-              <div id="site-categories" class="side-item ">
-                <div class="side-header">
-                  <h2>Categories</h2>
-                </div>
-                <div class="side-content">
-
-      	<p class="cat-list">
-        
-            <a href="Android.html"><strong>Android</strong></a>
-        
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
-            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
-        
-            <a href="C++.html"><strong>C++</strong></a>
-        
-            <a href="UI.html"><strong>UI</strong></a>
-        
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
-        
-            <a href="Game.html"><strong>Game</strong></a>
-        
-            <a href="Python.html"><strong>Python</strong></a>
-        
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-         
-        </p>
-
-
-                </div>
-              </div>
-
-              <div id="site-categories" class="side-item">
-                <div class="side-header">
-                  <h2>Recent Posts</h2>
-                </div>
-                <div class="side-content">
-                <ul class="posts-list">
-	      
-		      
-			      <li class="post">
-			        <a href="15663678647312.html">Docker学习</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15662718181666.html">Android GRPC接入</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15662693410122.html">Docker搭建Maven私服</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15620327900428.html">Xposed开发</a>
-			      </li>
-		     
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		   
-		  		</ul>
-                </div>
-              </div>
-        </div><!-- sidebar -->
-      </div><!-- hide for small -->
-</div><!-- large 4 -->
-
-</div><!-- row -->
-
- <div class="page-bottom clearfix">
-  <div class="row">
-   <p class="copyright">Copyright &copy; 2015
-Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
-Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
-  </div>
-</div>
-
-        </section>
-      </div>
-    </div>
+	</div>
+</div>        </div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a> &nbsp;&nbsp; 
+Theme by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+      </footer>
+		</div>
+	</div>
 
   
     
 
-    <script src="asset/js/foundation.min.js"></script>
-    <script>
-      $(document).foundation();
-      function fixSidebarHeight(){
-        var w1 = $('.markdown-body').height();
-          var w2 = $('#sidebar').height();
-          if (w1 > w2) { $('#sidebar').height(w1); };
-      }
-      $(function(){
-        fixSidebarHeight();
-      })
-      $(window).load(function(){
-          fixSidebarHeight();
-      });
-     
-    </script>
-
-    
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
-
-  </body>
+</body>
 </html>

@@ -1,144 +1,126 @@
-<!doctype html>
-<html class="no-js" lang="en">
-  <head>
-    <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>
-    
-  Android-事件分发机制源码攻略 - MagicalRice的Blog
+<!DOCTYPE HTML>
+<html>
+<head>
+	<meta charset="utf-8">
+	<title>  
+	  
+  	Android-事件分发机制源码攻略 - MagicalRice的Blog
+  	
+	</title>
+
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+
+	<link href="asset/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<link href="asset/stylesheets/font-awesome.min.css" media="screen, projection" rel="stylesheet" type="text/css">
+	<script src="asset/javascripts/jquery.min.js"></script>
+	<script src="asset/highlightjs/highlight.pack.js"></script>
+	<link href="asset/highlightjs/styles/solarized_dark.css" media="screen, projection" rel="stylesheet" type="text/css">
+<script>hljs.initHighlightingOnLoad();</script>
+
+	<!--[if lt IE 9]><script src="asset/javascripts/html5.js"></script><![endif]-->
+	<!-- <link href='http://fonts.googleapis.com/css?family=Nunito:400,300,700' rel='stylesheet' type='text/css'> -->
+	<style type="text/css">
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Nunito-Light'), url(asset/font/1TiHc9yag0wq3lDO9cw0voX0hVgzZQUfRDuZrPvH3D8.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Nunito-Regular'), url(asset/font/6TbRXKWJjpj6V2v_WyRbMX-_kf6ByYO6CLYdB4HQE-Y.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+/* latin */
+@font-face {
+  font-family: 'Nunito';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Nunito-Bold'), url(asset/font/TttUCfJ272GBgSKaOaD7KoX0hVgzZQUfRDuZrPvH3D8.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02C6, U+02DA, U+02DC, U+2000-206F, U+2074, U+20AC, U+2212, U+2215, U+E0FF, U+EFFD, U+F000;
+}
+	</style>
+	
+	<style type="text/css">
+	.container .left-col{ opacity: 1;}
+	#pagenavi a{ font-size: 1.3em;}
+	#pagenavi .next:before{ top: 3px;}
+	#pagenavi .prev:before{ top: 3px;}
+	.container .mid-col .mid-col-container #content .archives .title{ font-size: 1.5em;}
+	.container .mid-col .mid-col-container #content article{ padding: 15px 0px;}
+	#header .subtitle {
+		line-height: 1.2em;
+		padding-top: 8px;
+	}
+	article pre{ background: none; border: none; padding: 0;}
+	article .entry-content{text-align: left;}
+	.share-comment{ padding: 25px 0px; clear: both;}
+	hr{ margin: 20px 0px;border: 0; border-top:solid 1px #ddd;}
+	</style>
   
-  </title>
-  
-  
-  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
-    <link rel="stylesheet" href="asset/css/foundation.min.css" />
-    <link rel="stylesheet" href="asset/css/docs.css" />
-    <script src="asset/js/vendor/modernizr.js"></script>
-    <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
-<script type="text/javascript">
-  function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
-    document.getElementById('search_q').value = searchVal;
-    return true;
-  }
-</script>
-  </head>
-  <body class="antialiased hide-extras">
-    
-    <div class="marketing off-canvas-wrap" data-offcanvas>
-      <div class="inner-wrap">
+
+</head>
 
 
-<nav class="top-bar docs-bar hide-for-small" data-topbar>
+<body>
+	<div class="container">
+		<div class="left-col">
+			<div class="intrude-less">
+				<header id="header" class="inner">
+				 
+					
+					<h1><a href="index.html">MagicalRice的Blog</a></h1>
+					<p class="subtitle">技术博客</p>
+					<nav id="main-nav">
+						<ul class="main">
+						
+						  <li id=""><a target="self" href="index.html">Home</a></li>
+						
+						  <li id=""><a target="_self" href="archives.html">Archives</a></li>
+						
+						</ul>
+					</nav>
+
+					<nav id="sub-nav">
+						<div class="social">
 
 
-  <section class="top-bar-section">
-  <div class="row">
-      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
-        <ul id="main-menu" class="left">
-        
-        <li id=""><a target="self" href="index.html">Home</a></li>
-        
-        <li id=""><a target="_self" href="archives.html">Archives</a></li>
-        
-        </ul>
-
-        <ul class="right" id="search-wrap">
-          <li>
-<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
-    <input type="hidden" id="search_q" name="q" value="" />
-    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
-</form>
-</li>
-          </ul>
-      </div></div>
-  </div>
-  </section>
-
-</nav>
-
-        <nav class="tab-bar show-for-small">
-  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
-    <span> &nbsp; MagicalRice的Blog</span>
-  </a>
-</nav>
-
-<aside class="left-off-canvas-menu">
-      <ul class="off-canvas-list">
-        
-        <li><a target="self" href="index.html">Home</a></li>
-        
-        <li><a target="_self" href="archives.html">Archives</a></li>
-        
-
-    <li><label>Categories</label></li>
-
-        
-            <li><a href="Android.html">Android</a></li>
-        
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
-            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
-        
-            <li><a href="C++.html">C++</a></li>
-        
-            <li><a href="UI.html">UI</a></li>
-        
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
-        
-            <li><a href="Game.html">Game</a></li>
-        
-            <li><a href="Python.html">Python</a></li>
-        
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-         
-
-      </ul>
-    </aside>
-
-<a class="exit-off-canvas" href="#"></a>
 
 
-        <section id="main-content" role="main" class="scroll-container">
-        
-       
 
- <script type="text/javascript">
-  $(function(){
-    $('#menu_item_index').addClass('is_active');
-  });
-</script>
-<div class="row">
-  <div class="large-8 medium-8 columns">
-      <div class="markdown-body article-wrap">
-       <div class="article">
-          
-          <h1>Android-事件分发机制源码攻略</h1>
-     
-        <div class="read-more clearfix">
-          <span class="date">2017/11/2</span>
 
-          <span>posted in&nbsp;</span> 
-          
-              <span class="posted-in"><a href='Android.html'>Android</a></span>
-           
-         
-          <span class="comments">
-            
 
-            
-          </span>
 
-        </div>
-      </div><!-- article -->
 
-      <div class="article-content">
-      <h2 id="toc_0">前言</h2>
+
+
+
+
+								
+
+								<a class="rss" href="atom.xml" title="RSS">RSS</a>
+							
+						</div>
+					</nav>
+				</header>				
+			</div>
+		</div>	
+		<div class="mid-col">
+			<div class="mid-col-container"> <div id="content" class="inner">
+
+	<article class="post" itemscope itemtype="http://schema.org/BlogPosting">
+		<h1 class="title" itemprop="name">Android-事件分发机制源码攻略</h1>
+		<div class="entry-content" itemprop="articleBody">
+			<h2 id="toc_0">前言</h2>
 
 <p>android事件分发算是自定义View不可缺失的一部分，事件分发是指那一类跟屏幕交互的操作等事件，例如滑动，点击，长按这类。这些事件都是由摁下、移动、抬起等基本事件组成的。那事件分发是指当你点击了屏幕，这个事件是如何从Activity传递到真正处理这个事件的View上的过程。例如，我们在做ListView跟ViewPager嵌套的时候，既能左右滑动，又能上下滑动，这些事件是如何避免彼此间的冲突的。下面我会分三节来介绍这一原理。<br/><br/>
 首先，这次的源码分析是基于25.0.3版本进行的。</p>
@@ -164,7 +146,7 @@ View  </p>
 
 <p>上述三个类是主要的事件分发对象，后期的讨论也是集中在这三个类里面。这里有个点得提一下就是ViewGroup是View的子类。这些事件会在这三者的dispatchTouchEvent、onTouchEvent这两个方法里面传递，还有一个ViewGroup特有的onInterceptTouchEvent方法。下面给出以上提到的类以及方法之间的关系。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041696377769.png" alt="20171112151041696377769.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041696377769.png" alt="20171112151041696377769.png"/><figcaption>20171112151041696377769.png</figcaption></figure></p>
 
 <p>从这张图，我们可以看出，不同返回值，事件的分发方向不同，这里不做详细分析，这张图是否画得出来作为你对这次源码阅读的成绩。</p>
 
@@ -172,7 +154,7 @@ View  </p>
 
 <p><strong>Activity</strong></p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
@@ -189,7 +171,7 @@ View  </p>
 
 <p><strong>CusViewGroup</strong></p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
@@ -216,7 +198,7 @@ View  </p>
 
 <p><strong>View</strong></p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
@@ -235,7 +217,7 @@ View  </p>
 
 <p><strong>布局</strong></p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;com.example.coffeetime.cusviewdemo.CusLineaLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
@@ -254,7 +236,7 @@ View  </p>
 
 <h2 id="toc_4">结果</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041703651591.png" alt="20171112151041703651591.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041703651591.png" alt="20171112151041703651591.png"/><figcaption>20171112151041703651591.png</figcaption></figure></p>
 
 <blockquote>
 <p>ACTION_DOWN的值为0 <br/>
@@ -268,7 +250,7 @@ ACTION_MOVE的值为1</p>
 
 <p>从上述的结果，我们可以得出事件最先被拦截的地方是从Activity的dispatchTouchEvent方法开始，那我们的源码攻略也从这里开始。</p>
 
-<pre><code class="language-java"> /**
+<pre class="line-numbers"><code class="language-java"> /**
      * Called to process touch screen events.  You can override this to
      * intercept all touch screen events before they are dispatched to the
      * window.  Be sure to call this implementation for touch screen events
@@ -291,7 +273,7 @@ ACTION_MOVE的值为1</p>
 
 <p>这个方法首先判断事件类型，如果是ACTION_DOWN事件，则先执行onUserInteraction()方法；</p>
 
-<pre><code class="language-text">public void onUserInteraction() {
+<pre class="line-numbers"><code class="language-text">public void onUserInteraction() {
 }
 </code></pre>
 
@@ -301,12 +283,12 @@ ACTION_MOVE的值为1</p>
 
 <p>我们接着回到刚刚那个地方，判断完事件ACTION_DOWN事件之后，会执行getWindow().superDispatchTouchEvent(ev)这个方法，这个getWindow获取的是哪个Window呢，我们进去看看。</p>
 
-<pre><code class="language-java">public Window getWindow() {
+<pre class="line-numbers"><code class="language-java">public Window getWindow() {
     return mWindow;
 }
 </code></pre>
 
-<pre><code class="language-text">/**
+<pre class="line-numbers"><code class="language-text">/**
  * Abstract base class for a top-level window look and behavior policy.  An
  * instance of this class should be used as the top-level view added to the
  * window manager. It provides standard UI policies such as a background, title
@@ -321,7 +303,7 @@ public abstract class Window {}
 
 <p>通过这块注释，我们可以看出，window的实现类是phoneWindow。其实在Android里面很多都是可以通过阅读注释或者是官方文档去找出具体的实现类，不是只能依靠百度；好了，那我们可以直接进到phoneWindow类去看下superDispatchTouchEvent这个方法做了些什么</p>
 
-<pre><code class="language-java">   @Override
+<pre class="line-numbers"><code class="language-java">   @Override
     public boolean superDispatchTouchEvent(MotionEvent event) {
         return mDecor.superDispatchTouchEvent(event);
     }
@@ -331,13 +313,13 @@ public abstract class Window {}
 
 <p><strong>phoneWindow</strong></p>
 
-<pre><code class="language-text"> // This is the top-level view of the window, containing the window decor.
+<pre class="line-numbers"><code class="language-text"> // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
 </code></pre>
 
 <p><strong>DecorView</strong></p>
 
-<pre><code class="language-text">    public boolean superDispatchTouchEvent(MotionEvent event) {
+<pre class="line-numbers"><code class="language-text">    public boolean superDispatchTouchEvent(MotionEvent event) {
         return super.dispatchTouchEvent(event);
     }
 </code></pre>
@@ -348,7 +330,7 @@ public abstract class Window {}
 
 <p>在Activity层事件的传递过程如下图</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041706262125.png" alt="20171112151041706262125.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041706262125.png" alt="20171112151041706262125.png"/><figcaption>20171112151041706262125.png</figcaption></figure></p>
 
 <p>从Activity的dispatchTouchEvent获取事件经过PhoneWindow、DecorView再到最终的ViewGroup，这一层代码比较简单，没有比较难分析的，只是经过的类比较多，其实只要把握的主线，分析起来还是比较简单的。这一篇比较少，下一篇是ViewGroup的分析，由于ViewGroup的源码比较多，所以才拆开来写，不然太长了。</p>
 
@@ -361,7 +343,7 @@ public abstract class Window {}
 
 <p>大致就这两个逻辑，虽说比较粗略，不过，这对于接下来看源码就足够了，并且源码有比较多的注释，基本上大致的方向是可以弄懂了。</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         ... 
@@ -598,7 +580,7 @@ public abstract class Window {}
 
 <p>上面的dispatchTouchEvent返回值是由handle决定，我们先来看第一处第8行代码</p>
 
-<pre><code class="language-java"> boolean handled = false;
+<pre class="line-numbers"><code class="language-java"> boolean handled = false;
         if (onFilterTouchEventForSecurity(ev)) {
             final int action = ev.getAction();
             final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
@@ -617,7 +599,7 @@ public abstract class Window {}
 
 <p>这个onFilterTouchEventForSecurity方法如果返回false的话，基本上里面的代码都不用分析了，直接返回false。那我们进去看看这个方法做了什么。</p>
 
-<pre><code class="language-java">    /**
+<pre class="line-numbers"><code class="language-java">    /**
      * Filter the touch event to apply security policies.
      *
      * @param event The motion event to be filtered.
@@ -638,7 +620,7 @@ public abstract class Window {}
 
 <p>这是一个安全策略方面的过滤，我们来看下这两个变量FILTER_TOUCHES_WHEN_OBSCURED、MotionEvent.FLAG_WINDOW_IS_OBSCURED是什么意思</p>
 
-<pre><code class="language-text">    /**
+<pre class="line-numbers"><code class="language-text">    /**
      * Indicates that the view should filter touches when its window is obscured.
      * Refer to the class comments for more information about this security feature.
      * {@hide}
@@ -646,7 +628,7 @@ public abstract class Window {}
     static final int FILTER_TOUCHES_WHEN_OBSCURED = 0x00000400;
 </code></pre>
 
-<pre><code class="language-text">    /**
+<pre class="line-numbers"><code class="language-text">    /**
      * This flag indicates that the window that received this motion event is partly
      * or wholly obscured by another visible window above it.  This flag is set to true
      * even if the event did not directly pass through the obscured area.
@@ -662,7 +644,7 @@ public abstract class Window {}
 <p>从上面的代码注释可以看出来，这个View不能被其他的window遮挡住，这是谷歌的一个安全策略，避免被恶意程序误导用户或劫持触摸。<br/><br/>
 第二处handle的改变是在172行</p>
 
-<pre><code class="language-java">        if (mFirstTouchTarget == null) {
+<pre class="line-numbers"><code class="language-java">        if (mFirstTouchTarget == null) {
                // No touch targets so treat this as an ordinary view.
                handled = dispatchTransformedTouchEvent(ev, canceled, null,
                     TouchTarget.ALL_POINTER_IDS);
@@ -684,7 +666,7 @@ public abstract class Window {}
 
 <p>很明显handled的值又跟mFirstTouchTarget、alreadyDispatchedToNewTouchTarget这两个值有关，另外还跟dispatchTransformedTouchEvent（）这个方法有关，dispatchTransformedTouchEvent（）方法，我们留在后面分析，我们先来看看这两个值是在什么时候在哪里被改变的。</p>
 
-<pre><code class="language-java">         mLastTouchDownX = ev.getX();
+<pre class="line-numbers"><code class="language-java">         mLastTouchDownX = ev.getX();
          mLastTouchDownY = ev.getY();
          //给mFirstTouchTarget赋值，该事件已经被子View确认处理了
          newTouchTarget = addTouchTarget(child, idBitsToAssign);
@@ -696,7 +678,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>好了，如果是这样，我们再从上面的第13行开始分析。</p>
 
-<pre><code class="language-text"> // Handle an initial down.
+<pre class="line-numbers"><code class="language-text"> // Handle an initial down.
             if (actionMasked == MotionEvent.ACTION_DOWN) {
                 // Throw away all previous state when starting a new touch gesture.
                 // The framework may have dropped the up or cancel event for the previous
@@ -709,7 +691,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>这里先对该事件进行判断，如果是ACTION_DOWN事件会进到这个方法里面，做一些处理。我们来看下这两个方法都做了哪些。</p>
 
-<pre><code class="language-text">    /**
+<pre class="line-numbers"><code class="language-text">    /**
      * Cancels and clears all touch targets.
      */
     private void cancelAndClearTouchTargets(MotionEvent event) {
@@ -741,7 +723,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>从这个方法的名字可以看出来，这个方法做了两件事取消跟清除TouchTarget，首先是取消，这里的取消是指分发ACTION_CANCEL事件，在我上面注释代码的第18行，dispatchTransformedTouchEvent（）这个方法的第二个参数为true，这个值会在更改事件为ACTION_CANCEL，并分发给上次处理事件的View。这个分发事件的方法，我们留在后面分析，现在继续分析清除。</p>
 
-<pre><code class="language-text">    /**
+<pre class="line-numbers"><code class="language-text">    /**
      * Clears all touch targets.
      */
     private void clearTouchTargets() {
@@ -759,7 +741,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>这个方法很简单了，就对TouchTarget的next是回收，最后再把mFirstTouchTarget置null。好了，这两个方法分析完，我们再回到刚刚的那个地方，看到还有一个方法resetTouchState（）</p>
 
-<pre><code class="language-text">    /**
+<pre class="line-numbers"><code class="language-text">    /**
      * Resets all touch state in preparation for a new cycle.
      */
     private void resetTouchState() {
@@ -772,7 +754,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>这个方法除了clearTouchTargets（）、resetCancelNextUpFlag()这两个方法外，还对 mGroupFlags 这个标志做一个拦截方面的修改，这个标志可以让子View请求父布局不要去拦截某个事件（ACTION_DOWN除外），并且可通过getParent().requestDisallowInterceptTouchEvent()去修改这个值。</p>
 
-<pre><code class="language-text">  // Check for interception.
+<pre class="line-numbers"><code class="language-text">  // Check for interception.
             final boolean intercepted;
             //子View唯一一个可以用来控制父类事件传递
             //只有ACTION_DOWN事件跟mFirstTouchTarget不为空的情况，后面的讨论大多是围绕着mFirstTouchTarget来进行的
@@ -800,7 +782,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>按照我上面提供源码走下来，在87行处有着下面这个方法，这个方法主要是将子View按照Z轴的大小排序。</p>
 
-<pre><code class="language-text">  ArrayList&lt;View&gt; buildOrderedChildList() {
+<pre class="line-numbers"><code class="language-text">  ArrayList&lt;View&gt; buildOrderedChildList() {
         final int childrenCount = mChildrenCount;
         if (childrenCount &lt;= 1 || !hasChildWithZ()) return null;
 
@@ -834,7 +816,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>其中getAndVerifyPreorderedIndex只是对View的下标进行再次确定。这里面提到一个自定义排序的问题，正常情况的布局排序是根据xml的顺序或者addView的顺序决定的。当然google也提供了setChildrenDrawingOrderEnabled（），getChildDrawingOrder（）这两个方法进行自定义排序，有需求的可以去自行了解下，我们就不深入探讨了。</p>
 
-<pre><code class="language-text">  if (childWithAccessibilityFocus != null) {
+<pre class="line-numbers"><code class="language-text">  if (childWithAccessibilityFocus != null) {
         if (childWithAccessibilityFocus != child) {
               continue;
         }
@@ -845,7 +827,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>现在是取到了所有的子View，那么接下来就是筛选哪些View可以处理了。首先是先获取到哪个是获取焦点的View，并且这个View是否在这些子View里面。如果找到了就走到下一步。</p>
 
-<pre><code class="language-text">//判断这个View是否具备处理的条件
+<pre class="line-numbers"><code class="language-text">//判断这个View是否具备处理的条件
 if (!canViewReceivePointerEvents(child)
         || !isTransformedTouchPointInView(x, y, child, null)) {
     ev.setTargetAccessibilityFocus(false);
@@ -855,7 +837,7 @@ if (!canViewReceivePointerEvents(child)
 
 <p><strong>我们来看看第一个判断方法</strong></p>
 
-<pre><code class="language-text">  /**
+<pre class="line-numbers"><code class="language-text">  /**
      * Returns true if a child view can receive pointer events.
      * @hide
      */
@@ -867,7 +849,7 @@ if (!canViewReceivePointerEvents(child)
 
 <p><strong>第二个方法</strong></p>
 
-<pre><code class="language-text">/**
+<pre class="line-numbers"><code class="language-text">/**
  * Returns true if a child view contains the specified point when transformed
  * into its coordinate space.
  * Child must not be null.
@@ -889,7 +871,7 @@ protected boolean isTransformedTouchPointInView(float x, float y, View child,
 
 <p>可见或者是正在执行动画的，并且位置是落在这个View的范围的。满足这些条件外，再判断这个View是否已经是在mFirstTouchTarget的子View里面了，如果是的话，也是结束循环了。</p>
 
-<pre><code class="language-text">newTouchTarget = getTouchTarget(child);
+<pre class="line-numbers"><code class="language-text">newTouchTarget = getTouchTarget(child);
 if (newTouchTarget != null) {
     // Child is already receiving touch within its bounds.
     // Give it the new pointer in addition to the ones it is handling.
@@ -900,7 +882,7 @@ if (newTouchTarget != null) {
 
 <p>以上条件都满足的话，我们就进行分发事件的方法，我们来看下这个方法做了什么操作。</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
      * Transforms a motion event into the coordinate space of a particular child view,
      * filters out irrelevant pointer ids, and overrides its action if necessary.
      * If child is null, assumes the MotionEvent will be sent to this ViewGroup instead.
@@ -980,7 +962,7 @@ if (newTouchTarget != null) {
 
 <p>这个方法一看就有点长了，慌不慌~其实这个方法就做了两件事，第一件事，就是如果cancel为true的话，更改这个事件为ACTION_CANCEL；第二件事，就是child为null的话，调用super.dispatchTouchEvent(event);child不为空的话，就调用super.dispatchTouchEvent(event);好吧，其实这个方法，只需要看上面那部分就差不多了。</p>
 
-<pre><code class="language-text">...
+<pre class="line-numbers"><code class="language-text">...
 if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
             event.setAction(MotionEvent.ACTION_CANCEL);
             if (child == null) {
@@ -998,7 +980,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>如果dispatchTransformedTouchEvent方法返回true的话，就代表了这个事件已经被子View消费了，接下来关键的方法就是调用addTouchTarget（）这个方法，给mFirstTouchTarget赋值。</p>
 
-<pre><code class="language-text"> /**
+<pre class="line-numbers"><code class="language-text"> /**
      * Adds a touch target for specified child to the beginning of the list.
      * Assumes the target child is not already present.
      */
@@ -1012,7 +994,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>如果dispatchTransformedTouchEvent方法返回false的话，那么就代表这个事件没有View消费，那就是只能自己消费了</p>
 
-<pre><code class="language-text"> if (mFirstTouchTarget == null) {
+<pre class="line-numbers"><code class="language-text"> if (mFirstTouchTarget == null) {
            // No touch targets so treat this as an ordinary view.
            handled = dispatchTransformedTouchEvent(ev, canceled, null,
                    ouchTarget.ALL_POINTER_IDS);
@@ -1030,7 +1012,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>接着我们再来说下除了ACTION_DOWN以外的事件传递情况，从上面的demo我们可以得知，消费了ACTION_DOWN事件，后续的事件也将给这个View消费。也即是mFirstTouchTarget != null的情况。</p>
 
-<pre><code class="language-java">// Dispatch to touch targets, excluding the new touch target if we already
+<pre class="line-numbers"><code class="language-java">// Dispatch to touch targets, excluding the new touch target if we already
                 // dispatched to it.  Cancel touch targets if necessary.
                 //处理除了ACTION_DOWN以外的事件
                 TouchTarget predecessor = null;
@@ -1072,219 +1054,32 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>下面是整个dispatchTouchEvent()里面关键方法的调用流程，可以方便理解。</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041743495516.png" alt="20171112151041743495516.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171112151041743495516.png" alt="20171112151041743495516.png"/><figcaption>20171112151041743495516.png</figcaption></figure></p>
 
 <p>好了，整个ViewGroup层dispatchTouchEvent传递到View层的dispatchTouchEvent或者传递给super.dispatchTouchEvent(event)，下一节将对View层的源码进行解析。</p>
 
+		</div>
+	</article>
+	<div class="share-comment">
+	 
 
-    
+	  
 
-      </div>
+	  
 
-      <div class="row">
-        <div class="large-6 columns">
-        <p class="text-left" style="padding:15px 0px;">
-      
-          <a href="15561207872718.html" 
-          title="Previous Post: Android-自定义View播放Gif动画">&laquo; Android-自定义View播放Gif动画</a>
-      
-        </p>
-        </div>
-        <div class="large-6 columns">
-      <p class="text-right" style="padding:15px 0px;">
-      
-          <a  href="15561207872628.html" 
-          title="Next Post: Android-自定义曲线路径动画框架">Android-自定义曲线路径动画框架 &raquo;</a>
-      
-      </p>
-        </div>
-      </div>
-      <div class="comments-wrap">
-        <div class="share-comments">
-          
-
-          
-
-          
-        </div>
-      </div>
-    </div><!-- article-wrap -->
-  </div><!-- large 8 -->
-
-
-
-
- <div class="large-4 medium-4 columns">
-  <div class="hide-for-small">
-    <div id="sidebar" class="sidebar">
-          <div id="site-info" class="site-info">
-            
-                <h1>MagicalRice的Blog</h1>
-                <div class="site-des">技术博客</div>
-                <div class="social">
-
-
-
-
-
-
-
-
-
-
-
-  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
-                
-              	 </div>
-          	</div>
-
-             
-
-              <div id="site-categories" class="side-item ">
-                <div class="side-header">
-                  <h2>Categories</h2>
-                </div>
-                <div class="side-content">
-
-      	<p class="cat-list">
-        
-            <a href="Android.html"><strong>Android</strong></a>
-        
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
-            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
-        
-            <a href="C++.html"><strong>C++</strong></a>
-        
-            <a href="UI.html"><strong>UI</strong></a>
-        
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
-        
-            <a href="Game.html"><strong>Game</strong></a>
-        
-            <a href="Python.html"><strong>Python</strong></a>
-        
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-         
-        </p>
-
-
-                </div>
-              </div>
-
-              <div id="site-categories" class="side-item">
-                <div class="side-header">
-                  <h2>Recent Posts</h2>
-                </div>
-                <div class="side-content">
-                <ul class="posts-list">
-	      
-		      
-			      <li class="post">
-			        <a href="15663678647312.html">Docker学习</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15662718181666.html">Android GRPC接入</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15662693410122.html">Docker搭建Maven私服</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15639522586909.html">Kotlin为序列化类生成serialVersionUID</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="15620327900428.html">Xposed开发</a>
-			      </li>
-		     
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		  
-		      
-		   
-		  		</ul>
-                </div>
-              </div>
-        </div><!-- sidebar -->
-      </div><!-- hide for small -->
-</div><!-- large 4 -->
-
-</div><!-- row -->
-
- <div class="page-bottom clearfix">
-  <div class="row">
-   <p class="copyright">Copyright &copy; 2015
-Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
-Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
-  </div>
-</div>
-
-        </section>
-      </div>
-    </div>
+	</div>
+</div>        </div>
+			<footer id="footer" class="inner">Copyright &copy; 2014
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a> &nbsp;&nbsp; 
+Theme by <a href="http://shashankmehta.in/archive/2012/greyshade.html">Shashank Mehta</a>
+      </footer>
+		</div>
+	</div>
 
   
     
 
-    <script src="asset/js/foundation.min.js"></script>
-    <script>
-      $(document).foundation();
-      function fixSidebarHeight(){
-        var w1 = $('.markdown-body').height();
-          var w2 = $('#sidebar').height();
-          if (w1 > w2) { $('#sidebar').height(w1); };
-      }
-      $(function(){
-        fixSidebarHeight();
-      })
-      $(window).load(function(){
-          fixSidebarHeight();
-      });
-     
-    </script>
-
-    
 <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
-
-  </body>
+</body>
 </html>
