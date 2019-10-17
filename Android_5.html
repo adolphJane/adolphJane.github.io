@@ -118,6 +118,351 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207871244.html">
+                
+                  <h1>Android-超炫动画库</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><a href="https://github.com/Rkhcy/TransitionNote">源码地址</a><br/>
+<a href="https://github.com/android/platform_frameworks_support">Google Demo</a></p>
+
+<h2 id="toc_0">概述</h2>
+
+<p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/><figcaption>20171031150938495136462.gif</figcaption></figure></p>
+
+<p>还有github上很火的<a href="https://github.com/nickbutcher/plaid">plaid</a></p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/><figcaption>20171031150938501024243.gif</figcaption></figure></p>
+
+<p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。<br/>
+先看官网的一张关系图</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/><figcaption>20171031150938504260266.jpg</figcaption></figure></p>
+
+<p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
+
+<h2 id="toc_1">Scene</h2>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/><figcaption>20171031150938508078450.png</figcaption></figure></p>
+
+<p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法<br/>
+<code>getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code><br/><br/>
+比如：  </p>
+
+<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
+mScene1 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene1,getContext());
+</code></pre>
+
+<p>也可以直接<code>new Scene(ViewGroup sceneRoot, View layout)</code></p>
+
+<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
+View view1 = inflater.inflate(R.layout.scene1,container,false);
+mScene0 = new Scene(mSceneRoot,view0);
+mScene1 = new Scene(mSceneRoot,view1);
+</code></pre>
+
+<p>两种方式都需要传SceneRoot，即该场景的根节点。</p>
+
+<h2 id="toc_2">Transition</h2>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/><figcaption>20171031150938533375766.jpg</figcaption></figure></p>
+
+<p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：<br/>
+res/transition/fade_transition.xml</p>
+
+<p><code>&lt;fade xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;/&gt;</code></p>
+
+<p>然后在代码中：</p>
+
+<pre class="line-numbers"><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
+</code></pre>
+
+<p>或者直接在代码中：</p>
+
+<p><code>Transition mFadeTransition = new Fade();</code></p>
+
+<h2 id="toc_3">TransitionManager</h2>
+
+<p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/><figcaption>20171031150938549730496.gif</figcaption></figure></p>
+
+<p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
+
+<h2 id="toc_4">常用API</h2>
+
+<p>有时候我们只想改变当前已展示的视图层级中View的状态，可以通过beginDelayedTransition实现，下面列举系统内置的Transition的使用。</p>
+
+<h3 id="toc_5">AutoTransition</h3>
+
+<p>AutoTransition默认的动画效果，对应xml tag为autoTransition<br/>
+其实是以下几个动画组合顺序执行：</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:transitionOrdering=&quot;sequential&quot;&gt;
+    &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
+    &lt;changeBounds/&gt;
+    &lt;fade android:fadingMode=&quot;fade_in&quot;/&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>在代码中使用：</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
+if (mTextView.getVisibility() != View.VISIBLE){
+    mTextView.setVisibility(View.VISIBLE);
+} else {
+    mTextView.setVisibility(View.GONE);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/><figcaption>20171031150938579060510.gif</figcaption></figure></p>
+
+<h3 id="toc_6">ChangeBounds</h3>
+
+<p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画。</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
+FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)mTarget.getLayoutParams();
+if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
+    lp.gravity = Gravity.BOTTOM | Gravity.END;
+} else {
+    lp.gravity = Gravity.TOP | Gravity.START;
+}
+mTarget.setLayoutParams(lp);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/><figcaption>20171031150938627779470.gif</figcaption></figure></p>
+
+<h3 id="toc_7">ChangeClipBounds</h3>
+
+<p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
+
+<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
+TransitionManager.beginDelayedTransition(mRoot,new ChangeClipBounds());
+if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
+    ViewCompat.setClipBounds(mImageView,null);
+} else {
+    ViewCompat.setClipBounds(mImageView,BOUNDS);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/><figcaption>20171031150938645594705.gif</figcaption></figure></p>
+
+<h3 id="toc_8">ChangeImageTransform</h3>
+
+<p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
+mImageView.setScaleType(ImageView.ScaleType.xxx);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/><figcaption>20171031150938655679728.gif</figcaption></figure></p>
+
+<h3 id="toc_9">ChangeScroll</h3>
+
+<p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
+mTarget.scrollBy(-100,-100);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/><figcaption>20171031150938665356244.gif</figcaption></figure></p>
+
+<h3 id="toc_10">ChangeTransform</h3>
+
+<p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
+if (mContainer2.getChildCount() &gt; 0){
+    mContainer2.removeAllViews();
+    showRedSquare(mContainer1);
+} else {
+    mContainer1.removeAllViews();
+    showRedSquare(mContainer2);
+    mContainer2.getChildAt(0).setRotation(45);
+}
+
+private void showRedSquare(FrameLayout container){
+    final View view = LayoutInflater.from(getContext())
+                .inflate(R.layout.red_square,container,false);
+    container.addView(view);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/><figcaption>20171031150938690499587.gif</figcaption></figure></p>
+
+<h3 id="toc_11">Explode</h3>
+
+<p>对应xml tag为explode，作用对象：View的Visibility</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews){
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/><figcaption>20171031150938702666553.gif</figcaption></figure></p>
+
+<h3 id="toc_12">Fade</h3>
+
+<p>对应xml tag为fade，作用对象：View的Visibility<br/><br/>
+可以在初始化是指定IN或者OUT分别对应淡入和淡出，若不指定默认为淡入淡出效果</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews){
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/><figcaption>20171031150938727625794.gif</figcaption></figure></p>
+
+<h3 id="toc_13">Slide</h3>
+
+<p>对应xml tag为slide，作用对象：View的Visibility</p>
+
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews){
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/><figcaption>20171031150938732543238.gif</figcaption></figure></p>
+
+<h3 id="toc_14">TransitionSet</h3>
+
+<p>对应xml tag为transitionSet<br/><br/>
+可以在代码中创建transitionSet如：  </p>
+
+<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
+mTransition.addTransition(new ChangeImageTransform());
+mTransition.addTransition(new ChangeTransform());
+TransitionManager.beginDelayedTransition(mOUterFrame,mTransition);
+if (mInnerFrame.getChildCount() &gt; 0){
+    mInnerFrame.removeAllViews();
+    addImageView(mOUterFrame,ImageView.ScaleType.CENTER_CROP,mPhotoSize);
+} else {
+    mOuterFrame.removeViewAt(1);
+    addImageView(mInnerFrame,ImageView.ScaleType.FIT_XY,FrameLayout.LayoutParams.MATCH_PARENT);
+}
+</code></pre>
+
+<p>也可以通过加载xml布局创建transitionSet：<br/><br/>
+xml布局长这样：  </p>
+
+<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:transitionOrdering=&quot;together&quot;&gt;
+    &lt;changeImageTransform/&gt;
+    &lt;changeTransform/&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>通过transitionOrdering属性设置动画执行的顺序，together表示同时执行，sequential表示顺序执行，在代码中可以调用TransitionSet的<code>setOrdering(int)</code>方法，属性值传ORDERING_SEQUENTIAL或者ORDERING_TOGETHER<br/><br/>
+在代码中：  </p>
+
+<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+TransitionManager.beginDelayedTransition(mOuterFrame,mTransition);
+if (mInnerFrame.getChildCount() &gt; 0){
+    mInnerFrame.removeAllViews();
+    addImageView(mOUterFrame,ImageView.ScaleType.CENTER_CROP,mPhotoSize);
+} else {
+    mOuterFrame.removeViewAt(1);
+    addImageView(mInnerFrame,ImageView.ScaleType.FIT_XY,FrameLayout.LayoutParams.MATCH_PARENT);
+}
+</code></pre>
+
+<p>这里结合changeImageTransform和changeTransform，效果如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/><figcaption>20171031150938791428154.gif</figcaption></figure></p>
+
+<h3 id="toc_15">PathMotion</h3>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/><figcaption>2017103115093879453435.png</figcaption></figure></p>
+
+<p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
+
+<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
+TransitionManager.beginDelayedTransition(mRoot,mTransition);
+FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
+if ((lp.gravity &amp; Gravity.START) == START) {
+    lp.gravity = Gravity.END | Gravity.BOTTOM;
+} else {
+    lp.gravity = Gravity.START | Gravity.TOP;
+}
+mTarget.setLayoutParams(lp);
+</code></pre>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/><figcaption>20171031150938816788360.gif</figcaption></figure></p>
+
+<p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/><figcaption>20171031150938819673207.jpg</figcaption></figure></p>
+
+<h3 id="toc_16">自定义Transition</h3>
+
+<p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
+
+<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
+    @Override
+    public void captureStartValues(TransitionValues values){}
+    @Override
+    public void captureEndValues(TransitionValues values){}
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot,TransitionValues startValues,TransitionValues endValues){}
+}
+</code></pre>
+
+<p>其工作原理是在captureStartValues和captureEndValues中分别记录View的属性值，官网建议确保属性值不冲突，属性值的命名格式参考：<br/><br/>
+package_name:transition_name:property_name<br/><br/>
+在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：  </p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/><figcaption>2017103115093883857329.gif</figcaption></figure></p>
+
+<p>在两个Scene中使用自定义过渡动画，效果如下：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/><figcaption>20171031150938841128073.gif</figcaption></figure></p>
+
+<h2 id="toc_17">Note</h2>
+
+<ul>
+<li>Android 版本在4.0(API Level 14)到4.4.2(API Level 19)使用Android Support Library’s</li>
+<li>对于 SurfaceView可能不起效果，因为SurfaceView的实例是在非UI线程更新的，因此会造成和其他视图动画不同步。</li>
+<li>某些特定的转换类型在应用到TextureView时可能不会产生所需的动画效果。</li>
+<li>继承自AdapterView的如ListView，与该框架不兼容。</li>
+<li>不要对包含文本的视图的大小进行动画</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/9/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207871208.html">
                 
                   <h1>Android-自己封装DialogFragment</h1>
@@ -4523,801 +4868,6 @@ AIDL、Messenger、Binder、多进程、动画、滑动冲突、自定义View、
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207870883.html">
-                
-                  <h1>Android学习目录</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981318733039.png" alt="20171105150981318733039.png"/><figcaption>20171105150981318733039.png</figcaption></figure></p>
-
-<h2 id="toc_0">基础知识</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981323655802.jpg" alt="20171105150981323655802.jpg"/><figcaption>20171105150981323655802.jpg</figcaption></figure></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098132948858.jpg" alt="2017110515098132948858.jpg"/><figcaption>2017110515098132948858.jpg</figcaption></figure></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098133212830.jpg" alt="2017110515098133212830.jpg"/><figcaption>2017110515098133212830.jpg</figcaption></figure></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981334056897.jpg" alt="20171105150981334056897.jpg"/><figcaption>20171105150981334056897.jpg</figcaption></figure></p>
-
-<p>{% post_link android-learning-path Android学习路线 %}  </p>
-
-<p>{% post_link android-study Android学习资源 %}</p>
-
-<h3 id="toc_1">Java基础</h3>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981320969279.jpg" alt="20171105150981320969279.jpg"/><figcaption>20171105150981320969279.jpg</figcaption></figure></p>
-
-<h4 id="toc_2">Java字符串(String、StringBuilder、StringBuffer)</h4>
-
-<h4 id="toc_3">Java线程池(newFixedThreadPool、newSingleThreadExecutor、newCacheThreadPool)</h4>
-
-<ul>
-<li><p><code>newFixedThreadPool</code>：newFixedThreadPool,创建固定大小的线程池，poolCoreSize和maxPoolSize 相等，到达coreSize,则将新的任务放到缓存队列，有线程执行完毕，直接去取。</p></li>
-<li><p><code>newSingleThreadExecutor</code>：newSingleThreadExecutor,创建一个单线程的线程池，核心池的大小和最大池大小都为1.</p></li>
-<li><p><code>newCacheThreadPool</code>：newCacheThreadPool,无大小限制的线程池，提交一个任务就创建一个线程执行。</p></li>
-</ul>
-
-<h4 id="toc_4">Java集合</h4>
-
-<p><strong>Collection</strong>:</p>
-
-<ul>
-<li>List:
-<ul>
-<li>LinkedList</li>
-<li>ArrayList</li>
-<li>Vector</li>
-</ul></li>
-<li>Set
-<ul>
-<li>HashSet</li>
-<li>TreeSet</li>
-</ul></li>
-</ul>
-
-<p><strong>Map</strong>:</p>
-
-<ul>
-<li>HashMap</li>
-<li>TreeMap</li>
-<li>HashTable</li>
-</ul>
-
-<h4 id="toc_5">Java内存模型</h4>
-
-<p>Java 内存模型这一块非常重要，因为它涉及到我们程序的性能，我们需要知道，内存是如何分配的，成员变量、静态变量、局部变量、对象等各自分配到哪一个区：栈内存、堆内存</p>
-
-<h3 id="toc_6">数据结构</h3>
-
-<h3 id="toc_7">面向对象思想</h3>
-
-<p>OOP的的三大特性：封装、继承、多态。</p>
-
-<h3 id="toc_8">设计模式</h3>
-
-<h4 id="toc_9">程序设计6大原则</h4>
-
-<ul>
-<li>单一职责原则</li>
-<li>里氏替换原则</li>
-<li>依赖倒置原则</li>
-<li>接口隔离原则</li>
-<li>迪米特法则</li>
-<li>开闭原则</li>
-</ul>
-
-<h3 id="toc_10">Android Studio</h3>
-
-<p>{% post_link android-studio-plugin Android Studio插件 %}  </p>
-
-<p>{% post_link android-studio-keywords Android Studio快捷键 %}</p>
-
-<h3 id="toc_11">Android SDK</h3>
-
-<h3 id="toc_12">Activity</h3>
-
-<p>{% post_link android-activity-launcher Android-启动Acivity的工作流程 %}</p>
-
-<h3 id="toc_13">Service</h3>
-
-<h3 id="toc_14">BroadcastReceiver</h3>
-
-<h3 id="toc_15">ContentProvider</h3>
-
-<h3 id="toc_16">StatusBar</h3>
-
-<p>{% post_link android-statusbar Android-StatusBar详细学习 %}</p>
-
-<h3 id="toc_17">Fragment</h3>
-
-<h4 id="toc_18">DialogFragment</h4>
-
-<p>{% post_link android-dialogfragment Android-DialogFragment详细学习 %}</p>
-
-<h2 id="toc_19">UI</h2>
-
-<p>{% post_link android-xml Android-XML参数详细了解 %}</p>
-
-<h3 id="toc_20">Layout</h3>
-
-<p>{% post_link android-layout Android-Layout详细学习 %}</p>
-
-<h4 id="toc_21">FrameLayout</h4>
-
-<h4 id="toc_22">LinearLayout</h4>
-
-<h4 id="toc_23">TableLayout</h4>
-
-<h4 id="toc_24">GridLayout</h4>
-
-<h4 id="toc_25">RelativeLayout</h4>
-
-<h4 id="toc_26">DrawerLayout</h4>
-
-<h4 id="toc_27">SlidingPaneLayout</h4>
-
-<h4 id="toc_28">CoordinatorLayout</h4>
-
-<p>{% post_link android-coordinatorLayout Android-CoordinatorLayout %}</p>
-
-<h3 id="toc_29">View</h3>
-
-<p>{% post_link android-view-workflow Android-View的工作流程 %}</p>
-
-<h4 id="toc_30">Widgets</h4>
-
-<h5 id="toc_31">TextView</h5>
-
-<h5 id="toc_32">EditText</h5>
-
-<p>{% post_link android-edittext Android-EditText详细学习 %}  </p>
-
-<p>{% post_link android-windowSoftInputMode Android-WindowSoftInputMode详细学习 %}  </p>
-
-<h5 id="toc_33">Button</h5>
-
-<h5 id="toc_34">RadioButton</h5>
-
-<h5 id="toc_35">CheckBox</h5>
-
-<h5 id="toc_36">Switch</h5>
-
-<h5 id="toc_37">ToggleButton</h5>
-
-<h5 id="toc_38">ImageButton</h5>
-
-<h5 id="toc_39">ImageView</h5>
-
-<p>{% post_link android-imageview Android-ImageView详细学习 %}</p>
-
-<h5 id="toc_40">ProgressBar</h5>
-
-<h5 id="toc_41">SeekBar</h5>
-
-<h5 id="toc_42">RatingBar</h5>
-
-<h5 id="toc_43">Spinner</h5>
-
-<h5 id="toc_44">WebView</h5>
-
-<h4 id="toc_45">Containers</h4>
-
-<h5 id="toc_46">RadioGroup</h5>
-
-<h5 id="toc_47">ListView</h5>
-
-<h5 id="toc_48">GridView</h5>
-
-<h5 id="toc_49">ExpandableListView</h5>
-
-<h5 id="toc_50">ScrollVeiw</h5>
-
-<h5 id="toc_51">TabHost</h5>
-
-<h5 id="toc_52">SlidingDrawer</h5>
-
-<h5 id="toc_53">Gallery</h5>
-
-<h5 id="toc_54">VideoView</h5>
-
-<h5 id="toc_55">DialerFilter</h5>
-
-<h5 id="toc_56">RecyclerView</h5>
-
-<p>{% post_link android-recyclerview Android-RecyclerView详细学习 %}  </p>
-
-<h5 id="toc_57">CardView</h5>
-
-<h5 id="toc_58">PopuWindow</h5>
-
-<p>{% post_link android-popupwindow Android-PopupWindow详细学习 %}</p>
-
-<h5 id="toc_59">DialogFragment</h5>
-
-<h4 id="toc_60">Date&amp;Time</h4>
-
-<h5 id="toc_61">TextClock</h5>
-
-<h5 id="toc_62">AnalogClock</h5>
-
-<h5 id="toc_63">Chronometer</h5>
-
-<h5 id="toc_64">DatePicker</h5>
-
-<h5 id="toc_65">TimePicker</h5>
-
-<h5 id="toc_66">CalendarView</h5>
-
-<h4 id="toc_67">Expert</h4>
-
-<h5 id="toc_68">Space</h5>
-
-<h5 id="toc_69">CheckedTextView</h5>
-
-<h5 id="toc_70">QuickContactBadge</h5>
-
-<h5 id="toc_71">ExtractEditText</h5>
-
-<h5 id="toc_72">AutoCompleteTextView</h5>
-
-<h5 id="toc_73">MultiAutoCompleteText</h5>
-
-<h5 id="toc_74">NumberPicker</h5>
-
-<h5 id="toc_75">ZoomButton</h5>
-
-<h5 id="toc_76">ZoomController</h5>
-
-<h5 id="toc_77">GestureOverlayView</h5>
-
-<h5 id="toc_78">SurfaceView</h5>
-
-<h5 id="toc_79">TexttureView</h5>
-
-<h5 id="toc_80">StackView</h5>
-
-<h5 id="toc_81">ViewStub</h5>
-
-<p>{% post_link android-viewstub Android-ViewStub详细学习 %}</p>
-
-<h5 id="toc_82">ViewAnimator</h5>
-
-<h5 id="toc_83">ViewFlipper</h5>
-
-<h5 id="toc_84">ViewSwitcher</h5>
-
-<h5 id="toc_85">ImageSwitcher</h5>
-
-<h5 id="toc_86">TextSwitcher</h5>
-
-<h5 id="toc_87">AdapterViewFlipper</h5>
-
-<h5 id="toc_88">ViewPager</h5>
-
-<p>{% post_link android-viewpager Android-Viewpager详细学习 %}</p>
-
-<h4 id="toc_89">Custom</h4>
-
-<h5 id="toc_90">include</h5>
-
-<h5 id="toc_91">fragment</h5>
-
-<h5 id="toc_92">requestFocus</h5>
-
-<h3 id="toc_93">Custom View</h3>
-
-<h4 id="toc_94">extend system View</h4>
-
-<h4 id="toc_95">combination View</h4>
-
-<h4 id="toc_96">extend View</h4>
-
-<p>{% post_link android-view Android-View详细学习 %}  </p>
-
-<p>{% post_link android-draw Android自定义控件——绘图 %}  </p>
-
-<h5 id="toc_97">ViewTreeObserver</h5>
-
-<p>{% post_link android-getViewTreeObserver Android-getViewTreeObserver() %}</p>
-
-<h5 id="toc_98">ColorFilter</h5>
-
-<p>{% post_link android-colorfilter Android-ColorFilter详细学习 %}</p>
-
-<h5 id="toc_99">Xfermode</h5>
-
-<p>{% post_link android-xfermode Android-Xfermode详细学习 %}</p>
-
-<h5 id="toc_100">Paint</h5>
-
-<p>{% post_link android-paint Android-Paint详细学习 %}  </p>
-
-<p>{% post_link android-paints Android-Paint详细学习 %}</p>
-
-<h5 id="toc_101">Matrix</h5>
-
-<p>{% post_link android-matrix Android-Matrix详细学习 %}  </p>
-
-<h5 id="toc_102">Scroller</h5>
-
-<p>{% post_link android-scroller Android-Scroller详细学习 %}</p>
-
-<h5 id="toc_103">ViewConfiguration</h5>
-
-<p>{% post_link android-viewconfiguration Android-ViewConfiguration解析 %}</p>
-
-<h5 id="toc_104">MotionEvent</h5>
-
-<p>{% post_link android-motionevent Android-MotionEvent解析 %}</p>
-
-<h5 id="toc_105">VelocityTracker</h5>
-
-<p>{% post_link android-velocitytracker Android-VelocityTracker详细学习 %}</p>
-
-<h5 id="toc_106">SpannableString</h5>
-
-<p>{% post_link android-spannablestring Android-SpannableString设置复合文本 %}</p>
-
-<h3 id="toc_107">animation</h3>
-
-<p>{% post_link android-animation Android动画详细学习 %}  </p>
-
-<p>{% post_link android-activity-handoff-animation Android切换动画 %}</p>
-
-<h4 id="toc_108">ViewAnimation</h4>
-
-<h5 id="toc_109">TweenAnimation</h5>
-
-<h5 id="toc_110">FrameAnimation</h5>
-
-<h4 id="toc_111">PropertyAnimation</h4>
-
-<h5 id="toc_112">ValueAnimator</h5>
-
-<h5 id="toc_113">ObjectAnimator</h5>
-
-<h5 id="toc_114">AnimatorSet</h5>
-
-<h4 id="toc_115">VectorAnimation</h4>
-
-<h5 id="toc_116">SVG</h5>
-
-<h5 id="toc_117">VectorDrawable</h5>
-
-<h5 id="toc_118">AnimatedVectorDrawable</h5>
-
-<h3 id="toc_119">Resource</h3>
-
-<h4 id="toc_120">assets</h4>
-
-<h5 id="toc_121">AssetManager</h5>
-
-<h4 id="toc_122">res</h4>
-
-<h5 id="toc_123">anim</h5>
-
-<h5 id="toc_124">animator</h5>
-
-<h5 id="toc_125">color</h5>
-
-<h5 id="toc_126">drawable</h5>
-
-<h5 id="toc_127">interpolator</h5>
-
-<h5 id="toc_128">layout</h5>
-
-<h5 id="toc_129">menu</h5>
-
-<h5 id="toc_130">raw</h5>
-
-<h5 id="toc_131">values</h5>
-
-<h6 id="toc_132">arrays</h6>
-
-<h6 id="toc_133">attrs</h6>
-
-<h6 id="toc_134">bools</h6>
-
-<h6 id="toc_135">colors</h6>
-
-<h6 id="toc_136">string</h6>
-
-<h6 id="toc_137">styles</h6>
-
-<h4 id="toc_138">OpenGL</h4>
-
-<h4 id="toc_139">Bitmap</h4>
-
-<h5 id="toc_140">BitmapFactory</h5>
-
-<p>{% post_link android-bitmapfactory Android-BitmapFactory详细学习 %}</p>
-
-<h2 id="toc_141">Material Design 系列</h2>
-
-<h3 id="toc_142">Toolbar的使用</h3>
-
-<p>{% post_link android-toolbar Android-ToolBar详细学习 %}</p>
-
-<h3 id="toc_143">AppbarLayout+CollapsingToolbarLayout</h3>
-
-<p>{% post_link android-appbarlayout-collapsingtoolbar-toolbar Android-AppBarLayout&amp;CollapsingToolbar&amp;Toolbar组合使用 %}  </p>
-
-<p>{% post_link android-appbarlayout Android-AppBarLayout %}</p>
-
-<h3 id="toc_144">Behavior 相关：</h3>
-
-<ul>
-<li>BottomSheetBehavior</li>
-<li>BottomSheetDialog</li>
-<li>SwipeDismissBehavior</li>
-<li>自定义Behavior</li>
-</ul>
-
-<h3 id="toc_145">TextInputLayout + TextInputEditText</h3>
-
-<h3 id="toc_146">TabLayout</h3>
-
-<h3 id="toc_147">BottomNavigationView</h3>
-
-<h3 id="toc_148">CardView 阴影卡片</h3>
-
-<h3 id="toc_149">Snackbar , FloatActionButton</h3>
-
-<h2 id="toc_150">通信</h2>
-
-<h3 id="toc_151">Http</h3>
-
-<h3 id="toc_152">Socket</h3>
-
-<h3 id="toc_153">Bluetooth</h3>
-
-<h3 id="toc_154">NFC</h3>
-
-<h3 id="toc_155">Headset</h3>
-
-<h3 id="toc_156">USB</h3>
-
-<h2 id="toc_157">数据持久化</h2>
-
-<h3 id="toc_158">Sqlite</h3>
-
-<h4 id="toc_159">SQLiteOpenHelper</h4>
-
-<h4 id="toc_160">ContentProvider</h4>
-
-<h3 id="toc_161">File</h3>
-
-<p>{% post_link android-save-method Android存储方式以及路径API %}</p>
-
-<h4 id="toc_162">InternalStorage</h4>
-
-<h4 id="toc_163">ExternalStorage</h4>
-
-<h3 id="toc_164">SharedPreferences</h3>
-
-<h2 id="toc_165">多线程</h2>
-
-<p>{% post_link android-thread Android Thread %}  </p>
-
-<h2 id="toc_166">性能</h2>
-
-<p>{% post_link android-performance-optimize Android性能优化 %}</p>
-
-<h3 id="toc_167">UI优化</h3>
-
-<h4 id="toc_168">布局层次结构</h4>
-
-<p>{% post_link android-view-performance-optimizing Android界面性能调优 %}</p>
-
-<h4 id="toc_169">抽象布局使用</h4>
-
-<h4 id="toc_170">HierarchyViewer</h4>
-
-<h4 id="toc_171">Lint工具</h4>
-
-<h3 id="toc_172">内存优化</h3>
-
-<h4 id="toc_173">OOM</h4>
-
-<h4 id="toc_174">ANR</h4>
-
-<h4 id="toc_175">分析</h4>
-
-<h5 id="toc_176">Heap</h5>
-
-<h5 id="toc_177">adb shell</h5>
-
-<p>{% post_link android-adb Android-ADB命令 %}</p>
-
-<h6 id="toc_178">dumpsys meminfo</h6>
-
-<h6 id="toc_179">showmap</h6>
-
-<h5 id="toc_180">TraceView</h5>
-
-<h5 id="toc_181">Dalvik日志</h5>
-
-<h5 id="toc_182">logcat</h5>
-
-<h5 id="toc_183">MAT</h5>
-
-<h3 id="toc_184">电量优化</h3>
-
-<h3 id="toc_185">流量优化</h3>
-
-<h2 id="toc_186">调试(Debug)</h2>
-
-<p>{% post_link android-debug Android-Debug %}</p>
-
-<h3 id="toc_187">Logcat</h3>
-
-<h3 id="toc_188">adb</h3>
-
-<h3 id="toc_189">HierarchyViewer</h3>
-
-<h3 id="toc_190">TraceView</h3>
-
-<h3 id="toc_191">Heap</h3>
-
-<h3 id="toc_192">Lint</h3>
-
-<h2 id="toc_193">适配</h2>
-
-<h3 id="toc_194">OS Version</h3>
-
-<h4 id="toc_195">min SDK</h4>
-
-<h3 id="toc_196">UI界面适配</h3>
-
-<p>{% post_link android-ui-adapt Android界面适配 %}</p>
-
-<p>{% post_link android-screen-adapt Android屏幕适配 %}</p>
-
-<h4 id="toc_197">drawable</h4>
-
-<h2 id="toc_198">测试</h2>
-
-<h3 id="toc_199">Monkey</h3>
-
-<h3 id="toc_200">MonkeyRunner</h3>
-
-<h3 id="toc_201">JUnit</h3>
-
-<h3 id="toc_202">Robotium</h3>
-
-<h3 id="toc_203">Appium</h3>
-
-<h3 id="toc_204">Athrun(TMTS)</h3>
-
-<h3 id="toc_205">UIAutomator</h3>
-
-<h2 id="toc_206">安全</h2>
-
-<h3 id="toc_207">服务器安全</h3>
-
-<h3 id="toc_208">通信安全</h3>
-
-<h4 id="toc_209">与服务器通信</h4>
-
-<h4 id="toc_210">组件间通信</h4>
-
-<h3 id="toc_211">反编译</h3>
-
-<p>{% post_link android-decompile Android反编译 %}  </p>
-
-<p>{% post_link android-get-sha1 Android-获取sha1 %}  </p>
-
-<p>{% post_link android-smali Android-smali文件格式 %}</p>
-
-<h3 id="toc_212">数据加密</h3>
-
-<h3 id="toc_213">数据验签</h3>
-
-<h3 id="toc_214">代码混淆</h3>
-
-<h3 id="toc_215">WebView/JS安全调用</h3>
-
-<h3 id="toc_216">MD5、DES、RSA、https、证书、权限</h3>
-
-<h2 id="toc_217">NDK</h2>
-
-<p>{% post_link android-ndk Android-NDK %}</p>
-
-<h3 id="toc_218">JNI</h3>
-
-<h3 id="toc_219">C语言</h3>
-
-<h3 id="toc_220">C++</h3>
-
-<h2 id="toc_221">Android 多媒体</h2>
-
-<h3 id="toc_222">相机开发</h3>
-
-<h4 id="toc_223">使用自带的相机APP拍照</h4>
-
-<h4 id="toc_224">系统相册选择照片</h4>
-
-<h4 id="toc_225">系统相机或相册获取的照片裁剪</h4>
-
-<h4 id="toc_226">使用相机API 开发相机:</h4>
-
-<ul>
-<li>Android 5.0 （API 21 ）以下 使用Camera API </li>
-<li>Android 5.0 以上使用 Camera2 API </li>
-</ul>
-
-<h4 id="toc_227">自定义相册开发</h4>
-
-<h4 id="toc_228">自定义裁剪界面</h4>
-
-<h3 id="toc_229">视频开发</h3>
-
-<h4 id="toc_230">视频播放</h4>
-
-<ul>
-<li>MediaPlayer</li>
-<li>VideoView</li>
-</ul>
-
-<h4 id="toc_231">视频编解码</h4>
-
-<h3 id="toc_232">音频开发</h3>
-
-<h4 id="toc_233">AudioPlayer</h4>
-
-<h4 id="toc_234">音乐播放器</h4>
-
-<h2 id="toc_235">Android权限配置</h2>
-
-<h2 id="toc_236">Gradle</h2>
-
-<h3 id="toc_237">自定义Gradle插件</h3>
-
-<h3 id="toc_238">Gradle多渠道打包</h3>
-
-<h2 id="toc_239">手机功能</h2>
-
-<h3 id="toc_240">电话</h3>
-
-<h4 id="toc_241">联系人</h4>
-
-<h4 id="toc_242">通话记录</h4>
-
-<h3 id="toc_243">短/彩信</h3>
-
-<h3 id="toc_244">Audio</h3>
-
-<h3 id="toc_245">SD卡</h3>
-
-<h3 id="toc_246">感应器</h3>
-
-<h4 id="toc_247">加速</h4>
-
-<h4 id="toc_248">方向</h4>
-
-<h4 id="toc_249">重力</h4>
-
-<h4 id="toc_250">光线</h4>
-
-<h4 id="toc_251">陀螺仪</h4>
-
-<h4 id="toc_252">磁场</h4>
-
-<h4 id="toc_253">接近</h4>
-
-<h4 id="toc_254">温度</h4>
-
-<h4 id="toc_255">压力</h4>
-
-<h4 id="toc_256">线性加速度</h4>
-
-<h4 id="toc_257">旋转</h4>
-
-<h2 id="toc_258">第三方扩展</h2>
-
-<h3 id="toc_259">地图</h3>
-
-<h3 id="toc_260">语音识别</h3>
-
-<h3 id="toc_261">支付</h3>
-
-<h3 id="toc_262">统计分析</h3>
-
-<h3 id="toc_263">广告</h3>
-
-<h2 id="toc_264">其他</h2>
-
-<h3 id="toc_265">Intent</h3>
-
-<h3 id="toc_266">AndroidManifest</h3>
-
-<h3 id="toc_267">AIDL</h3>
-
-<h3 id="toc_268">Wifi</h3>
-
-<p>{% post_link android-wifi Android-WiFi %}</p>
-
-<h3 id="toc_269">国际化</h3>
-
-<h3 id="toc_270">响应式编程</h3>
-
-<p>{% post_link android-permissions Android权限机制 %}</p>
-
-<h3 id="toc_271">其他</h3>
-
-<p>{% post_link android-responsive-code Android响应式编程 %}  </p>
-
-<p>{% post_link android-mvp Android MVP模式 %}  </p>
-
-<p>{% post_link android-cold-launch Android冷启动实现APP秒开 %}  </p>
-
-<p>{% post_link android-studio-bitbucket AndroidStudio关联Bitbucket %}  </p>
-
-<p>{% post_link android-issues Android-Issues %}  </p>
-
-<p>{% post_link android-base-class Android-基类实现 %}  </p>
-
-<p>{% post_link android-modularization Android组件化学习%}</p>
-
-<h2 id="toc_272">Library</h2>
-
-<p>{% post_link android-library Android-开发中常用的支持库 %}  </p>
-
-<p>{% post_link android-efficient-tools Android高效开发工具库 %}  </p>
-
-<p>{% post_link android-quick-develop-frame Android快速开发框架 %}  </p>
-
-<p>{% post_link android-picasso Android-Picasso图片框架 %}  </p>
-
-<p>{% post_link android-greendao Android-GreenDao3.2.0的使用 %}  </p>
-
-<p>{% post_link android-eventbus Android-EventBus3.0的使用 %}  </p>
-
-<p>{% post_link android-common-android-library Android-常用的库 %}  </p>
-
-<p>{% post_link android-fresco Android-Fresco详细学习 %}  </p>
-
-<p>{% post_link android-rxjava Android-RxJava详细学习 %}  </p>
-
-<p>{% post_link android-gson Android-Gson详细学习 %}  </p>
-
-<p>{% post_link android-retrofit Android-Retrofit详细学习 %}  </p>
-
-<p>{% post_link android-databinding Android-DataBinding详细学习 %}</p>
-
-<h2 id="toc_273">实现</h2>
-
-<p>{% post_link android-custom-lock-screen Android自定义锁屏页 %}  </p>
-
-<p>{% post_link android-custom-skin Android自定义皮肤 %}</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -5405,31 +4955,31 @@ AIDL、Messenger、Binder、多进程、动画、滑动冲突、自定义View、
 	      
 		      
 			      <li class="post">
-			        <a href="15704556102016.html">iTerm2工具学习使用</a>
+			        <a href="15712984956484.html">代理模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15704404393204.html">Homebrew学习</a>
+			        <a href="15712937841703.html">备忘录模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15663678647312.html">Docker学习</a>
+			        <a href="15711947460528.html">观察者模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15662718181666.html">Android GRPC接入</a>
+			        <a href="15711314242192.html">策略模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15662693410122.html">Docker搭建Maven私服</a>
+			        <a href="15711233221322.html">适配器模式</a>
 			      </li>
 		     
 		  

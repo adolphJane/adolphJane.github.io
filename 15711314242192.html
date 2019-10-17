@@ -1,0 +1,615 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  策略模式 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>策略模式</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/10/15</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AE%97%E6%B3%95.html'>算法</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">策略模式介绍</h2>
+
+<p>在软件开发中也常常遇到这样的情况：实现某一个功能可以有多种算法或策略，我们根绝实际情况选择不同的算法或者策略来完成该功能。<br/>
+针对这种情况，一种常规的方法是将多种算法写在一个类中。但是当多个算法集中在一个类中时，这个类就会变得臃肿，这个类的维护成本会变高，在维护时也更容易引发错误。如果我们需要增加一种新的排序算法，需要修改封装算法类的源代码。这就明显违反了我们所说的OCP原则和单一职责原则。<br/>
+如果将这些算法或者策略抽象出来，提供一个统一的接口，不同的算法或者策略有不同的实现类，这样在程序客户端就可以通过注入不同的实现对象来实现算法或者策略的动态替换，这种模式的可扩展性、可维护性也就更高，这就是策略模式。</p>
+
+<span id="more"></span><!-- more -->
+
+<h2 id="toc_1">策略模式的定义</h2>
+
+<p>策略模式定义了一系列的算法，并将每一个算法封装起来，而且使它们还可以相互替换。策略模式让算法独立于使用它的客户而独立变化。</p>
+
+<h2 id="toc_2">策略模式的使用场景</h2>
+
+<ul>
+<li>针对同一类型问题的多种处理方式，仅仅是具体行为有差别时。</li>
+<li>需要安全地封装多种同一类型的操作时。</li>
+<li>出现同一抽象类有多个子类，而又需要使用if-else或者switch-case来选择具体子类时。</li>
+</ul>
+
+<h2 id="toc_3">策略模式的简单实现</h2>
+
+<p>通常如果一个问题有多个解决方案时，最简单的方式就是利用if-else或者switch-case方式，但是耦合性太高、代码臃肿、难以维护。应用策略模式就能很好地解决这类问题，它将各种方案分离开来，让程序客户端根据具体的需求来动态地选择不同的策略方案。</p>
+
+<p>示例中需要计算不同出行工具的成本，下面是我们第一个版本的代码</p>
+
+<pre class="line-numbers"><code class="language-java">public class PriceCalculator {
+    //公交车类型
+    private static final int BUS = 1;
+    //地铁类型
+    private static final int SUBWAY = 2;
+    
+    public static void main(String[] args) {
+        PriceCalculator calculator = new PriceCalculator();
+        System.out.println(&quot;坐16公里的公交车票价为：&quot; + calculator.calculatePrice(16, BUS));
+        System.out.println(&quot;坐16公里的地铁票价为：&quot; + calculator.calculatePrice(16, SUBWAY));
+    }
+}
+
+/**
+ * 北京公交车，十公里之内一元钱，超过十公里之后没加一元钱可以乘5公里
+ * @param km 公里
+ * @return
+ */
+ private int busPrice(int km) {
+    //超过十公里的总距离
+    int extraTotal = km - 10;
+    //超过的距离是5公里的距离
+    int extraFactor = extraTotal / 5;
+    //超过的距离对5公里取余
+    int fraction = extraTotal % 5;
+    //价格计算
+    int price = 1 + extraFactor * 1;
+    return fraction &gt; 0 ? ++price : price;
+ }
+ 
+ /**
+  * 6公里(含)内3元；6~12公里(含)4元；12~22公里(含)5元；22~32公里(含)6元
+  * @param km 公里
+  * @return
+  */
+  private int subwayPrice(int km) {
+    if(km &lt;= 6) {
+        return 3;
+    } else if(km &gt; 6 &amp;&amp; km &lt;= 12) {
+        return 4;
+    } else if(km &gt; 12 &amp;&amp; km &lt;= 22) {
+        return 5;
+    } else if(km &gt; 22 &amp;&amp; km &lt;= 32) {
+        return 6;
+    }
+    //其他距离我们简化为7元
+    return 7;
+  }
+  
+  int calculatePrice(int km, int type) {
+    if (type == BUS) {
+        return busPrice(km);
+    } else if (type == SUBWAY) {
+        return subwayPrice(km);
+    }
+    return 0;
+  }
+}
+</code></pre>
+
+<p>PriceCalculator类很明显的问题就是并不是单一职责，承担了公交车、地铁计费职责。当我们增加一种出行方式就需要在PriceCalculator中增加一个方法来计算出租车出行的价格，并且在calculatePrice函数中增加一个判断</p>
+
+<pre class="line-numbers"><code class="language-java">public class PriceCalculator {
+    //公交车类型
+    private static final int BUS = 1;
+    //地铁类型
+    private static final int SUBWAY = 2;
+    //出租车类型
+    private static final int TAXI = 3;
+    
+    /**
+     * 简单计算为每公里2元
+     * @param km 公里
+     * @return
+     */
+    private int taxiPrice(int km) {
+        return km * 2;
+    }
+    
+    int calculatePrice(int km, int type) {
+        if (type == BUS) {
+            return busPrice(km);
+        } else if (type == SUBWAY) {
+            return subwayPrice(km);
+        } else if (type == TAXI) {
+            return taxiPrice(km);
+        }
+        return 0;
+    }
+}
+</code></pre>
+
+<p>增加出行方式时，我们又需要在calculatePrice中添加if-else，此时很有可能就是复制上一个if-else，然后手动进行修改，手动复制代码也是很容易引入错误的做法之一，这样会使代码变得越来越臃肿，难以维护。</p>
+
+<p>用策略模式进行重构</p>
+
+<p>首先我们需要定义一个抽象的价格计算接口</p>
+
+<pre class="line-numbers"><code class="language-java">/**
+ * 计算接口
+ */
+public interface CalculateStrategy {
+    /**
+     * 按距离来计算价格
+     * @param km 公里
+     * @return 返回价格
+     */
+     int calculatePrice(int km);
+}
+</code></pre>
+
+<p>对于每一种出行方式我们都有一个独立的计算策略类，这些策略类都实现了CalculateStrategy接口，例如下面是公交车和地铁的计算策略类:</p>
+
+<pre class="line-numbers"><code class="language-java">//公交车价格计算策略
+public class BusStrategy implements CalculateStrategy {
+    /**
+     * 北京公交车，十公里之内一元钱，超过十公里之后每加一元钱可以乘5公里
+     * @param km 公里
+     * @return
+     */
+     @Override
+     public int calculatePrice(int km) {
+        //超过十公里的总距离
+        int extraTotal = km - 10;
+        //超过的距离是5公里的距离
+        int extraFactor = extraTotal / 5;
+        //超过的距离对5公里取余
+        int fraction = extraTotal % 5;
+        //价格计算
+        int price = 1 + extraFactor * 1;
+        return fraction &gt; 0 ? ++price : price;
+     }
+}
+
+//地铁价格计算策略
+public class SubwayStrategy implements CalculateStrategy {
+    /**
+     * 6公里(含)内3元；6~12公里(含)4元；12~22公里(含)5元；22~32公里(含)6元
+     * @param km 公里
+     * @return
+     */
+    private int calculatePrice(int km) {
+        if(km &lt;= 6) {
+            return 3;
+        } else if(km &gt; 6 &amp;&amp; km &lt;= 12) {
+            return 4;
+        } else if(km &gt; 12 &amp;&amp; km &lt;= 22) {
+            return 5;
+        } else if(km &gt; 22 &amp;&amp; km &lt;= 32) {
+            return 6;
+        }
+        //其他距离我们简化为7元
+        return 7;
+    }
+}
+</code></pre>
+
+<p>我们再创建一个TranficCalculator</p>
+
+<pre class="line-numbers"><code class="language-java">//公交出行价格计算器
+public class TranficCalculator {
+    public static void main(String[] args) {
+        TranficCalculator calculator = new TranficCalculator();
+        //设置计算策略
+        calculator.setStrategy(new BusStrategy());
+        //计算价格
+        System.out.println(&quot;公交车乘16公里的价格：&quot; + calculator.calculatePrice(16));
+    }
+    
+    CalculateStrategy mStrategy;
+    
+    public void setStrategy(CalculateStrategy strategy) {
+        this.mStrategy = strategy;
+    }
+    
+    public int calculatePrice(int km) {
+        return mStrategy.calculatePrice(km);
+    }
+}
+</code></pre>
+
+<p>通过策略模式添加出租车的计算策略，只需要添加一个出租车计算策略类，然后将该策略设置给TranficCalculator,最好直接通过TranficCalculator对象的计算方法。</p>
+
+<pre class="line-numbers"><code class="language-java">//出租车计算策略
+public class TaxiStrategy implements CalculateStrategy {
+    //价格我们简单计算为公里数*2
+    @Override
+    public int calculatePrice(int km) {
+        return km * 2;
+    }
+}
+</code></pre>
+
+<p>将策略注册到TranficCalculator中</p>
+
+<pre class="line-numbers"><code class="language-java">//公交出行价格计算器
+public class TranficCalculator {
+    public static void main(String[] args) {
+        TranficCalculator calculator = new TranficCalculator();
+        //设置计算策略
+        calculator.setStrategy(new TaxiStrategy());
+        //计算价格
+        System.out.println(&quot;出租车乘16公里的价格：&quot; + calculator.calculatePrice(16));
+    }
+    
+    CalculateStrategy mStrategy;
+    
+    public void setStrategy(CalculateStrategy strategy) {
+        this.mStrategy = strategy;
+    }
+    
+    public int calculatePrice(int km) {
+        return mStrategy.calculatePrice(km);
+    }
+}
+</code></pre>
+
+<p>上述示例清晰展示了二者的区别。前者通过if-else来解决问题，虽然实现较为简单，类型层级单一，但暴露的问题非常明显，即代码臃肿，逻辑复杂，难以升级和维护，没有结构可言；后者则是通过建立抽象，将不同的策略构建成一个具体的策略实现，通过不同的策略实现算法替换。在简化逻辑、结构的同时，增强了系统的可读性、稳定性、可扩展性，这对于较为复杂的业务逻辑显得更为直观，扩展也更为方便。</p>
+
+<h2 id="toc_4">总结</h2>
+
+<p>策略模式主要用来分离算法，在相同的行为抽象下有不同的具体实现策略。这个模式很好地演示了开闭原则，也就是定义抽象，注入不同的实现，从而达到很好地可扩展性。</p>
+
+<p><strong>优点</strong></p>
+
+<ul>
+<li>结构清晰明了、使用简单直观</li>
+<li>耦合度相对而言较低，扩展方便</li>
+<li>操作封装也更为彻底，数据更为安全</li>
+</ul>
+
+<p><strong>缺点</strong></p>
+
+<ul>
+<li>随着策略的增加，子类也会变得繁多</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15711947460528.html" 
+          title="Previous Post: 观察者模式">&laquo; 观察者模式</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15711233221322.html" 
+          title="Next Post: 适配器模式">适配器模式 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15712984956484.html">代理模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15712937841703.html">备忘录模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15711947460528.html">观察者模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15711314242192.html">策略模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15711233221322.html">适配器模式</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>

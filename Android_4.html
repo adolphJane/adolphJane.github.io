@@ -118,6 +118,198 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207871631.html">
+                
+                  <h1>Android 使用 Palette 让你的 UI 色彩与内容更贴合</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。</p>
+
+<p>Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。</p>
+
+<p>比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背景，我们可以提取视频海报的颜色，设置在背景上，使得效果更佳柔和美观。</p>
+
+<p>Palette 是一个 Support v7 的包，如果使用 Gradle 引入依赖，这里使用最新的 26.+。</p>
+
+<p><code>compile &quot;com.android.support:palette-v7:26.+&quot;</code></p>
+
+<h2 id="toc_1">Palette 的使用</h2>
+
+<p>Palette 使用起来非常的简单，既然目的是从一个图片中提取颜色，它的步骤就有：</p>
+
+<ol>
+<li>传递一个 Bitmap，得到一个 Palette。</li>
+<li>通过 Palette 提取需要的颜色。</li>
+</ol>
+
+<p>就是这么简单，如同要将大象放冰箱，需要几步一样清晰。</p>
+
+<p>那么接下来我们先来了解它使用的细节。</p>
+
+<h3 id="toc_2">传递 Bitmap 得到一个 Palette</h3>
+
+<p>Palette 在旧版本上有一些 <code>generate()</code> 的方法，用于生成一个 <code>Palette</code> 对象，但是在新版本上已经被标记为 <code>@Depercated</code> 了，所以这里不推荐使用。</p>
+
+<p>而在新版上，推荐使用 <code>Palette.Builder</code> 来创建我们的 <code>Palette</code> 对象，我们可以通过 <code>from()</code> 方法使用它。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg" alt="20171104150979158539416.jpg"/><figcaption>20171104150979158539416.jpg</figcaption></figure></p>
+
+<p>一般我们使用第一个方法即可，直接传递进去一个 Bitmap 对象。得到 Builder 之后，我们还可以配置一些规则，但是一般我们不需要进行额外的（后面会讲到）。再通过 <code>Builder.generate()</code> 即可得到我们需要的 Palette 对象了。</p>
+
+<h3 id="toc_3">通过 Palette 提取颜色</h3>
+
+<p>Palette 从图片中提取的颜色，有很多选择。这里又涉及到另外一个类，Swatch 。</p>
+
+<p>Palette 可被提取的每个颜色，都被封装成一个 Swatch 对象，用来管理多种颜色。</p>
+
+<p>这些 Swatch 有：</p>
+
+<ul>
+<li>DominantSwatch</li>
+<li>VibrantSwatch</li>
+<li>DarkVibrantSwatch</li>
+<li>LightVibrantSwatch</li>
+<li>MutedSwatch</li>
+<li>DarkMutedSwatch</li>
+<li>LightMutedSwatch</li>
+</ul>
+
+<p>其实这些 Swatch，真的不太好解释其意义，唯一特别一点的就是 DominantSwatch ，它是从图片中提取的最突出的颜色。</p>
+
+<p>这些 Swatch 在 Palette 都提供了对应的 <code>getXxx()</code> 方法获得。不过需要注意的是，这些 <code>getXxx()</code> 方法可能会得到一个 <code>null</code> ，因为有些颜色是没有的。</p>
+
+<p>如果只是需要得到一个颜色值，Palette 同时也提供了对应的 <code>getXxxColor()</code> 方法，方便我们使用。</p>
+
+<p>得到 Swatch 对象之后，就可以通过对应的 Swatch 中对应的 Api 获取我们需要的颜色值。</p>
+
+<ul>
+<li><code>getPopulation()</code> ：Swatch 中的像素个数。</li>
+<li><code>getRgb()</code>：颜色的 RGB 值。</li>
+<li><code>getHsl()</code>：颜色的 HSL 值。</li>
+<li><code>getBodyTextColor()</code>：对应的文字颜色值。</li>
+<li><code>getTitleTextColor()</code>：对应的标题文字颜色值。</li>
+</ul>
+
+<p>通常来说，我们只需要通过 getRgb() 获取到对应的颜色设置在背景上，如果背景之上还有文字内容，可以通过 getBodyTextColor() 提取出与背景匹配的文字颜色值，这样可以显得更加的柔和，让文字看起来更清晰和舒服。比如，如果一个深色的背景，为它设置一个默认的深色文字，基本上就看不见了，因为对比对太弱。</p>
+
+<h3 id="toc_4">举个例子</h3>
+
+<p>到这里，基本上 Palette 的基本 Api 就讲解清楚了，下面举个实际的例子来看看。</p>
+
+<p>这里找了三张 Eason 的海报，用于做 Palette 的 Demo 资源，间隔去替换图片，然后分别提取出对应的颜色和字体颜色，设置在下面按钮的背景上，然后每 3s 切换一张图片。</p>
+
+<p>因为有一些图片，获取的 Swatch 可能会返回 null ，所以这里用了一个比价扎眼的红色，作为错误色。</p>
+
+<p>以下是获取 Swatch 的代码。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg" alt="20171104150979172574268.jpg"/><figcaption>20171104150979172574268.jpg</figcaption></figure></p>
+
+<p>接下来通过 Swatch 提取我们需要的颜色。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg" alt="20171104150979175346480.jpg"/><figcaption>20171104150979175346480.jpg</figcaption></figure></p>
+
+<p>这里分别获取了需要的颜色以及字体颜色，下面看看运行的效果：</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif" alt="20171104150979178525822.gif"/><figcaption>20171104150979178525822.gif</figcaption></figure></p>
+
+<p>可以看到，确实有一些颜色，被标记成了红色，说明当前图片有获取不到的对应颜色。</p>
+
+<h2 id="toc_5">分析 Palette 的实现</h2>
+
+<h3 id="toc_6">Palette 的主线逻辑</h3>
+
+<p>继续深入看看 Palette 的实现原理，先从主线开始看。</p>
+
+<p>从 <code>Builder.generate()</code> 开始。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg" alt="20171104150979183575637.jpg"/><figcaption>20171104150979183575637.jpg</figcaption></figure></p>
+
+<p>从代码中可以看到，在 <code>generate()</code> 中，主线逻辑：</p>
+
+<ol>
+<li>首先会通过 <code>scaleBitmapDown()</code> 方法，将图片压缩成一个小像素的，等于生成了一个新的 <code>Bitmap</code> 对象，这样有利于内存的管理，并且也减少了计算量。</li>
+<li>然后再通过 <code>mRegion</code> 判断是否只是提取图片的某个区域，默认是完整的图片全部提取，当然也可以对 <code>mRegion</code> 进行配置。<br/>
+之后再构造一个 <code>ColorCutQuantizer</code> 对象，使用它的 <code>getQuantizedColors()</code> 方法得到 Swatch。</li>
+<li>使用完前面压缩的 <code>Bitmap</code> 对象之后，再使用 <code>recycle()</code> 将其回收掉。</li>
+<li>最后，通过 <code>Palette</code> 本身的构造函数，去生成一个 <code>Palette</code> 对象，返回出去。</li>
+</ol>
+
+<p>接下来看看比较关键的 <code>ColorCutQuantizer</code> 中的实现逻辑。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg" alt="20171104150979200867081.jpg"/><figcaption>20171104150979200867081.jpg</figcaption></figure></p>
+
+<p>从代码中可以看到，其中的逻辑还是很清晰的。</p>
+
+<ol>
+<li>首先通过 <code>quantizeFromRgb888()</code> 方法，将每个像素的颜色进行量化，类似于将每个颜色取一个靠近的设置。举个不恰当的例子，将不同深度的红，都标记成红色。</li>
+<li>再通过 <code>shouldIgnoreColor()</code> 过滤掉不需要的颜色。</li>
+<li>最终获取到的颜色，如果小于等于我们设置的 <code>maxColors</code>，就可以通过 <code>approximateToRgb888()</code> 生成一批 Swatch。</li>
+<li>如果大于 <code>maxColors</code>，就再通过 <code>quantizePixels()</code> 去掉一些杂色。</li>
+<li>无论如何，最终操作的就是这里得到的 <code>mQuantizedColors</code> 对象。</li>
+</ol>
+
+<h3 id="toc_7">Swatch 的 Target</h3>
+
+<p>所有需要的 Swatch ，都是被 Target 对象所标记。不同的 Swatch 都是通过 Target 中标记的常量值，进行运算，得到行的颜色。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg" alt="2017110415097921282334.jpg"/><figcaption>2017110415097921282334.jpg</figcaption></figure></p>
+
+<h3 id="toc_8">过滤掉不需要的颜色</h3>
+
+<p>Palette 可以设置一些我们不需要的颜色，让它们不参与运算。这里的过滤条件，通过 Filter 来设定，并且 Palette 也提供给了一个 DEFAULT_FALTER 来标记默认的过滤颜色。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg" alt="20171104150979216238491.jpg"/><figcaption>20171104150979216238491.jpg</figcaption></figure></p>
+
+<p>可以看到，默认的 Filter 会过滤掉一些靠近黑和白的颜色。</p>
+
+<p>当然，我们也可以自己定义 Filter ，并通过 Palette 中的 <code>addFilter()</code>、<code>clearFilters()</code> 来管理它。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg" alt="2017110415097964327573.jpg"/><figcaption>2017110415097964327573.jpg</figcaption></figure></p>
+
+<p>这里存储 Filter 的是一个 ArrayList ，所以我们是可以定义很多个 Filter 加入进去的，它们都会生效。</p>
+
+<h3 id="toc_9">设置 MaxColor</h3>
+
+<p>在 ColorCutQuantizer 中，被使用的 maxColor ，主要用于标记需要使用的颜色个数。它是可以通过 maximumColorCount() 方法，进行设置的，如果不对其进行设定，默认值为 16。</p>
+
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg" alt="20171104150979646212624.jpg"/><figcaption>20171104150979646212624.jpg</figcaption></figure></p>
+
+<p>理论上来说，这里设置的maxColor 的值越大，运算花费的时间就越长。而越小，可以被选择的色值也就越少。</p>
+
+<p>所以最佳的做法是根据当前 Bitmap 的用途来决定，色彩越丰富的图，设置的 maxColor 越大，即可。不过正常来说也不需要额外的设定，默认的配置就挺好用了。</p>
+
+<h2 id="toc_10">小结</h2>
+
+<p>到这里就分析完 Palette 的所有相关的内容，不要仅仅满足使用。实际上看了 Palette 的源码，对色彩的运算，也有了更加深入的了解。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/6</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207871588.html">
                 
                   <h1>Android 自定义 LayoutInflate 实现酷炫引导页</h1>
@@ -2356,351 +2548,6 @@ Collections.sort(list, Integer::compare);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207871244.html">
-                
-                  <h1>Android-超炫动画库</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><a href="https://github.com/Rkhcy/TransitionNote">源码地址</a><br/>
-<a href="https://github.com/android/platform_frameworks_support">Google Demo</a></p>
-
-<h2 id="toc_0">概述</h2>
-
-<p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/><figcaption>20171031150938495136462.gif</figcaption></figure></p>
-
-<p>还有github上很火的<a href="https://github.com/nickbutcher/plaid">plaid</a></p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/><figcaption>20171031150938501024243.gif</figcaption></figure></p>
-
-<p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。<br/>
-先看官网的一张关系图</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/><figcaption>20171031150938504260266.jpg</figcaption></figure></p>
-
-<p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
-
-<h2 id="toc_1">Scene</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/><figcaption>20171031150938508078450.png</figcaption></figure></p>
-
-<p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法<br/>
-<code>getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code><br/><br/>
-比如：  </p>
-
-<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
-mScene1 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene1,getContext());
-</code></pre>
-
-<p>也可以直接<code>new Scene(ViewGroup sceneRoot, View layout)</code></p>
-
-<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
-View view1 = inflater.inflate(R.layout.scene1,container,false);
-mScene0 = new Scene(mSceneRoot,view0);
-mScene1 = new Scene(mSceneRoot,view1);
-</code></pre>
-
-<p>两种方式都需要传SceneRoot，即该场景的根节点。</p>
-
-<h2 id="toc_2">Transition</h2>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/><figcaption>20171031150938533375766.jpg</figcaption></figure></p>
-
-<p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：<br/>
-res/transition/fade_transition.xml</p>
-
-<p><code>&lt;fade xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;/&gt;</code></p>
-
-<p>然后在代码中：</p>
-
-<pre class="line-numbers"><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
-</code></pre>
-
-<p>或者直接在代码中：</p>
-
-<p><code>Transition mFadeTransition = new Fade();</code></p>
-
-<h2 id="toc_3">TransitionManager</h2>
-
-<p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/><figcaption>20171031150938549730496.gif</figcaption></figure></p>
-
-<p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
-
-<h2 id="toc_4">常用API</h2>
-
-<p>有时候我们只想改变当前已展示的视图层级中View的状态，可以通过beginDelayedTransition实现，下面列举系统内置的Transition的使用。</p>
-
-<h3 id="toc_5">AutoTransition</h3>
-
-<p>AutoTransition默认的动画效果，对应xml tag为autoTransition<br/>
-其实是以下几个动画组合顺序执行：</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:transitionOrdering=&quot;sequential&quot;&gt;
-    &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
-    &lt;changeBounds/&gt;
-    &lt;fade android:fadingMode=&quot;fade_in&quot;/&gt;
-&lt;/transitionSet&gt;
-</code></pre>
-
-<p>在代码中使用：</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
-if (mTextView.getVisibility() != View.VISIBLE){
-    mTextView.setVisibility(View.VISIBLE);
-} else {
-    mTextView.setVisibility(View.GONE);
-}
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/><figcaption>20171031150938579060510.gif</figcaption></figure></p>
-
-<h3 id="toc_6">ChangeBounds</h3>
-
-<p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画。</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
-FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)mTarget.getLayoutParams();
-if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
-    lp.gravity = Gravity.BOTTOM | Gravity.END;
-} else {
-    lp.gravity = Gravity.TOP | Gravity.START;
-}
-mTarget.setLayoutParams(lp);
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/><figcaption>20171031150938627779470.gif</figcaption></figure></p>
-
-<h3 id="toc_7">ChangeClipBounds</h3>
-
-<p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
-
-<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
-TransitionManager.beginDelayedTransition(mRoot,new ChangeClipBounds());
-if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
-    ViewCompat.setClipBounds(mImageView,null);
-} else {
-    ViewCompat.setClipBounds(mImageView,BOUNDS);
-}
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/><figcaption>20171031150938645594705.gif</figcaption></figure></p>
-
-<h3 id="toc_8">ChangeImageTransform</h3>
-
-<p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
-mImageView.setScaleType(ImageView.ScaleType.xxx);
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/><figcaption>20171031150938655679728.gif</figcaption></figure></p>
-
-<h3 id="toc_9">ChangeScroll</h3>
-
-<p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
-mTarget.scrollBy(-100,-100);
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/><figcaption>20171031150938665356244.gif</figcaption></figure></p>
-
-<h3 id="toc_10">ChangeTransform</h3>
-
-<p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
-if (mContainer2.getChildCount() &gt; 0){
-    mContainer2.removeAllViews();
-    showRedSquare(mContainer1);
-} else {
-    mContainer1.removeAllViews();
-    showRedSquare(mContainer2);
-    mContainer2.getChildAt(0).setRotation(45);
-}
-
-private void showRedSquare(FrameLayout container){
-    final View view = LayoutInflater.from(getContext())
-                .inflate(R.layout.red_square,container,false);
-    container.addView(view);
-}
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/><figcaption>20171031150938690499587.gif</figcaption></figure></p>
-
-<h3 id="toc_11">Explode</h3>
-
-<p>对应xml tag为explode，作用对象：View的Visibility</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
-int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
-for (View view : mViews){
-    view.setVisibility(vis);
-}
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/><figcaption>20171031150938702666553.gif</figcaption></figure></p>
-
-<h3 id="toc_12">Fade</h3>
-
-<p>对应xml tag为fade，作用对象：View的Visibility<br/><br/>
-可以在初始化是指定IN或者OUT分别对应淡入和淡出，若不指定默认为淡入淡出效果</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
-int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
-for (View view : mViews){
-    view.setVisibility(vis);
-}
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/><figcaption>20171031150938727625794.gif</figcaption></figure></p>
-
-<h3 id="toc_13">Slide</h3>
-
-<p>对应xml tag为slide，作用对象：View的Visibility</p>
-
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
-int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
-for (View view : mViews){
-    view.setVisibility(vis);
-}
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/><figcaption>20171031150938732543238.gif</figcaption></figure></p>
-
-<h3 id="toc_14">TransitionSet</h3>
-
-<p>对应xml tag为transitionSet<br/><br/>
-可以在代码中创建transitionSet如：  </p>
-
-<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
-mTransition.addTransition(new ChangeImageTransform());
-mTransition.addTransition(new ChangeTransform());
-TransitionManager.beginDelayedTransition(mOUterFrame,mTransition);
-if (mInnerFrame.getChildCount() &gt; 0){
-    mInnerFrame.removeAllViews();
-    addImageView(mOUterFrame,ImageView.ScaleType.CENTER_CROP,mPhotoSize);
-} else {
-    mOuterFrame.removeViewAt(1);
-    addImageView(mInnerFrame,ImageView.ScaleType.FIT_XY,FrameLayout.LayoutParams.MATCH_PARENT);
-}
-</code></pre>
-
-<p>也可以通过加载xml布局创建transitionSet：<br/><br/>
-xml布局长这样：  </p>
-
-<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:transitionOrdering=&quot;together&quot;&gt;
-    &lt;changeImageTransform/&gt;
-    &lt;changeTransform/&gt;
-&lt;/transitionSet&gt;
-</code></pre>
-
-<p>通过transitionOrdering属性设置动画执行的顺序，together表示同时执行，sequential表示顺序执行，在代码中可以调用TransitionSet的<code>setOrdering(int)</code>方法，属性值传ORDERING_SEQUENTIAL或者ORDERING_TOGETHER<br/><br/>
-在代码中：  </p>
-
-<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
-TransitionManager.beginDelayedTransition(mOuterFrame,mTransition);
-if (mInnerFrame.getChildCount() &gt; 0){
-    mInnerFrame.removeAllViews();
-    addImageView(mOUterFrame,ImageView.ScaleType.CENTER_CROP,mPhotoSize);
-} else {
-    mOuterFrame.removeViewAt(1);
-    addImageView(mInnerFrame,ImageView.ScaleType.FIT_XY,FrameLayout.LayoutParams.MATCH_PARENT);
-}
-</code></pre>
-
-<p>这里结合changeImageTransform和changeTransform，效果如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/><figcaption>20171031150938791428154.gif</figcaption></figure></p>
-
-<h3 id="toc_15">PathMotion</h3>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/><figcaption>2017103115093879453435.png</figcaption></figure></p>
-
-<p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
-
-<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
-TransitionManager.beginDelayedTransition(mRoot,mTransition);
-FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
-if ((lp.gravity &amp; Gravity.START) == START) {
-    lp.gravity = Gravity.END | Gravity.BOTTOM;
-} else {
-    lp.gravity = Gravity.START | Gravity.TOP;
-}
-mTarget.setLayoutParams(lp);
-</code></pre>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/><figcaption>20171031150938816788360.gif</figcaption></figure></p>
-
-<p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/><figcaption>20171031150938819673207.jpg</figcaption></figure></p>
-
-<h3 id="toc_16">自定义Transition</h3>
-
-<p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
-
-<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
-    @Override
-    public void captureStartValues(TransitionValues values){}
-    @Override
-    public void captureEndValues(TransitionValues values){}
-    @Override
-    public Animator createAnimator(ViewGroup sceneRoot,TransitionValues startValues,TransitionValues endValues){}
-}
-</code></pre>
-
-<p>其工作原理是在captureStartValues和captureEndValues中分别记录View的属性值，官网建议确保属性值不冲突，属性值的命名格式参考：<br/><br/>
-package_name:transition_name:property_name<br/><br/>
-在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：  </p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/><figcaption>2017103115093883857329.gif</figcaption></figure></p>
-
-<p>在两个Scene中使用自定义过渡动画，效果如下：</p>
-
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/><figcaption>20171031150938841128073.gif</figcaption></figure></p>
-
-<h2 id="toc_17">Note</h2>
-
-<ul>
-<li>Android 版本在4.0(API Level 14)到4.4.2(API Level 19)使用Android Support Library’s</li>
-<li>对于 SurfaceView可能不起效果，因为SurfaceView的实例是在非UI线程更新的，因此会造成和其他视图动画不同步。</li>
-<li>某些特定的转换类型在应用到TextureView时可能不会产生所需的动画效果。</li>
-<li>继承自AdapterView的如ListView，与该框架不兼容。</li>
-<li>不要对包含文本的视图的大小进行动画</li>
-</ul>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -2788,31 +2635,31 @@ package_name:transition_name:property_name<br/><br/>
 	      
 		      
 			      <li class="post">
-			        <a href="15704556102016.html">iTerm2工具学习使用</a>
+			        <a href="15712984956484.html">代理模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15704404393204.html">Homebrew学习</a>
+			        <a href="15712937841703.html">备忘录模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15663678647312.html">Docker学习</a>
+			        <a href="15711947460528.html">观察者模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15662718181666.html">Android GRPC接入</a>
+			        <a href="15711314242192.html">策略模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15662693410122.html">Docker搭建Maven私服</a>
+			        <a href="15711233221322.html">适配器模式</a>
 			      </li>
 		     
 		  

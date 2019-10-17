@@ -3782,8 +3782,12 @@ menu_icons:
 
 <h3 id="toc_4">版本(tag)操作相关命令</h3>
 
+<p>Tag的概念类似于branch，区别是branch是可以不断改变、Merge的而Tag不行。Tag可以认为是一个快照，一个记录点，用于记录某个commit点或分支的历史快照。Tag通常打在Master分支上，以保证代码的准确性。目前的项目开发中，当发布版本时 tag 就派上用场了。例如 v1.0.1，v1.0.2… <br/>
+另外，git 提供了 tag 的增删改查一系列操作，在 tag 的使用上，可谓非常之方便。</p>
+
 <p>查看版本：<code>$ git tag</code><br/><br/>
-创建版本：<code>$ git tag [name]</code><br/><br/>
+创建版本：<code>$ git tag [name] [commitId]</code> <br/>
+创建带注释的版本：<code>$ git tag -a [name] -m [注释] [commitId]</code><br/><br/>
 删除版本：<code>$ git tag -d [name]</code><br/><br/>
 查看远程版本：<code>$ git tag -r</code><br/><br/>
 创建远程版本(本地版本push到远程)：<code>$ git push origin [name]</code><br/><br/>
@@ -3807,7 +3811,27 @@ menu_icons:
 <li>手动删除子模块残留的目录</li>
 </ul>
 
-<h3 id="toc_6">忽略一些文件、文件夹不提交</h3>
+<h3 id="toc_6">回退操作</h3>
+
+<p>git checkout 还原一个代码仓库中的文件。 <code>git checkout &lt;file&gt;</code>。可以初始化到上一个add指令执行成功后的状态。</p>
+
+<p><code>git reset &lt;last commit SHA&gt; &lt;file&gt;</code>。reset提交记录，但不修改本地工作区，从而进行新的提交。</p>
+
+<p><code>git reset --hard HEAD^</code>。 回退到上个版本。HEAD表示当前版本，上一个版本HEAD<sup>，上上个版本HEAD<sup><sup>，上100个版本HEAD~100。</sup></sup></sup></p>
+
+<p><code>git reset --hard &lt;commit id&gt;</code>。 回退到指定版本。</p>
+
+<h3 id="toc_7">文件暂存</h3>
+
+<p>当前开发者正在dev分支上进行一个新功能的开发，但是开发到一半，测试人员提了一个bug需要解决，这时候开发者通常需要创建一个bug分支来修改这个bug，但是当前dev分支并不是干净的，新功能开发到一半直接从dev上拉分支，代码是不完善的。在这种情况下，可以使用git stash指令将当前修改暂存起来，把修改前的分支作为新的bug分支，而不会带有新修改的代码。等重新切换回dev分支的时候，再把代码pop出来，继续开发。</p>
+
+<p><code>git stash</code> 暂存代码<br/>
+<code>git stash list</code> 查看当前暂存的内容<br/>
+<code>git stash apply</code> 进行内容恢复,不会删除记录<br/>
+<code>git stash pop</code> 进行内容恢复，会删除记录<br/>
+<code>git stash drop</code> 删除记录</p>
+
+<h3 id="toc_8">忽略一些文件、文件夹不提交</h3>
 
 <p>在仓库根目录下创建名称为“.gitignore”的文件，写入不需要的文件夹名或文件，每个元素占一行即可，如  </p>
 
@@ -3816,61 +3840,60 @@ bin
 *.db
 </code></pre>
 
-<h2 id="toc_7">Git 常用命令</h2>
+<h2 id="toc_9">Git 常用命令</h2>
 
-<pre class="line-numbers"><code class="language-text">git branch 查看本地所有分支
-git status 查看当前状态 
-git commit 提交 
-git branch -a 查看所有的分支
-git branch -r 查看本地所有分支
-git commit -am &quot;init&quot; 提交并且加注释 
+<pre class="line-numbers"><code class="language-shell">git branch # 查看本地所有分支
+git status # 查看当前状态 
+git commit # 提交 
+git branch -a # 查看所有的分支
+git branch -r # 查看本地所有分支
+git commit -am &quot;init&quot; # 提交并且加注释 
 git remote add origin git@192.168.1.119:ndshow
-git push origin master 将文件给推到服务器上 
-git remote show origin 显示远程库origin里的资源 
+git push origin master # 将文件给推到服务器上
+git push -u origin master # 不但会把本地的master分支内容推送到远程新的master分支，还会把本地的master分支和远程的master分支关联起来。
+git remote show origin # 显示远程库origin里的资源 
 git push origin master:develop
-git push origin master:hb-dev 将本地库与服务器上的库进行关联 
-git checkout --track origin/dev 切换到远程dev分支
-git branch -D master develop 删除本地库develop
-git checkout -b dev 建立一个新的本地分支dev
-git merge origin/dev 将分支dev与当前分支进行合并
-git checkout dev 切换到本地dev分支
-git remote show 查看远程库
+git push origin master:hb-dev # 将本地库与服务器上的库进行关联 
+git checkout --track origin/dev # 切换到远程dev分支
+git branch -D master develop # 删除本地库develop
+git checkout -b dev # 建立一个新的本地分支dev，并切换过去
+git merge origin/dev # 将分支dev与当前分支进行合并
+git checkout dev # 切换到本地dev分支
+git remote show # 查看远程库
 git add .
-git rm 文件名(包括路径) 从git中删除指定文件
-git clone git://github.com/schacon/grit.git 从服务器上将代码给拉下来
-git config --list 看所有用户
-git ls-files 看已经被提交的
-git rm [file name] 删除一个文件
-git commit -a 提交当前repos的所有的改变
-git add [file name] 添加一个文件到git index
-git commit -v 当你用－v参数的时候可以看commit的差异
-git commit -m &quot;This is the message describing the commit&quot; 添加commit信息
-git commit -a -a是代表add，把所有的change加到git index里然后再commit
-git commit -a -v 一般提交命令
-git log 看你commit的日志
-git diff 查看尚未暂存的更新
-git rm a.a 移除文件(从暂存区和工作区中删除)
-git rm --cached a.a 移除文件(只从暂存区中删除)
-git commit -m &quot;remove&quot; 移除文件(从Git中删除)
-git rm -f a.a 强行移除修改后文件(从暂存区和工作区中删除)
-git diff --cached 或 $ git diff --staged 查看尚未提交的更新
-git stash push 将文件给push到一个临时空间中
-git stash pop 将文件从临时空间pop下来
+git rm 文件名(包括路径) # 从git中删除指定文件
+git clone git://github.com/schacon/grit.git # 从服务器上将代码给拉下来
+git config --list # 查看所有用户
+git ls-files # 查看已经被提交的文件
+git commit -a # 提交当前repos的所有的改变
+git add [file name] # 添加一个文件到git index
+git commit -v # 当你用－v参数的时候可以看commit的差异
+git commit -m &quot;This is the message describing the commit&quot; # 添加commit信息
+git commit -a # -a是代表add，把所有的change加到git index里然后再commit
+git log # 查看日志
+git reflog # 增强查看日志
+git diff # 查看尚未暂存的更新
+git rm a.a # 移除文件(从暂存区和工作区中删除)
+git rm --cached # a.a 移除文件(只从暂存区中删除)
+git commit -m &quot;remove&quot; # 移除文件(从Git中删除)
+git rm -f a.a # 强行移除修改后文件(从暂存区和工作区中删除)
+git diff --cached 或 $ git diff --staged # 查看尚未提交的更新
+git stash push # 将文件给push到一个临时空间中
+git stash pop # 将文件从临时空间pop下来
 ---------------------------------------------------------
 git remote add origin git@github.com:username/Hello-World.git
-git push origin master 将本地项目给提交到服务器中
+git push origin master # 将本地项目给提交到服务器中
 -----------------------------------------------------------
-git pull 本地与服务器端同步
+git pull # 本地与服务器端同步
 -----------------------------------------------------------------
-git push (远程仓库名) (分支名) 将本地分支推送到服务器上去。
+git push (远程仓库名) (分支名) # 将本地分支推送到服务器上去。
 git push origin serverfix:awesomebranch
 ------------------------------------------------------------------
-git fetch 相当于是从远程获取最新版本到本地，不会自动merge
-git commit -a -m &quot;log_message&quot; (-a是提交所有改动，-m是加入log信息) 本地修改同步至服务器端 ：
-git branch branch_0.1 master 从主分支master创建branch_0.1分支
-git branch -m branch_0.1 branch_1.0 将branch_0.1重命名为branch_1.0
-git checkout branch_1.0/master 切换到branch_1.0/master分支
-du -hs
+git fetch # 相当于是从远程获取最新版本到本地，不会自动merge
+git commit -a -m &quot;log_message&quot; # (-a是提交所有改动，-m是加入log信息) 本地修改同步至服务器端 ：
+git branch branch_0.1 master # 从主分支master创建branch_0.1分支
+git branch -m branch_0.1 branch_1.0 # 将branch_0.1重命名为branch_1.0
+git checkout branch_1.0/master # 切换到branch_1.0/master分支
 
 -----------------------------------------------------------
 mkdir WebApp
@@ -4224,31 +4247,31 @@ LoadModule userdir_module libexec/apache2/mod_userdir.so
 	      
 		      
 			      <li class="post">
-			        <a href="15704556102016.html">iTerm2工具学习使用</a>
+			        <a href="15712984956484.html">代理模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15704404393204.html">Homebrew学习</a>
+			        <a href="15712937841703.html">备忘录模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15663678647312.html">Docker学习</a>
+			        <a href="15711947460528.html">观察者模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15662718181666.html">Android GRPC接入</a>
+			        <a href="15711314242192.html">策略模式</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15662693410122.html">Docker搭建Maven私服</a>
+			        <a href="15711233221322.html">适配器模式</a>
 			      </li>
 		     
 		  

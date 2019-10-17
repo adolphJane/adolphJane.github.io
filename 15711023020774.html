@@ -1,0 +1,492 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  装饰模式 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+  <script src="asset/highlightjs/highlight.pack.js"></script>
+  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <script>hljs.initHighlightingOnLoad();</script>
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>装饰模式</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/10/15</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E7%AE%97%E6%B3%95.html'>算法</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">装饰模式简介</h2>
+
+<p>装饰模式(Decorator Pattern)也称为包装模式(Wrapper Pattern)，结构性设计模式之一，其使用一种对客户端透明的方式来动态地扩展对象的功能，同时它也是继承关系的一种替代方案之一。</p>
+
+<span id="more"></span><!-- more -->
+
+<h2 id="toc_1">装饰模式的定义</h2>
+
+<p>动态地给一个对象添加一些额外的职责。就增加功能来说，装饰模式相比生成子类更加灵活。</p>
+
+<h2 id="toc_2">装饰模式的使用场景</h2>
+
+<p>需要透明且动态地扩展类的功能时。</p>
+
+<h2 id="toc_3">模式的简单实现</h2>
+
+<p>人总是要穿衣服的，我们将人定义为一个抽象类，将其穿衣的行为定义为一个抽象方法。</p>
+
+<pre class="line-numbers"><code class="language-java">public abstract class Person {
+    /**
+     *  Person 下有一个穿着的抽象方法
+     */
+     public abstract void dressed(); 
+}
+</code></pre>
+
+<p>该类就是抽象组件类，也就是我们需要装饰的原始对象，接下里实现一个具体的实现类。</p>
+
+<pre class="line-numbers"><code class="language-java">public class Boy extends Person {
+    @Override
+    public void dressed() {
+        // Boy类下dressed方法的基本逻辑
+        System.out.println(&quot;穿了内衣内裤&quot;);
+    }
+}
+</code></pre>
+
+<p>Boy类继承于Person类，该类仅对Person中的dressed方法作了具体的实现，而Boy类则是我们所要装饰的具体对象，现在需要一个装饰者来装饰我们的这个Boy对象，这里定义一个PersonCloth类来表示人所穿着的衣服。</p>
+
+<pre class="line-numbers"><code class="language-java">public abstract class PersonCloth extends Person {
+    protected Person mPerson; //保持一个Person类的引用
+    
+    public PersonCloth(Person mPerson) {
+        this.mPerson = mPerson;
+    }
+    
+    @Override
+    public void dressed() {
+        //调用Person类中的dressed方法
+        mPerson.dressed();
+    }
+}
+</code></pre>
+
+<p>在PersonCloth类中我们保持了一个对Person类的引用，可以方便地调用具体被装饰对象中的方法，这也是为什么我们可以在不破坏原类层次结构的情况下为类增加一些功能，我们只需要在被装饰对象的相应方法前或后增加相应的功能逻辑即可。</p>
+
+<p>使用一个类ExpensiveCloth表示高档衣服</p>
+
+<pre class="line-numbers"><code class="language-java">public class ExpensiveCloth extends PersonCloth {
+    public ExpensiveCloth(Person person) {
+        super(person);
+    }
+    
+    /**
+     * 穿短袖
+     */
+     private void dressShirt() {
+        System.out.println(&quot;穿件短袖&quot;);
+     } 
+     
+     /**
+     * 穿皮衣
+     */
+     private void dressLeather() {
+        System.out.println(&quot;穿件皮衣&quot;);
+     }
+     
+     /**
+     * 穿牛仔裤
+     */
+     private void dressJean() {
+        System.out.println(&quot;穿条牛仔裤&quot;);
+     }
+     
+     @Override
+     public void dressed() {
+        super.dressed();
+        dressShirt();
+        dressLeather();
+        dressJean();
+     }
+}
+</code></pre>
+
+<p>使用CheapCloth表示便宜的衣服</p>
+
+<pre class="line-numbers"><code class="language-java">public class CheapCloth extends PersonCloth {
+    public CheapCloth(Person person) {
+        super(person);
+    }
+    
+    /**
+     * 穿短裤
+     */
+     private void dressShorts() {
+        System.out.println(&quot;穿条短裤&quot;);
+     } 
+        
+     @Override
+     public void dressed() {
+        super.dressed();
+        dressShorts();
+     }
+}
+</code></pre>
+
+<p>这两个类本质上没有区别，都是为Boy类中的dressed方法提供功能扩展，不过这个扩展并非是直接修改原有的方法逻辑或结构，更恰当地说，仅仅是在另一个类中将原有的方法和新逻辑进行封装整合。</p>
+
+<p>在客户端中调用</p>
+
+<pre class="line-numbers"><code class="language-java">public class Main {
+    public static void main(String[] args) {
+        //首先我们要有一个Person男孩
+        Person person = new Boy();
+        
+        //然后为他穿上便宜的衣服
+        PersonCloth clothCheap = new CheapCloth(person);
+        clothCheap.dressed();
+        
+        //或穿上比较上档次的衣服
+        PersonCloth clothExpensive = new ExpensiveCloth(person);
+        clothExpensive.dressed();
+    }
+}
+</code></pre>
+
+<h2 id="toc_4">总结</h2>
+
+<p>装饰模式和代理模式有点类似，容易把装饰看作时代理。装饰模式是以对客户端透明的方法扩展对象的功能，是继承关系的一个替代方案；而代理模式则是给一个对象提供一个代理对象，并由代理对象来控制对原有对象的引用。装饰模式应该为所装饰的对象增强功能；代理模式对代理的对象施加控制，但不对对象本身的功能进行增强。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15711208032276.html" 
+          title="Previous Post: 外观模式(门面模式)">&laquo; 外观模式(门面模式)</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15710570199030.html" 
+          title="Next Post: 享元模式">享元模式 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="15712984956484.html">代理模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15712937841703.html">备忘录模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15711947460528.html">观察者模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15711314242192.html">策略模式</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15711233221322.html">适配器模式</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+    
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+
+
+  </body>
+</html>
