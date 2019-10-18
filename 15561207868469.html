@@ -225,13 +225,13 @@
 
 <p>DecorView是FrameLayout的子类，它可以被认为是Android视图树的根节点视图。DecorView作为顶级View，一般情况下它内部包含一个竖直方向的LinearLayout，在这个LinearLayout里面有上下两个部分（具体情况和Android版本及主体有关），上面的是标题栏，下面的是内容栏。在Activity中通过setContentView所设置的布局文件其实就是被加到内容栏之中的，而内容栏的id是content，在代码中可以通过ViewGroup content = （ViewGroup)findViewById(R.android.id.content)来得到content对应的layout。 <br/>
 DecorView的结构图： <br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789775483537.png" alt="20170224148789775483537.png"/><figcaption>20170224148789775483537.png</figcaption></figure></p>
+<figure><img src="media/15561207868469/15713234121230.png" alt=""/></figure></p>
 
 <h2 id="toc_2">View的绘制流程</h2>
 
 <p>View的绘制流程是从ViewRootImpl的performTraversals()方法开始的，它经过measure、layout和draw三个流程才能最终将view绘制出来，其中measure测量view的宽高，layout确定view在父容器中的位置，draw负责将view绘制在屏幕上。<br/><br/>
 view的绘制流程图：<br/><br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170224148789782350211.png" alt="20170224148789782350211.png"/><figcaption>20170224148789782350211.png</figcaption></figure></p>
+<figure><img src="media/15561207868469/15713234196147.png" alt=""/></figure></p>
 
 <p><strong>performTraversals()</strong>方法源码比较长，就不贴出来了，有兴趣可以去查看一下，从上面的流程图可以看出<strong>performTraversals</strong>会依次调用 <strong>performMeasure(childWidthMeasureSpec, childHeightMeasureSpec);</strong> -  <strong>performLayout(lp, mWidth, mHeight);</strong> - <strong>performDraw();</strong>三个方法，这三个方法顶级view的三个流程，在 <strong>performMeasure()</strong>中会调用<strong>mView.measure()</strong>方法，<strong>mView.measure()</strong>又会调用<strong>onMeasure()</strong>方法对所有子元素进行测量，这个时候measure流程就从父容器传递到了子元素中，这样就完成了依次measure过程，<strong>performLayout()</strong>和<strong>performDraw()</strong>与<strong>performMeasure()</strong>过程是类似的，唯一的不同是<strong>performDraw()</strong>过程在draw方法中是通过<strong>dispatchDraw(canvas)</strong>方法来完成绘制的;</p>
 

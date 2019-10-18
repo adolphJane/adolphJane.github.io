@@ -165,7 +165,7 @@
 
 <p>由此根据我们的经验，判断ColorFilter可能是个父类，具体实现可能下面还有子类完成的，于是再看Google的文档：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781638185946.png" alt="20171012150781638185946.png"/><figcaption>20171012150781638185946.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713327420386.png" alt=""/></figure></p>
 
 <p>一目了然了，ColorFilter下有3个子类ColorMatrixColorFilter, LightingColorFilter, PorterDuffColorFilter ，下面逐一学习一下。</p>
 
@@ -259,11 +259,11 @@ mPaint.setColorFilter(colorFilter);
 <p>将上面的ColorMatrixColorFilter中的float数组替换成这样的<br/>
 哎哟呵~颜色变深了，看起来神奇很多。那么，这个色彩矩阵以及这个float数组是怎样做到的呢？或者说是怎样通过计算后得到另外一个色彩值的呢？下面作图来说明一下，我们顶一个ColorMatrix的4*5的float型数组，然后定义一个我们自己MyColor，分别代表RGBA的值：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781645122295.jpg" alt="20171012150781645122295.jpg"/><figcaption>20171012150781645122295.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713327557838.jpg" alt=""/></figure></p>
 
 <p>实际上，安卓系统计算色彩值是用矩阵相乘的方式得出的，如上图的样子。这里的MyColor的各项值都要转换到[0,1]之间的值，下面就是我们实际转换的计算方式和结果了。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781647527079.jpg" alt="20171012150781647527079.jpg"/><figcaption>20171012150781647527079.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713327650356.jpg" alt=""/></figure></p>
 
 <p>通过上面的计算，我们得到了最终的RGBA的值是（0.5,0.25,0.2,1），说明RGB色彩值都发生了便宜，只有A未偏移，然后我们将这些值乘以255后还原一下看看，是不是跟上图的圈圈的色彩值是一致的呢，好吧，别看了，肯定必须一定是一样的。那么了解色彩矩阵有什么用呢？上面简单的更换一下色彩值而已，Paint类下也提供了setColor()方法，直接将色彩值设置上去，都TMD的方便，还搞什么玩意的矩阵，显得自己牛逼+蛋疼是不是？解释一下，上面的例子不过是个例子而已啊，真正开发的时候肯定是setColor比较简便嘛。问题来了，我们有可能处理的不是一个纯色彩的东西，而是一直图片呢？一张图片是有几十万中色彩值的，这时候setColor()就不可能让他们变色了吧，还是得用色彩矩阵来搞这玩意。下面我们从drawable目录下加载一张图片吧！</p>
 
@@ -304,7 +304,7 @@ mPaint.setColorFilter(colorFilter);
 }  
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781650576419.png" alt="20171012150781650576419.png"/><figcaption>20171012150781650576419.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713327784421.png" alt=""/></figure></p>
 
 <p>好了图片加载完毕，代码没有难度，上面的Paint没有做任何的处理，下面我们为Paint设置色彩过滤器吧！</p>
 
@@ -317,7 +317,7 @@ mPaint.setColorFilter(colorFilter);
 mPaint.setColorFilter(colorFilter);  
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781653146217.png" alt="20171012150781653146217.png"/><figcaption>20171012150781653146217.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713327887731.png" alt=""/></figure></p>
 
 <p>好吧图片变成黑白的了，难道setColor()也可以办吗？再改一个试试：</p>
 
@@ -330,7 +330,7 @@ mPaint.setColorFilter(colorFilter);
 mPaint.setColorFilter(colorFilter);  
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781655966867.png" alt="20171012150781655966867.png"/><figcaption>20171012150781655966867.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713328018868.png" alt=""/></figure></p>
 
 <p>这样的效果是不是有点像负片效果啊！好了，反正我也不懂图像学，ColorMatrixColorFilter想设置什么样的就改改矩阵就行了，到底需要什么效果，效果的值要设置成多少，我也不知道，问问美工吧！我们只负责写程序！呵呵~~</p>
 
@@ -355,7 +355,7 @@ mPaint.setColorFilter(colorFilter);
 
 <p>运行之后的结果，蓝天没了。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781662212525.png" alt="20171012150781662212525.png"/><figcaption>20171012150781662212525.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713328128205.png" alt=""/></figure></p>
 
 <h2 id="toc_3">PorterDuffColorFilter</h2>
 
@@ -409,11 +409,11 @@ mPaint.setColorFilter(colorFilter);
 
 <p>关于PorterDuff.Mode，Android系统一共提供了18种混排模式，在模拟器的ApiDemos/Graphics/XferModes，有张效果图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781665919671.png" alt="20171012150781665919671.png"/><figcaption>20171012150781665919671.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713328265702.png" alt=""/></figure></p>
 
 <p>这张图可以很形象的说明图片各种混排模式下的效果。其中Src代表原图，Dst代表目标图，两张图片使用不同的混排方式后，得到的图像是如上图所示的。  PorterDuff.Mode也提供了18种混排模式算法，其中比上图多了ADD和OVERLAY两种模式：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781667837297.png" alt="20171012150781667837297.png"/><figcaption>20171012150781667837297.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870430/15713328371456.png" alt=""/></figure></p>
 
 <p>其中Sa全称为Source alpha表示源图的Alpha通道；Sc全称为Source color表示源图的颜色；Da全称为Destination alpha表示目标图的Alpha通道；Dc全称为Destination color表示目标图的颜色，[...,..]前半部分计算的是结果图像的Alpha通道值，“,”后半部分计算的是结果图像的颜色值。图像混排后是依靠这两个值来重新计算ARGB值的，具体计算算法，抱歉，我也不知道，不过不要紧，不了解计算算法也不影响我们程序员写程序的。我们只要对照上面的apiDemo中提供的图片就能推测出混排后的结果的，下面是在网上找到的汉字语言描述，感谢这位作者的总结。</p>
 

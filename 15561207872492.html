@@ -352,7 +352,7 @@ explode.setMode(Visibility.MODE_IN);
 
 <p>再次执行程序，日志信息如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041141118718.png" alt="20171111151041141118718.png"/><figcaption>20171111151041141118718.png</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/15713057229285.jpg" alt=""/></figure></p>
 
 <p>原来A页面的退出动画和B页面的进入动画、B页面的返回动画和A页面的重现动画是并行执行的。也就是说A页面的ExitTransition不是没有执行，而是在它执行的时候，B页面已经覆盖上来，并且EnterTransition已经同时在执行了，这时A页面已经不可见了。这也是Android默认的转场动画执行流程。<br/><br/>
 那问题来了，如果想要并行执行该怎么办呢？<br/><br/>
@@ -372,17 +372,17 @@ getWindow().setWindowAllowReturnTransitionOverlap(false);
 <p>修改后效果如下：<br/>
 日志也显示现在是串行执行了：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041148016665.png" alt="20171111151041148016665.png"/><figcaption>20171111151041148016665.png</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/15713057362519.jpg" alt=""/></figure></p>
 
 <h2 id="toc_7">生命周期分析</h2>
 
 <p>保持上面的打印信息不变，我们增加两个Activity的生命周期日志信息，串行结果如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041150877583.png" alt="20171111151041150877583.png"/><figcaption>20171111151041150877583.png</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/15713057490633.jpg" alt=""/></figure></p>
 
 <p>并行如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041153077770.png" alt="20171111151041153077770.png"/><figcaption>20171111151041153077770.png</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/15713057620196.jpg" alt=""/></figure></p>
 
 <p>可以得到如下信息：</p>
 
@@ -442,7 +442,7 @@ startActivity(intent, activityOptionsCompat.toBundle());
 <p>当然也可以在代码中设置（注意要在调用时机，不能晚于OnResume）：<code>shared_image.setTransitionName(&quot;shared_image_&quot;);</code><br/>
 这样简单两步，咱们的带共享元素的转场动画就改造完成了：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041179398841.gif" alt="20171111151041179398841.gif"/><figcaption>20171111151041179398841.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/20171111151041179398841.gif" alt=""/></figure></p>
 
 <h2 id="toc_9">自定义共享元素动画</h2>
 
@@ -454,7 +454,7 @@ startActivity(intent, activityOptionsCompat.toBundle());
 
 <p>仔细一看这两个方法都只需要一个transition作为动画，所以意味着自定义共享元素动画就是自定义Transition了。套用第一篇自定义的那个直角移动ChangeRect，效果如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041183822484.gif" alt="20171111151041183822484.gif"/><figcaption>20171111151041183822484.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/20171111151041183822484.gif" alt=""/></figure></p>
 
 <h2 id="toc_10">其他方法</h2>
 
@@ -466,11 +466,11 @@ setSharedElementReenterTransition
 
 <p>看命名方式和普通的转场动画非常相似，也就是共享元素离开和重现动画的方法。但是共享元素转场是为了表现两个页面相似内容连贯性而设计的，一组动画就足以完成了。但如果我们都加上后会怎么样呢？为了动画更明显，我们把普通动画设为串行：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017111115104118664268.gif" alt="2017111115104118664268.gif"/><figcaption>2017111115104118664268.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/2017111115104118664268.gif" alt=""/></figure></p>
 
 <p>可以看到新增的两个并没有生效，通过日志打印也可以卡出这一点：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017111115104118919019.png" alt="2017111115104118919019.png"/><figcaption>2017111115104118919019.png</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/15713058665084.jpg" alt=""/></figure></p>
 
 <p>SharedElementExitTransition和SharedElementReenterTransition开始后立即就结束了。关于这一点，参看stackoverflow上的回答，简单来说这两个动画的设计只是为了作一些初始化而存在的。当我们点击跳转按钮的时候，马上就已经跳到了B（参看上一篇生命周期的分析），而共享元素动画没有所谓的串行机制，会马上执行SharedElementEnterTransition，所以转场动画内部会立即结束掉ExitTransition。而ReenterTransition我们也可以从gif图看到，SharedElementReturnTransition已经完成了动画，将目标View变为目标状态，所以不再进行SharedElementReturnTransition（也因为没必要），所以只进行了普通转场动画的ReenterTransition。</p>
 
@@ -478,7 +478,7 @@ setSharedElementReenterTransition
 
 <p>Window中有个关于共享元素的设置setSharedElementsUseOverlay(boolean sharedElementsUseOverlay)，我们将其设为false，重启App：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041191716571.gif" alt="20171111151041191716571.gif"/><figcaption>20171111151041191716571.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/20171111151041191716571.gif" alt=""/></figure></p>
 
 <p>可以看到动画执行流程没有变但是共享元素在移动过程中被遮住了，我们来看源码</p>
 
@@ -514,7 +514,7 @@ setSharedElementReenterTransition
 
 <p>前面的动画效果都是操作View原有的一些属性，View的内容没有(或者内容没有改变），所以如果与Svg矢量动画配合一番，会产生怎么样的效果呢：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171111151041200523866.gif" alt="20171111151041200523866.gif"/><figcaption>20171111151041200523866.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207872492/20171111151041200523866.gif" alt=""/></figure></p>
 
 <p>其实很简单，监听SharedElementEnterTransition和SharedElementReturnTransition动画，在其执行的时候执行矢量动画就行了。在更多关于这个矢量动画实现的东西可以参考这篇文章。</p>
 

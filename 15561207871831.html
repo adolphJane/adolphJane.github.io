@@ -197,7 +197,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 
 <p>LayoutInflater属于 android.view包下，在LayoutInflater的头部有一段关于LayoutInflater的介绍：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981598486071.png" alt="20171105150981598486071.png"/><figcaption>20171105150981598486071.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713348568693.png" alt=""/></figure></p>
 
 <p>由于篇幅原因，这里只截取了一部分图片，总结一下：</p>
 
@@ -274,7 +274,7 @@ return view;
 
 <p>这里就会收到报错信息提示，每个XML都会有一个预编译的过程，这个过程发生在构建阶段（Build），而不是运行时。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981625428282.png" alt="20171105150981625428282.png"/><figcaption>20171105150981625428282.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713348644088.png" alt=""/></figure></p>
 
 <h3 id="toc_13">LayoutInflater只能加载通过XmlPullParser解析的R文件资源</h3>
 
@@ -375,49 +375,49 @@ public Object getSystemService(String name) {
     }
     return getBaseContext().getSystemService(name);
 }
+</code></pre>
 
-在Activity的父类即ContextThemeWrapper的getSystemService()方法中，我们发现了LayoutInflater的创建过程，从上面的代码我们可以看出：
+<p>在Activity的父类即ContextThemeWrapper的getSystemService()方法中，我们发现了LayoutInflater的创建过程，从上面的代码我们可以看出：</p>
 
-每个Activity内包含的LayoutInflater是一个单例。
+<p>每个Activity内包含的LayoutInflater是一个单例。</p>
 
-Activity创建LayoutInflater时，是先使用最原始的BaseContext创建，然后在将Activity的父类ContextThemeWrapper的信息通过cloneInContext()方法与其绑定。
+<p>Activity创建LayoutInflater时，是先使用最原始的BaseContext创建，然后在将Activity的父类ContextThemeWrapper的信息通过cloneInContext()方法与其绑定。</p>
 
-然后我们在看下LayoutInflater的cloneInContext的实现：
+<p>然后我们在看下LayoutInflater的cloneInContext的实现：</p>
 
-`public abstract LayoutInflater cloneInContext(Context newContext);`
+<p><code>public abstract LayoutInflater cloneInContext(Context newContext);</code></p>
 
-先看下，这个方法的介绍：
+<p>先看下，这个方法的介绍：</p>
 
-![2017110515098197795785.png](http://ohtrrgyyd.bkt.clouddn.com/2017110515098197795785.png)
+<p><figure><img src="media/15561207871831/15713349011719.png" alt=""/></figure></p>
 
-这个方法通过现有的LayoutInflater创建一个新的LayoutInflater副本，唯一变化的地方是指向不同的上下文对象。
+<p>这个方法通过现有的LayoutInflater创建一个新的LayoutInflater副本，唯一变化的地方是指向不同的上下文对象。</p>
 
-在ContextThemeWrapper通过这个方法创建的新的LayoutInflater还包含了主题的信息。
+<p>在ContextThemeWrapper通过这个方法创建的新的LayoutInflater还包含了主题的信息。</p>
 
-在ContextThemeWrapper中使用cloneInContext是想将更多的信息，赋予LayoutInflater中，与其相互绑定。
+<p>在ContextThemeWrapper中使用cloneInContext是想将更多的信息，赋予LayoutInflater中，与其相互绑定。</p>
 
-# Activity中LayoutInflater创建
+<h1 id="toc_17">Activity中LayoutInflater创建</h1>
 
-对于Activity的LayoutInflater，其实在Activity创建之时就已经创建完成，但是这一块内容属于FrameWork层的内容，博主道行太浅了，只想带大家看下from这个方法的实现过程。
+<p>对于Activity的LayoutInflater，其实在Activity创建之时就已经创建完成，但是这一块内容属于FrameWork层的内容，博主道行太浅了，只想带大家看下from这个方法的实现过程。</p>
 
-这里如果大家想了解可以参考下这篇文章
+<p>这里如果大家想了解可以参考下这篇文章</p>
 
-[LayoutInflater源码解析](http://blog.csdn.net/u014486880/article/details/50707672)
+<p><a href="http://blog.csdn.net/u014486880/article/details/50707672">LayoutInflater源码解析</a></p>
 
-而Activity#getLayoutInflater方法：
+<p>而Activity#getLayoutInflater方法：</p>
 
-```java
-@NonNull
+<pre class="line-numbers"><code class="language-java">@NonNull
 public LayoutInflater getLayoutInflater() {
     return getWindow().getLayoutInflater();
 }
+</code></pre>
 
-这个Window对象即PhoneWindow，此时创建出来的LayoutInflater即PhoneLayoutInflater。
+<p>这个Window对象即PhoneWindow，此时创建出来的LayoutInflater即PhoneLayoutInflater。</p>
 
-这里给大家看下PhoneLayoutInflater的cloneInContext()方法：
+<p>这里给大家看下PhoneLayoutInflater的cloneInContext()方法：</p>
 
-```java
-public LayoutInflater cloneInContext(Context newContext) {
+<pre class="line-numbers"><code class="language-java">public LayoutInflater cloneInContext(Context newContext) {
     return new PhoneLayoutInflater(this, newContext);
 }
 
@@ -432,11 +432,12 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p><a href="http://androidxref.com/">Android源码查看网址</a></p>
 
-<h2 id="toc_17">将R.layout.xxx转换为View的过程分析</h2>
+<h2 id="toc_18">将R.layout.xxx转换为View的过程分析</h2>
 
 <p>其实这个过程即LayoutInflater.inflater()这个过程：</p>
 
 <pre class="line-numbers"><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+
     final Resources res = getContext().getResources();
     if (DEBUG) {
         Log.d(TAG, &quot;INFLATING from resource: \&quot;&quot; + res.getResourceName(resource) + &quot;\&quot; (&quot; + Integer.toHexString(resource) + &quot;)&quot;);
@@ -503,7 +504,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 }
 </code></pre>
 
-<h3 id="toc_18">第一部分：</h3>
+<h3 id="toc_19">第一部分：</h3>
 
 <p>这里第一部分的内容，主要是一个XML文件的读取过程，这里有两个判断：</p>
 
@@ -525,7 +526,7 @@ XmlPullParser.END_TAG                                           XML标签的结�
 XmlPullParser.TEXT                                              XML标签的内容
 </code></pre>
 
-<h3 id="toc_19">第二部分</h3>
+<h3 id="toc_20">第二部分</h3>
 
 <p>这部分的一开始先进行了Merge标签的检验，如果发现该节点是Merge，必须满足父View存在，并且与父View绑定的状态。</p>
 
@@ -539,12 +540,12 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p><a href="http://blog.csdn.net/l540675759/article/details/78017065">Android 中LayoutInflater（布局加载器）源码篇之rInflate方法</a></p>
 
-<h3 id="toc_20">第三部分</h3>
+<h3 id="toc_21">第三部分</h3>
 
 <p>我们再看一下第三部分的代码，代码中会有一些简要的说明：</p>
 
-<pre class="line-numbers"><code class="language-java">         //》》》》》》》》》》》》》》》》》第三部分》》》》》》》》》》》》》》》》》》》
-                    //createViewFromTag是一个根据name来创建View的方法
+<pre class="line-numbers"><code class="language-java">//》》》》》》》》》》》》》》》》》第三部分》》》》》》》》》》》》》》》》》》》
+//createViewFromTag是一个根据name来创建View的方法
                     final View temp = createViewFromTag(root, name, inflaterContext, attrs);
 
                     ViewGroup.LayoutParams params = null;
@@ -568,6 +569,7 @@ XmlPullParser.TEXT                                              XML标签的内�
                 }
             return result;
         }
+
 </code></pre>
 
 <p>将第三部分内容分拆一下主要分为以下几块内容：</p>
@@ -581,7 +583,8 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>接下来，我们要介绍的是inflater()方法中的参数，到底有什么作用？</p>
 
-<pre class="line-numbers"><code class="language-java">                    ViewGroup.LayoutParams params = null;
+<pre class="line-numbers"><code class="language-java">
+                    ViewGroup.LayoutParams params = null;
                     //当Root存在
                     if (root != null) {
                         params = root.generateLayoutParams(attrs);
@@ -631,11 +634,11 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>如果你之前没看过这段代码，其实你会像博主之前一样，一直在试，而不知道这段代码正确的含义，但是有时候源码会是一个很好的老师，通过它能够得到你想要的。</p>
 
-<h2 id="toc_21">流程图</h2>
+<h2 id="toc_22">流程图</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981981211425.png" alt="20171105150981981211425.png"/><figcaption>20171105150981981211425.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713349276858.png" alt=""/></figure></p>
 
-<h2 id="toc_22">CreateViewFromTag源码解析</h2>
+<h2 id="toc_23">CreateViewFromTag源码解析</h2>
 
 <pre class="line-numbers"><code class="language-java">private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
     return createViewFromTag(parent, name, context, attrs, false);
@@ -707,9 +710,9 @@ XmlPullParser.TEXT                                              XML标签的内�
 <li>如果没有设置Factory或Factory2，那么就会使用LayoutInflater默认的生成方式，进行View的生成</li>
 </ul>
 
-<h3 id="toc_23">createViewFromTag分析过程：</h3>
+<h3 id="toc_24">createViewFromTag分析过程：</h3>
 
-<h4 id="toc_24">处理view标签</h4>
+<h4 id="toc_25">处理view标签</h4>
 
 <p>如果标签的名称是view，注意是小写的view，这个标签一般大家不太常用，具体的使用情况如下：</p>
 
@@ -721,11 +724,11 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>在使用时，相当于所有控件标签的父类一样，可以设置class属性，这个属性会决定view这个节点会变成什么控件。</p>
 
-<h4 id="toc_25">如果该节点与主题相关，则需要特殊处理</h4>
+<h4 id="toc_26">如果该节点与主题相关，则需要特殊处理</h4>
 
 <p>如果该节点与主题（Theme）相关，需要将context与theme信息包装至ContextWrapper类。</p>
 
-<h4 id="toc_26">处理TAG_1995标签</h4>
+<h4 id="toc_27">处理TAG_1995标签</h4>
 
 <p>这就有意思了，TAG_1995指的是blink这个标签，这个标签感觉使用的很少，以至于大家根本不知道。</p>
 
@@ -742,18 +745,18 @@ XmlPullParser.TEXT                                              XML标签的内�
 &lt;/blink&gt;
 </code></pre>
 
-<h4 id="toc_27">判断其是否存在Factory或者Factory2</h4>
+<h4 id="toc_28">判断其是否存在Factory或者Factory2</h4>
 
 <p>在这里先对Factory进行判空，这里不管Factory还是Factory2（mPrivateFactory 就是Factory2），本质上都是一种扩展操作，提前解析name，然后直接将解析后的View返回。</p>
 
-<h5 id="toc_28">Factory</h5>
+<h5 id="toc_29">Factory</h5>
 
 <pre class="line-numbers"><code class="language-java">public interface Factory {
     public View onCreateView(String name, Context context, AttributeSet attrs);
 }
 </code></pre>
 
-<h5 id="toc_29">Factory2</h5>
+<h5 id="toc_30">Factory2</h5>
 
 <pre class="line-numbers"><code class="language-java">public interface Factory2 extends Factory {
     public View onCreateView(View parent, String name, Context context, AttributeSet attrs);
@@ -840,7 +843,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>所以一般setFactory()或者setFactory2()，一般在cloneInContext()之后设置，这样生成一个新的LayoutInflater，标记默认是false，才能够设置。</p>
 
-<h4 id="toc_30">LayoutInflater内置的解析过程</h4>
+<h4 id="toc_31">LayoutInflater内置的解析过程</h4>
 
 <p>如果Factory或者Factory2没有设置，或者返回View为null，才会使用默认解析方式。</p>
 
@@ -971,11 +974,11 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>而BaseDexClassLoader继承的是ClassLoader，但是在ClassLoader中getParent()方法赋予其Parent为BootClassLoader，这个如果大家感兴趣，可以自行查阅ClassLoader。</p>
 
-<h2 id="toc_31">流程图</h2>
+<h2 id="toc_32">流程图</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982093163000.png" alt="20171105150982093163000.png"/><figcaption>20171105150982093163000.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713350767455.jpg" alt=""/></figure></p>
 
-<h2 id="toc_32">rInflate()的源码分析</h2>
+<h2 id="toc_33">rInflate()的源码分析</h2>
 
 <pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 
@@ -1130,11 +1133,11 @@ viewGroup.addView(view, params);
 <li>parent.addView() 最后将该View添加进Parent布局</li>
 </ul>
 
-<h3 id="toc_33">第一阶段 : createViewFromTag()</h3>
+<h3 id="toc_34">第一阶段 : createViewFromTag()</h3>
 
 <p>createViewFromTag()是根据name(节点名称)来解析出View的一个方法</p>
 
-<h3 id="toc_34">第二阶段 ：rInflateChildren()</h3>
+<h3 id="toc_35">第二阶段 ：rInflateChildren()</h3>
 
 <pre class="line-numbers"><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
     rInflate(parser, parent, parent.getContext(), attrs, finishInflate);
@@ -1150,17 +1153,17 @@ viewGroup.addView(view, params);
 <li>或者type 为 XmlPullParser.END_DOCUMENT（文档结束的标识符）。</li>
 </ul>
 
-<h3 id="toc_35">第三阶段 parent.addView()将View添加进父View中</h3>
+<h3 id="toc_36">第三阶段 parent.addView()将View添加进父View中</h3>
 
 <p><code>viewGroup.addView(view, params);</code></p>
 
 <p>这段话，不难理解，就是将解析出的View，添加到父View中。</p>
 
-<h2 id="toc_36">流程图</h2>
+<h2 id="toc_37">流程图</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982208420747.png" alt="20171105150982208420747.png"/><figcaption>20171105150982208420747.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713350890413.jpg" alt=""/></figure></p>
 
-<h2 id="toc_37">parseInclude()是在哪里使用的？</h2>
+<h2 id="toc_38">parseInclude()是在哪里使用的？</h2>
 
 <pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
     //----------------省略部分代码--------------------//
@@ -1177,7 +1180,7 @@ viewGroup.addView(view, params);
 
 <p>从上来代码中，可以发现parseInclude()是在rInflate()中出现，作用是处理当前节点是Include标签时的状况。</p>
 
-<h2 id="toc_38">parseInclude()源码解析</h2>
+<h2 id="toc_39">parseInclude()源码解析</h2>
 
 <pre class="line-numbers"><code class="language-java"> //参数说明：
  // parser      解析布局的解析器
@@ -1322,33 +1325,33 @@ viewGroup.addView(view, params);
             throw new InflateException(&quot;&lt;include /&gt; can only be used inside of a ViewGroup&quot;);
         }
 
-        LayoutInflater.consumeChildElements(parser);
+LayoutInflater.consumeChildElements(parser);
     }
 </code></pre>
 
 <p>先把parseInclude()这个方法全景先看下，然后我们在进行分拆，一部分一部分分析。</p>
 
-<h2 id="toc_39">parseInclude()参数解读</h2>
+<h2 id="toc_40">parseInclude()参数解读</h2>
 
 <p>parseInclude()中分别含义四个参数：</p>
 
-<h3 id="toc_40">解析器 -&gt; XmlPullParser parser</h3>
+<h3 id="toc_41">解析器 -&gt; XmlPullParser parser</h3>
 
 <p>用来解析XML文件的解析器，通过解析器可以得到当前节点的相对应的AttributeSet（属性集）</p>
 
-<h3 id="toc_41">上下文对象 - &gt; Context context</h3>
+<h3 id="toc_42">上下文对象 - &gt; Context context</h3>
 
 <p>当前加载该XML的上下文对象，并且这个Context与LayoutInflater属于相互绑定关系（一一对应）</p>
 
-<h3 id="toc_42">父容器 - &gt; View parent</h3>
+<h3 id="toc_43">父容器 - &gt; View parent</h3>
 
 <p>包裹该节点的父容器，一般来说都是继承ViewGroup实现的视图组</p>
 
-<h3 id="toc_43">属性集 -&gt; AttributeSet attrs</h3>
+<h3 id="toc_44">属性集 -&gt; AttributeSet attrs</h3>
 
 <p>该节点的属性集，包括所有该节点的相关属性</p>
 
-<h2 id="toc_44">Include中的theme属性</h2>
+<h2 id="toc_45">Include中的theme属性</h2>
 
 <p>这里大家先了解一个相关的问题，关于include标签设置theme属性的情况：</p>
 
@@ -1362,7 +1365,7 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>也就是说Include标签设置的主题可以覆盖Activity设置的根主题，但是Include设置的主题只作用与Include内部。</p>
 
-<h3 id="toc_45">举个栗子：</h3>
+<h3 id="toc_46">举个栗子：</h3>
 
 <p><strong>style.xml</strong></p>
 
@@ -1440,11 +1443,11 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>从上面的XML文件我们可以看出两个Toolbar调用的background都指向theme的colorPrimary属性，接下来看一下显示效果：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982270724112.png" alt="20171105150982270724112.png"/><figcaption>20171105150982270724112.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713351026853.jpg" alt=""/></figure></p>
 
 <p>从效果图可以发现，Include Toolbar显示的颜色是粉色的，也就是Include额外设置的theme，这里也是从正面证明了这个概念。</p>
 
-<h2 id="toc_46">第一部分：Include Theme主题的设置</h2>
+<h2 id="toc_47">第一部分：Include Theme主题的设置</h2>
 
 <pre class="line-numbers"><code class="language-java">//------------------&lt;第一部分&gt;-------------------//
 //提取出Theme属性
@@ -1460,7 +1463,7 @@ ta.recycle();
 
 <p>通过上面的介绍，很明显这段代码含义，就是检测是否给Include标签设置了Theme属性，如果设置theme，就创建相应的ContextThemeWrapper，用于之后子标签的解析时theme的使用。</p>
 
-<h2 id="toc_47">第二部分：Include 内容布局的设置</h2>
+<h2 id="toc_48">第二部分：Include 内容布局的设置</h2>
 
 <pre class="line-numbers"><code class="language-java">//------------------&lt;第二部分&gt;-------------------//
 //先获取 layout 属性（资源 id）是否设置
@@ -1487,17 +1490,17 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <p>这部分的内容主要是提取Include的内容布局的提取，Include的内容布局的设置有两种：</p>
 
-<h3 id="toc_48">第一种 ： 直接@layout 后面设置布局的XML</h3>
+<h3 id="toc_49">第一种 ： 直接@layout 后面设置布局的XML</h3>
 
 <p><code>layout=&quot;@layout/test_toolbar&quot;</code></p>
 
-<h3 id="toc_49">第二种：通过引入theme的item设置的layout属性</h3>
+<h3 id="toc_50">第二种：通过引入theme的item设置的layout属性</h3>
 
-<h4 id="toc_50">Include标签下：</h4>
+<h4 id="toc_51">Include标签下：</h4>
 
 <p><code>layout=&quot;?attr/theme_layout&quot;</code></p>
 
-<h4 id="toc_51">包裹Include标签的布局Theme（注意：这里不是Include设置的主题）：</h4>
+<h4 id="toc_52">包裹Include标签的布局Theme（注意：这里不是Include设置的主题）：</h4>
 
 <pre class="line-numbers"><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
     &lt;item name=&quot;colorPrimary&quot;&gt;@color/colorPrimary&lt;/item&gt;
@@ -1510,7 +1513,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <p>而上面的代码的作用是检索layout属性，如果layout已经以第一种方式引入，就不需要在去theme中检索，如果layout第一种方式检索不到资源ID，那么就会去以第二种方式进行检索。</p>
 
-<h3 id="toc_52">第三部分： Include标签的View处理</h3>
+<h3 id="toc_53">第三部分： Include标签的View处理</h3>
 
 <pre class="line-numbers"><code class="language-text">            //------------------&lt;第三部分&gt;-------------------//
             //如果此时还找不到layout，那么必然异常~，会报找不到资源ID的layout异常
@@ -1591,13 +1594,13 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <p>这部分主要的作用是解析Include包裹layout的根标签：</p>
 
-<h4 id="toc_53">（1）先特别处理Merge标签 ：</h4>
+<h4 id="toc_54">（1）先特别处理Merge标签 ：</h4>
 
 <p>如果子节点是Merge标签，那么直接进行内容的解析，调用rInflater()方法。</p>
 
 <p>而rInflater()这个方法的作用是，解析某个节点，根据节点的不同类型从而进行不同的处理</p>
 
-<h4 id="toc_54">（2）解析Include的内容：</h4>
+<h4 id="toc_55">（2）解析Include的内容：</h4>
 
 <p>在这之前先通过createViewFromTag()方法，根据名称来生成相对应的View</p>
 
@@ -1642,17 +1645,17 @@ group.addView(view);
 
 <p>设置ViewGroup的显隐性，之后就将其添加至父View中，至此parseInclude的分析就到此结束。</p>
 
-<h2 id="toc_55">流程图</h2>
+<h2 id="toc_56">流程图</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982400667682.png" alt="20171105150982400667682.png"/><figcaption>20171105150982400667682.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713351149148.jpg" alt=""/></figure></p>
 
-<h2 id="toc_56">效果</h2>
+<h2 id="toc_57">效果</h2>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/201711041509789321695.jpg" alt="201711041509789321695.jpg"/><figcaption>201711041509789321695.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/15713351244735.jpg" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150982283383132.gif" alt="20171105150982283383132.gif"/><figcaption>20171105150982283383132.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207871831/20171105150982283383132.gif" alt=""/></figure></p>
 
-<h2 id="toc_57">分析</h2>
+<h2 id="toc_58">分析</h2>
 
 <p>这个效果属于视觉差的效果，原理是根据ViewPager的滑动方向，页面内物理做同向偏移，只要偏移距离大于页面的偏移，就会产生速度差，那么就会实现该效果。</p>
 
@@ -1684,7 +1687,7 @@ view.setTranslateY((0 - positionOffsetPixels) * yOut);
 <li>退出该界面时，界面上的物理快速飞出去。</li>
 </ul>
 
-<h2 id="toc_58">实现思路</h2>
+<h2 id="toc_59">实现思路</h2>
 
 <p>对于上述的分析，这里的实现思路存在两种：</p>
 
@@ -1693,7 +1696,7 @@ view.setTranslateY((0 - positionOffsetPixels) * yOut);
 <li>自定义LayoutInflater.Factory在解析时，将这些自定义属性提取，以Tag方式储存起来。</li>
 </ol>
 
-<h2 id="toc_59">优缺点分析</h2>
+<h2 id="toc_60">优缺点分析</h2>
 
 <p><strong>自定义View</strong>：</p>
 
@@ -1715,7 +1718,7 @@ view.setTranslateY((0 - positionOffsetPixels) * yOut);
 
 <p>在介绍之前，先看一段代码：</p>
 
-<pre class="line-numbers"><code class="language-text">View view;
+<pre class="line-numbers"><code class="language-java">View view;
 //如果Factory2存在，就会调用其onCreateView方法
 if (mFactory2 != null) {
     view = mFactory2.onCreateView(parent, name, context, attrs);
@@ -1747,7 +1750,7 @@ if (view == null &amp;&amp; mPrivateFactory != null) {
 
 <p>如果设置了Factory或者Factory2，那么就不会使用LayoutInflater默认的生成方式，那么生成View的过程，就由我们自主把控，这才是我们自定义LayoutInflater.Factory的主要原因。</p>
 
-<h2 id="toc_60">自定义Factory还是Factory2 ？</h2>
+<h2 id="toc_61">自定义Factory还是Factory2 ？</h2>
 
 <pre class="line-numbers"><code class="language-java">View view;
 //如果Factory2存在，就会调用其onCreateView方法
@@ -1790,20 +1793,20 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>实际选择的过程中，一般会选择自定义Factory2，因为Factory2本身也继承了Factory接口，而且Factory2的优先级比较高。</p>
 
-<h2 id="toc_61">注意事项</h2>
+<h2 id="toc_62">注意事项</h2>
 
-<h3 id="toc_62">设置Factory但是发现无响应，是因为本身LayoutInflater中存在Factory2**</h3>
+<h3 id="toc_63">设置Factory但是发现无响应，是因为本身LayoutInflater中存在Factory2</h3>
 
 <p>因为一般使用方式，是直接调用cloneInContext()方法，我们知道一般的默认解析器都是PhoneLayoutInflater，我们看下其实现方式：</p>
 
-<pre class="line-numbers"><code class="language-text">protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
+<pre class="line-numbers"><code class="language-java">protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
     super(original, newContext);
 }
 </code></pre>
 
 <p>本质就是调用LayoutInflater的两参构造方法：</p>
 
-<pre class="line-numbers"><code class="language-text">protected LayoutInflater(LayoutInflater original, Context newContext) {
+<pre class="line-numbers"><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
     mContext = newContext;
     mFactory = original.mFactory;
     mFactory2 = original.mFactory2;
@@ -1840,7 +1843,7 @@ newInflater.setFactory2(new CustomAppFactory(newInflater, this));
 return newInflater.inflate(layoutId, null);
 </code></pre>
 
-<h3 id="toc_63">使用AppCompatActivity直接setFactory2或者setFactory为什么报错？</h3>
+<h3 id="toc_64">使用AppCompatActivity直接setFactory2或者setFactory为什么报错？</h3>
 
 <p>这是因为 AppCompatActivity 在初始化的时候，已经设置了 Factory，下面来看下这部分代码</p>
 
@@ -1891,22 +1894,22 @@ public void installViewFactory() {
 
 <p>在使用前，先使用 cloneInContext()克隆出一个新的 LayoutInflater，然后在进行设置操作。</p>
 
-<pre class="line-numbers"><code class="language-text">LayoutInflate  newInflater = LayoutInflater.cloneInContext(inflater,context);
+<pre class="line-numbers"><code class="language-java">LayoutInflate  newInflater = LayoutInflater.cloneInContext(inflater,context);
 
 newInflater.setFactory(new CustomFactory（）)；
 </code></pre>
 
 <p>这样就避开在原 LayoutInflater 设置 Factory 报错了。</p>
 
-<h2 id="toc_64">自定义Factory2的实现 ——&gt; CustomAppFactory</h2>
+<h2 id="toc_65">自定义Factory2的实现 ——&gt; CustomAppFactory</h2>
 
 <p>根据上面的展示效果，我们可以判断出是ViewPager + Fragment的风格，所以我们自定义Factory应该在Fragment的onCreateView中，更改LayoutInflater。</p>
 
 <p>而且根据注意事项，我们一般会自定义优先级较高的Factory2，防止本身cloneInContext的LayoutInflater中已经存在Factory2，我们使用Factory会无效。</p>
 
-<h3 id="toc_65">使用方式</h3>
+<h3 id="toc_66">使用方式</h3>
 
-<pre class="line-numbers"><code class="language-text">public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+<pre class="line-numbers"><code class="language-java">public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     Bundle bundle = getArguments();
     int layoutId = bundle.getInt(LAYOUT_ID);
     //注意需要调用cloneInContext方法生成新的LayoutInflater
@@ -1917,7 +1920,7 @@ newInflater.setFactory(new CustomFactory（）)；
 }
 </code></pre>
 
-<h3 id="toc_66">自定义过程</h3>
+<h3 id="toc_67">自定义过程</h3>
 
 <p>那么就创建一个类CustomAppFactory来实现Factory2的接口，复写onCreateView的方法。</p>
 
@@ -1967,7 +1970,7 @@ public View onCreateView(View parent, String name, Context context, AttributeSet
 <li>扩展操作，将额外的属性，提取出来储存在Tag中</li>
 </ul>
 
-<h2 id="toc_67">onCreateView第一部分内容</h2>
+<h2 id="toc_68">onCreateView第一部分内容</h2>
 
 <pre class="line-numbers"><code class="language-java">if (name.contains(&quot;.&quot;)) {
     String checkName = name.substring(name.lastIndexOf(&quot;.&quot;));
@@ -2014,7 +2017,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 }
 </code></pre>
 
-<h2 id="toc_68">onCreateView第二部分内容</h2>
+<h2 id="toc_69">onCreateView第二部分内容</h2>
 
 <pre class="line-numbers"><code class="language-java">//实例化完成
 if (view != null) {
@@ -2100,13 +2103,14 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 }
 </code></pre>
 
-<h2 id="toc_69">处理ViewPager的滑动</h2>
+<h2 id="toc_70">处理ViewPager的滑动</h2>
 
 <p>这是实战篇的最后一部分内容，主要介绍的是ViewPager的滑动监听相关的处理，因为所有效果是基于ViewPager的滑动监听来显示的。</p>
 
 <p>因为本文主要介绍内容是自定义LayoutInflater.Factory，所以这里会简单叙述下：</p>
 
-<pre class="line-numbers"><code class="language-java">mInflaterVp.addOnPageChangeListener(new ViewPager.OnPageChangeListener() {
+<pre class="line-numbers"><code class="language-java">mInflaterVp.addOnPageChangeListener(new 
+ViewPager.OnPageChangeListener() {
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
         //获取ViewPager的宽度
@@ -2176,11 +2180,11 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
         }
     }
 });
-
-小红书引导页
-
-![20171105150982288981203.gif](http://ohtrrgyyd.bkt.clouddn.com/20171105150982288981203.gif)
 </code></pre>
+
+<p><strong>小红书引导页</strong></p>
+
+<p><figure><img src="media/15561207871831/20171105150982288981203.gif" alt=""/></figure></p>
 
 
     

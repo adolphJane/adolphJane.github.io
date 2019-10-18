@@ -491,7 +491,7 @@ RxAndroid，用于 Android 开发，添加了 Android 用的接口。地址： 
 RxJava 的观察者模式大致如下图：</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768244322280.jpg" alt="20171011150768244322280.jpg"/><figcaption>20171011150768244322280.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053119606.jpg" alt=""/></figure></p>
 
 <h3 id="toc_6">基本实现</h3>
 
@@ -649,11 +649,11 @@ observable.subscribe(subscriber);
 
 <p>整个过程中对象间的关系如下图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768259236098.jpg" alt="20171011150768259236098.jpg"/><figcaption>20171011150768259236098.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053244741.jpg" alt=""/></figure></p>
 
 <p>或者可以看动图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768262032561.gif" alt="20171011150768262032561.gif"/><figcaption>20171011150768262032561.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/20171011150768262032561.gif" alt=""/></figure></p>
 
 <p>除了 <code>subscribe(Observer)</code> 和<code>subscribe(Subscriber)</code> ，<code>subscribe()</code> 还支持不完整定义的回调，RxJava 会自动根据定义创建出 <code>Subscriber</code> 。形式如下：</p>
 
@@ -872,7 +872,7 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 <li><code>map()</code>: 事件对象的直接变换，具体功能上面已经介绍过。它是 RxJava 最常用的变换。 <code>map()</code> 的示意图：</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768275183643.jpg" alt="20171011150768275183643.jpg"/><figcaption>20171011150768275183643.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053605523.jpg" alt=""/></figure></p>
 
 <ul>
 <li><code>flatMap()</code>: 这是一个很有用但非常难理解的变换，因此我决定花多些篇幅来介绍它。 首先假设这么一种需求：假设有一个数据结构『学生』，现在需要打印出一组学生的名字。实现方式很简单：</li>
@@ -939,7 +939,7 @@ Observable.from(students)
 <p>从上面的代码可以看出， <code>flatMap()</code> 和 <code>map()</code> 有一个相同点：它也是把传入的参数转化之后返回另一个对象。但需要注意，和 <code>map()</code>不同的是， <code>flatMap()</code> 中返回的是个 <code>Observable</code> 对象，并且这个 <code>Observable</code> 对象并不是被直接发送到了 <code>Subscriber</code> 的回调方法中。 <code>flatMap()</code> 的原理是这样的：1. 使用传入的事件对象创建一个 <code>Observable</code> 对象；2. 并不发送这个 <code>Observable</code>, 而是将它激活，于是它开始发送事件；3. 每一个创建出来的 <code>Observable</code> 发送的事件，都被汇入同一个 <code>Observable</code> ，而这个 <code>Observable</code> 负责将这些事件统一交给 <code>Subscriber</code> 的回调方法。这三个步骤，把事件拆成了两级，通过一组新创建的 <code>Observable</code> 将初始的对象『铺平』之后通过统一路径分发了下去。而这个『铺平』就是 <code>flatMap()</code>所谓的 flat。<br/>
 <code>flatMap()</code>示意图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768279696022.jpg" alt="20171011150768279696022.jpg"/><figcaption>20171011150768279696022.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053760755.jpg" alt=""/></figure></p>
 
 <p>扩展：由于可以在嵌套的 <code>Observable</code> 中添加异步代码， <code>flatMap()</code> 也常用于嵌套的异步操作，例如嵌套的网络请求。示例代码（Retrofit + RxJava）：</p>
 
@@ -1001,15 +1001,15 @@ public &lt;R&gt; Observable&lt;R&gt; lift(Operator&lt;? extends R, ? super T&gt;
 <p>精简掉细节的话，也可以这么说：在 <code>Observable</code> 执行了 <code>lift(Operator)</code> 方法之后，会返回一个新的 <code>Observable</code>，这个新的 <code>Observable</code> 会像一个代理一样，负责接收原始的 <code>Observable</code> 发出的事件，并在处理后发送给 <code>Subscriber</code>。<br/><br/>
 如果你更喜欢具象思维，可以看图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768286972714.jpg" alt="20171011150768286972714.jpg"/><figcaption>20171011150768286972714.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053962421.jpg" alt=""/></figure></p>
 
 <p>或者可以看动图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768288754019.gif" alt="20171011150768288754019.gif"/><figcaption>20171011150768288754019.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/20171011150768288754019.gif" alt=""/></figure></p>
 
 <p>两次和多次的 <code>lift()</code> 同理，如下图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768291244711.jpg" alt="20171011150768291244711.jpg"/><figcaption>20171011150768291244711.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054269632.jpg" alt=""/></figure></p>
 
 <p>举一个具体的 <code>Operator</code> 的实现。下面这是一个将事件中的 <code>Integer</code> 对象转换成 <code>String</code> 的例子，仅供参考：</p>
 
@@ -1225,17 +1225,17 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 <p>其实， <code>subscribeOn()</code> 和 <code>observeOn()</code> 的内部实现，也是用的 <code>lift()</code>。具体看图（不同颜色的箭头表示不同的线程）：<br/>
 <code>subscribeOn()</code> 原理图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768302773604.jpg" alt="20171011150768302773604.jpg"/><figcaption>20171011150768302773604.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054408629.jpg" alt=""/></figure></p>
 
 <p><code>observeOn()</code> 原理图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768305726766.jpg" alt="20171011150768305726766.jpg"/><figcaption>20171011150768305726766.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054500040.jpg" alt=""/></figure></p>
 
 <p>从图中可以看出，<code>subscribeOn()</code> 和 <code>observeOn()</code> 都做了线程切换的工作（图中的 &quot;schedule...&quot; 部位）。不同的是， <code>subscribeOn()</code>的线程切换发生在 <code>OnSubscribe</code> 中，即在它通知上一级 <code>OnSubscribe</code> 时，这时事件还没有开始发送，因此 <code>subscribeOn()</code> 的线程控制可以从事件发出的开端就造成影响；  而 <code>observeOn()</code> 的线程切换则发生在它内建的 <code>Subscriber</code> 中，即发生在它即将给下一级 <code>Subscriber</code> 发送事件时，因此 <code>observeOn()</code> 控制的是它后面的线程。</p>
 
 <p>最后，我用一张图来解释当多个 <code>subscribeOn()</code> 和 <code>observeOn()</code> 混合使用时，线程调度是怎么发生的（由于图中对象较多，相对于上面的图对结构做了一些简化调整）：  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768308132152.jpg" alt="20171011150768308132152.jpg"/><figcaption>20171011150768308132152.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054782891.jpg" alt=""/></figure></p>
 
 <p>图中共有 5 处含有对事件的操作。由图中可以看出，①和②两处受第一个 <code>subscribeOn()</code> 影响，运行在红色线程；③和④处受第一个 <code>observeOn()</code> 的影响，运行在绿色线程；⑤处受第二个 <code>onserveOn()</code> 影响，运行在紫色线程；而第二个 <code>subscribeOn()</code> ，由于在通知过程中线程就被第一个 <code>subscribeOn()</code> 截断，因此对整个流程并没有任何影响。这里也就回答了前面的问题：当使用了多个 <code>subscribeOn()</code> 的时候，只有第一个 <code>subscribeOn()</code> 起作用。</p>
 
@@ -2111,27 +2111,27 @@ protected void onCreate(Bundle savedInstanceState) {
 &lt;/android.support.design.widget.AppBarLayout&gt;
 </code></pre>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171010150764973485968.gif" alt="20171010150764973485968.gif"/><figcaption>20171010150764973485968.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870050/20171010150764973485968.gif" alt=""/></figure></p>
 
 <h4 id="toc_10">（2）<code>enterAlways</code>:值设为<code>enterAlways</code>的View,当ScrollView往下滚动时，该View会直接往下滚动。而不用考虑ScrollView是否在滚动。</h4>
 
 <p>ToolBar高度设为：（<code>?android:attr/actionBarSize</code>）<br/>
 <code>app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171010150764977767320.gif" alt="20171010150764977767320.gif"/><figcaption>20171010150764977767320.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870050/20171010150764977767320.gif" alt=""/></figure></p>
 
 <h4 id="toc_11">（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</h4>
 
 <p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下 ,图中将高度设的比较大:200dp，并将最小高度设置为（<code>?android:attr/actionBarSize</code>）<br/>
 <code>app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171010150764983431424.gif" alt="20171010150764983431424.gif"/><figcaption>20171010150764983431424.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870050/20171010150764983431424.gif" alt=""/></figure></p>
 
 <h4 id="toc_12">（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。</h4>
 
 <p>图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize</code>,<code>app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171010150764986160489.gif" alt="20171010150764986160489.gif"/><figcaption>20171010150764986160489.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870050/20171010150764986160489.gif" alt=""/></figure></p>
 
 <h3 id="toc_13">将AppBarLayout与ScrollView关联起来</h3>
 
@@ -2196,7 +2196,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子<code>View</code>的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子<code>View</code>的布局。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171010150764992635490.gif" alt="20171010150764992635490.gif"/><figcaption>20171010150764992635490.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870050/20171010150764992635490.gif" alt=""/></figure></p>
 
 <p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色<code>Button</code>查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。<br/><br/>
 这个效果如果让你不用<code>CoordinatorLayout</code>去实现，应该没有任何问题，但是代码的耦合度应该非常大，你的代码必须要持有2个<code>View</code>的引用，然后在<code>onTouchEvent</code>里面做各种判断。如果我们想要实现的功能是，有更多的<code>View</code>要根据蓝色的<code>View</code>的移动相应作出响应，那么那就得在蓝色<code>View</code>的<code>onTounchEvent</code>里面针对其他的View处理各种逻辑。这耦合度未免太伤感了~<br/>
@@ -2389,7 +2389,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171010150765001948776.gif" alt="20171010150765001948776.gif"/><figcaption>20171010150765001948776.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870050/20171010150765001948776.gif" alt=""/></figure></p>
 
 <p>如果你希望拖动过程中状态栏是透明的，可以在CollapsingToolbarLayout中加 <code>app:statusBarScrim=&quot;@android:color/transparent&quot;</code>，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
 
@@ -2916,7 +2916,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 <li><code>getItemOffsets</code>：在每次测量item尺寸时被调用，将decoration的尺寸计算到item的尺寸中</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799957749046.png" alt="20171015150799957749046.png"/><figcaption>20171015150799957749046.png</figcaption></figure></p>
+<p><figure><img src="media/15561207869978/15713203883056.jpg" alt=""/></figure></p>
 
 <h3 id="toc_8">ItemDecoration三个方法的测试</h3>
 
@@ -2972,9 +2972,9 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <p>先上动图【注2】：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799983096582.gif" alt="20171015150799983096582.gif"/><figcaption>20171015150799983096582.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207869978/20171015150799983096582.gif" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799985361609.gif" alt="20171015150799985361609.gif"/><figcaption>20171015150799985361609.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207869978/20171015150799985361609.gif" alt=""/></figure></p>
 
 <p>上图中，getItemOffsets方法里，返回outRect不同，而onDraw方法绘制的分割线高度初始值设为25，并通过外部增减来观察其UI效果。</p>
 
@@ -3005,7 +3005,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <h4 id="toc_12">getItemOffsets &amp; onDrawOver</h4>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799996057841.gif" alt="20171015150799996057841.gif"/><figcaption>20171015150799996057841.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207869978/20171015150799996057841.gif" alt=""/></figure></p>
 
 <p>将之前onDraw方法内代码完整拷贝到onDrawOver下，并注释掉之前onDraw中的方法，很容易验证出onDrawOver与onDraw的唯一不同之处。</p>
 
@@ -3163,7 +3163,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 <li>支持自定义View作为Decoration</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101515080000957381.gif" alt="2017101515080000957381.gif"/><figcaption>2017101515080000957381.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207869978/2017101515080000957381.gif" alt=""/></figure></p>
 
 <p>上图hoverGroup.gif的使用代码如下：</p>
 
@@ -4723,7 +4723,7 @@ findViewById(android.R.id.content)
 
 <h3 id="toc_10">方法介绍</h3>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150781516882260.png" alt="20171012150781516882260.png"/><figcaption>20171012150781516882260.png</figcaption></figure></p>
+<p><figure><img src="media/15561207869937/15713203742240.jpg" alt=""/></figure></p>
 
 <h3 id="toc_11">getRootView特例</h3>
 

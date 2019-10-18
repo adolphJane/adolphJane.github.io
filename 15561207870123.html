@@ -257,7 +257,7 @@ RxAndroid，用于 Android 开发，添加了 Android 用的接口。地址： 
 RxJava 的观察者模式大致如下图：</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768244322280.jpg" alt="20171011150768244322280.jpg"/><figcaption>20171011150768244322280.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053119606.jpg" alt=""/></figure></p>
 
 <h3 id="toc_6">基本实现</h3>
 
@@ -415,11 +415,11 @@ observable.subscribe(subscriber);
 
 <p>整个过程中对象间的关系如下图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768259236098.jpg" alt="20171011150768259236098.jpg"/><figcaption>20171011150768259236098.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053244741.jpg" alt=""/></figure></p>
 
 <p>或者可以看动图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768262032561.gif" alt="20171011150768262032561.gif"/><figcaption>20171011150768262032561.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/20171011150768262032561.gif" alt=""/></figure></p>
 
 <p>除了 <code>subscribe(Observer)</code> 和<code>subscribe(Subscriber)</code> ，<code>subscribe()</code> 还支持不完整定义的回调，RxJava 会自动根据定义创建出 <code>Subscriber</code> 。形式如下：</p>
 
@@ -638,7 +638,7 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 <li><code>map()</code>: 事件对象的直接变换，具体功能上面已经介绍过。它是 RxJava 最常用的变换。 <code>map()</code> 的示意图：</li>
 </ul>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768275183643.jpg" alt="20171011150768275183643.jpg"/><figcaption>20171011150768275183643.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053605523.jpg" alt=""/></figure></p>
 
 <ul>
 <li><code>flatMap()</code>: 这是一个很有用但非常难理解的变换，因此我决定花多些篇幅来介绍它。 首先假设这么一种需求：假设有一个数据结构『学生』，现在需要打印出一组学生的名字。实现方式很简单：</li>
@@ -705,7 +705,7 @@ Observable.from(students)
 <p>从上面的代码可以看出， <code>flatMap()</code> 和 <code>map()</code> 有一个相同点：它也是把传入的参数转化之后返回另一个对象。但需要注意，和 <code>map()</code>不同的是， <code>flatMap()</code> 中返回的是个 <code>Observable</code> 对象，并且这个 <code>Observable</code> 对象并不是被直接发送到了 <code>Subscriber</code> 的回调方法中。 <code>flatMap()</code> 的原理是这样的：1. 使用传入的事件对象创建一个 <code>Observable</code> 对象；2. 并不发送这个 <code>Observable</code>, 而是将它激活，于是它开始发送事件；3. 每一个创建出来的 <code>Observable</code> 发送的事件，都被汇入同一个 <code>Observable</code> ，而这个 <code>Observable</code> 负责将这些事件统一交给 <code>Subscriber</code> 的回调方法。这三个步骤，把事件拆成了两级，通过一组新创建的 <code>Observable</code> 将初始的对象『铺平』之后通过统一路径分发了下去。而这个『铺平』就是 <code>flatMap()</code>所谓的 flat。<br/>
 <code>flatMap()</code>示意图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768279696022.jpg" alt="20171011150768279696022.jpg"/><figcaption>20171011150768279696022.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053760755.jpg" alt=""/></figure></p>
 
 <p>扩展：由于可以在嵌套的 <code>Observable</code> 中添加异步代码， <code>flatMap()</code> 也常用于嵌套的异步操作，例如嵌套的网络请求。示例代码（Retrofit + RxJava）：</p>
 
@@ -767,15 +767,15 @@ public &lt;R&gt; Observable&lt;R&gt; lift(Operator&lt;? extends R, ? super T&gt;
 <p>精简掉细节的话，也可以这么说：在 <code>Observable</code> 执行了 <code>lift(Operator)</code> 方法之后，会返回一个新的 <code>Observable</code>，这个新的 <code>Observable</code> 会像一个代理一样，负责接收原始的 <code>Observable</code> 发出的事件，并在处理后发送给 <code>Subscriber</code>。<br/><br/>
 如果你更喜欢具象思维，可以看图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768286972714.jpg" alt="20171011150768286972714.jpg"/><figcaption>20171011150768286972714.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713053962421.jpg" alt=""/></figure></p>
 
 <p>或者可以看动图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768288754019.gif" alt="20171011150768288754019.gif"/><figcaption>20171011150768288754019.gif</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/20171011150768288754019.gif" alt=""/></figure></p>
 
 <p>两次和多次的 <code>lift()</code> 同理，如下图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768291244711.jpg" alt="20171011150768291244711.jpg"/><figcaption>20171011150768291244711.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054269632.jpg" alt=""/></figure></p>
 
 <p>举一个具体的 <code>Operator</code> 的实现。下面这是一个将事件中的 <code>Integer</code> 对象转换成 <code>String</code> 的例子，仅供参考：</p>
 
@@ -991,17 +991,17 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 <p>其实， <code>subscribeOn()</code> 和 <code>observeOn()</code> 的内部实现，也是用的 <code>lift()</code>。具体看图（不同颜色的箭头表示不同的线程）：<br/>
 <code>subscribeOn()</code> 原理图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768302773604.jpg" alt="20171011150768302773604.jpg"/><figcaption>20171011150768302773604.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054408629.jpg" alt=""/></figure></p>
 
 <p><code>observeOn()</code> 原理图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768305726766.jpg" alt="20171011150768305726766.jpg"/><figcaption>20171011150768305726766.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054500040.jpg" alt=""/></figure></p>
 
 <p>从图中可以看出，<code>subscribeOn()</code> 和 <code>observeOn()</code> 都做了线程切换的工作（图中的 &quot;schedule...&quot; 部位）。不同的是， <code>subscribeOn()</code>的线程切换发生在 <code>OnSubscribe</code> 中，即在它通知上一级 <code>OnSubscribe</code> 时，这时事件还没有开始发送，因此 <code>subscribeOn()</code> 的线程控制可以从事件发出的开端就造成影响；  而 <code>observeOn()</code> 的线程切换则发生在它内建的 <code>Subscriber</code> 中，即发生在它即将给下一级 <code>Subscriber</code> 发送事件时，因此 <code>observeOn()</code> 控制的是它后面的线程。</p>
 
 <p>最后，我用一张图来解释当多个 <code>subscribeOn()</code> 和 <code>observeOn()</code> 混合使用时，线程调度是怎么发生的（由于图中对象较多，相对于上面的图对结构做了一些简化调整）：  </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171011150768308132152.jpg" alt="20171011150768308132152.jpg"/><figcaption>20171011150768308132152.jpg</figcaption></figure></p>
+<p><figure><img src="media/15561207870123/15713054782891.jpg" alt=""/></figure></p>
 
 <p>图中共有 5 处含有对事件的操作。由图中可以看出，①和②两处受第一个 <code>subscribeOn()</code> 影响，运行在红色线程；③和④处受第一个 <code>observeOn()</code> 的影响，运行在绿色线程；⑤处受第二个 <code>onserveOn()</code> 影响，运行在紫色线程；而第二个 <code>subscribeOn()</code> ，由于在通知过程中线程就被第一个 <code>subscribeOn()</code> 截断，因此对整个流程并没有任何影响。这里也就回答了前面的问题：当使用了多个 <code>subscribeOn()</code> 的时候，只有第一个 <code>subscribeOn()</code> 起作用。</p>
 

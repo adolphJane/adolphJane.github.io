@@ -142,7 +142,7 @@
 
 <p>关于性能优化我们可以不知道其他的，但一定要知道内存优化。因为内存泄漏可以Android的常客。那么什么是内存泄漏呢？内存不在GC的掌控范围之内了。那么java的GC内存回收机制是什么？某对象不在有任何引用的时候才会进行回收。那么GC回收机制的原理是什么？又或者说可以作为GC　Root引用点的是啥？或许有人听不懂我在讲啥。我们先来看张图。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938120277154.png" alt="20171031150938120277154.png"/><figcaption>20171031150938120277154.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713656808791.png" alt=""/></figure></p>
 
 <p>当我们向上寻找，一直寻找到GC Root的时候，此对象不会进行回收，例如，一个Activity。那么如果我们向上寻找，直到找到GC Root对象的时候，就说明它是不可以回收的，例如，我定义了一个int a；但是这个数据，我整个页面或者说整个项目都没有用到，则这个对象会被GC掉。</p>
 
@@ -177,7 +177,7 @@
 
 <p>我们需要分析内存溢出的原因，我们先来看一张图： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938126840752.png" alt="20171031150938126840752.png"/><figcaption>20171031150938126840752.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713656930534.png" alt=""/></figure></p>
 
 <p>内存泄漏一般导致应用卡顿，极端情况会导致项目boom。Boom的原因是因为超过内存的阈值。 <br/>
 原因主要有两方面：</p>
@@ -191,9 +191,9 @@
 
 <p>我们来看下下面两张图： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938130233770.png" alt="20171031150938130233770.png"/><figcaption>20171031150938130233770.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657020079.png" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938131538861.png" alt="20171031150938131538861.png"/><figcaption>20171031150938131538861.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657095476.png" alt=""/></figure></p>
 
 <p>对比两张图，我们可以在第一张的情况出现了oom情况，我们通过log打印发现，处理的好像没什么问题，换句话说，如果我不放那0.8M的图片。然后继续不停的操作同样会出现OOM，然而我们就蒙了。没什么图片加载怎么就这么崩掉了。</p>
 
@@ -208,11 +208,11 @@
 
 <p>就那我公司的项目举例把。首先，我们在这边可以看到memory。CPU和net的使用情况。 </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938135867093.png" alt="20171031150938135867093.png"/><figcaption>20171031150938135867093.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657215613.png" alt=""/></figure></p>
 
 <p>我们找到Object。看看我们内存的消耗情况。 </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938138041717.png" alt="20171031150938138041717.png"/><figcaption>20171031150938138041717.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657297064.png" alt=""/></figure></p>
 
 <p>随便这么一看，尼玛蛋，1300左右的view和一个Activity。还有3个context。可怕。。可以理解为一个Activity里面使用了将近1300个view。。。想都不敢想。。。</p>
 
@@ -220,11 +220,11 @@
 
 <p>我们可以更仔细的查找泄漏的位置，在AS里面使用 Heap SnapShot工具（堆栈快照）。如图所示： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938142116483.png" alt="20171031150938142116483.png"/><figcaption>20171031150938142116483.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657375160.png" alt=""/></figure></p>
 
 <p>我们点击后，他会进行一段时间的监控，然后会生成一个文件。我们点击我们package tree view。 </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938144979816.png" alt="20171031150938144979816.png"/><figcaption>20171031150938144979816.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657516723.png" alt=""/></figure></p>
 
 <p>我们找到自己项目的包名。然后进行进一步的分析。首先看一下2个列表的列名到底指的什么。 </p>
 
@@ -272,7 +272,7 @@
 
 <p>我们来随便的看一下内存中的数量： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938170331677.png" alt="20171031150938170331677.png"/><figcaption>20171031150938170331677.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657609152.png" alt=""/></figure></p>
 
 <p>这还是我们刚进手机，一个bean就被调用了这么多次。简直可怕。这个我们可以通过内存分析工具解决的。</p>
 
@@ -328,13 +328,13 @@
 
 <p>我们对于UI性能的优化还可以通过开发者选项中的GPU过度绘制工具来进行分析。在设置-&gt;开发者选项-&gt;调试GPU过度绘制（不同设备可能位置或者叫法不同）中打开调试后可以看见如下图（对settings当前界面过度绘制进行分析）： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938187814302.png" alt="20171031150938187814302.png"/><figcaption>20171031150938187814302.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657796585.png" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938189533910.png" alt="20171031150938189533910.png"/><figcaption>20171031150938189533910.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657891069.png" alt=""/></figure></p>
 
 <p>这图看着太乱，我们来一张简洁明了的图： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093819223109.png" alt="2017103115093819223109.png"/><figcaption>2017103115093819223109.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713657982645.png" alt=""/></figure></p>
 
 <p>我们的目标就是尽量减少红色Overdraw，看到更多的蓝色区域。</p>
 
@@ -380,9 +380,9 @@
 
 <p>我们依旧打开设置–&gt;开发者选项–&gt;GPU呈现模式分析–&gt;在屏幕上显示为条形图，如图所示： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938208067517.png" alt="20171031150938208067517.png"/><figcaption>20171031150938208067517.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658134293.png" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938209926269.png" alt="20171031150938209926269.png"/><figcaption>20171031150938209926269.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658216356.png" alt=""/></figure></p>
 
 <p>当然，也可以在执行完UI滑动操作后在命令行输入如下命令查看命令行打印的GPU渲染数据（分析依据：Draw + Process + Execute = 完整的显示一帧时间 &lt; 16ms）：</p>
 
@@ -396,11 +396,11 @@
 
 <p>Android Studio和IntellJ idead都有自带的代码检查工具。打开Analyze-&gt;Run Inspection by Name… –&gt;unused resource 点击开始检测，等待一下后会发现如下结果： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938218179898.png" alt="20171031150938218179898.png"/><figcaption>20171031150938218179898.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658334886.png" alt=""/></figure></p>
 
 <p>我们还可以这样，将鼠标放在代码区点击右键-&gt;Analyze-&gt;Inspect Code–&gt;界面选择你要检测的模块-&gt;点击确认开始检测，等待一下后会发现如下结果： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938220134827.png" alt="20171031150938220134827.png"/><figcaption>20171031150938220134827.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658538715.png" alt=""/></figure></p>
 
 <p>当然，我这只是截取了少一部分，我们看下下面那个提示：@param v tag description is missing 。意味着v的类型缺少了，要么补上介绍，要么直接删除。</p>
 
@@ -422,13 +422,13 @@
 <p>线程是我们项目中不可缺少的重要部分，因为我们大多数数据都是从网络获取的。So，线程这个是必备用品。 <br/>
 我们依旧可以通过Memory下面的Net进行网络的监听： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938225451445.png" alt="20171031150938225451445.png"/><figcaption>20171031150938225451445.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658679996.png" alt=""/></figure></p>
 
 <h2 id="toc_15">ANR问题</h2>
 
 <p>相信这个问题在座的各种没少遇到过，那么什么是ANR？application not responding。应用程序无响应。那么一般什么时候会出现ANR。Android官方规定：activity如果5s内无响应事件（屏幕触摸事件或者键盘输入事件）。BroadcastReceiver如果在10s内无法处理完成。Service如果20s内无法处理完成。这三种情况会导致ANR。用张简洁的图来介绍把。看起来方便~~ </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093823044615.png" alt="2017103115093823044615.png"/><figcaption>2017103115093823044615.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658773357.png" alt=""/></figure></p>
 
 <h2 id="toc_16">线程优化</h2>
 
@@ -515,15 +515,15 @@
 <p>我们先对比下三种启动的时间对比：<br/><br/>
 冷启动： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938245458902.png" alt="20171031150938245458902.png"/><figcaption>20171031150938245458902.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658903891.png" alt=""/></figure></p>
 
 <p>暖启动 ： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938246619966.png" alt="20171031150938246619966.png"/><figcaption>20171031150938246619966.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713658986268.png" alt=""/></figure></p>
 
 <p>热启动： </p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938247843794.png" alt="20171031150938247843794.png"/><figcaption>20171031150938247843794.png</figcaption></figure></p>
+<p><figure><img src="media/15561207871067/15713659065674.png" alt=""/></figure></p>
 
 <p>我们可以看到三者的明显的差距，一个冷启动将近一分钟，反正我是不想看，每次跑项目都好慢~那么我们应该怎么做？看到有些人介绍说改变项目的theme。把它改成launcher的theme。但我觉得，这种做测试的确没问题。但是一般项目都会有闪屏页。然后从闪屏跳转到首页。我们可以按照大多数的项目来改善。怎么说的，我们可以看到一般项目都有倒计时显示。也就是说倒计时结束就自动进入首页。或者可以直接跳过进入首页。也就是说我们可以通过此方法来进行，也就是说只要他倒计时结束，不管请求是否全部获取完我们都直接进入首页。我们可以在闪屏页进行一些必要的加载，例如用户信息，定位等等，那么至于其他的，我们可以进入主页进行预加载。就和热更新一样，在用户不知情的情况下，默默的更新bug。So，对于一些网络请求，例如广告之类的。我们可以通过此方法进行预加载。</p>
 

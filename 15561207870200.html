@@ -308,13 +308,13 @@ System.out.println(user.email); // ikidou@example.com
 
 <p>其实自动方式最终都是通过<code>JsonReader</code>来实现的，如果第一个参数是<code>String</code>类型，那么Gson会创建一个<code>StringReader</code>转换成流操作。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101215077695811912.png" alt="2017101215077695811912.png"/><figcaption>2017101215077695811912.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055100739.jpg" alt=""/></figure></p>
 
 <h3 id="toc_7">Gson的流式序列化</h3>
 
 <h4 id="toc_8">自动方式</h4>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150776961842252.png" alt="20171012150776961842252.png"/><figcaption>20171012150776961842252.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055221921.jpg" alt=""/></figure></p>
 
 <p>所以啊，学会利用IDE的自动完成是多么重要这下知道了吧！<br/>
 可以看出用红框选中的部分就是我们要找的东西。<br/><br/>
@@ -832,7 +832,7 @@ jsonObject.add...
 
 <p>之前在上一篇文中提到的<code>JsonSerializer</code>和<code>JsonDeserializer</code>解析的时候都利用到了一个中间件-<code>JsonElement</code>，比如下方的序列化过程。可以看到我们在把Java对象转化为JSON字符串的时候都会用到这个中间件<code>JsonElement</code></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150776994644553.png" alt="20171012150776994644553.png"/><figcaption>20171012150776994644553.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055343313.jpg" alt=""/></figure></p>
 
 <p>而<code>TypeAdapter</code>的使用正是去掉了这个中间层，直接用流来解析数据，极大程度上提高了解析效率。</p>
 
@@ -843,7 +843,7 @@ jsonObject.add...
 
 <p>如下图所示：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150776998438554.png" alt="20171012150776998438554.png"/><figcaption>20171012150776998438554.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055475704.jpg" alt=""/></figure></p>
 
 <p>下面就让我们来一起使用和了解TypeAdapter吧。</p>
 
@@ -1289,11 +1289,11 @@ public class Main {
 
 <p>这个例子实现了创建java对象并且转化为JSON字符串并写入文件的整个过程。下面的图标展示了内存的消耗情况：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777023393682.png" alt="20171012150777023393682.png"/><figcaption>20171012150777023393682.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055592610.jpg" alt=""/></figure></p>
 
 <p>上面的的LargeData在这里会消耗89MB的内存，从java对象转化为JSON字符串的过程将会消耗大概16s的时间并且需要超过1GB的内存。也就是说，序列化1MB的数据我们需要大约11MB的工作空间。1：11的确实是一个不小的比列。下面的 图片会展示整个过程的几个阶段。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777025353382.png" alt="20171012150777025353382.png"/><figcaption>20171012150777025353382.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055723682.jpg" alt=""/></figure></p>
 
 <p>可以看到的是，这里有四个方块分别代表不同的阶段，（但是IO 缓冲区并没有在这里得到使用，所以以灰色进行标注。）整个过程从java对象（蓝色方块），然后由<code>LargeDataSerialiser</code>类创建的JSONElement对象（红色方块），然后这些临时的对象又被转化为JSON 字符串（绿色方块），上面的示例代码使用<code>PrintStream</code>将内容输出到文件中并没有使用任何缓冲区。<br/>
 完成了第1部分的分析，接下来下面的分析流程是一样的：</p>
@@ -1371,11 +1371,11 @@ public class Main {
 
 <p>上面的代码完成的是从<strong>java对象 &gt;转化&gt;JSON 字符串</strong>并最终写入文件的过程。看看下面的性能分析图表：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777031491897.png" alt="20171012150777031491897.png"/><figcaption>20171012150777031491897.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055833702.jpg" alt=""/></figure></p>
 
 <p>和最初的那个方法一样，这里的LargeData对象将会需要89MB的内存，从java对象转化为JSON字符串的过程需要消耗4s的时间，大概650MB的内存。也就是说，序列化1MB的数据，大概需要7.5MB的内存空间。相比于之前的第一种JsonSerializer方法，这里减少了接近一半的内存消耗。同样的，来看看这个方法的几个过程：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777032621918.png" alt="20171012150777032621918.png"/><figcaption>20171012150777032621918.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713055920153.jpg" alt=""/></figure></p>
 
 <p>这里的序列化过程主要有两个阶段，相比于之前的<code>JSONSerializer</code>的序列化过程，这里没有了转化为JSONElement的过程，也就完成了内存消耗的减少。</p>
 
@@ -1421,11 +1421,11 @@ public class Main {
 
 <p>这个例子同样是将java对象转化为JSON字符串并且输出，也来看看下面的性能分析图表：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777036368764.png" alt="20171012150777036368764.png"/><figcaption>20171012150777036368764.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713056023643.jpg" alt=""/></figure></p>
 
 <p>可以看到的是同样的最初产生的数据是89MB,序列化过程将java对象转化为JSON字符串花了大概三秒钟的时间，消耗大概160MB的内存。也就是说序列化1MB的数据我们需要大概2MB的内存空间。相比于之前的两种方法，有了很大的改进。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777037225976.png" alt="20171012150777037225976.png"/><figcaption>20171012150777037225976.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713056123242.jpg" alt=""/></figure></p>
 
 <p>这个方法同样的是使用了两个阶段。不过在上面一个示例中的绿色方块部分在这里没有使用，这里直接完成了java对象到IO 缓冲区的转化并写入文件。<br/>
 虽然这里并不是Gson的关系，但是我们使用Gson的方法极大的减少了内存消耗，所以说在使用开源库的时候，能够正确高效的使用API也显得尤为重要。</p>
@@ -1472,9 +1472,9 @@ public class Main {
 
 <p>经过前面的分析，我们这里也可以这道这里主要分为三个阶段，下面提供性能分析图和JSONSerializer的阶段流程图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777041919731.png" alt="20171012150777041919731.png"/><figcaption>20171012150777041919731.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713056224094.jpg" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171012150777042722167.png" alt="20171012150777042722167.png"/><figcaption>20171012150777042722167.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870200/15713056309096.jpg" alt=""/></figure></p>
 
 <p>这里可以看到三个阶段完成的工作消耗了11s的时间，730MB的内存空间。也就是说1：8的比例。可以相比上面的例子，知道这里使用JSONSerializer产生了JSONElement对象消耗了很多的内存。</p>
 

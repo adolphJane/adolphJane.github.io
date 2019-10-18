@@ -157,7 +157,7 @@
 <p>　　然而，要实现一个自定义锁屏是一件繁琐的事情，因为系统有100种方法让这个非本地的锁屏待不下去。但是，人类的智慧是无限的，程序员需要逆流而上。<br/><br/>
 　　Android系统实现自定义锁屏页的思路很简单，即在App启动时开启一个service，在Service中时刻监听系统SCREEN_OFF的广播，当屏幕熄灭时，Service监听到广播，开启一个锁屏页Activity在屏幕最上层显示，该Activity创建的同时会去掉系统锁屏（当然如果有密码是禁不掉的）。示意图如下：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795013363128.png" alt="20171014150795013363128.png"/><figcaption>20171014150795013363128.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870570/15713322679776.png" alt=""/></figure></p>
 
 <p>道理很简单，我们这里需要讨论的是细节。</p>
 
@@ -239,7 +239,7 @@ mKeyguardLock.disableKeyguard();
 　　划瓶解锁的基本思路很简单，当手指在屏幕上滑动时，拦截并处理滑动事件，使锁屏页面随着手指运动，当运动到达一定的阀值时，用户手指松开手指，锁屏页自动滑动到屏幕边界消失，如果没有达到运动阀值，就会自动滑动到起始位置，重新覆盖屏幕。<br/><br/>
 　　为了将划屏逻辑与页面内容隔离开来，我们在锁屏页面布局中添加一个自定义的UnderView，这个UnderView填充整个屏幕，位于锁屏内容View（将其引用称之为mMoveView,并传入到UnderView中）的下方，所有划屏相关的事件都在这里拦截并处理。</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795122322931.png" alt="20171014150795122322931.png"/><figcaption>20171014150795122322931.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870570/15713322783529.png" alt=""/></figure></p>
 
 <p>mMoveView是锁屏页的显示内容，除了处理一些简单的点击事件，其他非点击事件序列都由底层的UnderView进行处理。只需要重写UnderView的onTouchEvent方法就能够实现：</p>
 
@@ -328,12 +328,12 @@ private void moveMoveView(float to,boolean exit){
 　　而第二个标记的问题在于，Google 认为导航栏对于用户来说是十分重要的，所以只会短暂隐藏导航栏。一旦用户做其他操作，例如点击一次屏幕，导航栏就会马上被重新调出。这样的设定对于看图软件，视频软件等等没什么大问题，但是对于游戏之类用户需要经常点击屏幕的 App，那就几乎是悲剧了——这也是为什么你在 Android 4.4 之前找不到什么全屏模式会自动隐藏导航栏的应用。<br/><br/>
 　　Android 4.4 之后加入的Immersive Full-Screen Mode 允许用户在应用全屏的情况下，通过在原有的状态栏/导航栏区域内做向内滑动的手势来实现短暂调出状态栏和导航栏的操作，且不会影响应用的正常全屏，短暂调出的状态栏和导航栏会呈半透明状态，并且在一段时间内或者用户与应用内元素进行互动的情况下自动隐藏，沉浸模式的四种状态如下图。（<a href="http://www.jcodecraeer.com/a/anzhuokaifa/androidkaifa/2015/0616/3047.html">参考</a>）</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795293493925.png" alt="20171014150795293493925.png"/><figcaption>20171014150795293493925.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870570/15713322917448.png" alt=""/></figure></p>
 
 <p>　　状态1代表没有进入沉浸模式时页面的状态，仍然可以看到Status Bar和Navigation Bar；状态2代表用户第一次进入沉浸模式时，系统的提示弹窗，告诉用户如何在沉浸模式下呼出Status Bar和Navigation Bar；状态3代表沉浸模式，可以看到Status Bar和Navigation Bar都被隐藏；状态4代表用户在Sticky沉浸模式下呼出Status Bar和Navigation Bar，可以看到两个Bar重新出现，但是过一段时间能够自动隐藏。<br/><br/>
 　　一般来说，沉浸模式的标记与其他Full Screen相关的Flag搭配起来才能达到我们想要的效果，即通过沉浸模式标记规定状态栏status bar和导航栏navigation bar显示和隐藏的运转逻辑，通过其他标签设定状态栏和导航栏显示或隐藏，以及显示或隐藏的样子。这些常见的Flag及相应功能如下表：<br/><br/>
 　　<br/>
-<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795296598206.png" alt="20171014150795296598206.png"/><figcaption>20171014150795296598206.png</figcaption></figure></p>
+<figure><img src="media/15561207870570/15713323021382.png" alt=""/></figure></p>
 
 <p>　　如此多的标签，看起来非常乱，但用起来却非常简单和明确，感兴趣的开发者可以自由搭配来测试一下。下面，我们通过一个例子，将这些标签应用于锁屏页，实现对Navigation Bar的自动隐藏，同时保留Status Bar。代码非常简单，在Activity的onCreate()方法中使用：<br/>
 　　</p>
@@ -383,13 +383,13 @@ public void onWindowFocusChanged(boolean hasFocus){
 
 <p>　　什么是透明栏？Google 在 Android 4.4 的 API 描述页面里提到了“Translucent system UI styling”，即半透明化的系统UI风格。这个“半透明化”包括了状态栏和通知栏，当开发者让应用支持这个新特性的时候，状态栏和导航栏可以单独/同时变为渐变的半透明样式，如下图：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079538614391.png" alt="2017101415079538614391.png"/><figcaption>2017101415079538614391.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870570/15713323115219.png" alt=""/></figure></p>
 
 <p>　　在 Android 5.0 之后引入了 Material Design，状态栏和导航栏也玩出了更多花样。现在除了原有的“半透明”模式以外，还有“全透明”以及“变色”模式，一种会完全隐藏背景，另一种可以取色作为背景颜色，多种样式的透明栏如下图（上图为透明状态栏，下图为透明导航栏）：</p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171014150795389627420.png" alt="20171014150795389627420.png"/><figcaption>20171014150795389627420.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870570/15713323241444.png" alt=""/></figure></p>
 
-<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101415079539225975.png" alt="2017101415079539225975.png"/><figcaption>2017101415079539225975.png</figcaption></figure></p>
+<p><figure><img src="media/15561207870570/15713323362509.png" alt=""/></figure></p>
 
 <p>　　所以，<strong>透明栏只是能够改变状态栏和导航栏的颜色，并不像沉浸模式那样隐藏状态栏和导航栏，两者是有本质区别的。</strong><br/><br/>
 　　对于Android 4.4以上5.0以下的版本，设置透明状态栏的方式如下：</p>
