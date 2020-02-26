@@ -118,6 +118,196 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207869112.html">
+                
+                  <h1>Apache简单搭建文件共享服务器</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>因为公司需求，增加打包测试发布的效率以及方便查看log信息。所以需要搭建一个简单的文件服务器。Mac内置Apache，所以我们可以很方便的搭建起来。</p>
+
+<h2 id="toc_1">启动Apache</h2>
+
+<p>启动：<code>sudo apachectl start</code><br/><br/>
+停止：<code>sudo apachectl stop</code><br/><br/>
+重启：<code>sudo apachectl restart</code><br/><br/>
+查看 Apache 版本 <code>httpd -v</code><br/><br/>
+浏览器打开 <a href="http://127.0.0.1">http://127.0.0.1</a> 可以看到 It works! 的页面  </p>
+
+<h2 id="toc_2">文件根目录</h2>
+
+<h3 id="toc_3">系统级的根目录</h3>
+
+<p><code>http://localhosts/</code> 对应的是 <code>/Library/WebServer/Documents/</code>  </p>
+
+<h4 id="toc_4">系统级根目录默认没有开启目录列表，开启方法：</h4>
+
+<p>编辑 <code>/etc/apache2/httpd.conf</code><br/><br/>
+文件搜索找到 <code>&lt;Directory &quot;/Library/WebServer/Documents&quot;&gt;</code>将 <code>Options FollowSymLinks Multiviews</code> 修改为<code>Options Indexes FollowSymLinks Multiviews</code></p>
+
+<h3 id="toc_5">用户级根目录</h3>
+
+<p>另一个 Web 根目录默认是 ~/Sites ，10.9 中你需要手动创建这个Sites目录。<br/><br/>
+检查<code>/etc/apache2/users/</code>这个目录下是否有 <code>username.conf</code> 文件<br/><br/>
+如果没有，则需要新建一个，username 需要是你的账户名字，建议使用终端创建这个文件：<br/><br/>
+<code>cd /etc/apache2/users</code><br/><br/>
+<code>sudo vi username.conf</code><br/><br/>
+贴入以下内容，注意修改 username 为你的账户名字  </p>
+
+<pre class="line-numbers"><code class="language-text">&lt;Directory &quot;/Users/username/Sites/&quot;&gt;
+Options Indexes MultiViews FollowSymLinks
+AllowOverride All
+Order allow,deny
+Allow from all
+Require all granted
+&lt;/Directory&gt;
+</code></pre>
+
+<p>这个文件的权限应该是:  </p>
+
+<p><code>-rw-r--r-- 1 root wheel 298 Jun 28 16:47 username.conf</code></p>
+
+<p>如果不是，请修改:  </p>
+
+<p><code>sudo chmod 644 username.conf</code></p>
+
+<p>编辑 <code>/etc/apache2/httpd.conf</code> 文件，删除下列这些代码前的注释符号： <code>#</code></p>
+
+<pre class="line-numbers"><code class="language-text">Include /private/etc/apache2/extra/httpd-userdir.conf
+LoadModule authz_core_module libexec/apache2/mod_authz_core.so
+LoadModule authz_host_module libexec/apache2/mod_authz_host.so
+LoadModule userdir_module libexec/apache2/mod_userdir.so
+</code></pre>
+
+<p>编辑 <code>/etc/apache2/extra/httpd-userdir.conf</code>文件，删除下列这些代码前的注释符号： <code>#</code><br/><br/>
+<code>Include /private/etc/apache2/users/*.conf</code>  </p>
+
+<p>重启 Apache<br/><br/>
+<code>sudo apachectl restart</code><br/><br/>
+这时，这个网址应该已经可以用了：<br/><br/>
+<code>http://localhost/~username/</code>  </p>
+
+<h2 id="toc_6">想去除/~username/</h2>
+
+<p>~username看着的确比较累赘，所以我们重定向把他给去掉<br/><br/>
+进入<code>/Library/WebServer/Documents</code>文件夹中，找到<code>index.html.en</code>文件，在里面添加一行<code>&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;</code>。最后变成这个样子。  </p>
+
+<pre class="line-numbers"><code class="language-text">&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;
+&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/3/17</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207868967.html">
+                
+                  <h1>命令行工具使用</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">替换Ruby的源</h2>
+
+<ul>
+<li><code>$gem source -r https://rubygems.org/</code></li>
+<li><code>$ gem source -a https://ruby.taobao.org</code></li>
+<li><code>$ gem sources -l</code>要想验证是否替换成功了，可以执行</li>
+<li><code>CURRENT SOURCES　http://ruby.taobao.org/</code>正常的输出结果</li>
+</ul>
+
+<h2 id="toc_1">Mac OS X安装Ruby运行环境</h2>
+
+<ul>
+<li>先安装 Xcode 开发工具，它将帮你安装好 Unix 环境需要的开发包。</li>
+<li>安装 RVM
+<ul>
+<li><code>$ curl -L https://get.rvm.io | bash -s stable</code>期间可能会问你sudo管理员密码，以及自动通过homebrew安装依赖包，等待一段时间后就可以成功安装好 RVM。</li>
+<li><code>$ source ~/.rvm/scripts/rvm</code>载入 RVM 环境</li>
+<li><code>rvm -v</code>检查一下是否安装正确</li>
+</ul></li>
+<li>用 RVM 安装 Ruby 环境
+<ul>
+<li><code>$ rvm list known</code>列出已知的ruby版本</li>
+<li><code>$ rvm install 2.4.0</code>可以选择现有的rvm版本来进行安装</li>
+<li><code>$ rvm list</code>查询已经安装的ruby</li>
+<li><code>$ rvm remove 1.9.2</code>卸载一个已安装版本</li>
+</ul></li>
+<li>设置 Ruby 版本
+<ul>
+<li><code>$ rvm 2.0.0 --default</code>RVM 装好以后，需要执行下面的命令将指定版本的 Ruby 设置为系统默认版本</li>
+</ul></li>
+</ul>
+
+<h2 id="toc_2">Mac OS X安装cocoapods</h2>
+
+<ul>
+<li><code>sudo gem install cocoapods</code></li>
+<li>如果速度不行，更换源。</li>
+</ul>
+
+<h2 id="toc_3">Mac OS X安装命令行切图工具</h2>
+
+<ul>
+<li>由一张1024*1024的图片批量生成applogo
+<ul>
+<li>brew install imagemagick</li>
+<li>配置icon_convert.sh文件</li>
+<li>cd 到icon_convert.sh所在文件夹</li>
+<li>执行<code>./icon_convert.sh &#39;1024.png&#39;</code></li>
+<li>生成对应的appicon</li>
+</ul></li>
+</ul>
+
+<p><figure><img src="media/15561207868967/15713049185843.jpg" alt=""/></figure></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/2/18</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207867705.html">
                 
                   <h1>CentOS7搭建Git</h1>
@@ -588,31 +778,31 @@ kramdown:
 	      
 		      
 			      <li class="post">
-			        <a href="15712984956484.html">代理模式</a>
+			        <a href="15826122642335.html">个人信息</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15712937841703.html">备忘录模式</a>
+			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15711947460528.html">观察者模式</a>
+			        <a href="15813395132789.html">Flutter VsCode插件</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15711314242192.html">策略模式</a>
+			        <a href="15809146907844.html">Flutter 组件小记</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15711233221322.html">适配器模式</a>
+			        <a href="15808782889824.html">Flutter常用第三方库</a>
 			      </li>
 		     
 		  
@@ -688,7 +878,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.1/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>
