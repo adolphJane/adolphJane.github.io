@@ -79,8 +79,6 @@
         
             <li><a href="Android.html">Android</a></li>
         
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
             <li><a href="C++.html">C++</a></li>
@@ -117,1796 +115,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="15561207871139.html">
-                
-                  <h1>Android-Fragment懒加载</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">生命周期</h2>
-
-<p>附上生命周期，帮助下面的学习。</p>
-
-<p><figure><img src="media/15561207871139/15713365181753.png" alt=""/></figure></p>
-
-<h2 id="toc_1">何为懒加载</h2>
-
-<p>Fragment 的 UI 对用户可见时才加载数据</p>
-
-<h2 id="toc_2">为什么需要</h2>
-
-<ul>
-<li>需求要求，我们一般是等数据加载完毕之后才会初始化UI，但是可能需求会先让UI显示，再加载数据</li>
-<li>与ViewPager搭配使用的时候，ViewPager有缓存机制，比如三个页面，0,1,2，当我们处于1页面的时候0,2也都会加载好，如果数据量较大的话，体验会很差</li>
-</ul>
-
-<h2 id="toc_3">实现原理</h2>
-
-<p>核心的点是判断UI的可见，Fragment提供了一个setUserVisibleHint(boolean isVisibleToUser)方法可以用来判断；</p>
-
-<h3 id="toc_4">setUserVisibleHint方法</h3>
-
-<ul>
-<li>单个 Fragment，setUserVisibleHint 是不会被调用的，只有该 Fragment 在 ViewPager 里才会被调用</li>
-<li>执行顺序：setUserVisibleHint 方法在Fragment的生命周期函数之前执行一次，此时isVisibleToUser是false，后续还会执行一次，此时isVisibleToUser是true，但是这次的时间是不确定的 。参考官方note说明</li>
-</ul>
-
-<p><figure><img src="media/15561207871139/15713365285264.png" alt=""/></figure></p>
-
-<h2 id="toc_5">实现代码</h2>
-
-<pre class="line-numbers"><code class="language-java">public class FriendFragment extends Fragment {
-
-    private boolean isVisible;
-    // 标志位，标志已经初始化完成，防止空指针的异常
-    private boolean isViewCreated;
-
-    public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState){
-        super.onCreateView(inflater, container, savedInstanceState);
-        isViewCreated = true;
-        View chatView = inflater.inflate(R.layout.activity_tab_friend, container,false);
-        return chatView;
-    }
-
-
-    @Override
-    public void setUserVisibleHint(boolean isVisibleToUser) {
-        super.setUserVisibleHint(isVisibleToUser);
-              Log.e(&quot;hhp&quot;, &quot;setUserVisibleHint: isVisibleToUser--&quot;+isVisibleToUser+&quot;---isViewCreated---&quot;+isViewCreated );
-        if (isVisibleToUser &amp;&amp; isViewCreated) {
-            isVisible = true;
-            lazyLoad();
-        }else {
-            isVisible = false;
-        }
-    }
-
-    private void lazyLoad() {
-        if (!isVisible || !isViewCreated) {
-            return;
-        }
-        getData();
-    }
-
-    private void getData() {
-        //加载数据
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        if (getUserVisibleHint()) {
-            getData();
-        }
-    }
-}
-</code></pre>
-
-<h3 id="toc_6">几点说明</h3>
-
-<p>分析两种情况：</p>
-
-<p>1.进来就加载的这个Fragment，此时isVisibleToUser 和isViewCreated 两个标志位的值如下</p>
-
-<p><figure><img src="media/15561207871139/15713365395269.png" alt=""/></figure></p>
-
-<p>，无法加载数据 ，所以需要在onActivityCreated方法中调用加载数据</p>
-
-<p>2.进来加载的不是这个Fragment，当该Fragment被缓存的时候，调用onActivityCreated方法getUserVisibleHint()值是false，不调用getData()方法；同理，isVisibleToUser和isViewCreated也是false，也不会调用getData()方法；滑动到该Fragment的时候，onActivityCreated方法不会再次执行，isVisibleToUser和isViewCreated都变为true，调用getData()方法加载数据。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207871105.html">
-                
-                  <h1>Android Gradle使用总结</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>阿里Maven替代<code>google()</code>,<code>jcenter()</code></p>
-
-<pre class="line-numbers"><code class="language-text">maven {
-    url &#39;https://maven.aliyun.com/repository/google&#39;
-}
-
-maven {
-    url &#39;https://maven.aliyun.com/repository/jcenter&#39;
-}
-</code></pre>
-
-<h2 id="toc_0">Android Gradle</h2>
-
-<p>Android项目使用 Gradle 作为构建框架，Gradle 又是以Groovy为脚本语言。所以学习Gradle之前需要先熟悉Groovy脚本语言。</p>
-
-<p>Groovy是基于Java语言的脚本语言，所以它的语法和Java非常相似，但是具有比java更好的灵活性。下面就列举一些和Java的主要区别。</p>
-
-<h2 id="toc_1">Android Gradle 的 Project 和 Tasks</h2>
-
-<p>这个Gradle中最重要的两个概念。每次构建（build）至少由一个project构成，一个project 由一到多个task构成。项目结构中的每个build.gradle文件代表一个project，在这编译脚本文件中可以定义一系列的task；task 本质上又是由一组被顺序执行的Action`对象构成，Action其实是一段代码块，类似于Java中的方法。</p>
-
-<h2 id="toc_2">Android Gradle 构建生命周期</h2>
-
-<p>每次构建的执行本质上执行一系列的Task。某些Task可能依赖其他Task。哪些没有依赖的Task总会被最先执行，而且每个Task只会被执行一遍。每次构建的依赖关系是在构建的配置阶段确定的。每次构建分为3个阶段：</p>
-
-<ul>
-<li>Initialization: 初始化阶段</li>
-</ul>
-
-<p>这是创建Project阶段，构建工具根据每个build.gradle文件创建出一个Project实例。初始化阶段会执行项目根目录下的settings.gradle文件，来分析哪些项目参与构建。</p>
-
-<p>所以这个文件里面的内容经常是：</p>
-
-<pre class="line-numbers"><code class="language-text">include &#39;:app&#39;
-include &#39;:libraries:someProject&#39;
-</code></pre>
-
-<p>这是告诉Gradle这些项目需要编译，所以我们引入一些开源的项目的时候，需要在这里填上对应的项目名称，来告诉Gradle这些项目需要参与构建。</p>
-
-<ul>
-<li>Configuration:配置阶段</li>
-</ul>
-
-<p>这个阶段，通过执行构建脚本来为每个project创建并配置Task。配置阶段会去加载所有参与构建的项目的build.gradle文件，会将每个build.gradle文件实例化为一个Gradle的project对象。然后分析project之间的依赖关系，下载依赖文件，分析project下的task之间的依赖关系。</p>
-
-<ul>
-<li>Execution:执行阶段</li>
-</ul>
-
-<p>这是Task真正被执行的阶段，Gradle会根据依赖关系决定哪些Task需要被执行，以及执行的先后顺序。 <br/>
-task是Gradle中的最小执行单元，我们所有的构建，编译，打包，debug，test等都是执行了某一个task，一个project可以有多个task，task之间可以互相依赖。例如我有两个task，taskA和taskB，指定taskA依赖taskB，然后执行taskA，这时会先去执行taskB，taskB执行完毕后在执行taskA。</p>
-
-<p>说到这可能会有疑问，我翻遍了build.gradle也没看见一个task长啥样，有一种被欺骗的赶脚！</p>
-
-<p>其实不是，你点击AndroidStudio右侧的一个Gradle按钮，会打开一个面板，内容差不多是这样的：</p>
-
-<p><figure><img src="media/15561207871105/15713362580966.png" alt=""/></figure></p>
-
-<p>里面的每一个条目都是一个task，那这些task是哪来的呢？</p>
-
-<p>一个是根目录下的 build.gradle 中的</p>
-
-<pre class="line-numbers"><code class="language-text">dependencies {
-    classpath &#39;com.android.tools.build:gradle:2.2.2&#39;
-}
-</code></pre>
-
-<p>一个是 app 目录下的 build.gradle 中的</p>
-
-<p><code>apply plugin: &#39;com.android.application&#39;</code></p>
-
-<p>这两段代码决定的。也就是说，Gradle提供了一个框架，这个框架有一些运行的机制可以让你完成编译，但是至于怎么编译是由插件决定的。还好Google已经给我们写好了Android对应的Gradle工具，我们使用就可以了。</p>
-
-<p>根目录下的build.gradle中dependencies {classpath ‘com.android.tools.build:gradle:2.2.2’}是Android Gradle编译插件的版本。</p>
-
-<p>app目录下的build.gradle中的apply plugin: ‘com.android.application’是引入了Android的应用构建项目，还有com.android.library和com.android.test用来构建library和测试。</p>
-
-<p>所有Android构建需要执行的task都封装在工具里，如果你有一些特殊需求的话，也可以自己写一些task。那么对于开发一个Android应用来说，最关键的部分就是如何来用AndroidGradle的插件了。</p>
-
-<h2 id="toc_3">认知Gradle Wrapper</h2>
-
-<p>Android Studio中默认会使用 Gradle Wrapper 而不是直接使用Gradle。命令也是使用gradlew而不是gradle。这是因为gradle针对特定的开发环境的构建脚本，新的gradle可能不能兼容旧版的构建环境。为了解决这个问题，使用Gradle Wrapper 来间接使用 gradle。相当于在外边包裹了一个中间层。对开发者来说，直接使用Gradlew 即可，不需要关心 gradle的版本变化。Gradle Wrapper 会负责下载合适的的gradle版本来构建项目。</p>
-
-<h2 id="toc_4">Android 三个文件重要的 gradle 文件</h2>
-
-<p>Gradle项目有3个重要的文件需要深入理解：项目根目录的 build.gradle , settings.gradle 和模块目录的 build.gradle 。</p>
-
-<ul>
-<li><p>1.settings.gradle 文件会在构建的 initialization 阶段被执行，它用于告诉构建系统哪些模块需要包含到构建过程中。对于单模块项目， settings.gradle 文件不是必需的。对于多模块项目，如果没有该文件，构建系统就不能知道该用到哪些模块。</p></li>
-<li><p>2.项目根目录的 build.gradle 文件用来配置针对所有模块的一些属性。它默认包含2个代码块：buildscript{…}和allprojects{…}。前者用于配置构建脚本所用到的代码库和依赖关系，后者用于定义所有模块需要用到的一些公共属性。</p></li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">buildscript {
-    repositories {
-        jcenter()
-    }
-    dependencies {
-        classpath &#39;com.android.tools.build:gradle:2.3.2&#39;
-    }
-}
-
-allprojects {
-    repositories {
-        jcenter()
-    }
-}
-
-task clean(type: Delete) {
-    delete rootProject.buildDir
-}
-</code></pre>
-
-<p>buildscript：定义了 Android 编译工具的类路径。repositories中, jCenter是一个著名的 Maven 仓库。</p>
-
-<p>allprojects:中定义的属性会被应用到所有 moudle 中，但是为了保证每个项目的独立性，我们一般不会在这里面操作太多共有的东西。</p>
-
-<ul>
-<li>3.模块级配置文件 build.gradle 针对每个moudle 的配置，如果这里的定义的选项和顶层 build.gradle定义的相同。它有3个重要的代码块：plugin，android 和 dependencies。</li>
-</ul>
-
-<h2 id="toc_5">定制项目属性（project properties)</h2>
-
-<p>在项目根目录的build.gradle配置文件中，我们可以定制适用于所有模块的属性，通过ext 代码块来实现。如下所示：</p>
-
-<pre class="line-numbers"><code class="language-text">ext {
-    compileSdkVersion = 22
-    buildToolsVersion = &quot;22.0.1&quot;
-}
-</code></pre>
-
-<p>然后我们可以在模块目录的build.gradle配置文件中引用这些属性,引用语法为rootProject.ext.{属性名}。如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    compileSdkVersion rootProject.ext.compileSdkVersion
-    buildToolsVersion rootProject.ext.buildToolsVersion
-}
-</code></pre>
-
-<h2 id="toc_6">Android studio gradle Task</h2>
-
-<p><figure><img src="media/15561207871105/15713362692371.png" alt=""/></figure></p>
-
-<pre class="line-numbers"><code class="language-text">//构建
-gradlew app:clean    //移除所有的编译输出文件，比如apk
-
-gradlew app:build   //构建 app module ，构建任务，相当于同时执行了check任务和assemble任务
-
-//检测
-gradlew app:check   //执行lint检测编译。
-
-//打包
-gradlew app:assemble //可以编译出release包和debug包，可以使用gradlew assembleRelease或者gradlew assembleDebug来单独编译一种包
-
-gradlew app:assembleRelease  //app module 打 release 包
-
-gradlew app:assembleDebug  //app module 打 debug 包
-
-//安装，卸载
-
-gradlew app:installDebug  //安装 app 的 debug 包到手机上
-
-gradlew app:uninstallDebug  //卸载手机上 app 的 debug 包
-
-gradlew app:uninstallRelease  //卸载手机上 app 的 release 包
-
-gradlew app:uninstallAll  //卸载手机上所有 app 的包
-</code></pre>
-
-<p>这些都是基本的命令，在实际项目中会根据不同的配置，会对这些task 设置不同的依赖。比如 默认的 assmeble 会依赖 assembleDebug 和assembleRelease，如果直接执行assmeble，最后会编译debug，和release 的所有版本出来。如果我们只需要编译debug 版本，我们可以运行assembleDebug。</p>
-
-<p>除此之外还有一些常用的新增的其他命令，比如 install命令，会将编译后的apk 安装到连接的设备。</p>
-
-<h2 id="toc_7">lint 检测</h2>
-
-<ul>
-<li>忽略编译器的 lint 检查</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-  lintOptions {
-      abortOnError false
-  }
-}
-</code></pre>
-
-<h2 id="toc_8">buildTypes 定义了编译类型</h2>
-
-<pre class="line-numbers"><code class="language-text">android{
-
-  buildTypes {
-       release {
-           minifyEnabled true  //打开混淆
-           proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-       }
-        debug {
-           minifyEnabled false //关闭混淆
-           proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-    }
-}
-</code></pre>
-
-<h2 id="toc_9">productFlavors 多渠道打包</h2>
-
-<p>AndroidManifest.xml 里设置动态渠道变量</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;meta-data
-    android:name=&quot;UMENG_CHANNEL&quot;
-    android:value=&quot;${UMENG_CHANNEL_VALUE}&quot; /&gt;
-</code></pre>
-
-<p>在 build.gradle 设置 productFlavors , 这里假定我们需要打包的渠道为酷安市场、360、小米、百度、豌豆荚。</p>
-
-<pre class="line-numbers"><code class="language-text">android {  
-
-    productFlavors {
-        kuan {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;kuan&quot;]
-        }
-        xiaomi {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;xiaomi&quot;]
-        }
-        qh360 {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;qh360&quot;]
-        }
-        baidu {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;baidu&quot;]
-        }
-        wandoujia {
-            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;wandoujia&quot;]
-        }
-    } 
-}
-</code></pre>
-
-<p>或者批量修改</p>
-
-<pre class="line-numbers"><code class="language-text">android {  
-
-    productFlavors {
-        kuan {}
-        xiaomi {}
-        qh360 {}
-        baidu {}
-        wandoujia {}
-    }  
-
-    productFlavors.all { 
-        flavor -&gt; flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name] 
-    }
-}
-</code></pre>
-
-<p>这样在打包的时候就可以选择渠道了</p>
-
-<p><figure><img src="media/15561207871105/15713362798754.png" alt=""/></figure></p>
-
-<p>或者用命令打包 ，比如：</p>
-
-<pre class="line-numbers"><code class="language-text">gradlew assembleWandoujiaRelease  //豌豆荚 release 包
-
-gradlew assembleWandoujiaDebug //豌豆荚 debug 包
-</code></pre>
-
-<h2 id="toc_10">多渠道设置包名</h2>
-
-<p>有时候我们需要分渠道设置 applicationId 、友盟的 appkey 、友盟渠道号。</p>
-
-<pre class="line-numbers"><code class="language-text">productFlavors {
-    google {
-        applicationId &quot;com.wifi.cool&quot;
-        manifestPlaceholders = [                
-            UMENG_APPKEY_VALUE : &quot;456789456789&quot;,
-            UMENG_CHANNEL_VALUE: &quot;google&quot;,            
-        ]
-    }
-
-    baidu{
-        applicationId &#39;com.wifi.hacker&#39;
-        manifestPlaceholders = [
-        UMENG_APPKEY_VALUE     : &quot;123456789789&quot;,
-        UMENG_CHANNEL_VALUE    : &quot;baidu&quot;,          
-        ]
-    }
-}
-</code></pre>
-
-<h2 id="toc_11">Signing 签名</h2>
-
-<p>在 android 标签下添加 signingConfigs 标签，如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    signingConfigs {
-        config {
-           keyAlias &#39;yiba&#39;
-           keyPassword &#39;123456&#39;
-           storeFile file(&#39;C:/work/Key.jks&#39;)
-           storePassword &#39;1234567&#39;
-       }
-   }
-} 
-</code></pre>
-
-<p>可以在 release 和 debug 包中定义签名，如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    signingConfigs {
-        config {
-            keyAlias &#39;yiba&#39;
-            keyPassword &#39;123456&#39;
-            storeFile file(&#39;C:/work/Key.jks&#39;)
-            storePassword &#39;1234567&#39;
-        }
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            signingConfig signingConfigs.config
-        }
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            signingConfig signingConfigs.config
-        }
-    }
-}
-</code></pre>
-
-<h2 id="toc_12">依赖管理</h2>
-
-<h3 id="toc_13">依赖 jcenter 包</h3>
-
-<p>每个库名称包含三个元素：组名:库名称:版本号</p>
-
-<p><code>compile &#39;com.android.support:appcompat-v7:25.0.0&#39;</code></p>
-
-<h3 id="toc_14">依赖本地 module</h3>
-
-<p><code>compile project(&#39;:YibaAnalytics&#39;)</code></p>
-
-<h3 id="toc_15">依赖 jar 包</h3>
-
-<ul>
-<li>把 jar 包放在 libs 目录下</li>
-<li>在 build.gradle 中添加依赖</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">dependencies {
-   compile files(&#39;libs/YibaAnalytics5.jar&#39;)
-}
-</code></pre>
-
-<p><figure><img src="media/15561207871105/15713362914899.png" alt=""/></figure></p>
-
-<h3 id="toc_16">依赖 aar 包</h3>
-
-<ul>
-<li>把 aar 包放到 libs 目录下</li>
-<li>在 build.gradle 中添加依赖</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">repositories {
-    flatDir {
-        dirs &#39;libs&#39;
-    }
-}
-
-dependencies {
-    compile(name:&#39;YibaAnalytics-release&#39;, ext:&#39;aar&#39;)
-}
-</code></pre>
-
-<p>如图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713363032809.png" alt=""/></figure></p>
-
-<ul>
-<li>自定义依赖包目录</li>
-</ul>
-
-<p>当我们的 aar 包需要被多个 module 依赖时，我们就不能把 aar 包放在单一的 module 中，我们可以在项目的根目录创建一个目录，比如叫 aar 目录，然后把我们的 aar 包放进去，如图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713363123670.png" alt=""/></figure></p>
-
-<p>在项目的根目录的 build.gradle 的 allprojects 标签下的 repositories 添加 ：</p>
-
-<pre class="line-numbers"><code class="language-text"> flatDir {
-     dirs &#39;../aar&#39;
-}
-</code></pre>
-
-<p>../aar 表示根目录下的 aar 文件夹。</p>
-
-<p>如图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713363259577.png" alt=""/></figure></p>
-
-<p>然后就可以添加依赖了，如下所示：</p>
-
-<p><code>compile(name:&#39;YibaAnalytics-release&#39;, ext:&#39;aar&#39;)</code></p>
-
-<h3 id="toc_17">依赖配置</h3>
-
-<p>有些时候，你可能需要和sdk协调工作。为了能顺利编译你的代码，你需要添加SDK到你的编译环境。你不需要将sdk包含在你的APK中，因为它早已经存在于设备中，所以配置来啦，我们会有5个不同的配置：</p>
-
-<ul>
-<li>compile</li>
-<li>apk</li>
-<li>provided</li>
-<li>testCompile</li>
-<li>androidTestCompile</li>
-</ul>
-
-<p>compile是默认的那个，其含义是包含所有的依赖包，即在APK里，compile的依赖会存在。</p>
-
-<p>apk的意思是apk中存在，但是不会加入编译中，这个貌似用的比较少。</p>
-
-<p>provided的意思是提供编译支持，但是不会写入apk。</p>
-
-<h3 id="toc_18">排除依赖兼容包</h3>
-
-<p>有时候我们在引入依赖包的时候，会额外的引入 v7, v4 的包，对我们的项目造成额外的负担，我们需要把这个兼容包排除，可以使用 exclude 就能做到。</p>
-
-<pre class="line-numbers"><code class="language-text">compile(&#39;com.google.firebase:firebase-ads:11.0.4&#39;, {
-      exclude group: &#39;com.android.support&#39;   //排除v7 , v4 包
-})
-</code></pre>
-
-<h2 id="toc_19">native包（so包）</h2>
-
-<p>用c或者c++写的library会被叫做so包，Android插件默认情况下支持native包，你需要把.so文件放在对应的文件夹中：</p>
-
-<p><figure><img src="media/15561207871105/15713363347764.png" alt=""/></figure></p>
-
-<p><strong>注意</strong></p>
-
-<p>jniLibs 目录应该和 Java 目录在同一级</p>
-
-<h2 id="toc_20">defaultConfig 详解</h2>
-
-<p>defaultConfig 对应的是 ProductFlavor 类。</p>
-
-<h2 id="toc_21">resConfigs ： 过滤语言</h2>
-
-<p>如果你的app中仅支持1,2种语言，但是可能引用的lib库包含多种其他语言的strings资源，这个时候我们可以通过resConfig指定我们需要的strings资源。</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    defaultConfig {
-        applicationId &quot;com.yiba.sharewe.lite.activity&quot;
-        minSdkVersion 14
-        targetSdkVersion 24
-        versionCode 46
-        versionName &quot;1.74&quot;
-        resConfigs &#39;en&#39;, &#39;zh-rCN&#39; ,&#39;es&#39;  //本次打包，只把 en(英文)、zh-rCN(中文简体)、es（西班牙语）打进保内，其他语言忽略
-    }
-}
-</code></pre>
-
-<h2 id="toc_22">resConfigs ： 过滤 drawable文件夹的资源</h2>
-
-<p>一般情况下，我们打完包，res 下面的资源如图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713363448569.png" alt=""/></figure></p>
-
-<p>现在加上资源过滤规则：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    defaultConfig {
-        applicationId &quot;com.wifi.analytics&quot;
-        minSdkVersion 9
-        targetSdkVersion 25
-        versionCode 1
-        versionName &quot;1.0&quot;
-        resConfigs &quot;hdpi&quot;  //打包的时候只保留 drawable-xhdpi 文件夹里面的资源
-    }
-}
-</code></pre>
-
-<p>这次我们打包效果如下：</p>
-
-<p><figure><img src="media/15561207871105/15713363581659.png" alt=""/></figure></p>
-
-<h2 id="toc_23">buildTypes 详解</h2>
-
-<p><a href="http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html">官方文档</a></p>
-
-<p>buildTypes{}对应的是 BuildType 类</p>
-
-<p><strong>继承关系</strong></p>
-
-<p>BuildType 继承 DefaultBuildType ； DefaultBuildType 继承 BaseConfigImpl ；</p>
-
-<pre class="line-numbers"><code class="language-text">BaseConfigImpl
-    --- DefaultBuildType 
-          --- BuildType
-</code></pre>
-
-<p><strong>buildTypes的属性</strong>：</p>
-
-<pre class="line-numbers"><code class="language-text">name：build type的名字
-
-applicationIdSuffix：应用id后缀
-
-versionNameSuffix：版本名称后缀
-
-debuggable：是否生成一个debug的apk
-
-minifyEnabled：是否混淆
-
-proguardFiles：混淆文件
-
-signingConfig：签名配置
-
-manifestPlaceholders：清单占位符
-
-shrinkResources：是否去除未利用的资源，默认false，表示不去除。
-
-zipAlignEnable：是否使用zipalign工具压缩。
-
-multiDexEnabled：是否拆成多个Dex
-
-multiDexKeepFile：指定文本文件编译进主Dex文件中
-
-multiDexKeepProguard：指定混淆文件编译进主Dex文件中
-</code></pre>
-
-<p><strong>buildType的方法</strong>：</p>
-
-<pre class="line-numbers"><code class="language-text">1.buildConfigField(type,name,value)：添加一个变量生成BuildConfig类。
-
-2.consumeProguardFile(proguardFile)：添加一个混淆文件进arr包。
-
-3.consumeProguardFile(proguardFiles)：添加混淆文件进arr包。
-
-4.externalNativeBuild(action)：配置本地的build选项。
-
-5.initWith：复制这个build类型的所有属性。
-
-6.proguardFile(proguardFile)：添加一个新的混淆配置文件。
-
-7.proguradFiles(files):添加新的混淆文件
-
-8.resValue(type,name,value)：添加一个新的生成资源
-
-9.setProguardFiles(proguardFileIterable):设置一个混淆配置文件。
-</code></pre>
-
-<h2 id="toc_24">initWith ：复制属性</h2>
-
-<pre class="line-numbers"><code class="language-text">android {
-    compileSdkVersion 25
-    buildToolsVersion &quot;25.0.2&quot;
-    defaultConfig {
-        applicationId &quot;com.wifi.analytics&quot;
-        minSdkVersion 9
-        targetSdkVersion 25
-        versionCode 1
-        versionName &quot;1.0&quot;
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-
-        myType {
-            initWith debug  //完全复制 debug 的所有属性‘
-            minifyEnabled true //自定义打开混淆
-        }
-    }
-}
-</code></pre>
-
-<h2 id="toc_25">applicationIdSuffix 、versionNameSuffix ：添加后缀</h2>
-
-<pre class="line-numbers"><code class="language-text">android {
-    compileSdkVersion 25
-    buildToolsVersion &quot;25.0.2&quot;
-    defaultConfig {
-        applicationId &quot;com.wifi.analytics&quot;
-        minSdkVersion 9
-        targetSdkVersion 25
-        versionCode 1
-        versionName &quot;1.0&quot;
-    }
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            applicationIdSuffix &quot;zhao&quot;  //applicationId 追加后缀名 zhao
-            versionNameSuffix &quot;debug&quot;  //versionName 追加后缀名 debug1.0
-        }
-    }
-}
-</code></pre>
-
-<p>效果图，如下：</p>
-
-<p><figure><img src="media/15561207871105/15713363714525.png" alt=""/></figure></p>
-
-<h2 id="toc_26">buildConfigField： 自定义属性</h2>
-
-<p>在 build.gradle 文件中定义 buildConfigField 属性</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://yiba.com\&quot;&quot;  //自定义String属性
-        }
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://yiba.com\&quot;&quot;  //自定义String属性
-        }
-    }
-}
-</code></pre>
-
-<p>然后点击同步按钮，然后就可以在 build 目录看到 debug 和 release 信息。</p>
-
-<p>debug 环境下的 BuildConfig 如下： </p>
-
-<p><figure><img src="media/15561207871105/15713363842541.png" alt=""/></figure></p>
-
-<p>release 环境下的 BuildConfig 如下：</p>
-
-<p><figure><img src="media/15561207871105/15713363916779.png" alt=""/></figure></p>
-
-<p>当然我们也可以在代码中获取自定义的值：</p>
-
-<pre class="line-numbers"><code class="language-text">//获取变量值
-String API = BuildConfig.API_ENV ;
-</code></pre>
-
-<p>上面演示了自定义 String 变量，也可以 自定义 int 、boolean</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    buildTypes {
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://www.baidu.com\&quot;&quot; //自定义 String 值
-            buildConfigField &quot;Boolean&quot;, &quot;openLog&quot;, &quot;true&quot; //自定义 boolean 值
-            buildConfigField &quot;int&quot;, &quot;age&quot;, &quot;10&quot;   //自定义 int 值
-        }
-    }
-}
-</code></pre>
-
-<h2 id="toc_27">Gradle 实现差异化构建</h2>
-
-<h3 id="toc_28">情景1</h3>
-
-<p>LeakCanary 是 square 公司出品的一个检测内存泄漏的开源库。</p>
-
-<p>GitHub ： <a href="https://github.com/square/leakcanary">https://github.com/square/leakcanary</a></p>
-
-<p>我们一般这样集成</p>
-
-<pre class="line-numbers"><code class="language-text">dependencies {
-    compile &#39;com.squareup.leakcanary:leakcanary-android:1.5.2&#39;
-}
-</code></pre>
-
-<p>然后我们在 Application 类中初始化：</p>
-
-<pre class="line-numbers"><code class="language-text">public class MyApplication extends Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-
-        LeakCanary.install(this);
-    }
-}
-</code></pre>
-
-<p>但是这样集成有一个弊端，就是 debug 和 release 包都会把 LeakCanary 的源码打进去，如果我们在 release 包中不把 LeakCanary 源码打进去，怎么办？ 还好 LeakCanary 给我们提供了一个方法，方法如下：</p>
-
-<pre class="line-numbers"><code class="language-text">dependencies {
-
- //打 debug 包
- debugCompile &#39;com.squareup.leakcanary:leakcanary-android:1.5.1&#39;
-
- //打 release 包
- releaseCompile &#39;com.squareup.leakcanary:leakcanary-android-no-op:1.5.1&#39;
-
-}
-</code></pre>
-
-<p>leakcanary-android-no-op 是一个空壳，里面有2个空类，所以就可以避免把 LeakCanary 源码打进 release 包。但是这种方式有个缺陷，如果一些开源库没有提供 releaseCompile 库，那我们改怎么办了？下面的情景2 就会讲到解决方案。</p>
-
-<h3 id="toc_29">情景2</h3>
-
-<p>Stetho 是 Faceboo k开源的Andorid调试工具。当你的应用集成Stetho时，开发者可以访问Chrome，在Chrome Developer Tools中查看应用布局，网络请求，sqlite，preference 等等。</p>
-
-<p>官网：<a href="http://facebook.github.io/stetho/">http://facebook.github.io/stetho/</a></p>
-
-<p>从官网可以看到 stetho 没有提供 releaseCompile 包 ， 情景1 的方案就不能用了。新的思路集成方案如下：</p>
-
-<pre class="line-numbers"><code class="language-text">dependencies {
-    debugCompile &#39;com.facebook.stetho:stetho:1.5.0&#39;
-}
-</code></pre>
-
-<p>在 src 目录下创建 debug 目录、release 目录 ，然后分别在 debug 目录 和 release 目录 创建 java 目录 ， 在 java 目录中创建包名，比如： com.app , 如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364007239.png" alt=""/></figure></p>
-
-<p>debug 目录下创建 SDKManage 类 ，如下 ：</p>
-
-<pre class="line-numbers"><code class="language-text">public class SDKManager {
-
-    public static void init(Context context) {
-        //初始化 Stetho
-        Stetho.initializeWithDefaults(context);
-    }
-}
-</code></pre>
-
-<p>release 目录下创建 SDKManage 类 ，如下 ：</p>
-
-<pre class="line-numbers"><code class="language-text">public class SDKManager {
-
-    public static void init(Context context) { 
-        //这是一个空方法，目的是不引入 Stetho 源码
-    }
-}
-</code></pre>
-
-<p>在住项目中的 MyApplication 类，并且完成 Stetho 的初始化，如下：</p>
-
-<pre class="line-numbers"><code class="language-text">public class MyApplication extends Application {
-
-    @Override
-    public void onCreate() {
-        super.onCreate();
-        SDKManager.init(this);
-    }
-}
-</code></pre>
-
-<p>这样我们便完成了简单的差异化构建, 打出来的 release 包就没有 Stetho 源码。</p>
-
-<h2 id="toc_30">SourceSet</h2>
-
-<h3 id="toc_31">SourceSet 简介</h3>
-
-<p>SourceSet 可以定义项目结构，也可以修改项目结构。Java插件默认实现了两个SourceSet，main 和 test。每个 SourceSet 都提供了一系列的属性，通过这些属性，可以定义该 SourceSet 所包含的源文件。比如，java.srcDirs，resources.srcDirs 。Java 插件中定义的其他任务，就根据 main 和 test 的这两个 SourceSet 的定义来寻找产品代码和测试代码等。</p>
-
-<h3 id="toc_32">SourceSet 定义源码目录</h3>
-
-<p>在 Android 项目中，我们可以在 src/main/java 目录新建 Java 文件，如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364118845.png" alt=""/></figure></p>
-
-<p>现在我们在 src 目录下，新建 test1 目录 ，发现不能在 test1 目录中新建 Java 文件，如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364211641.png" alt=""/></figure></p>
-
-<p>为什么在 test1 目录不能新建 Java 文件，因为 Gradle 中 SourceSet 默认定义的源码文件路径是src/main/java , 其他的文件下下面的源码我们自然无法访问。解决这个问题也很简单，我们需要在 SourceSet 中增加一个源码路径即可。如下所示：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            java {
-                srcDir &#39;src/test1&#39; //指定源码目录
-            }
-        }
-    }
-}
-</code></pre>
-
-<p>然后同步一下，就可以在 test1 目录中新建 Java 文件了。如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364350808.png" alt=""/></figure></p>
-
-<p>当然我们也可以同时指定多个源码目录，比如同时指定 test1 , test2 , test3 为源码目录。</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            java {
-                srcDir &#39;src/test1&#39; //指定 test1 为源码目录
-                srcDir &#39;src/test2&#39; //指定 test2 为源码目录
-                srcDir &#39;src/test3&#39; //指定 test3 为源码目录
-            }
-        }
-    }
-}
-</code></pre>
-
-<p>或者 这样写 ：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    sourceSets {
-        main {
-            java.srcDirs( &#39;src/test1&#39; , &#39;src/test2&#39; ,&#39;src/test3&#39; )
-        }
-    }
-}
-</code></pre>
-
-<p>效果如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364453181.png" alt=""/></figure></p>
-
-<h3 id="toc_33">SourceSet 定义资源目录</h3>
-
-<p>定义 test1 目录 Java 源代码路径、res 资源目录。目录结构如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364539966.png" alt=""/></figure></p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            java.srcDirs(&#39;src/test1/java&#39;)  //定义java 源代码
-            res.srcDirs(&#39;src/test1/res&#39;)    //定义资源目录（layout , drawable,values）
-        }
-    }
-}
-</code></pre>
-
-<h3 id="toc_34">SourceSet 实现 layout 分包</h3>
-
-<p>对于一个大项目来说，页面太多，布局文件就很多，有时在众多布局文件中找某个模块的布局文件，很是痛苦，为了解决这个问题，我们可以在创建多个 layout 目录，不同模块的布局文件放在不同的 layout 目录中，这样查找起来，就容易很多。</p>
-
-<p>例子：</p>
-
-<p>比如我们的项目中，有两个模块分别为：登录、注册。</p>
-
-<ul>
-<li><p>第一步：把项目中 layout 文件夹改名字为 layouts</p></li>
-<li><p>第二步：在 layouts 目录下，分别创建 login 、register 目录 。</p></li>
-<li><p>第三步：分别在 login 、register 目录下创建 layout 目录。注意这一步是必须的，否则会报错。</p></li>
-<li><p>第四步：把 登录布局文件、注册布局文件 分别放在 第三步创建的对应的 layout 目录下。</p></li>
-</ul>
-
-<p>效果图如下：</p>
-
-<p><figure><img src="media/15561207871105/15713364631613.png" alt=""/></figure></p>
-
-<p>SourceSet 实现如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            res.srcDirs &#39;src/main/res/layouts/login&#39;  //定义登录布局目录
-            res.srcDirs &#39;src/main/res/layouts/register&#39;  //定义注册布局目录
-        }
-    }
-}
-</code></pre>
-
-<h3 id="toc_35">SourceSet 定义 AndroidManifest 文件</h3>
-
-<p>指定 test1 目录下的 AndroidManifest 文件。项目结构如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364731329.png" alt=""/></figure></p>
-
-<p>代码如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            manifest.srcFile &#39;src/test1/AndroidManifest.xml&#39;
-        }
-    }
-}
-</code></pre>
-
-<p>在组件化开发中, 我们需要针对 debug 与 release 模式下, 指定不同的 Manifest 文件, 代码如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    def appDebug = false;
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            appDebug = false;
-        }
-
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-            appDebug = false;
-        }
-    }
-
-    sourceSets {
-        main {
-            if (appDebug) {
-                manifest.srcFile &#39;src/test1/AndroidManifest.xml&#39;
-            } else {
-                manifest.srcFile &#39;src/main/AndroidManifest.xml&#39;
-            }
-        }
-    }
-}
-</code></pre>
-
-<h3 id="toc_36">SourceSet 定义 assets 目录</h3>
-
-<p>Android Studio 项目目录中，assets 默认目录如下：</p>
-
-<p><figure><img src="media/15561207871105/15713364871019.png" alt=""/></figure></p>
-
-<p>如何重新定义 assets 目录 。在项目的根目录下创建 assets 目录，如下图所示：</p>
-
-<p><figure><img src="media/15561207871105/15713364957176.png" alt=""/></figure></p>
-
-<p>sourceSets 定义代码如下：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            assets.srcDirs = [&#39;assets&#39;]
-        }
-    }
-}
-</code></pre>
-
-<h3 id="toc_37">SourceSet 定义其他资源</h3>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-    sourceSets {
-        main {
-            jniLibs.srcDirs  //定义 jni 目录
-            aidl.srcDirs  //定义 aidl 目录
-        }
-    }
-}
-</code></pre>
-
-<h2 id="toc_38">applicationVariants</h2>
-
-<h3 id="toc_39">定义 versionName 、VersionCode</h3>
-
-<p>在打包的时候分 debug 、release 版本 , 需要控制 versionName</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-
-     applicationVariants.all { variant -&gt;
-        def flavor = variant.mergedFlavor
-        def versionName = flavor.versionName
-        if (variant.buildType.isDebuggable()) {
-            versionName += &quot;_debug&quot;  //debug 名字
-        } else {
-            versionName += &quot;_release&quot; //release 名字
-        }
-        flavor.versionName = versionName
-    }
-}
-</code></pre>
-
-<h3 id="toc_40">定义 APK 包的名字</h3>
-
-<pre class="line-numbers"><code class="language-text">apply plugin: &#39;com.android.application&#39;
-
-android {
-
-    defaultConfig {
-        applicationId &quot;android.plugin&quot;
-        minSdkVersion 14
-        targetSdkVersion 25
-        versionCode 1
-        versionName &quot;1.0&quot;
-    }
-
-    buildTypes {
-        release {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-        debug {
-            minifyEnabled false
-            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-    }
-
-    //定义渠道
-    productFlavors {
-        xiaomi {
-            //小米
-        }
-        wandoujia {
-            // 豌豆荚
-        }
-    }
-
-    //打包命名
-    applicationVariants.all {
-        variant -&gt;
-            variant.outputs.each {
-                output -&gt;
-
-                    //定义一个新的apk 名字。
-                    // 新名字 = app 名字+ 渠道号 + 构建类型 + 版本号 + 当前构建时间
-                    def apkName = &quot;appName_${variant.flavorName}_${buildType.name}_v${variant.versionName}_${getTime()}.apk&quot;;
-                    output.outputFile = new File(output.outputFile.parent, apkName);
-            }
-    }
-
-}
-
-//获取当前时间
-def getTime() {
-    String today = new Date().format(&#39;YY年MM月dd日HH时mm分&#39;)
-    return today
-}
-</code></pre>
-
-<p>效果图如下：</p>
-
-<p><figure><img src="media/15561207871105/15713365072870.png" alt=""/></figure></p>
-
-<h2 id="toc_41">Task</h2>
-
-<h3 id="toc_42">定义 task</h3>
-
-<pre class="line-numbers"><code class="language-text">//定义任务1
-task task1&lt;&lt;{
-    println &#39;task1&#39;
-}
-
-//定义任务2
-task task2&lt;&lt;{
-    println &#39;task2&#39;
-}
-</code></pre>
-
-<h3 id="toc_43">mustRunAfter 定义 task 执行顺序</h3>
-
-<pre class="line-numbers"><code class="language-text">//task2 的执行顺讯在 task1 之后
-task2.mustRunAfter task1
-</code></pre>
-
-<ul>
-<li>测试1 ： gradlew task1<br/></li>
-</ul>
-
-<p>效果如下：</p>
-
-<pre class="line-numbers"><code class="language-text">:app:task1
-task1
-</code></pre>
-
-<ul>
-<li>测试2 ： gradlew task2<br/></li>
-</ul>
-
-<p>效果如下：</p>
-
-<pre class="line-numbers"><code class="language-text">:app:task2
-task2
-</code></pre>
-
-<ul>
-<li>测试3 ： gradlew task1 task2<br/></li>
-</ul>
-
-<p>效果如下：</p>
-
-<pre class="line-numbers"><code class="language-text">:app:task1
-task1
-:app:task2
-task2
-</code></pre>
-
-<ul>
-<li>测试4 ： gradlew task2 task1<br/></li>
-</ul>
-
-<p>效果如下：</p>
-
-<pre class="line-numbers"><code class="language-text">:app:task1
-task1
-:app:task2
-task2
-</code></pre>
-
-<h3 id="toc_44">结论</h3>
-
-<p>如果单独执行 task1 就只会执行 task1 的任务；单独执行 task2 就只会执行 task2 的任务； <br/>
-如果同时执行 task1、task2 , 一定会先执行 task1 , 等 task1 执行完后，就会执行 task2 内容。</p>
-
-<h3 id="toc_45">扩展</h3>
-
-<p>上面 mustRunAfter 我们还有一种写法，如下图所示：</p>
-
-<p><code>task2 {}.mustRunAfter task1</code></p>
-
-<p>这个写法的效果和 mustRunAfter 是一样的，当然我们还可以在 花括号里面写一些任务，比如 ：</p>
-
-<pre class="line-numbers"><code class="language-text">task2 {
-    println &#39;我最先执行&#39;
-}.mustRunAfter task1
-</code></pre>
-
-<p>下面做个测试，测试命令如下：</p>
-
-<p><code>gradlew task2 task1</code></p>
-
-<p>效果如下：</p>
-
-<pre class="line-numbers"><code class="language-text">我最先执行
-
-:app:task1
-task1
-:app:task2
-task2
-</code></pre>
-
-<h3 id="toc_46">dependsOn 定义 task 依赖</h3>
-
-<p>task2 任务依赖于 task1 ,执行 task2 就会先执行 task1</p>
-
-<p><code>task2.dependsOn task1</code></p>
-
-<p>测试：</p>
-
-<p><code>gradlew task2</code></p>
-
-<p>效果如下：</p>
-
-<pre class="line-numbers"><code class="language-text">:app:task1
-task1
-:app:task2
-task2
-</code></pre>
-
-<h2 id="toc_47">常用 Gradlew 命令</h2>
-
-<ul>
-<li>1、gradlew -v : 查看版本号</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">------------------------------------------------------------
-Gradle 3.3
-------------------------------------------------------------
-
-Build time:   2017-01-03 15:31:04 UTC
-Revision:     075893a3d0798c0c1f322899b41ceca82e4e134b
-
-Groovy:       2.4.7
-Ant:          Apache Ant(TM) version 1.9.6 compiled on June 29 2015
-JVM:          1.8.0_112 (Oracle Corporation 25.112-b15)
-OS:           Windows 10 10.0 amd64
-</code></pre>
-
-<ul>
-<li>2、gradlew task ： 查看所有的 task</li>
-</ul>
-
-<h2 id="toc_48">参考资料</h2>
-
-<p><a href="http://www.jianshu.com/p/80e1f4a80d06#">Android 利用Gradle实现差异化构建</a></p>
-
-<p><a href="http://www.jianshu.com/p/011b8d63ba78">杨海 Android目录结构</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/11</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207871067.html">
-                
-                  <h1>Android App性能优化全方面解析</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">内存优化</h2>
-
-<p>关于性能优化我们可以不知道其他的，但一定要知道内存优化。因为内存泄漏可以Android的常客。那么什么是内存泄漏呢？内存不在GC的掌控范围之内了。那么java的GC内存回收机制是什么？某对象不在有任何引用的时候才会进行回收。那么GC回收机制的原理是什么？又或者说可以作为GC　Root引用点的是啥？或许有人听不懂我在讲啥。我们先来看张图。</p>
-
-<p><figure><img src="media/15561207871067/15713656808791.png" alt=""/></figure></p>
-
-<p>当我们向上寻找，一直寻找到GC Root的时候，此对象不会进行回收，例如，一个Activity。那么如果我们向上寻找，直到找到GC Root对象的时候，就说明它是不可以回收的，例如，我定义了一个int a；但是这个数据，我整个页面或者说整个项目都没有用到，则这个对象会被GC掉。</p>
-
-<h3 id="toc_1">GC的引用点</h3>
-
-<ul>
-<li>java栈中引用的对象</li>
-<li>方法静态引用的对象</li>
-<li>方法常量引用的对象</li>
-<li>Native中JNI引用的对象</li>
-<li>Thread——“活着的”线程</li>
-</ul>
-
-<h3 id="toc_2">如何判断</h3>
-
-<p>那么我们如何判断一个对象是一个垃圾对象，可以讲他进行回收呢？举了小例子教你们如何区分：</p>
-
-<blockquote>
-<p>一般在学校吃饭，我们有两种情况，第一：吃完饭就直接走人，碗筷留给阿姨来收拾处理。<br/>
-第二：吃完之后把碗筷放到收盘处直接进行回收。<br/>
-但我们是个有素质的人，一般采用第二种情况，但根据想法，我们更倾向于第一种。<br/>
-那么一般在饭店或者KFC中，都是第一种情况。<br/>
-那么此时，问题来了，如果我已经吃完饭，然后我并没有离开饭店，做在位置上和朋友吹吹牛逼，谈谈理想，聊聊人生。<br/>
-那么桌上那一堆碗筷是收还是不收？讲道理是不能收的。虽然实际也是不能收的。因为顾客是上帝~~~</p>
-</blockquote>
-
-<p>So，我们如何判断一个对象是一个可回收的垃圾对象呢？这是我们的一个主观的判断。但是有种情况我们是必须要考虑到的，没错，就是内存过多无法释放的时候，会直接导致OOM。整个项目boom炸了。什么鬼？outofmemory。没错就是它。</p>
-
-<h2 id="toc_3">内存溢出</h2>
-
-<h3 id="toc_4">分析原因</h3>
-
-<p>我们需要分析内存溢出的原因，我们先来看一张图： </p>
-
-<p><figure><img src="media/15561207871067/15713656930534.png" alt=""/></figure></p>
-
-<p>内存泄漏一般导致应用卡顿，极端情况会导致项目boom。Boom的原因是因为超过内存的阈值。 <br/>
-原因主要有两方面：</p>
-
-<ul>
-<li>代码存在泄漏，内存无法及时释放导致oom（这个我们后面说）</li>
-<li>一些逻辑消耗了大量内存，无法及时释放或者超过导致oom</li>
-</ul>
-
-<p>所谓消耗大量的内存的，绝大多数是因为图片加载。这是我们oom出现最频繁的地方。我前面有写过图片加载的方法，一个是控制每次加载的数量，第二，保证每次滑动的时候不进行加载，滑动完进行加载。一般情况使用先进后出，而不是先进先出。不过一般我们图片加载都是使用fresco或者Glide等开源库。 </p>
-
-<p>我们来看下下面两张图： </p>
-
-<p><figure><img src="media/15561207871067/15713657020079.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207871067/15713657095476.png" alt=""/></figure></p>
-
-<p>对比两张图，我们可以在第一张的情况出现了oom情况，我们通过log打印发现，处理的好像没什么问题，换句话说，如果我不放那0.8M的图片。然后继续不停的操作同样会出现OOM，然而我们就蒙了。没什么图片加载怎么就这么崩掉了。</p>
-
-<h3 id="toc_5">如何查看</h3>
-
-<p>首先，我们确定我们项目或者某几个类里面是否存在内存溢出的问题。我们可以通过如下方法：</p>
-
-<ul>
-<li>Android–&gt;System Information–&gt;MemoryUsage查看Object里面是否有没有被释放的Views和Activity</li>
-<li>命令行模式：adb shell dumpsys meminfo 包名 -d</li>
-</ul>
-
-<p>就那我公司的项目举例把。首先，我们在这边可以看到memory。CPU和net的使用情况。 </p>
-
-<p><figure><img src="media/15561207871067/15713657215613.png" alt=""/></figure></p>
-
-<p>我们找到Object。看看我们内存的消耗情况。 </p>
-
-<p><figure><img src="media/15561207871067/15713657297064.png" alt=""/></figure></p>
-
-<p>随便这么一看，尼玛蛋，1300左右的view和一个Activity。还有3个context。可怕。。可以理解为一个Activity里面使用了将近1300个view。。。想都不敢想。。。</p>
-
-<p>我们可以通过看Memory Monitor工具。 检查一个一个的动作。（比如Activity的跳转）。反复多次执行某一个操作，不断的通过这个工具查看内存的大概变化情况。 前后两个内存变化增加了不少。</p>
-
-<p>我们可以更仔细的查找泄漏的位置，在AS里面使用 Heap SnapShot工具（堆栈快照）。如图所示： </p>
-
-<p><figure><img src="media/15561207871067/15713657375160.png" alt=""/></figure></p>
-
-<p>我们点击后，他会进行一段时间的监控，然后会生成一个文件。我们点击我们package tree view。 </p>
-
-<p><figure><img src="media/15561207871067/15713657516723.png" alt=""/></figure></p>
-
-<p>我们找到自己项目的包名。然后进行进一步的分析。首先看一下2个列表的列名到底指的什么。 </p>
-
-<p>实例化对象的详细信息： </p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">名称</th>
-<th style="text-align: center">意义</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">Total Count</td>
-<td style="text-align: center">内存中该类的对象个数</td>
-</tr>
-<tr>
-<td style="text-align: center">Heap Count</td>
-<td style="text-align: center">堆内存中该类的对象个数</td>
-</tr>
-<tr>
-<td style="text-align: center">Sizeof</td>
-<td style="text-align: center">物理大小</td>
-</tr>
-<tr>
-<td style="text-align: center">Shallow size</td>
-<td style="text-align: center">该对象本身占有内存大小</td>
-</tr>
-<tr>
-<td style="text-align: center">Retained Size</td>
-<td style="text-align: center">释放该对象后，节省的内存大小</td>
-</tr>
-<tr>
-<td style="text-align: center">depth</td>
-<td style="text-align: center">深度</td>
-</tr>
-<tr>
-<td style="text-align: center">Dominating Size</td>
-<td style="text-align: center">管辖的内存大小</td>
-</tr>
-</tbody>
-</table>
-
-<p>我们来随便的看一下内存中的数量： </p>
-
-<p><figure><img src="media/15561207871067/15713657609152.png" alt=""/></figure></p>
-
-<p>这还是我们刚进手机，一个bean就被调用了这么多次。简直可怕。这个我们可以通过内存分析工具解决的。</p>
-
-<h2 id="toc_6">内存分析工具</h2>
-
-<p><strong>性能优化工具</strong>：</p>
-
-<ul>
-<li>Heap SnapShot工具</li>
-<li>Heap Viewer工具</li>
-<li>LeakCanary工具</li>
-<li>MAT工具</li>
-<li>TraceView工具（Device Monitor）</li>
-</ul>
-
-<p><strong>第三方分析工具</strong>：</p>
-
-<ul>
-<li>MemoryAnalyzer</li>
-<li>GT Home</li>
-<li>iTest <br/>
-　　 <br/>
-因为我没有这些工具，无法进行演示。</li>
-</ul>
-
-<h3 id="toc_7">注意事项</h3>
-
-<ul>
-<li><p>我们尽量不要使用Activity的上下文，而是使用application的上下文，因为application的生命周期长，进程退出时才会被销毁。所以，单例模式是最容易造成内存溢出的原本所在，因为单例模式的生命周期的应该和application的生命周期一样长，而不是和Activity的相同。</p></li>
-<li><p>Animation也会导致内存溢出，为什么？因为我们是通过view来进行演示的，导致view被Activity持有，而Activity又持有view。最后因为Activity无法释放，导致内存泄漏。解决方法是在Activity的ondestory（）方法中调用Animation.cancle（）进行停止，当然一些简单的动画我们可以通过自定义view来解决。至少我现在已经很少使用Animation了。没有一个动画是自定义view解决不了的。如何有，那就是两个~~~。</p></li>
-</ul>
-
-<h2 id="toc_8">UI优化</h2>
-
-<p>UI优化主要包括布局优化以及view的绘制优化。不急，我们接下来一个一个慢慢看~~。先说下UI的优化到底是什么？有些时候我们打开某个软件，会出现卡顿的情况。这就是UI的问题。那么我们想一下，什么情况会导致卡顿呢？一般是如下几种情况：</p>
-
-<ul>
-<li>人为在UI线程中做轻微耗时操作，导致UI线程卡顿；</li>
-<li>布局Layout过于复杂，无法在16ms内完成渲染；</li>
-<li>同一时间动画执行的次数过多，导致CPU或GPU负载过重；</li>
-<li>View过度绘制，导致某些像素在同一帧时间内被绘制多次，从而使CPU或GPU负载过重；</li>
-<li>View频繁的触发measure、layout，导致measure、layout累计耗时过多及整个View频繁的重新渲染；</li>
-<li>内存频繁触发GC过多（同一帧中频繁创建内存），导致暂时阻塞渲染操作；</li>
-<li>冗余资源及逻辑等导致加载和执行缓慢；</li>
-<li>臭名昭著的ANR；</li>
-</ul>
-
-<p>可以看见，上面这些导致卡顿的原因都是我们平时开发中非常常见的。有些人可能会觉得自己的应用用着还蛮OK的，其实那是因为你没进行一些瞬时测试和压力测试，一旦在这种环境下运行你的App你就会发现很多性能问题。</p>
-
-<h2 id="toc_9">布局优化</h2>
-
-<h3 id="toc_10">GPU绘制</h3>
-
-<p>我们对于UI性能的优化还可以通过开发者选项中的GPU过度绘制工具来进行分析。在设置-&gt;开发者选项-&gt;调试GPU过度绘制（不同设备可能位置或者叫法不同）中打开调试后可以看见如下图（对settings当前界面过度绘制进行分析）： </p>
-
-<p><figure><img src="media/15561207871067/15713657796585.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207871067/15713657891069.png" alt=""/></figure></p>
-
-<p>这图看着太乱，我们来一张简洁明了的图： </p>
-
-<p><figure><img src="media/15561207871067/15713657982645.png" alt=""/></figure></p>
-
-<p>我们的目标就是尽量减少红色Overdraw，看到更多的蓝色区域。</p>
-
-<p>可以发现，开启后在我们想要调试的应用界面中可以看到各种颜色的区域，具体含义如下： </p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">颜色</th>
-<th style="text-align: center">含义</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">无色</td>
-<td style="text-align: center">WebView等的渲染区域</td>
-</tr>
-<tr>
-<td style="text-align: center">蓝色</td>
-<td style="text-align: center">1* 过度绘制</td>
-</tr>
-<tr>
-<td style="text-align: center">绿色</td>
-<td style="text-align: center">2* 过度绘制</td>
-</tr>
-<tr>
-<td style="text-align: center">淡红色</td>
-<td style="text-align: center">3* 过度绘制</td>
-</tr>
-<tr>
-<td style="text-align: center">红色</td>
-<td style="text-align: center">4*(+) 过度绘制</td>
-</tr>
-</tbody>
-</table>
-
-<p>Overdraw有时候是因为你的UI布局存在大量重叠的部分，还有的时候是因为非必须的重叠背景。例如某个Activity有一个背景，然后里面的Layout又有自己的背景，同时子View又分别有自己的背景。仅仅是通过移除非必须的背景图片，这就能够减少大量的红色Overdraw区域，增加蓝色区域的占比。这一措施能够显著提升程序性能。</p>
-
-<p>如果布局中既能采用RealtiveLayout和LinearLayout，那么直接使用LinearLayout，因为Relativelayout的布局比较复杂，绘制的时候需要花费更多的CPU时间。如果需要多个LinearLayout或者Framelayout嵌套，那么可采用Relativelayout。因为多层嵌套导致布局的绘制有大部分是重复的，这会减少程序的性能。</p>
-
-<h3 id="toc_11">GPU呈现模式分析</h3>
-
-<p>我们依旧打开设置–&gt;开发者选项–&gt;GPU呈现模式分析–&gt;在屏幕上显示为条形图，如图所示： </p>
-
-<p><figure><img src="media/15561207871067/15713658134293.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207871067/15713658216356.png" alt=""/></figure></p>
-
-<p>当然，也可以在执行完UI滑动操作后在命令行输入如下命令查看命令行打印的GPU渲染数据（分析依据：Draw + Process + Execute = 完整的显示一帧时间 &lt; 16ms）：</p>
-
-<p><code>adb shell dumpsys gfxinfo [应用包名]</code></p>
-
-<p>随着界面的刷新，界面上会以实时柱状图来显示每帧的渲染时间，柱状图越高表示渲染时间越长，每个柱状图偏上都有一根代表16ms基准的绿色横线，每一条竖着的柱状线都包含三部分（蓝色代表测量绘制Display List的时间，红色代表OpenGL渲染Display List所需要的时间，黄色代表CPU等待GPU处理的时间），只要我们每一帧的总时间低于基准线就不会发生UI卡顿问题（个别超出基准线其实也不算啥问题的）。就简单的看下我们公司项目刚启动的时候,超出基准线好多。 </p>
-
-<p>突然就有那么一种想吐槽的感觉…..我记得之前我做了瘦身的优化，但是要让我做性能优化，我觉得应该没那么简单……..</p>
-
-<h2 id="toc_12">代码优化</h2>
-
-<p>Android Studio和IntellJ idead都有自带的代码检查工具。打开Analyze-&gt;Run Inspection by Name… –&gt;unused resource 点击开始检测，等待一下后会发现如下结果： </p>
-
-<p><figure><img src="media/15561207871067/15713658334886.png" alt=""/></figure></p>
-
-<p>我们还可以这样，将鼠标放在代码区点击右键-&gt;Analyze-&gt;Inspect Code–&gt;界面选择你要检测的模块-&gt;点击确认开始检测，等待一下后会发现如下结果： </p>
-
-<p><figure><img src="media/15561207871067/15713658538715.png" alt=""/></figure></p>
-
-<p>当然，我这只是截取了少一部分，我们看下下面那个提示：@param v tag description is missing 。意味着v的类型缺少了，要么补上介绍，要么直接删除。</p>
-
-<p>上面那两种方法是最容易找到代码缺陷以及无用代码的地方。所以尽情的入坑去填坑把~~</p>
-
-<h2 id="toc_13">绘制优化</h2>
-
-<p>那么什么是绘制优化？绘制优化主要是指View的Ondraw方法需要避免执行大量的操作。我将分为了2个方面。</p>
-
-<ul>
-<li>ondraw方法不需要创建新的局部对象，这是因为ondraw方法是实时执行的，这样会产品大量的临时对象，导致占用了更多内存，并且使系统不断的GC。降低了执行效率。</li>
-<li>Ondraw方法不需要执行耗时操作，在ondraw方法里少使用循环，因为循环会占用CPU的时间。导致绘制不流畅，卡顿等等。Google官方指出，view的绘制帧率稳定在60dps，这要求每帧的绘制时间不超过16ms（1000/60)。虽然很难保证，但我们需要尽可能的降低。</li>
-</ul>
-
-<p>60dps是目前最合适的图像显示速度，也是绝大部分Android设备设置的调试频率，如果在16ms内顺利完成界面刷新操作可以展示出流畅的画面，而由于任何原因导致接收到VSYNC信号的时候无法完成本次刷新操作，就会产生掉帧的现象，刷新帧率自然也就跟着下降(假定刷新帧率由正常的60fps降到30fps，用户就会明显感知到卡顿)。So，前面我们说GPU的时候也谈到了这个。总的而言，感觉还是蛮重要的…..</p>
-
-<h2 id="toc_14">网络优化</h2>
-
-<p>线程是我们项目中不可缺少的重要部分，因为我们大多数数据都是从网络获取的。So，线程这个是必备用品。 <br/>
-我们依旧可以通过Memory下面的Net进行网络的监听： </p>
-
-<p><figure><img src="media/15561207871067/15713658679996.png" alt=""/></figure></p>
-
-<h2 id="toc_15">ANR问题</h2>
-
-<p>相信这个问题在座的各种没少遇到过，那么什么是ANR？application not responding。应用程序无响应。那么一般什么时候会出现ANR。Android官方规定：activity如果5s内无响应事件（屏幕触摸事件或者键盘输入事件）。BroadcastReceiver如果在10s内无法处理完成。Service如果20s内无法处理完成。这三种情况会导致ANR。用张简洁的图来介绍把。看起来方便~~ </p>
-
-<p><figure><img src="media/15561207871067/15713658773357.png" alt=""/></figure></p>
-
-<h2 id="toc_16">线程优化</h2>
-
-<p>上面说的三种导致ANR的情况，绝大多数就是因为线程阻塞导致的。那么我们应该如何处理呢？Android系统为我们提供了若干组工具类来解决此问题。</p>
-
-<ul>
-<li><p><strong>Asynctask</strong>：为UI线程与工作线程之间进行快速处理的切换提供一种简单便捷的机制。适用于当下立即需要启动，但是异步执行的生命周期短暂的场景。</p></li>
-<li><p><strong>HandlerThread</strong>：为某些回调方法或者等待某些执行任务的执行设置一个专属的线程，并提供线程任务的调度机制。</p></li>
-<li><p><strong>ThreadPool</strong>：把任务分解成不同的单元，分发到各个不同的线程上，进行同时并发处理。</p></li>
-<li><p><strong>IntentService</strong>：适合执行由Ui触发的后台任务。并可以把这些任务执行的情况通过一定的机制反馈给UI。</p></li>
-</ul>
-
-<p>网络请求耗时会给用户带来卡顿的产品体验，虽然可以使用Loading提升用户体验，但属于治标不治本。例如，当网络差的时候我们公司的项目一个loading就是10多s。甚至更多…..我就记得我当时面试之前下了一次我们公司的项目，因为网差的问题…一个loading一分多钟。。当时砸手机的冲动都有了，别说卸软件了….</p>
-
-<p>一般多线程的情况我们可以通过Asynctask处理。（这玩意我真没怎么用过- -）我前面有说过annotation。这是google官方推出的注解。比bufferknife强大很多。这个可以快捷方便的处理多线程而且不会导致线程阻塞，而且你也可以控制线程的顺序，例如我要执行完线程A后，根据线程A的某个参数来执行线程B。以此类推…..</p>
-
-<p>至于线程池么，最多的还是要说道图片加载了~~。图片加载用三方就行了~想看详细介绍，我前面有说，当然除了这个还有下载操作。这就和IntentService有关联了。一般下载我很少涉及到。。用过几次android原生的downloadmanager。。感觉略坑。</p>
-
-<h2 id="toc_17">KO网络优化</h2>
-
-<p>现在讲网络优化的重点了…重点..重点…，一般用到网最最最主要的是什么？时间！！速度！！成功率！！，时间！！速度！！成功率！！，时间！！速度！！成功率！！重要的事说三遍哈。</p>
-
-<h3 id="toc_18">图片处理</h3>
-
-<p>这已经不是第一次在此文提到图片了。可见图片的重要性！！</p>
-
-<ul>
-<li>使用WebP格式；同样的照片，采用WebP格式可大幅节省流量，相对于JPG格式的图片，流量能节省将近 25% 到 35 %；相对于 PNG 格式的图片，流量可以节省将近80%。最重要的是使用WebP之后图片质量也没有改变。So，去和后台的小伙伴们商量吧~~</li>
-<li>使用缩略图，我在前面写图片加载有说过，就是控制他的inside和option。然后进行图片缩放。压缩？讲道理….我并不知道网络图片怎么压缩，but，我会缩放啊~~反正也不会失真。啦啦啦~咬我啊？</li>
-</ul>
-
-<h3 id="toc_19">网络请求处理</h3>
-
-<p>我们可以对服务端返回数据进行缓存，设定有效时间，有效时间之内不走网络请求，减少流量消耗。对网络的缓存可以参见HttpResponseCache。</p>
-
-<p>在某些情况，我们尽量少使用GPS定位，如果条件允许，尽可能使用网络定位。</p>
-
-<p>下载、上传，我们尽可能使用断点，说个简单的，我在公司，准备下一个500M的游戏，但是下到200M的时候我下班了，此时没有了无线网，我们可以回家后用无线继续下载。So，断点续传，断点下载也是我们的必修课~，所以我前面单独提了一篇断点续传的文章。</p>
-
-<p>刷新数据时，尽可能使用局部刷新，而不是全局刷新，第一、界面会闪屏一下，网差的界面直接白屏一段时间也不是不可能。第二、流量的使用！！我又要拿我们公司项目搞事情了。一个闪屏的缓存60+M。。。没错，就是60+M。简直可怕，我清个3、5次缓存，在打开个3、5次。好了，2分钟时间，我一个月流量就没了。。。So，我前面提到的网络缓存很重要，至于会不会加在项目中，我还是要看了在说- - 一个不小心，整个项目炸了都有可能。。。</p>
-
-<h2 id="toc_20">启动优化</h2>
-
-<p>众所周知，一个好的产品，除了功能强大，好的性能也必不可少。有调查显示，近50%的受访者因为apk太大而拒绝使用，近40%的受访者会因为APP性能差而卸载，性能也是造成APP用户沮丧的头号原因。</p>
-
-<p>安卓应用的启动方式分为三种：冷启动、暖启动、热启动，不同的启动方式决定了应用UI对用户可见所需要花费的时间长短。顾名思义，冷启动消耗的时间最长。基于冷启动方式的优化工作也是最考验产品用户体验的地方。谈及优化之前，我们先看看这三种启动方式的应用场景，以及启动过程中系统都做了些什么工作。</p>
-
-<h3 id="toc_21">冷启动</h3>
-
-<p>为什么说冷启动是耗时最长的。冷启动是在启动应用前，系统没有获取到当前app的activity、Service等等。例如，第一次启动app。又或者说杀死进程后第一次启动。那么对比其他两种方式。冷启动自然是耗时最久的。</p>
-
-<p>应用发生冷启动时，系统一定会执行下面的三个任务：</p>
-
-<ul>
-<li>开始加载并启动应用</li>
-<li>应用启动后，显示一个空白的启动窗口（启动闪屏页）</li>
-<li>创建应用信息</li>
-</ul>
-
-<p>那么创建应用信息，系统就需要做一屁股的事：</p>
-
-<ul>
-<li>application的初始化</li>
-<li>启动UI线程</li>
-<li>创建Activity</li>
-<li>导入视图（inflate view）</li>
-<li>计算视图大小（onmesure view）</li>
-<li>得到视图排版（onlayout view）</li>
-<li>绘制视图（ondraw view）</li>
-</ul>
-
-<p>这其中有两个 creation 工作，分别为 Application 和 Activity creation。他们均在 View 绘制展示之前。所以，在应用自定义的 Application 类和 第一个 Activity 类中，onCreate() 方法做的事情越多，冷启动消耗的时间越长。</p>
-
-<h3 id="toc_22">暖启动</h3>
-
-<p>当应用中的 Activities 被销毁，但在内存中常驻时，应用的启动方式就会变为暖启动。相比冷启动，暖启动过程减少了对象初始化、布局加载等工作，启动时间更短。但启动时，系统依然会展示闪屏页，直到第一个 Activity 的内容呈现为止。</p>
-
-<h3 id="toc_23">热启动</h3>
-
-<p>相比暖启动，热启动时应用做的工作更少，启动时间更短。热启动产生的场景很多，常见如：用户使用返回键退出应用，然后马上又重新启动应用。</p>
-
-<h3 id="toc_24">如何优化</h3>
-
-<p>我们先对比下三种启动的时间对比：<br/><br/>
-冷启动： </p>
-
-<p><figure><img src="media/15561207871067/15713658903891.png" alt=""/></figure></p>
-
-<p>暖启动 ： </p>
-
-<p><figure><img src="media/15561207871067/15713658986268.png" alt=""/></figure></p>
-
-<p>热启动： </p>
-
-<p><figure><img src="media/15561207871067/15713659065674.png" alt=""/></figure></p>
-
-<p>我们可以看到三者的明显的差距，一个冷启动将近一分钟，反正我是不想看，每次跑项目都好慢~那么我们应该怎么做？看到有些人介绍说改变项目的theme。把它改成launcher的theme。但我觉得，这种做测试的确没问题。但是一般项目都会有闪屏页。然后从闪屏跳转到首页。我们可以按照大多数的项目来改善。怎么说的，我们可以看到一般项目都有倒计时显示。也就是说倒计时结束就自动进入首页。或者可以直接跳过进入首页。也就是说我们可以通过此方法来进行，也就是说只要他倒计时结束，不管请求是否全部获取完我们都直接进入首页。我们可以在闪屏页进行一些必要的加载，例如用户信息，定位等等，那么至于其他的，我们可以进入主页进行预加载。就和热更新一样，在用户不知情的情况下，默默的更新bug。So，对于一些网络请求，例如广告之类的。我们可以通过此方法进行预加载。</p>
-
-<p>我们还可以这样，闪屏页我们把他当作一个fragment嵌套在MainActivity中，那么我们可以在进入闪屏时直接预加载主页的view。倒计时我们把闪屏页remove掉直接显示首页。</p>
-
-<p>通过上面的介绍，我们对启动优化有了一定的了解，其实总结的话很简单。就是减少耗时操作，总结如下：</p>
-
-<ul>
-<li>主线程中涉及到Shareperference能否在非UI线程执行。</li>
-<li>Application的创建过程中尽量少的进行耗时操作。</li>
-<li>减少布局的层次,并且生命周期回调的方法中尽量减少耗时的操作。</li>
-</ul>
-
-<h2 id="toc_25">电量优化</h2>
-
-<p>有了UI优化、内存优化、代码优化、网络优化之后我们在来说说应用开发中很重要的一个优化模块—–电量优化。</p>
-
-<h3 id="toc_26">耗电概念</h3>
-
-<p>其实大多数开发者对电量优化的重视程度极低，其实提到性能优化想到的就是内存优化，但我们不能忽视其他的优化，电量优化其实还是必要的，例如爱奇艺、优酷等等的视频播放器以及音乐播放器。众所周知，音乐和视频其实是耗电量最大的。如果用户一旦发现我们的应用非常耗电，不好意思，他们大多会选择卸载来解决此类问题。为此，我们需要进行优化。</p>
-
-<h3 id="toc_27">如何优化</h3>
-
-<p>其实我们把上面那四种优化解决了，就是最好的电量优化。So，对于电量优化，我在此提一些建议：</p>
-
-<ul>
-<li>需要进行网络请求时，我们需先判断网络当前的状态。</li>
-<li>在多网络请求的情况下，最好进行批量处理，尽量避免频繁的间隔网络请求。</li>
-<li>在同时有wifi和移动数据的情况下，我们应该直接屏幕移动数据的网络请求，只有当wifi断开时在调用，因为，wifi请求的耗电量远比移动数据的耗电量低的低。</li>
-<li>后台任务要尽可能少的唤醒CPU。（比方说，锁屏时，QQ的消息提示行就是唤醒了CPU。但是它的提示只有在你打开锁屏或者进行充电时才会进行提示。）</li>
-</ul>
-
-<h2 id="toc_28">优化总结</h2>
-
-<p>性能优化是我们进阶的毕竟之路。So，我们必须要会，至于“会”到什么程度，就要看个人理解了。其实，上面介绍的只是性能问题的冰山一角，真正的优化，我们是在项目中总结出来的。但，我们不能一味的追求优化，就例如我，现在只是在进行优化的总结，而对于真正的实行，并没有开始，因为，优化是有风险的，一个不小心，整个项目都可能炸了。所以这就需要你的经验，以及各种总结，在改进行优化的地方先进行优化，看看效果如何，例如，UI的优化以及代码的优化。可以先拿一些网上的开源项目进行优化等等。最后，尽情的享受优化把~~~</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/9/4</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="15561207871029.html">
                 
@@ -5495,6 +3703,1047 @@ public class AnnotationTest {
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="15561207870778.html">
+                
+                  <h1>Android-NDK图片高斯模糊</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">CMake</h2>
+
+<p>CMake是一款项目构建工具，通过编写简单明了的在CmakeLists.txt来生成makefile，简单来说就是一个makefile生成器。</p>
+
+<p>在Android Studio中安装CMake非常简单，打开Tools-&gt;Android-&gt;SDK Manager，选择SDK Tools标签页，勾选CMake、LLDB、NDK，OK自动安装即可。其中LLDB可以使我们在Android Studio中调试C/C++程序。NDK为原生开发工具包，必不可少。</p>
+
+<p><figure><img src="media/15561207870778/15713317710825.png" alt=""/></figure></p>
+
+<h2 id="toc_1">为什么要做JNI/NDK开发</h2>
+
+<p>众所周知，Java/Android程序是运行在JVM/Dalvik VM中，所以Java程序远没有C/C++程序性能高，尤其是在CPU密集型运算时，所以Java平台提供了JNI（Java Native Interface），可通过JNI调用C/C++等编写的so动态链接库。</p>
+
+<p><strong>注：Google在Android L以后用ART彻底代替了Dalvik VM，但ART本质上仍是一个虚拟机，并支持所有Dalvik VM指令集。</strong></p>
+
+<p>Java API中几乎所有与硬件相关的方法都是native的，比如I/O操作、网络访问、手机传感器、串口读写等。<br/><br/>
+本文涉及的图片处理是一种CPU密集型任务，在Android开发中使用native方法最为合适。</p>
+
+<h2 id="toc_2">如何使用CMake做JNI/NDK开发</h2>
+
+<h3 id="toc_3">新建工程</h3>
+
+<p>选中Include C++ Support，意为引入C++支持。</p>
+
+<h3 id="toc_4">配置C++支持</h3>
+
+<p><figure><img src="media/15561207870778/15713317834823.png" alt=""/></figure></p>
+
+<p>在Customize C++ Support界面默认即可,意为CMake/C++11环境</p>
+
+<h3 id="toc_5">认识CMakeLists.txt</h3>
+
+<p>工程创建完毕之后Android Studio会在app目录下生成CMakeLists.txt文件。CMakeLists.txt是CMake的配置文件，用于表明版本、依赖、等信息，以下为Android Studio生成的CMakeLists（过滤注释）</p>
+
+<pre class="line-numbers"><code class="language-text">cmake_minimum_required(VERSION 3.4.1)
+
+add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
+
+find_library(log-lib log)
+
+target_link_libraries(native-lib ${log-lib})
+</code></pre>
+
+<ul>
+<li>cmake_minimum_required(VERSION 3.4.1)<br/>
+CMake最小版本使用的是3.4.1。</li>
+<li>add_library()<br/>
+配置so库信息（为当前当前脚本文件添加库）
+<ul>
+<li>native-lib<br/>
+这个是声明引用so库的名称，在项目中，如果需要使用这个so文件，引用的名称就是这个。值得注意的是，实际上生成的so文件名称是libnative-lib。</li>
+<li>SHARED<br/>
+这个参数表示共享so库文件，也就是在Run项目或者build项目时会在目录intermediates\transforms\mergeJniLibs\debug\folders\2000\1f\main下生成so文件。</li>
+<li>src/main/cpp/native-lib.cpp<br/>
+构建so库的源文件。</li>
+</ul></li>
+<li>find_library()查找一个库文件
+<ul>
+<li>log-lib<br/>
+这个指定的是在NDK库中每个类型的库会存放一个特定的位置，而log库存放在log-lib中</li>
+<li>log<br/>
+指定使用log库</li>
+</ul></li>
+<li>target_link_libraries()<br/>
+如果你本地的库（native-lib）想要调用log库的方法，那么就需要配置这个属性，意思是把NDK库关联到本地库。
+<ul>
+<li>native-lib<br/>
+要被关联的库名称</li>
+<li>\({log-lib}  <br/>
+要关联的库名称，要用大括号包裹，前面还要有\)符号去引用。</li>
+</ul></li>
+</ul>
+
+<h3 id="toc_6">了解JNI的C/C++规范</h3>
+
+<h4 id="toc_7">数据类型</h4>
+
+<p>JNI的数据类型包含两种，分别是基本类型和引用类型，它们和Java中的数据类型对应关系如下两表所示。</p>
+
+<h5 id="toc_8">基本数据类型</h5>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: left">JNI类型</th>
+<th style="text-align: center">Java类型</th>
+<th style="text-align: center">描述</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: left">jboolean</td>
+<td style="text-align: center">boolean</td>
+<td style="text-align: center">无符号8位整型</td>
+</tr>
+<tr>
+<td style="text-align: left">jbyte</td>
+<td style="text-align: center">byte</td>
+<td style="text-align: center">无符号8位整型</td>
+</tr>
+<tr>
+<td style="text-align: left">jchar</td>
+<td style="text-align: center">char</td>
+<td style="text-align: center">无符号16位整型</td>
+</tr>
+<tr>
+<td style="text-align: left">jshort</td>
+<td style="text-align: center">short</td>
+<td style="text-align: center">有符号16位整型</td>
+</tr>
+<tr>
+<td style="text-align: left">jint</td>
+<td style="text-align: center">int</td>
+<td style="text-align: center">32位整型</td>
+</tr>
+<tr>
+<td style="text-align: left">jlong</td>
+<td style="text-align: center">long</td>
+<td style="text-align: center">64位整型</td>
+</tr>
+<tr>
+<td style="text-align: left">jfloat</td>
+<td style="text-align: center">float</td>
+<td style="text-align: center">32位浮点型</td>
+</tr>
+<tr>
+<td style="text-align: left">jdouble</td>
+<td style="text-align: center">double</td>
+<td style="text-align: center">64位浮点型</td>
+</tr>
+<tr>
+<td style="text-align: left">void</td>
+<td style="text-align: center">void</td>
+<td style="text-align: center">无类型</td>
+</tr>
+</tbody>
+</table>
+
+<h5 id="toc_9">引用数据类型</h5>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: left">JNI类型</th>
+<th style="text-align: center">Java类型</th>
+<th style="text-align: center">描述</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: left">jobject</td>
+<td style="text-align: center">Object</td>
+<td style="text-align: center">Object类型</td>
+</tr>
+<tr>
+<td style="text-align: left">jclass</td>
+<td style="text-align: center">Class</td>
+<td style="text-align: center">Class类型</td>
+</tr>
+<tr>
+<td style="text-align: left">jstring</td>
+<td style="text-align: center">String</td>
+<td style="text-align: center">String类型</td>
+</tr>
+<tr>
+<td style="text-align: left">jobjectArray</td>
+<td style="text-align: center">Object[]</td>
+<td style="text-align: center">对象数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jbooleanArray</td>
+<td style="text-align: center">boolean[]</td>
+<td style="text-align: center">boolean数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jbyteArray</td>
+<td style="text-align: center">byte[]</td>
+<td style="text-align: center">byte数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jcharArray</td>
+<td style="text-align: center">char[]</td>
+<td style="text-align: center">char数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jshortArray</td>
+<td style="text-align: center">short[]</td>
+<td style="text-align: center">short数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jintArray</td>
+<td style="text-align: center">int[]</td>
+<td style="text-align: center">int数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jlongArray</td>
+<td style="text-align: center">long[]</td>
+<td style="text-align: center">long数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jfloatArray</td>
+<td style="text-align: center">float[]</td>
+<td style="text-align: center">float数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jdoubleArray</td>
+<td style="text-align: center">double[]</td>
+<td style="text-align: center">double数组</td>
+</tr>
+<tr>
+<td style="text-align: left">jthrowable</td>
+<td style="text-align: center">Throwable</td>
+<td style="text-align: center">Throwable</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="toc_10">JNI的类型签名</h4>
+
+<p>JNI的类型签名标识了一个特定的Java类型，这个类型既可以是类也可以是方法，也可以是数据类型。</p>
+
+<ul>
+<li>类的签名比较简单，它采用 L+包名+类型+; 的形式，只需要将其中的.替换为/即可。例如java.lang.String， 它的签名为Ljava/lang/String; ，注意末尾的;也是签名一部分。<br/></li>
+<li>基本数据类型的签名采用一系列大写字母来表示, 如下表所示</li>
+</ul>
+
+<h5 id="toc_11">基本数据类型的签名</h5>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: left">Java类型</th>
+<th style="text-align: center">签名</th>
+<th style="text-align: center">Java类型</th>
+<th style="text-align: center">签名</th>
+<th style="text-align: center">Java类型</th>
+<th style="text-align: center">签名</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: left">boolean</td>
+<td style="text-align: center">Z</td>
+<td style="text-align: center">byte</td>
+<td style="text-align: center">B</td>
+<td style="text-align: center">char</td>
+<td style="text-align: center">C</td>
+</tr>
+<tr>
+<td style="text-align: left">short</td>
+<td style="text-align: center">S</td>
+<td style="text-align: center">int</td>
+<td style="text-align: center">I</td>
+<td style="text-align: center">long</td>
+<td style="text-align: center">J</td>
+</tr>
+<tr>
+<td style="text-align: left">float</td>
+<td style="text-align: center">F</td>
+<td style="text-align: center">double</td>
+<td style="text-align: center">D</td>
+<td style="text-align: center">void</td>
+<td style="text-align: center">V</td>
+</tr>
+</tbody>
+</table>
+
+<h4 id="toc_12">JNI C/C++函数编写</h4>
+
+<p>先来看看Android Studio为我们生成的示例</p>
+
+<pre class="line-numbers"><code class="language-java">JNIEXPORT jstring JNICALL
+Java_com_glee_myapplication_MainActivity_stringFromJNI(
+        JNIEnv* env,
+        jobject /* this */) {
+    std::string hello = &quot;Hello from C++&quot;;
+    return env-&gt;NewStringUTF(hello.c_str());
+}
+</code></pre>
+
+<ul>
+<li>JNIEXPORT &amp; JNICALL<br/>
+JNIEXPORT和JNICALL这两个宏（被定义在jni.h）确保这个函数在本地库外可见，并且编译器会进行正确的调用转换。</li>
+<li>函数规范<br/>
+在JNI中C/C++的函数名是有规范要求的，由以下几部分串接而成
+<ul>
+<li>Java_前缀</li>
+<li>完全限定的类名，并用下划线“_”作为分隔符</li>
+<li>第一参数JNIEnv* env</li>
+<li>第二个参数jobject或jclass</li>
+<li>其他参数按类型映射</li>
+<li>返回参数按类型映射</li>
+</ul></li>
+</ul>
+
+<h2 id="toc_13">JNI层操作Bitmap对象</h2>
+
+<h3 id="toc_14">原理</h3>
+
+<p>Android中JNI层处理Bitmap通常有两种方法</p>
+
+<ul>
+<li>获取到Bitmap中的byte数组并传入native方法，JNI层处理得到的byte数组后返回一个新的byte数组，Java层重建Bitmap对象。（不推荐）</li>
+<li>Java层直接向JNI层传入Bitmap的引用，JNI层得到Bitmap对象的图像数据的地址，直接修改Bitmap的byte数组。</li>
+</ul>
+
+<p>阅读了很多篇博客，很多开发者都会采用第一种方法，本人是极不推荐的。这种方法会在内存中重建一个byte数组，会造成内存的浪费，性能低下。<br/><br/>
+第二种方法是性能最优的，JNI层充分利用的C/C++指针的特性，直接获取到Bitmap中byte数组在内存中的地址，通过指针直接修改图像数据，所以用到了NDK中的android/bitmap.h。  </p>
+
+<p><strong>android/bitmap.h</strong></p>
+
+<p>android/bitmap.h这个头文件用于在JNI层操作Bitmap对象的，其包含于jnigraphics库中，所以要在CMakeLists.txt中的target_link_libraries加入-ljnigraphics，如下</p>
+
+<p><code>target_link_libraries(native-lib -ljnigraphics ${log-lib})</code></p>
+
+<p><strong>三个常用函数</strong></p>
+
+<ul>
+<li>AndroidBitmap_getInfo() 从位图句柄获得信息（宽度、高度、像素格式）</li>
+<li>AndroidBitmap_lockPixels() 对像素缓存上锁，即获得该缓存的指针。</li>
+<li>AndroidBitmap_unlockPixels() 解锁</li>
+</ul>
+
+<h3 id="toc_15">JNI接口函数</h3>
+
+<p>请看注释</p>
+
+<pre class="line-numbers"><code class="language-java">JNIEXPORT void JNICALL
+Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */, jobject bmp) {
+    AndroidBitmapInfo info = {0};//初始化BitmapInfo结构体
+    int *data=NULL;//初始化Bitmap图像数据指针
+    AndroidBitmap_getInfo(env, bmp, &amp;info);
+    AndroidBitmap_lockPixels(env, bmp, (void **) &amp;data);//锁定Bitmap，并且获得指针
+    /**********高斯模糊算法作对int数组进行处理***********/
+    //调用gaussBlur函数，把图像数据指针、图片长宽和模糊半径传入
+    gaussBlur(data,info.width,info.height,80);
+    /****************************************************/
+    AndroidBitmap_unlockPixels(env,bmp);//解锁
+}
+</code></pre>
+
+<p>这里用到的gaussBlur函数代码将在文章最后列出。</p>
+
+<h3 id="toc_16">Java层代码</h3>
+
+<p>请看注释</p>
+
+<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
+
+    static {
+        //通过静态代码块加载so库
+        System.loadLibrary(&quot;native-lib&quot;);
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        //初始化两个ImageView
+        ImageView iv1 = (ImageView) findViewById(R.id.img1);
+        ImageView iv2 = (ImageView) findViewById(R.id.img2);
+        //iv1设置图片
+        iv1.setImageResource(R.drawable.test);
+        //生成bitmap对象
+        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
+        //调用native方法，传入Bitmap对象，对Bitmap进行高斯迷糊处理
+        gaussBlur(bitmap);
+        //把Bitmap对象设置给iv2
+        iv2.setImageBitmap(bitmap);
+    }
+    //native方法声明
+    public native void gaussBlur(Bitmap bitmap);
+}
+</code></pre>
+
+<h3 id="toc_17">运行效果</h3>
+
+<p>上方的ImageView是没有进行高斯模糊处理的，下方的ImageView调用了JNI方法进行高斯模糊处理。</p>
+
+<p><figure><img src="media/15561207870778/15713317952653.png" alt=""/></figure></p>
+
+<h3 id="toc_18">高斯模糊算法</h3>
+
+<pre class="line-numbers"><code class="language-c">void gaussBlur1(int* pix, int w, int h, int radius)
+{
+    float sigma = (float) (1.0 * radius / 2.57);
+    float deno  = (float) (1.0 / (sigma * sqrt(2.0 * PI)));
+    float nume  = (float) (-1.0 / (2.0 * sigma * sigma));
+    float* gaussMatrix = (float*)malloc(sizeof(float)* (radius + radius + 1));
+    float gaussSum = 0.0;
+    for (int i = 0, x = -radius; x &lt;= radius; ++x, ++i)
+    {
+        float g = (float) (deno * exp(1.0 * nume * x * x));
+        gaussMatrix[i] = g;
+        gaussSum += g;
+    }
+    int len = radius + radius + 1;
+    for (int i = 0; i &lt; len; ++i)
+        gaussMatrix[i] /= gaussSum;
+    int* rowData  = (int*)malloc(w * sizeof(int));
+    int* listData = (int*)malloc(h * sizeof(int));
+    for (int y = 0; y &lt; h; ++y)
+    {
+        memcpy(rowData, pix + y * w, sizeof(int) * w);
+        for (int x = 0; x &lt; w; ++x)
+        {
+            float r = 0, g = 0, b = 0;
+            gaussSum = 0;
+            for (int i = -radius; i &lt;= radius; ++i)
+            {
+                int k = x + i;
+                if (0 &lt;= k &amp;&amp; k &lt;= w)
+                {
+                    //得到像素点的rgb值
+                    int color = rowData[k];
+                    int cr = (color &amp; 0x00ff0000) &gt;&gt; 16;
+                    int cg = (color &amp; 0x0000ff00) &gt;&gt; 8;
+                    int cb = (color &amp; 0x000000ff);
+                    r += cr * gaussMatrix[i + radius];
+                    g += cg * gaussMatrix[i + radius];
+                    b += cb * gaussMatrix[i + radius];
+                    gaussSum += gaussMatrix[i + radius];
+                }
+            }
+            int cr = (int)(r / gaussSum);
+            int cg = (int)(g / gaussSum);
+            int cb = (int)(b / gaussSum);
+            pix[y * w + x] = cr &lt;&lt; 16 | cg &lt;&lt; 8 | cb | 0xff000000;
+        }
+    }
+    for (int x = 0; x &lt; w; ++x)
+    {
+        for (int y = 0; y &lt; h; ++y)
+            listData[y] = pix[y * w + x];
+        for (int y = 0; y &lt; h; ++y)
+        {
+            float r = 0, g = 0, b = 0;
+            gaussSum = 0;
+            for (int j = -radius; j &lt;= radius; ++j)
+            {
+                int k = y + j;
+                if (0 &lt;= k &amp;&amp; k &lt;= h)
+                {
+                    int color = listData[k];
+                    int cr = (color &amp; 0x00ff0000) &gt;&gt; 16;
+                    int cg = (color &amp; 0x0000ff00) &gt;&gt; 8;
+                    int cb = (color &amp; 0x000000ff);
+                    r += cr * gaussMatrix[j + radius];
+                    g += cg * gaussMatrix[j + radius];
+                    b += cb * gaussMatrix[j + radius];
+                    gaussSum += gaussMatrix[j + radius];
+                }
+            }
+            int cr = (int)(r / gaussSum);
+            int cg = (int)(g / gaussSum);
+            int cb = (int)(b / gaussSum);
+            pix[y * w + x] = cr &lt;&lt; 16 | cg &lt;&lt; 8 | cb | 0xff000000;
+        }
+    }
+    free(gaussMatrix);
+    free(rowData);
+    free(listData);
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207870745.html">
+                
+                  <h1>Android-CoordinatorLayout详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>曾在网上找了一些关于<code>CoordinatorLayout</code>的教程，大部分文章都是把<code>CoordinatorLayout</code>、<code>AppbarLayout</code>、<code>CollapsingToolbarLayout</code> 以及<code>Toolbar</code>等一起使用来介绍，这让我不知不觉在心中认为把这几个布局要一起使用，而且只是用于那种场景中。其实<code>CoordinatorLayout</code>的功能并不是局限于与<code>AppBarLayout</code>一起使用，它的功能强大着呢，本文主要对<code>CoordinatorLayout</code>的使用进行介绍，后面再写一篇文章将<code>AppBarLayout</code>和<code>CollapsingToolBarLayout</code>整合<code>CoordinatorLayout</code>一起。那么到底<code>CoordinatorLayout</code>有多好用，请往下感受吧~</p>
+
+<h2 id="toc_0">CoordinatorLayout能做什么</h2>
+
+<p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子View的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子View的布局。我们先看一组动画图~</p>
+
+<p><figure><img src="media/15561207870745/20171014150799569357936.gif" alt=""/></figure></p>
+
+<p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色Button查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。</p>
+
+<p>这个效果如果让你不用<code>CoordinatorLayout</code>去实现，应该没有任何问题，但是代码的耦合度应该非常大，你的代码必须要持有2个View的引用，然后在onTouchEvent里面做各种判断。如果我们想要实现的功能是，有更多的View要根据蓝色的View的移动相应作出响应，那么那就得在蓝色View的<code>onTounchEvent</code>里面针对其他的View处理各种逻辑。这耦合度未免太伤感了~</p>
+
+<p>而<code>CoordinatorLayout</code>既然号称能帮我们协调子View的布局，我们接下来看看<code>CoordinatorLayout</code>如何实现~</p>
+
+<h2 id="toc_1">CoordinatorLayout使用</h2>
+
+<p><code>CoordinatorLayout</code>的使用核心是<code>Behavior</code>，<code>Behavior</code>就是执行你定制的动作。在讲<code>Behavior</code>之前必须先理解两个概念：<code>Child</code>和<code>Dependency</code>，什么意思呢？<code>Child</code>当然是子View的意思了，是谁的子View呢，当然是<code>CoordinatorLayout</code>的子<code>View</code>；其实<code>Child</code>是指要执行动作的<code>CoordinatorLayout</code>的子<code>View</code>。而<code>Dependency</code>是指<code>Child</code>依赖的<code>View</code>。比如上面的gif图中，蓝色的<code>View</code>就是<code>Dependency</code>，黄色的<code>View</code>就是<code>Child</code>，因为黄色的<code>View</code>的动作是依赖于蓝色的<code>View</code>。简而言之，就是如过<code>Dependency</code>这个View发生了变化，那么<code>Child</code>这个View就要相应发生变化。发生变化是具体发生什么变化呢？这里就要引入<code>Behavior</code>，<code>Child</code>发生变化的具体执行的代码都是放在<code>Behavior</code>这个类里面。</p>
+
+<p>怎么使用<code>Behavior</code>呢，首先，我们定义一个类，继承<code>CoordinatorLayout.Behavior&lt;T&gt;</code>,其中，泛型参数T是我们要执行动作的<code>View</code>类，也就是<code>Child</code>。然后就是去实现<code>Behavior</code>的两个方法：</p>
+
+<pre class="line-numbers"><code class="language-java">/**
+* 判断child的布局是否依赖dependency
+*/
+   @Override
+ public boolean layoutDependsOn(CoordinatorLayout parent, T child, View dependency) {
+    boolean rs;
+    //根据逻辑判断rs的取值
+    //返回false表示child不依赖dependency，ture表示依赖
+    return rs;  
+}
+
+/**
+* 当dependency发生改变时（位置、宽高等），执行这个函数
+* 返回true表示child的位置或者是宽高要发生改变，否则就返回false
+*/
+@Override
+public boolean onDependentViewChanged(CoordinatorLayout parent, T child, View dependency) {
+     //child要执行的具体动作
+        return true;
+}
+</code></pre>
+
+<p>有了上面的概念后，我们看看具体怎么去实现吧~</p>
+
+<p>为了响应跟随手指移动的操作，我们定义一个非常简单的<code>View</code>，这个<code>View</code>只响应跟随手指移动，将这个<code>View</code>作为<code>Dependency</code>。由于过于简单，这个<code>View</code>源码不粘贴，我们只需知道这个<code>View</code>的类名叫：<code>TempView</code>。</p>
+
+<p>我们看看<code>Behavior</code>的使用：</p>
+
+<pre class="line-numbers"><code class="language-java">package com.hc.studyCoordinatorLayout;
+
+import android.content.Context;
+import android.support.design.widget.CoordinatorLayout;
+import android.util.AttributeSet;
+import android.util.DisplayMetrics;
+import android.view.View;
+import android.widget.Button;
+
+/**
+ * Package com.hc.studyCoordinatorLayout
+ * Created by HuaChao on 2016/6/1.
+ */
+public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
+    private int width;
+
+    public MyBehavior(Context context, AttributeSet attrs) {
+        super(context, attrs);
+        DisplayMetrics display = context.getResources().getDisplayMetrics();
+        width = display.widthPixels;
+    }
+
+    @Override
+    public boolean layoutDependsOn(CoordinatorLayout parent, Button child, View dependency) {
+        //如果dependency是TempView的实例，说明它就是我们所需要的Dependency
+        return dependency instanceof TempView;
+    }
+
+    //每次dependency位置发生变化，都会执行onDependentViewChanged方法
+    @Override
+    public boolean onDependentViewChanged(CoordinatorLayout parent, Button btn, View dependency) {
+
+        //根据dependency的位置，设置Button的位置
+
+        int top = dependency.getTop();
+        int left = dependency.getLeft();
+
+        int x = width - left - btn.getWidth();
+        int y = top;
+
+        setPosition(btn, x, y);
+        return true;
+    }
+
+    private void setPosition(View v, int x, int y) {
+        CoordinatorLayout.MarginLayoutParams layoutParams = (CoordinatorLayout.MarginLayoutParams) v.getLayoutParams();
+        layoutParams.leftMargin = x;
+        layoutParams.topMargin = y;
+        v.setLayoutParams(layoutParams);
+    }
+}
+</code></pre>
+
+<p>OK，现在我们为<code>Button</code>类指定了<code>Dependency</code>，并且定义好了跟随<code>Dependency</code>一直变化的动作（<code>Behavior</code>），接下来我们就要指定好为哪个具体的<code>Button</code>实例来绑定这些。方法很简单，直接在布局文件指定就好：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot;
+    tools:context=&quot;com.hc.studyCoordinatorLayout.MainActivity&quot;&gt;
+
+    &lt;Button
+        android:id=&quot;@+id/btn&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:layout_marginLeft=&quot;300dp&quot;
+        android:layout_marginTop=&quot;300dp&quot;
+        android:background=&quot;#FFCC00&quot;
+        android:text=&quot;Hello&quot;
+        app:layout_behavior=&quot;com.hc.studyCoordinatorLayout.MyBehavior&quot; /&gt;
+
+    &lt;com.hc.studyCoordinatorLayout.TempView
+        android:layout_width=&quot;100dp&quot;
+        android:layout_height=&quot;100dp&quot;
+        android:layout_marginLeft=&quot;300dp&quot;
+        android:layout_marginTop=&quot;300dp&quot;
+        android:background=&quot;#3366CC&quot;  /&gt;
+&lt;/android.support.design.widget.CoordinatorLayout&gt;
+</code></pre>
+
+<p>是不是很简单呢？我们只需关注<code>Behavior</code>的编写就好了，把<code>Child</code>和<code>Dependency</code>之间的关系完全解耦了~</p>
+
+<p>附上<a href="http://download.csdn.net/detail/huachao1001/9537636">源码地址</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207870710.html">
+                
+                  <h1>Android-AppBarLayout</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Toolbar</h2>
+
+<p>Toobar主要是用来替换ActionBar的，换句话说，ActionBar能做的，Toolbar都能做。如果你对ActionBar的使用比较熟悉，你会发现Toolbar使用起来非常简单。ok，既然是替换，当然用Toolbar的时候就得先去把ActionBar给隐藏掉啦~</p>
+
+<p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
+&lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
+</code></pre>
+
+<p>当然了，你也可以新建一个<code>&lt;style&gt;</code>标签，将上面两行代码加入，并且将这个新建的标签作为<code>&lt;application&gt;</code>的<code>theme</code>。还可以选择通过将<code>AppTheme</code>的<code>parent</code>设置为<code>Theme.AppCompat.Light.NoActionBar</code>的方式。方法很多，可以自己随便选。</p>
+
+<p>接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
+
+<pre class="line-numbers"><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
+        android:id=&quot;@+id/toolbar&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:background=&quot;?attr/colorPrimary&quot;
+        android:layout_height=&quot;?android:attr/actionBarSize&quot;  /&gt;
+</code></pre>
+
+<p>最后将Toobar作为“ActionBar”来用</p>
+
+<pre class="line-numbers"><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(&quot;这里是Title&quot;);
+        toolbar.setSubtitle(&quot;这里是子标题&quot;);
+        toolbar.setLogo(R.drawable.icon); 
+        setSupportActionBar(toolbar);
+</code></pre>
+
+<p>可以对Toolbar设置Logo、标题、子标题等等~还有很多其他的设置，自己去慢慢玩，这里不提啦~。当然了，也可以在布局文件中设置这些，在布局文件设置就不写啦，hongyang大神有篇博客写的挺好的<a href="http://blog.csdn.net/lmj623565791/article/details/45303349">《 Android 5.x Theme 与 ToolBar 实战 》</a>可以去参考一下。</p>
+
+<p>如果Toolbar仅仅是用来对以往的ActionBar做一次替换，那也太没创意啦！完全没必要去替换了，因为它们表现出来的都是一样的，而且并没有让我们觉得用起来比ActionBar方便。那为啥要替换呢，总应该有他的理由吧：ActionBar是固定在顶部，并不能移动，我觉得这是最大的不好，而我们的ToolBar可以让我们随便摆放，就就可以带来很多灵活性和效果啦！</p>
+
+<p>正如你所看的这样，Toolbar根本就不够看的，一点都不复杂。接下来我们继续学习在Toolbar上面再套一层父View，让Toolbar更有互动性。</p>
+
+<h2 id="toc_1">AppBarLayout</h2>
+
+<blockquote>
+<p>AppBarLayout继承自LinearLayout，布局方向为垂直方向。所以你可以把它当成垂直布局的LinearLayout来使用。AppBarLayout是在LinearLayou上加了一些材料设计的概念，它可以让你定制当<strong>某个可滚动View</strong>的滚动手势发生变化时，其内部的子View实现何种动作。</p>
+</blockquote>
+
+<p>请注意：上面提到的<strong>某个可滚动View</strong>，可以理解为某个ScrollView。怎么理解上面的话呢？就是说，当某个ScrollView发生滚动时，你可以定制你的“顶部栏”应该执行哪些动作（如跟着一起滚动、保持不动等等）。那某个可移动的View到底是哪个可移动的View呢？这是由你自己指定的！如何指定，我们后面说。</p>
+
+<h3 id="toc_2">AppBarLayout子View的动作</h3>
+
+<p>内部的子View通过在布局中加<code>app:layout_scrollFlags</code>设置执行的动作，那么<code>app:layout_scrollFlags</code>可以设置哪些动作呢？分别如下：</p>
+
+<blockquote>
+<p>（1） scroll:值设为scroll的View会跟随滚动事件一起发生移动。</p>
+</blockquote>
+
+<p>什么意思呢？简单的说，就是当指定的ScrollView发生滚动时，该View也跟随一起滚动，就好像这个View也是属于这个ScrollView一样。</p>
+
+<p>一张gif足以说明：</p>
+
+<p><figure><img src="media/15561207870710/20171014150799488071606.gif" alt=""/></figure></p>
+
+<p>对应的布局文件</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;&gt;
+
+        &lt;android.support.v7.widget.Toolbar
+            android:id=&quot;@+id/toolbar&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;?android:attr/actionBarSize&quot;
+            android:background=&quot;?attr/colorPrimary&quot;
+            app:layout_scrollFlags=&quot;scroll&quot; /&gt;
+&lt;/android.support.design.widget.AppBarLayout&gt;
+</code></pre>
+
+<blockquote>
+<p>（2） enterAlways:值设为enterAlways的View,当ScrollView往下滚动时，该View会直接往下滚动。而不用考虑ScrollView是否在滚动。</p>
+</blockquote>
+
+<p>看个动画片（Y(<sup>o<sup>)Y）（ToolBar高度设为：<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code>）：</sup></sup></p>
+
+<p><figure><img src="media/15561207870710/20171014150799493830006.gif" alt=""/></figure></p>
+
+<blockquote>
+<p>（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</p>
+</blockquote>
+
+<p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code>）：</p>
+
+<p><figure><img src="media/15561207870710/20171014150799499853731.gif" alt=""/></figure></p>
+
+<blockquote>
+<p>（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。<br/>
+来个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code>）：</p>
+</blockquote>
+
+<p><figure><img src="media/15561207870710/20171014150799505696205.gif" alt=""/></figure></p>
+
+<h3 id="toc_3">将AppBarLayout与ScrollView关联起来</h3>
+
+<p>前面说了一直反复说“当ScrollView发生滚动时”，那么怎么将AppBarLayout与ScrollView关联起来呢？我们注意到，AppBarLayout与ScrollView之间动作“相互依赖”，这不就是我们上一篇<a href="http://blog.csdn.net/huachao1001/article/details/51554608">《CoordinateLayout的使用如此简单 》</a>所学的内容吗？把ScrollView和AppBarLayout作为CoordinateLayout的子View，然后编写一个Behavior，在这个Behavior里面判断当前的操作是应该让ScrollView时刻保持在AppBarLayout之下（即只要改变AppBarLayout的位置就可以一起滑动），还是应该让ScrollView内部滚动而不让AppBarLayout位置发生变化等等这些需求，都是可以在Behavior里面处理的。你可以去针对你的ScrollView编写Behavior。然而，我们看到我们的AppBarLayout事先的功能比较复杂，如果我们自己去定义这样的效果，代码非常复杂，还要考虑很多方面，好在Android帮我们写好啦，我们直接用就是了，这个ScrollView就是NestedScrollView，请注意，它并没有继承ScrollView，它继承的是FrameLayout，但是它实现的效果把它可以看成是ScrollView。</p>
+
+<p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
+
+<pre class="line-numbers"><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
+
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
+
+       &lt;!--将你的内容放在这里--&gt;
+
+&lt;/android.support.v4.widget.NestedScrollView&gt;
+</code></pre>
+
+<p>有没有注意到有个属性：<code>app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</code>,它就是指定Behavior的，<code>appbar_scrolling_view_behavior</code>对应的类的名称是：<code>android.support.design.widget.AppBarLayout$ScrollingViewBehavior</code>感兴趣的可以去分析源码。</p>
+
+<p>好了，我们现在会用AppBarLayout啦~是不是发现用起来so easy!接下来我们把剩下<code>CollapsingToolbarLayout</code>的给&quot;消化&quot;掉！</p>
+
+<h2 id="toc_4">CollapsingToolbarLayout</h2>
+
+<p>CollapsingToolbarLayout是用来对Toolbar进行再次包装的ViewGroup，主要是用于实现折叠（其实就是看起来像伸缩~）的App Bar效果。它需要放在AppBarLayout布局里面，并且作为AppBarLayout的直接子View。CollapsingToolbarLayout主要包括几个功能（参照了官方网站上内容，略加自己的理解进行解释）：</p>
+
+<blockquote>
+<p>(1) 折叠Title（Collapsing title）：当布局内容全部显示出来时，title是最大的，但是随着View逐步移出屏幕顶部，title变得越来越小。你可以通过调用<code>setTitle</code>函数来设置title。  </p>
+
+<p>(2)内容纱布（Content scrim）：根据滚动的位置是否到达一个阀值，来决定是否对View“盖上纱布”。可以通过<code>setContentScrim(Drawable)</code>来设置纱布的图片.  </p>
+
+<p>(3)状态栏纱布（Status bar scrim)：根据滚动位置是否到达一个阀值决定是否对状态栏“盖上纱布”，你可以通过<code>setStatusBarScrim(Drawable)</code>来设置纱布图片，但是只能在LOLLIPOP设备上面有作用。  </p>
+
+<p>(4)视差滚动子<code>View(Parallax scrolling children)</code>:子View可以选择在当前的布局当时是否以“视差”的方式来跟随滚动。<strong>（PS:其实就是让这个View的滚动的速度比其他正常滚动的View速度稍微慢一点）</strong>。将布局参数<code>app:layout_collapseMode</code>设为<code>parallax</code> </p>
+
+<p>(5)将子View位置固定(Pinned position children)：子View可以选择是否在全局空间上固定位置，这对于Toolbar来说非常有用，因为当布局在移动时，可以将Toolbar固定位置而不受移动的影响。 将app:layout_collapseMode设为pin。</p>
+</blockquote>
+
+<p>了解这些概念后，我们来看看布局吧~</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; &gt;
+
+
+    &lt;android.support.design.widget.AppBarLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
+
+        &lt;android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            app:expandedTitleMarginEnd=&quot;64dp&quot;
+            app:expandedTitleMarginStart=&quot;48dp&quot;
+            app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;&gt;
+
+            &lt;ImageView
+                android:id=&quot;@+id/main.backdrop&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;300dp&quot;
+                android:scaleType=&quot;centerCrop&quot;
+                android:src=&quot;@drawable/material_img&quot;
+                app:layout_collapseMode=&quot;parallax&quot; /&gt;
+
+            &lt;android.support.v7.widget.Toolbar
+                android:id=&quot;@+id/toolbar&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;?android:attr/actionBarSize&quot;
+                app:layout_collapseMode=&quot;pin&quot;  /&gt;
+
+        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;
+    &lt;/android.support.design.widget.AppBarLayout&gt;
+
+    &lt;android.support.v4.widget.NestedScrollView
+
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:paddingTop=&quot;50dp&quot;
+        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
+
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;@string/my_txt&quot;
+            android:textSize=&quot;20sp&quot; /&gt;
+
+    &lt;/android.support.v4.widget.NestedScrollView&gt;
+
+&lt;/android.support.design.widget.CoordinatorLayout&gt;
+</code></pre>
+
+<p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
+
+<p><figure><img src="media/15561207870710/20171014150799532425417.gif" alt=""/></figure></p>
+
+<p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>&quot;，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
+
+<p>献上<a href="http://download.csdn.net/detail/huachao1001/9538934">源码</a></p>
+
+<h2 id="toc_5">AppBarLayout的ScrollFlags属性</h2>
+
+<p>在前面两篇MD系列的文章中，通过两个案例基本上能够掌握了CoordinatorLayout与AppBarLayout的配合使用。本文我们回过头来详细聊聊AppBarLayout的ScrollFlags属性，了解一下不同值之间的区别。至此，Android Material Design系列的学习已进行到第七篇，大家可以点击以下链接查看之前的文章：</p>
+
+<ul>
+<li><a href="http://www.jianshu.com/p/39a66373498c">Android TabLayout 分分钟打造一个滑动标签页</a></li>
+<li><a href="http://www.jianshu.com/p/9eb3b17b0e77">Android 一文告诉你到底是用Dialog，Snackbar，还是Toast</a></li>
+<li><a href="http://www.jianshu.com/p/5328b2eee827">Android FloatingActionButton 重要的操作不要太多，一个就好</a></li>
+<li><a href="http://www.jianshu.com/p/ab04627cce58">Android 初识AppBarLayout 和 CoordinatorLayout</a></li>
+<li><a href="http://www.jianshu.com/p/4b0f3c80ebc9">Android CoordinatorLayout实战案例学习《一》</a></li>
+<li><a href="http://www.jianshu.com/p/360fd368936d">Android CoordinatorLayout 实战案例学习《二》</a></li>
+</ul>
+
+<p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
+
+<pre class="line-numbers"><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
+AppBarLayout.LayoutParams params = 
+    (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+</code></pre>
+
+<p>下面我们通过官网介绍、XML代码和对应的效果图分别分析这五种值的使用（备注：代码中设置也一样，不再赘述）：</p>
+
+<h3 id="toc_6">scroll</h3>
+
+<blockquote>
+<p>The view will be scroll in direct relation to scroll events. This flag needs to be set for any of the other flags to take effect. If any sibling views before this one do not have this flag, then this value has no effect.</p>
+</blockquote>
+
+<p>Child View 伴随着滚动事件而滚出或滚进屏幕。注意两点：第一点，如果使用了其他值，必定要使用这个值才能起作用；第二点：如果在这个child View前面的任何其他Child View没有设置这个值，那么这个Child View的设置将失去作用。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
+        android:id=&quot;@+id/appbar&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
+
+        &lt;android.support.v7.widget.Toolbar
+            xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+            android:id=&quot;@+id/tb_toolbar&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;@dimen/dp_56&quot;
+            app:titleTextColor=&quot;@color/white&quot;
+            app:title=&quot;@string/app_name&quot;
+            app:theme=&quot;@style/OverFlowMenuTheme&quot;
+            app:popupTheme=&quot;@style/AppTheme&quot;
+            android:background=&quot;@color/blue&quot;
+            app:layout_scrollFlags=&quot;scroll|enterAlways&quot;/&gt;
+
+    &lt;/android.support.design.widget.AppBarLayout&gt;
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842247229844.gif" alt=""/></figure></p>
+
+<h3 id="toc_7">enterAlways</h3>
+
+<blockquote>
+<p>When entering (scrolling on screen) the view will scroll on any downwards scroll event, regardless of whether the scrolling view is also scrolling. This is commonly referred to as the &#39;quick return&#39; pattern.</p>
+</blockquote>
+
+<p>快速返回模式。其实就是向下滚动时Scrolling View和Child View之间的滚动优先级问题。对比<code>scroll</code>和<code>scroll | enterAlways</code>设置，发生向下滚动事件时，前者优先滚动Scrolling View，后者优先滚动Child View，当优先滚动的一方已经全部滚进屏幕之后，另一方才开始滚动。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-java">...
+app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
+...
+
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842251698266.gif" alt=""/></figure></p>
+
+<h3 id="toc_8">enterAlwaysCollapsed</h3>
+
+<blockquote>
+<p>An additional flag for &#39;enterAlways&#39; which modifies the returning view to only initially scroll back to it&#39;s collapsed height. Once the scrolling view has reached the end of it&#39;s scroll range, the remainder of this view will be scrolled into view. The collapsed height is defined by the view&#39;s minimum height.</p>
+</blockquote>
+
+<p>enterAlways的附加值。这里涉及到Child View的高度和最小高度，向下滚动时，Child View先向下滚动最小高度值，然后Scrolling View开始滚动，到达边界时，Child View再向下滚动，直至显示完全。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">...
+android:layout_height=&quot;@dimen/dp_200&quot;
+android:minHeight=&quot;@dimen/dp_56&quot;
+...
+app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
+...
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842256217688.gif" alt=""/></figure></p>
+
+<h3 id="toc_9">exitUntilCollapsed</h3>
+
+<blockquote>
+<p>When exiting (scrolling off screen) the view will be scrolled until it is &#39;collapsed&#39;. The collapsed height is defined by the view&#39;s minimum height.</p>
+</blockquote>
+
+<p>这里也涉及到最小高度。发生向上滚动事件时，Child View向上滚动退出直至最小高度，然后Scrolling View开始滚动。也就是，Child View不会完全退出屏幕。</p>
+
+<p>示例SML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">...
+android:layout_height=&quot;@dimen/dp_200&quot;
+android:minHeight=&quot;@dimen/dp_56&quot;
+...
+app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
+...
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842260265572.gif" alt=""/></figure></p>
+
+<h3 id="toc_10">snap</h3>
+
+<blockquote>
+<p>Upon a scroll ending, if the view is only partially visible then it will be snapped and scrolled to it&#39;s closest edge. For example, if the view only has it&#39;s bottom 25% displayed, it will be scrolled off screen completely. Conversely, if it&#39;s bottom 75% is visible then it will be scrolled fully into view.</p>
+</blockquote>
+
+<p>简单理解，就是Child View滚动比例的一个吸附效果。也就是说，Child View不会存在局部显示的情况，滚动Child View的部分高度，当我们松开手指时，Child View要么向上全部滚出屏幕，要么向下全部滚进屏幕，有点类似ViewPager的左右滑动。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">...
+android:layout_height=&quot;@dimen/dp_200&quot;
+...
+app:layout_scrollFlags=&quot;scroll|snap&quot;
+...
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842265497458.gif" alt=""/></figure></p>
+
+<h3 id="toc_11">示例源码</h3>
+
+<p>我在GitHub上建立了一个Repository，用来存放整个Android Material Design系列控件的学习案例，会伴随着文章逐渐更新完善，欢迎大家补充交流，Star地址：</p>
+
+<p><a href="https://github.com/Mike-bel/MDStudySamples">https://github.com/Mike-bel/MDStudySamples</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -5549,8 +4798,6 @@ public class AnnotationTest {
         
             <a href="Android.html"><strong>Android</strong></a>
         
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
             <a href="C++.html"><strong>C++</strong></a>
@@ -5582,12 +4829,6 @@ public class AnnotationTest {
 	      
 		      
 			      <li class="post">
-			        <a href="15826122642335.html">个人信息</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
 			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
 			      </li>
 		     
@@ -5607,6 +4848,12 @@ public class AnnotationTest {
 		      
 			      <li class="post">
 			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15767453112302.html">添加环境变量</a>
 			      </li>
 		     
 		  

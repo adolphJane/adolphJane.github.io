@@ -79,8 +79,6 @@
         
             <li><a href="Android.html">Android</a></li>
         
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
             <li><a href="C++.html">C++</a></li>
@@ -117,1047 +115,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="15561207870778.html">
-                
-                  <h1>Android-NDK图片高斯模糊</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">CMake</h2>
-
-<p>CMake是一款项目构建工具，通过编写简单明了的在CmakeLists.txt来生成makefile，简单来说就是一个makefile生成器。</p>
-
-<p>在Android Studio中安装CMake非常简单，打开Tools-&gt;Android-&gt;SDK Manager，选择SDK Tools标签页，勾选CMake、LLDB、NDK，OK自动安装即可。其中LLDB可以使我们在Android Studio中调试C/C++程序。NDK为原生开发工具包，必不可少。</p>
-
-<p><figure><img src="media/15561207870778/15713317710825.png" alt=""/></figure></p>
-
-<h2 id="toc_1">为什么要做JNI/NDK开发</h2>
-
-<p>众所周知，Java/Android程序是运行在JVM/Dalvik VM中，所以Java程序远没有C/C++程序性能高，尤其是在CPU密集型运算时，所以Java平台提供了JNI（Java Native Interface），可通过JNI调用C/C++等编写的so动态链接库。</p>
-
-<p><strong>注：Google在Android L以后用ART彻底代替了Dalvik VM，但ART本质上仍是一个虚拟机，并支持所有Dalvik VM指令集。</strong></p>
-
-<p>Java API中几乎所有与硬件相关的方法都是native的，比如I/O操作、网络访问、手机传感器、串口读写等。<br/><br/>
-本文涉及的图片处理是一种CPU密集型任务，在Android开发中使用native方法最为合适。</p>
-
-<h2 id="toc_2">如何使用CMake做JNI/NDK开发</h2>
-
-<h3 id="toc_3">新建工程</h3>
-
-<p>选中Include C++ Support，意为引入C++支持。</p>
-
-<h3 id="toc_4">配置C++支持</h3>
-
-<p><figure><img src="media/15561207870778/15713317834823.png" alt=""/></figure></p>
-
-<p>在Customize C++ Support界面默认即可,意为CMake/C++11环境</p>
-
-<h3 id="toc_5">认识CMakeLists.txt</h3>
-
-<p>工程创建完毕之后Android Studio会在app目录下生成CMakeLists.txt文件。CMakeLists.txt是CMake的配置文件，用于表明版本、依赖、等信息，以下为Android Studio生成的CMakeLists（过滤注释）</p>
-
-<pre class="line-numbers"><code class="language-text">cmake_minimum_required(VERSION 3.4.1)
-
-add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
-
-find_library(log-lib log)
-
-target_link_libraries(native-lib ${log-lib})
-</code></pre>
-
-<ul>
-<li>cmake_minimum_required(VERSION 3.4.1)<br/>
-CMake最小版本使用的是3.4.1。</li>
-<li>add_library()<br/>
-配置so库信息（为当前当前脚本文件添加库）
-<ul>
-<li>native-lib<br/>
-这个是声明引用so库的名称，在项目中，如果需要使用这个so文件，引用的名称就是这个。值得注意的是，实际上生成的so文件名称是libnative-lib。</li>
-<li>SHARED<br/>
-这个参数表示共享so库文件，也就是在Run项目或者build项目时会在目录intermediates\transforms\mergeJniLibs\debug\folders\2000\1f\main下生成so文件。</li>
-<li>src/main/cpp/native-lib.cpp<br/>
-构建so库的源文件。</li>
-</ul></li>
-<li>find_library()查找一个库文件
-<ul>
-<li>log-lib<br/>
-这个指定的是在NDK库中每个类型的库会存放一个特定的位置，而log库存放在log-lib中</li>
-<li>log<br/>
-指定使用log库</li>
-</ul></li>
-<li>target_link_libraries()<br/>
-如果你本地的库（native-lib）想要调用log库的方法，那么就需要配置这个属性，意思是把NDK库关联到本地库。
-<ul>
-<li>native-lib<br/>
-要被关联的库名称</li>
-<li>\({log-lib}  <br/>
-要关联的库名称，要用大括号包裹，前面还要有\)符号去引用。</li>
-</ul></li>
-</ul>
-
-<h3 id="toc_6">了解JNI的C/C++规范</h3>
-
-<h4 id="toc_7">数据类型</h4>
-
-<p>JNI的数据类型包含两种，分别是基本类型和引用类型，它们和Java中的数据类型对应关系如下两表所示。</p>
-
-<h5 id="toc_8">基本数据类型</h5>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: left">JNI类型</th>
-<th style="text-align: center">Java类型</th>
-<th style="text-align: center">描述</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: left">jboolean</td>
-<td style="text-align: center">boolean</td>
-<td style="text-align: center">无符号8位整型</td>
-</tr>
-<tr>
-<td style="text-align: left">jbyte</td>
-<td style="text-align: center">byte</td>
-<td style="text-align: center">无符号8位整型</td>
-</tr>
-<tr>
-<td style="text-align: left">jchar</td>
-<td style="text-align: center">char</td>
-<td style="text-align: center">无符号16位整型</td>
-</tr>
-<tr>
-<td style="text-align: left">jshort</td>
-<td style="text-align: center">short</td>
-<td style="text-align: center">有符号16位整型</td>
-</tr>
-<tr>
-<td style="text-align: left">jint</td>
-<td style="text-align: center">int</td>
-<td style="text-align: center">32位整型</td>
-</tr>
-<tr>
-<td style="text-align: left">jlong</td>
-<td style="text-align: center">long</td>
-<td style="text-align: center">64位整型</td>
-</tr>
-<tr>
-<td style="text-align: left">jfloat</td>
-<td style="text-align: center">float</td>
-<td style="text-align: center">32位浮点型</td>
-</tr>
-<tr>
-<td style="text-align: left">jdouble</td>
-<td style="text-align: center">double</td>
-<td style="text-align: center">64位浮点型</td>
-</tr>
-<tr>
-<td style="text-align: left">void</td>
-<td style="text-align: center">void</td>
-<td style="text-align: center">无类型</td>
-</tr>
-</tbody>
-</table>
-
-<h5 id="toc_9">引用数据类型</h5>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: left">JNI类型</th>
-<th style="text-align: center">Java类型</th>
-<th style="text-align: center">描述</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: left">jobject</td>
-<td style="text-align: center">Object</td>
-<td style="text-align: center">Object类型</td>
-</tr>
-<tr>
-<td style="text-align: left">jclass</td>
-<td style="text-align: center">Class</td>
-<td style="text-align: center">Class类型</td>
-</tr>
-<tr>
-<td style="text-align: left">jstring</td>
-<td style="text-align: center">String</td>
-<td style="text-align: center">String类型</td>
-</tr>
-<tr>
-<td style="text-align: left">jobjectArray</td>
-<td style="text-align: center">Object[]</td>
-<td style="text-align: center">对象数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jbooleanArray</td>
-<td style="text-align: center">boolean[]</td>
-<td style="text-align: center">boolean数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jbyteArray</td>
-<td style="text-align: center">byte[]</td>
-<td style="text-align: center">byte数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jcharArray</td>
-<td style="text-align: center">char[]</td>
-<td style="text-align: center">char数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jshortArray</td>
-<td style="text-align: center">short[]</td>
-<td style="text-align: center">short数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jintArray</td>
-<td style="text-align: center">int[]</td>
-<td style="text-align: center">int数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jlongArray</td>
-<td style="text-align: center">long[]</td>
-<td style="text-align: center">long数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jfloatArray</td>
-<td style="text-align: center">float[]</td>
-<td style="text-align: center">float数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jdoubleArray</td>
-<td style="text-align: center">double[]</td>
-<td style="text-align: center">double数组</td>
-</tr>
-<tr>
-<td style="text-align: left">jthrowable</td>
-<td style="text-align: center">Throwable</td>
-<td style="text-align: center">Throwable</td>
-</tr>
-</tbody>
-</table>
-
-<h4 id="toc_10">JNI的类型签名</h4>
-
-<p>JNI的类型签名标识了一个特定的Java类型，这个类型既可以是类也可以是方法，也可以是数据类型。</p>
-
-<ul>
-<li>类的签名比较简单，它采用 L+包名+类型+; 的形式，只需要将其中的.替换为/即可。例如java.lang.String， 它的签名为Ljava/lang/String; ，注意末尾的;也是签名一部分。<br/></li>
-<li>基本数据类型的签名采用一系列大写字母来表示, 如下表所示</li>
-</ul>
-
-<h5 id="toc_11">基本数据类型的签名</h5>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: left">Java类型</th>
-<th style="text-align: center">签名</th>
-<th style="text-align: center">Java类型</th>
-<th style="text-align: center">签名</th>
-<th style="text-align: center">Java类型</th>
-<th style="text-align: center">签名</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: left">boolean</td>
-<td style="text-align: center">Z</td>
-<td style="text-align: center">byte</td>
-<td style="text-align: center">B</td>
-<td style="text-align: center">char</td>
-<td style="text-align: center">C</td>
-</tr>
-<tr>
-<td style="text-align: left">short</td>
-<td style="text-align: center">S</td>
-<td style="text-align: center">int</td>
-<td style="text-align: center">I</td>
-<td style="text-align: center">long</td>
-<td style="text-align: center">J</td>
-</tr>
-<tr>
-<td style="text-align: left">float</td>
-<td style="text-align: center">F</td>
-<td style="text-align: center">double</td>
-<td style="text-align: center">D</td>
-<td style="text-align: center">void</td>
-<td style="text-align: center">V</td>
-</tr>
-</tbody>
-</table>
-
-<h4 id="toc_12">JNI C/C++函数编写</h4>
-
-<p>先来看看Android Studio为我们生成的示例</p>
-
-<pre class="line-numbers"><code class="language-java">JNIEXPORT jstring JNICALL
-Java_com_glee_myapplication_MainActivity_stringFromJNI(
-        JNIEnv* env,
-        jobject /* this */) {
-    std::string hello = &quot;Hello from C++&quot;;
-    return env-&gt;NewStringUTF(hello.c_str());
-}
-</code></pre>
-
-<ul>
-<li>JNIEXPORT &amp; JNICALL<br/>
-JNIEXPORT和JNICALL这两个宏（被定义在jni.h）确保这个函数在本地库外可见，并且编译器会进行正确的调用转换。</li>
-<li>函数规范<br/>
-在JNI中C/C++的函数名是有规范要求的，由以下几部分串接而成
-<ul>
-<li>Java_前缀</li>
-<li>完全限定的类名，并用下划线“_”作为分隔符</li>
-<li>第一参数JNIEnv* env</li>
-<li>第二个参数jobject或jclass</li>
-<li>其他参数按类型映射</li>
-<li>返回参数按类型映射</li>
-</ul></li>
-</ul>
-
-<h2 id="toc_13">JNI层操作Bitmap对象</h2>
-
-<h3 id="toc_14">原理</h3>
-
-<p>Android中JNI层处理Bitmap通常有两种方法</p>
-
-<ul>
-<li>获取到Bitmap中的byte数组并传入native方法，JNI层处理得到的byte数组后返回一个新的byte数组，Java层重建Bitmap对象。（不推荐）</li>
-<li>Java层直接向JNI层传入Bitmap的引用，JNI层得到Bitmap对象的图像数据的地址，直接修改Bitmap的byte数组。</li>
-</ul>
-
-<p>阅读了很多篇博客，很多开发者都会采用第一种方法，本人是极不推荐的。这种方法会在内存中重建一个byte数组，会造成内存的浪费，性能低下。<br/><br/>
-第二种方法是性能最优的，JNI层充分利用的C/C++指针的特性，直接获取到Bitmap中byte数组在内存中的地址，通过指针直接修改图像数据，所以用到了NDK中的android/bitmap.h。  </p>
-
-<p><strong>android/bitmap.h</strong></p>
-
-<p>android/bitmap.h这个头文件用于在JNI层操作Bitmap对象的，其包含于jnigraphics库中，所以要在CMakeLists.txt中的target_link_libraries加入-ljnigraphics，如下</p>
-
-<p><code>target_link_libraries(native-lib -ljnigraphics ${log-lib})</code></p>
-
-<p><strong>三个常用函数</strong></p>
-
-<ul>
-<li>AndroidBitmap_getInfo() 从位图句柄获得信息（宽度、高度、像素格式）</li>
-<li>AndroidBitmap_lockPixels() 对像素缓存上锁，即获得该缓存的指针。</li>
-<li>AndroidBitmap_unlockPixels() 解锁</li>
-</ul>
-
-<h3 id="toc_15">JNI接口函数</h3>
-
-<p>请看注释</p>
-
-<pre class="line-numbers"><code class="language-java">JNIEXPORT void JNICALL
-Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */, jobject bmp) {
-    AndroidBitmapInfo info = {0};//初始化BitmapInfo结构体
-    int *data=NULL;//初始化Bitmap图像数据指针
-    AndroidBitmap_getInfo(env, bmp, &amp;info);
-    AndroidBitmap_lockPixels(env, bmp, (void **) &amp;data);//锁定Bitmap，并且获得指针
-    /**********高斯模糊算法作对int数组进行处理***********/
-    //调用gaussBlur函数，把图像数据指针、图片长宽和模糊半径传入
-    gaussBlur(data,info.width,info.height,80);
-    /****************************************************/
-    AndroidBitmap_unlockPixels(env,bmp);//解锁
-}
-</code></pre>
-
-<p>这里用到的gaussBlur函数代码将在文章最后列出。</p>
-
-<h3 id="toc_16">Java层代码</h3>
-
-<p>请看注释</p>
-
-<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
-
-    static {
-        //通过静态代码块加载so库
-        System.loadLibrary(&quot;native-lib&quot;);
-    }
-
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-        super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main);
-        //初始化两个ImageView
-        ImageView iv1 = (ImageView) findViewById(R.id.img1);
-        ImageView iv2 = (ImageView) findViewById(R.id.img2);
-        //iv1设置图片
-        iv1.setImageResource(R.drawable.test);
-        //生成bitmap对象
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.test);
-        //调用native方法，传入Bitmap对象，对Bitmap进行高斯迷糊处理
-        gaussBlur(bitmap);
-        //把Bitmap对象设置给iv2
-        iv2.setImageBitmap(bitmap);
-    }
-    //native方法声明
-    public native void gaussBlur(Bitmap bitmap);
-}
-</code></pre>
-
-<h3 id="toc_17">运行效果</h3>
-
-<p>上方的ImageView是没有进行高斯模糊处理的，下方的ImageView调用了JNI方法进行高斯模糊处理。</p>
-
-<p><figure><img src="media/15561207870778/15713317952653.png" alt=""/></figure></p>
-
-<h3 id="toc_18">高斯模糊算法</h3>
-
-<pre class="line-numbers"><code class="language-c">void gaussBlur1(int* pix, int w, int h, int radius)
-{
-    float sigma = (float) (1.0 * radius / 2.57);
-    float deno  = (float) (1.0 / (sigma * sqrt(2.0 * PI)));
-    float nume  = (float) (-1.0 / (2.0 * sigma * sigma));
-    float* gaussMatrix = (float*)malloc(sizeof(float)* (radius + radius + 1));
-    float gaussSum = 0.0;
-    for (int i = 0, x = -radius; x &lt;= radius; ++x, ++i)
-    {
-        float g = (float) (deno * exp(1.0 * nume * x * x));
-        gaussMatrix[i] = g;
-        gaussSum += g;
-    }
-    int len = radius + radius + 1;
-    for (int i = 0; i &lt; len; ++i)
-        gaussMatrix[i] /= gaussSum;
-    int* rowData  = (int*)malloc(w * sizeof(int));
-    int* listData = (int*)malloc(h * sizeof(int));
-    for (int y = 0; y &lt; h; ++y)
-    {
-        memcpy(rowData, pix + y * w, sizeof(int) * w);
-        for (int x = 0; x &lt; w; ++x)
-        {
-            float r = 0, g = 0, b = 0;
-            gaussSum = 0;
-            for (int i = -radius; i &lt;= radius; ++i)
-            {
-                int k = x + i;
-                if (0 &lt;= k &amp;&amp; k &lt;= w)
-                {
-                    //得到像素点的rgb值
-                    int color = rowData[k];
-                    int cr = (color &amp; 0x00ff0000) &gt;&gt; 16;
-                    int cg = (color &amp; 0x0000ff00) &gt;&gt; 8;
-                    int cb = (color &amp; 0x000000ff);
-                    r += cr * gaussMatrix[i + radius];
-                    g += cg * gaussMatrix[i + radius];
-                    b += cb * gaussMatrix[i + radius];
-                    gaussSum += gaussMatrix[i + radius];
-                }
-            }
-            int cr = (int)(r / gaussSum);
-            int cg = (int)(g / gaussSum);
-            int cb = (int)(b / gaussSum);
-            pix[y * w + x] = cr &lt;&lt; 16 | cg &lt;&lt; 8 | cb | 0xff000000;
-        }
-    }
-    for (int x = 0; x &lt; w; ++x)
-    {
-        for (int y = 0; y &lt; h; ++y)
-            listData[y] = pix[y * w + x];
-        for (int y = 0; y &lt; h; ++y)
-        {
-            float r = 0, g = 0, b = 0;
-            gaussSum = 0;
-            for (int j = -radius; j &lt;= radius; ++j)
-            {
-                int k = y + j;
-                if (0 &lt;= k &amp;&amp; k &lt;= h)
-                {
-                    int color = listData[k];
-                    int cr = (color &amp; 0x00ff0000) &gt;&gt; 16;
-                    int cg = (color &amp; 0x0000ff00) &gt;&gt; 8;
-                    int cb = (color &amp; 0x000000ff);
-                    r += cr * gaussMatrix[j + radius];
-                    g += cg * gaussMatrix[j + radius];
-                    b += cb * gaussMatrix[j + radius];
-                    gaussSum += gaussMatrix[j + radius];
-                }
-            }
-            int cr = (int)(r / gaussSum);
-            int cg = (int)(g / gaussSum);
-            int cb = (int)(b / gaussSum);
-            pix[y * w + x] = cr &lt;&lt; 16 | cg &lt;&lt; 8 | cb | 0xff000000;
-        }
-    }
-    free(gaussMatrix);
-    free(rowData);
-    free(listData);
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207870745.html">
-                
-                  <h1>Android-CoordinatorLayout详细学习</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>曾在网上找了一些关于<code>CoordinatorLayout</code>的教程，大部分文章都是把<code>CoordinatorLayout</code>、<code>AppbarLayout</code>、<code>CollapsingToolbarLayout</code> 以及<code>Toolbar</code>等一起使用来介绍，这让我不知不觉在心中认为把这几个布局要一起使用，而且只是用于那种场景中。其实<code>CoordinatorLayout</code>的功能并不是局限于与<code>AppBarLayout</code>一起使用，它的功能强大着呢，本文主要对<code>CoordinatorLayout</code>的使用进行介绍，后面再写一篇文章将<code>AppBarLayout</code>和<code>CollapsingToolBarLayout</code>整合<code>CoordinatorLayout</code>一起。那么到底<code>CoordinatorLayout</code>有多好用，请往下感受吧~</p>
-
-<h2 id="toc_0">CoordinatorLayout能做什么</h2>
-
-<p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子View的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子View的布局。我们先看一组动画图~</p>
-
-<p><figure><img src="media/15561207870745/20171014150799569357936.gif" alt=""/></figure></p>
-
-<p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色Button查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。</p>
-
-<p>这个效果如果让你不用<code>CoordinatorLayout</code>去实现，应该没有任何问题，但是代码的耦合度应该非常大，你的代码必须要持有2个View的引用，然后在onTouchEvent里面做各种判断。如果我们想要实现的功能是，有更多的View要根据蓝色的View的移动相应作出响应，那么那就得在蓝色View的<code>onTounchEvent</code>里面针对其他的View处理各种逻辑。这耦合度未免太伤感了~</p>
-
-<p>而<code>CoordinatorLayout</code>既然号称能帮我们协调子View的布局，我们接下来看看<code>CoordinatorLayout</code>如何实现~</p>
-
-<h2 id="toc_1">CoordinatorLayout使用</h2>
-
-<p><code>CoordinatorLayout</code>的使用核心是<code>Behavior</code>，<code>Behavior</code>就是执行你定制的动作。在讲<code>Behavior</code>之前必须先理解两个概念：<code>Child</code>和<code>Dependency</code>，什么意思呢？<code>Child</code>当然是子View的意思了，是谁的子View呢，当然是<code>CoordinatorLayout</code>的子<code>View</code>；其实<code>Child</code>是指要执行动作的<code>CoordinatorLayout</code>的子<code>View</code>。而<code>Dependency</code>是指<code>Child</code>依赖的<code>View</code>。比如上面的gif图中，蓝色的<code>View</code>就是<code>Dependency</code>，黄色的<code>View</code>就是<code>Child</code>，因为黄色的<code>View</code>的动作是依赖于蓝色的<code>View</code>。简而言之，就是如过<code>Dependency</code>这个View发生了变化，那么<code>Child</code>这个View就要相应发生变化。发生变化是具体发生什么变化呢？这里就要引入<code>Behavior</code>，<code>Child</code>发生变化的具体执行的代码都是放在<code>Behavior</code>这个类里面。</p>
-
-<p>怎么使用<code>Behavior</code>呢，首先，我们定义一个类，继承<code>CoordinatorLayout.Behavior&lt;T&gt;</code>,其中，泛型参数T是我们要执行动作的<code>View</code>类，也就是<code>Child</code>。然后就是去实现<code>Behavior</code>的两个方法：</p>
-
-<pre class="line-numbers"><code class="language-java">/**
-* 判断child的布局是否依赖dependency
-*/
-   @Override
- public boolean layoutDependsOn(CoordinatorLayout parent, T child, View dependency) {
-    boolean rs;
-    //根据逻辑判断rs的取值
-    //返回false表示child不依赖dependency，ture表示依赖
-    return rs;  
-}
-
-/**
-* 当dependency发生改变时（位置、宽高等），执行这个函数
-* 返回true表示child的位置或者是宽高要发生改变，否则就返回false
-*/
-@Override
-public boolean onDependentViewChanged(CoordinatorLayout parent, T child, View dependency) {
-     //child要执行的具体动作
-        return true;
-}
-</code></pre>
-
-<p>有了上面的概念后，我们看看具体怎么去实现吧~</p>
-
-<p>为了响应跟随手指移动的操作，我们定义一个非常简单的<code>View</code>，这个<code>View</code>只响应跟随手指移动，将这个<code>View</code>作为<code>Dependency</code>。由于过于简单，这个<code>View</code>源码不粘贴，我们只需知道这个<code>View</code>的类名叫：<code>TempView</code>。</p>
-
-<p>我们看看<code>Behavior</code>的使用：</p>
-
-<pre class="line-numbers"><code class="language-java">package com.hc.studyCoordinatorLayout;
-
-import android.content.Context;
-import android.support.design.widget.CoordinatorLayout;
-import android.util.AttributeSet;
-import android.util.DisplayMetrics;
-import android.view.View;
-import android.widget.Button;
-
-/**
- * Package com.hc.studyCoordinatorLayout
- * Created by HuaChao on 2016/6/1.
- */
-public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
-    private int width;
-
-    public MyBehavior(Context context, AttributeSet attrs) {
-        super(context, attrs);
-        DisplayMetrics display = context.getResources().getDisplayMetrics();
-        width = display.widthPixels;
-    }
-
-    @Override
-    public boolean layoutDependsOn(CoordinatorLayout parent, Button child, View dependency) {
-        //如果dependency是TempView的实例，说明它就是我们所需要的Dependency
-        return dependency instanceof TempView;
-    }
-
-    //每次dependency位置发生变化，都会执行onDependentViewChanged方法
-    @Override
-    public boolean onDependentViewChanged(CoordinatorLayout parent, Button btn, View dependency) {
-
-        //根据dependency的位置，设置Button的位置
-
-        int top = dependency.getTop();
-        int left = dependency.getLeft();
-
-        int x = width - left - btn.getWidth();
-        int y = top;
-
-        setPosition(btn, x, y);
-        return true;
-    }
-
-    private void setPosition(View v, int x, int y) {
-        CoordinatorLayout.MarginLayoutParams layoutParams = (CoordinatorLayout.MarginLayoutParams) v.getLayoutParams();
-        layoutParams.leftMargin = x;
-        layoutParams.topMargin = y;
-        v.setLayoutParams(layoutParams);
-    }
-}
-</code></pre>
-
-<p>OK，现在我们为<code>Button</code>类指定了<code>Dependency</code>，并且定义好了跟随<code>Dependency</code>一直变化的动作（<code>Behavior</code>），接下来我们就要指定好为哪个具体的<code>Button</code>实例来绑定这些。方法很简单，直接在布局文件指定就好：</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot;
-    tools:context=&quot;com.hc.studyCoordinatorLayout.MainActivity&quot;&gt;
-
-    &lt;Button
-        android:id=&quot;@+id/btn&quot;
-        android:layout_width=&quot;wrap_content&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:layout_marginLeft=&quot;300dp&quot;
-        android:layout_marginTop=&quot;300dp&quot;
-        android:background=&quot;#FFCC00&quot;
-        android:text=&quot;Hello&quot;
-        app:layout_behavior=&quot;com.hc.studyCoordinatorLayout.MyBehavior&quot; /&gt;
-
-    &lt;com.hc.studyCoordinatorLayout.TempView
-        android:layout_width=&quot;100dp&quot;
-        android:layout_height=&quot;100dp&quot;
-        android:layout_marginLeft=&quot;300dp&quot;
-        android:layout_marginTop=&quot;300dp&quot;
-        android:background=&quot;#3366CC&quot;  /&gt;
-&lt;/android.support.design.widget.CoordinatorLayout&gt;
-</code></pre>
-
-<p>是不是很简单呢？我们只需关注<code>Behavior</code>的编写就好了，把<code>Child</code>和<code>Dependency</code>之间的关系完全解耦了~</p>
-
-<p>附上<a href="http://download.csdn.net/detail/huachao1001/9537636">源码地址</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207870710.html">
-                
-                  <h1>Android-AppBarLayout</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">Toolbar</h2>
-
-<p>Toobar主要是用来替换ActionBar的，换句话说，ActionBar能做的，Toolbar都能做。如果你对ActionBar的使用比较熟悉，你会发现Toolbar使用起来非常简单。ok，既然是替换，当然用Toolbar的时候就得先去把ActionBar给隐藏掉啦~</p>
-
-<p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
-&lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
-</code></pre>
-
-<p>当然了，你也可以新建一个<code>&lt;style&gt;</code>标签，将上面两行代码加入，并且将这个新建的标签作为<code>&lt;application&gt;</code>的<code>theme</code>。还可以选择通过将<code>AppTheme</code>的<code>parent</code>设置为<code>Theme.AppCompat.Light.NoActionBar</code>的方式。方法很多，可以自己随便选。</p>
-
-<p>接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
-
-<pre class="line-numbers"><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
-        android:id=&quot;@+id/toolbar&quot;
-        android:layout_width=&quot;match_parent&quot;
-        android:background=&quot;?attr/colorPrimary&quot;
-        android:layout_height=&quot;?android:attr/actionBarSize&quot;  /&gt;
-</code></pre>
-
-<p>最后将Toobar作为“ActionBar”来用</p>
-
-<pre class="line-numbers"><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(&quot;这里是Title&quot;);
-        toolbar.setSubtitle(&quot;这里是子标题&quot;);
-        toolbar.setLogo(R.drawable.icon); 
-        setSupportActionBar(toolbar);
-</code></pre>
-
-<p>可以对Toolbar设置Logo、标题、子标题等等~还有很多其他的设置，自己去慢慢玩，这里不提啦~。当然了，也可以在布局文件中设置这些，在布局文件设置就不写啦，hongyang大神有篇博客写的挺好的<a href="http://blog.csdn.net/lmj623565791/article/details/45303349">《 Android 5.x Theme 与 ToolBar 实战 》</a>可以去参考一下。</p>
-
-<p>如果Toolbar仅仅是用来对以往的ActionBar做一次替换，那也太没创意啦！完全没必要去替换了，因为它们表现出来的都是一样的，而且并没有让我们觉得用起来比ActionBar方便。那为啥要替换呢，总应该有他的理由吧：ActionBar是固定在顶部，并不能移动，我觉得这是最大的不好，而我们的ToolBar可以让我们随便摆放，就就可以带来很多灵活性和效果啦！</p>
-
-<p>正如你所看的这样，Toolbar根本就不够看的，一点都不复杂。接下来我们继续学习在Toolbar上面再套一层父View，让Toolbar更有互动性。</p>
-
-<h2 id="toc_1">AppBarLayout</h2>
-
-<blockquote>
-<p>AppBarLayout继承自LinearLayout，布局方向为垂直方向。所以你可以把它当成垂直布局的LinearLayout来使用。AppBarLayout是在LinearLayou上加了一些材料设计的概念，它可以让你定制当<strong>某个可滚动View</strong>的滚动手势发生变化时，其内部的子View实现何种动作。</p>
-</blockquote>
-
-<p>请注意：上面提到的<strong>某个可滚动View</strong>，可以理解为某个ScrollView。怎么理解上面的话呢？就是说，当某个ScrollView发生滚动时，你可以定制你的“顶部栏”应该执行哪些动作（如跟着一起滚动、保持不动等等）。那某个可移动的View到底是哪个可移动的View呢？这是由你自己指定的！如何指定，我们后面说。</p>
-
-<h3 id="toc_2">AppBarLayout子View的动作</h3>
-
-<p>内部的子View通过在布局中加<code>app:layout_scrollFlags</code>设置执行的动作，那么<code>app:layout_scrollFlags</code>可以设置哪些动作呢？分别如下：</p>
-
-<blockquote>
-<p>（1） scroll:值设为scroll的View会跟随滚动事件一起发生移动。</p>
-</blockquote>
-
-<p>什么意思呢？简单的说，就是当指定的ScrollView发生滚动时，该View也跟随一起滚动，就好像这个View也是属于这个ScrollView一样。</p>
-
-<p>一张gif足以说明：</p>
-
-<p><figure><img src="media/15561207870710/20171014150799488071606.gif" alt=""/></figure></p>
-
-<p>对应的布局文件</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;&gt;
-
-        &lt;android.support.v7.widget.Toolbar
-            android:id=&quot;@+id/toolbar&quot;
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;?android:attr/actionBarSize&quot;
-            android:background=&quot;?attr/colorPrimary&quot;
-            app:layout_scrollFlags=&quot;scroll&quot; /&gt;
-&lt;/android.support.design.widget.AppBarLayout&gt;
-</code></pre>
-
-<blockquote>
-<p>（2） enterAlways:值设为enterAlways的View,当ScrollView往下滚动时，该View会直接往下滚动。而不用考虑ScrollView是否在滚动。</p>
-</blockquote>
-
-<p>看个动画片（Y(<sup>o<sup>)Y）（ToolBar高度设为：<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code>）：</sup></sup></p>
-
-<p><figure><img src="media/15561207870710/20171014150799493830006.gif" alt=""/></figure></p>
-
-<blockquote>
-<p>（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</p>
-</blockquote>
-
-<p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code>）：</p>
-
-<p><figure><img src="media/15561207870710/20171014150799499853731.gif" alt=""/></figure></p>
-
-<blockquote>
-<p>（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。<br/>
-来个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code>）：</p>
-</blockquote>
-
-<p><figure><img src="media/15561207870710/20171014150799505696205.gif" alt=""/></figure></p>
-
-<h3 id="toc_3">将AppBarLayout与ScrollView关联起来</h3>
-
-<p>前面说了一直反复说“当ScrollView发生滚动时”，那么怎么将AppBarLayout与ScrollView关联起来呢？我们注意到，AppBarLayout与ScrollView之间动作“相互依赖”，这不就是我们上一篇<a href="http://blog.csdn.net/huachao1001/article/details/51554608">《CoordinateLayout的使用如此简单 》</a>所学的内容吗？把ScrollView和AppBarLayout作为CoordinateLayout的子View，然后编写一个Behavior，在这个Behavior里面判断当前的操作是应该让ScrollView时刻保持在AppBarLayout之下（即只要改变AppBarLayout的位置就可以一起滑动），还是应该让ScrollView内部滚动而不让AppBarLayout位置发生变化等等这些需求，都是可以在Behavior里面处理的。你可以去针对你的ScrollView编写Behavior。然而，我们看到我们的AppBarLayout事先的功能比较复杂，如果我们自己去定义这样的效果，代码非常复杂，还要考虑很多方面，好在Android帮我们写好啦，我们直接用就是了，这个ScrollView就是NestedScrollView，请注意，它并没有继承ScrollView，它继承的是FrameLayout，但是它实现的效果把它可以看成是ScrollView。</p>
-
-<p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
-
-<pre class="line-numbers"><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
-
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
-
-       &lt;!--将你的内容放在这里--&gt;
-
-&lt;/android.support.v4.widget.NestedScrollView&gt;
-</code></pre>
-
-<p>有没有注意到有个属性：<code>app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</code>,它就是指定Behavior的，<code>appbar_scrolling_view_behavior</code>对应的类的名称是：<code>android.support.design.widget.AppBarLayout$ScrollingViewBehavior</code>感兴趣的可以去分析源码。</p>
-
-<p>好了，我们现在会用AppBarLayout啦~是不是发现用起来so easy!接下来我们把剩下<code>CollapsingToolbarLayout</code>的给&quot;消化&quot;掉！</p>
-
-<h2 id="toc_4">CollapsingToolbarLayout</h2>
-
-<p>CollapsingToolbarLayout是用来对Toolbar进行再次包装的ViewGroup，主要是用于实现折叠（其实就是看起来像伸缩~）的App Bar效果。它需要放在AppBarLayout布局里面，并且作为AppBarLayout的直接子View。CollapsingToolbarLayout主要包括几个功能（参照了官方网站上内容，略加自己的理解进行解释）：</p>
-
-<blockquote>
-<p>(1) 折叠Title（Collapsing title）：当布局内容全部显示出来时，title是最大的，但是随着View逐步移出屏幕顶部，title变得越来越小。你可以通过调用<code>setTitle</code>函数来设置title。  </p>
-
-<p>(2)内容纱布（Content scrim）：根据滚动的位置是否到达一个阀值，来决定是否对View“盖上纱布”。可以通过<code>setContentScrim(Drawable)</code>来设置纱布的图片.  </p>
-
-<p>(3)状态栏纱布（Status bar scrim)：根据滚动位置是否到达一个阀值决定是否对状态栏“盖上纱布”，你可以通过<code>setStatusBarScrim(Drawable)</code>来设置纱布图片，但是只能在LOLLIPOP设备上面有作用。  </p>
-
-<p>(4)视差滚动子<code>View(Parallax scrolling children)</code>:子View可以选择在当前的布局当时是否以“视差”的方式来跟随滚动。<strong>（PS:其实就是让这个View的滚动的速度比其他正常滚动的View速度稍微慢一点）</strong>。将布局参数<code>app:layout_collapseMode</code>设为<code>parallax</code> </p>
-
-<p>(5)将子View位置固定(Pinned position children)：子View可以选择是否在全局空间上固定位置，这对于Toolbar来说非常有用，因为当布局在移动时，可以将Toolbar固定位置而不受移动的影响。 将app:layout_collapseMode设为pin。</p>
-</blockquote>
-
-<p>了解这些概念后，我们来看看布局吧~</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot; &gt;
-
-
-    &lt;android.support.design.widget.AppBarLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
-
-        &lt;android.support.design.widget.CollapsingToolbarLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            app:expandedTitleMarginEnd=&quot;64dp&quot;
-            app:expandedTitleMarginStart=&quot;48dp&quot;
-            app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;&gt;
-
-            &lt;ImageView
-                android:id=&quot;@+id/main.backdrop&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;300dp&quot;
-                android:scaleType=&quot;centerCrop&quot;
-                android:src=&quot;@drawable/material_img&quot;
-                app:layout_collapseMode=&quot;parallax&quot; /&gt;
-
-            &lt;android.support.v7.widget.Toolbar
-                android:id=&quot;@+id/toolbar&quot;
-                android:layout_width=&quot;match_parent&quot;
-                android:layout_height=&quot;?android:attr/actionBarSize&quot;
-                app:layout_collapseMode=&quot;pin&quot;  /&gt;
-
-        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;
-    &lt;/android.support.design.widget.AppBarLayout&gt;
-
-    &lt;android.support.v4.widget.NestedScrollView
-
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:paddingTop=&quot;50dp&quot;
-        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
-
-        &lt;TextView
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            android:text=&quot;@string/my_txt&quot;
-            android:textSize=&quot;20sp&quot; /&gt;
-
-    &lt;/android.support.v4.widget.NestedScrollView&gt;
-
-&lt;/android.support.design.widget.CoordinatorLayout&gt;
-</code></pre>
-
-<p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
-
-<p><figure><img src="media/15561207870710/20171014150799532425417.gif" alt=""/></figure></p>
-
-<p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>&quot;，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
-
-<p>献上<a href="http://download.csdn.net/detail/huachao1001/9538934">源码</a></p>
-
-<h2 id="toc_5">AppBarLayout的ScrollFlags属性</h2>
-
-<p>在前面两篇MD系列的文章中，通过两个案例基本上能够掌握了CoordinatorLayout与AppBarLayout的配合使用。本文我们回过头来详细聊聊AppBarLayout的ScrollFlags属性，了解一下不同值之间的区别。至此，Android Material Design系列的学习已进行到第七篇，大家可以点击以下链接查看之前的文章：</p>
-
-<ul>
-<li><a href="http://www.jianshu.com/p/39a66373498c">Android TabLayout 分分钟打造一个滑动标签页</a></li>
-<li><a href="http://www.jianshu.com/p/9eb3b17b0e77">Android 一文告诉你到底是用Dialog，Snackbar，还是Toast</a></li>
-<li><a href="http://www.jianshu.com/p/5328b2eee827">Android FloatingActionButton 重要的操作不要太多，一个就好</a></li>
-<li><a href="http://www.jianshu.com/p/ab04627cce58">Android 初识AppBarLayout 和 CoordinatorLayout</a></li>
-<li><a href="http://www.jianshu.com/p/4b0f3c80ebc9">Android CoordinatorLayout实战案例学习《一》</a></li>
-<li><a href="http://www.jianshu.com/p/360fd368936d">Android CoordinatorLayout 实战案例学习《二》</a></li>
-</ul>
-
-<p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
-
-<pre class="line-numbers"><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
-AppBarLayout.LayoutParams params = 
-    (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-</code></pre>
-
-<p>下面我们通过官网介绍、XML代码和对应的效果图分别分析这五种值的使用（备注：代码中设置也一样，不再赘述）：</p>
-
-<h3 id="toc_6">scroll</h3>
-
-<blockquote>
-<p>The view will be scroll in direct relation to scroll events. This flag needs to be set for any of the other flags to take effect. If any sibling views before this one do not have this flag, then this value has no effect.</p>
-</blockquote>
-
-<p>Child View 伴随着滚动事件而滚出或滚进屏幕。注意两点：第一点，如果使用了其他值，必定要使用这个值才能起作用；第二点：如果在这个child View前面的任何其他Child View没有设置这个值，那么这个Child View的设置将失去作用。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
-        android:id=&quot;@+id/appbar&quot;
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
-
-        &lt;android.support.v7.widget.Toolbar
-            xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-            android:id=&quot;@+id/tb_toolbar&quot;
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;@dimen/dp_56&quot;
-            app:titleTextColor=&quot;@color/white&quot;
-            app:title=&quot;@string/app_name&quot;
-            app:theme=&quot;@style/OverFlowMenuTheme&quot;
-            app:popupTheme=&quot;@style/AppTheme&quot;
-            android:background=&quot;@color/blue&quot;
-            app:layout_scrollFlags=&quot;scroll|enterAlways&quot;/&gt;
-
-    &lt;/android.support.design.widget.AppBarLayout&gt;
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842247229844.gif" alt=""/></figure></p>
-
-<h3 id="toc_7">enterAlways</h3>
-
-<blockquote>
-<p>When entering (scrolling on screen) the view will scroll on any downwards scroll event, regardless of whether the scrolling view is also scrolling. This is commonly referred to as the &#39;quick return&#39; pattern.</p>
-</blockquote>
-
-<p>快速返回模式。其实就是向下滚动时Scrolling View和Child View之间的滚动优先级问题。对比<code>scroll</code>和<code>scroll | enterAlways</code>设置，发生向下滚动事件时，前者优先滚动Scrolling View，后者优先滚动Child View，当优先滚动的一方已经全部滚进屏幕之后，另一方才开始滚动。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-java">...
-app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
-...
-
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842251698266.gif" alt=""/></figure></p>
-
-<h3 id="toc_8">enterAlwaysCollapsed</h3>
-
-<blockquote>
-<p>An additional flag for &#39;enterAlways&#39; which modifies the returning view to only initially scroll back to it&#39;s collapsed height. Once the scrolling view has reached the end of it&#39;s scroll range, the remainder of this view will be scrolled into view. The collapsed height is defined by the view&#39;s minimum height.</p>
-</blockquote>
-
-<p>enterAlways的附加值。这里涉及到Child View的高度和最小高度，向下滚动时，Child View先向下滚动最小高度值，然后Scrolling View开始滚动，到达边界时，Child View再向下滚动，直至显示完全。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">...
-android:layout_height=&quot;@dimen/dp_200&quot;
-android:minHeight=&quot;@dimen/dp_56&quot;
-...
-app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
-...
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842256217688.gif" alt=""/></figure></p>
-
-<h3 id="toc_9">exitUntilCollapsed</h3>
-
-<blockquote>
-<p>When exiting (scrolling off screen) the view will be scrolled until it is &#39;collapsed&#39;. The collapsed height is defined by the view&#39;s minimum height.</p>
-</blockquote>
-
-<p>这里也涉及到最小高度。发生向上滚动事件时，Child View向上滚动退出直至最小高度，然后Scrolling View开始滚动。也就是，Child View不会完全退出屏幕。</p>
-
-<p>示例SML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">...
-android:layout_height=&quot;@dimen/dp_200&quot;
-android:minHeight=&quot;@dimen/dp_56&quot;
-...
-app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
-...
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842260265572.gif" alt=""/></figure></p>
-
-<h3 id="toc_10">snap</h3>
-
-<blockquote>
-<p>Upon a scroll ending, if the view is only partially visible then it will be snapped and scrolled to it&#39;s closest edge. For example, if the view only has it&#39;s bottom 25% displayed, it will be scrolled off screen completely. Conversely, if it&#39;s bottom 75% is visible then it will be scrolled fully into view.</p>
-</blockquote>
-
-<p>简单理解，就是Child View滚动比例的一个吸附效果。也就是说，Child View不会存在局部显示的情况，滚动Child View的部分高度，当我们松开手指时，Child View要么向上全部滚出屏幕，要么向下全部滚进屏幕，有点类似ViewPager的左右滑动。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">...
-android:layout_height=&quot;@dimen/dp_200&quot;
-...
-app:layout_scrollFlags=&quot;scroll|snap&quot;
-...
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842265497458.gif" alt=""/></figure></p>
-
-<h3 id="toc_11">示例源码</h3>
-
-<p>我在GitHub上建立了一个Repository，用来存放整个Android Material Design系列控件的学习案例，会伴随着文章逐渐更新完善，欢迎大家补充交流，Star地址：</p>
-
-<p><a href="https://github.com/Mike-bel/MDStudySamples">https://github.com/Mike-bel/MDStudySamples</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="15561207870673.html">
                 
@@ -3023,6 +1980,1931 @@ public void onWindowFocusChanged(boolean hasFocus){
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="15561207870430.html">
+                
+                  <h1>Android-ColorFilter详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>在Android Studio中点击进去看一下源码，可以看到ColorFilter里的代码量很少</p>
+
+<pre class="line-numbers"><code class="language-java">public class ColorFilter {  
+    /** 
+     * Holds the pointer to the native SkColorFilter instance. 
+     * 
+     * @hide 
+     */  
+    public long native_instance;  
+  
+    @Override  
+    protected void finalize() throws Throwable {  
+        try {  
+            super.finalize();  
+        } finally {  
+            destroyFilter(native_instance);  
+        }  
+    }  
+  
+    static native void destroyFilter(long native_instance);  
+}
+</code></pre>
+
+<p>由此根据我们的经验，判断ColorFilter可能是个父类，具体实现可能下面还有子类完成的，于是再看Google的文档：</p>
+
+<p><figure><img src="media/15561207870430/15713327420386.png" alt=""/></figure></p>
+
+<p>一目了然了，ColorFilter下有3个子类ColorMatrixColorFilter, LightingColorFilter, PorterDuffColorFilter ，下面逐一学习一下。</p>
+
+<h2 id="toc_1">ColorMatrixColorFilter</h2>
+
+<p><code>ColorMatrixColorFilter</code>翻译为颜色矩阵过滤器，神马是颜色矩阵？实际上， 安卓中管理色彩矩阵是以RGBA像素点的方式加载到内存的，这些点统一使用<code>ColorMatrix</code>的矩阵来统一管理，矩阵定义为4*5的排列形式。那好，首先来看看<code>ColorMatrixColorFilter</code>的两个构造器：</p>
+
+<pre class="line-numbers"><code class="language-java">public ColorMatrixColorFilter(ColorMatrix matrix) {  
+        mMatrix.set(matrix);  
+        update();  
+}  
+  
+public ColorMatrixColorFilter(float[] array) {  
+        if (array.length &lt; 20) {  
+            throw new ArrayIndexOutOfBoundsException();  
+        }  
+        mMatrix.set(array);  
+        update();  
+}  
+</code></pre>
+
+<p>ColorMatrixColorFilter中一个构造器需要接收ColorMatrix对象，另一个需要接收一个4*5的float型数组，我们再打开Android Studio追踪一下mMatrix.set()方法，可以看到以上两个构造器里面调的set方法各自实现的方式</p>
+
+<pre class="line-numbers"><code class="language-java">public void set(ColorMatrix src) {  
+        System.arraycopy(src.mArray, 0, mArray, 0, 20);  
+}  
+  
+public void set(float[] src) {  
+        System.arraycopy(src, 0, mArray, 0, 20);  
+}  
+</code></pre>
+
+<p>再追踪一下System.arraycopy()方法：</p>
+
+<pre class="line-numbers"><code class="language-java">public static void arraycopy(float[] src, int srcPos, float[] dst, int dstPos, int length)
+</code></pre>
+
+<p>好了，到这里，其实已经很明白了，ColorMatrixColorFilter构造器中接收的两个不同的参数，实际上底层实现方式都是一样的，都是同样调用System.arraycopy()中带float数组参数的方法。所以我们不必再考虑怎么样去写一个ColorMatrix对象传递给ColorMatrixColorFilter了，实际上我们使用第二个构造器，传递一个float数组，会显得程序更加直观易懂，那么我们就尝试写一个ColorMatrixColorFilter，并且设置给Paint吧.</p>
+
+<pre class="line-numbers"><code class="language-java">public class CustomView1 extends View {  
+    private Paint mPaint;  
+    private Context mContext;  
+    public CustomView1(Context context) {  
+        this(context, null);  
+    }  
+  
+    public CustomView1(Context context, AttributeSet attrs) {  
+        super(context, attrs);  
+        mContext = context;  
+        initPaint();  
+    }  
+    private void initPaint() {  
+        //初始化Paint，并且设置消除锯齿。  
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);  
+        //设置画笔样式为描边  
+        mPaint.setStyle(Paint.Style.FILL);  
+        //设置描边的粗细，单位：像素px 注意：当setStrokeWidth(0)的时候描边宽度并不为0而是只占一个像素  
+        mPaint.setStrokeWidth(20);  
+        //设置画笔颜色为自定义颜色  
+        mPaint.setColor(Color.argb(255, 255, 128, 102));  
+        ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+                1, 0, 0, 0, 0,  
+                0, 1, 0, 0, 0,  
+                0, 0, 1, 0, 0,  
+                0, 0, 0, 1, 0  
+        });  
+        mPaint.setColorFilter(colorFilter);  
+    }  
+    @Override  
+    protected void onDraw(Canvas canvas) {  
+        //画一个圆形，取屏幕中心点为圆心  
+        canvas.drawCircle(ScreenUtil.getScreenW(mContext) / 2,  
+                ScreenUtil.getScreenH(mContext) / 2, 100, mPaint);  
+    }  
+}
+</code></pre>
+
+<p>看上面的例子程序，首先创建了一个ColorMatrixColorFilter对象，并且传递进去一个float型的4*5排列的数组，然后调用Paint的setColorFilter方法将ColorMatrixColorFilter对象传入，我们在模拟器上运行一下，duang~~，我去，什么变化都没有，还是岛国的旗帜。这是怎么回事？下面有必要在学习一下了：</p>
+
+<p>其实一个4*5的float数组中分别对应的是RGBA的向量值，第一行代表的是R(红色)的向量值，第二行代表G(绿色)的向量值，第三行代表B(蓝色)的向量值，第四行代表A(透明度)的向量值，这4行分别代表不同的RGBA的向量值，并且值的取值范围是[0.0F , 2.0F]，当值为1.0F的时候，表示保持原有的色彩，不发生色彩便宜。so，如果我们想要将上面的红色的圈圈颜色变掉，就不能像上面的代码一样，将所有的向量值都设置为1.0F，下面我们修改一个：</p>
+
+<pre class="line-numbers"><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+                0.5F, 0, 0, 0, 0,  
+                0, 0.5F, 0, 0, 0,  
+                0, 0, 0.5F, 0, 0,  
+                0, 0, 0, 1, 0  
+});  
+mPaint.setColorFilter(colorFilter);  
+</code></pre>
+
+<p>将上面的ColorMatrixColorFilter中的float数组替换成这样的<br/>
+哎哟呵~颜色变深了，看起来神奇很多。那么，这个色彩矩阵以及这个float数组是怎样做到的呢？或者说是怎样通过计算后得到另外一个色彩值的呢？下面作图来说明一下，我们顶一个ColorMatrix的4*5的float型数组，然后定义一个我们自己MyColor，分别代表RGBA的值：</p>
+
+<p><figure><img src="media/15561207870430/15713327557838.jpg" alt=""/></figure></p>
+
+<p>实际上，安卓系统计算色彩值是用矩阵相乘的方式得出的，如上图的样子。这里的MyColor的各项值都要转换到[0,1]之间的值，下面就是我们实际转换的计算方式和结果了。</p>
+
+<p><figure><img src="media/15561207870430/15713327650356.jpg" alt=""/></figure></p>
+
+<p>通过上面的计算，我们得到了最终的RGBA的值是（0.5,0.25,0.2,1），说明RGB色彩值都发生了便宜，只有A未偏移，然后我们将这些值乘以255后还原一下看看，是不是跟上图的圈圈的色彩值是一致的呢，好吧，别看了，肯定必须一定是一样的。那么了解色彩矩阵有什么用呢？上面简单的更换一下色彩值而已，Paint类下也提供了setColor()方法，直接将色彩值设置上去，都TMD的方便，还搞什么玩意的矩阵，显得自己牛逼+蛋疼是不是？解释一下，上面的例子不过是个例子而已啊，真正开发的时候肯定是setColor比较简便嘛。问题来了，我们有可能处理的不是一个纯色彩的东西，而是一直图片呢？一张图片是有几十万中色彩值的，这时候setColor()就不可能让他们变色了吧，还是得用色彩矩阵来搞这玩意。下面我们从drawable目录下加载一张图片吧！</p>
+
+<pre class="line-numbers"><code class="language-java">public class CustomView2 extends View {  
+  
+    private Context mContext;  
+    private Paint mPaint;  
+    private Bitmap mBitmap;  
+    private int x, y;  
+  
+    public CustomView2(Context context) {  
+        this(context, null);  
+    }  
+  
+    public CustomView2(Context context, AttributeSet attrs) {  
+        super(context, attrs);  
+        mContext = context;  
+        initRes();  
+        initPaint();  
+    }  
+  
+    private void initRes() {  
+        //获取图片  
+        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.image);  
+        //获取图片显示起始位置  
+        x = ScreenUtil.getScreenW(mContext) / 2 - mBitmap.getWidth() / 2;  
+        y = ScreenUtil.getScreenH(mContext) / 2 - mBitmap.getHeight() / 2;  
+    }  
+  
+    private void initPaint() {  
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);  
+    }  
+  
+    @Override  
+    protected void onDraw(Canvas canvas) {  
+        canvas.drawBitmap(mBitmap, x, y, mPaint);  
+    }  
+}  
+</code></pre>
+
+<p><figure><img src="media/15561207870430/15713327784421.png" alt=""/></figure></p>
+
+<p>好了图片加载完毕，代码没有难度，上面的Paint没有做任何的处理，下面我们为Paint设置色彩过滤器吧！</p>
+
+<pre class="line-numbers"><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+                0.33F, 0.59F, 0.11F, 0, 0,  
+                0.33F, 0.59F, 0.11F, 0, 0,  
+                0.33F, 0.59F, 0.11F, 0, 0,  
+                0, 0, 0, 1, 0,  
+});  
+mPaint.setColorFilter(colorFilter);  
+</code></pre>
+
+<p><figure><img src="media/15561207870430/15713327887731.png" alt=""/></figure></p>
+
+<p>好吧图片变成黑白的了，难道setColor()也可以办吗？再改一个试试：</p>
+
+<pre class="line-numbers"><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+                1.5F, 1.5F, 1.5F, 0, -1,  
+                1.5F, 1.5F, 1.5F, 0, -1,  
+                1.5F, 1.5F, 1.5F, 0, -1,  
+                0, 0, 0, 1, 0,  
+        });  
+mPaint.setColorFilter(colorFilter);  
+</code></pre>
+
+<p><figure><img src="media/15561207870430/15713328018868.png" alt=""/></figure></p>
+
+<p>这样的效果是不是有点像负片效果啊！好了，反正我也不懂图像学，ColorMatrixColorFilter想设置什么样的就改改矩阵就行了，到底需要什么效果，效果的值要设置成多少，我也不知道，问问美工吧！我们只负责写程序！呵呵~~</p>
+
+<h2 id="toc_2">LightingColorFilter</h2>
+
+<p>LightingColorFilter顾名思义就是“光照色彩过滤器”，就是模拟一个光照照过图像所产生的效果，构造器是这样的：<br/>
+<code>public LightingColorFilter(int mul, int add)</code><br/><br/>
+查看一下Google文档，是这样介绍滴：</p>
+
+<p>光照色彩滤光片，可以用来模拟简单的照明效果。一个lightingcolorfilter定义了两个参数，一个用于与源颜色相乘（称为colormultiply）和一个用于添加到源颜色（称为coloradd）。alpha通道是原封不动的彩色滤光片。给定一个源颜色的RGB，由此产生的特定颜色计算如下：</p>
+
+<pre class="line-numbers"><code class="language-text">R&#39; = R * colorMultiply.R + colorAdd.R
+G&#39; = G * colorMultiply.G + colorAdd.G
+B&#39; = B * colorMultiply.B + colorAdd.B
+</code></pre>
+
+<p>每个通道值的结果范围是0~255。上面的介绍写的比较明白， 算法也很简单，我们以上面的原图为例，看见蓝天了吗，我们现在去掉这个蓝色的天。根据这个短发描述呢，我们仅仅去掉蓝色，就要将蓝色的通道值改变，将B计算为其它值，这时候colorMultiply.B = 00，colorAdd.B =00，计算得到的B = 00，其它的通道R和G均不变，那么,colorAdd.R=0，colorAdd.G =0；colorMultiply.R = FF，colorMultiply.G =FF，Alpha通道A是忽略的，所以随便设置什么都不会有变化的。</p>
+
+<pre class="line-numbers"><code class="language-java">LightingColorFilter colorFilter = new LightingColorFilter(0xFFFFFF00, 0x00000000);  
+mPaint.setColorFilter(colorFilter);
+</code></pre>
+
+<p>运行之后的结果，蓝天没了。</p>
+
+<p><figure><img src="media/15561207870430/15713328128205.png" alt=""/></figure></p>
+
+<h2 id="toc_3">PorterDuffColorFilter</h2>
+
+<p>ColorFilter下还有最后一个子类，PorterDuff混合模式的色彩过滤器，下面是其构造器：<br/>
+<code>public PorterDuffColorFilter(int color, PorterDuff.Mode mode)</code></p>
+
+<p>Google文档：PorterDuff滤光器可以用于点源像素使用一个单一的颜色和一个特定的波特达夫复合模式。</p>
+
+<p>PorterDuffColorFilter的构造器也很简单，其中第一个参数表示一个16进制的色彩值，第二个参数是一个枚举值PorterDuff.Mode，表示图片混排的模式，PorterDuff.Mode在Android下一共有16种。下面我们先写一个小例子看一下，这里我们还是使用上面的图片，为原图添加图片混排模式，颜色值设置为红色0XFFFF0000，混排模式设置为PorterDuff.Mode.DARKEN。</p>
+
+<pre class="line-numbers"><code class="language-java">public class CustomView2 extends View {  
+  
+    private Context mContext;  
+    private Paint mPaint;  
+    private Bitmap mBitmap;  
+    private int x, y;  
+  
+    public CustomView2(Context context) {  
+        this(context, null);  
+    }  
+  
+    public CustomView2(Context context, AttributeSet attrs) {  
+        super(context, attrs);  
+        mContext = context;  
+        initRes();  
+        initPaint();  
+    }  
+  
+    private void initRes() {  
+        //获取图片  
+        mBitmap = BitmapFactory.decodeResource(mContext.getResources(), R.mipmap.image);  
+        //获取图片显示起始位置  
+        x = ScreenUtil.getScreenW(mContext) / 2 - mBitmap.getWidth() / 2;  
+        y = ScreenUtil.getScreenH(mContext) / 2 - mBitmap.getHeight() / 2;  
+    }  
+  
+    private void initPaint() {  
+        mPaint = new Paint(Paint.ANTI_ALIAS_FLAG);  
+        PorterDuffColorFilter colorFilter = new PorterDuffColorFilter(0XFFFF0000, PorterDuff.Mode.DARKEN);  
+        mPaint.setColorFilter(colorFilter);  
+    }  
+  
+    @Override  
+    protected void onDraw(Canvas canvas) {  
+        canvas.drawBitmap(mBitmap, x, y, mPaint);  
+    }  
+}  
+</code></pre>
+
+<p>上面的图片就是运行之后的效果了，原图不仅变红了，而且还变暗了。其实我们这里将PorterDuffColorFilter的构造器参数拆开来分析一下，首先我们传递进去一个红色的颜色值0XFFFF0000，这里相当于创建了一张新的图层，图层的颜色就是0XFFFF0000，而我们的原图可以看作是第二张图层，我们先把这2个图片重叠放在一起，就会发现得到一个原图上很红的图片，然后我们看一下PorterDuff.Mode是DARKEN模式，表示在之前得到的“原图+很红”的图片上进一步将色调调成暗色，最终得到了如上所示的图片。</p>
+
+<p>关于PorterDuff.Mode，Android系统一共提供了18种混排模式，在模拟器的ApiDemos/Graphics/XferModes，有张效果图：</p>
+
+<p><figure><img src="media/15561207870430/15713328265702.png" alt=""/></figure></p>
+
+<p>这张图可以很形象的说明图片各种混排模式下的效果。其中Src代表原图，Dst代表目标图，两张图片使用不同的混排方式后，得到的图像是如上图所示的。  PorterDuff.Mode也提供了18种混排模式算法，其中比上图多了ADD和OVERLAY两种模式：</p>
+
+<p><figure><img src="media/15561207870430/15713328371456.png" alt=""/></figure></p>
+
+<p>其中Sa全称为Source alpha表示源图的Alpha通道；Sc全称为Source color表示源图的颜色；Da全称为Destination alpha表示目标图的Alpha通道；Dc全称为Destination color表示目标图的颜色，[...,..]前半部分计算的是结果图像的Alpha通道值，“,”后半部分计算的是结果图像的颜色值。图像混排后是依靠这两个值来重新计算ARGB值的，具体计算算法，抱歉，我也不知道，不过不要紧，不了解计算算法也不影响我们程序员写程序的。我们只要对照上面的apiDemo中提供的图片就能推测出混排后的结果的，下面是在网上找到的汉字语言描述，感谢这位作者的总结。</p>
+
+<p>注意：先绘制dst，再绘制src。</p>
+
+<ul>
+<li><strong>1.PorterDuff.Mode.CLEAR</strong>    所绘制源图像不会提交到画布上。</li>
+<li><strong>2.PorterDuff.Mode.SRC</strong>    只显示源图像。</li>
+<li><strong>3.PorterDuff.Mode.DST</strong>    只显示目标图像。</li>
+<li><strong>4.PorterDuff.Mode.SRC_OVER</strong>    正常绘制显示，源图像居上显示。</li>
+<li><strong>5.PorterDuff.Mode.DST_OVER</strong>    上下层都显示。目标图像居上显示。</li>
+<li><strong>6.PorterDuff.Mode.SRC_IN</strong>    取两层绘制交集中的源图像。</li>
+<li><strong>7.PorterDuff.Mode.DST_IN</strong>     取两层绘制交集中的目标图像。</li>
+<li><strong>8.PorterDuff.Mode.SRC_OUT</strong>    只在源图像和目标图像不相交的地方绘制源图像。</li>
+<li><strong>9.PorterDuff.Mode.DST_OUT</strong>    只在源图像和目标图像不相交的地方绘制目标图像。</li>
+<li><strong>10.PorterDuff.Mode.SRC_ATOP</strong>    在源图像和目标图像相交的地方绘制源图像，在不相交的地方绘制目标图像。</li>
+<li><strong>11.PorterDuff.Mode.DST_ATOP</strong>   在源图像和目标图像相交的地方绘制目标图像而在不相交的地方绘制源图像。</li>
+<li><strong>12.PorterDuff.Mode.XOR</strong>    异或：去除两图层交集部分</li>
+<li><strong>13.PorterDuff.Mode.DARKEN</strong>     取两图层全部区域，交集部分颜色加深</li>
+<li><strong>14.PorterDuff.Mode.LIGHTEN</strong>   取两图层全部，点亮交集部分颜色</li>
+<li><strong>15.PorterDuff.Mode.MULTIPLY</strong>    取两图层交集部分叠加后颜色</li>
+<li><strong>16.PorterDuff.Mode.SCREEN</strong>    滤色。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/13</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207870386.html">
+                
+                  <h1>Android-DataBinding详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>谷歌开发了一个非常厉害的新框架DataBinding， 数据绑定框架给我们带来了很大的方便，以前我们可能需要在每个Activity里写很多的findViewById，不仅麻烦，还增加了代码的耦合性，如果我们使用DataBinding，就可以抛弃那么多的findViewById，省时省力。说到这里，其实网上也有很多快速的注解框架，但是注解框架与DataBinding想比还是不好用，而且官网文档说DataBinding还能提高解析XML的速度，其实DataBinding的好用，不仅仅体现在可以省去使用很多啰嗦findViewById，还有很多。往下看你就会明白的。</p>
+
+<p>在介绍DataBinding之前，肯定要先学会搭建使用它的环境。在Android Studio上Databinding的使用还是很简单的。</p>
+
+<h2 id="toc_1">环境搭建</h2>
+
+<p>Android 的 Gradle 插件版本不低于 1.5.0-alpha1：classpath &#39;com.android.tools.build:gradle:1.5.0&#39;然后修改对应模块（Module）的 build.grade：</p>
+
+<pre class="line-numbers"><code class="language-java">android {
+    ....
+    dataBinding {
+        enabled = true
+    }
+}
+</code></pre>
+
+<p>注意：Android stuido 的版本一定要大于1.3，而且Android Studio目前对binding对象没有自动代码提示，只会在编译时进行检查。<br/>
+就是这么简单，但是1.3及以前的版本，对于环境的搭建，可能就会麻烦一点（没事1.3的环境搭建方法，网上多得是）。</p>
+
+<h2 id="toc_2">基础展示</h2>
+
+<p>我们在具体的讲解之前，先用一个简单的小例子来学习一下基础并展现一下DataBinding的巨大魅力，估计你会被其简单的特性所吸引哦。<br/><br/>
+首先我们先建立一个java bean，就是一个非常简单的用户类吧。</p>
+
+<pre class="line-numbers"><code class="language-java">package loonggg.net.databinding.bean;
+/**
+ * Created by loongggdroid on 2016/3/14.
+ */
+public class User {
+    private String name;
+    private String age;
+    public User(String name, String age) {
+        this.name = name;
+        this.age = age;
+    }
+    public void setName(String name) {
+        this.name = name;
+    }
+    public void setAge(String age) {
+        this.age = age;
+    }
+    public String getName() {
+        return this.name;
+    }
+    public String getAge() {
+        return this.age;
+    }
+}
+</code></pre>
+
+<p>其次，来看看使用了DataBinding之后的布局文件是什么样子的呢？主要的变化是在layout布局文件之中。</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+
+    &lt;data&gt;
+        &lt;variable
+            name=&quot;user&quot;
+            type=&quot;loonggg.net.databinding.bean.User&quot; /&gt;
+    &lt;/data&gt;
+
+    &lt;LinearLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+
+        &lt;TextView
+            android:layout_width=&quot;wrap_content&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;@{user.name}&quot; /&gt;
+
+        &lt;TextView
+            android:layout_width=&quot;wrap_content&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;@{user.age}&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p>看到这里，可能有的人就开始有点迷糊了，没有给控件定义id，而是用了@{ }的方法，到底是怎么回事？先不忙，一会再给你解释，我们再来看看怎么把值传进去的，在Activity中是如何使用的。</p>
+
+<pre class="line-numbers"><code class="language-java">package loonggg.net.databinding;
+
+import android.app.Activity;
+import android.databinding.DataBindingUtil;
+import android.os.Bundle;
+
+import loonggg.net.databinding.bean.User;
+import loonggg.net.databinding.databinding.ActivityMainBinding;
+
+public class MainActivity extends Activity {
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+        User user = new User(&quot;loonggg&quot;, &quot;23&quot;);
+        binding.setUser(user);
+    }
+
+}
+</code></pre>
+
+<p>看到Activity是不是感觉很简洁，很清爽，没有了控件的初始化findViewById，然后再去setText(), 就仅仅只添加了两行代码。运行结果，不用说，显而易见，肯定会显示loonggg和23。</p>
+
+<h2 id="toc_3">基础用法</h2>
+
+<h3 id="toc_4">布局生命</h3>
+
+<p>例子我们介绍完了，对于例子中出现的一些新东西，有必要解释一下，java bean那里就不解释了，大家肯定都懂，我们就从布局文件讲起。相比以前使用的xml，根节点由具体的某个layout（比如LinearLayout ）变成了layout，里面包括了data节点和传统的视图。这里的data节点就像是连接 View 和 Modle 的桥梁。在这个data节点中声明一个variable变量，那值就可以轻松传到布局文件中来了。</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
+
+&lt;!--type中声明的就是我们的用户实体类User，一定要写全，带着包名，我们给这个实体类命名为user--&gt;
+    &lt;data&gt;
+        &lt;variable
+            name=&quot;user&quot;
+            type=&quot;loonggg.net.databinding.bean.User&quot; /&gt;
+    &lt;/data&gt; 
+    &lt;LinearLayout&gt;
+     ……
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p>变量名为user变量类型为&quot;loonggg.net.databinding.bean.User &quot;</p>
+
+<p>type中声明的就是我们的用户实体类User，一定要写全，带着包名，我们给这个实体类命名为user，TextView中的@{user.name}就是把这个user中的名字展示出来，age同样如此。</p>
+
+<h3 id="toc_5">绑定Variable</h3>
+
+<p>虽然在布局文件中对应上了，但是值是怎么传进去的呢？这就是我们要将的Activity中的那两行代码了，它把实体类和布局文件进行了绑定。修改MainActivity中的onCreate，用 DatabindingUtil.setContentView() 来替换掉 setContentView()，然后创建一个 user 对象，通过 binding.setUser(user) 与 variable 进行绑定。</p>
+
+<pre class="line-numbers"><code class="language-java">@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    User user = new User(&quot;loonggg&quot;, &quot;23&quot;);
+    binding.setUser(user);
+}
+</code></pre>
+
+<p>ActivityLayoutDetailBinding这个类是自动生成的和你的布局文件名字一样，如果你想要去改变名字的话</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+    xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;&gt;  
+  
+    &lt;!--这里你也可以为Binding类进行命名，有三种形式  
+        1、Custom:会在databinding包下  
+        2、.Custom:会在当前的包名下创建  
+        3、com.andly.Custom:会在指定的包名下进行创建--&gt;  
+    &lt;data class=&quot;CustomBinding&quot;&gt;&lt;/data&gt; //在app_package/databinding下生成CustomBinding；
+    &lt;data class=&quot;.CustomBinding&quot;&gt;&lt;/data&gt; //在app_package下生成CustomBinding；
+    &lt;data class=&quot;com.example.CustomBinding&quot;&gt;&lt;/data&gt; // 明确指定包名和类名。
+</code></pre>
+
+<h2 id="toc_6">高级用法</h2>
+
+<h3 id="toc_7">import用法</h3>
+
+<p>其实data节点也是支持import用法的，比如：</p>
+
+<pre class="line-numbers"><code class="language-java">&lt;data&gt;
+     &lt;import type=&quot;loonggg.net.databinding.bean.User &quot;/&gt;
+     &lt;variablename=&quot;user&quot;type=&quot;User&quot; /&gt;
+&lt;/data&gt;
+</code></pre>
+
+<p>这里需要注意的是：<code>import</code>并不能像java 一样可以 <code>import xx.xxx.*</code>，必须具体到写清楚每个要导入的类名。</p>
+
+<h3 id="toc_8">类名相同</h3>
+
+<p>到这里你可能会问如果import了两个相同名称的类咋办？别怕，人家想的很周到，可以起个别名或者昵称嘛！例如：</p>
+
+<pre class="line-numbers"><code class="language-java">···
+&lt;data&gt; 
+  &lt;import type=&quot;xxx.User&quot; alias=&quot;MyUser&quot;&gt; 
+  &lt;import type=&quot;xxx.xx.User&quot;&gt; 
+
+   &lt;variable 
+            name=&quot;user&quot; 
+            type=&quot;User&quot; /&gt; 
+    &lt;variable 
+            name=&quot;myUser&quot; 
+            type=&quot;MyUser&quot;/&gt; 
+&lt;/data&gt; 
+&lt;TextView xxx:@{myUser.getName()}&gt; 
+&lt;TextView xxx:@{user.getName()}&gt;
+···
+</code></pre>
+
+<h3 id="toc_9">变量定义的高级用法</h3>
+
+<p>在上面，我们学会了如何去在xml中定义一些简单的变量。我们没有定义像List、Map等这样的集合变量。那这种集合变量该如何定义呢？其实定义的方式和我们上面的基本一致，区别就在于我们还需要为它定义key的变量，例如：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;layout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt; 
+    &lt;data&gt; 
+        &lt;import type=&quot;android.graphics.Bitmap&quot; /&gt; 
+        &lt;import type=&quot;java.util.ArrayList&quot; /&gt; 
+        &lt;import type=&quot;java.util.HashMap&quot; /&gt;  
+        &lt;!-- 集合的定义 --&gt;
+        &lt;variable 
+            name=&quot;list&quot; 
+            type=&quot;ArrayList&amp;lt;String&gt;&quot; /&gt; // 左尖括号需要转义
+        &lt;variable 
+            name=&quot;map&quot; 
+            type=&quot;HashMap&amp;lt;String, String&gt;&quot; /&gt; 
+        &lt;variable 
+            name=&quot;array&quot; 
+            type=&quot;String[]&quot; /&gt; 
+        &lt;!-- 为集合定义对应的索引 --&gt;
+        &lt;variable 
+            name=&quot;listKey&quot; 
+            type=&quot;int&quot; /&gt; 
+        &lt;variable 
+            name=&quot;mapKey&quot; 
+            type=&quot;String&quot; /&gt; 
+        &lt;variable 
+            name=&quot;arrayKey&quot; 
+            type=&quot;int&quot; /&gt; 
+        &lt;!-- 字符串，布尔值和int的用法--&gt;
+        &lt;variable 
+            name=&quot;str&quot; 
+            type=&quot;String&quot;/&gt; 
+        &lt;variable 
+            name=&quot;error&quot; 
+            type=&quot;boolean&quot;/&gt; 
+        &lt;variable 
+            name=&quot;num&quot; 
+            type=&quot;int&quot; /&gt; 
+    &lt;/data&gt; 
+    &lt;LinearLayout 
+        android:orientation=&quot;vertical&quot; 
+        android:layout_width=&quot;match_parent&quot; 
+        android:layout_height=&quot;wrap_content&quot;&gt; 
+
+        &lt;TextView 
+            android:layout_width=&quot;wrap_content&quot; 
+            android:layout_height=&quot;wrap_content&quot; 
+            android:text=&quot;@{list[listKey]}&quot;/&gt; 
+        &lt;TextView 
+            android:layout_width=&quot;wrap_content&quot; 
+            android:layout_height=&quot;wrap_content&quot; 
+            android:text=&quot;@{map[`name`]}&quot;/&gt; 
+        &lt;TextView 
+            android:layout_width=&quot;wrap_content&quot; 
+            android:layout_height=&quot;wrap_content&quot; 
+            android:text=&quot;@{array[0]}&quot;/&gt; 
+        &lt;TextView 
+            android:layout_width=&quot;wrap_content&quot; 
+            android:layout_height=&quot;wrap_content&quot; 
+            android:text=&quot;@{str}&quot;/&gt; 
+        &lt;TextView 
+            android:layout_width=&quot;wrap_content&quot; 
+            android:layout_height=&quot;wrap_content&quot; 
+            android:text=&quot;@{String.valueOf(num)}&quot;/&gt; 
+    &lt;/LinearLayout&gt; 
+&lt;/layout&gt;
+</code></pre>
+
+<p>在引用的同时也可以加上简单的逻辑运算</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;!--数据绑定将自动检测null异常，如果你的表达式为null，它将会给它赋值为(null)  
+ 如果为int类型则默认为0--&gt;  
+ &lt;!--之前都是写三元运算符的形式，当然在数据绑定中也能够使用，但更推荐下面那种--&gt;  
+ &lt;TextView  
+     android:layout_width=&quot;match_parent&quot;  
+     android:layout_height=&quot;wrap_content&quot;  
+     android:text=&quot;@{boo?note:null}&quot; /&gt;  
+ &lt;!--?? :null合并运算符，当左边为null会显示右边--&gt;  
+ &lt;TextView  
+     android:layout_width=&quot;match_parent&quot;  
+     android:layout_height=&quot;wrap_content&quot;  
+     android:text=&quot;@{note??null}&quot;  
+     android:textColor=&quot;#00FF00&quot;  
+     android:textSize=&quot;18sp&quot; /&gt;  
+</code></pre>
+
+<pre class="line-numbers"><code class="language-markup">&lt;!--引用资源文件--&gt;  
+&lt;ImageView  
+    android:layout_width=&quot;wrap_content&quot;  
+    android:layout_height=&quot;wrap_content&quot;  
+    android:paddingLeft=&quot;@{boo?@dimen/large_padding:@dimen/small_padding}&quot;  
+    android:src=&quot;@{image}&quot; /&gt; 
+</code></pre>
+
+<pre class="line-numbers"><code class="language-markup">&lt;TextView  
+    android:layout_width=&quot;match_parent&quot;  
+    android:layout_height=&quot;wrap_content&quot;  
+    android:text=&#39;@{String.valueOf(map[`one`])}&#39;/&gt;  
+</code></pre>
+
+<h3 id="toc_10">Observable数据改变自动更新</h3>
+
+<p><code>Observable</code>是一个接口，它的子类有<code>BaseObservable</code>,<code>ObservableField</code>,<code>ObservableBoolean</code>,<code>ObservableByte</code>, <code>ObservableChar</code>, <code>ObservableShort</code>, <code>ObservableInt</code>, <code>ObservableLong</code>, <code>ObservableFloat</code>, <code>ObservableDouble</code>, and <code>ObservableParcelable</code>，<code>ObservableArrayList</code>,<code>ObservableArrayMap</code><br/>
+现在我们来看看 如何在数据改变时，不手动设置，让其自动改变：</p>
+
+<p><strong>布局文件</strong></p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+&lt;layout&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;www.zhang.com.databinding.model.Person&quot; /&gt;
+        &lt;variable
+            name=&quot;person&quot;
+            type=&quot;Person&quot; /&gt;
+    &lt;/data&gt;
+    &lt;!--我们需要展示的布局--&gt;
+    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{`firstName:`+person.firstName}&quot; /&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{`lastName:`+person.lastName}&quot; /&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{`age:`+person.age}&quot; /&gt;
+        &lt;Button
+            android:id=&quot;@+id/second_btn1&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;改变数据&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p><strong>Person类</strong></p>
+
+<pre class="line-numbers"><code class="language-java">package www.zhang.com.databinding.model;
+
+import android.databinding.BaseObservable;
+import android.databinding.Bindable;
+
+import www.zhang.com.databinding.BR;
+
+public class Person extends BaseObservable {
+    private String firstName;
+    private String lastName;
+    private int age;
+    public Person(String firstName, String lastName, int age) {
+        this.firstName = firstName;
+        this.lastName = lastName;
+        this.age = age;
+    }
+    @Bindable
+    public String getFirstName() {
+        return firstName;
+    }
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+        notifyPropertyChanged(BR.firstName);
+    }
+    @Bindable
+    public String getLastName() {
+        return lastName;
+    }
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+        notifyPropertyChanged(BR.lastName);
+    }
+    @Bindable
+    public int getAge() {
+        return age;
+    }
+    public void setAge(int age) {
+        this.age = age;
+        notifyPropertyChanged(BR.age);
+    }
+}
+</code></pre>
+
+<p>Model类继承BaseObservable,BaseObservable实现 Android.databinding.Observable接口，Observable接口可以允许附加一个监听器到model对象以便监听对象上的所有属性的变化。<br/><br/>
+Observable接口有一个机制来添加和删除监听器，但通知与否由开发人员管理。为了使开发更容易，BaseObservable实现了监听器注册机制。DataBinding实现类依然负责通知当属性改变时。这是通过指定一个Bindable注解给getter以及setter内通知来完成的。<br/><br/>
+notifyPropertyChanged(BR.参数名)通知更新这一个参数，需要与@Bindable注解配合使用。notifyChange()通知更新所有参数，可以不用和@Bindable注解配合使用</p>
+
+<p><strong>SecondActivity</strong></p>
+
+<pre class="line-numbers"><code class="language-java">public class SecondActivity extends AppCompatActivity {
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActivitySecondBinding binding = DataBindingUtil.setContentView(SecondActivity.this, R.layout.activity_second);
+
+        final Person person = new Person(&quot;zhang&quot;,&quot;san&quot;,38);
+        binding.setPerson(person);
+
+        binding.secondBtn1.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                person.setFirstName(&quot;li&quot;);
+                person.setLastName(&quot;si&quot;);
+                person.setAge(40);
+            }
+        });
+    }
+}
+</code></pre>
+
+<h4 id="toc_11">示例</h4>
+
+<pre class="line-numbers"><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+&lt;layout&gt;
+    &lt;data&gt;
+        &lt;import type=&quot;www.zhang.com.databinding.model.Animal&quot;/&gt;
+        &lt;variable
+            name=&quot;animal&quot;
+            type=&quot;Animal&quot;/&gt;
+        &lt;variable
+            name=&quot;list&quot;
+            type=&quot;android.databinding.ObservableArrayList&amp;lt;String&amp;gt;&quot;/&gt;
+        &lt;variable
+            name=&quot;map&quot;
+            type=&quot;android.databinding.ObservableArrayMap&amp;lt;String,String&amp;gt;&quot;/&gt;
+    &lt;/data&gt;
+    &lt;!--我们需要展示的布局--&gt;
+    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{animal.field}&quot; /&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{String.valueOf(animal.age)}&quot; /&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{list[0]}&quot; /&gt;
+        &lt;!--Map集合既可以通过map[key]的方式，也可以通过调用API--&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{list[1]}&quot; /&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{map[`name`]}&quot; /&gt;
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:text=&quot;@{map[`age`]}&quot; /&gt;
+        &lt;Button
+            android:id=&quot;@+id/four_btn&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:text=&quot;改变数据&quot;
+            android:layout_height=&quot;wrap_content&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p><strong>Animal类</strong></p>
+
+<pre class="line-numbers"><code class="language-java">public class Animal {
+    public final ObservableField&lt;String&gt; field = new ObservableField&lt;&gt;();
+    public final ObservableInt age = new ObservableInt();
+}
+</code></pre>
+
+<p><strong>FourActivity</strong></p>
+
+<pre class="line-numbers"><code class="language-java">package www.zhang.com.databinding;
+
+public class FourActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        ActivityFourBinding binding = DataBindingUtil.setContentView(FourActivity.this, R.layout.activity_four);
+        final Animal animal = new Animal();
+
+        animal.field.set(&quot;cat&quot;);
+        animal.age.set(2);
+        binding.setAnimal(animal);
+
+        final ObservableArrayList&lt;String&gt; list = new ObservableArrayList&lt;&gt;();
+        list.add(&quot;dog&quot;);
+        list.add(&quot;mouse&quot;);
+        binding.setList(list);
+
+        final ObservableArrayMap&lt;String, String&gt; map = new ObservableArrayMap&lt;&gt;();
+        map.put(&quot;name&quot;,&quot;Tom&quot;);
+        map.put(&quot;age&quot;,&quot;4&quot;);
+        binding.setMap(map);
+
+        binding.fourBtn.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                animal.field.set(&quot;dog&quot;);
+                animal.age.set(4);
+                list.set(0,&quot;cat&quot;);
+                list.set(1,&quot;dog&quot;);
+                map.put(&quot;name&quot;,&quot;Sam&quot;);
+                map.put(&quot;age&quot;,&quot;5&quot;);
+            }
+        });
+
+    }
+}
+</code></pre>
+
+<p>当Animal属性数据改变，list/map集合数据改变，会自动更新数据，我们不需要自己手动设置，省去了一个操作，让我们更专注于业务逻辑。</p>
+
+<h3 id="toc_12">事件的绑定</h3>
+
+<pre class="line-numbers"><code class="language-markup">&lt;!--  
+    绑定事件的格式有两种：    
+    1、方法引用：直接用handle.Click或者handle::Click  推荐后者  
+--&gt;  
+&lt;Button  
+    android:layout_width=&quot;match_parent&quot;  
+    android:layout_height=&quot;wrap_content&quot;  
+    android:text=&quot;@{user.name}&quot;  
+    android:onClick=&quot;@{handle::Click}&quot;/&gt;  
+</code></pre>
+
+<pre class="line-numbers"><code class="language-markup">&lt;!--  
+     2、监听绑定：使用()组，括号里面所填的是你为参数起的名字，这样你就可以在后面的括号进行引用  
+        如果你监听的事件需要返回值，那么你的方法也要返回一个相同类型  
+ --&gt;  
+ &lt;Button  
+     android:layout_width=&quot;match_parent&quot;  
+     android:layout_height=&quot;wrap_content&quot;  
+     android:onClick=&quot;@{()-&gt;handle.eventHandler(user)}&quot;  
+     android:text=&quot;传入布局文件中的数据&quot; /&gt;  
+  
+ &lt;Button  
+     android:layout_width=&quot;match_parent&quot;  
+     android:layout_height=&quot;wrap_content&quot;  
+     android:onClick=&quot;@{(thisView)-&gt;handle.eventHandlerView(thisView,user)}&quot;  
+     android:text=&quot;传入此View&quot; /&gt;  
+ &lt;!--如果你需要为一个点击事件设置一个断言，那么使用void作为一个标志,表示什么也不做--&gt;  
+ &lt;Button  
+     android:layout_width=&quot;match_parent&quot;  
+     android:layout_height=&quot;wrap_content&quot;  
+     android:onClick=&quot;@{(v)-&gt;handle.isVisible(v)?handle.doSomething():void}&quot;  
+     android:text=&quot;判断是否为visible&quot; /&gt;  
+  
+ &lt;!--对于一些控件有自己专门的单击事件，需要创建下面的属性进行避免  
+    SearchView    android:onSearchClick  
+    ZoomControls  android:onZoomIn  
+    ZoomControls  android:onZoomOut--&gt;  
+ &lt;SearchView  
+     android:layout_width=&quot;match_parent&quot;  
+     android:layout_height=&quot;wrap_content&quot;  
+     android:onClick=&quot;@{(v)-&gt;handle.searchClick(v)}&quot;  
+     android:onSearchClick=&quot;@{(v)-&gt;handle.onSearchClick(v)}&quot;&gt;  
+  
+ &lt;/SearchView&gt;  
+</code></pre>
+
+<p>实现监听方法，保证参数个数、类型、返回值都要保证和你使用set时监听一样，不然就出报错。</p>
+
+<pre class="line-numbers"><code class="language-java">public void checkChanged(View view, boolean isCheck) {  
+    System.out.println(&quot;checkChanged:&quot; + view + &quot;    &quot; + isCheck);  
+}  
+  
+public boolean longClick(View view) {  
+    System.out.println(&quot;longClick:&quot; + view);  
+    return true;  
+}  
+</code></pre>
+
+<p>可以直接在 xml 导入android.view.View.OnClickListener，并制定其点击事件。</p>
+
+<pre class="line-numbers"><code class="language-java">&lt;variable
+    name=&quot;clickListener&quot;
+    type=&quot;android.view.View.OnClickListener&quot; /&gt;
+...
+  android:onClick=&quot;@{clickListener}&quot;
+...
+</code></pre>
+
+<pre class="line-numbers"><code class="language-java">holder.binding.setClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+               //do something
+        });
+</code></pre>
+
+<h3 id="toc_13">表达式</h3>
+
+<p>其实在xml文件中还是支持表达式的，比如说如下：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;TextView
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    android:text=&#39;@{error ? &quot;error&quot; : &quot;ok&quot;}&#39;/&gt;
+</code></pre>
+
+<p>这是一个布尔值的使用。</p>
+
+<p><strong>下面我们就来看看表达式支持的一下语法和不支持的语法支持的表达式：</strong></p>
+
+<ul>
+<li>Mathematical + - / * %<br/></li>
+<li>String concatenation +<br/></li>
+<li>Logical &amp;&amp; ||<br/></li>
+<li>Binary &amp; | ^<br/></li>
+<li>Unary + - ! ~<br/></li>
+<li>Shift &gt;&gt; &gt;&gt;&gt; &lt;&lt;<br/></li>
+<li>Comparison == &gt; &lt; &gt;= &lt;=<br/></li>
+<li>instanceof<br/></li>
+<li>Grouping ()<br/></li>
+<li>Literals - character, String, numeric, null<br/></li>
+<li>Cast<br/></li>
+<li>Method calls</li>
+<li>Field access</li>
+<li>Array access []</li>
+<li>Ternary operator ?:</li>
+</ul>
+
+<p><strong>不支持的表达式：</strong></p>
+
+<ul>
+<li>this</li>
+<li>super</li>
+<li>new</li>
+<li>Explicit generic invocation</li>
+</ul>
+
+<h3 id="toc_14">在布局中使用include</h3>
+
+<p>如果你需要用到从xml传过来的数据需要去使用bind:user属性，这里的user是你定义的实体类名</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;!--当你使用include的时候，你可以使用命名空间和属性中的变量名  
+来将数据传送到另一个布局中去,值得注意的是当include的父节点为merge时将不支持--&gt;  
+&lt;include  
+    layout=&quot;@layout/detail_include&quot;  
+    bind:user=&quot;@{user}&quot; /&gt; 
+</code></pre>
+
+<p>然后只需要在include布局里面声明之后便可以直接使用了。</p>
+
+<h4 id="toc_15">示例</h4>
+
+<p><strong>activity_five.xml</strong></p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+&lt;layout&gt;
+
+    &lt;data &gt;
+        &lt;import type=&quot;www.zhang.com.databinding.model.Content&quot;/&gt;
+        &lt;variable
+            name=&quot;con&quot;
+            type=&quot;Content&quot;/&gt;
+    &lt;/data&gt;
+    &lt;!--我们需要展示的布局--&gt;
+    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+        &lt;include
+            android:id=&quot;@+id/toolbar&quot;
+            layout=&quot;@layout/toolbar&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:layout_width=&quot;match_parent&quot;
+            bind:content=&quot;@{con}&quot; /&gt;
+ &lt;!--通过命名空间将写有toolbar的xml文件中定义的content对象作为属性绑定con对象，这2个对象是同一个类--&gt;
+            &lt;TextView
+                android:text=&quot;@string/app_name&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;wrap_content&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p><strong>toolbar.xml</strong></p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout &gt;
+    &lt;data&gt;
+        &lt;import type=&quot;www.zhang.com.databinding.model.Content&quot;/&gt;
+      &lt;variable
+          name=&quot;content&quot;
+          type=&quot;Content&quot;/&gt;
+    &lt;/data&gt;
+
+&lt;android.support.v7.widget.Toolbar
+    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:id=&quot;@+id/toolbar&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:layout_height=&quot;56dp&quot;
+    android:layout_width=&quot;match_parent&quot;
+    app:title=&quot;@{content.title}&quot;
+    app:subtitle=&quot;@{content.subTitle}&quot;
+    android:background=&quot;@color/colorPrimary&quot;
+    app:titleTextColor=&quot;@android:color/white&quot;
+    app:subtitleTextColor=&quot;@android:color/white&quot; /&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p>在activity_five.xml中的include属性中定义了一个id,同时又在toolbar.xml中的Toolbar标签中又定义了一个id,其作用是通过binding.toolbar.toolbar等同于Toolbar控件，可以方便做一些操作等(不加id，同样能将变量参数传进去)<br/>
+FiveActivity中</p>
+
+<pre class="line-numbers"><code class="language-java">public class FiveActivity extends AppCompatActivity {
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        ActivityFiveBinding binding =DataBindingUtil.setContentView(FiveActivity.this, R.layout.activity_five);
+
+        Content con = new Content(&quot;Title&quot;,&quot;SubTitle&quot;);
+        binding.setCon(con);
+
+//        binding.toolbar.setContent(con);  //这个测试没有效果，不会显示toolbar的title/subTitle
+//        binding.toolbar.toolbar.setTitle(&quot;&quot;); 
+//        binding.toolbar.toolbar.setSubtitle(&quot;&quot;);
+
+        //下面的代码也可以通过DataBinding绑定数据
+        binding.toolbar.toolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        setSupportActionBar(binding.toolbar.toolbar);
+        binding.toolbar.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+    }
+}
+</code></pre>
+
+<p><strong>Content</strong></p>
+
+<pre class="line-numbers"><code class="language-java">public class Content extends BaseObservable {
+    private String title;
+    private String subTitle;
+
+    public Content(String title, String subTitle) {
+        this.title = title;
+        this.subTitle = subTitle;
+    }
+
+    @Bindable public String getSubTitle() {
+        return subTitle;
+    }
+
+    public void setSubTitle(String subTitle) {
+        this.subTitle = subTitle;
+        notifyPropertyChanged(BR.subTitle);
+    }
+
+    @Bindable public String getTitle() {
+        return title;
+    }
+
+    public void setTitle(String title) {
+        this.title = title;
+        notifyPropertyChanged(BR.title);
+    }
+}
+</code></pre>
+
+<h3 id="toc_16">带id的控件的赋值方式</h3>
+
+<p>对于xml文件中控件的赋值，其实也是可以在java文件中，用java来实现的。我就以最上面那个简单的小例子来说，假如给一个TextView设置的id如下：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;TextView
+    android:id=&quot;@+id/name&quot;
+    android:layout_width=&quot;wrap_content&quot;
+    android:layout_height=&quot;wrap_content&quot;
+    /&gt;
+</code></pre>
+
+<p>在Activity中这样赋值：</p>
+
+<pre class="line-numbers"><code class="language-java">@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    ActivityMainBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_main);
+    binding.name.setText(&quot;非著名程序员&quot;);
+}
+</code></pre>
+
+<h3 id="toc_17">在布局中使用ViewStub</h3>
+
+<pre class="line-numbers"><code class="language-java">/** 
+ * 为ViewStub设置监听，当显示的时候为它绑定数据，因为当不显示的ViewStub会在视图中消失 
+ */  
+vs = (ViewStub) findViewById(R.id.viewstub);  
+vs.setOnInflateListener(new ViewStub.OnInflateListener() {  
+    @Override  
+    public void onInflate(ViewStub stub, View inflated) {  
+        ViewstubBinding viewstubBinding = ViewstubBinding.bind(inflated);  
+        Info info = new Info();  
+        info.setInfo(&quot;Andly Info&quot;);  
+        viewstubBinding.setInfo(info);  
+        Drawable d = getResources().getDrawable(R.mipmap.ic_launcher);  
+        viewstubBinding.setDrawable(d);  
+    }  
+});  
+  
+public void toggleViewStub(View view) {  
+    vs.inflate();  
+}  
+</code></pre>
+
+<h3 id="toc_18">在布局中使用RecycleView控件</h3>
+
+<h4 id="toc_19">1、添加RecycleView控件</h4>
+
+<pre class="line-numbers"><code class="language-markup">&lt;!--  
+    这里使用到了自定义属性，因为RecycleView里面有setAdapter方法，所以这里可以直接用app:adapter  
+--&gt;  
+&lt;android.support.v7.widget.RecyclerView  
+    android:id=&quot;@+id/rv&quot;  
+    android:layout_width=&quot;match_parent&quot;  
+    android:layout_height=&quot;match_parent&quot;  
+    app:adapter=&quot;@{adapter}&quot; /&gt;  
+</code></pre>
+
+<h4 id="toc_20">2、为RecycleView定义适配器</h4>
+
+<pre class="line-numbers"><code class="language-java">@Override  
+public ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {  
+    ViewDataBinding viewDataBinding = DataBindingUtil.inflate(LayoutInflater.from(parent.getContext()), layoutId, parent, false);  
+    return new ViewHolder(viewDataBinding);  
+}  
+@Override  
+public void onBindViewHolder(ViewHolder holder, int position) {  
+    holder.binding.setVariable(variable, list.get(position));  
+    holder.binding.executePendingBindings();  
+    //当然这里你也可以为其设置点击如：  
+    //holder.binding.getRoot.setOnclickListener()  
+}  
+@Override  
+public int getItemCount() {  
+    return list.size();  
+}  
+  
+class ViewHolder extends RecyclerView.ViewHolder {  
+    ViewDataBinding binding;  
+  
+    public ViewHolder(ViewDataBinding binding) {  
+        super(binding.getRoot());  
+        this.binding = binding;  
+    }  
+}  
+</code></pre>
+
+<h4 id="toc_21">3、为RecycleView设置Adapter</h4>
+
+<pre class="line-numbers"><code class="language-java">//这里注意的是一定要是BR.dataInfo不能是其它的常数  
+MyAdapter adapter = new MyAdapter(list, R.layout.rv_item, BR.dataInfo);  
+binding.setAdapter(adapter);  
+binding.rv.setLayoutManager(new LinearLayoutManager(this));
+</code></pre>
+
+<p>这样就大功告成，然而在很多情况我们都需要去对每个Item进行处理，如显示网络图片等等，这里我们就需要使用数据绑定自定义属性的功能，看代码</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;ImageView  
+    android:layout_width=&quot;150dp&quot;  
+    android:layout_height=&quot;90dp&quot;  
+    app:imageError=&quot;@{@drawable/android}&quot;  
+    app:imagePath=&quot;@{dataInfo.imageUrl}&quot; /&gt;  
+</code></pre>
+
+<pre class="line-numbers"><code class="language-java">//当你在一个方法只需要一个参数的时候可以使用@BindingAdapter(&quot;imageUrlStr&quot;)，加上之后就可以在布局文件中直接使用imageUrlStr  
+//运行之后就会调用loadImage方法  
+@BindingAdapter(&quot;imageUrlStr&quot;)  
+public static void loadImage(ImageView iv, String url) {  
+    Glide.with(iv.getContext()).load(url).into(iv);//这里使用Glide库  
+}  
+  
+//上面是为loadImage传入一个参数，当传入两个或多个参数的时候应使用@BindingAdapter({&quot;imagePath&quot;, &quot;imageError&quot;})  
+//这个的ImageView自定义了两个属性一个是imagePath传入的是url,一个是imageError为Drawable  
+@BindingAdapter({&quot;imagePath&quot;, &quot;imageError&quot;})  
+public static void downloadImage(ImageView iv, String url, Drawable error) {  
+    Glide.with(iv.getContext()).load(url).error(error).into(iv);  
+}  
+</code></pre>
+
+<p>上面的方法使用的是静态方法，如果你不想使用静态方法你需要重写一个数据绑定组件类去实现DataBindingComponent</p>
+
+<pre class="line-numbers"><code class="language-java">public class MyComponent implements android.databinding.DataBindingComponent {  
+    private Utils utils;  
+    @Override  
+    public Utils getUtils() {  
+        if (utils == null) {  
+            utils = new Utils();  
+        }  
+        return utils;  
+    }  
+}  
+</code></pre>
+
+<p>然后你需要在Activity为其进行设置</p>
+
+<pre class="line-numbers"><code class="language-java">//第一种方式  
+DataBindingUtil.setDefaultComponent(new MyComponent());  
+//第二种方式  
+ActivityMyListViewBinding binding = DataBindingUtil.setContentView(this, R.layout.activity_my_list_view,new MyComponent());  
+//第三种方式  
+DataBindingUtil.bind(root,new MyComponent());  
+</code></pre>
+
+<p>最后有个不起眼的小功能，就是当使用数据绑定的时候在预览界面不能看到显示的内容，这时你可以为你的控件设置默认显示内容<code>android:text=&quot;@{placeName,default=PLACEHOLDER}&quot;</code></p>
+
+<h5 id="toc_22">示例</h5>
+
+<p><strong>activity_five.xml</strong></p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;&lt;!--布局以layout作为根布局--&gt;
+&lt;layout&gt;
+
+    &lt;data &gt;
+        &lt;import type=&quot;www.zhang.com.databinding.model.Content&quot;/&gt;
+        &lt;variable
+            name=&quot;con&quot;
+            type=&quot;Content&quot;/&gt;
+    &lt;/data&gt;
+    &lt;!--我们需要展示的布局--&gt;
+    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        xmlns:bind=&quot;http://schemas.android.com/apk/res-auto&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;match_parent&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+        &lt;include
+            android:id=&quot;@+id/toolbar&quot;
+            layout=&quot;@layout/toolbar&quot;
+            android:layout_height=&quot;56dp&quot;
+            android:layout_width=&quot;match_parent&quot;
+            bind:content=&quot;@{con}&quot; /&gt;
+        &lt;!--通过命名空间将写有toolbar的xml文件中定义的content对象作为属性绑定con对象，这2个对象是同一个类--&gt;
+            &lt;android.support.v7.widget.RecyclerView
+                android:id=&quot;@+id/recycler&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;wrap_content&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p><strong>recycler_item.xml</strong></p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;layout&gt;
+    &lt;data&gt;
+        &lt;variable
+            name=&quot;str&quot;
+            type=&quot;String&quot;/&gt;
+    &lt;/data&gt;
+    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:paddingLeft=&quot;@dimen/activity_horizontal_margin&quot;
+        android:paddingRight=&quot;@dimen/activity_horizontal_margin&quot;
+        android:orientation=&quot;vertical&quot;&gt;
+
+        &lt;TextView
+            android:text=&quot;@{str}&quot;
+            android:gravity=&quot;center_vertical&quot;
+            android:textColor=&quot;@android:color/black&quot;
+            android:textSize=&quot;16sp&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;48dp&quot; /&gt;
+    &lt;/LinearLayout&gt;
+&lt;/layout&gt;
+</code></pre>
+
+<p><strong>FiveActivity</strong></p>
+
+<pre class="line-numbers"><code class="language-java">public class FiveActivity extends AppCompatActivity {
+
+    private ActivityFiveBinding binding;
+
+    @Override
+    protected void onCreate(@Nullable Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        supportRequestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        binding = DataBindingUtil.setContentView(FiveActivity.this, R.layout.activity_five);
+
+        initToolbar();
+        initRecyclerView();
+    }
+
+    private void initRecyclerView() {
+        LinearLayoutManager manager = new LinearLayoutManager(FiveActivity.this);
+        binding.recycler.setLayoutManager(manager);
+        binding.recycler.setHasFixedSize(true);
+        MyAdapter adapter = new MyAdapter(getApplicationContext());
+        binding.recycler.setAdapter(adapter);
+    }
+
+    private void initToolbar() {
+        Content con = new Content(&quot;Title&quot;,&quot;SubTitle&quot;);
+        binding.setCon(con);
+
+//        binding.toolbar.setContent(con);  //这个测试没有效果，不会显示toolbar的title/subTitle
+//        binding.toolbar.toolbar.setTitle(&quot;&quot;);
+//        binding.toolbar.toolbar.setSubtitle(&quot;&quot;);
+
+        //下面的代码也可以通过DataBinding绑定数据
+        binding.toolbar.toolbar.setNavigationIcon(R.mipmap.ic_launcher);
+        setSupportActionBar(binding.toolbar.toolbar);
+        binding.toolbar.toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                finish();
+            }
+        });
+    }
+}
+</code></pre>
+
+<p><strong>MyAdapter</strong></p>
+
+<pre class="line-numbers"><code class="language-java">public class MyAdapter extends RecyclerView.Adapter&lt;MyAdapter.MyViewHolder&gt; {
+
+    private Context mContext;
+    String[] datas;
+
+    public MyAdapter(Context context) {
+        mContext = context;
+        datas = context.getResources().getStringArray(R.array.item_list);
+    }
+
+    @Override
+    public MyAdapter.MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+        RecyclerItemBinding binding = DataBindingUtil.inflate(LayoutInflater.from(mContext), R.layout.recycler_item, parent, false);
+        return new MyViewHolder(binding);
+    }
+
+    @Override
+    public void onBindViewHolder(MyAdapter.MyViewHolder holder, int position) {
+        String name = datas[position];
+        holder.getBinding().setVariable(www.zhang.com.databinding.BR.str,name);
+        //holder.getBinding().setStr(name); //两者都可以
+
+        //executePendingBindings()方法说明
+        // When a variable or observable changes, the binding will be scheduled to change before the next frame. 
+        // There are times, however, when binding must be executed immediately. 
+        // To force execution, use the executePendingBindings() method.
+        holder.getBinding().executePendingBindings();//此方法必须执行在UI线程，当绑定的数据修改时更新视图（不知道翻译的准不准）
+    }
+
+    @Override
+    public int getItemCount() {
+        return datas.length;
+    }
+
+    public class MyViewHolder extends RecyclerView.ViewHolder {
+        private RecyclerItemBinding binding;
+
+        public MyViewHolder(ViewDataBinding binding) {
+            super(binding.getRoot());
+            this.binding = (RecyclerItemBinding) binding;
+        }
+
+        public RecyclerItemBinding getBinding() {
+            return binding;
+        }
+
+        public void setBinding(RecyclerItemBinding binding) {
+            this.binding = binding;
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_23">@BindingAdapter</h3>
+
+<p>@BindingAdapter用于修饰方法。<br/><br/>
+一些属性需要定制绑定逻辑，一个用@BindingAdapter修饰的静态方法可以自定义属性的setter操作。<br/><br/>
+android自身实现了大量的Adapter，你可以在项目module的android.databinding.adapters包下找到这些代码。</p>
+
+<pre class="line-numbers"><code class="language-java">public class CardViewBindingAdapter {
+    @BindingAdapter(&quot;contentPadding&quot;)
+    public static void setContentPadding(CardView view, int padding) {
+        view.setContentPadding(padding, padding, padding, padding);
+    }
+}
+</code></pre>
+
+<p><strong>方法内的参数可以设置多个，参数的传递在布局文件中使用自定义命名空间的属性传入。</strong></p>
+
+<ul>
+<li>1、默认的你的自定义的命名空间，在匹配时会被忽略。</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-text">@BindingAdapter(&quot;contentPadding&quot;)
+</code></pre>
+
+<ul>
+<li>2、允许重写android的命名空间。</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-text"> @BindingAdapter(&quot;android:contentPadding&quot;)
+</code></pre>
+
+<p><code>app:contentPadding</code>与<code>android:contentPadding</code>处理行为可以不一样。<br/>
+<code>app:contentPadding</code>与<code>custom:contentPadding</code>处理行为是一致的。（仅android是特殊的命名空间）。</p>
+
+<h4 id="toc_24">示例</h4>
+
+<pre class="line-numbers"><code class="language-java">@BindingAdapter({&quot;imageUrl&quot;, &quot;type&quot;, &quot;position&quot;, &quot;debrisfly&quot;, &quot;width&quot;, &quot;height&quot;})
+public static void setImageUrl(SimpleDraweeView view, String url, int type, int position, boolean debrisfly, int width, int height) {
+    if (url == null) {
+        url = &quot;&quot;;
+    }
+    Uri uri = null;
+    switch (type) {
+        case 1:
+            uri = Util.parse7(url, BocaiApplication.getInstance());
+            break;
+        case 2:
+            uri = Util.parse2(url, BocaiApplication.getInstance());
+            break;
+        case 3:
+            uri = Util.parse3(url, BocaiApplication.getInstance());
+            break;
+
+        case 8:
+            uri = Util.parse(url, BocaiApplication.getInstance());
+            break;
+        case 10:
+            uri = Util.parseUrlBy230(url, BocaiApplication.getInstance());
+            break;
+    }
+    ControllerListener controllerListener = new BaseControllerListener&lt;ImageInfo&gt;() {
+        @Override
+        public void onFinalImageSet(
+                String id,
+                @Nullable ImageInfo imageInfo,
+                @Nullable Animatable anim) {
+            if (imageInfo == null) {
+                return;
+            }
+            if (anim != null) {
+                anim.start();
+            }
+        }
+
+        @Override
+        public void onIntermediateImageSet(String id, @Nullable ImageInfo imageInfo) {
+        }
+
+        @Override
+        public void onFailure(String id, Throwable throwable) {
+        }
+    };
+
+    DraweeController controller = Fresco.newDraweeControllerBuilder()
+            .setControllerListener(controllerListener)
+            .setUri(uri)
+            .setOldController(view.getController())
+            // other setters
+            .build();
+    view.setController(controller);
+    debrisflys(debrisfly, position,view,width,height);
+}
+</code></pre>
+
+<p>需要注意，当你创建的适配器属性与系统默认的产生冲突时，你的自定义适配器将会覆盖掉系统原先定义的注解，这将会产生一些意外的问题。<br/>
+假设需要对下面接口，做适配。</p>
+
+<pre class="line-numbers"><code class="language-java">public interface ILogAction{
+      void login();
+      void logout();
+}
+</code></pre>
+
+<p>则需要一个方法一个接口，这么做的原因是避免<code>login()</code>的修改影响到<code>logout()</code>。所以根据业务需要，可能需要排列组合适配这两个接口。</p>
+
+<blockquote>
+<p>1、适配 login<br/>
+2、适配 logout<br/>
+3、适配 login + logout</p>
+</blockquote>
+
+<h3 id="toc_25">@BindingBuildInfo</h3>
+
+<pre class="line-numbers"><code class="language-java">@BindingBuildInfo(
+buildId=&quot;3fefc6ba-1e95-4dcf-8ffa-278fe0f449bd&quot;,
+modulePackage=&quot;com.ipudong.library&quot;,
+sdkRoot=&quot;/Users/robert/Library/Android/sdk&quot;,
+layoutInfoDir=&quot;/Users/robert/android/develops/pudong-d-android/lib_basic/build/intermediates/data-binding-info/debug&quot;,
+exportClassListTo=&quot;/Users/robert/android/develops/pudong-d-android/lib_basic/build/intermediates/data-binding-info/debug/_generated.txt&quot;,
+isLibrary=true,
+minSdk=14,
+enableDebugLogs=false,
+printEncodedError=true
+)
+public class DataBindingInfo {}
+</code></pre>
+
+<p>在SOURCE阶段会自动生成DataBindingInfo.class，并标记注解如上。</p>
+
+<h3 id="toc_26">@BindingConversion</h3>
+
+<blockquote>
+<p>Annotate methods that are used to automatically convert from the expression type to the value used in the setter.<br/><br/>
+有时候会遇到类型不匹配的问题，比如<code>R.color.white</code>是<code>int</code>，但是通过Data Binding赋值给<code>android:background</code>属性后，需要把<code>int</code>转换为<code>ColorDrawable</code>。</p>
+</blockquote>
+
+<pre class="line-numbers"><code class="language-java">@BindingConversion
+public static Drawable convertColorToDrawable(int drawable) {
+  return new ColorDrawable(drawable);
+}
+</code></pre>
+
+<h3 id="toc_27">@BindingMethod &amp;&amp; @BindingMethods</h3>
+
+<blockquote>
+<p>Used within an BindingMethods annotation to describe a renaming of an attribute to the setter used to set that attribute.Used to enumerate attribute-to-setter renaming.</p>
+</blockquote>
+
+<p><strong>@BindingMethods用于修饰类。</strong></p>
+
+<p>一些属性虽然拥有setters但是并不与名字相匹配，这些方法的属性可以通过 @BindingMethod &amp;&amp; @BindingMethods 注释 setters。</p>
+
+<pre class="line-numbers"><code class="language-java">@BindingMethods({
+       @BindingMethod(type = &quot;android.widget.ImageView&quot;,
+                      attribute = &quot;android:tint&quot;,
+                      method = &quot;setImageTintList&quot;),
+})
+</code></pre>
+
+<p>开发人员不太可能需要重命名 setters ，因为android框架属性已经实现了这一部分。<br/><br/>
+事件的默认值是带有<code>AttrChanged</code>的属性名称。在上面的例子中，默认值是<code>android:textAttrChanged</code>，即使它没有提供。<br/><br/>
+事件属性用于通知数据绑定系统值已更改。开发人员通常会创建一个<code>BindingAdapter</code>来分配事件。比如：  </p>
+
+<pre class="line-numbers"><code class="language-java">@BindingAdapter(value = {&quot;android:beforeTextChanged&quot;, &quot;android:onTextChanged&quot;,
+                          &quot;android:afterTextChanged&quot;, &quot;android:textAttrChanged&quot;},
+                          requireAll = false)
+ public static void setTextWatcher(TextView view, final BeforeTextChanged before,
+                                   final OnTextChanged on, final AfterTextChanged after,
+                                   final InverseBindingListener textAttrChanged) {
+     TextWatcher newValue = new TextWatcher() {
+         ...
+         @Override
+         public void onTextChanged(CharSequence s, int start, int before, int count) {
+             if (on != null) {
+                 on.onTextChanged(s, start, before, count);
+             }
+             if (textAttrChanged != null) {
+                 textAttrChanged.onChange();
+             }
+         }
+     }
+     TextWatcher oldValue = ListenerUtil.trackListener(view, newValue, R.id.textWatcher);
+     if (oldValue != null) {
+         view.removeTextChangedListener(oldValue);
+     }
+     view.addTextChangedListener(newValue);
+ }
+</code></pre>
+
+<p>如同<code>BindingAdapters</code>一样， <code>InverseBindingAdapter</code>方法 也可以将 <code>DataBindingComponent</code>作为第一个参数，可以是具有从<code>DataBindingComponent</code>检索的实例的实例方法。<br/><br/>
+<code>InverseBindingListener</code>非常有用。  </p>
+
+<p><a href="https://developer.android.com/reference/android/databinding/InverseBindingListener.html">参考 InverseBindingListener</a></p>
+
+<h3 id="toc_28">@InverseBindingMethod</h3>
+
+<p><code>InverseBindingMethod</code>用于标识如何监听对<code>View</code>属性的更改以及要调用的<code>getter</code>方法。<code>InverseBindingMethod</code> 应该与<code>InverseBindingMethods</code>的部分方法相关联。  </p>
+
+<pre class="line-numbers"><code class="language-java">@InverseBindingMethods({@InverseBindingMethod(
+     type = android.widget.TextView.class,
+     attribute = &quot;android:text&quot;,
+     event = &quot;android:textAttrChanged&quot;,
+     method = &quot;getText&quot;)})
+ public class MyTextViewBindingAdapters { ... }
+</code></pre>
+
+<p>@InverseBindingMethods中的属性method 是可选的。</p>
+
+<blockquote>
+<p>如果其没有提供， 属性名称会查找如下几种可能性：方法名称，前缀为is或者get的方法名称。 如属性android:text, 数据绑定框架会在TextView中搜索public CharSequence getText() 方法。</p>
+</blockquote>
+
+<p>@InverseBindingMethods中的属性event是可选的。</p>
+
+<blockquote>
+<p>如果其没有提供，默认会使用属性名+AttrChanged后缀。如属性android:text, 默认的事件名称android:textAttrChanged。</p>
+</blockquote>
+
+<p>这个事件也需要配置相关的<code>@BindingAdapter</code>，如下：</p>
+
+<pre class="line-numbers"><code class="language-java">@BindingAdapter(value = {&quot;android:beforeTextChanged&quot;, &quot;android:onTextChanged&quot;,
+                          &quot;android:afterTextChanged&quot;, &quot;android:textAttrChanged&quot;},
+                          requireAll = false)
+ public static void setTextWatcher(TextView view, final BeforeTextChanged before,
+                                   final OnTextChanged on, final AfterTextChanged after,
+                                   final InverseBindingListener textAttrChanged) {
+     TextWatcher newValue = new TextWatcher() {
+         ...
+         @Override
+         public void onTextChanged(CharSequence s, int start, int before, int count) {
+             if (on != null) {
+                 on.onTextChanged(s, start, before, count);
+             }
+             if (textAttrChanged != null) {
+                 textAttrChanged.onChange();
+             }
+         }
+     }
+     TextWatcher oldValue = ListenerUtil.trackListener(view, newValue, R.id.textWatcher);
+     if (oldValue != null) {
+         view.removeTextChangedListener(oldValue);
+     }
+     view.addTextChangedListener(newValue);
+ }
+</code></pre>
+
+<h3 id="toc_29">@InverseBindingMethods</h3>
+
+<blockquote>
+<p>用于枚举属性，<code>getter</code>和事件关联。</p>
+</blockquote>
+
+<h3 id="toc_30">@Untaggable</h3>
+
+<p>Data Binding相关的jar包由四部分组成，</p>
+
+<ol>
+<li>baseLibrary-2.1.0-rc1.jar<br/>
+    作为运行时类库被打进APK中；</li>
+<li>DataBinderPlugin（gradle plugin）<br/>
+    在编译期使用，利用gradle-api（之前叫transform-api，1.5生，2.0改名）处理xml文件，生成DataBindingInfo.java；</li>
+<li>compiler-2.1.0-rc1.jar<br/>
+    在编译器使用，入口类继承自AbstractProcessor，用于处理注解，并生成Binding类，DataBindingCompoent.java，DataBinderMapper.java类；</li>
+<li>compilerCommon-2.1.0-rc1.jar<br/>
+    被DataBinderPlugin和compiler-2.1.0-rc1.jar所依赖</li>
+</ol>
+
+<h3 id="toc_31">改变监听</h3>
+
+<p><code>addOnPropertyChangedCallback： Model</code>属性改变时回调发生 <br/>
+<code>OnRebindCallback: view</code>发生改变重复绑定时触发</p>
+
+<pre class="line-numbers"><code class="language-java">mModel.addOnPropertyChangedCallback(new Observable.OnPropertyChangedCallback() {
+    @Override
+    public void onPropertyChanged(Observable observable, int i) {
+        if (i == BR.name) {
+            Toast.makeText(TwoWayActivity.this, &quot;name changed&quot;,
+                    Toast.LENGTH_SHORT).show();
+        } else if (i == BR.password) {
+            Toast.makeText(TwoWayActivity.this, &quot;password changed&quot;,
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+});
+</code></pre>
+
+<h3 id="toc_32">Component</h3>
+
+<p>通过<code>DataBindingUtil.setDefaultComponent</code>来设置不同环境下不同的<code>Component</code>， <br/>
+设置之后就可以使用该<code>Component</code>提供的<code>Adapter</code>方法，默认不设置是全局使用，可以理解为作用域。</p>
+
+<pre class="line-numbers"><code class="language-java">public interface TestableAdapter {
+    @BindingAdapter(&quot;android:src&quot;)
+    void setImageUrl(ImageView imageView, String url);
+}
+
+public interface DataBindingComponent {
+    TestableAdapter getTestableAdapter();
+}
+
+DataBindingUtil.setDefaultComponent(myComponent); 
+ ‐ or ‐
+binding = MyLayoutBinding.inflate(layoutInflater, myComponent);
+</code></pre>
+
+<h2 id="toc_33">相关编译流程</h2>
+
+<h3 id="toc_34">STEP1 资源处理</h3>
+
+<p><code>aapt</code>或者<code>gradle</code>执行时，都会触发资源处理。在资源处理过程中，<code>DataBinding</code>都会扫描一遍现有的资源，生成不包含<code>&lt;layout&gt;</code>的<code>data-binding-layout-out</code>以及<code>DataBinding</code>所需要的<code>data-binding-info</code>；</p>
+
+<h3 id="toc_35">STEP2 DataBindingInfo.class生成</h3>
+
+<p>在完成资源处理后，<code>aapt</code>或者<code>gradle-api</code>都会去执行<code>DataBindingInfo.class</code>生成操作，把相关的信息写入<code>DataBindingInfo.class</code>的@BindingBuildInfo注解中；</p>
+
+<h3 id="toc_36">STEP3 监听到注解变化</h3>
+
+<p>生成<code>@BindingBuildInfo</code>注解，或者code中发现有新的注解写入，<code>AbstractProcessor</code>注解处理器就开始执行注解处理。<code>DataBinding</code>中有一个<code>ProcessDataBinding.jav</code>a类专门来处理<code>DataBinding</code>相关的注解；</p>
+
+<h3 id="toc_37">STEP4 ProcessDataBinding处理注解，生成bin</h3>
+
+<p><code>ProcessDataBinding</code>中处理注解永远会按顺执行3步，<code>ProcessMethodAdapter</code>，<code>ProcessExpressions</code>，<code>ProcessBindable</code>。每次执行都会从磁盘反序列化对应的bin文件，然后往bin中写入新的，完成后再序列化到磁盘；</p>
+
+<h3 id="toc_38">STEP5 生成最终产物</h3>
+
+<p>执行<code>ProcessMethodAdapter</code>生成<code>DataBindingComponents.class</code>；执行<code>ProcessExpressions</code>生成<code>ViewDataBinding.class</code>子类（ActivityDetail2Binding.class），并触发<code>DataBindingMapper.class</code>更新；执行<code>ProcessBindable</code>生成<code>BR.class</code>，并触发<code>DataBindingMapper.class</code>更新。</p>
+
+<h2 id="toc_39">注意：</h2>
+
+<p>不允许使用混合类型</p>
+
+<pre class="line-numbers"><code class="language-java">&lt;!--值得注意的是  
+    android:background=&quot;@{boo?@color/red:@drawable/background}&quot;  
+    这么写将会发生错误，因为在BindingConversion默认实现为：  
+    @BindingConversion  
+    public static ColorDrawable convertColorToDrawable(int color) {  
+            return new ColorDrawable(color);  
+        }  
+--&gt;  
+&lt;ImageView  
+    android:layout_width=&quot;100dp&quot;  
+    android:layout_height=&quot;100dp&quot;  
+    android:layout_marginTop=&quot;20dp&quot;  
+    android:background=&quot;@{boo?@color/red:@color/green}&quot; /&gt;  
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/8</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15561207870348.html">
+                
+                  <h1>Android-ViewStub详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>在开发应用程序的时候，经常会遇到这样的情况，会在运行时动态根据条件来决定显示哪个View或某个布局。那么最通常的想法就是把可能用到的View都写在上面，先把它们的可见性都设为<code>View.GONE</code>，然后在代码中动态的更改它的可见性。这样的做法的优点是逻辑简单而且控制起来比较灵活。但是它的缺点就是，耗费资源。虽然把View的初始可见<code>View.GONE</code>但是在Inflate布局的时候View仍然会被Inflate，也就是说仍然会创建对象，会被实例化，会被设置属性。也就是说，会耗费内存等资源。</p>
+
+<h2 id="toc_1">ViewStub</h2>
+
+<p>上面的问题，推荐的做法是使用 Android.view.ViewStub，ViewStub是一个轻量级的View，它一个看不见的，不占布局位置，占用资源非常小的控件。可以为ViewStub指定一个布局，在Inflate布局的时候，只有ViewStub会被初始化，然后当ViewStub被设置为可见的时候，或是调用了<code>ViewStub.inflate()</code>的时候，ViewStub所向的布局就会被Inflate和实例化，然后ViewStub的布局属性都会传给它所指向的布局。这样，就可以使用ViewStub来方便的在运行时，要还是不要显示某个布局。<br/>
+但ViewStub也不是万能的，下面总结下ViewStub能做的事儿和什么时候该用ViewStub，什么时候该用可见性的控制。</p>
+
+<h2 id="toc_2">特点</h2>
+
+<ul>
+<li>ViewStub只能Inflate一次，之后ViewStub对象会被置为空。按句话说，某个被ViewStub指定的布局被Inflate后，就不能够再通过ViewStub来控制它了。</li>
+<li>ViewStub只能用来Inflate一个布局文件，而不是某个具体的View，当然也可以把View写在某个布局文件中。</li>
+</ul>
+
+<h2 id="toc_3">可以考虑使用ViewStub的情况</h2>
+
+<ul>
+<li>在程序的运行期间，某个布局在Inflate后，就不会有变化，除非重新启动。因为ViewStub只能Inflate一次，之后会被置空，所以无法指望后面接着使用ViewStub来控制布局。所以当需要<em>在运行时不止一次的显示和隐藏某个布局</em>，那么ViewStub是做不到的。这时就只能使用View的可见性来控制了。</li>
+<li>想要控制显示与隐藏的是一个布局文件，而非某个View。因为设置给ViewStub的只能是某个布局文件的Id，所以无法让它来控制某个View。所以，如果想要控制某个View(如Button或TextView)的显示与隐藏，或者想要在运行时不断的显示与隐藏某个布局或View，只能使用View的可见性来控制。</li>
+</ul>
+
+<h2 id="toc_4">下面来看一个实例</h2>
+
+<p>在这个例子中，要显示二种不同的布局，一个是用TextView显示一段文字，另一个则是用ImageView显示一个图片。这二个是在onCreate()时决定是显示哪一个，这里就是应用ViewStub的最佳地点。</p>
+
+<p>先来看看布局，一个是主布局，里面只定义二个ViewStub，一个用来控制TextView一个用来控制ImageView，另外就是一个是为显示文字的做的TextView布局，一个是为ImageView而做的布局：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
+&lt;LinearLayout  
+  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+  android:orientation=&quot;vertical&quot;  
+  android:layout_width=&quot;fill_parent&quot;  
+  android:layout_height=&quot;fill_parent&quot;  
+  android:gravity=&quot;center_horizontal&quot;&gt;  
+  &lt;ViewStub   
+    android:id=&quot;@+id/viewstub_demo_text&quot;  
+    android:layout_width=&quot;wrap_content&quot;  
+    android:layout_height=&quot;wrap_content&quot;  
+    android:layout_marginLeft=&quot;5dip&quot;  
+    android:layout_marginRight=&quot;5dip&quot;  
+    android:layout_marginTop=&quot;10dip&quot;  
+    android:layout=&quot;@layout/viewstub_demo_text_layout&quot;/&gt;  
+  &lt;ViewStub   
+    android:id=&quot;@+id/viewstub_demo_image&quot;  
+    android:layout_width=&quot;wrap_content&quot;  
+    android:layout_height=&quot;wrap_content&quot;  
+    android:layout_marginLeft=&quot;5dip&quot;  
+    android:layout_marginRight=&quot;5dip&quot;  
+    android:layout=&quot;@layout/viewstub_demo_image_layout&quot;/&gt;  
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<p>为TextView的布局：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
+&lt;LinearLayout  
+  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+  android:orientation=&quot;vertical&quot;  
+  android:layout_width=&quot;wrap_content&quot;  
+  android:layout_height=&quot;wrap_content&quot;&gt;  
+    &lt;TextView  
+        android:id=&quot;@+id/viewstub_demo_textview&quot;  
+        android:layout_width=&quot;fill_parent&quot;  
+        android:layout_height=&quot;wrap_content&quot;  
+        android:background=&quot;#aa664411&quot;  
+        android:textSize=&quot;16sp&quot;/&gt;  
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<p>为ImageView的布局：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
+&lt;LinearLayout  
+  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
+  android:orientation=&quot;vertical&quot;  
+  android:layout_width=&quot;wrap_content&quot;  
+  android:layout_height=&quot;wrap_content&quot;&gt;  
+    &lt;ImageView  
+        android:id=&quot;@+id/viewstub_demo_imageview&quot;  
+        android:layout_width=&quot;wrap_content&quot;  
+        android:layout_height=&quot;wrap_content&quot;/&gt;  
+&lt;/LinearLayout&gt;
+</code></pre>
+
+<p>下面来看代码，决定来显示哪一个，只需要找到相应的ViewStub然后调用其infalte()就可以获得相应想要的布局：</p>
+
+<pre class="line-numbers"><code class="language-java">public class ViewStubDemoActivity extends Activity {  
+    @Override  
+    public void onCreate(Bundle savedInstanceState) {  
+        super.onCreate(savedInstanceState);  
+        setContentView(R.layout.viewstub_demo_activity);  
+        if ((((int) (Math.random() * 100)) &amp; 0x01) == 0) {  
+            // to show text  
+            // all you have to do is inflate the ViewStub for textview  
+            ViewStub stub = (ViewStub) findViewById(R.id.viewstub_demo_text);  
+            stub.inflate();  
+            TextView text = (TextView) findViewById(R.id.viewstub_demo_textview);  
+            text.setText(&quot;The tree of liberty must be refreshed from time to time&quot; +  
+                    &quot; with the blood of patroits and tyrants! Freedom is nothing but &quot; +  
+                    &quot;a chance to be better!&quot;);  
+        } else {  
+            // to show image  
+            // all you have to do is inflate the ViewStub for imageview  
+            ViewStub stub = (ViewStub) findViewById(R.id.viewstub_demo_image);  
+            stub.inflate();  
+            ImageView image = (ImageView) findViewById(R.id.viewstub_demo_imageview);  
+            image.setImageResource(R.drawable.happy_running_dog);  
+        }  
+    }  
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/8</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -3077,8 +3959,6 @@ public void onWindowFocusChanged(boolean hasFocus){
         
             <a href="Android.html"><strong>Android</strong></a>
         
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
             <a href="C++.html"><strong>C++</strong></a>
@@ -3110,12 +3990,6 @@ public void onWindowFocusChanged(boolean hasFocus){
 	      
 		      
 			      <li class="post">
-			        <a href="15826122642335.html">个人信息</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
 			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
 			      </li>
 		     
@@ -3135,6 +4009,12 @@ public void onWindowFocusChanged(boolean hasFocus){
 		      
 			      <li class="post">
 			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="15767453112302.html">添加环境变量</a>
 			      </li>
 		     
 		  
