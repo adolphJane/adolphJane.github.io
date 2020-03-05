@@ -116,6 +116,384 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207870710.html">
+                
+                  <h1>Android-AppBarLayout</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Toolbar</h2>
+
+<p>Toobar主要是用来替换ActionBar的，换句话说，ActionBar能做的，Toolbar都能做。如果你对ActionBar的使用比较熟悉，你会发现Toolbar使用起来非常简单。ok，既然是替换，当然用Toolbar的时候就得先去把ActionBar给隐藏掉啦~</p>
+
+<p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
+&lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
+</code></pre>
+
+<p>当然了，你也可以新建一个<code>&lt;style&gt;</code>标签，将上面两行代码加入，并且将这个新建的标签作为<code>&lt;application&gt;</code>的<code>theme</code>。还可以选择通过将<code>AppTheme</code>的<code>parent</code>设置为<code>Theme.AppCompat.Light.NoActionBar</code>的方式。方法很多，可以自己随便选。</p>
+
+<p>接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
+
+<pre class="line-numbers"><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
+        android:id=&quot;@+id/toolbar&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:background=&quot;?attr/colorPrimary&quot;
+        android:layout_height=&quot;?android:attr/actionBarSize&quot;  /&gt;
+</code></pre>
+
+<p>最后将Toobar作为“ActionBar”来用</p>
+
+<pre class="line-numbers"><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        toolbar.setTitle(&quot;这里是Title&quot;);
+        toolbar.setSubtitle(&quot;这里是子标题&quot;);
+        toolbar.setLogo(R.drawable.icon); 
+        setSupportActionBar(toolbar);
+</code></pre>
+
+<p>可以对Toolbar设置Logo、标题、子标题等等~还有很多其他的设置，自己去慢慢玩，这里不提啦~。当然了，也可以在布局文件中设置这些，在布局文件设置就不写啦，hongyang大神有篇博客写的挺好的<a href="http://blog.csdn.net/lmj623565791/article/details/45303349">《 Android 5.x Theme 与 ToolBar 实战 》</a>可以去参考一下。</p>
+
+<p>如果Toolbar仅仅是用来对以往的ActionBar做一次替换，那也太没创意啦！完全没必要去替换了，因为它们表现出来的都是一样的，而且并没有让我们觉得用起来比ActionBar方便。那为啥要替换呢，总应该有他的理由吧：ActionBar是固定在顶部，并不能移动，我觉得这是最大的不好，而我们的ToolBar可以让我们随便摆放，就就可以带来很多灵活性和效果啦！</p>
+
+<p>正如你所看的这样，Toolbar根本就不够看的，一点都不复杂。接下来我们继续学习在Toolbar上面再套一层父View，让Toolbar更有互动性。</p>
+
+<h2 id="toc_1">AppBarLayout</h2>
+
+<blockquote>
+<p>AppBarLayout继承自LinearLayout，布局方向为垂直方向。所以你可以把它当成垂直布局的LinearLayout来使用。AppBarLayout是在LinearLayou上加了一些材料设计的概念，它可以让你定制当<strong>某个可滚动View</strong>的滚动手势发生变化时，其内部的子View实现何种动作。</p>
+</blockquote>
+
+<p>请注意：上面提到的<strong>某个可滚动View</strong>，可以理解为某个ScrollView。怎么理解上面的话呢？就是说，当某个ScrollView发生滚动时，你可以定制你的“顶部栏”应该执行哪些动作（如跟着一起滚动、保持不动等等）。那某个可移动的View到底是哪个可移动的View呢？这是由你自己指定的！如何指定，我们后面说。</p>
+
+<h3 id="toc_2">AppBarLayout子View的动作</h3>
+
+<p>内部的子View通过在布局中加<code>app:layout_scrollFlags</code>设置执行的动作，那么<code>app:layout_scrollFlags</code>可以设置哪些动作呢？分别如下：</p>
+
+<blockquote>
+<p>（1） scroll:值设为scroll的View会跟随滚动事件一起发生移动。</p>
+</blockquote>
+
+<p>什么意思呢？简单的说，就是当指定的ScrollView发生滚动时，该View也跟随一起滚动，就好像这个View也是属于这个ScrollView一样。</p>
+
+<p>一张gif足以说明：</p>
+
+<p><figure><img src="media/15561207870710/20171014150799488071606.gif" alt=""/></figure></p>
+
+<p>对应的布局文件</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;&gt;
+
+        &lt;android.support.v7.widget.Toolbar
+            android:id=&quot;@+id/toolbar&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;?android:attr/actionBarSize&quot;
+            android:background=&quot;?attr/colorPrimary&quot;
+            app:layout_scrollFlags=&quot;scroll&quot; /&gt;
+&lt;/android.support.design.widget.AppBarLayout&gt;
+</code></pre>
+
+<blockquote>
+<p>（2） enterAlways:值设为enterAlways的View,当ScrollView往下滚动时，该View会直接往下滚动。而不用考虑ScrollView是否在滚动。</p>
+</blockquote>
+
+<p>看个动画片（Y(<sup>o<sup>)Y）（ToolBar高度设为：<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code>）：</sup></sup></p>
+
+<p><figure><img src="media/15561207870710/20171014150799493830006.gif" alt=""/></figure></p>
+
+<blockquote>
+<p>（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</p>
+</blockquote>
+
+<p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code>）：</p>
+
+<p><figure><img src="media/15561207870710/20171014150799499853731.gif" alt=""/></figure></p>
+
+<blockquote>
+<p>（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。<br/>
+来个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code>）：</p>
+</blockquote>
+
+<p><figure><img src="media/15561207870710/20171014150799505696205.gif" alt=""/></figure></p>
+
+<h3 id="toc_3">将AppBarLayout与ScrollView关联起来</h3>
+
+<p>前面说了一直反复说“当ScrollView发生滚动时”，那么怎么将AppBarLayout与ScrollView关联起来呢？我们注意到，AppBarLayout与ScrollView之间动作“相互依赖”，这不就是我们上一篇<a href="http://blog.csdn.net/huachao1001/article/details/51554608">《CoordinateLayout的使用如此简单 》</a>所学的内容吗？把ScrollView和AppBarLayout作为CoordinateLayout的子View，然后编写一个Behavior，在这个Behavior里面判断当前的操作是应该让ScrollView时刻保持在AppBarLayout之下（即只要改变AppBarLayout的位置就可以一起滑动），还是应该让ScrollView内部滚动而不让AppBarLayout位置发生变化等等这些需求，都是可以在Behavior里面处理的。你可以去针对你的ScrollView编写Behavior。然而，我们看到我们的AppBarLayout事先的功能比较复杂，如果我们自己去定义这样的效果，代码非常复杂，还要考虑很多方面，好在Android帮我们写好啦，我们直接用就是了，这个ScrollView就是NestedScrollView，请注意，它并没有继承ScrollView，它继承的是FrameLayout，但是它实现的效果把它可以看成是ScrollView。</p>
+
+<p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
+
+<pre class="line-numbers"><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
+
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
+
+       &lt;!--将你的内容放在这里--&gt;
+
+&lt;/android.support.v4.widget.NestedScrollView&gt;
+</code></pre>
+
+<p>有没有注意到有个属性：<code>app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</code>,它就是指定Behavior的，<code>appbar_scrolling_view_behavior</code>对应的类的名称是：<code>android.support.design.widget.AppBarLayout$ScrollingViewBehavior</code>感兴趣的可以去分析源码。</p>
+
+<p>好了，我们现在会用AppBarLayout啦~是不是发现用起来so easy!接下来我们把剩下<code>CollapsingToolbarLayout</code>的给&quot;消化&quot;掉！</p>
+
+<h2 id="toc_4">CollapsingToolbarLayout</h2>
+
+<p>CollapsingToolbarLayout是用来对Toolbar进行再次包装的ViewGroup，主要是用于实现折叠（其实就是看起来像伸缩~）的App Bar效果。它需要放在AppBarLayout布局里面，并且作为AppBarLayout的直接子View。CollapsingToolbarLayout主要包括几个功能（参照了官方网站上内容，略加自己的理解进行解释）：</p>
+
+<blockquote>
+<p>(1) 折叠Title（Collapsing title）：当布局内容全部显示出来时，title是最大的，但是随着View逐步移出屏幕顶部，title变得越来越小。你可以通过调用<code>setTitle</code>函数来设置title。  </p>
+
+<p>(2)内容纱布（Content scrim）：根据滚动的位置是否到达一个阀值，来决定是否对View“盖上纱布”。可以通过<code>setContentScrim(Drawable)</code>来设置纱布的图片.  </p>
+
+<p>(3)状态栏纱布（Status bar scrim)：根据滚动位置是否到达一个阀值决定是否对状态栏“盖上纱布”，你可以通过<code>setStatusBarScrim(Drawable)</code>来设置纱布图片，但是只能在LOLLIPOP设备上面有作用。  </p>
+
+<p>(4)视差滚动子<code>View(Parallax scrolling children)</code>:子View可以选择在当前的布局当时是否以“视差”的方式来跟随滚动。<strong>（PS:其实就是让这个View的滚动的速度比其他正常滚动的View速度稍微慢一点）</strong>。将布局参数<code>app:layout_collapseMode</code>设为<code>parallax</code> </p>
+
+<p>(5)将子View位置固定(Pinned position children)：子View可以选择是否在全局空间上固定位置，这对于Toolbar来说非常有用，因为当布局在移动时，可以将Toolbar固定位置而不受移动的影响。 将app:layout_collapseMode设为pin。</p>
+</blockquote>
+
+<p>了解这些概念后，我们来看看布局吧~</p>
+
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+    android:layout_width=&quot;match_parent&quot;
+    android:layout_height=&quot;match_parent&quot; &gt;
+
+
+    &lt;android.support.design.widget.AppBarLayout
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
+
+        &lt;android.support.design.widget.CollapsingToolbarLayout
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            app:expandedTitleMarginEnd=&quot;64dp&quot;
+            app:expandedTitleMarginStart=&quot;48dp&quot;
+            app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;&gt;
+
+            &lt;ImageView
+                android:id=&quot;@+id/main.backdrop&quot;
+                android:layout_width=&quot;wrap_content&quot;
+                android:layout_height=&quot;300dp&quot;
+                android:scaleType=&quot;centerCrop&quot;
+                android:src=&quot;@drawable/material_img&quot;
+                app:layout_collapseMode=&quot;parallax&quot; /&gt;
+
+            &lt;android.support.v7.widget.Toolbar
+                android:id=&quot;@+id/toolbar&quot;
+                android:layout_width=&quot;match_parent&quot;
+                android:layout_height=&quot;?android:attr/actionBarSize&quot;
+                app:layout_collapseMode=&quot;pin&quot;  /&gt;
+
+        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;
+    &lt;/android.support.design.widget.AppBarLayout&gt;
+
+    &lt;android.support.v4.widget.NestedScrollView
+
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:paddingTop=&quot;50dp&quot;
+        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
+
+        &lt;TextView
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;wrap_content&quot;
+            android:text=&quot;@string/my_txt&quot;
+            android:textSize=&quot;20sp&quot; /&gt;
+
+    &lt;/android.support.v4.widget.NestedScrollView&gt;
+
+&lt;/android.support.design.widget.CoordinatorLayout&gt;
+</code></pre>
+
+<p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
+
+<p><figure><img src="media/15561207870710/20171014150799532425417.gif" alt=""/></figure></p>
+
+<p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>&quot;，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
+
+<p>献上<a href="http://download.csdn.net/detail/huachao1001/9538934">源码</a></p>
+
+<h2 id="toc_5">AppBarLayout的ScrollFlags属性</h2>
+
+<p>在前面两篇MD系列的文章中，通过两个案例基本上能够掌握了CoordinatorLayout与AppBarLayout的配合使用。本文我们回过头来详细聊聊AppBarLayout的ScrollFlags属性，了解一下不同值之间的区别。至此，Android Material Design系列的学习已进行到第七篇，大家可以点击以下链接查看之前的文章：</p>
+
+<ul>
+<li><a href="http://www.jianshu.com/p/39a66373498c">Android TabLayout 分分钟打造一个滑动标签页</a></li>
+<li><a href="http://www.jianshu.com/p/9eb3b17b0e77">Android 一文告诉你到底是用Dialog，Snackbar，还是Toast</a></li>
+<li><a href="http://www.jianshu.com/p/5328b2eee827">Android FloatingActionButton 重要的操作不要太多，一个就好</a></li>
+<li><a href="http://www.jianshu.com/p/ab04627cce58">Android 初识AppBarLayout 和 CoordinatorLayout</a></li>
+<li><a href="http://www.jianshu.com/p/4b0f3c80ebc9">Android CoordinatorLayout实战案例学习《一》</a></li>
+<li><a href="http://www.jianshu.com/p/360fd368936d">Android CoordinatorLayout 实战案例学习《二》</a></li>
+</ul>
+
+<p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
+
+<pre class="line-numbers"><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
+AppBarLayout.LayoutParams params = 
+    (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
+params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
+    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
+</code></pre>
+
+<p>下面我们通过官网介绍、XML代码和对应的效果图分别分析这五种值的使用（备注：代码中设置也一样，不再赘述）：</p>
+
+<h3 id="toc_6">scroll</h3>
+
+<blockquote>
+<p>The view will be scroll in direct relation to scroll events. This flag needs to be set for any of the other flags to take effect. If any sibling views before this one do not have this flag, then this value has no effect.</p>
+</blockquote>
+
+<p>Child View 伴随着滚动事件而滚出或滚进屏幕。注意两点：第一点，如果使用了其他值，必定要使用这个值才能起作用；第二点：如果在这个child View前面的任何其他Child View没有设置这个值，那么这个Child View的设置将失去作用。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
+        android:id=&quot;@+id/appbar&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
+
+        &lt;android.support.v7.widget.Toolbar
+            xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
+            android:id=&quot;@+id/tb_toolbar&quot;
+            android:layout_width=&quot;match_parent&quot;
+            android:layout_height=&quot;@dimen/dp_56&quot;
+            app:titleTextColor=&quot;@color/white&quot;
+            app:title=&quot;@string/app_name&quot;
+            app:theme=&quot;@style/OverFlowMenuTheme&quot;
+            app:popupTheme=&quot;@style/AppTheme&quot;
+            android:background=&quot;@color/blue&quot;
+            app:layout_scrollFlags=&quot;scroll|enterAlways&quot;/&gt;
+
+    &lt;/android.support.design.widget.AppBarLayout&gt;
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842247229844.gif" alt=""/></figure></p>
+
+<h3 id="toc_7">enterAlways</h3>
+
+<blockquote>
+<p>When entering (scrolling on screen) the view will scroll on any downwards scroll event, regardless of whether the scrolling view is also scrolling. This is commonly referred to as the &#39;quick return&#39; pattern.</p>
+</blockquote>
+
+<p>快速返回模式。其实就是向下滚动时Scrolling View和Child View之间的滚动优先级问题。对比<code>scroll</code>和<code>scroll | enterAlways</code>设置，发生向下滚动事件时，前者优先滚动Scrolling View，后者优先滚动Child View，当优先滚动的一方已经全部滚进屏幕之后，另一方才开始滚动。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-java">...
+app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
+...
+
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842251698266.gif" alt=""/></figure></p>
+
+<h3 id="toc_8">enterAlwaysCollapsed</h3>
+
+<blockquote>
+<p>An additional flag for &#39;enterAlways&#39; which modifies the returning view to only initially scroll back to it&#39;s collapsed height. Once the scrolling view has reached the end of it&#39;s scroll range, the remainder of this view will be scrolled into view. The collapsed height is defined by the view&#39;s minimum height.</p>
+</blockquote>
+
+<p>enterAlways的附加值。这里涉及到Child View的高度和最小高度，向下滚动时，Child View先向下滚动最小高度值，然后Scrolling View开始滚动，到达边界时，Child View再向下滚动，直至显示完全。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">...
+android:layout_height=&quot;@dimen/dp_200&quot;
+android:minHeight=&quot;@dimen/dp_56&quot;
+...
+app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
+...
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842256217688.gif" alt=""/></figure></p>
+
+<h3 id="toc_9">exitUntilCollapsed</h3>
+
+<blockquote>
+<p>When exiting (scrolling off screen) the view will be scrolled until it is &#39;collapsed&#39;. The collapsed height is defined by the view&#39;s minimum height.</p>
+</blockquote>
+
+<p>这里也涉及到最小高度。发生向上滚动事件时，Child View向上滚动退出直至最小高度，然后Scrolling View开始滚动。也就是，Child View不会完全退出屏幕。</p>
+
+<p>示例SML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">...
+android:layout_height=&quot;@dimen/dp_200&quot;
+android:minHeight=&quot;@dimen/dp_56&quot;
+...
+app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
+...
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842260265572.gif" alt=""/></figure></p>
+
+<h3 id="toc_10">snap</h3>
+
+<blockquote>
+<p>Upon a scroll ending, if the view is only partially visible then it will be snapped and scrolled to it&#39;s closest edge. For example, if the view only has it&#39;s bottom 25% displayed, it will be scrolled off screen completely. Conversely, if it&#39;s bottom 75% is visible then it will be scrolled fully into view.</p>
+</blockquote>
+
+<p>简单理解，就是Child View滚动比例的一个吸附效果。也就是说，Child View不会存在局部显示的情况，滚动Child View的部分高度，当我们松开手指时，Child View要么向上全部滚出屏幕，要么向下全部滚进屏幕，有点类似ViewPager的左右滑动。</p>
+
+<p>示例XML代码：</p>
+
+<pre class="line-numbers"><code class="language-markup">...
+android:layout_height=&quot;@dimen/dp_200&quot;
+...
+app:layout_scrollFlags=&quot;scroll|snap&quot;
+...
+</code></pre>
+
+<p>对应效果图：</p>
+
+<p><figure><img src="media/15561207870710/20171019150842265497458.gif" alt=""/></figure></p>
+
+<h3 id="toc_11">示例源码</h3>
+
+<p>我在GitHub上建立了一个Repository，用来存放整个Android Material Design系列控件的学习案例，会伴随着文章逐渐更新完善，欢迎大家补充交流，Star地址：</p>
+
+<p><a href="https://github.com/Mike-bel/MDStudySamples">https://github.com/Mike-bel/MDStudySamples</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/8/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207870673.html">
                 
                   <h1>Android-Debug</h1>
@@ -3760,151 +4138,6 @@ binding = MyLayoutBinding.inflate(layoutInflater, myComponent);
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207870348.html">
-                
-                  <h1>Android-ViewStub详细学习</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>在开发应用程序的时候，经常会遇到这样的情况，会在运行时动态根据条件来决定显示哪个View或某个布局。那么最通常的想法就是把可能用到的View都写在上面，先把它们的可见性都设为<code>View.GONE</code>，然后在代码中动态的更改它的可见性。这样的做法的优点是逻辑简单而且控制起来比较灵活。但是它的缺点就是，耗费资源。虽然把View的初始可见<code>View.GONE</code>但是在Inflate布局的时候View仍然会被Inflate，也就是说仍然会创建对象，会被实例化，会被设置属性。也就是说，会耗费内存等资源。</p>
-
-<h2 id="toc_1">ViewStub</h2>
-
-<p>上面的问题，推荐的做法是使用 Android.view.ViewStub，ViewStub是一个轻量级的View，它一个看不见的，不占布局位置，占用资源非常小的控件。可以为ViewStub指定一个布局，在Inflate布局的时候，只有ViewStub会被初始化，然后当ViewStub被设置为可见的时候，或是调用了<code>ViewStub.inflate()</code>的时候，ViewStub所向的布局就会被Inflate和实例化，然后ViewStub的布局属性都会传给它所指向的布局。这样，就可以使用ViewStub来方便的在运行时，要还是不要显示某个布局。<br/>
-但ViewStub也不是万能的，下面总结下ViewStub能做的事儿和什么时候该用ViewStub，什么时候该用可见性的控制。</p>
-
-<h2 id="toc_2">特点</h2>
-
-<ul>
-<li>ViewStub只能Inflate一次，之后ViewStub对象会被置为空。按句话说，某个被ViewStub指定的布局被Inflate后，就不能够再通过ViewStub来控制它了。</li>
-<li>ViewStub只能用来Inflate一个布局文件，而不是某个具体的View，当然也可以把View写在某个布局文件中。</li>
-</ul>
-
-<h2 id="toc_3">可以考虑使用ViewStub的情况</h2>
-
-<ul>
-<li>在程序的运行期间，某个布局在Inflate后，就不会有变化，除非重新启动。因为ViewStub只能Inflate一次，之后会被置空，所以无法指望后面接着使用ViewStub来控制布局。所以当需要<em>在运行时不止一次的显示和隐藏某个布局</em>，那么ViewStub是做不到的。这时就只能使用View的可见性来控制了。</li>
-<li>想要控制显示与隐藏的是一个布局文件，而非某个View。因为设置给ViewStub的只能是某个布局文件的Id，所以无法让它来控制某个View。所以，如果想要控制某个View(如Button或TextView)的显示与隐藏，或者想要在运行时不断的显示与隐藏某个布局或View，只能使用View的可见性来控制。</li>
-</ul>
-
-<h2 id="toc_4">下面来看一个实例</h2>
-
-<p>在这个例子中，要显示二种不同的布局，一个是用TextView显示一段文字，另一个则是用ImageView显示一个图片。这二个是在onCreate()时决定是显示哪一个，这里就是应用ViewStub的最佳地点。</p>
-
-<p>先来看看布局，一个是主布局，里面只定义二个ViewStub，一个用来控制TextView一个用来控制ImageView，另外就是一个是为显示文字的做的TextView布局，一个是为ImageView而做的布局：</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
-&lt;LinearLayout  
-  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
-  android:orientation=&quot;vertical&quot;  
-  android:layout_width=&quot;fill_parent&quot;  
-  android:layout_height=&quot;fill_parent&quot;  
-  android:gravity=&quot;center_horizontal&quot;&gt;  
-  &lt;ViewStub   
-    android:id=&quot;@+id/viewstub_demo_text&quot;  
-    android:layout_width=&quot;wrap_content&quot;  
-    android:layout_height=&quot;wrap_content&quot;  
-    android:layout_marginLeft=&quot;5dip&quot;  
-    android:layout_marginRight=&quot;5dip&quot;  
-    android:layout_marginTop=&quot;10dip&quot;  
-    android:layout=&quot;@layout/viewstub_demo_text_layout&quot;/&gt;  
-  &lt;ViewStub   
-    android:id=&quot;@+id/viewstub_demo_image&quot;  
-    android:layout_width=&quot;wrap_content&quot;  
-    android:layout_height=&quot;wrap_content&quot;  
-    android:layout_marginLeft=&quot;5dip&quot;  
-    android:layout_marginRight=&quot;5dip&quot;  
-    android:layout=&quot;@layout/viewstub_demo_image_layout&quot;/&gt;  
-&lt;/LinearLayout&gt;
-</code></pre>
-
-<p>为TextView的布局：</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
-&lt;LinearLayout  
-  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
-  android:orientation=&quot;vertical&quot;  
-  android:layout_width=&quot;wrap_content&quot;  
-  android:layout_height=&quot;wrap_content&quot;&gt;  
-    &lt;TextView  
-        android:id=&quot;@+id/viewstub_demo_textview&quot;  
-        android:layout_width=&quot;fill_parent&quot;  
-        android:layout_height=&quot;wrap_content&quot;  
-        android:background=&quot;#aa664411&quot;  
-        android:textSize=&quot;16sp&quot;/&gt;  
-&lt;/LinearLayout&gt;
-</code></pre>
-
-<p>为ImageView的布局：</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;  
-&lt;LinearLayout  
-  xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
-  android:orientation=&quot;vertical&quot;  
-  android:layout_width=&quot;wrap_content&quot;  
-  android:layout_height=&quot;wrap_content&quot;&gt;  
-    &lt;ImageView  
-        android:id=&quot;@+id/viewstub_demo_imageview&quot;  
-        android:layout_width=&quot;wrap_content&quot;  
-        android:layout_height=&quot;wrap_content&quot;/&gt;  
-&lt;/LinearLayout&gt;
-</code></pre>
-
-<p>下面来看代码，决定来显示哪一个，只需要找到相应的ViewStub然后调用其infalte()就可以获得相应想要的布局：</p>
-
-<pre class="line-numbers"><code class="language-java">public class ViewStubDemoActivity extends Activity {  
-    @Override  
-    public void onCreate(Bundle savedInstanceState) {  
-        super.onCreate(savedInstanceState);  
-        setContentView(R.layout.viewstub_demo_activity);  
-        if ((((int) (Math.random() * 100)) &amp; 0x01) == 0) {  
-            // to show text  
-            // all you have to do is inflate the ViewStub for textview  
-            ViewStub stub = (ViewStub) findViewById(R.id.viewstub_demo_text);  
-            stub.inflate();  
-            TextView text = (TextView) findViewById(R.id.viewstub_demo_textview);  
-            text.setText(&quot;The tree of liberty must be refreshed from time to time&quot; +  
-                    &quot; with the blood of patroits and tyrants! Freedom is nothing but &quot; +  
-                    &quot;a chance to be better!&quot;);  
-        } else {  
-            // to show image  
-            // all you have to do is inflate the ViewStub for imageview  
-            ViewStub stub = (ViewStub) findViewById(R.id.viewstub_demo_image);  
-            stub.inflate();  
-            ImageView image = (ImageView) findViewById(R.id.viewstub_demo_imageview);  
-            image.setImageResource(R.drawable.happy_running_dog);  
-        }  
-    }  
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/8/8</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -4090,7 +4323,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

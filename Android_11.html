@@ -116,6 +116,260 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207869292.html">
+                
+                  <h1>EventBus 3.0的使用</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>一直用Handler来处理应用内的通信，但是发现局限性还是太大了。EventBus是一个Android端优化的publish/subscribe消息总线，简化了应用程序内各组件间、组件与后台线程间的通信。比如请求网络，等网络返回时通过Handler或Broadcast通知UI，两个Fragment之间需要通过Listener通信，这些需求都可以通过EventBus实现。</p>
+
+<h2 id="toc_1">使用EventBus</h2>
+
+<h3 id="toc_2">添加依赖库</h3>
+
+<p><code>compile &#39;org.greenrobot:eventbus:3.0.0&#39;</code></p>
+
+<h3 id="toc_3">注册</h3>
+
+<p>举个例子，你需要在一个activity中注册eventbus事件，然后定义接收方法，这和Android的广播机制很像，你需要首先注册广播，然后需要编写内部类，实现接收广播，然后操作UI,在EventBus中，你同样需要这么做。</p>
+
+<pre class="line-numbers"><code class="language-java">@Override
+protected void onCreate(Bundle savedInstanceState) {
+    super.onCreate(savedInstanceState);
+    setContentView(R.layout.activity_main);
+
+    EventBus.getDefault().register(this);
+
+}
+@Override
+protected void onDestroy() {
+    super.onDestroy();
+    EventBus.getDefault().unregister(this);
+}
+</code></pre>
+
+<h3 id="toc_4">订阅者</h3>
+
+<p>类似广播，但是有别于2.4版本，你不必再去约定OnEvent方法开头了:</p>
+
+<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
+public void helloEventBus(String message){
+    mText.setText(message);
+}
+</code></pre>
+
+<p>该操作很简单，定义了一个hello方法，需要传入String参数，在其中操作UI操作，注意：<br/>
+我们添加了注解@Subscribe，其含义为订阅者，在其内传入了threadMode，我们定义为ThreadMode.MainThread，其含义为该方法在UI线程完成，这样你就不要担心抛出异常啦。是不是很简单？</p>
+
+<h3 id="toc_5">发布者</h3>
+
+<p>既然你在某个地方订阅了内容，当然就会在某个地方发布消息。举个例子，你的这个activity需要http请求，而http请求你肯定是在异步线程中操作，其返回结果后，你可以这么写：</p>
+
+<pre class="line-numbers"><code class="language-java">String json=&quot;&quot;;
+EventBus.getDefault().post(json);
+</code></pre>
+
+<p>这样就OK了，你可以试下能否正常运行了！</p>
+
+<h2 id="toc_6">原理初探</h2>
+
+<p>你订阅了内容，所以你需要在该类注册EventBus，而你订阅的方法需要传入String,即你的接收信息为String类型，那么在post的时候，你post出去的也应该是String类型，其才会接收到消息。</p>
+
+<h3 id="toc_7">如果你post的是对象</h3>
+
+<p>首先你需要定义一个类似pojo类：</p>
+
+<pre class="line-numbers"><code class="language-java">public class MessageEvent {
+  public final String name;
+  public final String password;
+  public MessageEvent(String name,String password) {
+    this.name = name;
+    this.password=password;
+  }
+}
+</code></pre>
+
+<h3 id="toc_8">然后你post的时候：</h3>
+
+<p><code>EventBus.getDefault().post(new MessageEvent(&quot;hello&quot;,&quot;world&quot;));</code></p>
+
+<h3 id="toc_9">当然，你接收的方法也需要改为：</h3>
+
+<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MainThread)
+public void helloEventBus(MessageEvent message){
+    mText.setText(message.name);
+}
+</code></pre>
+
+<h2 id="toc_10">ThreadMode提供了四个常量：</h2>
+
+<ul>
+<li>MainThread 主线程</li>
+<li>BackgroundThread 后台线程</li>
+<li>Async 后台线程</li>
+<li>PostThread 发送线程（默认）</li>
+</ul>
+
+<p>BackgroundThread:当事件是在UI线程发出，那么事件处理实际上是需要新建单独线程，如果是在后台线程发出，那么事件处理就在该线程。该事件处理方法应该是快速的，避免阻塞后台线程。<br/><br/>
+Async：发送事件方不需要等待事件处理完毕。这种方式适用于该事件处理方法需要较长时间，例如网络请求。</p>
+
+<h2 id="toc_11">EventBus黏性事件</h2>
+
+<p>EventBus除了普通事件也支持粘性事件，这个有点类似广播分类中的粘性广播。本身粘性广播用的就比较少，为了方便理解成订阅在发布事件之后，但同样可以收到事件。订阅/解除订阅和普通事件一样，但是处理订阅函数有所不同，需要注解中添加<code>sticky = true</code></p>
+
+<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,sticky = true) //在ui线程执行
+    public void onDataSynEvent(DataSynEvent event) {
+        Log.e(TAG, &quot;event----&gt;&quot; + event.getCount());
+}
+</code></pre>
+
+<h3 id="toc_12">发送粘性事件</h3>
+
+<p><code>EventBus.getDefault().postSticky(new DataSynEvent());</code>  </p>
+
+<h3 id="toc_13">对于粘性广播我们都比较清楚属于常驻广播，对于EventBus粘性事件也类似，我们如果不再需要该粘性事件我们可以移除</h3>
+
+<p><code>EventBus.getDefault().removeStickyEvent(new DataSynEvent());</code>  </p>
+
+<h3 id="toc_14">或者调用移除所有粘性事件</h3>
+
+<p><code>EventBus.getDefault().removeAllStickyEvents();</code>  </p>
+
+<p>默认情况下，其为false。什么情况下使用sticky呢？<br/><br/>
+当你希望你的事件不被马上处理的时候，举个栗子，比如说，在一个详情页点赞之后，产生一个VoteEvent，VoteEvent并不立即被消费，而是等用户退出详情页回到商品列表之后，接收到该事件，然后刷新Adapter等。其实这就是之前我们用startActivityForResult和onActivityResult做的事情。  </p>
+
+<h2 id="toc_15">订阅事件的优先级</h2>
+
+<p>事件的优先级类似广播的优先级，优先级越高优先获得消息</p>
+
+<pre class="line-numbers"><code class="language-java">@Subscribe(threadMode = ThreadMode.MAIN,priority = 100) //在ui线程执行 优先级100
+    public void onDataSynEvent(DataSynEvent event) {
+        Log.e(TAG, &quot;event----&gt;&quot; + event.getCount());
+}
+</code></pre>
+
+<h2 id="toc_16">终止事件往下传递</h2>
+
+<p>发送有序广播可以终止广播的继续往下传递，EventBus也实现了此功能<br/>
+<code>EventBus.getDefault().cancelEventDelivery(event) ;//优先级高的订阅者可以终止事件往下传递</code></p>
+
+<h2 id="toc_17">建议</h2>
+
+<p>推荐大家在使用EventBus的时候，创建一个事件类，把你的每一个参数（或者可能发生冲突的参数），封装成一个类：</p>
+
+<pre class="line-numbers"><code class="language-java">public class Event  {  
+    public static class UserListEvent {  
+        public List&lt;User&gt; users ;  
+    }
+    public static class ItemListEvent {  
+        public List&lt;Item&gt; items;  
+    }    
+}
+</code></pre>
+
+<h2 id="toc_18">processor使用</h2>
+
+<p>按照Markus Junginger的说法（EventBus创作者），在3.0中，如果你想进一步提升你的app的性能.<br/>
+EventBus提供了一个EventBusAnnotationProcessor注解处理器来在编译期通过读取@Subscribe()注解并解析,处理其中所包含的信息,然后生成java类来保存所有订阅者关于订阅的信息,这样就比在运行时使用反射来获得这些订阅者的信息速度要快.<br/><br/>
+其在编译的时候为注册类构建了一个索引，而不是在运行时，这样的结果是其让EventBus 3.0的性能提升了一倍，相比2.4来说，其会是它的3到6倍。大家可以感受下：<br/><br/>
+<figure><img src="media/15561207869292/15713067794323.jpg" alt=""/></figure></p>
+
+<h3 id="toc_19">具体使用：在build.gradle中添加如下配置</h3>
+
+<pre class="line-numbers"><code class="language-text">buildscript {
+    dependencies {
+        classpath &#39;com.neenbedankt.gradle.plugins:android-apt:1.8&#39;
+    }
+}
+apply plugin: &#39;com.neenbedankt.android-apt&#39;
+
+dependencies {
+    compile &#39;org.greenrobot:eventbus:3.0.0&#39;
+    apt &#39;org.greenrobot:eventbus-annotation-processor:3.0.1&#39;
+}
+apt {
+    arguments {
+        eventBusIndex &quot;com.whoislcj.eventbus.MyEventBusIndex&quot;
+    }
+}
+</code></pre>
+
+<h3 id="toc_20">使用索引</h3>
+
+<p>此时编译一次，自动生成生成索引类。在\build\generated\source\apt\PakageName\下看到通过注解分析生成的索引类，这样我们便可以在初始化EventBus时应用我们生成的索引了。自动生成的代码。</p>
+
+<pre class="line-numbers"><code class="language-java">/** This class is generated by EventBus, do not edit. */
+public class MyEventBusIndex implements SubscriberInfoIndex {
+    private static final Map&lt;Class&lt;?&gt;, SubscriberInfo&gt; SUBSCRIBER_INDEX;
+
+    static {
+        SUBSCRIBER_INDEX = new HashMap&lt;Class&lt;?&gt;, SubscriberInfo&gt;();
+
+        putIndex(new SimpleSubscriberInfo(com.whoislcj.testhttp.MainActivity.class, true, new SubscriberMethodInfo[] {
+            new SubscriberMethodInfo(&quot;onDataSynEvent&quot;, com.whoislcj.testhttp.eventBus.DataSynEvent.class,
+                    ThreadMode.MAIN, 100, false),
+            new SubscriberMethodInfo(&quot;onDataSynEvent1&quot;, com.whoislcj.testhttp.eventBus.TestEvent.class, ThreadMode.MAIN,
+                    0, true),
+        }));
+
+    }
+
+    private static void putIndex(SubscriberInfo info) {
+        SUBSCRIBER_INDEX.put(info.getSubscriberClass(), info);
+    }
+
+    @Override
+    public SubscriberInfo getSubscriberInfo(Class&lt;?&gt; subscriberClass) {
+        SubscriberInfo info = SUBSCRIBER_INDEX.get(subscriberClass);
+        if (info != null) {
+            return info;
+        } else {
+            return null;
+        }
+    }
+}
+</code></pre>
+
+<p>添加索引到EventBus默认的单例中<br/><br/>
+<code>EventBus.builder().addIndex(new MyEventBusIndex()).installDefaultEventBus();</code>  </p>
+
+<h3 id="toc_21">对比添加前后注册效率对比</h3>
+
+<p>分别EventBus.getDefault().register(this);</p>
+
+<ul>
+<li>添加之前：前后用了9毫秒</li>
+<li>添加之后：前后用了2毫秒</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/4/2</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207869255.html">
                 
                   <h1>GreenDao3.2.0的使用</h1>
@@ -747,120 +1001,608 @@ public class Shop{
                       
                       <div class="a-content-text">
                         
-                        	<h2 id="toc_0">查看设备</h2>
+                        	<h2 id="toc_0">基本命令</h2>
 
-<pre class="line-numbers"><code class="language-text">adb devices
-</code></pre>
+<ul>
+<li>进入指定设备 <code>adb -s serialNumber shell</code></li>
+<li>查看版本 <code>adb version</code></li>
+<li>查看日志 <code>adb logcat</code></li>
+<li>查看设备 <code>adb devices</code></li>
+<li>连接状态 <code>adb get-state</code></li>
+<li>启动ADB服务 <code>adb start-server</code></li>
+<li>停止ADB服务 <code>adb kill-server</code></li>
+<li>电脑推送到手机 <code>adb push [local path] [remote path]</code></li>
+<li>手机拉取到电脑 <code>adb pull [remote path] [local path]</code></li>
+</ul>
 
-<p>这个命令是查看当前连接的设备, 连接到计算机的android设备或者模拟器将会列出显示</p>
+<h2 id="toc_1">adb shell下的am 与 pm</h2>
 
-<h2 id="toc_1">安装软件</h2>
+<blockquote>
+<p>注:am和pm命令必须先切换到adb shell模式下才能使用</p>
+</blockquote>
 
-<pre class="line-numbers"><code class="language-text">adb install &lt;apk文件路径&gt;
-</code></pre>
+<h3 id="toc_2">am</h3>
 
-<p>这个命令将指定的apk文件安装到设备上</p>
+<p>am全称activity manager，你能使用am去模拟各种系统的行为，例如去启动一个activity，强制停止进程，发送广播进程，修改设备屏幕属性等等。当你在adb shell命令下执行am命令:</p>
 
-<h2 id="toc_2">卸载软件</h2>
+<p><strong>am <command></strong></p>
 
-<pre class="line-numbers"><code class="language-text">adb uninstall &lt;软件名&gt;
-adb uninstall -k &lt;软件名&gt;
-</code></pre>
+<ul>
+<li>启动app <code>am start -n {packageName}/.{activityName}</code></li>
+<li>杀app的进程 <code>am kill &lt;packageName&gt;</code></li>
+<li>强制停止一切 <code>am force-stop &lt;packageName&gt;</code></li>
+<li>启动服务 <code>am startservice</code></li>
+<li>停止服务 <code>am stopservice</code></li>
+<li>打开简书 <code>am start -a android.intent.action.VIEW -d http://www.jianshu.cn/</code></li>
+<li>拨打10086 <code>am start -a android.intent.action.CALL -d tel:10086</code></li>
+</ul>
 
-<p>如果加 -k 参数,为卸载软件但是保留配置和缓存文件.</p>
+<h3 id="toc_3">pm</h3>
 
-<h2 id="toc_3">进入设备或模拟器的shell</h2>
+<p>pm全称package manager，你能使用pm命令去模拟Android行为或者查询设备上的应用等，当你在adb shell命令下执行pm命令：</p>
 
-<pre class="line-numbers"><code class="language-text">adb shell
-</code></pre>
+<p><strong>pm <command></strong></p>
 
-<p>通过上面的命令，就可以进入设备或模拟器的shell环境中，在这个Linux Shell中，你可以执行各种Linux的命令，另外如果只想执行一条shell命令，可以采用以下的方式：</p>
+<ul>
+<li>列出手机所有的包名 <code>pm list packages</code></li>
+<li>安装/卸载 <code>pm install/uninstall</code></li>
+</ul>
 
-<pre class="line-numbers"><code class="language-text">adb shell [command]
-</code></pre>
+<h2 id="toc_4">模拟用户事件</h2>
 
-<p>如：adb shell dmesg会打印出内核的调试信息。</p>
+<ul>
+<li><strong>文本输入:</strong> <code>adb shell input text &lt;string&gt;</code>
+例:手机端输出demo字符串，相应指令：<code>adb shell input &quot;demo&quot;</code>.</li>
+<li><strong>键盘事件：</strong> <code>input keyevent &lt;KEYCODE&gt;</code>，其中KEYCODE见本文结尾的附表
+例:点击返回键，相应指令： <code>input keyevent 4</code>.</li>
+<li><strong>点击事件：</strong> <code>input tap &lt;x&gt; &lt;y&gt;</code>
+例: 点击坐标（500，500），相应指令： <code>input tap 500 500</code>.</li>
+<li><strong>滑动事件：</strong> <code>input swipe &lt;x1&gt; &lt;y1&gt; &lt;x2&gt; &lt;y2&gt; &lt;time&gt;</code>
+例: 从坐标(300，500)滑动到(100，500)，相应指令： <code>input swipe 300 500 100 500</code>.<br/>
+例: 200ms时间从坐标(300，500)滑动到(100，500)，相应指令： <code>input swipe 300 500 100 500 200</code>.</li>
+</ul>
 
-<h2 id="toc_4">发布端口</h2>
+<h2 id="toc_5">logcat日志</h2>
 
-<pre class="line-numbers"><code class="language-text">adb forward tcp:5555 tcp:8000
-</code></pre>
+<ul>
+<li>显示包含的<code>logcat logcat \| grep &lt;str&gt;</code></li>
+<li>显示包含，并忽略大小写的<code>logcat logcat \| grep -i &lt;str&gt;</code></li>
+<li>读完所有log后返回，而不会一直等待 <code>logcat -d</code></li>
+<li>清空log并退出 <code>logcat -c</code></li>
+<li>打印最近的<code>count logcat -t &lt;count&gt;</code></li>
+<li>格式化输出Log，其中format有如下可选值： <code>logcat -v &lt;format&gt;</code>
+<ul>
+<li><strong>brief</strong> — 显示优先级/标记和原始进程的PID (默认格式)</li>
+<li><strong>process</strong> — 仅显示进程PID</li>
+<li><strong>tag</strong> — 仅显示优先级/标记</li>
+<li><strong>thread</strong> — 仅显示进程：线程和优先级/标记</li>
+<li><strong>raw</strong> — 显示原始的日志信息，没有其他的元数据字段</li>
+<li><strong>time</strong> — 显示日期，调用时间，优先级/标记，PID</li>
+<li><strong>long</strong> —显示所有的元数据字段并且用空行分隔消息内容</li>
+</ul></li>
+</ul>
 
-<p>可以设置任意的端口号，做为主机向模拟器或设备的请求端口。如：</p>
+<h2 id="toc_6">远程ADB</h2>
 
-<h2 id="toc_5">从电脑上发送文件到设备</h2>
+<p>为避免使用数据线，可通过wifi通信，前提是手机与PC处于同一局域网</p>
 
-<pre class="line-numbers"><code class="language-text">adb push &lt;本地路径&gt; &lt;远程路径&gt;
-</code></pre>
+<ul>
+<li><p><strong>启动方法:</strong> <code>adb tcpip 5555  //这一步，必须通过数据线把手机与PC连接后再执行</code><br/>
+<code>adb connect &lt;手机IP&gt;</code></p></li>
+<li><p>**停止方法: **<code>adb disconnect //断开wifi连接</code><br/>
+<code>adb usb //切换到usb模式</code></p></li>
+</ul>
 
-<p>用push命令可以把本机电脑上的文件或者文件夹复制到设备(手机)</p>
+<h2 id="toc_7">其他命令</h2>
 
-<h2 id="toc_6">从设备上下载文件到电脑</h2>
+<ul>
+<li>查看当前 <code>ls</code></li>
+<li>打印当前路径 <code>pwd</code></li>
+<li>查看当前连接的设备 <code>adb devices</code></li>
+<li>终止adb服务进程 <code>adb kill-server</code></li>
+<li>重启adb服务进程 <code>adb start-server</code></li>
+<li>PID是:8607 查看某个进程的日志 <code>adb logcat -v process |grep 8607</code></li>
+<li>清理缓存 <code>logcat -c</code></li>
+<li>打印xys标签log <code>adb logcat -s xys</code></li>
+<li>打印192.168.56.101:5555设备里的xys标签log <code>adb -s 192.168.56.101:5555 logcat -s xys</code></li>
+<li>打印在ActivityManager标签里包含start的日志 <code>adb logcat -s ActivityManager | findstr &quot;START&quot;</code>
+<ul>
+<li>&quot;-s&quot;选项 : 设置输出日志的标签, 只显示该标签的日志;</li>
+<li>&quot;-f&quot;选项 : 将日志输出到文件, 默认输出到标准输出流中, -f 参数执行不成功;</li>
+<li>&quot;-r&quot;选项 : 按照每千字节输出日志, 需要 -f 参数, 不过这个命令没有执行成功;</li>
+<li>&quot;-n&quot;选项 : 设置日志输出的最大数目, 需要 -r 参数, 这个执行 感觉 跟 adb logcat 效果一样;</li>
+<li>&quot;-v&quot;选项 : 设置日志的输出格式, 注意只能设置一项;</li>
+<li>&quot;-c&quot;选项 : 清空所有的日志缓存信息;</li>
+<li>&quot;-d&quot;选项 : 将缓存的日志输出到屏幕上, 并且不会阻塞;</li>
+<li>&quot;-t&quot;选项 : 输出最近的几行日志, 输出完退出, 不阻塞;</li>
+<li>&quot;-g&quot;选项 : 查看日志缓冲区信息;</li>
+<li>&quot;-b&quot;选项 : 加载一个日志缓冲区, 默认是 main, 下面详解;</li>
+<li>&quot;-B&quot;选项 : 以二进制形式输出日志;</li>
+</ul></li>
+<li>重启机器 <code>adb reboot</code></li>
+<li>获取序列号 <code>adb get-serialno</code></li>
+<li>重启到bootloader，即刷机模式 <code>adb reboot bootloader</code></li>
+<li>重启到recovery，即恢复模式 <code>adb reboot recovery</code></li>
+<li>安装APK：<code>adb install &lt;apkfile&gt; //比如：adb install baidu.apk</code></li>
+<li>安装apk到sd卡： <code>adb install -s &lt;apkfile&gt; // 比如：adb install -s baidu.apk</code></li>
+<li>卸载APK：<code>adb uninstall &lt;package&gt; //比如：adb uninstall com.baidu.search</code></li>
+<li>获取机器MAC地址 <code>adb shell cat /sys/class/net/wlan0/address</code></li>
+<li>启动应用：<code>adb shell am start -n &lt;package_name&gt;/.&lt;activity_class_name&gt; 例如:adb shell am start -n yf.o2o.store/yf.o2o.store.activity.LoginActivity</code></li>
+<li>查看占用内存排序 <code>adb shell top</code></li>
+<li>查看占用内存前6的app： <code>adb shell top -m 6</code></li>
+<li>刷新一次内存信息，然后返回：<code>adb shell top -n 1</code></li>
+<li>查询各进程内存使用情况：<code>adb shell procrank</code></li>
+<li>杀死一个进程：<code>adb shell kill [pid]</code></li>
+<li>查看进程列表：<code>adb shell ps</code></li>
+<li>查看指定进程状态：<code>adb shell ps -x [PID]</code></li>
+<li>查看后台services信息： <code>adb shell service list</code></li>
+<li>查看当前内存占用： <code>adb shell cat /proc/meminfo</code></li>
+<li>查看IO内存分区：<code>adb shell cat /proc/iomem</code></li>
+<li>将system分区重新挂载为可读写分区：<code>adb remount</code></li>
+<li>从本地复制文件到设备： <code>adb push &lt;local&gt; &lt;remote&gt;</code></li>
+<li>从设备复制文件到本地： <code>adb pull &lt;remote&gt; &lt;local&gt;</code></li>
+<li>列出目录下的文件和文件夹，等同于dos中的dir命令：<code>adb shell ls</code></li>
+<li>进入文件夹，等同于dos中的cd 命令：<code>adb shell cd &lt;folder&gt;</code></li>
+<li>重命名文件： <code>adb shell rename path/oldfilename path/newfilename</code></li>
+<li>删除system/avi.apk： <code>adb shell rm /system/avi.apk</code></li>
+<li>删除文件夹及其下面所有文件：<code>adb shell rm -r &lt;folder&gt;</code></li>
+<li>移动文件：<code>adb shell mv path/file newpath/file</code></li>
+<li>设置文件权限：<code>adb shell chmod 777 /system/fonts/DroidSansFallback.ttf</code></li>
+<li>新建文件夹：<code>adb shell mkdir path/foldelname</code></li>
+<li>查看文件内容：<code>adb shell cat &lt;file&gt;</code></li>
+<li>查看wifi密码：<code>adb shell cat /data/misc/wifi/*.conf</code></li>
+<li>清除log缓存：<code>adb logcat -c</code></li>
+<li>查看bug报告：<code>adb bugreport</code></li>
+<li>获取设备名称：<code>adb shell cat /system/build.prop</code></li>
+<li>查看ADB帮助：<code>adb help</code></li>
+<li>跑monkey：
+<ul>
+<li><code>adb shell monkey -v -p your.package.name 500</code></li>
+<li><code>adb -s 192.168.244.151:5555 shell monkey -v -p com.bolexim 500</code></li>
+</ul></li>
+</ul>
 
-<pre class="line-numbers"><code class="language-text">adb pull &lt;远程路径&gt; &lt;本地路径&gt;
-</code></pre>
+<h2 id="toc_8">附表</h2>
 
-<p>用pull命令可以把设备(手机)上的文件或者文件夹复制到本机电脑</p>
+<p>下表中， 箭头左边为keycode值，箭头右边为keycode的含义，部分用中文标注</p>
 
-<h2 id="toc_7">查看bug报告</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left">KeyCode</th>
+<th style="text-align: left">Value</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead>
 
-<pre class="line-numbers"><code class="language-text">adb bugreport
-</code></pre>
-
-<h2 id="toc_8">记录无线通讯日志</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell
-logcat -b radio
-</code></pre>
-
-<p>一般来说，无线通讯的日志非常多，在运行时没必要去记录，但我们还是可以通过命令，设置记录</p>
-
-<h2 id="toc_9">获取设备的ID和序列号</h2>
-
-<pre class="line-numbers"><code class="language-text">adb get-product
-adb get-serialno
-adb shell
-sqlite3 
-</code></pre>
-
-<h2 id="toc_10">adb shell后面跟的命令主要来自</h2>
-
-<pre class="line-numbers"><code class="language-text">源码\system\core\toolbox目录和源码\frameworks\base\cmds目录
-</code></pre>
-
-<h2 id="toc_11">删除系统应用</h2>
-
-<pre class="line-numbers"><code class="language-text">adb remount （重新挂载系统分区，使系统分区重新可写）。
-adb shell
-cd system/app
-rm *.apk
-</code></pre>
-
-<h2 id="toc_12">获取管理员权限</h2>
-
-<pre class="line-numbers"><code class="language-text">adb root
-</code></pre>
-
-<h2 id="toc_13">启动Activity</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell am start -n 包名/包名＋类名（-n 类名,-a action,-d date,-m MIME-TYPE,-c category,-e 扩展数据,等）。
-</code></pre>
-
-<h2 id="toc_14">复制文件</h2>
-
-<pre class="line-numbers"><code class="language-text">你可向一个设备或从一个设备中复制文件,复制一个文件或目录到设备或模拟器上： 
-adb push &lt;source&gt; &lt;destination&gt;&lt;/destination&gt;&lt;/source&gt; 
-如：adb push test.txt /tmp/test.txt 
-从设备或模拟器上复制一个文件或目录： 
-adb pull &lt;source&gt; &lt;destination&gt;&lt;/destination&gt;&lt;/source&gt; 
-如：adb pull /addroid/lib/libwebcore.so .
-</code></pre>
-
-<h2 id="toc_15">搜索模拟器/设备的实例</h2>
-
-<pre class="line-numbers"><code class="language-text">取得当前运行的模拟器/设备的实例的列表及每个实例的状态： 
-adb devices
-</code></pre>
+<tbody>
+<tr>
+<td style="text-align: left">0</td>
+<td style="text-align: left">KEYCODE_UNKNOWN</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">1</td>
+<td style="text-align: left">KEYCODE_MENU</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">2</td>
+<td style="text-align: left">KEYCODE_SOFT_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">3</td>
+<td style="text-align: left">KEYCODE_HOME</td>
+<td style="text-align: left">Home键</td>
+</tr>
+<tr>
+<td style="text-align: left">4</td>
+<td style="text-align: left">KEYCODE_BACK</td>
+<td style="text-align: left">返回键</td>
+</tr>
+<tr>
+<td style="text-align: left">5</td>
+<td style="text-align: left">KEYCODE_CALL</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6</td>
+<td style="text-align: left">KEYCODE_ENDCALL</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">7</td>
+<td style="text-align: left">KEYCODE_0</td>
+<td style="text-align: left">数字键0</td>
+</tr>
+<tr>
+<td style="text-align: left">8</td>
+<td style="text-align: left">KEYCODE_1</td>
+<td style="text-align: left">数字键1</td>
+</tr>
+<tr>
+<td style="text-align: left">9</td>
+<td style="text-align: left">KEYCODE_2</td>
+<td style="text-align: left">数字键2</td>
+</tr>
+<tr>
+<td style="text-align: left">10</td>
+<td style="text-align: left">KEYCODE_3</td>
+<td style="text-align: left">数字键3</td>
+</tr>
+<tr>
+<td style="text-align: left">11</td>
+<td style="text-align: left">KEYCODE_4</td>
+<td style="text-align: left">数字键4</td>
+</tr>
+<tr>
+<td style="text-align: left">12</td>
+<td style="text-align: left">KEYCODE_5</td>
+<td style="text-align: left">数字键5</td>
+</tr>
+<tr>
+<td style="text-align: left">13</td>
+<td style="text-align: left">KEYCODE_6</td>
+<td style="text-align: left">数字键6</td>
+</tr>
+<tr>
+<td style="text-align: left">14</td>
+<td style="text-align: left">KEYCODE_7</td>
+<td style="text-align: left">数字键7</td>
+</tr>
+<tr>
+<td style="text-align: left">15</td>
+<td style="text-align: left">KEYCODE_8</td>
+<td style="text-align: left">数字键8</td>
+</tr>
+<tr>
+<td style="text-align: left">16</td>
+<td style="text-align: left">KEYCODE_9</td>
+<td style="text-align: left">数字键9</td>
+</tr>
+<tr>
+<td style="text-align: left">17</td>
+<td style="text-align: left">KEYCODE_STAR</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">18</td>
+<td style="text-align: left">KEYCODE_POUND</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">19</td>
+<td style="text-align: left">KEYCODE_DPAD_UP</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">20</td>
+<td style="text-align: left">KEYCODE_DPAD_DOWN</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">21</td>
+<td style="text-align: left">KEYCODE_DPAD_LEFT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">22</td>
+<td style="text-align: left">KEYCODE_DPAD_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">23</td>
+<td style="text-align: left">KEYCODE_DPAD_CENTER</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">24</td>
+<td style="text-align: left">KEYCODE_VOLUME_UP</td>
+<td style="text-align: left">音量键+</td>
+</tr>
+<tr>
+<td style="text-align: left">25</td>
+<td style="text-align: left">KEYCODE_VOLUME_DOWN</td>
+<td style="text-align: left">音量键-</td>
+</tr>
+<tr>
+<td style="text-align: left">26</td>
+<td style="text-align: left">KEYCODE_POWER</td>
+<td style="text-align: left">Power键</td>
+</tr>
+<tr>
+<td style="text-align: left">27</td>
+<td style="text-align: left">KEYCODE_CAMERA</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">28</td>
+<td style="text-align: left">KEYCODE_CLEAR</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">29</td>
+<td style="text-align: left">KEYCODE_A</td>
+<td style="text-align: left">字母键A</td>
+</tr>
+<tr>
+<td style="text-align: left">30</td>
+<td style="text-align: left">KEYCODE_B</td>
+<td style="text-align: left">字母键B</td>
+</tr>
+<tr>
+<td style="text-align: left">31</td>
+<td style="text-align: left">KEYCODE_C</td>
+<td style="text-align: left">字母键C</td>
+</tr>
+<tr>
+<td style="text-align: left">32</td>
+<td style="text-align: left">KEYCODE_D</td>
+<td style="text-align: left">字母键D</td>
+</tr>
+<tr>
+<td style="text-align: left">33</td>
+<td style="text-align: left">KEYCODE_E</td>
+<td style="text-align: left">字母键E</td>
+</tr>
+<tr>
+<td style="text-align: left">34</td>
+<td style="text-align: left">KEYCODE_F</td>
+<td style="text-align: left">字母键F</td>
+</tr>
+<tr>
+<td style="text-align: left">35</td>
+<td style="text-align: left">KEYCODE_G</td>
+<td style="text-align: left">字母键G</td>
+</tr>
+<tr>
+<td style="text-align: left">36</td>
+<td style="text-align: left">KEYCODE_H</td>
+<td style="text-align: left">字母键H</td>
+</tr>
+<tr>
+<td style="text-align: left">37</td>
+<td style="text-align: left">KEYCODE_I</td>
+<td style="text-align: left">字母键I</td>
+</tr>
+<tr>
+<td style="text-align: left">38</td>
+<td style="text-align: left">KEYCODE_J</td>
+<td style="text-align: left">字母键J</td>
+</tr>
+<tr>
+<td style="text-align: left">39</td>
+<td style="text-align: left">KEYCODE_K</td>
+<td style="text-align: left">字母键K</td>
+</tr>
+<tr>
+<td style="text-align: left">40</td>
+<td style="text-align: left">KEYCODE_L</td>
+<td style="text-align: left">字母键L</td>
+</tr>
+<tr>
+<td style="text-align: left">41</td>
+<td style="text-align: left">KEYCODE_M</td>
+<td style="text-align: left">字母键M</td>
+</tr>
+<tr>
+<td style="text-align: left">42</td>
+<td style="text-align: left">KEYCODE_N</td>
+<td style="text-align: left">字母键N</td>
+</tr>
+<tr>
+<td style="text-align: left">43</td>
+<td style="text-align: left">KEYCODE_O</td>
+<td style="text-align: left">字母键O</td>
+</tr>
+<tr>
+<td style="text-align: left">44</td>
+<td style="text-align: left">KEYCODE_P</td>
+<td style="text-align: left">字母键P</td>
+</tr>
+<tr>
+<td style="text-align: left">45</td>
+<td style="text-align: left">KEYCODE_Q</td>
+<td style="text-align: left">字母键Q</td>
+</tr>
+<tr>
+<td style="text-align: left">46</td>
+<td style="text-align: left">KEYCODE_R</td>
+<td style="text-align: left">字母键R</td>
+</tr>
+<tr>
+<td style="text-align: left">47</td>
+<td style="text-align: left">KEYCODE_S</td>
+<td style="text-align: left">字母键S</td>
+</tr>
+<tr>
+<td style="text-align: left">48</td>
+<td style="text-align: left">KEYCODE_T</td>
+<td style="text-align: left">字母键T</td>
+</tr>
+<tr>
+<td style="text-align: left">49</td>
+<td style="text-align: left">KEYCODE_U</td>
+<td style="text-align: left">字母键U</td>
+</tr>
+<tr>
+<td style="text-align: left">50</td>
+<td style="text-align: left">KEYCODE_V</td>
+<td style="text-align: left">字母键V</td>
+</tr>
+<tr>
+<td style="text-align: left">51</td>
+<td style="text-align: left">KEYCODE_W</td>
+<td style="text-align: left">字母键W</td>
+</tr>
+<tr>
+<td style="text-align: left">52</td>
+<td style="text-align: left">KEYCODE_X</td>
+<td style="text-align: left">字母键X</td>
+</tr>
+<tr>
+<td style="text-align: left">53</td>
+<td style="text-align: left">KEYCODE_Y</td>
+<td style="text-align: left">字母键Y</td>
+</tr>
+<tr>
+<td style="text-align: left">54</td>
+<td style="text-align: left">KEYCODE_Z</td>
+<td style="text-align: left">字母键Z</td>
+</tr>
+<tr>
+<td style="text-align: left">55</td>
+<td style="text-align: left">KEYCODE_COMMA</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">56</td>
+<td style="text-align: left">KEYCODE_PERIOD</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">57</td>
+<td style="text-align: left">KEYCODE_ALT_LEFT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">58</td>
+<td style="text-align: left">KEYCODE_ALT_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">59</td>
+<td style="text-align: left">KEYCODE_SHIFT_LEFT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">60</td>
+<td style="text-align: left">KEYCODE_SHIFT_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">61</td>
+<td style="text-align: left">KEYCODE_TAB</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">62</td>
+<td style="text-align: left">KEYCODE_SPACE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">63</td>
+<td style="text-align: left">KEYCODE_SYM</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">64</td>
+<td style="text-align: left">KEYCODE_EXPLORER</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">65</td>
+<td style="text-align: left">KEYCODE_ENVELOPE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">66</td>
+<td style="text-align: left">KEYCODE_ENTER</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">67</td>
+<td style="text-align: left">KEYCODE_DEL</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">68</td>
+<td style="text-align: left">KEYCODE_GRAVE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">69</td>
+<td style="text-align: left">KEYCODE_MINUS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">70</td>
+<td style="text-align: left">KEYCODE_EQUALS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">71</td>
+<td style="text-align: left">KEYCODE_LEFT_BRACKET</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">72</td>
+<td style="text-align: left">KEYCODE_RIGHT_BRACKET</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">73</td>
+<td style="text-align: left">KEYCODE_BACKSLASH</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">74</td>
+<td style="text-align: left">KEYCODE_SEMICOLON</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">75</td>
+<td style="text-align: left">KEYCODE_APOSTROPHE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">76</td>
+<td style="text-align: left">KEYCODE_SLASH</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">77</td>
+<td style="text-align: left">KEYCODE_AT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">78</td>
+<td style="text-align: left">KEYCODE_NUM</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">79</td>
+<td style="text-align: left">KEYCODE_HEADSETHOOK</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">80</td>
+<td style="text-align: left">KEYCODE_FOCUS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">81</td>
+<td style="text-align: left">KEYCODE_PLUS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">82</td>
+<td style="text-align: left">KEYCODE_MENU</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">83</td>
+<td style="text-align: left">KEYCODE_NOTIFICATION</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">84</td>
+<td style="text-align: left">KEYCODE_SEARCH</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody>
+</table>
 
                         
                       </div>
@@ -5097,321 +5839,6 @@ UserActivity实现了IUserView及View.OnClickListener接口，同时有一个Use
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207868717.html">
-                
-                  <h1>Android Wi-Fi 直连</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Wi-Fi直连是Android 4.0(API level 14)或更高的版本的才加入的新功能，使用Wi-Fi直连相关的API可以发现并连接支持Wi-Fi直连的设备，连接之后设备之间可以通信，传输的距离比蓝牙的传输距离要远很多</p>
-
-<h2 id="toc_0">API 概述</h2>
-
-<ul>
-<li>Wi-Fi直连的方法<br/>
-类WifiP2pManager提供了一些方法来使用Wi-Fi直连的相关的接口来发现连接设备<br/></li>
-</ul>
-
-<table>
-<thead>
-<tr>
-<th>方法</th>
-<th style="text-align: center">描述</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>initialize()</td>
-<td style="text-align: center">在Wi-Fi框架中注册，必须在其他方法之前调用</td>
-</tr>
-<tr>
-<td>connect()</td>
-<td style="text-align: center">和另外的直连设备连接</td>
-</tr>
-<tr>
-<td>cancelConnect()</td>
-<td style="text-align: center">取消正在连接的动作</td>
-</tr>
-<tr>
-<td>requestConnectInfo()</td>
-<td style="text-align: center">请求已经连接的信息</td>
-</tr>
-<tr>
-<td>createGroup()</td>
-<td style="text-align: center">创建直连的设备组</td>
-</tr>
-<tr>
-<td>removeGroup()</td>
-<td style="text-align: center">删除当前的设置组</td>
-</tr>
-<tr>
-<td>requestGroupInfo()</td>
-<td style="text-align: center">请求当前组的信息</td>
-</tr>
-<tr>
-<td>discoverPeers()</td>
-<td style="text-align: center">初始化搜索</td>
-</tr>
-<tr>
-<td>requestPeers()</td>
-<td style="text-align: center">请求已经发现的设备的列表</td>
-</tr>
-</tbody>
-</table>
-
-<ul>
-<li>Wi-Fi直连的监听<br/>
-类WifiP2pManager中也提供了很多的监听接口，计时的通知当前的 activity相关的搜索和连接的<br/>
-结果</li>
-</ul>
-
-<table>
-<thead>
-<tr>
-<th>接口</th>
-<th style="text-align: center">相关的操作</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>WifiP2pManager.ActionListener</td>
-<td style="text-align: center">相关的操作：connect(), cancelConnect(), createGroup(), removeGroup(), and discoverPeers()</td>
-</tr>
-<tr>
-<td>WifiP2pManager.ChannelListener</td>
-<td style="text-align: center">相关的操作：initialize()</td>
-</tr>
-<tr>
-<td>WifiP2pManager.ConnectionInfoListener</td>
-<td style="text-align: center">相关的操作：requestConnectInfo()</td>
-</tr>
-<tr>
-<td>WifiP2pManager.GroupInfoListener</td>
-<td style="text-align: center">相关的操作：requestGroupInfo()</td>
-</tr>
-<tr>
-<td>WifiP2pManager.PeerListListener</td>
-<td style="text-align: center">相关的操作：requestPeers()</td>
-</tr>
-</tbody>
-</table>
-
-<ul>
-<li>Wi-Fi直连的Intent</li>
-</ul>
-
-<table>
-<thead>
-<tr>
-<th>Intent</th>
-<th style="text-align: center">描述</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>WIFI_P2P_CONNECTION_CHANGED_ACTION</td>
-<td style="text-align: center">当设备的Wi-Fi的连接状态发生变化时触发</td>
-</tr>
-<tr>
-<td>WIFI_P2P_PEERS_CHANGED_ACTION</td>
-<td style="text-align: center">在调用discoverPeers()时触发，可以调用requestPeers()方法更新设备列表</td>
-</tr>
-<tr>
-<td>WIFI_P2P_STATE_CHANGED_ACTION</td>
-<td style="text-align: center">Wi-Fi直连的状态发生变化时触发</td>
-</tr>
-<tr>
-<td>WIFI_P2P_THIS_DEVICE_CHANGED_ACTION</td>
-<td style="text-align: center">Wi-Fi直连的设备的详细信息发生变化时触发</td>
-</tr>
-</tbody>
-</table>
-
-<h2 id="toc_1">创建Wi-Fi直连的应用</h2>
-
-<ul>
-<li>初始化设置<br/>
-首先要保证设置支持Wi-Fi直连相关的协议，如果支持，我们就可以获得WifiP2pManager的实例，创建并注册相关的广播，使用相关的<br/>
-api<br/>
-在AndroidManifest中必须声明相关的权限,Wi-Fi直连是在api level 14及更高的版本才能使用，还要声明<code>android:minSdkVersion=&quot;14&quot;</code></li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">&lt;uses-sdk android:minSdkVersion=&quot;14&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_WIFI_STATE&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.CHANGE_WIFI_STATE&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.CHANGE_NETWORK_STATE&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.INTERNET&quot; /&gt;
-&lt;uses-permission android:name=&quot;android.permission.ACCESS_NETWORK_STATE&quot; /&gt;
-</code></pre>
-
-<ul>
-<li>初始化WifiP2pManager的实例，并注册相关的广播，监听Wi-Fi直连的状态<br/>
-``` java<br/>
-private WifiP2pManager mManager;<br/>
-private Channel mChannel;<br/>
-private IntentFilter directFilter;<br/>
-private WiFiDirectReceiver directReceiver ;</li>
-</ul>
-
-<p>@Override<br/>
-protected void onCreate(Bundle savedInstanceState) {<br/>
-  super.onCreate(savedInstanceState);<br/>
-  setContentView(R.layout.activity_main);</p>
-
-<p>mManager = (WifiP2pManager)this.getSystemService(Context.WIFI_P2P_SERVICE);<br/>
-  mChannel = mManager.initialize(this, this.getMainLooper(), null);<br/>
-  directReceiver = new WiFiDirectReceiver(mManager, mChannel, this);</p>
-
-<p>directFilter = new IntentFilter();<br/>
-  directFilter.addAction(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION);<br/>
-  directFilter.addAction(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION);<br/>
-  directFilter.addAction(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION);<br/>
-  directFilter.addAction(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION);</p>
-
-<p>}</p>
-
-<p>//注册广播监听<br/>
-@Override<br/>
-protected void onResume() {<br/>
-  super.onResume();<br/>
-  this.registerReceiver(directReceiver, directFilter);<br/>
-}</p>
-
-<p>//取消注册<br/>
-@Override<br/>
-protected void onPause() {<br/>
-  super.onPause();<br/>
-  this.unregisterReceiver(directReceiver);<br/>
-}</p>
-
-<pre class="line-numbers"><code class="language-text">
-- 广播接受
-
-``` java
-public class WiFiDirectReceiver extends BroadcastReceiver{
-
-    private WifiP2pManager mManager;
-    private Channel mChannel;
-    private MainActivity mActivity;
-    private PeerListListener mListener;
-    private WifiP2pConfig mConfig = new WifiP2pConfig();
-
-    public WiFiDirectReceiver(){}
-
-    public WiFiDirectReceiver(WifiP2pManager manager,Channel channel,MainActivity activity){
-        this.mManager = manager;
-        this.mChannel = channel;
-        this.mActivity = activity;
-    }
-
-    @Override
-    public void onReceive(Context context, Intent intent) {
-        String action = intent.getAction();
-        Log.e(&quot;tag&quot;, &quot;===============wifi direct action: &quot;+action);
-        if(action.equals(WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION)){
-            int state = intent.getIntExtra(WifiP2pManager.EXTRA_WIFI_STATE, -1);
-            if(state == WifiP2pManager.WIFI_P2P_STATE_ENABLED){
-                //打开
-            }else if(state == WifiP2pManager.WIFI_P2P_STATE_DISABLED){
-                //关闭
-            }
-        }else if(action.equals(WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION)){
-
-        }else if(action.equals(WifiP2pManager.WIFI_P2P_CONNECTION_CHANGED_ACTION)){
-
-        }else if(action.equals(WifiP2pManager.WIFI_P2P_THIS_DEVICE_CHANGED_ACTION)){
-
-        }
-    }
-}
-</code></pre>
-
-<ul>
-<li>发现设备</li>
-</ul>
-
-<p>在调用之后initialize()方法之后，会触发<code>WifiP2pManager.WIFI_P2P_STATE_CHANGED_ACTION</code>的广播，在BroadcastReceiver<br/>
-中，如果WifiP2pManager.WIFI_P2P_STATE_ENABLED的状态已经打开，在BroadcastReceiver调用discoverPeers方法,如果发现设备.</p>
-
-<p>会回调onSuccess方法  </p>
-
-<pre class="line-numbers"><code class="language-java">mManager.discoverPeers(mChannel, new WifiP2pManager.ActionListener() {
-@Override
-                    public void onSuccess() {
-                        Log.e(&quot;tag&quot;, &quot;===================discovery success&quot;);
-                    }
-
-                    @Override
-                    public void onFailure(int reason) {
-                        Log.e(&quot;tag&quot;, &quot;===================discovery failed&quot;);
-                    }
-});
-</code></pre>
-
-<p>如果发现设备，系统会触发WifiP2pManager.WIFI_P2P_PEERS_CHANGED_ACTION这个广播，在这个广播中可以调用requestPeers方法可以列出所有的设备</p>
-
-<pre class="line-numbers"><code class="language-java">if(null != mManager){
-    mManager.requestPeers(mChannel, new WifiP2pManager.PeerListListener() {
-        @Override
-        public void onPeersAvailable(WifiP2pDeviceList peers) {
-            Log.e(&quot;tag&quot;, &quot;==================peers list size: &quot;+peers.getDeviceList().size());
-            for(WifiP2pDevice device: peers.getDeviceList()){
-                Log.e(&quot;tag&quot;, &quot;==================device addr: &quot;+device.deviceName+&quot; name: &quot;+device.deviceName);
-            }
-        }
-    });
-}
-</code></pre>
-
-<ul>
-<li>连接设备<br/>
-对于已经发现的设备我们可以调用connect()方法连接，需要初始化WifiP2pConfig,并设置config的deviceAddress</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">private WifiP2pConfig mConfig = new WifiP2pConfig();  
-mConfig.deviceAddress = device.deviceAddress;
-mManager.connect(mChannel, mConfig, new WifiP2pManager.ActionListener() {
-    @Override
-    public void onSuccess() {
-        Log.e(&quot;tag&quot;, &quot;==============connnect success&quot;);
-    }
-    @Override
-    public void onFailure(int reason) {
-        Log.e(&quot;tag&quot;, &quot;=================connect failed&quot;);
-    }
-});
-</code></pre>
-
-<p>连接成功会回调onSuccess方法</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/2/2</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -5597,7 +6024,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

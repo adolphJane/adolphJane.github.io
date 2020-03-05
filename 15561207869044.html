@@ -136,120 +136,608 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <h2 id="toc_0">查看设备</h2>
+      <h2 id="toc_0">基本命令</h2>
 
-<pre class="line-numbers"><code class="language-text">adb devices
-</code></pre>
+<ul>
+<li>进入指定设备 <code>adb -s serialNumber shell</code></li>
+<li>查看版本 <code>adb version</code></li>
+<li>查看日志 <code>adb logcat</code></li>
+<li>查看设备 <code>adb devices</code></li>
+<li>连接状态 <code>adb get-state</code></li>
+<li>启动ADB服务 <code>adb start-server</code></li>
+<li>停止ADB服务 <code>adb kill-server</code></li>
+<li>电脑推送到手机 <code>adb push [local path] [remote path]</code></li>
+<li>手机拉取到电脑 <code>adb pull [remote path] [local path]</code></li>
+</ul>
 
-<p>这个命令是查看当前连接的设备, 连接到计算机的android设备或者模拟器将会列出显示</p>
+<h2 id="toc_1">adb shell下的am 与 pm</h2>
 
-<h2 id="toc_1">安装软件</h2>
+<blockquote>
+<p>注:am和pm命令必须先切换到adb shell模式下才能使用</p>
+</blockquote>
 
-<pre class="line-numbers"><code class="language-text">adb install &lt;apk文件路径&gt;
-</code></pre>
+<h3 id="toc_2">am</h3>
 
-<p>这个命令将指定的apk文件安装到设备上</p>
+<p>am全称activity manager，你能使用am去模拟各种系统的行为，例如去启动一个activity，强制停止进程，发送广播进程，修改设备屏幕属性等等。当你在adb shell命令下执行am命令:</p>
 
-<h2 id="toc_2">卸载软件</h2>
+<p><strong>am <command></strong></p>
 
-<pre class="line-numbers"><code class="language-text">adb uninstall &lt;软件名&gt;
-adb uninstall -k &lt;软件名&gt;
-</code></pre>
+<ul>
+<li>启动app <code>am start -n {packageName}/.{activityName}</code></li>
+<li>杀app的进程 <code>am kill &lt;packageName&gt;</code></li>
+<li>强制停止一切 <code>am force-stop &lt;packageName&gt;</code></li>
+<li>启动服务 <code>am startservice</code></li>
+<li>停止服务 <code>am stopservice</code></li>
+<li>打开简书 <code>am start -a android.intent.action.VIEW -d http://www.jianshu.cn/</code></li>
+<li>拨打10086 <code>am start -a android.intent.action.CALL -d tel:10086</code></li>
+</ul>
 
-<p>如果加 -k 参数,为卸载软件但是保留配置和缓存文件.</p>
+<h3 id="toc_3">pm</h3>
 
-<h2 id="toc_3">进入设备或模拟器的shell</h2>
+<p>pm全称package manager，你能使用pm命令去模拟Android行为或者查询设备上的应用等，当你在adb shell命令下执行pm命令：</p>
 
-<pre class="line-numbers"><code class="language-text">adb shell
-</code></pre>
+<p><strong>pm <command></strong></p>
 
-<p>通过上面的命令，就可以进入设备或模拟器的shell环境中，在这个Linux Shell中，你可以执行各种Linux的命令，另外如果只想执行一条shell命令，可以采用以下的方式：</p>
+<ul>
+<li>列出手机所有的包名 <code>pm list packages</code></li>
+<li>安装/卸载 <code>pm install/uninstall</code></li>
+</ul>
 
-<pre class="line-numbers"><code class="language-text">adb shell [command]
-</code></pre>
+<h2 id="toc_4">模拟用户事件</h2>
 
-<p>如：adb shell dmesg会打印出内核的调试信息。</p>
+<ul>
+<li><strong>文本输入:</strong> <code>adb shell input text &lt;string&gt;</code>
+例:手机端输出demo字符串，相应指令：<code>adb shell input &quot;demo&quot;</code>.</li>
+<li><strong>键盘事件：</strong> <code>input keyevent &lt;KEYCODE&gt;</code>，其中KEYCODE见本文结尾的附表
+例:点击返回键，相应指令： <code>input keyevent 4</code>.</li>
+<li><strong>点击事件：</strong> <code>input tap &lt;x&gt; &lt;y&gt;</code>
+例: 点击坐标（500，500），相应指令： <code>input tap 500 500</code>.</li>
+<li><strong>滑动事件：</strong> <code>input swipe &lt;x1&gt; &lt;y1&gt; &lt;x2&gt; &lt;y2&gt; &lt;time&gt;</code>
+例: 从坐标(300，500)滑动到(100，500)，相应指令： <code>input swipe 300 500 100 500</code>.<br/>
+例: 200ms时间从坐标(300，500)滑动到(100，500)，相应指令： <code>input swipe 300 500 100 500 200</code>.</li>
+</ul>
 
-<h2 id="toc_4">发布端口</h2>
+<h2 id="toc_5">logcat日志</h2>
 
-<pre class="line-numbers"><code class="language-text">adb forward tcp:5555 tcp:8000
-</code></pre>
+<ul>
+<li>显示包含的<code>logcat logcat \| grep &lt;str&gt;</code></li>
+<li>显示包含，并忽略大小写的<code>logcat logcat \| grep -i &lt;str&gt;</code></li>
+<li>读完所有log后返回，而不会一直等待 <code>logcat -d</code></li>
+<li>清空log并退出 <code>logcat -c</code></li>
+<li>打印最近的<code>count logcat -t &lt;count&gt;</code></li>
+<li>格式化输出Log，其中format有如下可选值： <code>logcat -v &lt;format&gt;</code>
+<ul>
+<li><strong>brief</strong> — 显示优先级/标记和原始进程的PID (默认格式)</li>
+<li><strong>process</strong> — 仅显示进程PID</li>
+<li><strong>tag</strong> — 仅显示优先级/标记</li>
+<li><strong>thread</strong> — 仅显示进程：线程和优先级/标记</li>
+<li><strong>raw</strong> — 显示原始的日志信息，没有其他的元数据字段</li>
+<li><strong>time</strong> — 显示日期，调用时间，优先级/标记，PID</li>
+<li><strong>long</strong> —显示所有的元数据字段并且用空行分隔消息内容</li>
+</ul></li>
+</ul>
 
-<p>可以设置任意的端口号，做为主机向模拟器或设备的请求端口。如：</p>
+<h2 id="toc_6">远程ADB</h2>
 
-<h2 id="toc_5">从电脑上发送文件到设备</h2>
+<p>为避免使用数据线，可通过wifi通信，前提是手机与PC处于同一局域网</p>
 
-<pre class="line-numbers"><code class="language-text">adb push &lt;本地路径&gt; &lt;远程路径&gt;
-</code></pre>
+<ul>
+<li><p><strong>启动方法:</strong> <code>adb tcpip 5555  //这一步，必须通过数据线把手机与PC连接后再执行</code><br/>
+<code>adb connect &lt;手机IP&gt;</code></p></li>
+<li><p>**停止方法: **<code>adb disconnect //断开wifi连接</code><br/>
+<code>adb usb //切换到usb模式</code></p></li>
+</ul>
 
-<p>用push命令可以把本机电脑上的文件或者文件夹复制到设备(手机)</p>
+<h2 id="toc_7">其他命令</h2>
 
-<h2 id="toc_6">从设备上下载文件到电脑</h2>
+<ul>
+<li>查看当前 <code>ls</code></li>
+<li>打印当前路径 <code>pwd</code></li>
+<li>查看当前连接的设备 <code>adb devices</code></li>
+<li>终止adb服务进程 <code>adb kill-server</code></li>
+<li>重启adb服务进程 <code>adb start-server</code></li>
+<li>PID是:8607 查看某个进程的日志 <code>adb logcat -v process |grep 8607</code></li>
+<li>清理缓存 <code>logcat -c</code></li>
+<li>打印xys标签log <code>adb logcat -s xys</code></li>
+<li>打印192.168.56.101:5555设备里的xys标签log <code>adb -s 192.168.56.101:5555 logcat -s xys</code></li>
+<li>打印在ActivityManager标签里包含start的日志 <code>adb logcat -s ActivityManager | findstr &quot;START&quot;</code>
+<ul>
+<li>&quot;-s&quot;选项 : 设置输出日志的标签, 只显示该标签的日志;</li>
+<li>&quot;-f&quot;选项 : 将日志输出到文件, 默认输出到标准输出流中, -f 参数执行不成功;</li>
+<li>&quot;-r&quot;选项 : 按照每千字节输出日志, 需要 -f 参数, 不过这个命令没有执行成功;</li>
+<li>&quot;-n&quot;选项 : 设置日志输出的最大数目, 需要 -r 参数, 这个执行 感觉 跟 adb logcat 效果一样;</li>
+<li>&quot;-v&quot;选项 : 设置日志的输出格式, 注意只能设置一项;</li>
+<li>&quot;-c&quot;选项 : 清空所有的日志缓存信息;</li>
+<li>&quot;-d&quot;选项 : 将缓存的日志输出到屏幕上, 并且不会阻塞;</li>
+<li>&quot;-t&quot;选项 : 输出最近的几行日志, 输出完退出, 不阻塞;</li>
+<li>&quot;-g&quot;选项 : 查看日志缓冲区信息;</li>
+<li>&quot;-b&quot;选项 : 加载一个日志缓冲区, 默认是 main, 下面详解;</li>
+<li>&quot;-B&quot;选项 : 以二进制形式输出日志;</li>
+</ul></li>
+<li>重启机器 <code>adb reboot</code></li>
+<li>获取序列号 <code>adb get-serialno</code></li>
+<li>重启到bootloader，即刷机模式 <code>adb reboot bootloader</code></li>
+<li>重启到recovery，即恢复模式 <code>adb reboot recovery</code></li>
+<li>安装APK：<code>adb install &lt;apkfile&gt; //比如：adb install baidu.apk</code></li>
+<li>安装apk到sd卡： <code>adb install -s &lt;apkfile&gt; // 比如：adb install -s baidu.apk</code></li>
+<li>卸载APK：<code>adb uninstall &lt;package&gt; //比如：adb uninstall com.baidu.search</code></li>
+<li>获取机器MAC地址 <code>adb shell cat /sys/class/net/wlan0/address</code></li>
+<li>启动应用：<code>adb shell am start -n &lt;package_name&gt;/.&lt;activity_class_name&gt; 例如:adb shell am start -n yf.o2o.store/yf.o2o.store.activity.LoginActivity</code></li>
+<li>查看占用内存排序 <code>adb shell top</code></li>
+<li>查看占用内存前6的app： <code>adb shell top -m 6</code></li>
+<li>刷新一次内存信息，然后返回：<code>adb shell top -n 1</code></li>
+<li>查询各进程内存使用情况：<code>adb shell procrank</code></li>
+<li>杀死一个进程：<code>adb shell kill [pid]</code></li>
+<li>查看进程列表：<code>adb shell ps</code></li>
+<li>查看指定进程状态：<code>adb shell ps -x [PID]</code></li>
+<li>查看后台services信息： <code>adb shell service list</code></li>
+<li>查看当前内存占用： <code>adb shell cat /proc/meminfo</code></li>
+<li>查看IO内存分区：<code>adb shell cat /proc/iomem</code></li>
+<li>将system分区重新挂载为可读写分区：<code>adb remount</code></li>
+<li>从本地复制文件到设备： <code>adb push &lt;local&gt; &lt;remote&gt;</code></li>
+<li>从设备复制文件到本地： <code>adb pull &lt;remote&gt; &lt;local&gt;</code></li>
+<li>列出目录下的文件和文件夹，等同于dos中的dir命令：<code>adb shell ls</code></li>
+<li>进入文件夹，等同于dos中的cd 命令：<code>adb shell cd &lt;folder&gt;</code></li>
+<li>重命名文件： <code>adb shell rename path/oldfilename path/newfilename</code></li>
+<li>删除system/avi.apk： <code>adb shell rm /system/avi.apk</code></li>
+<li>删除文件夹及其下面所有文件：<code>adb shell rm -r &lt;folder&gt;</code></li>
+<li>移动文件：<code>adb shell mv path/file newpath/file</code></li>
+<li>设置文件权限：<code>adb shell chmod 777 /system/fonts/DroidSansFallback.ttf</code></li>
+<li>新建文件夹：<code>adb shell mkdir path/foldelname</code></li>
+<li>查看文件内容：<code>adb shell cat &lt;file&gt;</code></li>
+<li>查看wifi密码：<code>adb shell cat /data/misc/wifi/*.conf</code></li>
+<li>清除log缓存：<code>adb logcat -c</code></li>
+<li>查看bug报告：<code>adb bugreport</code></li>
+<li>获取设备名称：<code>adb shell cat /system/build.prop</code></li>
+<li>查看ADB帮助：<code>adb help</code></li>
+<li>跑monkey：
+<ul>
+<li><code>adb shell monkey -v -p your.package.name 500</code></li>
+<li><code>adb -s 192.168.244.151:5555 shell monkey -v -p com.bolexim 500</code></li>
+</ul></li>
+</ul>
 
-<pre class="line-numbers"><code class="language-text">adb pull &lt;远程路径&gt; &lt;本地路径&gt;
-</code></pre>
+<h2 id="toc_8">附表</h2>
 
-<p>用pull命令可以把设备(手机)上的文件或者文件夹复制到本机电脑</p>
+<p>下表中， 箭头左边为keycode值，箭头右边为keycode的含义，部分用中文标注</p>
 
-<h2 id="toc_7">查看bug报告</h2>
+<table>
+<thead>
+<tr>
+<th style="text-align: left">KeyCode</th>
+<th style="text-align: left">Value</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead>
 
-<pre class="line-numbers"><code class="language-text">adb bugreport
-</code></pre>
-
-<h2 id="toc_8">记录无线通讯日志</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell
-logcat -b radio
-</code></pre>
-
-<p>一般来说，无线通讯的日志非常多，在运行时没必要去记录，但我们还是可以通过命令，设置记录</p>
-
-<h2 id="toc_9">获取设备的ID和序列号</h2>
-
-<pre class="line-numbers"><code class="language-text">adb get-product
-adb get-serialno
-adb shell
-sqlite3 
-</code></pre>
-
-<h2 id="toc_10">adb shell后面跟的命令主要来自</h2>
-
-<pre class="line-numbers"><code class="language-text">源码\system\core\toolbox目录和源码\frameworks\base\cmds目录
-</code></pre>
-
-<h2 id="toc_11">删除系统应用</h2>
-
-<pre class="line-numbers"><code class="language-text">adb remount （重新挂载系统分区，使系统分区重新可写）。
-adb shell
-cd system/app
-rm *.apk
-</code></pre>
-
-<h2 id="toc_12">获取管理员权限</h2>
-
-<pre class="line-numbers"><code class="language-text">adb root
-</code></pre>
-
-<h2 id="toc_13">启动Activity</h2>
-
-<pre class="line-numbers"><code class="language-text">adb shell am start -n 包名/包名＋类名（-n 类名,-a action,-d date,-m MIME-TYPE,-c category,-e 扩展数据,等）。
-</code></pre>
-
-<h2 id="toc_14">复制文件</h2>
-
-<pre class="line-numbers"><code class="language-text">你可向一个设备或从一个设备中复制文件,复制一个文件或目录到设备或模拟器上： 
-adb push &lt;source&gt; &lt;destination&gt;&lt;/destination&gt;&lt;/source&gt; 
-如：adb push test.txt /tmp/test.txt 
-从设备或模拟器上复制一个文件或目录： 
-adb pull &lt;source&gt; &lt;destination&gt;&lt;/destination&gt;&lt;/source&gt; 
-如：adb pull /addroid/lib/libwebcore.so .
-</code></pre>
-
-<h2 id="toc_15">搜索模拟器/设备的实例</h2>
-
-<pre class="line-numbers"><code class="language-text">取得当前运行的模拟器/设备的实例的列表及每个实例的状态： 
-adb devices
-</code></pre>
+<tbody>
+<tr>
+<td style="text-align: left">0</td>
+<td style="text-align: left">KEYCODE_UNKNOWN</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">1</td>
+<td style="text-align: left">KEYCODE_MENU</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">2</td>
+<td style="text-align: left">KEYCODE_SOFT_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">3</td>
+<td style="text-align: left">KEYCODE_HOME</td>
+<td style="text-align: left">Home键</td>
+</tr>
+<tr>
+<td style="text-align: left">4</td>
+<td style="text-align: left">KEYCODE_BACK</td>
+<td style="text-align: left">返回键</td>
+</tr>
+<tr>
+<td style="text-align: left">5</td>
+<td style="text-align: left">KEYCODE_CALL</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">6</td>
+<td style="text-align: left">KEYCODE_ENDCALL</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">7</td>
+<td style="text-align: left">KEYCODE_0</td>
+<td style="text-align: left">数字键0</td>
+</tr>
+<tr>
+<td style="text-align: left">8</td>
+<td style="text-align: left">KEYCODE_1</td>
+<td style="text-align: left">数字键1</td>
+</tr>
+<tr>
+<td style="text-align: left">9</td>
+<td style="text-align: left">KEYCODE_2</td>
+<td style="text-align: left">数字键2</td>
+</tr>
+<tr>
+<td style="text-align: left">10</td>
+<td style="text-align: left">KEYCODE_3</td>
+<td style="text-align: left">数字键3</td>
+</tr>
+<tr>
+<td style="text-align: left">11</td>
+<td style="text-align: left">KEYCODE_4</td>
+<td style="text-align: left">数字键4</td>
+</tr>
+<tr>
+<td style="text-align: left">12</td>
+<td style="text-align: left">KEYCODE_5</td>
+<td style="text-align: left">数字键5</td>
+</tr>
+<tr>
+<td style="text-align: left">13</td>
+<td style="text-align: left">KEYCODE_6</td>
+<td style="text-align: left">数字键6</td>
+</tr>
+<tr>
+<td style="text-align: left">14</td>
+<td style="text-align: left">KEYCODE_7</td>
+<td style="text-align: left">数字键7</td>
+</tr>
+<tr>
+<td style="text-align: left">15</td>
+<td style="text-align: left">KEYCODE_8</td>
+<td style="text-align: left">数字键8</td>
+</tr>
+<tr>
+<td style="text-align: left">16</td>
+<td style="text-align: left">KEYCODE_9</td>
+<td style="text-align: left">数字键9</td>
+</tr>
+<tr>
+<td style="text-align: left">17</td>
+<td style="text-align: left">KEYCODE_STAR</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">18</td>
+<td style="text-align: left">KEYCODE_POUND</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">19</td>
+<td style="text-align: left">KEYCODE_DPAD_UP</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">20</td>
+<td style="text-align: left">KEYCODE_DPAD_DOWN</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">21</td>
+<td style="text-align: left">KEYCODE_DPAD_LEFT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">22</td>
+<td style="text-align: left">KEYCODE_DPAD_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">23</td>
+<td style="text-align: left">KEYCODE_DPAD_CENTER</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">24</td>
+<td style="text-align: left">KEYCODE_VOLUME_UP</td>
+<td style="text-align: left">音量键+</td>
+</tr>
+<tr>
+<td style="text-align: left">25</td>
+<td style="text-align: left">KEYCODE_VOLUME_DOWN</td>
+<td style="text-align: left">音量键-</td>
+</tr>
+<tr>
+<td style="text-align: left">26</td>
+<td style="text-align: left">KEYCODE_POWER</td>
+<td style="text-align: left">Power键</td>
+</tr>
+<tr>
+<td style="text-align: left">27</td>
+<td style="text-align: left">KEYCODE_CAMERA</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">28</td>
+<td style="text-align: left">KEYCODE_CLEAR</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">29</td>
+<td style="text-align: left">KEYCODE_A</td>
+<td style="text-align: left">字母键A</td>
+</tr>
+<tr>
+<td style="text-align: left">30</td>
+<td style="text-align: left">KEYCODE_B</td>
+<td style="text-align: left">字母键B</td>
+</tr>
+<tr>
+<td style="text-align: left">31</td>
+<td style="text-align: left">KEYCODE_C</td>
+<td style="text-align: left">字母键C</td>
+</tr>
+<tr>
+<td style="text-align: left">32</td>
+<td style="text-align: left">KEYCODE_D</td>
+<td style="text-align: left">字母键D</td>
+</tr>
+<tr>
+<td style="text-align: left">33</td>
+<td style="text-align: left">KEYCODE_E</td>
+<td style="text-align: left">字母键E</td>
+</tr>
+<tr>
+<td style="text-align: left">34</td>
+<td style="text-align: left">KEYCODE_F</td>
+<td style="text-align: left">字母键F</td>
+</tr>
+<tr>
+<td style="text-align: left">35</td>
+<td style="text-align: left">KEYCODE_G</td>
+<td style="text-align: left">字母键G</td>
+</tr>
+<tr>
+<td style="text-align: left">36</td>
+<td style="text-align: left">KEYCODE_H</td>
+<td style="text-align: left">字母键H</td>
+</tr>
+<tr>
+<td style="text-align: left">37</td>
+<td style="text-align: left">KEYCODE_I</td>
+<td style="text-align: left">字母键I</td>
+</tr>
+<tr>
+<td style="text-align: left">38</td>
+<td style="text-align: left">KEYCODE_J</td>
+<td style="text-align: left">字母键J</td>
+</tr>
+<tr>
+<td style="text-align: left">39</td>
+<td style="text-align: left">KEYCODE_K</td>
+<td style="text-align: left">字母键K</td>
+</tr>
+<tr>
+<td style="text-align: left">40</td>
+<td style="text-align: left">KEYCODE_L</td>
+<td style="text-align: left">字母键L</td>
+</tr>
+<tr>
+<td style="text-align: left">41</td>
+<td style="text-align: left">KEYCODE_M</td>
+<td style="text-align: left">字母键M</td>
+</tr>
+<tr>
+<td style="text-align: left">42</td>
+<td style="text-align: left">KEYCODE_N</td>
+<td style="text-align: left">字母键N</td>
+</tr>
+<tr>
+<td style="text-align: left">43</td>
+<td style="text-align: left">KEYCODE_O</td>
+<td style="text-align: left">字母键O</td>
+</tr>
+<tr>
+<td style="text-align: left">44</td>
+<td style="text-align: left">KEYCODE_P</td>
+<td style="text-align: left">字母键P</td>
+</tr>
+<tr>
+<td style="text-align: left">45</td>
+<td style="text-align: left">KEYCODE_Q</td>
+<td style="text-align: left">字母键Q</td>
+</tr>
+<tr>
+<td style="text-align: left">46</td>
+<td style="text-align: left">KEYCODE_R</td>
+<td style="text-align: left">字母键R</td>
+</tr>
+<tr>
+<td style="text-align: left">47</td>
+<td style="text-align: left">KEYCODE_S</td>
+<td style="text-align: left">字母键S</td>
+</tr>
+<tr>
+<td style="text-align: left">48</td>
+<td style="text-align: left">KEYCODE_T</td>
+<td style="text-align: left">字母键T</td>
+</tr>
+<tr>
+<td style="text-align: left">49</td>
+<td style="text-align: left">KEYCODE_U</td>
+<td style="text-align: left">字母键U</td>
+</tr>
+<tr>
+<td style="text-align: left">50</td>
+<td style="text-align: left">KEYCODE_V</td>
+<td style="text-align: left">字母键V</td>
+</tr>
+<tr>
+<td style="text-align: left">51</td>
+<td style="text-align: left">KEYCODE_W</td>
+<td style="text-align: left">字母键W</td>
+</tr>
+<tr>
+<td style="text-align: left">52</td>
+<td style="text-align: left">KEYCODE_X</td>
+<td style="text-align: left">字母键X</td>
+</tr>
+<tr>
+<td style="text-align: left">53</td>
+<td style="text-align: left">KEYCODE_Y</td>
+<td style="text-align: left">字母键Y</td>
+</tr>
+<tr>
+<td style="text-align: left">54</td>
+<td style="text-align: left">KEYCODE_Z</td>
+<td style="text-align: left">字母键Z</td>
+</tr>
+<tr>
+<td style="text-align: left">55</td>
+<td style="text-align: left">KEYCODE_COMMA</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">56</td>
+<td style="text-align: left">KEYCODE_PERIOD</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">57</td>
+<td style="text-align: left">KEYCODE_ALT_LEFT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">58</td>
+<td style="text-align: left">KEYCODE_ALT_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">59</td>
+<td style="text-align: left">KEYCODE_SHIFT_LEFT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">60</td>
+<td style="text-align: left">KEYCODE_SHIFT_RIGHT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">61</td>
+<td style="text-align: left">KEYCODE_TAB</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">62</td>
+<td style="text-align: left">KEYCODE_SPACE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">63</td>
+<td style="text-align: left">KEYCODE_SYM</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">64</td>
+<td style="text-align: left">KEYCODE_EXPLORER</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">65</td>
+<td style="text-align: left">KEYCODE_ENVELOPE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">66</td>
+<td style="text-align: left">KEYCODE_ENTER</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">67</td>
+<td style="text-align: left">KEYCODE_DEL</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">68</td>
+<td style="text-align: left">KEYCODE_GRAVE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">69</td>
+<td style="text-align: left">KEYCODE_MINUS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">70</td>
+<td style="text-align: left">KEYCODE_EQUALS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">71</td>
+<td style="text-align: left">KEYCODE_LEFT_BRACKET</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">72</td>
+<td style="text-align: left">KEYCODE_RIGHT_BRACKET</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">73</td>
+<td style="text-align: left">KEYCODE_BACKSLASH</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">74</td>
+<td style="text-align: left">KEYCODE_SEMICOLON</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">75</td>
+<td style="text-align: left">KEYCODE_APOSTROPHE</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">76</td>
+<td style="text-align: left">KEYCODE_SLASH</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">77</td>
+<td style="text-align: left">KEYCODE_AT</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">78</td>
+<td style="text-align: left">KEYCODE_NUM</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">79</td>
+<td style="text-align: left">KEYCODE_HEADSETHOOK</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">80</td>
+<td style="text-align: left">KEYCODE_FOCUS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">81</td>
+<td style="text-align: left">KEYCODE_PLUS</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">82</td>
+<td style="text-align: left">KEYCODE_MENU</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">83</td>
+<td style="text-align: left">KEYCODE_NOTIFICATION</td>
+<td style="text-align: left"></td>
+</tr>
+<tr>
+<td style="text-align: left">84</td>
+<td style="text-align: left">KEYCODE_SEARCH</td>
+<td style="text-align: left"></td>
+</tr>
+</tbody>
+</table>
 
 
     
@@ -456,7 +944,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

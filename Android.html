@@ -298,6 +298,807 @@
               </div><!-- article -->
         
 			<div class="article">
+                <a class="clearlink" href="15824373904407.html">
+                
+                  <h1>Android面试问题总结</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">横竖屏切换时Activity的生命周期</h2>
+
+<p>此时的生命周期跟清单文件里的配置有关系。</p>
+
+<ol>
+<li>不设置 Activity 的 android:configChanges 时，切屏会重新调用各个生命周期默认首先销毁当前 activity,然后重新加载。 </li>
+<li>设置 Activity <code>android:configChanges=&quot;orientation|keyboardHidden|screenSize&quot;</code>时，切 屏不会重新调用各个生命周期，只会执行 <code>onConfigurationChanged</code> 方法。</li>
+</ol>
+
+<h2 id="toc_1">Android 中的 Context, Activity，Appliction 有 什么区别?</h2>
+
+<ul>
+<li><strong>相同:</strong> Activity 和 Application 都是 Context 的子类。
+Context 从字面上理解就是上下文的意思，在实际应用中它也确实是起到了管理上下文环境中各个参数和变量的总用，方便我们可以简单的访问到各种资源。</li>
+<li><strong>不同:</strong> 维护的生命周期不同。 Context 维护的是当前的 Activity 的生命周期， Application 维护的是整个项目的生命周期。</li>
+</ul>
+
+<p>使用 context 的时候，小心内存泄露，防止内存泄露，注意一下几个方面:</p>
+
+<ol>
+<li>不要让生命周期长的对象引用 activity context，即保证引用 activity 的对象 要与 activity 本身生命周期是一样的。</li>
+<li>对于生命周期长的对象，可以使用 application，context。</li>
+<li>避免非静态的内部类，尽量使用静态类，避免生命周期问题，注意内部类对 外部对象引用导致的生命周期变化。</li>
+</ol>
+
+<h2 id="toc_2">Context 是什么?，一个应用有多少个 Context</h2>
+
+<ol>
+<li>它描述的是一个应用程序环境的信息，即上下文。</li>
+<li>该类是一个抽象(abstract class)类，Android 提供了该抽象类的具体实 现类(ContextIml)。</li>
+<li>通过它我们可以获取应用程序的资源和类，也包括一些应用级别操作， 例如:启动一个 Activity，发送广播，接受 Intent，信息等。</li>
+<li>一个应用Context数量=Activity个数+service个数+1个</li>
+</ol>
+
+<h2 id="toc_3">什么是 IntentService?有何优点?</h2>
+
+<h3 id="toc_4">一、IntentService 简介</h3>
+
+<p>IntentService 是 Service 的子类，是个抽象类，比普通的 Service 增加了额外的功能。它可以用于在后台执行耗时的异步任务，当任务完成后会自动停止。它拥有较高的优先级，不易被系统杀死(继承自 Service 的缘故)，因此比较适 合执行一些高优先级的异步任务 它内部通过 HandlerThread 和 Handler 实现异步操作。当任务完成后，IntentService 会自动停止，而不需要手动调用 stopSelf()。另外， 可以多次启动 IntentService，每个耗时操作都会以工作队列的方式在 IntentService 中 onHandlerIntent()回调方法中执行，并且每次只会执行一个工作线程。</p>
+
+<h3 id="toc_5">二、IntentService 特征</h3>
+
+<ul>
+<li>会创建独立的 worker 线程来处理所有的 Intent 请求;</li>
+<li>会创建独立的 worker 线程来处理 onHandleIntent()方法实现的代码，无需处理多线程问题;</li>
+<li>所有请求处理完成后，IntentService 会自动停止，无需调用 stopSelf()方法停止 Service;</li>
+<li>为 Service 的 onBind()提供默认实现，返回 null;</li>
+<li>为 Service 的 onStartCommand 提供默认实现，将请求 Intent 添加到队列 中;</li>
+</ul>
+
+<h2 id="toc_6">什么是 Service 以及描述下它的生命周期。Service 有哪些启动方 法，有什么区别，怎样停用 Service?</h2>
+
+<p>在 Service 的生命周期中，被回调的方法比 Activity 少一些，只有 onCreate, onStart, onDestroy,onBind 和 onUnbind。</p>
+
+<p>通常有两种方式启动一个 Service,他们对 Service 生命周期的影响是不一样的。</p>
+
+<ol>
+<li><strong>通过 startService</strong>
+Service 会经历 onCreate 到 onStart，然后处于运行状态，stopService的时候调用 onDestroy 方法。<br/>
+如果是调用者自己直接退出而没有调用 stopService 的话，Service 会一直在后台运行。</li>
+<li><strong>通过 bindService</strong>
+Service 会运行 onCreate，然后是调用 onBind，这个时候调用者和 Service 绑定在一起。调用者退出了，Srevice 就会调用 onUnbind-&gt;onDestroyed 方 法。</li>
+</ol>
+
+<p>所谓绑定在一起就共存亡了。调用者也可以通过调用 unbindService 方法来停止服务，这时候 Srevice 就会调用 onUnbind-&gt;onDestroyed 方法。 需要注意的是如果这几个方法交织在一起的话，会出现什么情况呢? 一个原则是 Service 的 onCreate 的方法只会被调用一次，就是你无论多少次的 startService 又 bindService，Service 只被创建一次。</p>
+
+<p>如果先是 bind 了，那么 start 的时候就直接运行 Service 的 onStart 方法， 如果先是 start，那么 bind 的时候就直接运行 onBind 方法。</p>
+
+<p>如果 service 运行期间调用了 bindService，这时候再调用 stopService 的话， service 是不会调用 onDestroy 方法的，service 就 stop 不掉了，只能调用 UnbindService, service 就会被销毁。</p>
+
+<p>如果一个 service 通过 startService 被 start 之后，多次调用 startService 的话，service 会多次调用 onStart 方法。多次调用 stopService 的话，service 只会调用一次 onDestroyed 方法。</p>
+
+<p>如果一个 service 通过 bindService 被 start 之后，多次调用 bindService 的话，service 只会调用一次 onBind 方法。<br/>
+多次调用 unbindService 的话会抛出异常。</p>
+
+<h2 id="toc_7">请描述一下 BroadcastReceiver</h2>
+
+<p>BroadCastReceiver 是 Android 四大组件之一，主要用于接收系统或者 app 发送的广播事件。<br/>
+<strong>广播分两种:</strong>有序广播和无序广播。<br/>
+<strong>内部通信实现机制:</strong>通过 Android 系统的 Binder 机制实现通信。 <br/>
+<strong>无序广播:</strong>完全异步，逻辑上可以被任何广播接收者接收到。优点是效率较高。 缺点是一个接收者不能将处理结果传递给下一个接收者，并无法终止广播 intent 的传播。<br/>
+<strong>有序广播:</strong>按照被接收者的优先级顺序，在被接收者中依次传播。比如有三个广 播接收者 A，B，C，优先级是 A &gt; B &gt; C。那这个消息先传给 A，再传给 B，最 后传给 C。每个接收者有权终止广播，比如 B 终止广播，C 就无法接收到。此外 A 接收到广播后可以对结果对象进行操作，当广播传给 B 时，B 可以从结果对象 中取得 A 存入的数据。</p>
+
+<p>在通过 <code>Context.sendOrderedBroadcast(intent, receiverPermission, resultReceiver, scheduler, initialCode, initialData, initialExtras)</code> 时我们可以 指定 resultReceiver 广播接收者，这个接收者我们可以认为是最终接收者，通 常情况下如果比他优先级更高的接收者如果没有终止广播，那么他的 onReceive 会被执行两次，第一次是正常的按照优先级顺序执行，第二次是作为最终接收者 接收。如果比他优先级高的接收者终止了广播，那么他依然能接收到广播。 在我们的项目中经常使用广播接收者接收系统通知，比如开机启动、sd 挂载、 低电量、外播电话、锁屏等。 </p>
+
+<p>如果我们做的是播放器，那么监听到用户锁屏后我们应该将我们的播放之暂停 等。</p>
+
+<h2 id="toc_8">Serializable 和 Parcelable 的区别</h2>
+
+<p>在使用内存的时候，Parcelable 类比 Serializable 性能高，所以推荐使用 Parcelable 类。</p>
+
+<ol>
+<li>Serializable 在序列化的时候会产生大量的临时变量，从而引起频繁的 GC。</li>
+<li>Parcelable 不能使用在要将数据存储在磁盘上的情况。尽管 Serializable 效率低点，但在这种情况下，还是建议你用 Serializable 。</li>
+</ol>
+
+<p>实现:</p>
+
+<ol>
+<li>Serializable 的实现，只需要继承 Serializable 即可。这只是给对象打了一个标记，系统会自动将其序列化。</li>
+<li>Parcelabel 的实现，需要在类中添加一个静态成员变量 CREATOR，这个变量需要继承 Parcelable.Creator 接口。</li>
+</ol>
+
+<h2 id="toc_9">请描述一下 Intent 和 IntentFilter</h2>
+
+<p>Android 中通过 Intent 对象来表示一条消息，一个 Intent 对象不仅包含有这个消息的目的地，还可以包含消息的内容，这好比一封 Email，其中不仅应 该包含收件地址，还可以包含具体的内容。对于一个 Intent 对象，消息“目的 地”是必须的，而内容则是可选项。</p>
+
+<p>IntentFilter: 可以理解为邮局或者是一个信笺的分拣系统... 这个分拣系统通过 3 个参数来识别</p>
+
+<ul>
+<li>Action: 动作 view</li>
+<li>Data: 数据 uri uri</li>
+<li>Category : 而外的附加信息</li>
+</ul>
+
+<p><strong>Action 匹配</strong><br/>
+Action 是一个用户定义的字符串，用于描述一个 Android 应用程序组件，一 个 IntentFilter 可 以 包 含 多 个 Action 。 在 AndroidManifest.xml 的 Activity 定义时可以在其 <intent-filter >节点指定一个 Action 列表用于标 示 Activity 所能接受的“动作”.</p>
+
+<p><strong>URI 数据匹配</strong><br/>
+一个 Intent 可以通过 URI 携带外部数据给目标组件。在 <intent-filter> 节点中，通过 <data/>节点匹配外部数据。</p>
+
+<p>mimeType 属性指定携带外部数据的数据类型，scheme 指定协议，host、 port、path 指定数据的位置、端口、和路径。如果在 Intent Filter 中指定了这些属性，那么只有所有的属性都匹配成功<br/>
+时 URI 数据匹配才会成功。</p>
+
+<p><strong>Category 类别匹配</strong><br/>
+<intent-filter >节点中可以为组件定义一个 Category 类别列表，当 Intent 中包含这个列表的所有项目时 Category 类别匹配才会成功。</p>
+
+<h2 id="toc_10">描述一下 Fragment 的生命周期</h2>
+
+<p><figure><img src="media/15824373904407/9A2B46B8-AC68-42FF-B099-33EEB9DBC747.png" alt="9A2B46B8-AC68-42FF-B099-33EEB9DB"/><figcaption>9A2B46B8-AC68-42FF-B099-33EEB9DB</figcaption></figure></p>
+
+<h2 id="toc_11">ANR 是什么?怎样避免和解决 ANR</h2>
+
+<p>在 Android 上，如果你的应用程序有一段时间响应不够灵敏，系统会向用 户显示一个对话框，这个对话框称作应用程序无响应(ANR:Application Not Responding)对话框。用户可以选择让程序继续运行，但是，他们在使用你的 应用程序时，并不希望每次都要处理这个对话框。因此，在程序里对响应性能的 设计很重要，这样，系统不会显示 ANR 给用户。</p>
+
+<p><strong>ANR 一般有三种类型:</strong></p>
+
+<ol>
+<li>KeyDispatchTimeout(5 seconds) --主要类型:按键或触摸事件在特定时间内无响应</li>
+<li>BroadcastTimeout(10 seconds):BroadcastReceiver 在特定时间内无法处理完成</li>
+<li>ServiceTimeout(20 seconds) --小概率类型:Service 在特定的时间内无法处理完成</li>
+</ol>
+
+<p><strong>ANR原因</strong></p>
+
+<ol>
+<li>耗时的网络访问</li>
+<li>大量的数据读写</li>
+<li>数据库操作</li>
+<li>硬件操作(比如 camera)</li>
+<li>调用 thread 的 join()方法、sleep()方法、wait()方法或者等待线程锁的时候</li>
+<li>service binder 的数量达到上限</li>
+<li>system server 中发生 WatchDog ANR </li>
+<li>service 忙导致超时无响应</li>
+<li>其他线程持有锁，导致主线程等待超时 </li>
+<li>其它线程终止或崩溃导致主线程一直等待</li>
+</ol>
+
+<p>查找 ANR 的方式: 1. 导出/data/data/anr/traces.txt，找出函数和调用过程， 分析代码 2. 通过性能 LOG 人肉查找</p>
+
+<h2 id="toc_12">Android 线程间通信有哪几种方式</h2>
+
+<ul>
+<li>共享内存(变量);</li>
+<li>文件，数据库;</li>
+<li>Handler;</li>
+<li>Java 里的 wait()，notify()，notifyAll()</li>
+</ul>
+
+<h2 id="toc_13">android 应用对内存是如何限制的?我们应该如何合理使用内存?</h2>
+
+<p>Android 每一个应用的堆内存大小有限<br/>
+通常的情况为 16M-48M</p>
+
+<p><strong>如何合理使用内存?</strong><br/>
+1、注意资源回收，像数据库，输入输出流，定位操作这样的对象，要在使 用完及时关闭流。<br/>
+2、少使用静态变量，因为系统将静态变量的优先级设定的很高，会最后回 收。所以可能因为静态变量导致该回收的没有回收。而回收了不该回收的内 存。<br/>
+3、注意大图片的缩放，如果载入的图片很大，要先经过自己程序的处理， 降低分辨率等。最好设置多种分辨率格式的图片，以减少内存消耗。<br/>
+4、动态注册监听，把一些只有显示的时候才使用到的监听放进程序内部， 而不是放在 manifesat 中去。<br/>
+5、减少使用动画，或者适当减少动画的帧数。<br/>
+6、注意自己的程序逻辑，在该关闭自己程序的控件的时候，主动关闭，不 要交给系统去决定。(这个要自己把握好，也不是说都自己搞定，只有那些 自己确定需要关闭的对象，自己将其关闭。)</p>
+
+<h2 id="toc_14">dp、px、dpi、dip之间的关系</h2>
+
+<p><strong>px:</strong>是英文单词pixel的缩写，意为像素，屏幕上的点。我们通常所说的分辨率如480X800就是指的像素。<br/>
+<strong>in:</strong>表示英寸，是屏幕的物理尺寸。每英寸等于2.54厘米。<br/>
+<strong>dpi:</strong>是Dots Per Inch的缩写, 每英寸点数，即每英寸包含像素个数。<br/>
+<strong>density:</strong>屏幕密度，density和dpi的关系为 density = dpi/160<br/>
+<strong>dp:</strong>是 dip 的简写，设备独立像素。Android特有的单位，在dpi = 160屏幕上，1dp = 1px。px = density * dp ; density = dpi / 160 ; px = dp * (dpi / 160)。</p>
+
+<h2 id="toc_15">什么是 AIDL 以及如何使用</h2>
+
+<ol>
+<li>aidl 是 Android interface definition Language 的英文缩写，意思Android 接口定义语言。</li>
+<li>使用 aidl 可以帮助我们发布以及调用远程服务，实现跨进程通信。</li>
+<li>将服务的 aidl 放到对应的 src 目录，工程的 gen 目录会生成相应的接口<br/>
+类</li>
+</ol>
+
+<h2 id="toc_16">Handler 机制</h2>
+
+<p>Android 中主线程也叫 UI 线程，那么从名字上我们也知道主线程主要是用 来创建、更新 UI 的，而其他耗时操作，比如网络访问，或者文件处理，多媒体 处理等都需要在子线程中操作，之所以在子线程中操作是为了保证 UI 的流畅程 度，手机显示的刷新频率是 60Hz，也就是一秒钟刷新 60 次，每 16.67 毫秒刷 新一次，为了不丢帧，那么主线程处理代码最好不要超过 16 毫秒。当子线程处 理完数据后，为了防止 UI 处理逻辑的混乱，Android 只允许主线程修改 UI，那 么这时候就需要 Handler 来充当子线程和主线程之间的桥梁了。</p>
+
+<p>我们通常将 Handler 声明在 Activity 中，然后覆写 Handler 中的 handleMessage 方 法 , 当 子 线 程 调 用 handler.sendMessage() 方 法 后 handleMessage 方法就会在主线程中执行。</p>
+
+<p>这里面除了 Handler、Message 外还有隐藏的 Looper 和 MessageQueue 对象。</p>
+
+<p>在主线程中 Android 默认已经调用了 Looper.preper()方法，调用该方法的目的是在 Looper 中创建 MessageQueue 成员变量并把 Looper 对象绑定到当 前线程中。当调用 Handler 的 sendMessage(对象)方法的时候就将 Message 对象添加到了 Looper 创建的 MessageQueue 队列中，同时给 Message 指定 了 target 对象，其实这个 target 对象就是 Handler 对象。主线程默认执行了 Looper.looper()方法，该方法从 Looper 的成员变量 MessageQueue 中取 出 Message，然后调用 Message 的 target 对象的 handleMessage()方法。这 样就完成了整个消息机制。</p>
+
+<h2 id="toc_17">描述一下Android的事件分发事件</h2>
+
+<ol>
+<li>Touch 事件分发中只有两个主角:ViewGroup 和 View。ViewGroup 包含 onInterceptTouchEvent、dispatchTouchEvent、onTouchEvent 三个相关事 件。View 包含 dispatchTouchEvent、onTouchEvent 两个相关事件。其中 ViewGroup 又继承于 View。</li>
+<li>ViewGroup 和 View 组成了一个树状结构，根节点为 Activity 内部包含的 一个 ViwGroup。</li>
+<li>触摸事件由 Action_Down、Action_Move、Aciton_UP 组成，其中一次 完整的触摸事件中，Down 和 Up 都只有一个，Move 有若干个，可以为 0 个。</li>
+<li>当 Acitivty 接收到 Touch 事件时，将遍历子 View 进行 Down 事件的分发。 ViewGroup 的遍历可以看成是递归的。分发的目的是为了找到真正要处理本次 完整触摸事件的 View，这个 View 会在 onTouchuEvent 结果返回 true。</li>
+<li>当某个子 View 返回 true 时，会中止 Down 事件的分发，同时在 ViewGroup 中记录该子 View。接下去的 Move 和 Up 事件将由该子 View 直接进行处理。由于子 View 是保存在 ViewGroup 中的，多层 ViewGroup 的节点 结构时，上级 ViewGroup 保存的会是真实处理事件的 View 所在的 ViewGroup 对象:如 ViewGroup0-ViewGroup1-TextView 的结构中，TextView 返回了 true，它将被保存在 ViewGroup1 中，而 ViewGroup1 也会返回 true，被保存 在 ViewGroup0 中。当 Move 和 UP 事件来时，会先从 ViewGroup0 传递至 ViewGroup1，再由 ViewGroup1 传递至 TextView。</li>
+<li>当 ViewGroup 中所有子 View 都不捕获 Down 事件时，将触发 ViewGroup 自身的 onTouch 事件。触发的方式是调用 super.dispatchTouchEvent 函数，即父类 View 的 dispatchTouchEvent 方法。 在所有子 View 都不处理的情况下，触发 Acitivity 的 onTouchEvent 方法。</li>
+<li>onInterceptTouchEvent 有两个作用:
+<ol>
+<li>拦截 Down 事件的分发。</li>
+<li>中止 Up 和 Move 事件向目标 View 传递，使得目标 View 所在的 ViewGroup 捕获 Up 和 Move 事件。</li>
+</ol></li>
+</ol>
+
+<h2 id="toc_18">Handler、Message、Looper、MessageQueue</h2>
+
+<h3 id="toc_19">一、相关概念的解释</h3>
+
+<p><strong>主线程(UI 线程)</strong><br/>
+<strong>定义:</strong>当程序第一次启动时，Android 会同时启动一条主线程(Main Thread) <br/>
+<strong>作用:</strong>主线程主要负责处理与 UI 相关的事件</p>
+
+<p><strong>Message(消息)</strong><br/>
+<strong>定义:</strong>Handler 接收和处理的消息对象(Bean对象)<br/>
+<strong>作用:</strong>通信时相关信息的存放和传递</p>
+
+<p><strong>ThreadLocal</strong><br/>
+<strong>定义:</strong>线程内部的数据存储类 <br/>
+<strong>作用:</strong>负责存储和获取本线程的 Looper</p>
+
+<p><strong>MessageQueue(消息队列)</strong> <br/>
+<strong>定义:</strong>采用单链表的数据结构来存储消息列表<br/>
+<strong>作用:</strong>用来存放通过 Handler 发过来的 Message，按照先进先出执行</p>
+
+<p><strong>Handler(处理者)</strong><br/>
+<strong>定义:</strong>Message 的主要处理者<br/>
+<strong>作用:</strong>负责发送 Message 到消息队列&amp;处理 Looper 分派过来的 Message</p>
+
+<p><strong>Looper(循环器)</strong><br/>
+<strong>定义:</strong>扮演 Message Queue 和 Handler 之间桥梁的角色<br/>
+<strong>作用:</strong> 消息循环:循环取出 Message Queue 的 Message； 消息派发:将取出的 Message 交付给相应的 Handler</p>
+
+<h2 id="toc_20">HandlerThread</h2>
+
+<p><strong>HandlerThread 作用</strong><br/>
+当系统有多个耗时任务需要执行时，每个任务都会开启一个新线程去执行耗时任 务，这样会导致系统多次创建和销毁线程，从而影响性能。为了解决这一问题， Google 提供了 HandlerThread，HandlerThread 是在线程中创建一个 Looper 循环器，让 Looper 轮询消息队列，当有耗时任务进入队列时，则不需要开启新 线程，在原有的线程中执行耗时任务即可，否则线程阻塞。</p>
+
+<p><strong>HanlderThread 的优缺点</strong></p>
+
+<ul>
+<li>HandlerThread 本质上是一个线程类，它继承了 Thread;</li>
+<li>HandlerThread 有自己的内部 Looper 对象，可以进行 looper 循环;</li>
+<li>通过获取 HandlerThread 的 looper 对象传递给 Handler 对象，可以在 handleMessage()方法中执行异步任务。</li>
+<li>创建 HandlerThread 后必须先调用 HandlerThread.start()方法，Thread 会先调用 run 方法，创建 Looper 对象。</li>
+<li>HandlerThread 优点是异步不会堵塞，减少对性能的消耗</li>
+<li>HandlerThread 缺点是不能同时继续进行多任务处理，需要等待进行处 理，处理效率较低</li>
+<li>HandlerThread 与线程池不同，HandlerThread 是一个串行队列，背后只有一个线程。</li>
+</ul>
+
+<h2 id="toc_21">AsyncTask</h2>
+
+<p><strong>AsyncTask 是什么</strong></p>
+
+<p>AsyncTask 是一种轻量级的异步任务类，它可以在线程池中执行后台任务，然后把执行的进度和最终结果传递给主线程并主线程中更新 UI，通过 AsyncTask 可以更加方便执行后台任务以及在主线程中访问 UI，但是 AsyncTask 并不适合进行特别耗时的后台任务，对于特别耗时的任务来说，建议使用线程池。</p>
+
+<p><strong>AsyncTask 使用方法</strong></p>
+
+<p>三个参数 Params:表示后台任务执行时的参数类型，该参数会传给 AysncTask 的 doInBackground()方法 Progress:表示后台任务的执行进度的参数类型， 该参数会作为 onProgressUpdate()方法的参数 Result:表示后台任务的返回 结果的参数类型，该参数会作为 onPostExecute()方法的参数 五个方法 onPreExecute():异步任务开启之前回调，在主线程中执行 doInBackground():执行异步任务，在线程池中执行 onProgressUpdate(): 当 doInBackground 中调用 publishProgress 时回调，在主线程中执行 onPostExecute():在异步任务执行之后回调，在主线程中执行 onCancelled(): 在异步任务被取消时回调</p>
+
+<p><strong>AsyncTask 引起的内存泄漏</strong> </p>
+
+<p>原因:非静态内部类持有外部类的匿名引用，导致 Activity 无法释放 解决: AsyncTask 内部持有外部 Activity 的弱引用 AsyncTask 改为静态内部类 Activity 的 onDestory()中调用AsyncTask.cancel()</p>
+
+<p><strong>结果丢失</strong></p>
+
+<p>屏幕旋转或 Activity 在后台被系统杀掉等情况会导致 Activity 的重新创建，之前 运行的 AsyncTask 会持有一个之前 Activity 的引用，这个引用已经无效，这时 调用 onPostExecute()再去更新界面将不再生效。</p>
+
+<p><strong>AsyncTask 并行 or 串行</strong></p>
+
+<p>AsyncTask 在 Android 2.3 之前默认采用并行执行任务，AsyncTask 在 Android2.3 之后默认采用串行执行任务 如果需要在 Android 2.3 之后采用并行执行任 务，可以调用 AsyncTask 的 executeOnExecutor();</p>
+
+<p><strong>AsyncTask 内部的线程池</strong></p>
+
+<p><code>private static volatile Executor sDefaultExecutor = SERIAL_EXECUTOR;</code><br/>
+sDefaultExecutor 是 SerialExecutor 的一个实例，而且它是个静态变量。也就是说， 一个进程里面所有 AsyncTask 对象都共享同一个 SerialExecutor 对象。</p>
+
+<h2 id="toc_22">子线程发消息到主线程进行更新 UI，除了 handler 和 AsyncTask，还有什么?</h2>
+
+<ol>
+<li>用 Activity 对象的 runOnUiThread 方法更新 在子线程中通过 runOnUiThread()方法更新 UI。</li>
+<li>用 View.post(Runnable r)方法更新 UI</li>
+</ol>
+
+<h2 id="toc_23">说下 java 中的线程创建方式，线程池的工作原理。</h2>
+
+<p>java 中有三种创建线程的方式</p>
+
+<ol>
+<li>继承 Thread 类实现多线程</li>
+<li>实现 Runnable 接口</li>
+<li>通过线程池</li>
+</ol>
+
+<p>线程池的工作原理:线程池可以减少创建和销毁线程的次数，从而减少系统资源 的消耗，当一个任务提交到线程池时</p>
+
+<ol>
+<li>首先判断核心线程池中的线程是否已经满了，如果没满，则创建一个核心线程执行任务，否则进入下一步</li>
+<li>判断工作队列是否已满，没有满则加入工作队列，否则执行下一步</li>
+<li>判断线程数是否达到了最大值，如果不是，则创建非核心线程执行任务，否则执行饱和策略，默认抛出异常</li>
+</ol>
+
+<h2 id="toc_24">说下 handler 原理</h2>
+
+<p>Handler，Message，looper 和 MessageQueue 构成了安卓的消息机制，handler 创 建后可以通过 sendMessage 将消息加入消息队列，然后 looper 不断的将消息从 MessageQueue 中取出来，回调到 Hander 的 handleMessage 方法，从而实现线程 的通信。<br/>
+从两种情况来说，第一在 UI 线程创建 Handler,此时我们不需要手动开启 looper， 因为在应用启动时，在 ActivityThread 的 main 方法中就创建了一个当前主线程的 looper，并开启了消息队列，消息队列是一个无限循环，为什么无限循环不会 ANR? 因为可以说，应用的整个生命周期就是运行在这个消息循环中的，安卓是由事件 驱动的，Looper.loop 不断的接收处理事件，每一个点击触摸或者 Activity 每一个 生命周期都是在 Looper.loop 的控制之下的，looper.loop 一旦结束，应用程序的 生命周期也就结束了。我们可以想想什么情况下会发生 ANR，第一，事件没有 得到处理，第二，事件正在处理，但是没有及时完成，而对事件进行处理的就是 looper，所以只能说事件的处理如果阻塞会导致 ANR，而不能说 looper 的无限循 环会 ANR<br/>
+另一种情况就是在子线程创建 Handler,此时由于这个线程中没有默认开启的消息 队列，所以我们需要手动调用 looper.prepare(),并通过 looper.loop 开启消息<br/>
+主线程 Looper 从消息队列读取消息，当读完所有消息时，主线程阻塞。子线程 往消息队列发送消息，并且往管道文件写数据，主线程即被唤醒，从管道文件读取数据，主线程被唤醒只是为了读取消息，当消息读取完毕，再次睡眠。因此 loop 的循环并不会对 CPU 性能有过多的消耗。</p>
+
+<h2 id="toc_25">内存泄漏的场景和解决办法</h2>
+
+<p>1.非静态内部类的静态实例 非静态内部类会持有外部类的引用，如果非静态内部类的实例是静态的，就会长 期的维持着外部类的引用，组织被系统回收，解决办法是使用静态内部类 2.多线程相关的匿名内部类和非静态内部类 匿名内部类同样会持有外部类的引用，如果在线程中执行耗时操作就有可能发生 内存泄漏，导致外部类无法被回收，直到耗时任务结束，解决办法是在页面退出 时结束线程中的任务<br/>
+3.Handler 内存泄漏<br/>
+Handler 导致的内存泄漏也可以被归纳为非静态内部类导致的，Handler 内部 message 是被存储在 MessageQueue 中的，有些 message 不能马上被处理，存在 的时间会很长，导致 handler 无法被回收，如果 handler 是非静态的，就会导致它 的外部类无法被回收，解决办法是 1.使用静态 handler，外部类引用使用弱引用 处理 2.在退出页面时移除消息队列中的消息<br/>
+4.Context 导致内存泄漏<br/>
+根据场景确定使用 Activity 的 Context 还是 Application 的 Context,因为二者生命 周期不同，对于不必须使用 Activity 的 Context 的场景(Dialog),一律采用Application 的 Context,单例模式是最常见的发生此泄漏的场景，比如传入一个 Activity 的 Context 被静态类引用，导致无法回收<br/>
+5.静态 View 导致泄漏<br/>
+使用静态 View 可以避免每次启动 Activity 都去读取并渲染 View，但是静态 View 会持有 Activity 的引用，导致无法回收，解决办法是在 Activity 销毁的时候将静 态 View 设置为 null(View 一旦被加载到界面中将会持有一个 Context 对象的引 用，在这个例子中，这个 context 对象是我们的 Activity，声明一个静态变量引用 这个 View，也就引用了 activity)<br/>
+6.WebView 导致的内存泄漏<br/>
+WebView 只要使用一次，内存就不会被释放，所以 WebView 都存在内存泄漏的 问题，通常的解决办法是为 WebView 单开一个进程，使用 AIDL 进行通信，根 据业务需求在合适的时机释放掉<br/>
+7.资源对象未关闭导致<br/>
+如 Cursor，File 等，内部往往都使用了缓冲，会造成内存泄漏，一定要确保关闭 它并将引用置为 null<br/>
+8.集合中的对象未清理 集合用于保存对象，如果集合越来越大，不进行合理的清理，尤其是入股集合是 静态的<br/>
+9.Bitmap 导致内存泄漏<br/>
+bitmap 是比较占内存的，所以一定要在不使用的时候及时进行清理，避免静态变量持有大的 bitmap 对象<br/>
+10.监听器未关闭<br/>
+很多需要 register 和 unregister 的系统服务要在合适的时候进行 unregister,手动添 加的 listener 也需要及时移除</p>
+
+<h2 id="toc_26">如何避免 OOM?</h2>
+
+<p>1.使用更加轻量的数据结构:如使用 ArrayMap/SparseArray 替代 HashMap,HashMap 更耗内存，因为它需要额外的实例对象来记录 Mapping 操作， SparseArray 更加高效，因为它避免了 Key Value 的自动装箱，和装箱后的解箱操 作<br/>
+2.便面枚举的使用，可以用静态常量或者注解@IntDef 替代<br/>
+3.Bitmap 优化:<br/>
+a.尺寸压缩:通过 InSampleSize 设置合适的缩放<br/>
+b.颜色质量:设置合适的 format，ARGB_6666/RBG_545/ARGB_4444/ALPHA_6， 存在很大差异<br/>
+c.inBitmap:使用 inBitmap 属性可以告知 Bitmap 解码器去尝试使用已经存在的内 存区域，新解码的 Bitmap 会尝试去使用之前那张 Bitmap 在 Heap 中所占据的 pixel data 内存区域，而不是去问内存重新申请一块区域来存放 Bitmap。利用这种特性， 即使是上千张的图片，也只会仅仅只需要占用屏幕所能够显示的图片数量的内存 大小，但复用存在一些限制，具体体现在:在 Android 4.4 之前只能重用相同大小的 Bitmap 的内存，而 Android 4.4 及以后版本则只要后来的 Bitmap 比之前的 小即可。使用 inBitmap 参数前，每创建一个 Bitmap 对象都会分配一块内存供其 使用，而使用了 inBitmap 参数后，多个 Bitmap 可以复用一块内存，这样可以提 高性能<br/>
+4.StringBuilder 替代 String: 在有些时候，代码中会需要使用到大量的字符串拼接 的操作，这种时候有必要考虑使用 StringBuilder 来替代频繁的“+”<br/>
+5.避免在类似 onDraw 这样的方法中创建对象，因为它会迅速占用大量内存，引 起频繁的 GC 甚至内存抖动<br/>
+6.减少内存泄漏也是一种避免 OOM 的方法</p>
+
+<h2 id="toc_27">onSaveInstanceState(Bundle outState)在什么时机会被调用呢？</h2>
+
+<p>当activity有可能被系统回收的情况下，而且是在onStop()之前。注意是有可能，如果是已经确定会被销毁，比如用户按下了返回键，或者调用了finish()方法销毁activity，则onSaveInstanceState不会被调用。或者也可以说，此方法只有在activity被异常终止的情况下会被调用。</p>
+
+<h2 id="toc_28">onRestoreInstanceState什么时机被调用？</h2>
+
+<p>onRestoreInstanceState(Bundle savedInstanceState)只有在activity确实是被系统回收，重新创建activity的情况下才会被调用。</p>
+
+<p><code>onPause -&gt; onSaveInstanceState -&gt; onStop -&gt; onDestroy -&gt; onCreate -&gt; onStart -&gt; onRestoreInstanceState -&gt; onResume</code><br/>
+在这里onRestoreInstanceState被调用，是因为屏幕切换时原来的activity确实被系统回收了，又重新创建了一个新的activity。<br/>
+（顺便吐槽一下网上的那些文章说横屏切竖屏和竖屏切横屏时activity生命周期方法执行不一样，经自己实践证明是一样的。）</p>
+
+<p>而按HOME键返回桌面，又马上点击应用图标回到原来页面时，activity生命周期如下：<br/>
+onPause -&gt; onSaveInstanceState -&gt; onStop -&gt; onRestart -&gt; onStart -&gt; onResume<br/>
+因为activity没有被系统回收，因此onRestoreInstanceState没有被调用。</p>
+
+<p>如果onRestoreInstanceState被调用了，则页面必然被回收过，则onSaveInstanceState必然被调用过。</p>
+
+<h2 id="toc_29">onCreate()里也有Bundle参数，可以用来恢复数据，它和onRestoreInstanceState有什么区别？</h2>
+
+<p>因为onSaveInstanceState 不一定会被调用，所以onCreate()里的Bundle参数可能为空，如果使用onCreate()来恢复数据，一定要做非空判断。</p>
+
+<p>而onRestoreInstanceState的Bundle参数一定不会是空值，因为它只有在上次activity被回收了才会调用。</p>
+
+<p>而且onRestoreInstanceState是在onStart()之后被调用的。有时候我们需要onCreate()中做的一些初始化完成之后再恢复数据，用onRestoreInstanceState会比较方便。<br/>
+用onRestoreInstanceState方法恢复数据，你可以决定是否在方法里调用父类的onRestoreInstanceState方法，即是否调用super.onRestoreInstanceState(savedInstanceState);<br/>
+而用onCreate()恢复数据，你必须调用super.onCreate(savedInstanceState)，否则会报错。</p>
+
+<h2 id="toc_30">是否用过SurfaceView，它是什么?他的继承方式是什么? 他与 View 的区别(从源码角度，如加载，绘制等)。</h2>
+
+<p>SurfaceView 中采用了双缓冲机制，保证了 UI 界面的流畅性，同时 SurfaceView 不在主线程中绘制，而是另开辟一个线程去绘制，所以它不妨碍 UI 线程;<br/>
+SurfaceView 继承于 View，他和 View 主要有以下三点区别:</p>
+
+<ul>
+<li>(1)View 底层没有双缓冲机制，SurfaceView 有;</li>
+<li>(2)view 主要适用于主动更新，而 SurfaceView 适用与被动的更新，如频繁的<br/>
+刷新</li>
+<li>(3)view 会在主线程中去更新 UI，而 SurfaceView 则在子线程中刷新;</li>
+</ul>
+
+<p>SurfaceView 的内容不在应用窗口上，所以不能使用变换(平移、缩放、旋转等)。<br/>
+也难以放在 ListView 或者 ScrollView 中，不能使用 UI 控件的一些特性比如 View.setAlpha()</p>
+
+<p>View:显示视图，内置画布，提供图形绘制函数、触屏事件、按键事件函数等; 必须在 UI 主线程内更新画面，速度较慢。</p>
+
+<p>SurfaceView:基于 view 视图进行拓展的视图类，更适合 2D 游戏的开发;是 view 的子类，类似使用双缓机制，在新的线程中更新画面所以刷新界面速度比 view 快，Camera 预览界面使用 SurfaceView。</p>
+
+<p>GLSurfaceView:基于 SurfaceView 视图再次进行拓展的视图类，专用于 3D 游戏 开发的视图;是 SurfaceView 的子类，openGL 专用。</p>
+
+<h2 id="toc_31">如何实现进程保活</h2>
+
+<p>a: Service 设置成 START_STICKY kill 后会被重启(等待 5 秒左右)，重传 Intent， 保持与重启前一样<br/>
+b: 通过 startForeground 将进程设置为前台进程， 做前台服务，优先级和前台应用一个级别，除非在系统内存非常缺，否则此进程不会被 kill<br/>
+c: 双进程 Service: 让 2 个进程互相保护对方，其中一个 Service 被清理后，另 外没被清理的进程可以立即重启进程<br/>
+d: 用 C 编写守护进程(即子进程) : Android 系统中当前进程(Process)fork 出来的 子进程，被系统认为是两个不同的进程。当父进程被杀死的时候，子进程仍然可 以存活，并不受影响(Android5.0 以上的版本不可行)联系厂商，加入白名单</p>
+
+<h2 id="toc_32">冷启动的流程</h2>
+
+<p>当点击 app 的启动图标时，安卓系统会从 Zygote 进程中 fork 创建出一个新的进 程分配给该应用，之后会依次创建和初始化 Application 类、创建 MainActivity 类、加载主题样式 Theme 中的 windowBackground 等属性设置给 MainActivity 以 及配置 Activity 层级上的一些属性、再 inflate 布局、当 onCreate/onStart/onResume 方法都走完了后最后才进行 contentView 的 measure/layout/draw 显示在界面上</p>
+
+<p><strong>冷启动的生命周期简要流程:</strong><br/>
+Application 构造方法 –&gt; attachBaseContext()–&gt;onCreate –&gt;Activity 构造方法 –&gt; onCreate() –&gt; 配置主体中的背景等操作 –&gt;onStart() –&gt; onResume() –&gt; 测量、布 局、绘制显示<br/>
+冷启动的优化主要是视觉上的优化，解决白屏问题，提高用户体验，所以通过上 面冷启动的过程。能做的优化如下:</p>
+
+<ol>
+<li>减少 onCreate()方法的工作量</li>
+<li>不要让 Application 参与业务的操作</li>
+<li>不要在 Application 进行耗时操作 </li>
+<li>不要以静态变量的方式在 Application 保存数据 </li>
+<li>减少布局的复杂度和层级</li>
+<li>减少主线程耗时</li>
+</ol>
+
+<h2 id="toc_33">静态代理和动态代理的区别，什么场景使用?</h2>
+
+<h2 id="toc_34">1.APK安装过程</h2>
+
+<p>应用安装涉及到如下几个目录：</p>
+
+<ul>
+<li>system/app：系统自带的应用程序，无法删除</li>
+<li>data/app：用户程序安装的目录，有删除权限。安装时把apk文件复制到此目录</li>
+<li>data/data：存放应用程序的数据</li>
+<li>data/dalvik-cache：将apk中的dex文件安装到dalvik-cache目录下</li>
+</ul>
+
+<p>复制APK安装包到data/app目录下，解压并扫描安装包，把dex文件(Dalvik字节码)保存到dalvik-cache目录，并在data/data目录下创建对应的应用数据目录</p>
+
+<h2 id="toc_35">2.Dalvik与ART的区别</h2>
+
+<h2 id="toc_36">3.ANR是什么？怎样避免和解决ANR</h2>
+
+<h2 id="toc_37">4.描述一下Android手机启动过程和App启动过程</h2>
+
+<h2 id="toc_38">5.Handler源码分析</h2>
+
+<h2 id="toc_39">6.谈一谈Proguard混淆技术</h2>
+
+<h2 id="toc_40">7.设备横竖屏切换的时候，生面周期的变化</h2>
+
+<h2 id="toc_41">8.RecyclerView和ListView的区别</h2>
+
+<h2 id="toc_42">9.内存泄漏和内存溢出是什么？一般怎么处理内存泄漏</h2>
+
+<ul>
+<li><p><strong>1.单例造成的内存泄漏</strong><br/>
+由于单例的静态特性使得其生命周期和应用的生命周期一样长，如果一个对象已经不再需要使用了，而单例对象还持有该对象的引用，就会使得该对象不能被正常回收，从而导致了内存泄漏。</p></li>
+<li><p><strong>2.非静态内部类创建静态实例造成的内存泄漏</strong><br/>
+例如，有时候我们可能会在启动频繁的Activity中，为了避免重复创建相同的数据资源，可能会出现如下写法：</p></li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
+   private static TestResource mResource = null;
+   @Override
+  protected void onCreate(Bundle savedInstanceState) {
+     super.onCreate(savedInstanceState);
+       setContentView(R.layout.activity_main);
+       if(mResource == null){
+          mResource = new TestResource();
+       }
+      //...
+   }
+
+ class TestResource {
+  //...
+   }
+}
+</code></pre>
+
+<p>这样在Activity内部创建了一个非静态内部类的单例，每次启动Activity时都会使用该单例的数据。虽然这样避免了资源的重复创建，但是这种写法却会造成内存泄漏。因为非静态内部类默认会持有外部类的引用，而该非静态内部类又创建了一个静态的实例，该实例的生命周期和应用的一样长，这就导致了该静态实例一直会持有该Activity的引用，从而导致Activity的内存资源不能被正常回收。</p>
+
+<p><strong>解决方法：</strong>将该内部类设为静态内部类或将该内部类抽取出来封装成一个单例，如果需要使用Context，就使用Application的Context。</p>
+
+<ul>
+<li><strong>3.Handler造成的内存泄漏</strong>
+示例：创建匿名内部类的静态对象</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
+   private final Handler handler = new Handler() {
+    @Override
+   public void handleMessage(Message msg) {
+        // ...
+    }
+  };
+
+  @Override
+   protected void onCreate(Bundle savedInstanceState) {
+       super.onCreate(savedInstanceState);
+      setContentView(R.layout.activity_main);
+      new Thread(new Runnable() {
+          @Override
+          public void run() {
+             // ...
+             handler.sendEmptyMessage(0x123);
+           }
+     });
+  }
+}
+</code></pre>
+
+<ul>
+<li>1、从Android的角度<br/>
+当Android应用程序启动时，该应用程序的主线程会自动创建一个Looper对象和与之关联的MessageQueue。当主线程中实例化一个Handler对象后，它就会自动与主线程Looper的MessageQueue关联起来。所有发送到MessageQueue的Message都会持有Handler的引用，所以Looper会据此回调Handle的handleMessage()方法来处理消息。只要MessageQueue中有未处理的Message，Looper就会不断的从中取出并交给Handler处理。另外，主线程的Looper对象会伴随该应用程序的整个生命周期。</li>
+<li>2、 Java角度<br/>
+在Java中，非静态内部类和匿名类内部类都会潜在持有它们所属的外部类的引用，但是静态内部类却不会。</li>
+</ul>
+
+<p>对上述的示例进行分析，当MainActivity结束时，未处理的消息持有handler的引用，而handler又持有它所属的外部类也就是MainActivity的引用。这条引用关系会一直保持直到消息得到处理，这样阻止了MainActivity被垃圾回收器回收，从而造成了内存泄漏。</p>
+
+<p><strong>解决方法：</strong>将Handler类独立出来或者使用静态内部类，这样便可以避免内存泄漏。</p>
+
+<ul>
+<li><p><strong>4.线程造成的内存泄漏</strong><br/>
+示例：AsyncTask和Runnable<br/>
+AsyncTask和Runnable都使用了匿名内部类，那么它们将持有其所在Activity的隐式引用。如果任务在Activity销毁之前还未完成，那么将导致Activity的内存资源无法被回收，从而造成内存泄漏。<br/>
+<strong>解决方法：</strong>将AsyncTask和Runnable类独立出来或者使用静态内部类，这样便可以避免内存泄漏。</p></li>
+<li><p><strong>5.资源未关闭造成的内存泄漏</strong><br/>
+对于使用了BraodcastReceiver，ContentObserver，File，Cursor，Stream，Bitmap等资源，应该在Activity销毁时及时关闭或者注销，否则这些资源将不会被回收，从而造成内存泄漏。</p>
+<ul>
+<li>1）比如在Activity中register了一个BraodcastReceiver，但在Activity结束后没有unregister该BraodcastReceiver。</li>
+<li>2）资源性对象比如Cursor，Stream、File文件等往往都用了一些缓冲，我们在不使用的时候，应该及时关闭它们，以便它们的缓冲及时回收内存。它们的缓冲不仅存在于 java虚拟机内，还存在于java虚拟机外。如果我们仅仅是把它的引用设置为null，而不关闭它们，往往会造成内存泄漏。</li>
+<li>3）对于资源性对象在不使用的时候，应该调用它的close()函数将其关闭掉，然后再设置为null。在我们的程序退出时一定要确保我们的资源性对象已经关闭。</li>
+<li>4）Bitmap对象不在使用时调用recycle()释放内存。2.3以后的bitmap应该是不需要手动recycle了，内存已经在java层了。</li>
+</ul></li>
+<li><p><strong>6.使用ListView时造成的内存泄漏</strong><br/>
+初始时ListView会从BaseAdapter中根据当前的屏幕布局实例化一定数量的View对象，同时ListView会将这些View对象缓存起来。当向上滚动ListView时，原先位于最上面的Item的View对象会被回收，然后被用来构造新出现在下面的Item。这个构造过程就是由getView()方法完成的，getView()的第二个形参convertView就是被缓存起来的Item的View对象（初始化时缓存中没有View对象则convertView是null）。<br/>
+构造Adapter时，没有使用缓存的convertView。<br/>
+<strong>解决方法：</strong>在构造Adapter时，使用缓存的convertView。</p></li>
+<li><p><strong>7.集合容器中的内存泄露</strong><br/>
+我们通常把一些对象的引用加入到了集合容器（比如ArrayList）中，当我们不需要该对象时，并没有把它的引用从集合中清理掉，这样这个集合就会越来越大。如果这个集合是static的话，那情况就更严重了。<br/>
+<strong>解决方法：</strong>在退出程序之前，将集合里的东西clear，然后置为null，再退出程序。</p></li>
+<li><p><strong>8.WebView造成的泄露</strong><br/>
+当我们不要使用WebView对象时，应该调用它的destory()函数来销毁它，并释放其占用的内存，否则其长期占用的内存也不能被回收，从而造成内存泄露。<br/>
+<strong>解决方法：</strong>为WebView另外开启一个进程，通过AIDL与主线程进行通信，WebView所在的进程可以根据业务的需要选择合适的时机进行销毁，从而达到内存的完整释放。</p></li>
+</ul>
+
+<h2 id="toc_43">10.图片加载框架有哪些？他们之间的区别是什么</h2>
+
+<h2 id="toc_44">11. 三级缓存</h2>
+
+<h2 id="toc_45">12.Retrofit和OkHttp源码分析</h2>
+
+<h2 id="toc_46">13.Android序列化的两种方式</h2>
+
+<h2 id="toc_47">14.IntentService和AIDL的作用</h2>
+
+<h2 id="toc_48">15.Handler、 Thread 和 HandlerThread 的差别</h2>
+
+<h2 id="toc_49">16.@TargetApi()</h2>
+
+<h2 id="toc_50">17.Touch事件传递机制</h2>
+
+<h2 id="toc_51">18.如何保证一个后台服务不被杀死,比较省电的方式是什么</h2>
+
+<ul>
+<li>双进程守护(就是开启二个service,二个service是不同的进程中，用aidl监听，有一个service杀死了，另一个service监听到了就重新启动刚杀死的service)，这个有时间时专门写文章介绍；</li>
+<li>service绑定通知栏成为前台服务,</li>
+<li>还有一个就是锁屏时启动一个像素的activity,哈哈，好像某应用就是这么干的；</li>
+<li>AlarmManager不断启动service</li>
+<li>通过jni调用，在c层启动多进程</li>
+</ul>
+
+<h2 id="toc_52">19.Android View 刷新机制</h2>
+
+<h2 id="toc_53">20.LinearLayout 对比 RelativeLayout</h2>
+
+<p>RelativeLayout会让子View调用2次onMeasure，LinearLayout 在有weight时，也会调用子View2次onMeasure，RelativeLayout的子View如果高度和RelativeLayout不同，则会引发效率问题，当子View很复杂时，这个问题会更加严重。如果可以，尽量使用padding代替margin。在不影响层级深度的情况下,使用LinearLayout和FrameLayout而不是RelativeLayout。<br/>
+最后再思考一下文章开头那个矛盾的问题，为什么Google给开发者默认新建了个RelativeLayout，而自己却在DecorView中用了个LinearLayout。因为DecorView的层级深度是已知而且固定的，上面一个标题栏，下面一个内容栏。采用RelativeLayout并不会降低层级深度，所以此时在根节点上用LinearLayout是效率最高的。而之所以给开发者默认新建了个RelativeLayout是希望开发者能采用尽量少的View层级来表达布局以实现性能最优，因为复杂的View嵌套对性能的影响会更大一些。</p>
+
+<h2 id="toc_54">21.优化自定义 view</h2>
+
+<p>为了加速你的view，对于频繁调用的方法，需要尽量减少不必要的代码。先从onDraw开始，需要特别注意不应该在这里做内存分配的事情，因为它会导致GC，从而导致卡顿。在初始化或者动画间隙期间做分配内存的动作。不要在动画正在执行的时候做内存分配的事情。</p>
+
+<p>你还需要尽可能的减少onDraw被调用的次数，大多数时候导致onDraw都是因为调用了invalidate().因此请尽量减少调用invaildate()的次数。如果可能的话，尽量调用含有4个参数的invalidate()方法而不是没有参数的invalidate()。没有参数的invalidate会强制重绘整个view。</p>
+
+<p>另外一个非常耗时的操作是请求layout。任何时候执行requestLayout()，会使得Android UI系统去遍历整个View的层级来计算出每一个view的大小。如果找到有冲突的值，它会需要重新计算好几次。另外需要尽量保持View的层级是扁平化的，这样对提高效率很有帮助。</p>
+
+<p>如果你有一个复杂的UI，你应该考虑写一个自定义的ViewGroup来执行他的layout操作。与内置的view不同，自定义的view可以使得程序仅仅测量这一部分，这避免了遍历整个view的层级结构来计算大小。这个PieChart 例子展示了如何继承ViewGroup作为自定义view的一部分。PieChart 有子views，但是它从来不测量它们。而是根据他自身的layout法则，直接设置它们的大小。</p>
+
+<h2 id="toc_55">22.描述一次网络请求的流程</h2>
+
+<ul>
+<li>域名解析</li>
+<li>TCP的三次握手</li>
+<li>建立TCP连接后发起HTTP请求</li>
+<li>服务器响应HTTP请求</li>
+<li>浏览器解析html代码</li>
+<li>同时请求html代码中的资源（如js、css、图片等）</li>
+<li>最后浏览器对页面进行渲染并呈现给用户</li>
+</ul>
+
+<h2 id="toc_56">23.String Stringbuffer Stringbuilder</h2>
+
+<ul>
+<li>String：适用于少量的字符串操作的情况</li>
+<li>StringBuilder：适用于单线程下在字符缓冲区进行大量操作的情况（非线程安全）</li>
+<li>StringBuffer：适用多线程下在字符缓冲区进行大量操作的情况（线程安全）<br/>
+在大部分情况下 StringBuilder &gt; StringBuffer</li>
+</ul>
+
+<h2 id="toc_57">24.TCP 的 3 次握手和四次挥手； TCP 与 UDP 的区别</h2>
+
+<ol>
+<li>TCP面向连接（如打电话要先拨号建立连接）;UDP是无连接的，即发送数据之前不需要建立连接</li>
+<li>TCP提供可靠的服务。也就是说，通过TCP连接传送的数据，无差错，不丢失，不重复，且按序到达;UDP尽最大努力交付，即不保证可靠交付</li>
+<li>TCP面向字节流，实际上是TCP把数据看成一连串无结构的字节流;UDP是面向报文的UDP没有拥塞控制，因此网络出现拥塞不会使源主机的发送速率降低（对实时应用很有用，如IP电话，实时视频会议等）</li>
+<li>每一条TCP连接只能是点到点的;UDP支持一对一，一对多，多对一和多对多的交互通信</li>
+<li>TCP首部开销20字节;UDP的首部开销小，只有8个字节</li>
+<li>TCP的逻辑通信信道是全双工的可靠信道，UDP则是不可靠信道</li>
+</ol>
+
+<h2 id="toc_58">25.HTTP 与 HTTPS 的区别以及如何实现安全性</h2>
+
+<h2 id="toc_59">26.HTTP 协议； HTTP1.0 与 2.0 的区别；HTTP 报文结构</h2>
+
+<h2 id="toc_60">27.性能优化，如何检测一段代码的执行时间，界面卡顿如何修复</h2>
+
+<h2 id="toc_61">28.滑动不流畅怎么处理</h2>
+
+<h2 id="toc_62">29.fps如何提高</h2>
+
+<h2 id="toc_63">30.内存泄露怎么检测，leakcanay 的原理</h2>
+
+<h2 id="toc_64">31.对自定义view的理解</h2>
+
+<h2 id="toc_65">32.性能优化（一定要具体说出很多方案，比如内存、电量、流量等具体解决方案）</h2>
+
+<h2 id="toc_66">33.单例模式的写法和各种写法的优缺点</h2>
+
+<h2 id="toc_67">34.EventBus实现原理</h2>
+
+<h2 id="toc_68">35.Android源码中用到了哪些设计模式，举例说明</h2>
+
+<h2 id="toc_69">36.一个Android正常启动有多少个线程?</h2>
+
+<h2 id="toc_70">37.Binder机制的实现思想</h2>
+
+<h2 id="toc_71">38.简单描述Https的实现思路</h2>
+
+<h2 id="toc_72">39.描述下快速排序的思想，时间复杂度？什么场景对应着最坏情况？</h2>
+
+<h2 id="toc_73">40.TCP/IP四层模型，网络层和传输层有什么区别？网络层的主要工作是什么</h2>
+
+<h2 id="toc_74">41.socket.accept()函数对应着TCP三次握手中哪一次握手，哪个函数代表连接建立完毕，四次挥手的过程？</h2>
+
+<h2 id="toc_75">42.有做过哪些优化工作，卡顿优化，内存优化，启动优化，APK体积优化，每个做了哪些工作</h2>
+
+<h2 id="toc_76">43.JNI开发中有碰到什么问题？怎么定位native crash</h2>
+
+<h2 id="toc_77">44.打印回环数组</h2>
+
+<h2 id="toc_78">45.Looper消息机制，postDelay的Message怎么处理，Looper中的消息是同步还是异步？什么情况下会有异步消息</h2>
+
+<h2 id="toc_79">46.android的屏幕刷新机制，怎么优化UI卡顿情况</h2>
+
+<h2 id="toc_80">47.有没有使用过插件化框架，实现原理？</h2>
+
+<h2 id="toc_81">48.手写线程安全的观察者模式</h2>
+
+<h2 id="toc_82">49.android 7.0,8.0，9.0, 10.0有哪些新特性，有没有了解过</h2>
+
+<h2 id="toc_83">50.HashMap的原理以及android中为什么建议用ArrayMap和SpareArray替代HashMap？</h2>
+
+<h2 id="toc_84">51.让你加载一个200M左右的GIF，如何实现及优化，不可降低画质</h2>
+
+<h2 id="toc_85">52.多个behavior联动怎么做？你会重写Behavior中的那几个方法？</h2>
+
+<h2 id="toc_86">53.进程间通讯有哪些方式</h2>
+
+<h2 id="toc_87">54.Java线程池有哪些，自己实现的话怎样去做</h2>
+
+<h2 id="toc_88">55.Hash Map原理</h2>
+
+<h2 id="toc_89">56.LinkedHash Map原理机制</h2>
+
+<h2 id="toc_90">57.service的理解</h2>
+
+<h2 id="toc_91">58.activity显示启动和隐式启动区别</h2>
+
+<h2 id="toc_92">59.synchroinzed的原理是什么</h2>
+
+<h2 id="toc_93">60.RecyclerView的局部刷新和缓存机制</h2>
+
+<h2 id="toc_94">61.网络原理，Http和Https的区别，UDP和TCP的区别。三次握手和四次挥手。 断点续传。Http报文结构和状态码。</h2>
+
+<h2 id="toc_95">62.ArrayList,HashMap,LinkedList,ConcurrentHashMap, SparseArray，HashSet,TreeSet，以上集合需要达到熟练程度。</h2>
+
+<h2 id="toc_96">63.arouter的实现原理</h2>
+
+<h2 id="toc_97">64.双亲委托机制，如何打破双亲委托机制</h2>
+
+<h2 id="toc_98">65.glide实现原理，有什么出彩的点</h2>
+
+<h2 id="toc_99">66.https的握手过程</h2>
+
+<h2 id="toc_100">67.类加载机制简述，</h2>
+
+<h2 id="toc_101">68.webview的内存泄漏是否了解</h2>
+
+<h2 id="toc_102">69.Js与原生之间的交互有几种，有什么不同和优缺点。Js在之前版本的安全漏洞是否了解，如何避免，为什么会有这个漏洞。</h2>
+
+<h2 id="toc_103">70.如何判读链表成环，如何找到入环的点</h2>
+
+<h2 id="toc_104">71.不同线程之间是如何进行同步的。</h2>
+
+<h2 id="toc_105">72.对象初始化过程</h2>
+
+<h2 id="toc_106">73.activity切换时，两个activity的生命周期变化</h2>
+
+<h2 id="toc_107">74.组件间通信除了Arouter还有什么其他实现方式，如何实现互相调用。</h2>
+
+<h2 id="toc_108">75.HashMap原理，如何解决hash冲突，除了这种方式还有其他的方式吗。</h2>
+
+<h2 id="toc_109">76.SparseArray与HashMap区别，他的优点是什么。</h2>
+
+<h2 id="toc_110">77.项目中用的是哪种序列化方式，为什么要用这一种，除了他们的原理不同，还有哪些考量。</h2>
+
+<h2 id="toc_111">78.说一下对MVC MVP MVVM的理解，以及MVVM的实现方式有哪些。</h2>
+
+<h2 id="toc_112">79.Retrofit是否有过了解，是否了解其动态代理的实现。</h2>
+
+<h2 id="toc_113">80.项目中用的代理是如何实现的，只能在java层做代理吗。</h2>
+
+<h2 id="toc_114">81.目前Android中常见的应用双开，系统是如何实现的。</h2>
+
+<h2 id="toc_115">82.Android中一屏展示两个应用，那实现这个效果，你觉得framework层需要做哪些修改。</h2>
+
+<h2 id="toc_116">83.如果让你用代码实现.9图的伸缩过程，你有什么思路。</h2>
+
+<h2 id="toc_117">84.假如让你设计Binder机制中两个进程的通信协议，你有什么思路吗。</h2>
+
+<h2 id="toc_118">85.java中常见的ArrayList是否线程安全，如何让它变的线程安全。系统提供的方法实现线程安全本质上是如何做到的。</h2>
+
+<h2 id="toc_119">86.简述Java的内存模型</h2>
+
+<h2 id="toc_120">87.JVM内存回收时有没有办法监听，如何解救，解救过后finalize方法是否每次都会调用。</h2>
+
+<h2 id="toc_121">88.Application可以做Activity生命周期的回调，为什么还要通过反射去实现，如何考量的。</h2>
+
+<h2 id="toc_122">89.自定义view时draw()和onDraw()方法有什么区别。</h2>
+
+<h2 id="toc_123">90.是否了解onSavedInstanceState方法，灭屏时是否会触发。 OnRestoreInstanceState与其总是成对出现的吗，说一下你的理解。</h2>
+
+<h2 id="toc_124">91.讲一下Android的动画原理。</h2>
+
+<h2 id="toc_125">92.ConcurrentHashMap的原理是什么。</h2>
+
+<h2 id="toc_126">93.volatile作用？如何保证线程之间可见的</h2>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/2/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15779319049745.html">
                 
                   <h1>Android Studio之Debug: 运行期代码植入</h1>
@@ -460,42 +1261,6 @@
                   <div class="more-left left">
                    <a href="15743996911213.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2019/11/22</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15713923056028.html">
-                
-                  <h1>学习ConstraintLayout</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">ConstraintLayout简介</h2>
-
-<p>ConstraintLayout作为一款可以灵活调整view位置和大小的Viewgroup被Google疯狂推荐，以前创建布局，默认根元素都是LinearLayout,现在是ConstraintLayout了。ConstraintLayout能够以支持库的形式最小支持到API 9，同时也在不断的丰富ConstraintLayout的API和功能。ConstraintLayout在复杂布局中能够有效的，降低布局的层级，提高性能，使用更加灵活。</p>
-
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15713923056028.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2019/10/18</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -696,7 +1461,7 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
     </script>
 
     
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
+<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>
