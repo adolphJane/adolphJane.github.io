@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -142,23 +144,23 @@
 
 <p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
 
-<p><figure><img src="media/15561207871979/20171105150989405862477.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989405862477.gif" alt=""/></p>
 
 <p>还有github上很火的plaid</p>
 
-<p><figure><img src="media/15561207871979/20171105150989409049352.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989409049352.gif" alt=""/></p>
 
 <p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。</p>
 
 <p>先看官网的一张关系图</p>
 
-<p><figure><img src="media/15561207871979/15713352808456.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713352808456.png" alt=""/></p>
 
 <p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
 
 <h3 id="toc_1">Scene</h3>
 
-<p><figure><img src="media/15561207871979/15713352901896.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713352901896.png" alt=""/></p>
 
 <p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法</p>
 
@@ -166,13 +168,13 @@
 
 <p>比如：</p>
 
-<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene0, getContext());
+<pre><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene0, getContext());
 mScene1 = Scene.getSceneForLayout(mSceneRoot, R.layout.scene1, getContext());
 </code></pre>
 
 <p>也可以直接new Scene(ViewGroup sceneRoot, View layout)</p>
 
-<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0, container, false);
+<pre><code class="language-java">View view0 = inflater.inflate(R.layout.scene0, container, false);
 View view1 = inflater.inflate(R.layout.scene1, container, false);
 mScene0 = new Scene(mSceneRoot, view0);
 mScene1 = new Scene(mSceneRoot, view1);
@@ -182,7 +184,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <h3 id="toc_2">Transition</h3>
 
-<p><figure><img src="media/15561207871979/15713353049060.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713353049060.png" alt=""/></p>
 
 <p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：</p>
 
@@ -192,7 +194,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>然后在代码中：</p>
 
-<pre class="line-numbers"><code class="language-java">Transition mFadeTransition =
+<pre><code class="language-java">Transition mFadeTransition =
         TransitionInflater.from(this).
         inflateTransition(R.transition.fade_transition);
 </code></pre>
@@ -205,7 +207,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
 
-<p><figure><img src="media/15561207871979/2017110515098942555933.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/2017110515098942555933.gif" alt=""/></p>
 
 <p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
 
@@ -219,7 +221,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>其实是以下几个动画组合顺序执行：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;sequential&quot;&gt;
     &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
     &lt;changeBounds /&gt;
@@ -229,7 +231,7 @@ mScene1 = new Scene(mSceneRoot, view1);
 
 <p>在代码中使用：</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new AutoTransition());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new AutoTransition());
         if (mTextView.getVisibility() != View.VISIBLE) {
             mTextView.setVisibility(View.VISIBLE);
         } else {
@@ -237,13 +239,13 @@ mScene1 = new Scene(mSceneRoot, view1);
         }
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989430739154.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989430739154.gif" alt=""/></p>
 
 <h3 id="toc_6">ChangeBounds</h3>
 
 <p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeBounds());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeBounds());
 FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
 if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
     lp.gravity = Gravity.BOTTOM | Gravity.END;
@@ -253,13 +255,13 @@ if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
 mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><figure><img src="media/15561207871979/2017110515098943515468.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/2017110515098943515468.gif" alt=""/></p>
 
 <h3 id="toc_7">ChangeClipBounds</h3>
 
 <p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
 
-<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20, 20, 100, 100);
+<pre><code class="language-java">Rect BOUNDS = new Rect(20, 20, 100, 100);
 TransitionManager.beginDelayedTransition(mRoot, new ChangeClipBounds());
 if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
     ViewCompat.setClipBounds(mImageView, null);
@@ -268,33 +270,33 @@ if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
 }
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989440946179.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989440946179.gif" alt=""/></p>
 
 <h3 id="toc_8">ChangeImageTransform</h3>
 
 <p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeImageTransform());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeImageTransform());
 mImageView.setScaleType(ImageView.ScaleType.XXX);
 </code></pre>
 
-<p><figure><img src="media/15561207871979/2017110515098944414343.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/2017110515098944414343.gif" alt=""/></p>
 
 <h3 id="toc_9">ChangeScroll</h3>
 
 <p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeScroll());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeScroll());
 mTarget.scrollBy(-100, -100);
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989447884273.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989447884273.gif" alt=""/></p>
 
 <h3 id="toc_10">ChangeTransform</h3>
 
 <p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeTransform());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new ChangeTransform());
 if (mContainer2.getChildCount() &gt; 0) {
     mContainer2.removeAllViews();
     showRedSquare(mContainer1);
@@ -310,20 +312,20 @@ private void showRedSquare(FrameLayout container) {
 }
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989451859396.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989451859396.gif" alt=""/></p>
 
 <h3 id="toc_11">Explode</h3>
 
 <p>对应xml tag为explode，作用对象：View的Visibility</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Explode());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Explode());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews) {
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989454127663.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989454127663.gif" alt=""/></p>
 
 <h3 id="toc_12">Fade</h3>
 
@@ -331,14 +333,14 @@ for (View view : mViews) {
 
 <p>可以在初始化时指定IN或者OUT分别对应淡入和淡出，也可以通过fade.setMode方法设置，若不指定默认为淡入淡出效果</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Fade());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Fade());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews) {
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989462426664.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989462426664.gif" alt=""/></p>
 
 <h3 id="toc_13">Slide</h3>
 
@@ -346,14 +348,14 @@ for (View view : mViews) {
 
 <p>可以初始化时传入Gravity.XX，也可以通过slide.setSlideEdge方法设置，默认方向为Gravity.BOTTOM</p>
 
-<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Slide());
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot, new Slide());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews) {
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989465258549.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989465258549.gif" alt=""/></p>
 
 <h3 id="toc_14">TransitionSet</h3>
 
@@ -361,7 +363,7 @@ for (View view : mViews) {
 
 <p>可以在代码中创建transitionSet如：</p>
 
-<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
+<pre><code class="language-java">mTransition = new TransitionSet();
 mTransition.addTransition(new ChangeImageTransform());
 mTransition.addTransition(new ChangeTransform());
 TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
@@ -379,7 +381,7 @@ TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
 
 <p>xml布局长这样：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;together&quot;&gt;
     &lt;changeImageTransform/&gt;
@@ -391,7 +393,7 @@ TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
 
 <p>在代码中：</p>
 
-<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet) TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+<pre><code class="language-java">mTransition = (TransitionSet) TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
 TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
         if (mInnerFrame.getChildCount() &gt; 0) {
             mInnerFrame.removeAllViews();
@@ -405,15 +407,15 @@ TransitionManager.beginDelayedTransition(mOuterFrame, mTransition);
 
 <p>这里结合changeImageTransform和changeTransform，效果如下：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989470836625.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989470836625.gif" alt=""/></p>
 
 <h3 id="toc_15">PathMotion</h3>
 
-<p><figure><img src="media/15561207871979/15713355623351.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713355623351.png" alt=""/></p>
 
 <p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
 
-<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
+<pre><code class="language-java">mTransition = new AutoTransition();
 mTransition.setPathMotion(new ArcMotion());
 TransitionManager.beginDelayedTransition(mRoot, mTransition);
         FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
@@ -425,17 +427,17 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
         mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><figure><img src="media/15561207871979/20171105150989476785110.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989476785110.gif" alt=""/></p>
 
 <p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
 
-<p><figure><img src="media/15561207871979/15713355914588.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713355914588.png" alt=""/></p>
 
 <h3 id="toc_16">自定义Transition</h3>
 
 <p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
 
-<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
+<pre><code class="language-java">public class CustomTransition extends Transition {
     @Override
     public void captureStartValues(TransitionValues values) {}
     @Override
@@ -453,11 +455,11 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989483061249.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989483061249.gif" alt=""/></p>
 
 <p>在两个Scene中使用自定义过渡动画，效果如下：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989484813223.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989484813223.gif" alt=""/></p>
 
 <h2 id="toc_17">Note</h2>
 
@@ -477,18 +479,18 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>先看下content transition的一个例子，在Google Play Games上的应用：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989496665009.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989496665009.gif" alt=""/></p>
 
 <p>在经过学习后我们也可以设计出类似的效果，首先需要了解在界面过渡中涉及到的一些重要方法，从ActivtyA调用startActivity方法唤起ActivityB，到ActivityB按返回键返回ActivityA涉及到与Transition有关的方法</p>
 
-<p><figure><img src="media/15561207871979/15713356682115.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713356682115.png" alt=""/></p>
 
 <ul>
 <li>ActivityA.exitTransition()</li>
 <li>ActivityB.enterTransition()</li>
 </ul>
 
-<p><figure><img src="media/15561207871979/15713356798222.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713356798222.png" alt=""/></p>
 
 <ul>
 <li>ActivityB.returnTransition()</li>
@@ -501,7 +503,7 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>在style中添加<code>android:windowContentTransitions</code> 属性启用窗口内容转换(Material-theme应用默认为true)，指定该Activity的Transition</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;!-- Base application theme. --&gt;
+<pre><code class="language-text">&lt;!-- Base application theme. --&gt;
 &lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
     &lt;!-- enable window content transitions --&gt;
     &lt;item name=&quot;android:windowContentTransitions&quot;&gt;true&lt;/item&gt;
@@ -515,7 +517,7 @@ TransitionManager.beginDelayedTransition(mRoot, mTransition);
 
 <p>也可以在代码中指定</p>
 
-<pre class="line-numbers"><code class="language-text">// inside your activity (if you did not enable transitions in your theme)
+<pre><code class="language-text">// inside your activity (if you did not enable transitions in your theme)
 getWindow().requestFeature(Window.FEATURE_CONTENT_TRANSITIONS);
 // set an enter transition
 getWindow().setEnterTransition(new Explode());
@@ -525,7 +527,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>然后启动Acticity</p>
 
-<pre class="line-numbers"><code class="language-text">startActivity(intent,
+<pre><code class="language-text">startActivity(intent,
               ActivityOptions.makeSceneTransitionAnimation(this).toBundle());
 </code></pre>
 
@@ -533,7 +535,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>这里在代码中指定ActivityA的exitTransition:</p>
 
-<pre class="line-numbers"><code class="language-text">private void setupTransition() {
+<pre><code class="language-text">private void setupTransition() {
         Slide slide = new Slide(Gravity.LEFT);
         slide.setDuration(1000);
         slide.setInterpolator(new FastOutSlowInInterpolator());
@@ -543,7 +545,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>使用xml方式指定ActivityB的enterTransition：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;slide
         android:duration=&quot;1000&quot;
@@ -566,7 +568,7 @@ getWindow().setExitTransition(new Explode());
 
 <p>运行效果如下：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989524969946.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989524969946.gif" alt=""/></p>
 
 <p>上图动画有两个问题:</p>
 
@@ -577,23 +579,23 @@ getWindow().setExitTransition(new Explode());
 
 <p>问题1是因为默认情况下enter/return transition会比exit/reenter transition完全结束前稍微快一点运行，如果想让前者完全运行完后者再进来，可以在代码中调用Window的</p>
 
-<pre class="line-numbers"><code class="language-text">setWindowAllowEnterTransitionOverlap(false)
+<pre><code class="language-text">setWindowAllowEnterTransitionOverlap(false)
 setWindowAllowReturnTransitionOverlap(false)
 </code></pre>
 
 <p>或者在xml中设置</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt; 
+<pre><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt; 
 &lt;item name=&quot;android:windowAllowReturnTransitionOverlap&quot;&gt;false&lt;/item&gt;
 </code></pre>
 
 <p>运行如下：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989532889905.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989532889905.gif" alt=""/></p>
 
 <p>再看下问题2，默认情况下状态栏和标题栏也会参与动画(如果有导航栏也会，测试机默认木有导航栏)，当我们把xxxoverlap属性设为false后就看得比较明显了，如果不想让它们参与动画通过excludeTarget()将其排除，在代码中：</p>
 
-<pre class="line-numbers"><code class="language-java">private void setupTransition() {
+<pre><code class="language-java">private void setupTransition() {
     Slide slide = new Slide(Gravity.LEFT);
     slide.setDuration(1000);
     slide.setInterpolator(new FastOutSlowInInterpolator());
@@ -606,7 +608,7 @@ setWindowAllowReturnTransitionOverlap(false)
 
 <p>或者在xml中：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre><code class="language-text">&lt;slide xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:slideEdge=&quot;left&quot;
     android:interpolator=&quot;@android:interpolator/fast_out_slow_in&quot;
     android:duration=&quot;1000&quot;&gt;
@@ -623,7 +625,7 @@ setWindowAllowReturnTransitionOverlap(false)
 
 <p>效果如下：</p>
 
-<p><figure><img src="media/15561207871979/2017110515098956444650.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/2017110515098956444650.gif" alt=""/></p>
 
 <h4 id="toc_22">具体流程</h4>
 
@@ -651,15 +653,15 @@ setWindowAllowReturnTransitionOverlap(false)
 
 <p>shareElement Transition的例子</p>
 
-<p><figure><img src="media/15561207871979/20171105150989573322645.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989573322645.gif" alt=""/></p>
 
 <p>shareElement Transition指的是共享元素从activity/fragment到其他activity/fragment时的动画</p>
 
-<p><figure><img src="media/15561207871979/15713357845915.png" alt=""/></figure></p>
+<p><img src="media/15561207871979/15713357845915.png" alt=""/></p>
 
 <p>有了上面的分析看名字应该也猜得出方法对应的功能了，如果没有设置exit/enter shared element transitions，默认为 @android:transition/move，上面的Content Transition是根据Visibility的变化创建动画，而shareElement Transition是根据大小，位置，和外观的变化创建动画，如chanageBounds、changeTransform、ChangeClipBounds、 ChangeImageTransform等，具体API使用和效果可以参考上篇。指定shareElement Transition可以通过代码形式：</p>
 
-<pre class="line-numbers"><code class="language-text">getWindow().setSharedElementEnterTransition();
+<pre><code class="language-text">getWindow().setSharedElementEnterTransition();
 getWindow().setSharedElementExitTransition();
 getWindow().setSharedElementReturnTransition();
 getWindow().setSharedElementReenterTransition();
@@ -667,7 +669,7 @@ getWindow().setSharedElementReenterTransition();
 
 <p>也可以通过xml形式：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;!-- Base application theme. --&gt;
+<pre><code class="language-text">&lt;!-- Base application theme. --&gt;
 &lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.DarkActionBar&quot;&gt;
     &lt;!-- specify shared element transitions --&gt;
     &lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
@@ -679,7 +681,7 @@ getWindow().setSharedElementReenterTransition();
 
 <p>然后启动Acticity</p>
 
-<pre class="line-numbers"><code class="language-text">Intent intent = new Intent(this, DetailsActivity.class);
+<pre><code class="language-text">Intent intent = new Intent(this, DetailsActivity.class);
 // Pass data object in the bundle and populate details activity.
 intent.putExtra(DetailsActivity.EXTRA_CONTACT, contact);
 ActivityOptionsCompat options = ActivityOptionsCompat.
@@ -689,7 +691,7 @@ startActivity(intent, options.toBundle());
 
 <p>在布局文件中对于要共享的View添加android:transitionName且保持一致，如果要共享的View有点多，可以通过Pair，Pair<View,String> 存储着共享View和View的名称，使用如下</p>
 
-<pre class="line-numbers"><code class="language-text">Intent intent = new Intent(context, DetailsActivity.class);
+<pre><code class="language-text">Intent intent = new Intent(context, DetailsActivity.class);
 intent.putExtra(DetailsActivity.EXTRA_CONTACT, contact);
 Pair&lt;View, String&gt; p1 = Pair.create((View)ivProfile, &quot;profile&quot;);
 Pair&lt;View, String&gt; p2 = Pair.create(vPalette, &quot;palette&quot;);
@@ -703,14 +705,14 @@ startActivity(intent, options.toBundle());
 
 <p>在ActivityB的theme中添加SharedElementEnterTransition</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
+<pre><code class="language-text">&lt;item name=&quot;android:windowSharedElementEnterTransition&quot;&gt;
 @transition/change_image_transform
 &lt;/item&gt;
 </code></pre>
 
 <p>change_image_transform.xml</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;&gt;
     &lt;changeBounds
         android:duration=&quot;1000&quot;
@@ -723,7 +725,7 @@ startActivity(intent, options.toBundle());
 
 <p>执行效果：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989590151493.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989590151493.gif" alt=""/></p>
 
 <h3 id="toc_25">具体流程</h3>
 
@@ -743,7 +745,7 @@ startActivity(intent, options.toBundle());
 
 <p>为了更直观，把ActivityA的exitTransition先注释掉，运行效果：</p>
 
-<p><figure><img src="media/15561207871979/20171105150989597967932.gif" alt=""/></figure></p>
+<p><img src="media/15561207871979/20171105150989597967932.gif" alt=""/></p>
 
 <p>可以看到，ActivityB确实像盖在ActivityA上，这里用到了 ViewOverlay，原理简单来说就是在其他View上draw，共享View利用该技术可以实现画在其他View上。我们可以通过Window的setSharedElementsUseOverlay(false)来关闭该功能，不过这样一来会使最终结果和你预想的不一致，默认该值为true。</p>
 
@@ -751,7 +753,7 @@ startActivity(intent, options.toBundle());
 
 <p>上面分析Transition会获取共享视图前后的状态值来创建动画，如果我们的图片是网上下载的，那么很有可能图片的准确大小需要下载下来才能确定，Activity Transitions API提供了一对方法暂时推迟过渡，直到我们确切地知道共享元素已经被适当的渲染和放置。在onCreate中调用postponeEnterTransition()(API &gt;= 21)或者supportPostponeEnterTransition()（API &lt; 21）延迟过渡；当图片的状态确定后，调用startPostponedEnterTransition()（API &gt;= 21）或supportStartPostponedEnterTransition()（API &lt; 21）恢复过渡，常见处理：</p>
 
-<pre class="line-numbers"><code class="language-text">// ... load remote image with Glide/Picasso here
+<pre><code class="language-text">// ... load remote image with Glide/Picasso here
 
 supportPostponeEnterTransition();
 ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
@@ -783,8 +785,8 @@ ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="15561207871939.html" 
-          title="Next Post: Android-底部Tab菜单栏">Android-底部Tab菜单栏 &raquo;</a>
+          <a  href="15561207871903.html" 
+          title="Next Post: Java-你应该知道的JDK知识">Java-你应该知道的JDK知识 &raquo;</a>
       
       </p>
         </div>
@@ -838,9 +840,9 @@ ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -857,6 +859,10 @@ ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -873,31 +879,31 @@ ivBackdrop.getViewTreeObserver().addOnPreDrawListener(
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -952,6 +958,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -972,8 +1187,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

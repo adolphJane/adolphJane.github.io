@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -121,7 +123,7 @@
           <h1>Android-自定义View播放Gif动画</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/11/2</span>
+          <span class="date">2017/11/02</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -167,7 +169,7 @@
 
 <p>首先定义一些需要的属性，用于在布局文件中设置gif</p>
 
-<pre class="line-numbers"><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
+<pre><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
         &lt;!--gif文件引用--&gt;
         &lt;attr name=&quot;gifSrc&quot; format=&quot;reference&quot;  /&gt;
         &lt;!--是否加载完自动播放--&gt;
@@ -179,7 +181,7 @@
 
 <p>然后定义Gif的播放监听器,来监听各个时段的事件，命名的含义都很简单就不再介绍了：</p>
 
-<pre class="line-numbers"><code class="language-java">public interface OnPlayListener {
+<pre><code class="language-java">public interface OnPlayListener {
         void onPlayStart();
 
         void onPlaying(int percent);
@@ -194,7 +196,7 @@
 
 <p>声明类，直接继承ImageView，这样我们不仅可以显示Gif动画，也可以显示普通图片：public class GifImageView extends AppCompatImageView然后加载Gif图片资源</p>
 
-<pre class="line-numbers"><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
+<pre><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
         mOnPlayListener = onPlayListener;
         movie = Movie.decodeStream(getResources().openRawResource(movieResourceId));
         if (movie == null) {
@@ -212,7 +214,7 @@
 
 <p>调用requestLayout重新计算View大小，并重新绘制。如果是gif格式则View宽高等于movie的宽高，不是则调用父类的测量方法。</p>
 
-<pre class="line-numbers"><code class="language-text">   @Override
+<pre><code class="language-text">   @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (movie != null) {
             int movieWidth = movie.width();
@@ -226,7 +228,7 @@
 
 <p>开始播放，其实就是调用invalidate从而调用onDraw方法就行UI绘制：</p>
 
-<pre class="line-numbers"><code class="language-text">    public void play(int counts) {
+<pre><code class="language-text">    public void play(int counts) {
         this.counts = counts;
         reset();
         if (mOnPlayListener != null) {
@@ -238,7 +240,7 @@
 
 <p>不断调用onDraw方法来绘制Gif当前时间的图片帧（同样需要判断是否是gif格式，不是则调用父类的绘制方法）：</p>
 
-<pre class="line-numbers"><code class="language-text"> @Override
+<pre><code class="language-text"> @Override
     protected void onDraw(Canvas canvas) {
         if (movie != null) {
             if (!mPaused &amp;&amp; hasStart) {
@@ -262,7 +264,7 @@
 
 <p>最核心的方法就是计算当前时间需要绘制处于movie中的对应时间的图片帧。</p>
 
-<pre class="line-numbers"><code class="language-text"> private int getCurrentFrameTime() {
+<pre><code class="language-text"> private int getCurrentFrameTime() {
         if (movieDuration == 0)
             return 0;
             //因为有暂停，所以需要减去暂停时间
@@ -285,7 +287,7 @@
 
 <p>暂停Gif播放：</p>
 
-<pre class="line-numbers"><code class="language-text">   public void pause() {
+<pre><code class="language-text">   public void pause() {
         if (movie != null &amp;&amp; !mPaused &amp;&amp; hasStart) {
             mPaused = true;
             invalidate();
@@ -303,7 +305,7 @@
 
 <p>继续Gif播放：</p>
 
-<pre class="line-numbers"><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
+<pre><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
                 mPaused = false;
                 dealyTime = dealyTime + SystemClock.uptimeMillis() - mMoviePauseTime;
                 invalidate();
@@ -321,7 +323,7 @@
 
 <p>相信看了上面GifImageView的实现原理后，倒叙播放的实现也是很容易的。</p>
 
-<pre class="line-numbers"><code class="language-text">    public void playReserver() {
+<pre><code class="language-text">    public void playReserver() {
         if (movie != null) {
             reset();
             reverse = true;
@@ -339,12 +341,12 @@
 
 <p>如下图，狗子的头已经从原来的左边转到右边变成了现在的右边转到左边（ಠᴗಠ）。</p>
 
-<p><figure><img src="media/15561207872718/20171112151041826167420.gif" alt=""/></figure></p>
+<p><img src="media/15561207872718/20171112151041826167420.gif" alt=""/></p>
 
 <p>像播放视频一样播放Gif动画<br/>
 这部分是我在写完GifView后想到的一点进阶功能，既然我们已经实现了播放和暂停，即能控制在某个时间点播放指定的Gif图片帧，如果再加入进度条，快进等功能，那么不就能做到和视频播放器一样的功能了吗？限于篇幅，我只简单实现了进度条功能，更多功能实现请移步Github，地址：<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Frenjianan%2FGifView">GifView</a></p>
 
-<p><figure><img src="media/15561207872718/20171112151041830828970.gif" alt=""/></figure></p>
+<p><img src="media/15561207872718/20171112151041830828970.gif" alt=""/></p>
 
 
     
@@ -418,9 +420,9 @@
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -437,6 +439,10 @@
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -453,31 +459,31 @@
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -532,6 +538,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -552,8 +767,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

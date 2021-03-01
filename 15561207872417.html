@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -138,7 +140,7 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <p><figure><img src="media/15561207872417/20171109151015906869351.gif" alt=""/></figure></p>
+      <p><img src="media/15561207872417/20171109151015906869351.gif" alt=""/></p>
 
 <span id="more"></span><!-- more -->
 
@@ -245,18 +247,18 @@
 
 <p><strong>第一阶段，绘制两个圆</strong></p>
 
-<p><figure><img src="media/15561207872417/20171109151015971189141.gif" alt=""/></figure></p>
+<p><img src="media/15561207872417/20171109151015971189141.gif" alt=""/></p>
 
 <p>如上图所示，这里两个圆是慢慢绘制出来的， 圆的 path 很容易绘制出来，这里我就不讲了，然后PathMeasure的getLength可以获取 path 总的长度，getSegment可以获取某个点到某个点的 Path。因此一个 ValueAnimator 就可以解决从0到100%长度的过程，具体实现看后面的代码。</p>
 
 <p>然后问题来了，path画出来的圆的起点在哪里？怎么控制两个圆开始绘制的角度不一样。有同学可能想到了旋转90°再画第二个圆，当然这种方式是可以实现的，但是由于后面的三角形也需要旋转，这里我们就不用 path 画圆了，用 path 添加一个正方形 Rect 的圆弧也是一个圆，然后我们的圆弧可以控制开始的角度，弧度。<br/>
 然后变成这样了</p>
 
-<p><figure><img src="media/15561207872417/20171109151015974099352.gif" alt=""/></figure></p>
+<p><img src="media/15561207872417/20171109151015974099352.gif" alt=""/></p>
 
 <p>WTF？角度怎么不对了，我明明设置的开始角度的呀</p>
 
-<pre class="line-numbers"><code class="language-text">innerCircle.addArc(innerRect, 150, -360);
+<pre><code class="language-text">innerCircle.addArc(innerRect, 150, -360);
 outerCircle.addArc(outerRect, 60, -360);
 </code></pre>
 
@@ -264,7 +266,7 @@ outerCircle.addArc(outerRect, 60, -360);
 
 <p><strong>第二阶段，两个点在圆里面弹射</strong></p>
 
-<p><figure><img src="media/15561207872417/20171109151015979584476.gif" alt=""/></figure></p>
+<p><img src="media/15561207872417/20171109151015979584476.gif" alt=""/></p>
 
 <p>看起来好像还要干什么碰撞反弹之类的事，一副高科技的样子，其实不是的。</p>
 
@@ -278,20 +280,20 @@ outerCircle.addArc(outerRect, 60, -360);
 
 <p>从里是从起点开始截取，那么我们不从起点开始截取，从当前点附近开始截取不就行了吗，哈哈哈哈~so easy</p>
 
-<pre class="line-numbers"><code class="language-text">float stopD = distance * pathMeasure.getLength();
+<pre><code class="language-text">float stopD = distance * pathMeasure.getLength();
 float startD = stopD - (0.5f - Math.abs(0.5f - distance)) * 200;
 pathMeasure.getSegment(startD, stopD, drawPath, true);
 </code></pre>
 
 <p><strong>第三阶段绘制两个三角形</strong></p>
 
-<p><figure><img src="media/15561207872417/20171109151015984291399.gif" alt=""/></figure></p>
+<p><img src="media/15561207872417/20171109151015984291399.gif" alt=""/></p>
 
 <p>其实两个三角形就是第二步的运动轨迹，也是就是说直接用第阶段的 Path 即可，然后再用第一阶段一样的办法就可以实现效果。</p>
 
 <h2 id="toc_2">代码实现</h2>
 
-<pre class="line-numbers"><code class="language-java">public class GranzortView extends View {
+<pre><code class="language-java">public class GranzortView extends View {
     private Paint paint;
     private Path innerCircle;//内圆 path
     private Path outerCircle;//外圆 path
@@ -508,16 +510,16 @@ pathMeasure.getSegment(startD, stopD, drawPath, true);
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="15561207872454.html" 
-          title="Previous Post: Android-视频播放器开发">&laquo; Android-视频播放器开发</a>
+          <a href="15561207872581.html" 
+          title="Previous Post: Android-手势检测GestureDetector全面分析">&laquo; Android-手势检测GestureDetector全面分析</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="15561207872380.html" 
-          title="Next Post: Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库">Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库 &raquo;</a>
+          <a  href="15561207872454.html" 
+          title="Next Post: Android-视频播放器开发">Android-视频播放器开发 &raquo;</a>
       
       </p>
         </div>
@@ -571,9 +573,9 @@ pathMeasure.getSegment(startD, stopD, drawPath, true);
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -590,6 +592,10 @@ pathMeasure.getSegment(startD, stopD, drawPath, true);
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -606,31 +612,31 @@ pathMeasure.getSegment(startD, stopD, drawPath, true);
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -685,6 +691,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -705,8 +920,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

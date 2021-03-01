@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -121,7 +123,7 @@
           <h1>Android-组件化学习</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/8/24</span>
+          <span class="date">2017/08/24</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -142,7 +144,7 @@
 
 <h2 id="toc_0">项目关系图</h2>
 
-<p><figure><img src="media/15561207870639/15713321165510.png" alt=""/></figure></p>
+<p><img src="media/15561207870639/15713321165510.png" alt=""/></p>
 
 <ul>
 <li>sdk: 一些公用库，各种辅助类，和第三方view</li>
@@ -155,7 +157,7 @@
 
 <p>想必大家都知道了，定义一个isBuildModule=false，在组件的build.gradle中加入</p>
 
-<pre class="line-numbers"><code class="language-java">if (isBuildModule.toBoolean()) {
+<pre><code class="language-java">if (isBuildModule.toBoolean()) {
     apply plugin: &#39;com.android.application&#39;
 } else {
     apply plugin: &#39;com.android.library&#39;
@@ -182,7 +184,7 @@
 
 <p>我把所以的library都依赖在basic，每个组件都会依赖这个包，这样就不会存在library的版本问题，资源的问题就是</p>
 
-<pre class="line-numbers"><code class="language-text"> defaultConfig {
+<pre><code class="language-text"> defaultConfig {
 
         if (isBuildModule.toBoolean()) {
             applicationId &quot;com.wkw.archives&quot;
@@ -203,7 +205,7 @@
 
 <p>你可以选择阿里的<a href="https://github.com/alibaba/ARouter">ARouter</a>库，但是我的项目没有那么复杂，组件也就4个左右，所以没有使用阿里的库，我采用的是以下就是核心代码，</p>
 
-<pre class="line-numbers"><code class="language-java">Object result = null;
+<pre><code class="language-java">Object result = null;
 Class&lt;?&gt; c = Class.forName(className);
 if (c != null) {
     result = c.newInstance();
@@ -217,7 +219,7 @@ return result;
 
 <p><a href="https://github.com/android10/Android-CleanArchitecture">CleanArchitecture框架的github地址</a>，这里再介绍分享一篇文章小鄧子的<a href="http://www.jianshu.com/p/3edcf85539a6">Easy Clean architecture on Android</a>,我把data和domain会写在各自的业务模块中，自己的模块只要定义自己的就可以了，有个ApplicationModule会定义一些每个模块都需要的，</p>
 
-<pre class="line-numbers"><code class="language-java">public class ApplicationModule {
+<pre><code class="language-java">public class ApplicationModule {
 
     @Provides
     @Singleton
@@ -260,7 +262,7 @@ return result;
 <p>然后在module_archives模块中会有ArchivesDataRepositoryModule和ArchivesActivityModule<br/>
 其中KnowledgeDataRepositoryModule用于提供如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@Module
+<pre><code class="language-java">@Module
 public class ArchivesDataRepositoryModule {
 
     @Provides
@@ -279,7 +281,7 @@ public class ArchivesDataRepositoryModule {
 
 <p>ArchivesActivityModule的代码如下：</p>
 
-<pre class="line-numbers"><code class="language-java">@Module
+<pre><code class="language-java">@Module
 public abstract class ArchivesActivityModule {
    @PerActivity
    @ContributesAndroidInjector()
@@ -289,7 +291,7 @@ public abstract class ArchivesActivityModule {
 
 <p>这样在主app的AppComponent类中加入：</p>
 
-<pre class="line-numbers"><code class="language-java">@Singleton
+<pre><code class="language-java">@Singleton
 @Component(modules = {
        AndroidInjectionModule.class, ApplicationModule.class,
        ArchivesDataRepositoryModule.class, ArchivesActivityModule.class,
@@ -308,7 +310,7 @@ public interface AppComponent {
 
 <p>在module_archives为debug模式下也会有个AppComponent</p>
 
-<pre class="line-numbers"><code class="language-java">@Singleton
+<pre><code class="language-java">@Singleton
 @Component(modules = {
         AndroidInjectionModule.class, ApplicationModule.class,
         ArchivesDataRepositoryModule.class, ArchivesActivityModule.class
@@ -326,7 +328,7 @@ public interface AppComponent {
 
 <p>各种模块初始化api和Repository，你要是嫌弃每个模块都要引入两个.class文件，你可以使用一个然后采用include的方式好比dagger中的AndroidSupportInjectionModule类方式</p>
 
-<pre class="line-numbers"><code class="language-java">@Beta
+<pre><code class="language-java">@Beta
 @Module(includes = AndroidInjectionModule.class)
 public abstract class AndroidSupportInjectionModule {
   @Multibinds
@@ -343,7 +345,7 @@ public abstract class AndroidSupportInjectionModule {
 
 <p>各种模块当为library是要打包成aar的，maven-release-kline-aar.gradle文件代码如下:</p>
 
-<pre class="line-numbers"><code class="language-java">apply plugin: &#39;maven&#39;
+<pre><code class="language-java">apply plugin: &#39;maven&#39;
 
 ext {// ext is a gradle closure allowing the declaration of global properties
     PUBLISH_GROUP_ID = &#39;com.wkw&#39;
@@ -451,9 +453,9 @@ artifacts {
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -470,6 +472,10 @@ artifacts {
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -486,31 +492,31 @@ artifacts {
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -565,6 +571,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -585,8 +800,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

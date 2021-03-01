@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -121,7 +123,7 @@
           <h1>Android-手势检测GestureDetector全面分析</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/11/1</span>
+          <span class="date">2017/11/01</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -148,7 +150,7 @@
 
 <p>　　Detector的意思就是探测者，所以GestureDetector就是用来监听手势的发生。它内部有3个Listener接口，用来回调不同类型的触摸事件，用一个简略的类图来显示：<br/>
 　　<br/>
-<figure><img src="media/15561207872581/15713059947377.jpg" alt=""/></figure></p>
+<img src="media/15561207872581/15713059947377.jpg" alt=""/></p>
 
 <p>里面这些接口的方法，就是相应触摸事件的回调，实现了这些方法，就能实现传入触摸事件之后做出相应的回调。</p>
 
@@ -188,7 +190,7 @@
 
 <p>GestureDetector的使用很简单，因为它的功能就是定义为识别手势，所以使用的话就是输入完整的触摸事件（完整的意思就是用户所有的触摸操作都是输入给它。为什么要强调完整，因为我上一篇博客就是分享如何拦截子View的部分触摸事件），识别然后进行相应的回调：</p>
 
-<pre class="line-numbers"><code class="language-java">    private void init(Context context){
+<pre><code class="language-java">    private void init(Context context){
         mOnGestureListener = new MyOnGestureListener();
         mGestureDetector = new GestureDetector(context,mOnGestureListener);
 //        mGestureDetector.setIsLongpressEnabled(false);
@@ -223,7 +225,7 @@
 
 <p>　　GestureDetector的源码接近800行，这在Android源码中已经算是比较短的了（毕竟注释也占一两百行了），所以说它的实现也不是很复杂的。从它的构造方法开始：</p>
 
-<pre class="line-numbers"><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
+<pre><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
         this(context, listener, null);
     }
 
@@ -280,7 +282,7 @@
 
 <p>　　可见GestureDetector的创建就是初始化一些属性，然后就是把对应的Listener设置好，还有初始化Handler，而这里的GestureHandler，是控制onShowPress()，onLongPress()，onSingleTapConfirmed()`回调的关键：</p>
 
-<pre class="line-numbers"><code class="language-java">  private class GestureHandler extends Handler {
+<pre><code class="language-java">  private class GestureHandler extends Handler {
         //省略构造函数...
 
         @Override
@@ -327,7 +329,7 @@
 
 <p>　　初始化完之后，就是看它的如何处理输入了，这是它的核心逻辑：</p>
 
-<pre class="line-numbers"><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
+<pre><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
         //检查事件输入的一致性,log出来一致性的信息，如：有事件只有up没有down
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTouchEvent(ev, 0);
@@ -408,7 +410,7 @@
 
 <p>　　下面进入DOWN事件的处理：</p>
 
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_DOWN:
             if (mDoubleTapListener != null) {
                 //处理双击
@@ -494,7 +496,7 @@
 
 <p>然后再看看对MOVE事件的处理：</p>
 
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_MOVE:
             //如果是正在长按和点击了鼠标右键
             if (mInLongPress || mInContextClick) {
@@ -547,7 +549,7 @@
 
 <p>接下来再看UP事件：</p>
 
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_UP:
             mStillDown = false;
             MotionEvent currentUpEvent = MotionEvent.obtain(ev);
@@ -609,7 +611,7 @@
 <li>onSingleTapConfirmed()回调：从前面GestureHandler里面的TAP消息的实现可以看到：</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">            case TAP:
+<pre><code class="language-java">            case TAP:
                 // If the user&#39;s finger is still down, do not count it as a tap
                 //这里控制SingleTapConfirmed的回调，
                 if (mDoubleTapListener != null) {
@@ -634,7 +636,7 @@
 
 <p>　　对于多个手指落下，前面的统一处理已经是把所有手指的坐标值加起来然后算平均值了，所以我们多根手指触摸的时候，其实滑动的实际点是这些手指的中心焦点。回看上面的MOVE事件处理，中心焦点的位置值FocusX和FocusY决定onScroll(onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY))的后两个参数值，所以处理多点触控的话就使用它们比较方便。因为MotionEvent是使用数组装着当前屏幕上所有指针的动作的，使用前两个参数的话还要循环用getX(int pointerIndex)和getY(int pointerIndex)方法取出各个指针的值再自己处理。</p>
 
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_POINTER_DOWN:
             mDownFocusX = mLastFocusX = focusX;
             mDownFocusY = mLastFocusY = focusY;
@@ -692,7 +694,7 @@
 
 <p>　　ContextClick的事件是由onGenericMotionEvent()传入：</p>
 
-<pre class="line-numbers"><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
+<pre><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(ev, 0);
         }
@@ -819,16 +821,16 @@
         <div class="large-6 columns">
         <p class="text-left" style="padding:15px 0px;">
       
-          <a href="15561207872628.html" 
-          title="Previous Post: Android-自定义曲线路径动画框架">&laquo; Android-自定义曲线路径动画框架</a>
+          <a href="15561207872492.html" 
+          title="Previous Post: Android-转场动画深度解析">&laquo; Android-转场动画深度解析</a>
       
         </p>
         </div>
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="15561207872529.html" 
-          title="Next Post: Android-最适合使用RxJava处理的四种场景">Android-最适合使用RxJava处理的四种场景 &raquo;</a>
+          <a  href="15561207872417.html" 
+          title="Next Post: Android-玩转PathMeasure">Android-玩转PathMeasure &raquo;</a>
       
       </p>
         </div>
@@ -882,9 +884,9 @@
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -901,6 +903,10 @@
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -917,31 +923,31 @@
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -996,6 +1002,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -1016,8 +1231,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

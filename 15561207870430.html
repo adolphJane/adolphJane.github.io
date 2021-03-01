@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -121,7 +123,7 @@
           <h1>Android-ColorFilter详细学习</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/8/13</span>
+          <span class="date">2017/08/13</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -142,7 +144,7 @@
 
 <p>在Android Studio中点击进去看一下源码，可以看到ColorFilter里的代码量很少</p>
 
-<pre class="line-numbers"><code class="language-java">public class ColorFilter {  
+<pre><code class="language-java">public class ColorFilter {  
     /** 
      * Holds the pointer to the native SkColorFilter instance. 
      * 
@@ -165,7 +167,7 @@
 
 <p>由此根据我们的经验，判断ColorFilter可能是个父类，具体实现可能下面还有子类完成的，于是再看Google的文档：</p>
 
-<p><figure><img src="media/15561207870430/15713327420386.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713327420386.png" alt=""/></p>
 
 <p>一目了然了，ColorFilter下有3个子类ColorMatrixColorFilter, LightingColorFilter, PorterDuffColorFilter ，下面逐一学习一下。</p>
 
@@ -173,7 +175,7 @@
 
 <p><code>ColorMatrixColorFilter</code>翻译为颜色矩阵过滤器，神马是颜色矩阵？实际上， 安卓中管理色彩矩阵是以RGBA像素点的方式加载到内存的，这些点统一使用<code>ColorMatrix</code>的矩阵来统一管理，矩阵定义为4*5的排列形式。那好，首先来看看<code>ColorMatrixColorFilter</code>的两个构造器：</p>
 
-<pre class="line-numbers"><code class="language-java">public ColorMatrixColorFilter(ColorMatrix matrix) {  
+<pre><code class="language-java">public ColorMatrixColorFilter(ColorMatrix matrix) {  
         mMatrix.set(matrix);  
         update();  
 }  
@@ -189,7 +191,7 @@ public ColorMatrixColorFilter(float[] array) {
 
 <p>ColorMatrixColorFilter中一个构造器需要接收ColorMatrix对象，另一个需要接收一个4*5的float型数组，我们再打开Android Studio追踪一下mMatrix.set()方法，可以看到以上两个构造器里面调的set方法各自实现的方式</p>
 
-<pre class="line-numbers"><code class="language-java">public void set(ColorMatrix src) {  
+<pre><code class="language-java">public void set(ColorMatrix src) {  
         System.arraycopy(src.mArray, 0, mArray, 0, 20);  
 }  
   
@@ -200,12 +202,12 @@ public void set(float[] src) {
 
 <p>再追踪一下System.arraycopy()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">public static void arraycopy(float[] src, int srcPos, float[] dst, int dstPos, int length)
+<pre><code class="language-java">public static void arraycopy(float[] src, int srcPos, float[] dst, int dstPos, int length)
 </code></pre>
 
 <p>好了，到这里，其实已经很明白了，ColorMatrixColorFilter构造器中接收的两个不同的参数，实际上底层实现方式都是一样的，都是同样调用System.arraycopy()中带float数组参数的方法。所以我们不必再考虑怎么样去写一个ColorMatrix对象传递给ColorMatrixColorFilter了，实际上我们使用第二个构造器，传递一个float数组，会显得程序更加直观易懂，那么我们就尝试写一个ColorMatrixColorFilter，并且设置给Paint吧.</p>
 
-<pre class="line-numbers"><code class="language-java">public class CustomView1 extends View {  
+<pre><code class="language-java">public class CustomView1 extends View {  
     private Paint mPaint;  
     private Context mContext;  
     public CustomView1(Context context) {  
@@ -247,7 +249,7 @@ public void set(float[] src) {
 
 <p>其实一个4*5的float数组中分别对应的是RGBA的向量值，第一行代表的是R(红色)的向量值，第二行代表G(绿色)的向量值，第三行代表B(蓝色)的向量值，第四行代表A(透明度)的向量值，这4行分别代表不同的RGBA的向量值，并且值的取值范围是[0.0F , 2.0F]，当值为1.0F的时候，表示保持原有的色彩，不发生色彩便宜。so，如果我们想要将上面的红色的圈圈颜色变掉，就不能像上面的代码一样，将所有的向量值都设置为1.0F，下面我们修改一个：</p>
 
-<pre class="line-numbers"><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+<pre><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
                 0.5F, 0, 0, 0, 0,  
                 0, 0.5F, 0, 0, 0,  
                 0, 0, 0.5F, 0, 0,  
@@ -259,15 +261,15 @@ mPaint.setColorFilter(colorFilter);
 <p>将上面的ColorMatrixColorFilter中的float数组替换成这样的<br/>
 哎哟呵~颜色变深了，看起来神奇很多。那么，这个色彩矩阵以及这个float数组是怎样做到的呢？或者说是怎样通过计算后得到另外一个色彩值的呢？下面作图来说明一下，我们顶一个ColorMatrix的4*5的float型数组，然后定义一个我们自己MyColor，分别代表RGBA的值：</p>
 
-<p><figure><img src="media/15561207870430/15713327557838.jpg" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713327557838.jpg" alt=""/></p>
 
 <p>实际上，安卓系统计算色彩值是用矩阵相乘的方式得出的，如上图的样子。这里的MyColor的各项值都要转换到[0,1]之间的值，下面就是我们实际转换的计算方式和结果了。</p>
 
-<p><figure><img src="media/15561207870430/15713327650356.jpg" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713327650356.jpg" alt=""/></p>
 
 <p>通过上面的计算，我们得到了最终的RGBA的值是（0.5,0.25,0.2,1），说明RGB色彩值都发生了便宜，只有A未偏移，然后我们将这些值乘以255后还原一下看看，是不是跟上图的圈圈的色彩值是一致的呢，好吧，别看了，肯定必须一定是一样的。那么了解色彩矩阵有什么用呢？上面简单的更换一下色彩值而已，Paint类下也提供了setColor()方法，直接将色彩值设置上去，都TMD的方便，还搞什么玩意的矩阵，显得自己牛逼+蛋疼是不是？解释一下，上面的例子不过是个例子而已啊，真正开发的时候肯定是setColor比较简便嘛。问题来了，我们有可能处理的不是一个纯色彩的东西，而是一直图片呢？一张图片是有几十万中色彩值的，这时候setColor()就不可能让他们变色了吧，还是得用色彩矩阵来搞这玩意。下面我们从drawable目录下加载一张图片吧！</p>
 
-<pre class="line-numbers"><code class="language-java">public class CustomView2 extends View {  
+<pre><code class="language-java">public class CustomView2 extends View {  
   
     private Context mContext;  
     private Paint mPaint;  
@@ -304,11 +306,11 @@ mPaint.setColorFilter(colorFilter);
 }  
 </code></pre>
 
-<p><figure><img src="media/15561207870430/15713327784421.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713327784421.png" alt=""/></p>
 
 <p>好了图片加载完毕，代码没有难度，上面的Paint没有做任何的处理，下面我们为Paint设置色彩过滤器吧！</p>
 
-<pre class="line-numbers"><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+<pre><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
                 0.33F, 0.59F, 0.11F, 0, 0,  
                 0.33F, 0.59F, 0.11F, 0, 0,  
                 0.33F, 0.59F, 0.11F, 0, 0,  
@@ -317,11 +319,11 @@ mPaint.setColorFilter(colorFilter);
 mPaint.setColorFilter(colorFilter);  
 </code></pre>
 
-<p><figure><img src="media/15561207870430/15713327887731.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713327887731.png" alt=""/></p>
 
 <p>好吧图片变成黑白的了，难道setColor()也可以办吗？再改一个试试：</p>
 
-<pre class="line-numbers"><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
+<pre><code class="language-java">ColorMatrixColorFilter colorFilter = new ColorMatrixColorFilter(new float[]{  
                 1.5F, 1.5F, 1.5F, 0, -1,  
                 1.5F, 1.5F, 1.5F, 0, -1,  
                 1.5F, 1.5F, 1.5F, 0, -1,  
@@ -330,7 +332,7 @@ mPaint.setColorFilter(colorFilter);
 mPaint.setColorFilter(colorFilter);  
 </code></pre>
 
-<p><figure><img src="media/15561207870430/15713328018868.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713328018868.png" alt=""/></p>
 
 <p>这样的效果是不是有点像负片效果啊！好了，反正我也不懂图像学，ColorMatrixColorFilter想设置什么样的就改改矩阵就行了，到底需要什么效果，效果的值要设置成多少，我也不知道，问问美工吧！我们只负责写程序！呵呵~~</p>
 
@@ -342,20 +344,20 @@ mPaint.setColorFilter(colorFilter);
 
 <p>光照色彩滤光片，可以用来模拟简单的照明效果。一个lightingcolorfilter定义了两个参数，一个用于与源颜色相乘（称为colormultiply）和一个用于添加到源颜色（称为coloradd）。alpha通道是原封不动的彩色滤光片。给定一个源颜色的RGB，由此产生的特定颜色计算如下：</p>
 
-<pre class="line-numbers"><code class="language-text">R&#39; = R * colorMultiply.R + colorAdd.R
+<pre><code class="language-text">R&#39; = R * colorMultiply.R + colorAdd.R
 G&#39; = G * colorMultiply.G + colorAdd.G
 B&#39; = B * colorMultiply.B + colorAdd.B
 </code></pre>
 
 <p>每个通道值的结果范围是0~255。上面的介绍写的比较明白， 算法也很简单，我们以上面的原图为例，看见蓝天了吗，我们现在去掉这个蓝色的天。根据这个短发描述呢，我们仅仅去掉蓝色，就要将蓝色的通道值改变，将B计算为其它值，这时候colorMultiply.B = 00，colorAdd.B =00，计算得到的B = 00，其它的通道R和G均不变，那么,colorAdd.R=0，colorAdd.G =0；colorMultiply.R = FF，colorMultiply.G =FF，Alpha通道A是忽略的，所以随便设置什么都不会有变化的。</p>
 
-<pre class="line-numbers"><code class="language-java">LightingColorFilter colorFilter = new LightingColorFilter(0xFFFFFF00, 0x00000000);  
+<pre><code class="language-java">LightingColorFilter colorFilter = new LightingColorFilter(0xFFFFFF00, 0x00000000);  
 mPaint.setColorFilter(colorFilter);
 </code></pre>
 
 <p>运行之后的结果，蓝天没了。</p>
 
-<p><figure><img src="media/15561207870430/15713328128205.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713328128205.png" alt=""/></p>
 
 <h2 id="toc_3">PorterDuffColorFilter</h2>
 
@@ -366,7 +368,7 @@ mPaint.setColorFilter(colorFilter);
 
 <p>PorterDuffColorFilter的构造器也很简单，其中第一个参数表示一个16进制的色彩值，第二个参数是一个枚举值PorterDuff.Mode，表示图片混排的模式，PorterDuff.Mode在Android下一共有16种。下面我们先写一个小例子看一下，这里我们还是使用上面的图片，为原图添加图片混排模式，颜色值设置为红色0XFFFF0000，混排模式设置为PorterDuff.Mode.DARKEN。</p>
 
-<pre class="line-numbers"><code class="language-java">public class CustomView2 extends View {  
+<pre><code class="language-java">public class CustomView2 extends View {  
   
     private Context mContext;  
     private Paint mPaint;  
@@ -409,11 +411,11 @@ mPaint.setColorFilter(colorFilter);
 
 <p>关于PorterDuff.Mode，Android系统一共提供了18种混排模式，在模拟器的ApiDemos/Graphics/XferModes，有张效果图：</p>
 
-<p><figure><img src="media/15561207870430/15713328265702.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713328265702.png" alt=""/></p>
 
 <p>这张图可以很形象的说明图片各种混排模式下的效果。其中Src代表原图，Dst代表目标图，两张图片使用不同的混排方式后，得到的图像是如上图所示的。  PorterDuff.Mode也提供了18种混排模式算法，其中比上图多了ADD和OVERLAY两种模式：</p>
 
-<p><figure><img src="media/15561207870430/15713328371456.png" alt=""/></figure></p>
+<p><img src="media/15561207870430/15713328371456.png" alt=""/></p>
 
 <p>其中Sa全称为Source alpha表示源图的Alpha通道；Sc全称为Source color表示源图的颜色；Da全称为Destination alpha表示目标图的Alpha通道；Dc全称为Destination color表示目标图的颜色，[...,..]前半部分计算的是结果图像的Alpha通道值，“,”后半部分计算的是结果图像的颜色值。图像混排后是依靠这两个值来重新计算ARGB值的，具体计算算法，抱歉，我也不知道，不过不要紧，不了解计算算法也不影响我们程序员写程序的。我们只要对照上面的apiDemo中提供的图片就能推测出混排后的结果的，下面是在网上找到的汉字语言描述，感谢这位作者的总结。</p>
 
@@ -455,8 +457,8 @@ mPaint.setColorFilter(colorFilter);
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="15561207870386.html" 
-          title="Next Post: Android-DataBinding详细学习">Android-DataBinding详细学习 &raquo;</a>
+          <a  href="15561207870348.html" 
+          title="Next Post: Android-ViewStub详细学习">Android-ViewStub详细学习 &raquo;</a>
       
       </p>
         </div>
@@ -510,9 +512,9 @@ mPaint.setColorFilter(colorFilter);
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -529,6 +531,10 @@ mPaint.setColorFilter(colorFilter);
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -545,31 +551,31 @@ mPaint.setColorFilter(colorFilter);
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -624,6 +630,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -644,8 +859,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

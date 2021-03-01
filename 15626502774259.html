@@ -1,0 +1,724 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android 使用 Palette 让你的 UI 色彩与内容更贴合 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android 使用 Palette 让你的 UI 色彩与内容更贴合</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/10/31</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">前言</h2>
+
+<p>今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。</p>
+
+<p>Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。</p>
+
+<p>比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背景，我们可以提取视频海报的颜色，设置在背景上，使得效果更佳柔和美观。</p>
+
+<p>Palette 是一个 Support v7 的包，如果使用 Gradle 引入依赖，这里使用最新的 26.+。</p>
+
+<p><code>compile &quot;com.android.support:palette-v7:26.+&quot;</code></p>
+
+<h2 id="toc_1">Palette 的使用</h2>
+
+<p>Palette 使用起来非常的简单，既然目的是从一个图片中提取颜色，它的步骤就有：</p>
+
+<ol>
+<li>传递一个 Bitmap，得到一个 Palette。</li>
+<li>通过 Palette 提取需要的颜色。</li>
+</ol>
+
+<p>就是这么简单，如同要将大象放冰箱，需要几步一样清晰。</p>
+
+<p>那么接下来我们先来了解它使用的细节。</p>
+
+<h3 id="toc_2">传递 Bitmap 得到一个 Palette</h3>
+
+<p>Palette 在旧版本上有一些 <code>generate()</code> 的方法，用于生成一个 <code>Palette</code> 对象，但是在新版本上已经被标记为 <code>@Depercated</code> 了，所以这里不推荐使用。</p>
+
+<p>而在新版上，推荐使用 <code>Palette.Builder</code> 来创建我们的 <code>Palette</code> 对象，我们可以通过 <code>from()</code> 方法使用它。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg" alt="20171104150979158539416.jpg"/></p>
+
+<p>一般我们使用第一个方法即可，直接传递进去一个 Bitmap 对象。得到 Builder 之后，我们还可以配置一些规则，但是一般我们不需要进行额外的（后面会讲到）。再通过 <code>Builder.generate()</code> 即可得到我们需要的 Palette 对象了。</p>
+
+<h3 id="toc_3">通过 Palette 提取颜色</h3>
+
+<p>Palette 从图片中提取的颜色，有很多选择。这里又涉及到另外一个类，Swatch 。</p>
+
+<p>Palette 可被提取的每个颜色，都被封装成一个 Swatch 对象，用来管理多种颜色。</p>
+
+<p>这些 Swatch 有：</p>
+
+<ul>
+<li>DominantSwatch</li>
+<li>VibrantSwatch</li>
+<li>DarkVibrantSwatch</li>
+<li>LightVibrantSwatch</li>
+<li>MutedSwatch</li>
+<li>DarkMutedSwatch</li>
+<li>LightMutedSwatch</li>
+</ul>
+
+<p>其实这些 Swatch，真的不太好解释其意义，唯一特别一点的就是 DominantSwatch ，它是从图片中提取的最突出的颜色。</p>
+
+<p>这些 Swatch 在 Palette 都提供了对应的 <code>getXxx()</code> 方法获得。不过需要注意的是，这些 <code>getXxx()</code> 方法可能会得到一个 <code>null</code> ，因为有些颜色是没有的。</p>
+
+<p>如果只是需要得到一个颜色值，Palette 同时也提供了对应的 <code>getXxxColor()</code> 方法，方便我们使用。</p>
+
+<p>得到 Swatch 对象之后，就可以通过对应的 Swatch 中对应的 Api 获取我们需要的颜色值。</p>
+
+<ul>
+<li><code>getPopulation()</code> ：Swatch 中的像素个数。</li>
+<li><code>getRgb()</code>：颜色的 RGB 值。</li>
+<li><code>getHsl()</code>：颜色的 HSL 值。</li>
+<li><code>getBodyTextColor()</code>：对应的文字颜色值。</li>
+<li><code>getTitleTextColor()</code>：对应的标题文字颜色值。</li>
+</ul>
+
+<p>通常来说，我们只需要通过 getRgb() 获取到对应的颜色设置在背景上，如果背景之上还有文字内容，可以通过 getBodyTextColor() 提取出与背景匹配的文字颜色值，这样可以显得更加的柔和，让文字看起来更清晰和舒服。比如，如果一个深色的背景，为它设置一个默认的深色文字，基本上就看不见了，因为对比对太弱。</p>
+
+<h3 id="toc_4">举个例子</h3>
+
+<p>到这里，基本上 Palette 的基本 Api 就讲解清楚了，下面举个实际的例子来看看。</p>
+
+<p>这里找了三张 Eason 的海报，用于做 Palette 的 Demo 资源，间隔去替换图片，然后分别提取出对应的颜色和字体颜色，设置在下面按钮的背景上，然后每 3s 切换一张图片。</p>
+
+<p>因为有一些图片，获取的 Swatch 可能会返回 null ，所以这里用了一个比价扎眼的红色，作为错误色。</p>
+
+<p>以下是获取 Swatch 的代码。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg" alt="20171104150979172574268.jpg"/></p>
+
+<p>接下来通过 Swatch 提取我们需要的颜色。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg" alt="20171104150979175346480.jpg"/></p>
+
+<p>这里分别获取了需要的颜色以及字体颜色，下面看看运行的效果：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif" alt="20171104150979178525822.gif"/></p>
+
+<p>可以看到，确实有一些颜色，被标记成了红色，说明当前图片有获取不到的对应颜色。</p>
+
+<h2 id="toc_5">分析 Palette 的实现</h2>
+
+<h3 id="toc_6">Palette 的主线逻辑</h3>
+
+<p>继续深入看看 Palette 的实现原理，先从主线开始看。</p>
+
+<p>从 <code>Builder.generate()</code> 开始。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg" alt="20171104150979183575637.jpg"/></p>
+
+<p>从代码中可以看到，在 <code>generate()</code> 中，主线逻辑：</p>
+
+<ol>
+<li>首先会通过 <code>scaleBitmapDown()</code> 方法，将图片压缩成一个小像素的，等于生成了一个新的 <code>Bitmap</code> 对象，这样有利于内存的管理，并且也减少了计算量。</li>
+<li>然后再通过 <code>mRegion</code> 判断是否只是提取图片的某个区域，默认是完整的图片全部提取，当然也可以对 <code>mRegion</code> 进行配置。<br/>
+之后再构造一个 <code>ColorCutQuantizer</code> 对象，使用它的 <code>getQuantizedColors()</code> 方法得到 Swatch。</li>
+<li>使用完前面压缩的 <code>Bitmap</code> 对象之后，再使用 <code>recycle()</code> 将其回收掉。</li>
+<li>最后，通过 <code>Palette</code> 本身的构造函数，去生成一个 <code>Palette</code> 对象，返回出去。</li>
+</ol>
+
+<p>接下来看看比较关键的 <code>ColorCutQuantizer</code> 中的实现逻辑。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg" alt="20171104150979200867081.jpg"/></p>
+
+<p>从代码中可以看到，其中的逻辑还是很清晰的。</p>
+
+<ol>
+<li>首先通过 <code>quantizeFromRgb888()</code> 方法，将每个像素的颜色进行量化，类似于将每个颜色取一个靠近的设置。举个不恰当的例子，将不同深度的红，都标记成红色。</li>
+<li>再通过 <code>shouldIgnoreColor()</code> 过滤掉不需要的颜色。</li>
+<li>最终获取到的颜色，如果小于等于我们设置的 <code>maxColors</code>，就可以通过 <code>approximateToRgb888()</code> 生成一批 Swatch。</li>
+<li>如果大于 <code>maxColors</code>，就再通过 <code>quantizePixels()</code> 去掉一些杂色。</li>
+<li>无论如何，最终操作的就是这里得到的 <code>mQuantizedColors</code> 对象。</li>
+</ol>
+
+<h3 id="toc_7">Swatch 的 Target</h3>
+
+<p>所有需要的 Swatch ，都是被 Target 对象所标记。不同的 Swatch 都是通过 Target 中标记的常量值，进行运算，得到行的颜色。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg" alt="2017110415097921282334.jpg"/></p>
+
+<h3 id="toc_8">过滤掉不需要的颜色</h3>
+
+<p>Palette 可以设置一些我们不需要的颜色，让它们不参与运算。这里的过滤条件，通过 Filter 来设定，并且 Palette 也提供给了一个 DEFAULT_FALTER 来标记默认的过滤颜色。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg" alt="20171104150979216238491.jpg"/></p>
+
+<p>可以看到，默认的 Filter 会过滤掉一些靠近黑和白的颜色。</p>
+
+<p>当然，我们也可以自己定义 Filter ，并通过 Palette 中的 <code>addFilter()</code>、<code>clearFilters()</code> 来管理它。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg" alt="2017110415097964327573.jpg"/></p>
+
+<p>这里存储 Filter 的是一个 ArrayList ，所以我们是可以定义很多个 Filter 加入进去的，它们都会生效。</p>
+
+<h3 id="toc_9">设置 MaxColor</h3>
+
+<p>在 ColorCutQuantizer 中，被使用的 maxColor ，主要用于标记需要使用的颜色个数。它是可以通过 maximumColorCount() 方法，进行设置的，如果不对其进行设定，默认值为 16。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg" alt="20171104150979646212624.jpg"/></p>
+
+<p>理论上来说，这里设置的maxColor 的值越大，运算花费的时间就越长。而越小，可以被选择的色值也就越少。</p>
+
+<p>所以最佳的做法是根据当前 Bitmap 的用途来决定，色彩越丰富的图，设置的 maxColor 越大，即可。不过正常来说也不需要额外的设定，默认的配置就挺好用了。</p>
+
+<h2 id="toc_10">小结</h2>
+
+<p>到这里就分析完 Palette 的所有相关的内容，不要仅仅满足使用。实际上看了 Palette 的源码，对色彩的运算，也有了更加深入的了解。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15626502774098.html" 
+          title="Previous Post: Android-实现dialog的3D翻转">&laquo; Android-实现dialog的3D翻转</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15626502774575.html" 
+          title="Next Post: Android 动态更换桌面图标">Android 动态更换桌面图标 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16136612078589.html">继承</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16127020620600.html">封装</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>

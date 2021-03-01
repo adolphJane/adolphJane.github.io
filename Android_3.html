@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -118,904 +120,396 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15561207872417.html">
+                <a class="clearlink" href="15626502773829.html">
                 
-                  <h1>Android-玩转PathMeasure</h1>
+                  <h1>Android-底部Tab菜单栏</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<p><figure><img src="media/15561207872417/20171109151015906869351.gif" alt=""/></figure></p>
+                        	<h2 id="toc_0">前言</h2>
 
+<p>Android开发中使用底部菜单栏的频次非常高，主要的实现手段有以下：</p>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872417.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/10/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+<ul>
+<li>TabWidget</li>
+<li>隐藏TabWidget，使用RadioGroup和RadioButton</li>
+<li>FragmentTabHost</li>
+<li>5.0以后的TabLayout</li>
+<li>最近推出的 Bottom navigation</li>
+</ul>
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872380.html">
-                
-                  <h1>Android-高级UI特效之炫酷漂浮动画—一个能让View执行漂浮的库</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>FloatingView-android能够让View执行漂亮的漂浮动画的库</p>
+<p>今天带大家来探索下如何用Fragment+FragmentTabHost++ViewPager<br/>
+实现底部菜单栏</p>
 
+<h2 id="toc_1">总体设计思路</h2>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872380.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/10/30</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+<ul>
+<li>Fragment：存放不同选项的页面内容</li>
+<li>FragmentTabHost：点击切换选项卡</li>
+<li>ViewPager：实现页面的左右滑动效果</li>
+</ul>
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872340.html">
-                
-                  <h1>Android-RecyclerViewItemDecoration的进阶使用</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ol>
-<li>ItemDecoration实现padding </li>
-<li>ItemDecoration实现下划线 </li>
-<li>ItemDecoration实现酷炫吸顶效果 </li>
-<li>ItemDecoration实现item的拖拽，平移等操作 </li>
+<h2 id="toc_2">概念介绍</h2>
+
+<h3 id="toc_3">FragmentTabHost</h3>
+
+<p>用于实现点击选项进行切换选项卡的自定义效果</p>
+
+<blockquote>
+<p>使用FragmentTabHost，就是先用TabHost“装着”Fragment，然后放进MainActivity里面</p>
+</blockquote>
+
+<h3 id="toc_4">ViewPager</h3>
+
+<ul>
+<li>定义<br/>
+ViewPager是android扩展包v4包中的类</li>
+</ul>
+
+<p><code>android.support.v4.view.ViewPager</code></p>
+
+<ul>
+<li>作用<br/>
+左右切换当前的view，实现滑动切换的效果。</li>
+</ul>
+
+<blockquote>
+<p>注：<br/><br/>
+1.ViewPager类直接继承了ViewGroup类，和LinearLayout等布局一样，都是一个容器，需要在里面添加我们想要显示的内容。<br/><br/>
+2.ViewPager类需要PagerAdapter适配器类提供数据，与ListView类似<br/><br/>
+3.Google官方建议ViewPager配合Fragment使用   </p>
+</blockquote>
+
+<h3 id="toc_5">Fragment</h3>
+
+<ul>
+<li>定义<br/>
+Fragment是activity的界面中的一部分或一种行为</li>
+</ul>
+
+<blockquote>
+<p>1.把Fragment认为模块化的一段activity<br/><br/>
+2.它具有自己的生命周期，接收它自己的事件，并可以在activity运行时被添加或删除<br/><br/>
+3.Fragment不能独立存在，它必须嵌入到activity中，而且Fragment的生命周期直接受所在的activity的影响。例如：当activity暂停时，它拥有的所有的Fragment们都暂停了，当activity销毁时，它拥有的所有Fragment们都被销毁。  </p>
+</blockquote>
+
+<ul>
+<li>作用<br/>
+主要是为了支持更动态、更灵活的界面设计（从3.0开始引入）</li>
+</ul>
+
+<h2 id="toc_6">实现步骤</h2>
+
+<ol>
+<li>在主xml布局里面定义一个FragmentTabHost控件</li>
+<li>定义底部菜单栏布局</li>
+<li>定义每个Fragment布局</li>
+<li>定义每个Fragment的Java类</li>
+<li>定义适配器以关联页卡和ViewPage</li>
+<li>定义MainActivity（具体实现请看注释）</li>
 </ol>
 
+<h2 id="toc_7">工程文件目录</h2>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872340.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/10/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150989723658930.png" alt="20171105150989723658930.png"/></p>
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872300.html">
-                
-                  <h1>Android-事件分发机制详解：史上最全面、最易懂</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
+<h2 id="toc_8">具体实现实例</h2>
 
-<ul>
-<li>Android事件分发机制是Android开发者必须了解的基础</li>
-<li>网上有大量关于Android事件分发机制的文章，但存在一些问题：内容不全、思路不清晰、无源码分析、简单问题复杂化等等</li>
-<li>今天，我将全面总结Android的事件分发机制，我能保证这是市面上的最全面、最清晰、最易懂的</li>
-</ul>
+<h3 id="toc_9">步骤1：在主xml布局里面定义一个FragmentTabHost控件</h3>
 
+<p>主xml布局：<strong>Main_tab_layout.xml</strong></p>
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872300.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/10/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    xmlns:tools=&quot;http://schemas.android.com/tools&quot;
+    android:layout_width=&quot;fill_parent&quot;
+    android:layout_height=&quot;fill_parent&quot;
+    android:orientation=&quot;vertical&quot; &gt;
 
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872263.html">
-                
-                  <h1>Android-史上最全解析Android消息推送解决方案</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
+    &lt;include layout=&quot;@layout/main_top&quot; /&gt;
 
-<p>消息推送在Android开发中应用的场景是越来越多了，比如说电商产品进行活动宣传、资讯类产品进行新闻推送等等。</p>
+    &lt;android.support.v4.view.ViewPager
+        android:id=&quot;@+id/pager&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;0dp&quot;
+        android:layout_weight=&quot;1&quot; /&gt;&lt;!--装4个Fragment--&gt;
 
-<p>本文将介绍Android中实现消息推送的7种主流解决方案。</p>
+    &lt;FrameLayout
+        android:visibility=&quot;gone&quot;
+        android:layout_width=&quot;match_parent&quot;
+        android:layout_height=&quot;0dp&quot;
+        android:layout_weight=&quot;1&quot; /&gt;
 
+    &lt;!--定义FragmentTabHost控件--&gt;
+    &lt;android.support.v4.app.FragmentTabHost
+        android:id=&quot;@android:id/tabhost&quot;
+        android:layout_width=&quot;fill_parent&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:background=&quot;@android:color/black&quot; &gt;&lt;!--装4个Fragment--&gt;
 
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872263.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/10/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872230.html">
-                
-                  <h1>Android-RecyclerView自定义ItemDecoration从入门到实现吸顶效果</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>RecyclerView性能和自由度相比ListView强大很多,但很恼人的是它没有像ListView一样默认提供分割线.</p>
-
-<p>刚接触RecyclerView,用过才发现RecyclerView没有分割线过后,遂到网上搜解决办法才发现自定义一个ItemDecoration只要一条黑线还要写代码,好麻烦,不知道有没像我一样懒得折腾上网搜现成的,粘贴到项目直接用.</p>
-
-<p>拖了很久才去解决这个问题,上网大致看了一下教程,其实不难而且自定义功能很强大.</p>
-
-<p>首先新建一个类覆写ItemDecoration里面有三个方法:</p>
-
-<pre class="line-numbers"><code class="language-java">public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
-
-    public SimpleItemDecoration(Context context) {
-
-    }
-
-    
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDraw(c, parent, state);
-    }
-
-    
-    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDrawOver(c, parent, state);
-
-    }
-
-
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-    }
-}
+        &lt;FrameLayout
+            android:id=&quot;@android:id/tabcontent&quot;
+            android:layout_width=&quot;0dp&quot;
+            android:layout_height=&quot;0dp&quot;
+            android:layout_weight=&quot;0&quot; /&gt;&lt;!--装Tab的内容--&gt;
+    &lt;/android.support.v4.app.FragmentTabHost&gt;
+&lt;/RelativeLayout&gt;
 </code></pre>
 
-<ul>
-<li>onDraw名字很熟悉吧,和View中的onDraw一样,是用来画东西的, 在item上画分割线就靠这个方法了.</li>
-<li>onDrawOver 英文Over的意思在...的上面 ,可以理解成是图层关系,item的内容和分割线是第一层(要在第一层画东西要调用onDraw),而onDrawOver是第二层,位于onDraw的上面</li>
-<li>getItemOffsets 看名字可以知道是设置item的偏移值,其实效果和padding一样.</li>
-</ul>
+<h3 id="toc_10">步骤2：定义底部菜单栏布局</h3>
 
-<p>以上三个方法都是在RecylerView发生滑动的时候触发.</p>
+<p><strong>tab_content.xml</strong></p>
 
-<p>需要注意的是三个方法的都有一个RecyclerView parent,通过这个参数我们可以获取到RecyclerView的属性,例如 parent.getChildCount();获取子View的个数,但是这个并不是获取RecyclerView所有的item个数,而是当前屏幕可见的item个数.</p>
+<p>一般是图片在上，文字在下</p>
 
-<p>所以画一条分割线需要的代码是这样的:</p>
-
-<pre class="line-numbers"><code class="language-java">    private int wight;
-    private int height;
-    private int item_height;
-    private int item_padding;
-    private Paint paint;
-
-public SimpleItemDecoration(Context context) {
-
-        wight=context.getResources().getDisplayMetrics().widthPixels;
-        height=context.getResources().getDisplayMetrics().heightPixels;
-        paint=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-        paint.setColor(Color.BLACK);
-        item_height=DensityUtil.dip2px(context, 1);
-        item_padding=DensityUtil.dip2px(context, 10);
-    }
-
-    @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDraw(c, parent, state);
-        int count=parent.getChildCount();
-        for (int i = 0; i &lt; count; i++) {
-            View view=parent.getChildAt(i);
-            int top=view.getTop();
-            int bottom=top+item_height;
-            c.drawRect(0,top,wight,bottom,paint);
-
-        }
-
-         .....
-    }
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;    
+android:layout_width=&quot;match_parent&quot;    
+android:layout_height=&quot;match_parent&quot;    
+android:gravity=&quot;center&quot;   
+android:orientation=&quot;vertical&quot;    
+android:background=&quot;#ffffff&quot;&gt;    
+&lt;ImageView        
+android:id=&quot;@+id/tab_imageview&quot;        
+android:layout_width=&quot;wrap_content&quot;        
+android:layout_height=&quot;wrap_content&quot;        
+/&gt;    
+&lt;TextView        
+android:id=&quot;@+id/tab_textview&quot;        
+android:layout_width=&quot;wrap_content&quot;        
+android:layout_height=&quot;wrap_content&quot;        
+android:text=&quot;&quot;        
+android:textColor=&quot;@drawable/selector_text_background&quot; /&gt;
+&lt;/LinearLayout&gt;
 </code></pre>
 
-<p>运行后得到如下图的效果.</p>
+<h3 id="toc_11">步骤3：定义Fragment布局</h3>
 
-<p><figure><img src="media/15561207872230/15713345820801.png" alt=""/></figure></p>
-
-<p>接着把<code>item_height=DensityUtil.dip2px(context, 1);</code>的1改成30,你会发现item的内容和黑色的分割线重合了</p>
-
-<p><figure><img src="media/15561207872230/15713345905617.png" alt=""/></figure></p>
-
-<p>因为上面说了item和内容和onDraw中画的内容在同一图层,当然会被出现重合的情况.这个时候getItemOffsets就能派上用场了.只要在原来的item的加个偏移值(效果和在Adpater中为item设置padding的效果是一样的,只是在ItemDecoration统一处理比较合适)onDraw中画的分割线有多高,我就paddingBottom多少.</p>
-
-<p>所以代码是是这样的:</p>
-
-<pre class="line-numbers"><code class="language-java">  public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        outRect.bottom=item_height;
-    }
-</code></pre>
-
-<p>再次运行代码item被挡住的问题就解决了,RecyclerView的自定义ItemDecoration就是这么简单.有点自定义View经验的人理解起来都不会难</p>
-
-<p><figure><img src="media/15561207872230/15713346036776.png" alt=""/></figure></p>
-
-<p>分割线不要占满,要有和Left,Right有间距啊?</p>
-
-<p>添加如下代码:</p>
-
-<pre class="line-numbers"><code class="language-java">    private int wight;
-    private int height;
-    private int item_height;
-    private Paint paint;
-    private float item_padding;
-
-    public SimpleItemDecoration(Context context) {
-
-        wight=context.getResources().getDisplayMetrics().widthPixels;
-        height=context.getResources().getDisplayMetrics().heightPixels;
-        paint=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-        paint.setColor(Color.BLACK);
-        item_height=DensityUtil.dip2px(context, 1);
-        item_padding=DensityUtil.dip2px(context, 10);
-    }
-
-    @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDraw(c, parent, state);
-        int count=parent.getChildCount();
-        for (int i = 0; i &lt; count; i++) {
-            View view=parent.getChildAt(i);
-            int top=view.getBottom();
-            int bottom=top+item_height;
-            //这里把left和right的值分别增加item_padding,和减去item_padding.
-            c.drawRect(item_padding,top,wight-item_padding,bottom,paint);
-
-        }
-          ....
-    }
-</code></pre>
-
-<p><figure><img src="media/15561207872230/15713346158297.png" alt=""/></figure></p>
-
-<p>一般用到的分割线根据以上的代码再自己的按照需求稍微修改一下基本都能满足需求了.</p>
-
-<p>之前在网上看到通过自定义ItemDecoration实现仿照旧版的instagram吸顶效果,感觉那种效果很好看,研究了一下发现只要理解了上面文章所说的几个方法实现起来并不难.</p>
-
-<p>先来看最终效果图:</p>
-
-<p><figure><img src="media/15561207872230/2017110815101479719495.gif" alt=""/></figure></p>
-
-<p>要实现吸顶的效果需要完成这些步骤:</p>
-
-<ul>
-<li>首先需要画一条高度足够容下文字和图片的分割线.</li>
-<li>因为是吸顶效果,所以分割线和传统的分割线一样应该是在每个item的上方而不是下方</li>
-<li>当前屏幕可见的第一个item的Bottom&lt;=item_height(分割线的高度) 说明可见的第一个item的底部已经超出了分割线的高度,这个时候就应该让第一条分割线随着RecyclerView向上滑动直到滑出屏幕,这个时候第二个item就取代了第一个item变成了第一个item,否则分割线一直固定不动.</li>
-<li>判断当前屏幕的第一个可见的item是哪个</li>
-<li>把当前屏幕可见的item进行对比,如果item的内容第一个字相同,则把它们归为一组,用一条分割线显示即可.</li>
-</ul>
-
-<p>先来实现1和2的要求,主要代码部分如下:</p>
-
-<pre class="line-numbers"><code class="language-java">private int wight;
-    private int height;
-    private int item_height;
-    private Paint paint;
-    private float item_padding;
-
-    public SimpleItemDecoration(Context context) {
-
-        wight=context.getResources().getDisplayMetrics().widthPixels;
-        height=context.getResources().getDisplayMetrics().heightPixels;
-        paint=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-        //更改画笔颜色为自定义的颜色
-        paint.setColor(context.getResources().getColor(R.color.itemColor));
-        item_height=DensityUtil.dip2px(context, 30);
-        item_padding=DensityUtil.dip2px(context, 10);
-    }
-
-
-@Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        //因为分割线是在item的上方,所以需要为每个item腾出一条分割线的高度
-        outRect.top=item_height;
-
-    }
-
-@Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDraw(c, parent, state);
-        int count=parent.getChildCount();
-        for (int i = 0; i &lt; count; i++) {
-            View view=parent.getChildAt(i);
-            //分割线不能和item的内容重叠,所以把分割线画在getItemOffsets为item腾出来的位置上.
-            //所以top需要上移item_height
-            int top=view.getTop()-item_height;
-            //bottom同理
-            int bottom=top+item_height;
-            c.drawRect(0,top,wight,bottom,paint);
-        }
-    }
-
-....
-</code></pre>
-
-<p>最终实现的效果如图:</p>
-
-<p><figure><img src="media/15561207872230/15713346513616.png" alt=""/></figure></p>
-
-<p>注意看陈奕迅这个item的分割线是在item的上面的,并且分割线的高度已经足够容下我们稍后要绘制的内容了.</p>
-
-<p>接着来实现3,怎么样才能让分割线在满足条件的时候动,不满足的时候固定?</p>
-
-<p>这个时候就需要用到代码中一直没覆写的onDrawOver方法了,先来实现固定不动的分割线,代码也是非常的简单,在原来的代码上覆写onDrawOver方法<br/>
-(这里new了新的画笔paint2,把固定的分割线用半透明红色来作为背景,方便理解效果):</p>
-
-<pre class="line-numbers"><code class="language-java">paint2=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-paint2.setColor(Color.parseColor(&quot;#52ff0000&quot;));
-  
-@Override
-public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-    super.onDrawOver(c, parent, state);
-}
-</code></pre>
-
-<p><figure><img src="media/15561207872230/20171108151014817074489.gif" alt=""/></figure></p>
-
-<p>接着来实现实现: 当前屏幕可见的第一个item的Bottom&lt;=item_height(分割线的高度)让第一条分割线随着RecyclerView向上滑动直到滑出屏幕,代码如下:</p>
-
-<pre class="line-numbers"><code class="language-java">@Override
-    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDrawOver(c, parent, state);
-        View child0 = parent.getChildAt(0);
-
-        //如果第一个item的Bottom&lt;=分割线的高度
-        if (child0.getBottom() &lt;= item_height) {
-            //随着RecyclerView滑动 分割线的top=固定为0不动,bottom则赋值为child0的bottom值.
-            c.drawRect(0, 0, wight,child0.getBottom() , paint2);
-        } else {
-            //固定不动
-            c.drawRect(0, 0, wight, item_height, paint2);
-
-        }
-    }
-</code></pre>
-
-<p><figure><img src="media/15561207872230/20171108151014821936037.gif" alt=""/></figure></p>
-
-<p>可以看到滑动时当第二item的顶部和第一个item的底部相互接触到后继续滑动的话第一个item就会慢慢向上滑动,直到第一个item完全画出屏幕,固定分割线立马回到最开始的位置和item2分割线重叠了在一起<br/>
-,现在可以把paint2换回paint效果会更直观,不上效果图了,可以自己去测试.</p>
-
-<p>对第一次接触ItemDecoration的人来说,难点都已经讲完了,剩下的就是在分割线范围计算出合适的位置调动drawText和drawBitmap画下文字和图片,直接贴上完整的源码:</p>
-
-<p>(在源码注释里面已经把没有讲到的方法大致提了一下实现的原理)</p>
-
-<p>自定义ItemDecoration的代码:</p>
-
-<pre class="line-numbers"><code class="language-java">/**
- * Created by Lipt0n on 2017/8/26.
- */
-
-public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
-
-
-    private Bitmap bitmap;
-    private Paint.FontMetrics fontMetrics;
-    private int wight;
-    private int itemDecorationHeight;
-    private Paint paint;
-    private ObtainTextCallback callback;
-    private float itemDecorationPadding;
-    private TextPaint textPaint;
-    private Rect text_rect=new Rect();
-    public SimpleItemDecoration(Context context, ObtainTextCallback callback) {
-
-        wight=context.getResources().getDisplayMetrics().widthPixels;
-        paint=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
-        paint.setColor(context.getResources().getColor(R.color.itemColor));
-        itemDecorationHeight=DensityUtil.dip2px(context, 30);
-        itemDecorationPadding=DensityUtil.dip2px(context, 10);
-        this.callback = callback;
-
-
-
-        textPaint = new TextPaint(Paint.ANTI_ALIAS_FLAG | Paint.DITHER_FLAG);
-        textPaint.setColor(Color.WHITE);
-        textPaint.setTextAlign(Paint.Align.LEFT);
-        textPaint.setTextSize(DensityUtil.dip2px(context, 25));
-        fontMetrics = new Paint.FontMetrics();
-        textPaint.getFontMetrics(fontMetrics);
-
-        bitmap= BitmapFactory.decodeResource(context.getResources(), R.mipmap.ic_launcher_round);
-        ScaleBitmap();
-    }
-
-    //bitmap的大小和itemDecorationHeight进行比较对图片进行缩放操作(对性能有追求可以在加载到内存的时候进行压缩)
-    private void ScaleBitmap() {
-        Matrix matrix=new Matrix();
-        float scale=bitmap.getWidth()&gt;itemDecorationHeight?Float.valueOf(itemDecorationHeight)/Float.valueOf(bitmap.getHeight()):Float.valueOf(bitmap.getHeight())/Float.valueOf(itemDecorationHeight);
-        matrix.postScale(scale,scale);
-        bitmap= Bitmap.createBitmap(bitmap,0,0,bitmap.getWidth(),bitmap.getHeight(),matrix,false);
-    }
-
-
-
-    @Override
-    public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDraw(c, parent, state);
-        int count=parent.getChildCount();
-        for (int i = 0; i &lt; count; i++) {
-            View view=parent.getChildAt(i);
-            int top=view.getTop()-itemDecorationHeight;
-            int bottom=top+itemDecorationHeight;
-
-
-            int position = parent.getChildAdapterPosition(view);
-            String content = callback.getText(position);
-            textPaint.getTextBounds(content,0, content.length(),text_rect);
-
-            if(isFirstInGroup(position)) {
-                c.drawRect(0,top,wight,bottom,paint);
-                c.drawText(content, itemDecorationPadding+bitmap.getWidth(), bottom-fontMetrics.descent, textPaint);
-                c.drawBitmap(bitmap,itemDecorationPadding,bottom-bitmap.getHeight(),paint);
-            }
-        }
-    }
-
-    @Override
-    public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
-        super.onDrawOver(c, parent, state);
-
-        View child0=parent.getChildAt(0);
-        int position = parent.getChildAdapterPosition(child0);
-        String content = callback.getText(position);
-        if(child0.getBottom()&lt;=itemDecorationHeight&amp;&amp;isFirstInGroup(position+1)){
-            c.drawRect(0, 0, wight, child0.getBottom(), paint);
-            c.drawText(content, itemDecorationPadding+bitmap.getWidth(), child0.getBottom()-fontMetrics.descent, textPaint);
-            c.drawBitmap(bitmap,itemDecorationPadding,child0.getBottom()-bitmap.getHeight(),paint);
-        }
-        else {
-            c.drawRect(0, 0, wight, itemDecorationHeight, paint);
-            c.drawText(content, itemDecorationPadding+bitmap.getWidth(), itemDecorationHeight-fontMetrics.descent, textPaint);
-            c.drawBitmap(bitmap,itemDecorationPadding,itemDecorationHeight-bitmap.getHeight(),paint);
-        }
-    }
-
-
-    @Override
-    public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
-        super.getItemOffsets(outRect, view, parent, state);
-        int position= parent.getChildAdapterPosition(view);
-        //如果不是在同一组就腾出分割线需要的高度
-        if(isFirstInGroup(position)){
-            outRect.top=itemDecorationHeight;
-        }
-
-    }
-
-    //回调接口,通过该回调获取item的内容的第一个文字
-    public interface ObtainTextCallback {
-        String getText(int position);
-    }
-
-    //判断当前item和下一个item的第一个文字是否相同,如果相同说明是同一组,不需要画分割线
-    private boolean isFirstInGroup(int pos) {
-       //如果是adapter的第一个position直接return,因为第一个item必须有分割线
-        if (pos == 0) {
-            return true;
-        } else {
-             //否者判断前一个item的字符串 与 当前item字符串 是否相同
-            String prevGroupId = callback.getText(pos - 1);
-            String groupId = callback.getText(pos);          
-            if (prevGroupId.equals(groupId)) {
-                return false;
-            } else {
-                return true;
-            }
-        }
-    }
-}
-</code></pre>
-
-<p><strong>Activity中调用的代码:</strong></p>
-
-<pre class="line-numbers"><code class="language-java">recyclerView.addItemDecoration(new SimpleItemDecoration(this, new SimpleItemDecoration.ObtainTextCallback() {
-    @Override
-    public String getText(int position) {
-        return dataList.get(position).substring(0,1);
-    }
-}));
-</code></pre>
-
-<p>只要理解了最开始提到的ItemDecoration 的3个主要方法,再处理一下文字分组的逻辑实现起来不会太难,花点耐心还是能写出来的.</p>
-
-<p>贴上<a href="https://github.com/granden/RecyclerViewDemo">github源码地址</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872196.html">
-                
-                  <h1>Android-拍照获取缩略图以及完整图片(适配androidN)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">调用系统相机拍照获取缩照片略图</h2>
+<p>fragment_item1.xml&amp;fragment_item2.xml</p>
 
 <blockquote>
-<p>调用系统相机拍照时，如果不传路径，图片默认返回缩略图，不需要权限</p>
+<p>这里使用两个选项，由于fragment_item1.xml与fragment_item2.xml相同，这里只贴出一个</p>
 </blockquote>
 
-<pre class="line-numbers"><code class="language-java">Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-    startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
-}
-</code></pre>
+<p><strong>fragment_item1.xml</strong></p>
 
-<p><code>takePictureIntent.resolveActivity(getPackageManager()) != null</code></p>
-
-<p>在官方文档中有描述：startActivityForResult（）方法受到调用resolveActivity（）的条件的保护，该方法返回可处理该意图的第一个活动组件，执行此检查很重要，因为如果您使用没有应用程序可以处理的意图调用startActivityForResult（），则您的应用程序将崩溃。所以只要结果不为空，就可以安全的使用意图，大概意思是检测手机中有没有相机。</p>
-
-<p>另外一种检测相机的方法是</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;manifest ... &gt;
-    &lt;uses-feature android:name=&quot;android.hardware.camera&quot;
-                  android:required=&quot;true&quot; /&gt;
-    ...
-&lt;/manifest&gt;
-</code></pre>
-
-<p>required=true表示要安装该应用，手机必须有摄像头该硬件。要不然不允许安装</p>
-
-<p><strong>处理回调</strong></p>
-
-<pre class="line-numbers"><code class="language-java">@Override
-protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-    if (requestCode == REQUEST_IMAGE_CAPTURE &amp;&amp; resultCode == RESULT_OK) {
-        Bundle extras = data.getExtras();
-        Bitmap imageBitmap = (Bitmap) extras.get(&quot;data&quot;);
-        mImageView.setImageBitmap(imageBitmap);
-    }
-}
-</code></pre>
-
-<h2 id="toc_1">调用系统相机拍照获取全尺寸照片</h2>
-
-<blockquote>
-<p>如果要保存一个全尺寸的照片，必须提供一个完整的文件名，当照片需要保存到公有目录时，那么需要一个写入的权限(写入权限已经隐含的允许读取[READ_EXTERNAL_STORAGE]，这样子就可以将app拍的照片写入到外部存储,该外部存储的链接是<code>getExternalStoragePublicDirectory()</code></p>
-</blockquote>
-
-<pre class="line-numbers"><code class="language-text">&lt;manifest ...&gt;
-    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot; /&gt;
-    ...
-&lt;/manifest&gt;
-</code></pre>
-
-<blockquote>
-<p>当需要将得到的照片保存到私有目录时，使用该链接<code>getExternalFilesDir(),getFilesDir()</code>，这两个目录下的文件在应用删除的时候就自动删掉了，在android4.4以下需要权限，4.4以上应用之间不能被其他程序访问，因此该权限只要在4.4以下加入</p>
-</blockquote>
-
-<pre class="line-numbers"><code class="language-text">&lt;manifest ...&gt;
-    &lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;
-                     android:maxSdkVersion=&quot;18&quot; /&gt;
-    ...
-&lt;/manifest&gt;
-</code></pre>
-
-<ul>
-<li>提供一个不会冲突的文件名，例如按时间来起名</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">String mCurrentPhotoPath;
-
-private File createImageFile() throws IOException {
-    // Create an image file name
-    String timeStamp = new SimpleDateFormat(&quot;yyyyMMdd_HHmmss&quot;).format(new Date());
-    String imageFileName = &quot;JPEG_&quot; + timeStamp + &quot;_&quot;;
-    File storageDir = getExternalFilesDir(Environment.DIRECTORY_PICTURES);
-    File image = File.createTempFile(
-        imageFileName,  /* prefix */
-        &quot;.jpg&quot;,         /* suffix */
-        storageDir      /* directory */
-    );
-
-    // Save a file: path for use with ACTION_VIEW intents
-    mCurrentPhotoPath = image.getAbsolutePath();
-    return image;
-}
-</code></pre>
-
-<ul>
-<li>构造拍照intent，适配7.0以及4.0</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">static final int REQUEST_TAKE_PHOTO = 1;
-
-    private void camera2() {
-        Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-        // Ensure that there&#39;s a camera activity to handle the intent
-        if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
-            // Create the File where the photo should go
-            File photoFile = null;
-
-            try {
-                photoFile = createImageFile();
-            } catch (IOException ex) {
-                // Error occurred while creating the File
-            }
-            // Continue only if the File was successfully created
-            if (photoFile != null) {
-                Uri photoURI = FileProvider.getUriForFile(this,
-                        &quot;lsp.com.ipctest.fileprovider&quot;,
-                        photoFile);
-
-                //解决4.0
-                List&lt;ResolveInfo&gt; resInfoList = getPackageManager()
-                        .queryIntentActivities(takePictureIntent, PackageManager.MATCH_DEFAULT_ONLY);
-                for (ResolveInfo resolveInfo : resInfoList) {
-                    String packageName = resolveInfo.activityInfo.packageName;
-                    grantUriPermission(packageName, photoURI, Intent.FLAG_GRANT_READ_URI_PERMISSION
-                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION);
-                }
-
-
-                takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, photoURI);
-                startActivityForResult(takePictureIntent, REQUEST_TAKE_PHOTO);
-            }
-        }
-    }
-</code></pre>
-
-<blockquote>
-<p><code>FileProvider.getUriForFile()</code>用来返回一个content：// URI。对于最新的针对Android 7.0（API级别24）的应用程序，通过一个包边界传递一个文件：// URI会导致FileUriExposedException<br/>
-鸿洋的博客关于android7.0 以及 4.0 拍照封装的处理(点击跳转)</p>
-</blockquote>
-
-<ul>
-<li>取得结果</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">if (requestCode == REQUEST_TAKE_PHOTO &amp;&amp; resultCode == RESULT_OK) {
-    Bitmap imageBitmap = BitmapFactory.decodeFile(mCurrentPhotoPath);
-    Log.e(TAG, &quot;文件大小&quot; + imageBitmap.getByteCount() / 1024 + &quot;kb&quot;);
-    ((ImageView) findViewById(R.id.img)).setImageBitmap(imageBitmap);
-}
-</code></pre>
-
-<ul>
-<li>将照片保存到相册如果你保存图片的路径是getExternalFilesDir() 媒体扫描器访问不到，只有你自己的应用可以访问，因此一下方法可以将图片保存到相册</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">private void galleryAddPic() {
-    Intent mediaScanIntent = new Intent(Intent.ACTION_MEDIA_SCANNER_SCAN_FILE);
-    File f = new File(mCurrentPhotoPath);
-    Uri contentUri = Uri.fromFile(f);
-    mediaScanIntent.setData(contentUri);
-    this.sendBroadcast(mediaScanIntent);
-}
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/10/24</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207872163.html">
-                
-                  <h1>Android-关于android UI适配的一些思考</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">关于xml中写死dp的思考</h2>
-
-<p>首先我们应该先把问题抛出，如果我们在xml把控件的宽度和高度写死，比如</p>
-
-<pre class="line-numbers"><code class="language-text"> &lt;TextView
-            android:layout_width=&quot;100dp&quot;
-            android:layout_height=&quot;50dp&quot;
-            android:gravity=&quot;center&quot;
-            android:text=&quot;asdasdasd&quot;
-            /&gt;
-</code></pre>
-
-<p>相信大多时候都可以这么写，因为Android dp这个单位就是为了适配屏幕而出现的控件长度单位，它会让100dp在不同的手机不同的屏幕尺寸都有相似的表现。 <br/>
-为什么是相似的表现而不是绝对的表现呢？因为不同的设备，横向和纵向所拥有的dp很可能是不同的，一般手机横向dp在360dp左右，也就是说，如果你写了一个宽度为180dp的控件，在一些手机可能有屏幕的一般宽，有一些手机超过一般，有一些手机不到一半。</p>
-
-<p>我们写这样的一段代码，然后看一下xml的预览效果：</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;LinearLayout
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:orientation=&quot;vertical&quot;
-    android:background=&quot;#123333&quot;
-    android:id=&quot;@+id/container&quot;
-    android:layout_width=&quot;360dp&quot;
+    android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;&gt;
+
+    &lt;TextView
+        android:id=&quot;@+id/textView1&quot;
+        android:layout_width=&quot;wrap_content&quot;
+        android:layout_height=&quot;wrap_content&quot;
+        android:text=&quot;fragment1&quot;
+        android:textSize=&quot;20sp&quot;/&gt;
 
 &lt;/LinearLayout&gt;
 </code></pre>
 
-<p><figure><img src="media/15561207872163/15713348283425.png" alt=""/></figure></p>
+<h3 id="toc_12">步骤4： 定义每个Fragment的Java类</h3>
 
-<p><figure><img src="media/15561207872163/15713348348639.png" alt=""/></figure></p>
+<blockquote>
+<p>1.这里使用两个选项：Fragment1.java&amp;fragmen2.java<br/><br/>
+2.由于Fragment1.java&amp;fragmen2.java相同，这里只贴出一个</p>
+</blockquote>
 
-<p><figure><img src="media/15561207872163/15713348413021.png" alt=""/></figure></p>
+<p><strong>Fragment1.java</strong></p>
 
-<h2 id="toc_1">关于java动态写控件大小的思考</h2>
+<pre><code class="language-java">package com.example.carson_ho.tab_menu_demo;
 
-<p>我们看到360dp在不同设备的所表现的占屏比是不同的。如果我们写数值比较小的dp相信直接写死的问题不大。但是如果设计稿上某个控件的宽度你换算完刚好是340dp怎么，肯定不能写340dp。其实我们可以用match_parent然后用padding margin之类的东西，在左右留一个小数值dp的距离，来实现效果。但是如果这个控件要求是高度和宽度的比例是固定的，比如展示一个广告浮层的图片，那么xml估计就无法锁定宽高比了，我们就必须借助java代码来决定这个控件高度：</p>
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
 
-<pre class="line-numbers"><code class="language-java">RelativeLayout.LayoutParams mLayoutParams = 
-new RelativeLayout.LayoutParams (mHeight,mWidth);
-mLayoutParams.addRule(RelativeLayout.ALIGN_TOP, R.id.supernatant);
-mLayoutParams.addRule(RelativeLayout.ALIGN_LEFT, R.id.supernatant);
-bigSupernatantImgLayoutParams.setMargins(DPIUtil.dip2px(9f), 0, 0, 0);
-bigImg.setLayoutParams(mLayoutParams);
+/**
+ * Created by Carson_Ho on 16/5/23.
+ */
+public class Fragment1 extends Fragment
+
+    {
+        @Override
+        public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
+        View view = inflater.inflate(R.layout.fragment_item1, null);
+        return view;
+    }
+}
 </code></pre>
 
-<p>类似这样宽度和高度都是活的，我们可以通过获取屏幕的实际宽高像素，来通过等比，相似等一些算法，转换出比例和UI设计图一样的UI，但是最大的弊端应该就是，这么书写会让java代码比较多，比较乱。因此会有一些百分百布局框架等，其实思路都类似，等比缩放就是很核心思路。 <br/>
-有个轻量的方法也就是写个工具类算出设计图到手机屏幕的转换关系：</p>
+<h3 id="toc_13">步骤5： 定义适配器关联页卡和ViewPage</h3>
 
-<pre class="line-numbers"><code class="language-java">public static int getHeightByValue720(int mValue) {
-return (int) ((float) (DPITools.getHeight() * nDesignValue) / (float) 1280);
+<p><strong>MyFragmentAdapter.java</strong></p>
+
+<pre><code class="language-java">package com.example.carson_ho.tab_menu_demo;
+
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
+import android.support.v4.app.FragmentPagerAdapter;
+
+import java.util.List;
+
+/**
+ * Created by Carson_Ho on 16/5/23.
+ */
+public class MyFragmentAdapter {extends FragmentPagerAdapter
+
+    {
+
+        List&lt;Fragment&gt; list;
+
+
+
+        public MyFragmentAdapter(FragmentManager fm,List&lt;Fragment&gt; list) {
+        super(fm);
+        this.list=list;
+    }//写构造方法，方便赋值调用
+        @Override
+        public Fragment getItem(int arg0) {
+        return list.get(arg0);
+    }//根据Item的位置返回对应位置的Fragment，绑定item和Fragment
+
+        @Override
+        public int getCount() {
+        return list.size();
+    }//设置Item的数量
+
+    }
+</code></pre>
+
+<h3 id="toc_14">步骤6： 定义MainActivity</h3>
+
+<p>具体实现看注释<br/><br/>
+<strong>MainActivity.java</strong></p>
+
+<pre><code class="language-text">package com.example.carson_ho.tab_menu_demo;
+
+import android.os.Bundle;
+import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
+import android.support.v4.app.FragmentTabHost;
+import android.support.v4.view.ViewPager;
+import android.view.LayoutInflater;
+import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
+import android.widget.TabHost;
+import android.widget.TabWidget;
+import android.widget.TextView;
+
+import java.util.ArrayList;
+import java.util.List;
+
+public class MainActivity extends FragmentActivity implements
+        ViewPager.OnPageChangeListener, TabHost.OnTabChangeListener {
+
+    private FragmentTabHost mTabHost;
+    private LayoutInflater layoutInflater;
+    private Class fragmentArray[] = { Fragment1.class, Fragment2.class };
+    private int imageViewArray[] = { R.drawable.tab_home_btn, R.drawable.tab_view_btn };
+    private String textViewArray[] = { &quot;首页&quot;, &quot;分类&quot;};
+    private List&lt;Fragment&gt; list = new ArrayList&lt;Fragment&gt;();
+    private ViewPager vp;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        initView();//初始化控件
+        initPage();//初始化页面
     }
 
-public static int getWidthByValue720(int mValue) {
-return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
+    //    控件初始化控件
+    private void initView() {
+        vp = (ViewPager) findViewById(R.id.pager);
+
+        /*实现OnPageChangeListener接口,目的是监听Tab选项卡的变化，然后通知ViewPager适配器切换界面*/
+        /*简单来说,是为了让ViewPager滑动的时候能够带着底部菜单联动*/
+
+        vp.addOnPageChangeListener(this);//设置页面切换时的监听器
+        layoutInflater = LayoutInflater.from(this);//加载布局管理器
+
+        /*实例化FragmentTabHost对象并进行绑定*/
+        mTabHost = (FragmentTabHost) findViewById(android.R.id.tabhost);//绑定tahost
+        mTabHost.setup(this, getSupportFragmentManager(), R.id.pager);//绑定viewpager
+
+        /*实现setOnTabChangedListener接口,目的是为监听界面切换），然后实现TabHost里面图片文字的选中状态切换*/
+        /*简单来说,是为了当点击下面菜单时,上面的ViewPager能滑动到对应的Fragment*/
+        mTabHost.setOnTabChangedListener(this);
+
+        int count = textViewArray.length;
+
+        /*新建Tabspec选项卡并设置Tab菜单栏的内容和绑定对应的Fragment*/
+        for (int i = 0; i &lt; count; i++) {
+            // 给每个Tab按钮设置标签、图标和文字
+            TabHost.TabSpec tabSpec = mTabHost.newTabSpec(textViewArray[i])
+                    .setIndicator(getTabItemView(i));
+            // 将Tab按钮添加进Tab选项卡中，并绑定Fragment
+            mTabHost.addTab(tabSpec, fragmentArray[i], null);
+            mTabHost.setTag(i);
+            mTabHost.getTabWidget().getChildAt(i)
+                    .setBackgroundResource(R.drawable.selector_tab_background);//设置Tab被选中的时候颜色改变
+        }
     }
-</code></pre>
 
-<p>这个方法就是如果是720的设计稿，我们将设计稿的值转换为在所用设备下同比例的大小。这似乎很完美。 <br/>
-如果设计给的控件大小是 100X200 ，那么如果运行在1080p的设配上。我们动态得到控件的大小是150X300.很开心，1080的横向纵向像素是720的1.5倍，控件也大了1.5倍这，的确没毛病。但是我们可能低估了安卓阵营了。</p>
+    /*初始化Fragment*/
+    private void initPage() {
+        Fragment1 fragment1 = new Fragment1();
+        Fragment2 fragment2 = new Fragment2();
 
-<h2 id="toc_2">关于动态宽高写布局的一些思考。</h2>
+        list.add(fragment1);
+        list.add(fragment2);
 
-<p>三星Galaxy S8分辨率： 2960*1440 (570 ppi)</p>
-
-<p>如果按照上述方式我们在三星Galaxy S8上运行效果会是如何呢？结果是200X462。控件已经倍拉伸了，原因就是S8的屏幕比例不是16比9所以，按照原来的方式缩放，就会造成拉伸，为此市面上也有解决方案：</p>
-
-<pre class="line-numbers"><code class="language-java">public static int getValueByValue720(int mValue) {
-return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
+        //绑定Fragment适配器
+        vp.setAdapter(new MyFragmentAdapter(getSupportFragmentManager(), list));
+        mTabHost.getTabWidget().setDividerDrawable(null);
     }
-</code></pre>
 
-<p>就是无论宽度还是高度，都是用宽度缩放，那么刚才控件在S8上得到的数值就是200X400.控件不会被拉伸，由于现在大多界面都是可以Scroll的，那么就算高度不标准问题也不大，我们比如一个listview我们保证在16比9的手机上，能正好展示4个item，在16比10的手机上展示3个半item，在18.5比9的设备上展示4个半item，这个设计产品还是用户都是可以接受的。</p>
-
-<h2 id="toc_3">关于动态宽度为基准写布局的一些思考。</h2>
-
-<p>然而关于方法三又存在一些问题，设想下面一个场景，页面里展示的是一个cardview，cardview的背景是一张图片，所以cardview宽高必须固定，这个cardview又是不允许上下滑动的，里面又有很多控件，在16比9的设计稿上，cardview里面的控件，排列整齐，最后也没什么太大的边界。</p>
-
-<p>这样面临一个问题，如果在16比10的手机上，其实每次计算出的高度都是大于手机比例的，因此cardview后面的几个控件可能无法正常显示，或被拉伸。在18.5比9的手机上，cardview下面可能有空余，或者根据不同layout方式，可能其他地方有空余。我认为这还是可以接受的，比较这种手机是少数，但是控件被挤压就难以接受了。归纳起来也就说，如果这种不能上下滑动的view，可以让它有空余，但是不能让它挤压。我们可以使用一个保守的方法，判断手机是否是大于16比9，如果大于就说明手机比较瘦高，如果小于就说明手机比较胖。我们就可以用相对充裕的方法计算控件宽高，来保证控件不被挤压。</p>
-
-<pre class="line-numbers"><code class="language-java">public static boolean bigThan169() {
-        float h = DPIUtil.getHeight();
-        float w = DPIUtil.getWidth();
-        if ((h / w) &gt; 1.78f) return true;
-        else return false;
+    private View getTabItemView(int i) {
+        //将xml布局转换为view对象
+        View view = layoutInflater.inflate(R.layout.tab_content, null);
+        //利用view对象，找到布局中的组件,并设置内容，然后返回视图
+        ImageView mImageView = (ImageView) view
+                .findViewById(R.id.tab_imageview);
+        TextView mTextView = (TextView) view.findViewById(R.id.tab_textview);
+        mImageView.setBackgroundResource(imageViewArray[i]);
+        mTextView.setText(textViewArray[i]);
+        return view;
     }
+
+
+    @Override
+    public void onPageScrollStateChanged(int arg0) {
+
+    }//arg0 ==1的时候表示正在滑动，arg0==2的时候表示滑动完毕了，arg0==0的时候表示什么都没做，就是停在那。
+
+    @Override
+    public void onPageScrolled(int arg0, float arg1, int arg2) {
+
+    }//表示在前一个页面滑动到后一个页面的时候，在前一个页面滑动前调用的方法
+
+    @Override
+    public void onPageSelected(int arg0) {//arg0是表示你当前选中的页面位置Postion，这事件是在你页面跳转完毕的时候调用的。
+        TabWidget widget = mTabHost.getTabWidget();
+        int oldFocusability = widget.getDescendantFocusability();
+        widget.setDescendantFocusability(ViewGroup.FOCUS_BLOCK_DESCENDANTS);//设置View覆盖子类控件而直接获得焦点
+        mTabHost.setCurrentTab(arg0);//根据位置Postion设置当前的Tab
+        widget.setDescendantFocusability(oldFocusability);//设置取消分割线
+
+    }
+
+    @Override
+    public void onTabChanged(String tabId) {//Tab改变的时候调用
+        int position = mTabHost.getCurrentTab();
+        vp.setCurrentItem(position);//把选中的Tab的位置赋给适配器，让它控制页面切换
+    }
+
+}
 </code></pre>
-
-<pre class="line-numbers"><code class="language-java">if (bigThan169())
-newWidth = DPIUtil.getWidthByDesignValue720(DesignWidth);（以宽度为基准）
-else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为基准 从而保证控件上下高度够用）
-</code></pre>
-
-<p>总之就这就是一个保守，保证控件装得下的思路，若果是控件横向被挤压也是一样的。我们为了保证显示的下，缩小了控件。</p>
-
-<p>总结：UI适配愈走愈远，有时也要和设计师产品经理协调，不要设计一些容易触发适配问题的页面，减少安卓端的适配压力，但是如果场景真的无法避免，我们就只能有更优雅的方式去解决适配问题。</p>
 
                         
                       </div>
@@ -1024,11 +518,13 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/10/23</span>
+                    <span class="date">2019/10/31</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
           				   
+                    
+
                   </div>
                   <div class="more-right right">
                   <span class="comments">
@@ -1041,202 +537,520 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15561207872129.html">
+                <a class="clearlink" href="15626502774098.html">
                 
-                  <h1>Android-轻松自制flyme悬浮球</h1>
+                  <h1>Android-实现dialog的3D翻转</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">效果图</h2>
+
+<p>本文实现了 Android 中 dialog 的 3D 翻转效果。这里通过一个简单的应用场景记录下。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981489051639.gif" alt="20171105150981489051639.gif"/></p>
+
+<h2 id="toc_1">分析</h2>
+
+<blockquote>
+<p>起初自己的思路是 Activity 进行界面跳转实现旋转效果，网上看了很多，写下来发现效果不对。之后又看到 Google 上面的 Card Flid Animation 效果是这样的。</p>
+</blockquote>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/201711051509814926496.gif" alt="201711051509814926496.gif"/></p>
+
+<p>看着确实不错，然而拿下来 demo 放慢翻转速度后发现，不是我想要的。但是跟我看到的一个 app 里面的效果一样<br/>
+然后想改成 dialog 试试效果，发现更是不行了。</p>
+
+<blockquote>
+<p>Card Flid Animation效果如下：<br/><br/>
+这个是通过Activity来切换Fragment实现的，可以看到区别是翻转时候貌似会变大，其实没用，只是翻转后的视觉问题。</p>
+</blockquote>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981496621515.gif" alt="20171105150981496621515.gif"/></p>
+
+<p>听说 openGl 比较麻烦，并且没有用过。然后就搜了下Rotate3DAnimaitons。<br/>
+搜到了<a href="http://blog.csdn.net/growing_tree/article/details/50428148">这篇文章</a><br/>
+所以这篇文章里的实现方法不是我的原创，是参考人家的。在这里感谢这位大神。<br/>
+不过他这个是 activity 里的，我就想要一个 dialog 效果，因为电脑上TIM 的打开红包这个 3D 效果看着不错，其实大同小异，就拿过来改成Dialog。<br/>
+对于 Rotate3DAnimaitons 这篇文章已经很详细了，有需要的可以参考下。</p>
+
+<p><strong>Rotate3dAnimation</strong></p>
+
+<pre><code class="language-java">/**
+ * An animation that rotates the view on the Y axis between two specified angles.
+ * This animation also adds a translation on the Z axis (depth) to improve the effect.
+ */
+public class Rotate3dAnimation extends Animation {
+    private final float mFromDegrees;
+    private final float mToDegrees;
+    private final float mCenterX;
+    private final float mCenterY;
+    private final float mDepthZ;
+    private final boolean mReverse;
+    private Camera mCamera;
+
+    /**
+     * Creates a new 3D rotation on the Y axis. The rotation is defined by its
+     * start angle and its end angle. Both angles are in degrees. The rotation
+     * is performed around a center point on the 2D space, definied by a pair
+     * of X and Y coordinates, called centerX and centerY. When the animation
+     * starts, a translation on the Z axis (depth) is performed. The length
+     * of the translation can be specified, as well as whether the translation
+     * should be reversed in time.
+     *
+     * @param fromDegrees the start angle of the 3D rotation //起始角度
+     * @param toDegrees the end angle of the 3D rotation //结束角度
+     * @param centerX the X center of the 3D rotation //x中轴线
+     * @param centerY the Y center of the 3D rotation //y中轴线
+     * @param reverse true if the translation should be reversed, false otherwise//是否反转
+     */
+    public Rotate3dAnimation(float fromDegrees, float toDegrees,
+            float centerX, float centerY, float depthZ, boolean reverse) {
+        mFromDegrees = fromDegrees;
+        mToDegrees = toDegrees;
+        mCenterX = centerX;
+        mCenterY = centerY;
+        mDepthZ = depthZ;//Z轴移动的距离，这个来影响视觉效果，可以解决flip animation那个给人看似放大的效果
+        mReverse = reverse;
+    }
+
+    @Override
+    public void initialize(int width, int height, int parentWidth, int parentHeight) {
+        super.initialize(width, height, parentWidth, parentHeight);
+        mCamera = new Camera();
+    }
+
+    @Override
+    protected void applyTransformation(float interpolatedTime, Transformation t) {
+        final float fromDegrees = mFromDegrees;
+        float degrees = fromDegrees + ((mToDegrees - fromDegrees) * interpolatedTime);
+
+        final float centerX = mCenterX;
+        final float centerY = mCenterY;
+        final Camera camera = mCamera;
+
+        final Matrix matrix = t.getMatrix();
+
+        Log.i(&quot;interpolatedTime&quot;, interpolatedTime+&quot;&quot;);
+        camera.save();
+        if (mReverse) {
+            camera.translate(0.0f, 0.0f, mDepthZ * interpolatedTime);
+        } else {
+            camera.translate(0.0f, 0.0f, mDepthZ * (1.0f - interpolatedTime));
+        }
+        camera.rotateY(degrees);
+        camera.getMatrix(matrix);
+        camera.restore();
+
+        matrix.preTranslate(-centerX, -centerY);
+        matrix.postTranslate(centerX, centerY);
+    }
+}
+</code></pre>
+
+<h2 id="toc_2">dialog实现3D翻转代码</h2>
+
+<pre><code class="language-java">public class MyDialog extends Dialog {
+
+    @BindView(R.id.et_user_name)
+    EditText etUserName;
+    @BindView(R.id.et_password)
+    EditText etPassword;
+    @BindView(R.id.cb_auto_login)
+    CheckBox cbAutoLogin;
+    @BindView(R.id.tv_forget_pwd)
+    TextView tvForgetPwd;
+    @BindView(R.id.ll_content)
+    LinearLayout llContent;
+    @BindView(R.id.et_email)
+    EditText etEmail;
+    @BindView(R.id.btn_back)
+    Button btnBack;
+    @BindView(R.id.container)
+    RelativeLayout container;
+    private Context context;
+
+    @BindView(R.id.ll_register)
+    LinearLayout llRegister;
+
+    //接口回调传递参数
+    private OnClickListenerInterface mListener;
+    private View view;
+//
+    private String strContent;
+
+    private int centerX;
+    private int centerY;
+    private int depthZ = 700;//修改此处可以改变距离来达到你满意的效果
+    private int duration = 300;//动画时间
+    private Rotate3dAnimation openAnimation;
+    private Rotate3dAnimation closeAnimation;
+
+    private boolean isOpen = false;
+
+    public interface OnClickListenerInterface {
+
+        /**
+         * 确认,
+         */
+        void doConfirm();
+
+        /**
+         * 取消
+         */
+//        public void doCancel();
+    }
+
+    public MyDialog(Context context) {
+        super(context);
+        this.context = context;
+    }
+
+    public MyDialog(Context context, String content) {
+        super(context);
+        this.context = context;
+        this.strContent = content;
+    }
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        //去掉系统的黑色矩形边框
+        getWindow().setBackgroundDrawableResource(android.R.color.transparent);
+        requestWindowFeature(Window.FEATURE_NO_TITLE);
+
+        init();
+    }
+
+    public void init() {
+        LayoutInflater inflater = LayoutInflater.from(context);
+        view = inflater.inflate(R.layout.dialog_my, null);
+        setContentView(view);
+        ButterKnife.bind(this);
+        etPassword.setTypeface(Typeface.DEFAULT);
+        etPassword.setTransformationMethod(new PasswordTransformationMethod());
+        tvForgetPwd.setOnClickListener(new OnWidgetClickListener());
+        btnBack.setOnClickListener(new OnWidgetClickListener());
+        Window dialogWindow = getWindow();
+        WindowManager.LayoutParams lp = dialogWindow.getAttributes();
+        DisplayMetrics d = context.getResources().getDisplayMetrics(); // 获取屏幕宽、高用
+        lp.width = (int) (d.widthPixels * 0.8); // 宽度设置为屏幕的0.8
+        lp.height = (int) (d.heightPixels * 0.6); // 高度设置为屏幕的0.6
+        dialogWindow.setAttributes(lp);
+        setCanceledOnTouchOutside(false);
+        setCancelable(true);
+    }
+
+    public void setClicklistener(OnClickListenerInterface clickListenerInterface) {
+        this.mListener = clickListenerInterface;
+    }
+
+    private class OnWidgetClickListener implements View.OnClickListener {
+        @Override
+        public void onClick(View v) {
+
+            int id = v.getId();
+            switch (id) {
+                case R.id.tv_forget_pwd:
+                    startAnimation();
+                    break;
+                case R.id.btn_back:
+                    startAnimation();
+                    break;
+            }
+        }
+    }
+
+    private void startAnimation() {
+        //接口回调传递参数
+        centerX = container.getWidth() / 2;
+        centerY = container.getHeight() / 2;
+        if (openAnimation == null) {
+            initOpenAnim();
+            initCloseAnim();
+        }
+
+        //用作判断当前点击事件发生时动画是否正在执行
+        if (openAnimation.hasStarted() &amp;&amp; !openAnimation.hasEnded()) {
+            return;
+        }
+        if (closeAnimation.hasStarted() &amp;&amp; !closeAnimation.hasEnded()) {
+            return;
+        }
+
+        //判断动画执行
+        if (isOpen) {
+
+            container.startAnimation(openAnimation);
+
+        } else {
+
+            container.startAnimation(closeAnimation);
+
+        }
+        isOpen = !isOpen;
+    }
+
+    /**
+     *注意旋转角度
+     */
+    private void initOpenAnim() {
+        //从0到90度，顺时针旋转视图，此时reverse参数为true，达到90度时动画结束时视图变得不可见，
+        openAnimation = new Rotate3dAnimation(0, 90, centerX, centerY, depthZ, true);
+        openAnimation.setDuration(duration);
+        openAnimation.setFillAfter(true);
+        openAnimation.setInterpolator(new AccelerateInterpolator());
+        openAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                llRegister.setVisibility(View.GONE);
+                llContent.setVisibility(View.VISIBLE);
+                //从270到360度，顺时针旋转视图，此时reverse参数为false，达到360度动画结束时视图变得可见
+                Rotate3dAnimation rotateAnimation = new Rotate3dAnimation(270, 360, centerX, centerY, depthZ, false);
+                rotateAnimation.setDuration(duration);
+                rotateAnimation.setFillAfter(true);
+                rotateAnimation.setInterpolator(new DecelerateInterpolator());
+                container.startAnimation(rotateAnimation);
+            }
+        });
+    }
+
+    private void initCloseAnim() {
+        closeAnimation = new Rotate3dAnimation(360, 270, centerX, centerY, depthZ, true);
+        closeAnimation.setDuration(duration);
+        closeAnimation.setFillAfter(true);
+        closeAnimation.setInterpolator(new AccelerateInterpolator());
+        closeAnimation.setAnimationListener(new Animation.AnimationListener() {
+
+            @Override
+            public void onAnimationStart(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationRepeat(Animation animation) {
+
+            }
+
+            @Override
+            public void onAnimationEnd(Animation animation) {
+                llRegister.setVisibility(View.VISIBLE);
+                llContent.setVisibility(View.GONE);
+                Rotate3dAnimation rotateAnimation = new Rotate3dAnimation(90, 0, centerX, centerY, depthZ, false);
+                rotateAnimation.setDuration(duration);
+                rotateAnimation.setFillAfter(true);
+                rotateAnimation.setInterpolator(new DecelerateInterpolator());
+                container.startAnimation(rotateAnimation);
+            }
+        });
+    }
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502774259.html">
+                
+                  <h1>Android 使用 Palette 让你的 UI 色彩与内容更贴合</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
                         	<h2 id="toc_0">前言</h2>
 
-<p>去年用了一整年的MX4Pro，魅族留给我最大的印象就是悬浮球了（质量问题我就不说了），左右滑动切换应用、上拉返回桌面、下拉打开通知栏、轻触返回…，一切都那么丝滑。然而自从上半年换成了s7dege，我感觉怎么也习惯不了没有悬浮球的生活了。</p>
+<p>今天介绍一个 Android 下比较有意思的 Support v7 库，Palette，它翻译过来就是调色板。</p>
 
-<p>三星自己也有一个类似于悬浮球的功能，不过太过复杂，不易用，悬浮球本来就该是一个一步操作的产品，看来三星在软件设计方面还是任重而道远。于是乎我便在各大应用市场上找悬浮球，把所有排名靠前的悬浮球应用都安装试了一下，最后终于让我找到了一款几乎和flyme悬浮球相仿的app。</p>
+<p>Palette 可以从一张 Bitmap 中提取出它突出的颜色，这样我们就可以将提取出来的颜色设置在 App 的固定 UI 中（例如：ToolBar 的背景），使得 UI 页面的整体风格更加的美观和融洽。</p>
 
-<p>这款app在我手机里呆了好几个月，是我手机里除了微信之外，唯一允许自启动的应用了。很感谢这款app的开发者，不仅没有任何广告，还非常好用，完美移植了flyme自带的悬浮球功能。</p>
+<p>比如，对于一些影视类的 App，视频详情页的主题都是视频的海报，那么对于页面背景，我们可以提取视频海报的颜色，设置在背景上，使得效果更佳柔和美观。</p>
 
-<p>然而渐渐的，我便感觉到了一丝不舒服，那就是我每次安装了一个新app，打开后提示要赋予权限（存储、拍照）的时候，6.0的系统总会温馨的弹出一个框：</p>
+<p>Palette 是一个 Support v7 的包，如果使用 Gradle 引入依赖，这里使用最新的 26.+。</p>
 
-<p>然后我就必须到设置页面，花半天找到悬浮球，关掉它的“可出现在顶部的应用程”权限，然后才能回到app，授予权限。最后，我还得再次跑到设置页面，再花半天找到悬浮球，打开它的“可出现在顶部的应用程”权限。朋友啊朋友，这种体验，一次就够了，然而硬是让我体验了N次啊！</p>
+<p><code>compile &quot;com.android.support:palette-v7:26.+&quot;</code></p>
 
-<p>然而有什么能难得倒程序员的呢？刚好这个周末在家无事，我决定按照自己的习惯，打造一个心目中最易用的悬浮球。</p>
+<h2 id="toc_1">Palette 的使用</h2>
 
-<h2 id="toc_1">设计</h2>
-
-<h3 id="toc_2">UI</h3>
-
-<p>UI很简单，直接用sketch切了三个圆，一个是作为背景的灰色半透明的圆，一个是中心的小圆，另外还有一个默认隐藏的大圆。</p>
-
-<h3 id="toc_3">功能</h3>
-
-<p>因为自己的操作习惯是固定的，所以也就不需要给悬浮球添加自定义操作的功能了，直接将操作对应的功能写死即可。</p>
+<p>Palette 使用起来非常的简单，既然目的是从一个图片中提取颜色，它的步骤就有：</p>
 
 <ol>
-<li>单击：返回</li>
-<li>长按：移动悬浮球</li>
-<li>左滑右滑：打开最近应用程序</li>
-<li>上拉：返回桌面</li>
-<li>下拉：</li>
+<li>传递一个 Bitmap，得到一个 Palette。</li>
+<li>通过 Palette 提取需要的颜色。</li>
 </ol>
 
-<p>这块我最先开始定义的很简单，就是下拉通知栏，但是经过一天的使用，我又给它加了一个功能，就是保持下拉状态1.5秒，将移除悬浮球。这样你便可以很简单的移除掉悬浮球了。</p>
+<p>就是这么简单，如同要将大象放冰箱，需要几步一样清晰。</p>
 
-<h2 id="toc_4">实现</h2>
+<p>那么接下来我们先来了解它使用的细节。</p>
 
-<h3 id="toc_5">如何添加悬浮球到桌面</h3>
+<h3 id="toc_2">传递 Bitmap 得到一个 Palette</h3>
 
-<p>这里首先要感谢郭霖大神的 《 Android桌面悬浮窗效果实现，仿360手机卫士悬浮窗效果》，这部分我参考了这篇文章，成功的将悬浮球添加到了桌面。</p>
+<p>Palette 在旧版本上有一些 <code>generate()</code> 的方法，用于生成一个 <code>Palette</code> 对象，但是在新版本上已经被标记为 <code>@Depercated</code> 了，所以这里不推荐使用。</p>
 
-<pre class="line-numbers"><code class="language-java">public static void addBallView(Context context) {
-    if (mBallView == null) {
-        WindowManager windowManager = getWindowManager(context);
-        int screenWidth = windowManager.getDefaultDisplay().getWidth();
-        int screenHeight = windowManager.getDefaultDisplay().getHeight();
-        mBallView = new FloatBallView(context);
-        LayoutParams params = new LayoutParams();
-        params.x = screenWidth;
-        params.y = screenHeight / 2;
-        params.width = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.height = WindowManager.LayoutParams.WRAP_CONTENT;
-        params.gravity = Gravity.LEFT | Gravity.TOP;
-        params.type = LayoutParams.TYPE_PHONE;
-        params.format = PixelFormat.RGBA_8888;
-        params.flags = LayoutParams.FLAG_NOT_TOUCH_MODAL
-                | LayoutParams.FLAG_NOT_FOCUSABLE;
-        mBallView.setLayoutParams(params);
-        windowManager.addView(mBallView, params);
-    }
-}
-</code></pre>
+<p>而在新版上，推荐使用 <code>Palette.Builder</code> 来创建我们的 <code>Palette</code> 对象，我们可以通过 <code>from()</code> 方法使用它。</p>
 
-<h3 id="toc_6">手势判断</h3>
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979158539416.jpg" alt="20171104150979158539416.jpg"/></p>
 
-<p>这是最重要的部分了，承担着悬浮球的主要功能。</p>
+<p>一般我们使用第一个方法即可，直接传递进去一个 Bitmap 对象。得到 Builder 之后，我们还可以配置一些规则，但是一般我们不需要进行额外的（后面会讲到）。再通过 <code>Builder.generate()</code> 即可得到我们需要的 Palette 对象了。</p>
 
-<h4 id="toc_7">手指按下时</h4>
+<h3 id="toc_3">通过 Palette 提取颜色</h3>
 
-<p>按下时，隐藏小球，展现大球，并记录按下位置和按下时间。</p>
+<p>Palette 从图片中提取的颜色，有很多选择。这里又涉及到另外一个类，Swatch 。</p>
 
-<pre class="line-numbers"><code class="language-java">case MotionEvent.ACTION_DOWN:
-       mIsTouching = true;
-       mImgBall.setVisibility(INVISIBLE);
-       mImgBigBall.setVisibility(VISIBLE);
-       mLastDownTime = System.currentTimeMillis();
-       mLastDownX = event.getX();
-       mLastDownY = event.getY();
-       postDelayed(new Runnable() {
-               @Override
-               public void run() {
-                   if (isLongTouch()) {
-                       mIsLongTouch = true;
-                       mVibrator.vibrate(mPattern, -1);
-                   }
-             }
-       }, LONG_CLICK_LIMIT);
-       break;
-</code></pre>
+<p>Palette 可被提取的每个颜色，都被封装成一个 Swatch 对象，用来管理多种颜色。</p>
 
-<p>代码最后的postDealy时干嘛使的呢？就是通过延迟300毫秒，判断是否是长按模式。如果目前还没有处于其他模式，则可判断为长按，并震动提醒。</p>
+<p>这些 Swatch 有：</p>
 
-<h4 id="toc_8">手指移动时</h4>
+<ul>
+<li>DominantSwatch</li>
+<li>VibrantSwatch</li>
+<li>DarkVibrantSwatch</li>
+<li>LightVibrantSwatch</li>
+<li>MutedSwatch</li>
+<li>DarkMutedSwatch</li>
+<li>LightMutedSwatch</li>
+</ul>
 
-<p>这时要判断是否是处于长按状态，如果是，那么进入MOVE模式，移动悬浮球，如果不是，则判断操作手势，即下拉还是上拉等其他手势。</p>
+<p>其实这些 Swatch，真的不太好解释其意义，唯一特别一点的就是 DominantSwatch ，它是从图片中提取的最突出的颜色。</p>
 
-<pre class="line-numbers"><code class="language-java">case MotionEvent.ACTION_MOVE:
-      if (!mIsLongTouch &amp;&amp; isTouchSlop(event)) {
-              return true;
-      }
-      if (mIsLongTouch &amp;&amp; (mCurrentMode == MODE_NONE || mCurrentMode == MODE_MOVE)) {
-              mLayoutParams.x = (int) (event.getRawX() - mOffsetToParent);
-              mLayoutParams.y = (int) (event.getRawY() - mOffsetToParentY);
-              mWindowManager.updateViewLayout(FloatBallView.this, mLayoutParams);
-              mBigBallX = mImgBigBall.getX();
-              mBigBallY = mImgBigBall.getY();
-              mCurrentMode = MODE_MOVE;
-      } else {
-              doGesture(event);
-      }
-      break;
-</code></pre>
+<p>这些 Swatch 在 Palette 都提供了对应的 <code>getXxx()</code> 方法获得。不过需要注意的是，这些 <code>getXxx()</code> 方法可能会得到一个 <code>null</code> ，因为有些颜色是没有的。</p>
 
-<p>进行手势操作的代码如下，主要是根据当前坐标与按下时记录的坐标进行计算，判断手势，并更新大球位置。</p>
+<p>如果只是需要得到一个颜色值，Palette 同时也提供了对应的 <code>getXxxColor()</code> 方法，方便我们使用。</p>
 
-<pre class="line-numbers"><code class="language-java">private void doGesture(MotionEvent event) {
-    float offsetX = event.getX() - mLastDownX;
-    float offsetY = event.getY() - mLastDownY;
+<p>得到 Swatch 对象之后，就可以通过对应的 Swatch 中对应的 Api 获取我们需要的颜色值。</p>
 
-    if (Math.abs(offsetX) &lt; mTouchSlop &amp;&amp; Math.abs(offsetY) &lt; mTouchSlop) {
-        return;
-    }
-    if (Math.abs(offsetX) &gt; Math.abs(offsetY)) {
-        if (offsetX &gt; 0) {
-            if (mCurrentMode == MODE_RIGHT) {
-                return;
-            }
-            mCurrentMode = MODE_RIGHT;
-            mImgBigBall.setX(mBigBallX + OFFSET);
-            mImgBigBall.setY(mBigBallY);
-        } else {
-            if (mCurrentMode == MODE_LEFT) {
-                return;
-            }
-            mCurrentMode = MODE_LEFT;
-            mImgBigBall.setX(mBigBallX - OFFSET);
-            mImgBigBall.setY(mBigBallY);
-        }
-    } else {
-        if (offsetY &gt; 0) {
-            if (mCurrentMode == MODE_DOWN || mCurrentMode == MODE_GONE) {
-                return;
-            }
-            mCurrentMode = MODE_DOWN;
-            mImgBigBall.setX(mBigBallX);
-            mImgBigBall.setY(mBigBallY + OFFSET);
+<ul>
+<li><code>getPopulation()</code> ：Swatch 中的像素个数。</li>
+<li><code>getRgb()</code>：颜色的 RGB 值。</li>
+<li><code>getHsl()</code>：颜色的 HSL 值。</li>
+<li><code>getBodyTextColor()</code>：对应的文字颜色值。</li>
+<li><code>getTitleTextColor()</code>：对应的标题文字颜色值。</li>
+</ul>
 
-            //如果长时间保持下拉状态，将会触发移除悬浮球功能
-            postDelayed(new Runnable() {
-                @Override
-                public void run() {
-                    if (mCurrentMode == MODE_DOWN &amp;&amp; mIsTouching) {
-                        toRemove();
-                        mCurrentMode = MODE_GONE;
-                    }
-                }
-            }, TO_APP_INDEX_LIMIT);
-        } else {
-            if (mCurrentMode == MODE_UP) {
-                return;
-            }
-            mCurrentMode = MODE_UP;
-            mImgBigBall.setX(mBigBallX);
-            mImgBigBall.setY(mBigBallY - OFFSET);
-        }
-    }
-}
-</code></pre>
+<p>通常来说，我们只需要通过 getRgb() 获取到对应的颜色设置在背景上，如果背景之上还有文字内容，可以通过 getBodyTextColor() 提取出与背景匹配的文字颜色值，这样可以显得更加的柔和，让文字看起来更清晰和舒服。比如，如果一个深色的背景，为它设置一个默认的深色文字，基本上就看不见了，因为对比对太弱。</p>
 
-<h4 id="toc_9">手指抬起时</h4>
+<h3 id="toc_4">举个例子</h3>
 
-<p>手指抬起后，先要判断是否是长按模式，不是的话再判断是否是单击，都不是的话就根据当前状态触发对应功能。</p>
+<p>到这里，基本上 Palette 的基本 Api 就讲解清楚了，下面举个实际的例子来看看。</p>
 
-<pre class="line-numbers"><code class="language-java">case MotionEvent.ACTION_CANCEL:
-case MotionEvent.ACTION_UP:
-       mIsTouching = false;
-       if (mIsLongTouch) {
-           mIsLongTouch = false;
-       } else if (isClick(event)) {
-           AccessibilityUtil.doBack(mService);
-       } else {
-           doUp();
-       }
-       mImgBall.setVisibility(VISIBLE);
-       mImgBigBall.setVisibility(INVISIBLE);
-       mCurrentMode = MODE_NONE;
-       break;
-</code></pre>
+<p>这里找了三张 Eason 的海报，用于做 Palette 的 Demo 资源，间隔去替换图片，然后分别提取出对应的颜色和字体颜色，设置在下面按钮的背景上，然后每 3s 切换一张图片。</p>
 
-<p>魅族小米请注意！试了魅族pro5，先点击start-&gt;进入辅助功能界面-&gt;点击无障碍-&gt;开启FloatBall辅助功能。接着还要干一件事，就是魅族自己给悬浮窗加了权限，必须进入设置-&gt;应用管理-&gt;已安装中找到floatball-&gt;权限管理-&gt;开启悬浮窗权限，小米应该也是。此处不想吐槽国产ROM</p>
+<p>因为有一些图片，获取的 Swatch 可能会返回 null ，所以这里用了一个比价扎眼的红色，作为错误色。</p>
+
+<p>以下是获取 Swatch 的代码。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979172574268.jpg" alt="20171104150979172574268.jpg"/></p>
+
+<p>接下来通过 Swatch 提取我们需要的颜色。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979175346480.jpg" alt="20171104150979175346480.jpg"/></p>
+
+<p>这里分别获取了需要的颜色以及字体颜色，下面看看运行的效果：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979178525822.gif" alt="20171104150979178525822.gif"/></p>
+
+<p>可以看到，确实有一些颜色，被标记成了红色，说明当前图片有获取不到的对应颜色。</p>
+
+<h2 id="toc_5">分析 Palette 的实现</h2>
+
+<h3 id="toc_6">Palette 的主线逻辑</h3>
+
+<p>继续深入看看 Palette 的实现原理，先从主线开始看。</p>
+
+<p>从 <code>Builder.generate()</code> 开始。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979183575637.jpg" alt="20171104150979183575637.jpg"/></p>
+
+<p>从代码中可以看到，在 <code>generate()</code> 中，主线逻辑：</p>
+
+<ol>
+<li>首先会通过 <code>scaleBitmapDown()</code> 方法，将图片压缩成一个小像素的，等于生成了一个新的 <code>Bitmap</code> 对象，这样有利于内存的管理，并且也减少了计算量。</li>
+<li>然后再通过 <code>mRegion</code> 判断是否只是提取图片的某个区域，默认是完整的图片全部提取，当然也可以对 <code>mRegion</code> 进行配置。<br/>
+之后再构造一个 <code>ColorCutQuantizer</code> 对象，使用它的 <code>getQuantizedColors()</code> 方法得到 Swatch。</li>
+<li>使用完前面压缩的 <code>Bitmap</code> 对象之后，再使用 <code>recycle()</code> 将其回收掉。</li>
+<li>最后，通过 <code>Palette</code> 本身的构造函数，去生成一个 <code>Palette</code> 对象，返回出去。</li>
+</ol>
+
+<p>接下来看看比较关键的 <code>ColorCutQuantizer</code> 中的实现逻辑。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979200867081.jpg" alt="20171104150979200867081.jpg"/></p>
+
+<p>从代码中可以看到，其中的逻辑还是很清晰的。</p>
+
+<ol>
+<li>首先通过 <code>quantizeFromRgb888()</code> 方法，将每个像素的颜色进行量化，类似于将每个颜色取一个靠近的设置。举个不恰当的例子，将不同深度的红，都标记成红色。</li>
+<li>再通过 <code>shouldIgnoreColor()</code> 过滤掉不需要的颜色。</li>
+<li>最终获取到的颜色，如果小于等于我们设置的 <code>maxColors</code>，就可以通过 <code>approximateToRgb888()</code> 生成一批 Swatch。</li>
+<li>如果大于 <code>maxColors</code>，就再通过 <code>quantizePixels()</code> 去掉一些杂色。</li>
+<li>无论如何，最终操作的就是这里得到的 <code>mQuantizedColors</code> 对象。</li>
+</ol>
+
+<h3 id="toc_7">Swatch 的 Target</h3>
+
+<p>所有需要的 Swatch ，都是被 Target 对象所标记。不同的 Swatch 都是通过 Target 中标记的常量值，进行运算，得到行的颜色。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097921282334.jpg" alt="2017110415097921282334.jpg"/></p>
+
+<h3 id="toc_8">过滤掉不需要的颜色</h3>
+
+<p>Palette 可以设置一些我们不需要的颜色，让它们不参与运算。这里的过滤条件，通过 Filter 来设定，并且 Palette 也提供给了一个 DEFAULT_FALTER 来标记默认的过滤颜色。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979216238491.jpg" alt="20171104150979216238491.jpg"/></p>
+
+<p>可以看到，默认的 Filter 会过滤掉一些靠近黑和白的颜色。</p>
+
+<p>当然，我们也可以自己定义 Filter ，并通过 Palette 中的 <code>addFilter()</code>、<code>clearFilters()</code> 来管理它。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110415097964327573.jpg" alt="2017110415097964327573.jpg"/></p>
+
+<p>这里存储 Filter 的是一个 ArrayList ，所以我们是可以定义很多个 Filter 加入进去的，它们都会生效。</p>
+
+<h3 id="toc_9">设置 MaxColor</h3>
+
+<p>在 ColorCutQuantizer 中，被使用的 maxColor ，主要用于标记需要使用的颜色个数。它是可以通过 maximumColorCount() 方法，进行设置的，如果不对其进行设定，默认值为 16。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150979646212624.jpg" alt="20171104150979646212624.jpg"/></p>
+
+<p>理论上来说，这里设置的maxColor 的值越大，运算花费的时间就越长。而越小，可以被选择的色值也就越少。</p>
+
+<p>所以最佳的做法是根据当前 Bitmap 的用途来决定，色彩越丰富的图，设置的 maxColor 越大，即可。不过正常来说也不需要额外的设定，默认的配置就挺好用了。</p>
+
+<h2 id="toc_10">小结</h2>
+
+<p>到这里就分析完 Palette 的所有相关的内容，不要仅仅满足使用。实际上看了 Palette 的源码，对色彩的运算，也有了更加深入的了解。</p>
 
                         
                       </div>
@@ -1245,11 +1059,13 @@ case MotionEvent.ACTION_UP:
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/10/21</span>
+                    <span class="date">2019/10/31</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
           				   
+                    
+
                   </div>
                   <div class="more-right right">
                   <span class="comments">
@@ -1262,460 +1078,120 @@ case MotionEvent.ACTION_UP:
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15561207872093.html">
+                <a class="clearlink" href="15626502774575.html">
                 
-                  <h1>Android-爱奇艺APK瘦身经验</h1>
+                  <h1>Android 动态更换桌面图标</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<h2 id="toc_0">APK瘦身的价值</h2>
+                        	<h2 id="toc_0">简介</h2>
 
-<p>用户常常避免下载太大的APP，尤其是使用移动流量的情况，而且太大的APP也会占用更多的内存并消耗更多的资源，导致安装速度和加载速度变慢，在低配手机上，这些情况尤其严重。</p>
+<p>最近看到有可以实现动态改变桌面图标这个功能，比如天猫等app在各种剁手节的时候基本都会换个应景的图标以及整体风格，而这里只讨论图标的更换，查阅了一些资料，这里就介绍一下我认为最便捷的方式。</p>
 
-<p>作为中国互联网领先的手机APP，爱奇艺非常重视APP客户端的用户体验，始终关注APK的体积，并持续的跟进优化。</p>
+<h2 id="toc_1">原理</h2>
 
-<p>目前爱奇艺Android APK大小指标在视频行业甚至整个移动互联网已经处于领先地位，下面是我们在APK瘦身之路上的一些经验分享。</p>
+<p>原理其实很简单就是利用<activity-alias>标签，控制其enabled属性，用来显示与否。</p>
 
-<h2 id="toc_1">APK组成结构</h2>
+<h2 id="toc_2">实现</h2>
 
-<p>在使用一些很酷的方法，来减少应用程序的大小之前，必须先了解实际的APK文件格式。</p>
+<p>实现之前，先简单描述一下需求：</p>
 
-<p>简单地说，APK是一个包含文件/文件夹的压缩文件。作为一个开发者，我们可以很容易的通过打开压缩文件的方式查看到APK里面的内容。</p>
+<p>App默认图标是Android机器人图标，然后还有另外两个图标icon_1和icon_2，通过按钮点击设置变成哪个图标，也有一个还原图标的功能。</p>
 
-<h3 id="toc_2">7zip打开APK后的视图</h3>
+<h3 id="toc_3">实现步骤：</h3>
 
-<p><figure><img src="media/15561207872093/15713347055136.png" alt=""/></figure></p>
+<ul>
+<li>增加对应个数的<activity-alias>标签</li>
+<li>增加布局喝对应点击事件</li>
+<li>代码控制显示哪个图标</li>
+</ul>
 
-<h3 id="toc_3">各个文件或文件夹的功能</h3>
+<p>接下来就一步一步的来实现：</p>
+
+<p><strong>增加对应个数的<activity-alias>标签</strong></p>
+
+<p>这里还有两个图标，所以我们再增加两个<activity-alias>标签，这个标签是在AndroidManifest.xml的<application>标签内的，和<activity>标签同一级，其中一个代码如下：</p>
+
+<pre><code class="language-text">&lt;activity-alias
+    android:name=&quot;.MainActivity1&quot;
+    android:enabled=&quot;false&quot;
+    android:icon=&quot;@mipmap/icon_1&quot;
+    android:label=&quot;@string/app_name&quot;
+    android:targetActivity=&quot;.MainActivity&quot;&gt;
+    &lt;intent-filter&gt;
+        &lt;action android:name=&quot;android.intent.action.MAIN&quot;/&gt;
+        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot;/&gt;
+    &lt;/intent-filter&gt;
+&lt;/activity-alias&gt;
+</code></pre>
+
+<p>这里需要注意一下他的这几个属性：</p>
 
 <table>
 <thead>
 <tr>
-<th style="text-align: center">文件/文件夹</th>
-<th style="text-align: center">作用/功能</th>
+<th style="text-align: center">属性</th>
+<th style="text-align: center">含义</th>
 </tr>
 </thead>
 
 <tbody>
 <tr>
-<td style="text-align: center">res</td>
-<td style="text-align: center">包含所有没有被编译到.arsc里面的资源文件</td>
+<td style="text-align: center">name</td>
+<td style="text-align: center">可任意取值，只要能保证是唯一标识即可，为了方便管理建议有规律一些</td>
 </tr>
 <tr>
-<td style="text-align: center">lib</td>
-<td style="text-align: center">引用库的文件夹</td>
+<td style="text-align: center">targetActivity</td>
+<td style="text-align: center">这个属性的值就是代表指向的是哪个Activity，而这个标签本身代表是该Activity的别名，记得指向的Activity要在该标签之前申明，否则可能运行不起来</td>
 </tr>
 <tr>
-<td style="text-align: center">assets</td>
-<td style="text-align: center">assets文件夹相比于res文件夹，还有可能放字体文件、预置数据和web页面等,通过AssetManager访问</td>
+<td style="text-align: center">icon</td>
+<td style="text-align: center">指的是该别名对应的应用图标</td>
 </tr>
 <tr>
-<td style="text-align: center">META_INF</td>
-<td style="text-align: center">存放的是签名信息，用来保证apk包的完整性和系统的安全。在生成一个APK的时候，会对所有的打包文件做一个校验计算，并把结果放在该目录下面</td>
+<td style="text-align: center">label</td>
+<td style="text-align: center">指的是该别名对应的应用名字</td>
 </tr>
 <tr>
-<td style="text-align: center">classes.dex</td>
-<td style="text-align: center">包含编译后的应用程序源码转化成的dex字节码。APK里面，可能会存在多个dex文件</td>
-</tr>
-<tr>
-<td style="text-align: center">resources.arsc</td>
-<td style="text-align: center">一些资源和标识符被编译和写入这个文件</td>
-</tr>
-<tr>
-<td style="text-align: center">Androidmanifest.xml</td>
-<td style="text-align: center">编译时，应用程序的AndroidManifest.xml被转化成二进制格式</td>
+<td style="text-align: center">enabled</td>
+<td style="text-align: center">默认是true，true就会显示在桌面上，这里为了保证桌面只显示一个图标，则<activity-alias>中的属性都是false，而在之后代码中动态控制这个属性，来显示和隐藏对应的图标</td>
 </tr>
 </tbody>
 </table>
 
-<h3 id="toc_4">爱奇艺 APK各组成部分的占比情况</h3>
+<p>至于<intent-filter>，这个和Activity的没有区别,其实完全可以把<activity-alias>当作Activity组件来看，只是不是真身，是别名罢了。</p>
 
-<p><figure><img src="media/15561207872093/15713347172308.png" alt=""/></figure></p>
+<p>另一个也是同理的，这里就不介绍了。</p>
 
-<p>通过爱奇艺Android客户端APK组成的饼状图可以看出，APK里面占较大比重的是libs,res,dex这三块。</p>
+<p><strong>增加布局和对应点击事件</strong></p>
 
-<h2 id="toc_5">APK瘦身方案</h2>
+<p>这一点其实没啥好说的，布局就是一个竖直方向的LinearLayout，里边有三个Button，通过其onClick属性，设置点击相应的方法，当然你也可以获取到这些Button再设置OnClickListener，代码比较简单，文末有Demo地址。</p>
 
-<p>通过上面的分析，已经了解了APK的基本构成。下面我们就采用多种手段进行APK瘦身</p>
+<p><strong>代码控制显示哪个图标</strong></p>
 
-<h3 id="toc_6">针对整体优化</h3>
+<p>这一步其实也就是调用PackageManager中的一个方法即可，方法如下：</p>
 
-<h4 id="toc_7">插件化</h4>
-
-<p>从应用功能扩张的角度看，APK包体积的增大是必然的，然而插件技术的出现很好的解决了这个问题。</p>
-
-<p>通过分离应用中比较独立的模块，然后以插件的形式进行加载，比如爱奇艺Android客户端有很多的相对独立的功能，游戏，漫画，文学，电影票，应用商店等，都是通过插件的方式，从服务器下载，然后以插件的方式加载到我们的主工程。</p>
-
-<h4 id="toc_8">7ZIP压缩</h4>
-
-<p>一般情况下面，AS直接编译生成的APK里面，.arsc文件是没有进行任何压缩的，前文中APK组成部分的第一张图就可以看出。</p>
-
-<p>下面，我们来解压APK，重新用7zip进行压缩，就会发现几乎所有文件都变小了，特别是.arsc文件，减小的比较多。</p>
-
-<p><figure><img src="media/15561207872093/15713347270901.png" alt=""/></figure></p>
-
-<p>对比7zip压缩前和压缩后APK里面文件的变化，可以看出通过7zip压缩，.arsc文件大概减小了2M多，其它文件/文件夹体积也减小了5%左右。</p>
-
-<h4 id="toc_9">签名方式</h4>
-
-<p>Google在Android7.0系统提供了新的apksigner签名工具，相比使用java提供的jarsigner签名工具，APK体积可以减小约5%（依赖文件数量）。</p>
-
-<p>我们来看一下两种不同签名方式所带来的APK体积变化</p>
-
-<p><figure><img src="media/15561207872093/15713347376656.png" alt=""/></figure></p>
-
-<p>第一个APK是未签名的，第二个是使用jarsigner签名的，第三个是使用apksigner签名生成。可以看出，使用apksigner签名比使用jarsigner签名生成的APK减小了1.1M。</p>
-
-<p>那么再来看一下这两种APK签名后的文件大小差异在哪里</p>
-
-<p><figure><img src="media/15561207872093/15713347472494.png" alt=""/></figure></p>
-
-<p>上图中间是未签名的APK,左边是jarsigner签名的,右边是apksigner签名的。</p>
-
-<p>对比未签名的APK，用jarsigner签名工具签名，APK里面所有压缩后的文件和文件夹体积都增大了；而apksigner签名工具签名，除了META_INF文件夹增大了以外，其它文件和文件夹的大小都没有改变。</p>
-
-<p>产生上述变化的原因是：jarsigner是针对每个文件进行了签名，然后针对签名后的文件计算摘要，并写入到META-INF文件夹下的MANIFEST.MF文件里面；而apksigner直接计算所有文件的摘要，写入MANIFEST.MF文件。</p>
-
-<p>新的apksigner工具，已经集成到Android 7.0 SDK中了，使用方法可以参考<a href="https://developer.android.com/studio/command-line/apksigner.html">官方文档</a></p>
-
-<h4 id="toc_10">瘦身前后APK对比</h4>
-
-<p>在不同的版本通过不同方式进行APK瘦身的详情图，如下：</p>
-
-<p><figure><img src="media/15561207872093/15713347558686.png" alt=""/></figure></p>
-
-<p>插件化是2年前所做的优化，7zip压缩和签名方式都是最近的优化方案，并且通过jenkins自动化脚本实现的。</p>
-
-<h3 id="toc_11">针对资源优化</h3>
-
-<h4 id="toc_12">移除重复的资源</h4>
-
-<h5 id="toc_13">一套资源</h5>
-
-<p>Android在适配图片资源的时候，如果只有一套资源，低密度手机会缩放图片，高密度手机会拉伸图片。我们利用这个特性，存放一套资源图就可以供所有密度的手机使用。</p>
-
-<p>综合考虑图片清晰度，静态大小和内存占用情况，一般采用xhdpi下的资源图片。</p>
-
-<h5 id="toc_14">重复资源</h5>
-
-<p>很多时候，随着工程的增大，以及开发人员的变动，有些资源文件名字不同，但是内容却完全相同。我们可以通过扫描文件的MD5值，找出名字不同，内容相同的图片并删除，做到图片不重复。</p>
-
-<h4 id="toc_15">移除无用的资源</h4>
-
-<p>由于项目的迭代以及UI改版等各种因素，会导致工程项目里面有许多无用的资源的存在，定期扫描处理无用资源。</p>
-
-<h5 id="toc_16">通过Lint工具扫描工程资源</h5>
-
-<p>当Lint工具扫描发现无用资源的时候，会输出如下的信息，就可以删除这种资源。</p>
-
-<pre class="line-numbers"><code class="language-text">res/layout/preferences.xml: Warning: The resource R.layout.preferences appears
-    to be unused [UnusedResources]
-</code></pre>
-
-<p>需要特别注意的是，需要确保不存在反射，资源拼接等访问这些资源，才可以安全的删除掉这些资源，从而减小资源个数。</p>
-
-<h5 id="toc_17">通过Gradle参数配置</h5>
-
-<p>如果工程比较大，由主工程和多个子工程组成的话，子工程里面也可能包含很多的无用资源。可以通过设置shrinkResources=true让Gradle移走无用的资源，否则默认情况下，Gradle编译只会移除无用代码，而不会关心无用资源。</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    // Other settings
- 
-    buildTypes {
-            release {
-                    minifyEnabled true
-                    shrinkResources true
-                    proguardFiles
-getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
-        }
-    }
+<pre><code class="language-java">private void changeLauncher(String name) {
+    PackageManager pm = getPackageManager();
+    //隐藏之前显示的桌面组件
+    pm.setComponentEnabledSetting(getComponentName(),
+            PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+    //显示新的桌面组件
+    pm.setComponentEnabledSetting(new ComponentName(MainActivity.this, name),
+            PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
 }
 </code></pre>
 
-<p>需要特别注意的是shrinkResources依赖于minifyEnabled，必须和minifyEnabled一起用，即打开shrinkResources也必须打开minifyEnabled。</p>
+<p>都是调用PackageManager的setComponentEnabledSetting方法，第一个参数表示操作的组件是哪个，第二个参数表示显示还是隐藏，第三个组件表示是否关掉app。</p>
 
-<h5 id="toc_18">通过开源扫描工具</h5>
-
-<p>大家可能会发现Lint不是非常好用，当工程里面存在反射，过滤结果非常麻烦。</p>
-
-<p>所以我们实现了一个资源扫描的工具(<a href="https://github.com/zhuzhumouse/ScanUnusedResouce">https://github.com/zhuzhumouse/ScanUnusedResouce</a> )，可以过滤掉通过反射调用的资源。</p>
-
-<p>原理就是把所有java和xml文件以字符串扫描到内存，然后拿到资源文件（xml,png,jpg等）名称做匹配查找，如果没有匹配到，该资源就是无用资源，可以直接删除。</p>
-
-<p>该扫描工具可以解决反射调用的问题，但是不能解决资源拼接的问题，还有就是不能处理存在很多资源前缀相同的情况。</p>
-
-<h4 id="toc_19">png图片压缩</h4>
-
-<p>可以通过使用图片压缩工具对png图片进行压缩,压缩效果比较好的工具有：pngcrush,pngquant,zopflipng等，可以在保持图片质量的前提下，缩减图片的大小。</p>
-
-<p>还可以通过网站对图片进行压缩，如比较有名的www.tinypng.com，该网站对上传的图片自动选择合适的压缩算法，压缩比比较高，但是只支持500张免费图片，更多图片处理是要收费的。</p>
-
-<h4 id="toc_20">采用WebP格式</h4>
-
-<p>WebP分为有损压缩，无损压缩以及包含透明度的有损压缩。</p>
-
-<p>有损WebP是基于VP8视频编码中的预测编码方法来压缩图像数据；无损WebP基于使用不同的技术对图像数据进行转换；有损WebP(支持透明度)区别于有损WebP和无损WebP，这种编码允许对RGB频道的有损编码同时可对透明度频道进行无损编码。</p>
-
-<p>目前4.2及以上的手机系统已经支持WebP的无损和有损压缩，但是4.0,4.1的手机系统只支持不含透明度的有损压缩。如果应用支持的最低版本(minSdkVersion)是4.0，那么就只能针对不含透明度的图片进行WebP转换了。</p>
-
-<p>在Android Studio 2.3版本及以上，我们可以选中 drawable 和 mipmap 文件夹，右键后选择 convert to webp，将图片转为 WebP 格式。如果Android Stuido版本比较低的话，可以直接通过官方提供的cwebp工具，将png转换为WebP。</p>
-
-<p><strong>下面是两张png转WebP的详情对比图</strong></p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: center">png (KB)</th>
-<th style="text-align: center">WebP 75 (KB)</th>
-<th style="text-align: center">WebP 90 (KB)</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: center">120</td>
-<td style="text-align: center">2.7</td>
-<td style="text-align: center">5.78</td>
-</tr>
-<tr>
-<td style="text-align: center">10</td>
-<td style="text-align: center">15</td>
-<td style="text-align: center">27</td>
-</tr>
-</tbody>
-</table>
-
-<p>从以上两张样图的转换结果看，不是所有的图片都有高压缩比，有些图片压缩后反而会增大，比如第二张样图。WebP对色差比较小的图片，压缩比会比较高，任何一种压缩算法只能针对具有某种特点的图片进行压缩，没用万能压缩方法。</p>
-
-<h4 id="toc_21">大背景图处理</h4>
-
-<p>对清晰度要求高的大图片，采用单纯的压缩方法就不能满足UE的要求了，需要找到一种非压缩方式来解决这个问题。</p>
-
-<p>纯色图+后台下载的方式很好的解决了这个问题，客户端先使用纯色图片，然后大图从后端下载，这样只是启动的前几次使用纯色图，以后都会使用大图。</p>
-
-<h4 id="toc_22">Lottie动画库的使用</h4>
-
-<p>动画，尤其是帧动画，一直都是相当占用资源的。现在可以通过Airbnb公司开源的Lottie动画库，直接用json文件来描述动画，然后直接加载绘制出来。</p>
-
-<p><a href="https://github.com/airbnb/lottie-android">具体使用参考</a></p>
-
-<h4 id="toc_23">其它资源策略</h4>
+<h2 id="toc_4">TIPS</h2>
 
 <ol>
-<li>首先考虑能否不用图片，比如使用shape代码实现。</li>
-<li>其次如果用图片的话，能否优先使用.9图来简化图片。</li>
-<li>采用svg矢量图和VectorDrawable类来替换传统的图片。</li>
-<li>如果图片只是旋转角度或者颜色不同，可以用代码实现变换。</li>
+<li><p>这里有个技巧，建议不要直接点了切换按钮就去执行切换图标，因为执行切换图标之后始终会关闭这次打开的app，所以我们 可以点击之后先记录下要换成哪个图标，在程序退出的时候再切换图标，这样一来就不会关闭该app了。</p></li>
+<li><p>细心的朋友会发现，在调试阶段，我改了这个app的启动图标，再执行代码启动，发现启动不了，其实这是因为代码中默认启动那个组件和修改后的那个组件不一致了，所以就启动不了，而对于程序的更新和安装是没有影响的。</p></li>
+<li><p>这种方式动态更换图标，更换的时候不是，切换之后就马上生效的，据我观察应该和手机性能有关，在执行该操作之后，会在几秒钟之内改变图标，但是对于普通桌面图标的改变，该缺点还是可以接受的，毕竟不是用户手动触发，也不影响体验。</p></li>
 </ol>
-
-<h4 id="toc_24">资源瘦身前后APK对比</h4>
-
-<p>爱奇艺客户端使用到的资源优化方案详情如图所示</p>
-
-<p><figure><img src="media/15561207872093/15713347635420.png" alt=""/></figure></p>
-
-<p>目前爱奇艺客户端使用了这四种资源优化方式。</p>
-
-<p>原来客户端xhdpi和xxhdpi下面有一部分重叠的资源，删除后包体积缩减了1M；移除无用资源是通过自己的扫描工具，获取无用资源列表，然后确认处理；pngquart压缩是打包过程中通过gradle自动化脚本实现的；WebP格式是通过python脚本，遍历查找不含透明度的图片，然后进行WebP转化替换原图片的。</p>
-
-<h3 id="toc_25">针对代码优化</h3>
-
-<p>上面已经详细的介绍了资源文件的优化方法，通过这些优化，包体积得到明显的缩减，下面我们再来讨论一下代码的优化。</p>
-
-<h4 id="toc_26">代码混淆</h4>
-
-<p>在gradle使用minifyEnabled进行Proguard混淆的配置，可大大减小APP大小：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    buildTypes {
-        release {
-            minifyEnabled true
-            proguardFile(&#39;groguard.cfg&#39;)
-        }
-    }
-</code></pre>
-
-<p>下面是代码混淆前后APK的详情</p>
-
-<p><figure><img src="media/15561207872093/15713347745661.png" alt=""/></figure></p>
-
-<p>尤其需要注意的是：在proguard中，是否保留符号表对APP的大小是有显著的影响的，可酌情不保留，但是建议尽量保留用于调试。</p>
-
-<h4 id="toc_27">无用代码扫描</h4>
-
-<p>同无用资源扫描方式一样，可以针对无用的代码进行扫描，这里需要关注的一点就是在插件里面通过反射的方法调用的主应用的一些类和方法是不能删除的。</p>
-
-<p>也可以使用SonarQube扫描无用类，以及不同类里面的重复代码。</p>
-
-<p><a href="https://github.com/SonarSource/sonarqube">详情请参考</a></p>
-
-<h4 id="toc_28">剔除R文件</h4>
-
-<p>随着项目中资源的增加，会发现生成的dex文件里面R.class文件越来越大。我们知道真正使用资源的地方都是以R.xxx.xxx这种方式访问的，而R.xxx.xx是对应于.arsc文件里面的一个常量值。arsc里面的内容具体如下：</p>
-
-<h5 id="toc_29">字符串资源在.arsc文件里面的存储方式</h5>
-
-<p><figure><img src="media/15561207872093/15713347846488.png" alt=""/></figure></p>
-
-<h5 id="toc_30">Layout下面的Xml资源文件在.arsc文件里面的存储方式</h5>
-
-<p><figure><img src="media/15561207872093/15713347928420.png" alt=""/></figure></p>
-
-<p>通过这两张截图我们可以看出，直接用ID替换资源访问代码R.XXX.XXX，这样R.class文件就没有任何作用了，可以删除它，并且代码里面的资源访问字符串也变成了常量，两个方面都减小了dex的大小。</p>
-
-<p>剔除R文件可以参考<a href="https://github.com/meili/ThinRPlugin">开源工具</a></p>
-
-<h4 id="toc_31">注解替代枚举</h4>
-
-<p>谷歌官方一直强烈推荐用注解替代枚举，一方面可以缩减包体积，另一方便可以节省内存开销。我们来对比一下，在使用注解和使用枚举两种情况下，生成的class文件内容。</p>
-
-<p>枚举类型源码</p>
-
-<pre class="line-numbers"><code class="language-java">public enum MarkViewType3{
-    SIMPLE_TEXT_MARK,
-    DO_LIKE_MARK,
-    BOTTOM_BANNER1,
-    BOTTOM_BANNER2,
-    TL_GREY_BACKGROUND_RANK,
-    /**
-     *服务导航mark
-     */
-    SERVICENAVIRIGHTMARK,
-    /**
-     *搜索页热点事件，标题、评论、事件
-     */
-    BOTTOM_COMPOUND_TEXT_BANNER
-}
-</code></pre>
-
-<p>编译生成dex后的class文件</p>
-
-<pre class="line-numbers"><code class="language-java">public enum MarkViewType3
-{
-  static
-  {
-    DO_LIKE_MARK = new MarkViewType3(&quot;DO_LIKE_MARK&quot;, 1);
-    BOTTOM_BANNER1 = new MarkViewType3(&quot;BOTTOM_BANNER1&quot;, 2);
-    BOTTOM_BANNER2 = new MarkViewType3(&quot;BOTTOM_BANNER2&quot;, 3);
-    TL_GREY_BACKGROUND_RANK = new MarkViewType3(&quot;TL_GREY_BACKGROUND_RANK&quot;, 4);
-    SERVICENAVIRIGHTMARK = new MarkViewType3(&quot;SERVICENAVIRIGHTMARK&quot;, 5);
-    BOTTOM_COMPOUND_TEXT_BANNER = new MarkViewType3(&quot;BOTTOM_COMPOUND_TEXT_BANNER&quot;, 6);
-    $VALUES = new MarkViewType3[] { SIMPLE_TEXT_MARK, DO_LIKE_MARK, BOTTOM_BANNER1, BOTTOM_BANNER2, TL_GREY_BACKGROUND_RANK, SERVICENAVIRIGHTMARK, BOTTOM_COMPOUND_TEXT_BANNER };
-  }
-}
-</code></pre>
-
-<p>通过对比可以看到生成的class文件里面，每个变量都是一个对象，并且还有一个value对象数组。</p>
-
-<p>注解的实现源码</p>
-
-<pre class="line-numbers"><code class="language-java">public class MarkViewType1{
-    public static final int SIMPLE_TEXT_MARK = 0;
-    public static final int DO_LIKE_MARK = 1;
-    public static final int BOTTOM_BANNER1 = 2;
-    public static final int BOTTOM_BANNER2 = 3;
-    public static final int TL_GREY_BACKGROUND_RANK = 4;
-    /**
-     *服务导航mark
-     */
-    public static final int SERVICENAVIRIGHTMARK = 5;
-    /**
-     *搜索页热点事件，标题、评论、事件
-     */
-    public static final int BOTTOM_COMPOUND_TEXT_BANNER = 6;
-    @IntDef ({SIMPLE_TEXT_MARK, DO_LIKE_MARK, BOTTOM_BANNER1, BOTTOM_BANNER2, TL_GREY_BACKGROUND_RANK
-            , SERVICENAVIRIGHTMARK, BOTTOM_COMPOUND_TEXT_BANNER})
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface MarkViewType1Anno{
-    }
-}
-</code></pre>
-
-<p>生成的class文件</p>
-
-<pre class="line-numbers"><code class="language-java">public class MarkViewType1
-{
-  public static final int BOTTOM_BANNER1 = 2;
-  public static final int BOTTOM_BANNER2 = 3;
-  public static final int BOTTOM_COMPOUND_TEXT_BANNER = 6;
-  public static final int DO_LIKE_MARK = 1;
-  public static final int SERVICENAVIRIGHTMARK = 5;
-  public static final int SIMPLE_TEXT_MARK = 0;
-  public static final int TL_GREY_BACKGROUND_RANK = 4;
- 
-  @Retention(RetentionPolicy.SOURCE)
-  public static @interface MarkViewType1Anno
-  {
-  }
-}
-</code></pre>
-
-<p>注解生成的class文件只是一些常量。</p>
-
-<p>通过上面的代码对比可以看出，常量+注解的形式，一方面可以减小生成的class文件的字节数，另一方面可以减小内存开销。</p>
-
-<h4 id="toc_32">代码瘦身前和瘦身后APK对比</h4>
-
-<p>爱奇艺客户端代码优化详情如图所示</p>
-
-<p><figure><img src="media/15561207872093/15713348021070.png" alt=""/></figure></p>
-
-<p>由上图可以看出，代码混淆可以很大程度的减小包体积，尤其是引入了比较多点的第三方库的情况。所以打包的时候，应该开启代码混淆，以及资源混淆。</p>
-
-<p>注解替代枚举，经过尝试，发现大量修改之后，对缩减包体积帮助不大，所以爱奇艺客户端没有采用该方案。</p>
-
-<h3 id="toc_33">arsc文件优化</h3>
-
-<p>在剔除R文件小节中，大家已经看到了.arsc文件内容格式。在整体优化小节中，已经对.arsc进行了比较大的优化，接下来分析一下其它优化方式。</p>
-
-<p>可以采用混淆来缩减资源文件的名称，以及移除未使用的备用资源等方式来优化.arsc文件。如何移除未使用的备用资源，gradle里面</p>
-
-<p>增加如下配置：</p>
-
-<pre class="line-numbers"><code class="language-text">android {
-    defaultConfig {
-        ...
-            resConfigs &quot;zh&quot;, &quot;zh_CN&quot;, &quot;zh_HK&quot;, &quot;zh_MO&quot;, &quot;zh_TW&quot;, &quot;en&quot;
-    }
-}
-</code></pre>
-
-<p>通过该方式，爱奇艺客户端包体积可以缩减100多KB。</p>
-
-<h3 id="toc_34">lib目录优化</h3>
-
-<p>只提供对主流架构的支持，比如arm，对于mips和x86架构可以考虑不提供支持，系统会自动提供相应的兼容。爱奇艺客户端只在armeabi下面放置了一套so库文件。</p>
-
-<p>除了插件化，客户端还是用了RN的方案，从而引入了RN的so库。由于RN的so库资源比较大，有2M多，进而引入了RN的so库的插件化。通过so库的插件化，来缩减包体积。RN库的插件化，包体积就缩减了1M多。</p>
-
-<h3 id="toc_35">包瘦身详情总结</h3>
-
-<p>通过上面所有方式进行瘦身，APK变化详情，如下图所示：</p>
-
-<p><figure><img src="media/15561207872093/15713348131985.png" alt=""/></figure></p>
-
-<p>由上图可以看出，经过代码优化，资源优化，lib库优化，.arsc文件优化，及整体优化，包体积由54.2M缩减到28.2M。</p>
-
-<h2 id="toc_36">瘦身过程中遇到的问题</h2>
-
-<h3 id="toc_37">WebP支持问题</h3>
-
-<p>WebP图片的转化过程中，一定要注意资源拼接的情况。</p>
-
-<p>比如如果存在vip_1,vip_2,vip_3,vip_4,vip_5等五个资源，要么都转化成WebP,要么都不转，不能处理其中的一部分。</p>
-
-<p>替换一些引导图的时候，一定要打包工具和客户端同时替换。如果客户端把引导图替换成了WebP格式，而打包的时候，由于不同步，该图片又被替换成png格式，就会导致资源加载不成功，进而程序崩溃。</p>
-
-<h3 id="toc_38">签名方式</h3>
-
-<p>使用apksigner签名工具前，必须先执行zipalign操作；而使用jarsigner签名工具则是先签名，然后再用zipalign优化。</p>
-
-<h2 id="toc_39">小结</h2>
-
-<p>目前爱奇艺Android客户端主要通过插件化、RN、签名方式、7zip压缩、保留一套资源、代码资源混淆、无用资源处理、剔除R文件、图片压缩等方式来缩减包体积，包体积整体缩减了20M多。</p>
-
-<p>缩减包体积是一个长期的任务，未来还有很多事情需要做，比如定期扫描无用代码和资源资源、图片持续优化、矢量图、Lottie动画的大量使用等等，随着新技术的涌现，我们会有更多的方法去缩小包体积，使得应用更轻盈运行速度更快。</p>
 
                         
                       </div>
@@ -1724,11 +1200,2825 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/10/21</span>
+                    <span class="date">2019/10/31</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
           				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502774614.html">
+                
+                  <h1>Android Studio配置</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">显示行号</h2>
+
+<p>当我首次启动我的 Android Studio 的时候，我想做的第一件事就是希望能看到文件中的行号。</p>
+
+<p><strong>配置方法</strong></p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | General | Appearance</li>
+<li>勾选 Show line numbers</li>
+</ul>
+
+<h2 id="toc_1">驼峰选择</h2>
+
+<p>Android 开发中，我们通常会使用驼峰命名法对变量进行命名，但是当我们通过 Ctrl + Left/ Right 键改变字符选择区域的时候 Android Studio 默认不支持‘驼峰’单词的选择。</p>
+
+<p><strong>配置方法</strong></p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | General | Smart Keys</li>
+<li>选中 Use “CamelHumps” words</li>
+</ul>
+
+<p><strong>注意</strong>:如果你仍然希望当鼠标在单词上双击之后选中整个单词，需要作如下设置：</p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | General</li>
+<li>取消选中 ‘Honor Camel Humps words settings when selecting on double click’</li>
+</ul>
+
+<h2 id="toc_2">命名前缀</h2>
+
+<p>我们通常会遵循 Android 官方关于编码风格的指导来进行字段命名。在 Android 源码中我们可以看到通常成员变量都是以‘m’开始。其实Android Studio 可以自动在帮我们生成字段名称的时候加上自定义的前缀，如:</p>
+
+<ul>
+<li>非共有，非静态的成员变量以’m’开始</li>
+<li>静态成员变量以’s’开始</li>
+</ul>
+
+<p><strong>配置方法</strong></p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | Code Style | Java</li>
+<li>选择 Code Generation 标签</li>
+<li>给普通 Field 添加一个’m’前缀，给 Static filed 添加一个’s’前缀</li>
+</ul>
+
+<h2 id="toc_3">快速导包</h2>
+
+<p>在 Android Studio 中，我们可以通过 Alt + Enter 和 Control + Alt + O 进行导包和清除无用导包，但我们都希望这些事情应当快速自动完成。</p>
+
+<p><strong>配置方法</strong></p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | General | Auto Import</li>
+<li>勾选 Optimize imports on the fly</li>
+<li>勾选 Add unambiguous imports on the fly</li>
+</ul>
+
+<h2 id="toc_4">Log 颜色</h2>
+
+<p>Darcula 主题中 Logcat 的默认配色只有红白两种颜色，不太便于我们区分 Log 的类型。</p>
+
+<p><strong>配置方法</strong></p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | Color &amp; Fonts | Android Logcat</li>
+<li>点击 Click on Save As…按钮创建一个新的配色 Scheme</li>
+<li>按照下面的表格修改对应的颜色(修改之前需要取消勾选 Use inherited attributes)</li>
+</ul>
+
+<table>
+<thead>
+<tr>
+<th style="text-align: center">Log级别</th>
+<th style="text-align: center">颜色</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td style="text-align: center">Assert:</td>
+<td style="text-align: center">#AA66CC</td>
+</tr>
+<tr>
+<td style="text-align: center">Debug:</td>
+<td style="text-align: center">#33B5E5</td>
+</tr>
+<tr>
+<td style="text-align: center">Error:</td>
+<td style="text-align: center">#FF4444</td>
+</tr>
+<tr>
+<td style="text-align: center">Info:</td>
+<td style="text-align: center">#99CC00</td>
+</tr>
+<tr>
+<td style="text-align: center">Verbose:</td>
+<td style="text-align: center">#FFFFFF</td>
+</tr>
+<tr>
+<td style="text-align: center">Warning:</td>
+<td style="text-align: center">#FFBB33</td>
+</tr>
+</tbody>
+</table>
+
+<h2 id="toc_5">代码字体修改</h2>
+
+<p>代码编辑区字体修改：选择菜单栏“File--settings--Editor--Colors&amp;Fonts--Font”</p>
+
+<p>同样也可以修改控制台的字体(Console Font)</p>
+
+<p>修改完之后发现AS的一些默认字体如侧边栏的工程目录的字体并没有发生变化，如果想改的话，那还是改一下吧（我个人一般是不改的），修改AS的默认字体(Appearance -&gt; Override default fonts by (not recommended))</p>
+
+<h2 id="toc_6">活动模板</h2>
+
+<p>Android Studio 中默认提供了很多非常方便的活动模板(Live Templates)，例如，我们输入sout 后按 enter 键， Android Studio 会自动帮我们写入 System.out.println();其实 sout 就是 AS 自带的一个活动模板。</p>
+
+<p>Editor -&gt; Live Templates</p>
+
+<p>由此可以看出，活动模板就是我们常用代码的一个缩写。开发中有很多代码都会重复出现，因此自定义合适的活动模板能很大程度上避免我们很多重复的体力劳动。那么问题来了，如何自定义？</p>
+
+<p>这里我们实现一个AS不自带的方法，就是我们经常使用的switch用法作为例子。</p>
+
+<ul>
+<li>在Custom的自定义组下，创建一个swi的自定义活动模板</li>
+<li>提示关键字设置为 swi ，描述为 switch的选择语句</li>
+<li>然后设置四个参数CONTAINER, FIRST,SECOND,END,分别代表着参数，第一个选择，第二个选择，最后一个光标坐落点。</li>
+<li>然后点击右边的Edit variabldes，然后进行对四个参数的作用进行赋值，第一个参数我们选择suggestFirstVariableName(“Object”)表示系统推荐的，第二、三是为了我们方便写入我们需要的值，换行只需要回车就可以切换，避免鼠标操作，纯键盘手打，第四个参数就是我们输入的最后。</li>
+</ul>
+
+<p><strong>配置方法</strong></p>
+
+<ul>
+<li>File | Settings 打开设置</li>
+<li>选择 Editor | Code Style | Live Templates</li>
+<li>点击最右侧的加号并选择 Template Group</li>
+<li>在弹出的对话框中输入一个活动模板分组的名称，如 custom</li>
+<li>在左侧选中上一步中创建的 custom 分组，点击右边的加号</li>
+<li>选择 Live Template ，在 Abbreviation 中对输入 psh</li>
+<li>在 Description 中输入这个活动模板的描述</li>
+<li>在 Template text 中输入以下代码</li>
+<li>点击下方的 Define 按钮，选中 java 表示这个模板用于java代码</li>
+<li>点击右侧的 Edit variables</li>
+<li>选择 Expression 下拉框中的 className 并勾选 Skip if…</li>
+</ul>
+
+<blockquote>
+<p>这个操作的作用是，AS会自动将我们在上一步中用’$’符包裹的 className自动替换为当前类不含包名的类名</p>
+</blockquote>
+
+<ul>
+<li>点击 Apply 和 Ok 让设置生效。</li>
+</ul>
+
+<h2 id="toc_7">类的头文件声明，标上自己的专注权</h2>
+
+<p>类的头文件声明，因为我们写的代码，在开发程序的时候，我们一般都会给文件自动添加上一些关于文件的注释信息，比如开发者的名字，开发的时间，开发者的联系方式等等，效果图如下。</p>
+
+<p><strong>设置步骤</strong></p>
+
+<ul>
+<li>点击菜单栏的“File“-&gt;“Settings”，打开Settings窗口</li>
+<li>点击“IDE Settings”下面的“File and Code Templates”，然后选中Templates里面的Class</li>
+<li>然后选中Includes tab下面的File Header。</li>
+<li>在最右边的输入框中就可以输入我们想要设置的注释模板了。比如我们输入：</li>
+</ul>
+
+<pre><code class="language-text"> /**  
+  * Created by OCN.Yang on ${DATE}. ${HOUR}:${MINUTE}  
+  * mail:yangocn@163.com  
+  */  
+</code></pre>
+
+<p>然后点击ok便大功告成了。</p>
+
+<h2 id="toc_8">禁止自动打开上次的工程</h2>
+
+<p>我喜欢自己选打开哪个工程，果断禁用，设置如下：<br/>
+Preference -&gt; Appearance &amp; Behavior -&gt; System Settings -&gt; Startup/shutdown -&gt; Reopen last project on startup</p>
+
+<h2 id="toc_9">禁止代码折叠</h2>
+
+<p>Intellij IDEA默认有很多地方的代码都会自动折叠，不过我看不惯，所以取消了，设置如下：</p>
+
+<p>Preference -&gt; Editor -&gt; General -&gt; Code Folding -&gt; One-line methods | &quot;Closures&quot;(anonymous classes implementing one method,before Java 8) | Generic constructor and method parameters</p>
+
+<h2 id="toc_10">全屏代码</h2>
+
+<p>这个功能是Android studio自带的功能，但是需要你先手动设置一下：全屏代码的快捷键（默认情况下这个功能是没有快捷键的，即是关闭的）：Toggle Presentation mode</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502774655.html">
+                
+                  <h1>Android-Lambda 表达式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Lambda 表达式</h2>
+
+<p>编程中提到的 Lambda 表达式，通常是在需要一个函数，但是又不想费神去命名一个函数的场合下使用，也就是指匿名函数。</p>
+
+<p>Lambda 允许我们把行为传到函数里。之前把行为传到函数里我们采用的是匿名内部类，该方法导致行为最重要的方法夹杂在中间，不够突出，详见举例中代码。</p>
+
+<pre><code class="language-java">//以前点击事件，使用了匿名内部类
+mButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+                Toast.makeText(MainActivity.this, &quot;toast&quot;, Toast.LENGTH_LONG).show();
+            }
+        });
+//新款Lambda 表达式，大家可以比较下上下的不同之处
+mButton.setOnClickListener(view -&gt; Toast.makeText(MainActivity.this, &quot;toast&quot;, Toast.LENGTH_LONG).show());
+</code></pre>
+
+<p>因此Lambda 表达式可以理解为简洁地表示可传递的匿名函数的一种方式：它没有名称，但它有参数列表、函数主体、返回类型，可能还有一个可以抛出的异常列表。</p>
+
+<h2 id="toc_1">代码格式</h2>
+
+<p>Lambda 表达式的基本格式是：() -&gt; {}</p>
+
+<p>有下面三种具体表达：</p>
+
+<pre><code class="language-text">//(params) -&gt; expression
+//接收 x 和 y 这两个整形参数并返回它们的和； 
+(int x, int y) -&gt; x + y
+
+//(params) -&gt; statement   
+//不接收参数，返回整数 ‘42’； 
+() -&gt; 42
+
+//(params) -&gt; {statement}
+//接收一个字符串并把它打印到控制台，不返回值。
+(String s) -&gt; { System.out.println(s); }
+</code></pre>
+
+<h2 id="toc_2">文字解释</h2>
+
+<p>Lambda 表达式的语法由参数列表、箭头符号 -&gt; 和函数体组成。函数体既可以是一个表达式，也可以是一个语句块：</p>
+
+<ul>
+<li>表达式：表达式会被执行然后返回执行结果。</li>
+<li>语句块：语句块中的语句会被依次执行，就像方法中的语句一样
+<ul>
+<li>return 语句会把控制权交给匿名方法的调用者</li>
+<li>break 和 continue 只能在循环中使用</li>
+<li>如果函数体有返回值，那么函数体内部的每一条路径都必须有返回值</li>
+</ul></li>
+</ul>
+
+<p>Lambda 表达式也会经常出现在嵌套环境中，比如说作为方法的参数。为了使 lambda 表达式在这些场景下尽可能简洁，我们去除了不必要的分隔符。不过在某些情况下我们也可以把它分为多行，然后用括号包起来，就像其它普通表达式一样。</p>
+
+<pre><code class="language-java">FileFilter java = (File f) -&gt; f.getName().endsWith(&quot;*.java&quot;);
+String user = doPrivileged(() -&gt; System.getProperty(&quot;user.name&quot;));
+new Thread(() -&gt; {
+  connectToService();
+  sendNotification();
+}).start();
+</code></pre>
+
+<h2 id="toc_3">具体案例</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171030150929646040242.png" alt="20171030150929646040242.png"/></p>
+
+<h2 id="toc_4">方法引用（关键字 ::）</h2>
+
+<blockquote>
+<p>简单来说，方法引用就是 Lambda 表达式的一种简写。当你创建一个 Lambda 表达式时，你创建了一个匿名方法并提供方法体，但你使用方法引用时，你只需要提供已经存在的方法的名字，它本身已经包含方法体。</p>
+</blockquote>
+
+<p>做一个简单的解释，对集合进行排序，使用了Comparator的匿名内部类写法</p>
+
+<pre><code class="language-java">public static void main(String[] args) {
+        List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();
+        list.add(2);
+        list.add(1);
+    
+        Collections.sort(list,new  Comparator&lt;Integer&gt;(){
+            @Override
+            public int compare(Integer a, Integer b) {
+                return a - b;
+            }
+        });
+    }
+
+//用Lambda 进行表示
+Collections.sort(list, (a, b) -&gt; a - b);
+
+//使用Lamabda 的方法引用，可以让匿名内部类Comparator中方法的两个参数和Integer类中compare方法的两个参数自动对应起来，是不是简洁明了呢。
+Collections.sort(list, Integer::compare);
+</code></pre>
+
+<p>方法引用的种类（Kinds of method references）</p>
+
+<ul>
+<li>静态方法引用：ClassName::methodName</li>
+<li>实例上的实例方法引用：instanceReference::methodName</li>
+<li>超类上的实例方法引用：super::methodName</li>
+<li>类型上的实例方法引用：ClassName::methodName</li>
+<li>构造方法引用：Class::new</li>
+<li>数组构造方法引用：TypeName[]::new</li>
+<li>对于静态方法引用，我们需要在类名和方法名之间加入 :: 分隔符，例如 Integer::sum</li>
+</ul>
+
+<h2 id="toc_5">使用 Lambda 的好处</h2>
+
+<ul>
+<li>Lambda 表达式不需要每次都要被实例化，对于 Java 来说，带来巨大的好处。不像实例化匿名类，对内存的影响可以降到最小。</li>
+<li>Lambda 表达式不需要拷贝变量到它的运行环境中，从而 Lambda 表达式被当做是一个真正的方法来对待，而不是一个类的实例 。</li>
+<li>因为是复制，变量必须声明为 final 类型，以保证在获取和使用时不会被改变。Java 使用了优雅的方式保证了变量不会被更新，所以我们不用显式地把变量加上 final 修饰。</li>
+<li>Lambda 表达式函数体适合小型 Lambda 表达式，它消除了 return 关键字，使得语法更加简洁。</li>
+<li>Lambda 表达式取代了匿名内部类，取消了模板，允许通过函数式风格编写代码，使代码的可读性更高，如果不想看不懂大佬的代码的话，赶紧学起来吧。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502774695.html">
+                
+                  <h1>Android-超炫动画库</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><a href="https://github.com/Rkhcy/TransitionNote">源码地址</a><br/>
+<a href="https://github.com/android/platform_frameworks_support">Google Demo</a></p>
+
+<h2 id="toc_0">概述</h2>
+
+<p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/></p>
+
+<p>还有github上很火的<a href="https://github.com/nickbutcher/plaid">plaid</a></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/></p>
+
+<p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。<br/>
+先看官网的一张关系图</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/></p>
+
+<p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
+
+<h2 id="toc_1">Scene</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/></p>
+
+<p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法<br/>
+<code>getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code><br/><br/>
+比如：  </p>
+
+<pre><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
+mScene1 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene1,getContext());
+</code></pre>
+
+<p>也可以直接<code>new Scene(ViewGroup sceneRoot, View layout)</code></p>
+
+<pre><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
+View view1 = inflater.inflate(R.layout.scene1,container,false);
+mScene0 = new Scene(mSceneRoot,view0);
+mScene1 = new Scene(mSceneRoot,view1);
+</code></pre>
+
+<p>两种方式都需要传SceneRoot，即该场景的根节点。</p>
+
+<h2 id="toc_2">Transition</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/></p>
+
+<p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：<br/>
+res/transition/fade_transition.xml</p>
+
+<p><code>&lt;fade xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;/&gt;</code></p>
+
+<p>然后在代码中：</p>
+
+<pre><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
+</code></pre>
+
+<p>或者直接在代码中：</p>
+
+<p><code>Transition mFadeTransition = new Fade();</code></p>
+
+<h2 id="toc_3">TransitionManager</h2>
+
+<p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/></p>
+
+<p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
+
+<h2 id="toc_4">常用API</h2>
+
+<p>有时候我们只想改变当前已展示的视图层级中View的状态，可以通过beginDelayedTransition实现，下面列举系统内置的Transition的使用。</p>
+
+<h3 id="toc_5">AutoTransition</h3>
+
+<p>AutoTransition默认的动画效果，对应xml tag为autoTransition<br/>
+其实是以下几个动画组合顺序执行：</p>
+
+<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:transitionOrdering=&quot;sequential&quot;&gt;
+    &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
+    &lt;changeBounds/&gt;
+    &lt;fade android:fadingMode=&quot;fade_in&quot;/&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>在代码中使用：</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
+if (mTextView.getVisibility() != View.VISIBLE){
+    mTextView.setVisibility(View.VISIBLE);
+} else {
+    mTextView.setVisibility(View.GONE);
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/></p>
+
+<h3 id="toc_6">ChangeBounds</h3>
+
+<p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画。</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
+FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)mTarget.getLayoutParams();
+if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
+    lp.gravity = Gravity.BOTTOM | Gravity.END;
+} else {
+    lp.gravity = Gravity.TOP | Gravity.START;
+}
+mTarget.setLayoutParams(lp);
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/></p>
+
+<h3 id="toc_7">ChangeClipBounds</h3>
+
+<p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
+
+<pre><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
+TransitionManager.beginDelayedTransition(mRoot,new ChangeClipBounds());
+if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
+    ViewCompat.setClipBounds(mImageView,null);
+} else {
+    ViewCompat.setClipBounds(mImageView,BOUNDS);
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/></p>
+
+<h3 id="toc_8">ChangeImageTransform</h3>
+
+<p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
+mImageView.setScaleType(ImageView.ScaleType.xxx);
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/></p>
+
+<h3 id="toc_9">ChangeScroll</h3>
+
+<p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
+mTarget.scrollBy(-100,-100);
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/></p>
+
+<h3 id="toc_10">ChangeTransform</h3>
+
+<p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
+if (mContainer2.getChildCount() &gt; 0){
+    mContainer2.removeAllViews();
+    showRedSquare(mContainer1);
+} else {
+    mContainer1.removeAllViews();
+    showRedSquare(mContainer2);
+    mContainer2.getChildAt(0).setRotation(45);
+}
+
+private void showRedSquare(FrameLayout container){
+    final View view = LayoutInflater.from(getContext())
+                .inflate(R.layout.red_square,container,false);
+    container.addView(view);
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/></p>
+
+<h3 id="toc_11">Explode</h3>
+
+<p>对应xml tag为explode，作用对象：View的Visibility</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews){
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/></p>
+
+<h3 id="toc_12">Fade</h3>
+
+<p>对应xml tag为fade，作用对象：View的Visibility<br/><br/>
+可以在初始化是指定IN或者OUT分别对应淡入和淡出，若不指定默认为淡入淡出效果</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews){
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/></p>
+
+<h3 id="toc_13">Slide</h3>
+
+<p>对应xml tag为slide，作用对象：View的Visibility</p>
+
+<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
+int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
+for (View view : mViews){
+    view.setVisibility(vis);
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/></p>
+
+<h3 id="toc_14">TransitionSet</h3>
+
+<p>对应xml tag为transitionSet<br/><br/>
+可以在代码中创建transitionSet如：  </p>
+
+<pre><code class="language-java">mTransition = new TransitionSet();
+mTransition.addTransition(new ChangeImageTransform());
+mTransition.addTransition(new ChangeTransform());
+TransitionManager.beginDelayedTransition(mOUterFrame,mTransition);
+if (mInnerFrame.getChildCount() &gt; 0){
+    mInnerFrame.removeAllViews();
+    addImageView(mOUterFrame,ImageView.ScaleType.CENTER_CROP,mPhotoSize);
+} else {
+    mOuterFrame.removeViewAt(1);
+    addImageView(mInnerFrame,ImageView.ScaleType.FIT_XY,FrameLayout.LayoutParams.MATCH_PARENT);
+}
+</code></pre>
+
+<p>也可以通过加载xml布局创建transitionSet：<br/><br/>
+xml布局长这样：  </p>
+
+<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+    android:transitionOrdering=&quot;together&quot;&gt;
+    &lt;changeImageTransform/&gt;
+    &lt;changeTransform/&gt;
+&lt;/transitionSet&gt;
+</code></pre>
+
+<p>通过transitionOrdering属性设置动画执行的顺序，together表示同时执行，sequential表示顺序执行，在代码中可以调用TransitionSet的<code>setOrdering(int)</code>方法，属性值传ORDERING_SEQUENTIAL或者ORDERING_TOGETHER<br/><br/>
+在代码中：  </p>
+
+<pre><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+TransitionManager.beginDelayedTransition(mOuterFrame,mTransition);
+if (mInnerFrame.getChildCount() &gt; 0){
+    mInnerFrame.removeAllViews();
+    addImageView(mOUterFrame,ImageView.ScaleType.CENTER_CROP,mPhotoSize);
+} else {
+    mOuterFrame.removeViewAt(1);
+    addImageView(mInnerFrame,ImageView.ScaleType.FIT_XY,FrameLayout.LayoutParams.MATCH_PARENT);
+}
+</code></pre>
+
+<p>这里结合changeImageTransform和changeTransform，效果如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/></p>
+
+<h3 id="toc_15">PathMotion</h3>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/></p>
+
+<p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
+
+<pre><code class="language-java">mTransition = new AutoTransition();
+TransitionManager.beginDelayedTransition(mRoot,mTransition);
+FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
+if ((lp.gravity &amp; Gravity.START) == START) {
+    lp.gravity = Gravity.END | Gravity.BOTTOM;
+} else {
+    lp.gravity = Gravity.START | Gravity.TOP;
+}
+mTarget.setLayoutParams(lp);
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/></p>
+
+<p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/></p>
+
+<h3 id="toc_16">自定义Transition</h3>
+
+<p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
+
+<pre><code class="language-java">public class CustomTransition extends Transition {
+    @Override
+    public void captureStartValues(TransitionValues values){}
+    @Override
+    public void captureEndValues(TransitionValues values){}
+    @Override
+    public Animator createAnimator(ViewGroup sceneRoot,TransitionValues startValues,TransitionValues endValues){}
+}
+</code></pre>
+
+<p>其工作原理是在captureStartValues和captureEndValues中分别记录View的属性值，官网建议确保属性值不冲突，属性值的命名格式参考：<br/><br/>
+package_name:transition_name:property_name<br/><br/>
+在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：  </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/></p>
+
+<p>在两个Scene中使用自定义过渡动画，效果如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/></p>
+
+<h2 id="toc_17">Note</h2>
+
+<ul>
+<li>Android 版本在4.0(API Level 14)到4.4.2(API Level 19)使用Android Support Library’s</li>
+<li>对于 SurfaceView可能不起效果，因为SurfaceView的实例是在非UI线程更新的，因此会造成和其他视图动画不同步。</li>
+<li>某些特定的转换类型在应用到TextureView时可能不会产生所需的动画效果。</li>
+<li>继承自AdapterView的如ListView，与该框架不兼容。</li>
+<li>不要对包含文本的视图的大小进行动画</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502774857.html">
+                
+                  <h1>Android Gradle使用总结</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Android Gradle</h2>
+
+<p>Android项目使用 Gradle 作为构建框架，Gradle 又是以Groovy为脚本语言。所以学习Gradle之前需要先熟悉Groovy脚本语言。</p>
+
+<p>Groovy是基于Java语言的脚本语言，所以它的语法和Java非常相似，但是具有比java更好的灵活性。下面就列举一些和Java的主要区别。</p>
+
+<h2 id="toc_1">Android Gradle 的 Project 和 Tasks</h2>
+
+<p>这个Gradle中最重要的两个概念。每次构建（build）至少由一个project构成，一个project 由一到多个task构成。项目结构中的每个build.gradle文件代表一个project，在这编译脚本文件中可以定义一系列的task；task 本质上又是由一组被顺序执行的Action`对象构成，Action其实是一段代码块，类似于Java中的方法。</p>
+
+<h2 id="toc_2">Android Gradle 构建生命周期</h2>
+
+<p>每次构建的执行本质上执行一系列的Task。某些Task可能依赖其他Task。哪些没有依赖的Task总会被最先执行，而且每个Task只会被执行一遍。每次构建的依赖关系是在构建的配置阶段确定的。每次构建分为3个阶段：</p>
+
+<ul>
+<li>Initialization: 初始化阶段</li>
+</ul>
+
+<p>这是创建Project阶段，构建工具根据每个build.gradle文件创建出一个Project实例。初始化阶段会执行项目根目录下的settings.gradle文件，来分析哪些项目参与构建。</p>
+
+<p>所以这个文件里面的内容经常是：</p>
+
+<pre><code class="language-text">include &#39;:app&#39;
+include &#39;:libraries:someProject&#39;
+</code></pre>
+
+<p>这是告诉Gradle这些项目需要编译，所以我们引入一些开源的项目的时候，需要在这里填上对应的项目名称，来告诉Gradle这些项目需要参与构建。</p>
+
+<ul>
+<li>Configuration:配置阶段</li>
+</ul>
+
+<p>这个阶段，通过执行构建脚本来为每个project创建并配置Task。配置阶段会去加载所有参与构建的项目的build.gradle文件，会将每个build.gradle文件实例化为一个Gradle的project对象。然后分析project之间的依赖关系，下载依赖文件，分析project下的task之间的依赖关系。</p>
+
+<ul>
+<li>Execution:执行阶段</li>
+</ul>
+
+<p>这是Task真正被执行的阶段，Gradle会根据依赖关系决定哪些Task需要被执行，以及执行的先后顺序。 <br/>
+task是Gradle中的最小执行单元，我们所有的构建，编译，打包，debug，test等都是执行了某一个task，一个project可以有多个task，task之间可以互相依赖。例如我有两个task，taskA和taskB，指定taskA依赖taskB，然后执行taskA，这时会先去执行taskB，taskB执行完毕后在执行taskA。</p>
+
+<p>说到这可能会有疑问，我翻遍了build.gradle也没看见一个task长啥样，有一种被欺骗的赶脚！</p>
+
+<p>其实不是，你点击AndroidStudio右侧的一个Gradle按钮，会打开一个面板，内容差不多是这样的：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920575828.png" alt="20171028150920575828.png"/></p>
+
+<p>里面的每一个条目都是一个task，那这些task是哪来的呢？</p>
+
+<p>一个是根目录下的 build.gradle 中的</p>
+
+<pre><code class="language-text">dependencies {
+    classpath &#39;com.android.tools.build:gradle:2.2.2&#39;
+}
+</code></pre>
+
+<p>一个是 app 目录下的 build.gradle 中的</p>
+
+<p><code>apply plugin: &#39;com.android.application&#39;</code></p>
+
+<p>这两段代码决定的。也就是说，Gradle提供了一个框架，这个框架有一些运行的机制可以让你完成编译，但是至于怎么编译是由插件决定的。还好Google已经给我们写好了Android对应的Gradle工具，我们使用就可以了。</p>
+
+<p>根目录下的build.gradle中dependencies {classpath ‘com.android.tools.build:gradle:2.2.2’}是Android Gradle编译插件的版本。</p>
+
+<p>app目录下的build.gradle中的apply plugin: ‘com.android.application’是引入了Android的应用构建项目，还有com.android.library和com.android.test用来构建library和测试。</p>
+
+<p>所有Android构建需要执行的task都封装在工具里，如果你有一些特殊需求的话，也可以自己写一些task。那么对于开发一个Android应用来说，最关键的部分就是如何来用AndroidGradle的插件了。</p>
+
+<h2 id="toc_3">认知Gradle Wrapper</h2>
+
+<p>Android Studio中默认会使用 Gradle Wrapper 而不是直接使用Gradle。命令也是使用gradlew而不是gradle。这是因为gradle针对特定的开发环境的构建脚本，新的gradle可能不能兼容旧版的构建环境。为了解决这个问题，使用Gradle Wrapper 来间接使用 gradle。相当于在外边包裹了一个中间层。对开发者来说，直接使用Gradlew 即可，不需要关心 gradle的版本变化。Gradle Wrapper 会负责下载合适的的gradle版本来构建项目。</p>
+
+<h2 id="toc_4">Android 三个文件重要的 gradle 文件</h2>
+
+<p>Gradle项目有3个重要的文件需要深入理解：项目根目录的 build.gradle , settings.gradle 和模块目录的 build.gradle 。</p>
+
+<ul>
+<li><p>1.settings.gradle 文件会在构建的 initialization 阶段被执行，它用于告诉构建系统哪些模块需要包含到构建过程中。对于单模块项目， settings.gradle 文件不是必需的。对于多模块项目，如果没有该文件，构建系统就不能知道该用到哪些模块。</p></li>
+<li><p>2.项目根目录的 build.gradle 文件用来配置针对所有模块的一些属性。它默认包含2个代码块：buildscript{…}和allprojects{…}。前者用于配置构建脚本所用到的代码库和依赖关系，后者用于定义所有模块需要用到的一些公共属性。</p></li>
+</ul>
+
+<pre><code class="language-text">buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath &#39;com.android.tools.build:gradle:2.3.2&#39;
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+</code></pre>
+
+<p>buildscript：定义了 Android 编译工具的类路径。repositories中, jCenter是一个著名的 Maven 仓库。</p>
+
+<p>allprojects:中定义的属性会被应用到所有 moudle 中，但是为了保证每个项目的独立性，我们一般不会在这里面操作太多共有的东西。</p>
+
+<ul>
+<li>3.模块级配置文件 build.gradle 针对每个moudle 的配置，如果这里的定义的选项和顶层 build.gradle定义的相同。它有3个重要的代码块：plugin，android 和 dependencies。</li>
+</ul>
+
+<h2 id="toc_5">定制项目属性（project properties)</h2>
+
+<p>在项目根目录的build.gradle配置文件中，我们可以定制适用于所有模块的属性，通过ext 代码块来实现。如下所示：</p>
+
+<pre><code class="language-text">ext {
+    compileSdkVersion = 22
+    buildToolsVersion = &quot;22.0.1&quot;
+}
+</code></pre>
+
+<p>然后我们可以在模块目录的build.gradle配置文件中引用这些属性,引用语法为rootProject.ext.{属性名}。如下：</p>
+
+<pre><code class="language-text">android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+}
+</code></pre>
+
+<h2 id="toc_6">Android studio gradle Task</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920589712600.png" alt="20171028150920589712600.png"/></p>
+
+<pre><code class="language-text">//构建
+gradlew app:clean    //移除所有的编译输出文件，比如apk
+
+gradlew app:build   //构建 app module ，构建任务，相当于同时执行了check任务和assemble任务
+
+//检测
+gradlew app:check   //执行lint检测编译。
+
+//打包
+gradlew app:assemble //可以编译出release包和debug包，可以使用gradlew assembleRelease或者gradlew assembleDebug来单独编译一种包
+
+gradlew app:assembleRelease  //app module 打 release 包
+
+gradlew app:assembleDebug  //app module 打 debug 包
+
+//安装，卸载
+
+gradlew app:installDebug  //安装 app 的 debug 包到手机上
+
+gradlew app:uninstallDebug  //卸载手机上 app 的 debug 包
+
+gradlew app:uninstallRelease  //卸载手机上 app 的 release 包
+
+gradlew app:uninstallAll  //卸载手机上所有 app 的包
+</code></pre>
+
+<p>这些都是基本的命令，在实际项目中会根据不同的配置，会对这些task 设置不同的依赖。比如 默认的 assmeble 会依赖 assembleDebug 和assembleRelease，如果直接执行assmeble，最后会编译debug，和release 的所有版本出来。如果我们只需要编译debug 版本，我们可以运行assembleDebug。</p>
+
+<p>除此之外还有一些常用的新增的其他命令，比如 install命令，会将编译后的apk 安装到连接的设备。</p>
+
+<h2 id="toc_7">lint 检测</h2>
+
+<ul>
+<li>忽略编译器的 lint 检查</li>
+</ul>
+
+<pre><code class="language-text">android {
+
+  lintOptions {
+      abortOnError false
+  }
+}
+</code></pre>
+
+<h2 id="toc_8">buildTypes 定义了编译类型</h2>
+
+<pre><code class="language-text">android{
+
+  buildTypes {
+       release {
+           minifyEnabled true  //打开混淆
+           proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+       }
+        debug {
+           minifyEnabled false //关闭混淆
+           proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_9">productFlavors 多渠道打包</h2>
+
+<p>AndroidManifest.xml 里设置动态渠道变量</p>
+
+<pre><code class="language-text">&lt;meta-data
+    android:name=&quot;UMENG_CHANNEL&quot;
+    android:value=&quot;${UMENG_CHANNEL_VALUE}&quot; /&gt;
+</code></pre>
+
+<p>在 build.gradle 设置 productFlavors , 这里假定我们需要打包的渠道为酷安市场、360、小米、百度、豌豆荚。</p>
+
+<pre><code class="language-text">android {  
+
+    productFlavors {
+        kuan {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;kuan&quot;]
+        }
+        xiaomi {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;xiaomi&quot;]
+        }
+        qh360 {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;qh360&quot;]
+        }
+        baidu {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;baidu&quot;]
+        }
+        wandoujia {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;wandoujia&quot;]
+        }
+    } 
+}
+</code></pre>
+
+<p>或者批量修改</p>
+
+<pre><code class="language-text">android {  
+
+    productFlavors {
+        kuan {}
+        xiaomi {}
+        qh360 {}
+        baidu {}
+        wandoujia {}
+    }  
+
+    productFlavors.all { 
+        flavor -&gt; flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name] 
+    }
+}
+</code></pre>
+
+<p>这样在打包的时候就可以选择渠道了</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920602392842.png" alt="20171028150920602392842.png"/></p>
+
+<p>或者用命令打包 ，比如：</p>
+
+<pre><code class="language-text">gradlew assembleWandoujiaRelease  //豌豆荚 release 包
+
+gradlew assembleWandoujiaDebug //豌豆荚 debug 包
+</code></pre>
+
+<h2 id="toc_10">多渠道设置包名</h2>
+
+<p>有时候我们需要分渠道设置 applicationId 、友盟的 appkey 、友盟渠道号。</p>
+
+<pre><code class="language-text">productFlavors {
+    google {
+        applicationId &quot;com.wifi.cool&quot;
+        manifestPlaceholders = [                
+            UMENG_APPKEY_VALUE : &quot;456789456789&quot;,
+            UMENG_CHANNEL_VALUE: &quot;google&quot;,            
+        ]
+    }
+
+    baidu{
+        applicationId &#39;com.wifi.hacker&#39;
+        manifestPlaceholders = [
+        UMENG_APPKEY_VALUE     : &quot;123456789789&quot;,
+        UMENG_CHANNEL_VALUE    : &quot;baidu&quot;,          
+        ]
+    }
+}
+</code></pre>
+
+<h2 id="toc_11">Signing 签名</h2>
+
+<p>在 android 标签下添加 signingConfigs 标签，如下：</p>
+
+<pre><code class="language-text">android {
+    signingConfigs {
+        config {
+           keyAlias &#39;yiba&#39;
+           keyPassword &#39;123456&#39;
+           storeFile file(&#39;C:/work/Key.jks&#39;)
+           storePassword &#39;1234567&#39;
+       }
+   }
+} 
+</code></pre>
+
+<p>可以在 release 和 debug 包中定义签名，如下：</p>
+
+<pre><code class="language-text">android {
+    signingConfigs {
+        config {
+            keyAlias &#39;yiba&#39;
+            keyPassword &#39;123456&#39;
+            storeFile file(&#39;C:/work/Key.jks&#39;)
+            storePassword &#39;1234567&#39;
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            signingConfig signingConfigs.config
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            signingConfig signingConfigs.config
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_12">依赖管理</h2>
+
+<h3 id="toc_13">依赖 jcenter 包</h3>
+
+<p>每个库名称包含三个元素：组名:库名称:版本号</p>
+
+<p><code>compile &#39;com.android.support:appcompat-v7:25.0.0&#39;</code></p>
+
+<h3 id="toc_14">依赖本地 module</h3>
+
+<p><code>compile project(&#39;:YibaAnalytics&#39;)</code></p>
+
+<h3 id="toc_15">依赖 jar 包</h3>
+
+<ul>
+<li>把 jar 包放在 libs 目录下</li>
+<li>在 build.gradle 中添加依赖</li>
+</ul>
+
+<pre><code class="language-text">dependencies {
+   compile files(&#39;libs/YibaAnalytics5.jar&#39;)
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920619455522.png" alt="20171028150920619455522.png"/></p>
+
+<h3 id="toc_16">依赖 aar 包</h3>
+
+<ul>
+<li>把 aar 包放到 libs 目录下</li>
+<li>在 build.gradle 中添加依赖</li>
+</ul>
+
+<pre><code class="language-text">repositories {
+    flatDir {
+        dirs &#39;libs&#39;
+    }
+}
+
+dependencies {
+    compile(name:&#39;YibaAnalytics-release&#39;, ext:&#39;aar&#39;)
+}
+</code></pre>
+
+<p>如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920622394032.png" alt="20171028150920622394032.png"/></p>
+
+<ul>
+<li>自定义依赖包目录</li>
+</ul>
+
+<p>当我们的 aar 包需要被多个 module 依赖时，我们就不能把 aar 包放在单一的 module 中，我们可以在项目的根目录创建一个目录，比如叫 aar 目录，然后把我们的 aar 包放进去，如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920623519197.png" alt="20171028150920623519197.png"/></p>
+
+<p>在项目的根目录的 build.gradle 的 allprojects 标签下的 repositories 添加 ：</p>
+
+<pre><code class="language-text"> flatDir {
+     dirs &#39;../aar&#39;
+}
+</code></pre>
+
+<p>../aar 表示根目录下的 aar 文件夹。</p>
+
+<p>如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920625348073.png" alt="20171028150920625348073.png"/></p>
+
+<p>然后就可以添加依赖了，如下所示：</p>
+
+<p><code>compile(name:&#39;YibaAnalytics-release&#39;, ext:&#39;aar&#39;)</code></p>
+
+<h3 id="toc_17">依赖配置</h3>
+
+<p>有些时候，你可能需要和sdk协调工作。为了能顺利编译你的代码，你需要添加SDK到你的编译环境。你不需要将sdk包含在你的APK中，因为它早已经存在于设备中，所以配置来啦，我们会有5个不同的配置：</p>
+
+<ul>
+<li>compile</li>
+<li>apk</li>
+<li>provided</li>
+<li>testCompile</li>
+<li>androidTestCompile</li>
+</ul>
+
+<p>compile是默认的那个，其含义是包含所有的依赖包，即在APK里，compile的依赖会存在。</p>
+
+<p>apk的意思是apk中存在，但是不会加入编译中，这个貌似用的比较少。</p>
+
+<p>provided的意思是提供编译支持，但是不会写入apk。</p>
+
+<h3 id="toc_18">排除依赖兼容包</h3>
+
+<p>有时候我们在引入依赖包的时候，会额外的引入 v7, v4 的包，对我们的项目造成额外的负担，我们需要把这个兼容包排除，可以使用 exclude 就能做到。</p>
+
+<pre><code class="language-text">compile(&#39;com.google.firebase:firebase-ads:11.0.4&#39;, {
+      exclude group: &#39;com.android.support&#39;   //排除v7 , v4 包
+})
+</code></pre>
+
+<h2 id="toc_19">native包（so包）</h2>
+
+<p>用c或者c++写的library会被叫做so包，Android插件默认情况下支持native包，你需要把.so文件放在对应的文件夹中：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920630815374.png" alt="20171028150920630815374.png"/></p>
+
+<p><strong>注意</strong></p>
+
+<p>jniLibs 目录应该和 Java 目录在同一级</p>
+
+<h2 id="toc_20">defaultConfig 详解</h2>
+
+<p>defaultConfig 对应的是 ProductFlavor 类。</p>
+
+<h2 id="toc_21">resConfigs ： 过滤语言</h2>
+
+<p>如果你的app中仅支持1,2种语言，但是可能引用的lib库包含多种其他语言的strings资源，这个时候我们可以通过resConfig指定我们需要的strings资源。</p>
+
+<pre><code class="language-text">android {
+
+    defaultConfig {
+        applicationId &quot;com.yiba.sharewe.lite.activity&quot;
+        minSdkVersion 14
+        targetSdkVersion 24
+        versionCode 46
+        versionName &quot;1.74&quot;
+        resConfigs &#39;en&#39;, &#39;zh-rCN&#39; ,&#39;es&#39;  //本次打包，只把 en(英文)、zh-rCN(中文简体)、es（西班牙语）打进保内，其他语言忽略
+    }
+}
+</code></pre>
+
+<h2 id="toc_22">resConfigs ： 过滤 drawable文件夹的资源</h2>
+
+<p>一般情况下，我们打完包，res 下面的资源如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920635182429.png" alt="20171028150920635182429.png"/></p>
+
+<p>现在加上资源过滤规则：</p>
+
+<pre><code class="language-text">android {
+    defaultConfig {
+        applicationId &quot;com.wifi.analytics&quot;
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+        resConfigs &quot;hdpi&quot;  //打包的时候只保留 drawable-xhdpi 文件夹里面的资源
+    }
+}
+</code></pre>
+
+<p>这次我们打包效果如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920637414691.png" alt="20171028150920637414691.png"/></p>
+
+<h2 id="toc_23">buildTypes 详解</h2>
+
+<p><a href="http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html">官方文档</a></p>
+
+<p>buildTypes{}对应的是 BuildType 类</p>
+
+<p><strong>继承关系</strong></p>
+
+<p>BuildType 继承 DefaultBuildType ； DefaultBuildType 继承 BaseConfigImpl ；</p>
+
+<pre><code class="language-text">BaseConfigImpl
+    --- DefaultBuildType 
+          --- BuildType
+</code></pre>
+
+<p><strong>buildTypes的属性</strong>：</p>
+
+<pre><code class="language-text">name：build type的名字
+
+applicationIdSuffix：应用id后缀
+
+versionNameSuffix：版本名称后缀
+
+debuggable：是否生成一个debug的apk
+
+minifyEnabled：是否混淆
+
+proguardFiles：混淆文件
+
+signingConfig：签名配置
+
+manifestPlaceholders：清单占位符
+
+shrinkResources：是否去除未利用的资源，默认false，表示不去除。
+
+zipAlignEnable：是否使用zipalign工具压缩。
+
+multiDexEnabled：是否拆成多个Dex
+
+multiDexKeepFile：指定文本文件编译进主Dex文件中
+
+multiDexKeepProguard：指定混淆文件编译进主Dex文件中
+</code></pre>
+
+<p><strong>buildType的方法</strong>：</p>
+
+<pre><code class="language-text">1.buildConfigField(type,name,value)：添加一个变量生成BuildConfig类。
+
+2.consumeProguardFile(proguardFile)：添加一个混淆文件进arr包。
+
+3.consumeProguardFile(proguardFiles)：添加混淆文件进arr包。
+
+4.externalNativeBuild(action)：配置本地的build选项。
+
+5.initWith：复制这个build类型的所有属性。
+
+6.proguardFile(proguardFile)：添加一个新的混淆配置文件。
+
+7.proguradFiles(files):添加新的混淆文件
+
+8.resValue(type,name,value)：添加一个新的生成资源
+
+9.setProguardFiles(proguardFileIterable):设置一个混淆配置文件。
+</code></pre>
+
+<h2 id="toc_24">initWith ：复制属性</h2>
+
+<pre><code class="language-text">android {
+    compileSdkVersion 25
+    buildToolsVersion &quot;25.0.2&quot;
+    defaultConfig {
+        applicationId &quot;com.wifi.analytics&quot;
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+
+        myType {
+            initWith debug  //完全复制 debug 的所有属性‘
+            minifyEnabled true //自定义打开混淆
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_25">applicationIdSuffix 、versionNameSuffix ：添加后缀</h2>
+
+<pre><code class="language-text">android {
+    compileSdkVersion 25
+    buildToolsVersion &quot;25.0.2&quot;
+    defaultConfig {
+        applicationId &quot;com.wifi.analytics&quot;
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            applicationIdSuffix &quot;zhao&quot;  //applicationId 追加后缀名 zhao
+            versionNameSuffix &quot;debug&quot;  //versionName 追加后缀名 debug1.0
+        }
+    }
+}
+</code></pre>
+
+<p>效果图，如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920649886369.png" alt="20171029150920649886369.png"/></p>
+
+<h2 id="toc_26">buildConfigField： 自定义属性</h2>
+
+<p>在 build.gradle 文件中定义 buildConfigField 属性</p>
+
+<pre><code class="language-text">android {
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://yiba.com\&quot;&quot;  //自定义String属性
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://yiba.com\&quot;&quot;  //自定义String属性
+        }
+    }
+}
+</code></pre>
+
+<p>然后点击同步按钮，然后就可以在 build 目录看到 debug 和 release 信息。</p>
+
+<p>debug 环境下的 BuildConfig 如下： </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920652322417.png" alt="20171029150920652322417.png"/></p>
+
+<p>release 环境下的 BuildConfig 如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920653292275.png" alt="20171029150920653292275.png"/></p>
+
+<p>当然我们也可以在代码中获取自定义的值：</p>
+
+<pre><code class="language-text">//获取变量值
+String API = BuildConfig.API_ENV ;
+</code></pre>
+
+<p>上面演示了自定义 String 变量，也可以 自定义 int 、boolean</p>
+
+<pre><code class="language-text">android {
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://www.baidu.com\&quot;&quot; //自定义 String 值
+            buildConfigField &quot;Boolean&quot;, &quot;openLog&quot;, &quot;true&quot; //自定义 boolean 值
+            buildConfigField &quot;int&quot;, &quot;age&quot;, &quot;10&quot;   //自定义 int 值
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_27">Gradle 实现差异化构建</h2>
+
+<h3 id="toc_28">情景1</h3>
+
+<p>LeakCanary 是 square 公司出品的一个检测内存泄漏的开源库。</p>
+
+<p>GitHub ： <a href="https://github.com/square/leakcanary">https://github.com/square/leakcanary</a></p>
+
+<p>我们一般这样集成</p>
+
+<pre><code class="language-text">dependencies {
+    compile &#39;com.squareup.leakcanary:leakcanary-android:1.5.2&#39;
+}
+</code></pre>
+
+<p>然后我们在 Application 类中初始化：</p>
+
+<pre><code class="language-text">public class MyApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        LeakCanary.install(this);
+    }
+}
+</code></pre>
+
+<p>但是这样集成有一个弊端，就是 debug 和 release 包都会把 LeakCanary 的源码打进去，如果我们在 release 包中不把 LeakCanary 源码打进去，怎么办？ 还好 LeakCanary 给我们提供了一个方法，方法如下：</p>
+
+<pre><code class="language-text">dependencies {
+
+ //打 debug 包
+ debugCompile &#39;com.squareup.leakcanary:leakcanary-android:1.5.1&#39;
+
+ //打 release 包
+ releaseCompile &#39;com.squareup.leakcanary:leakcanary-android-no-op:1.5.1&#39;
+
+}
+</code></pre>
+
+<p>leakcanary-android-no-op 是一个空壳，里面有2个空类，所以就可以避免把 LeakCanary 源码打进 release 包。但是这种方式有个缺陷，如果一些开源库没有提供 releaseCompile 库，那我们改怎么办了？下面的情景2 就会讲到解决方案。</p>
+
+<h3 id="toc_29">情景2</h3>
+
+<p>Stetho 是 Faceboo k开源的Andorid调试工具。当你的应用集成Stetho时，开发者可以访问Chrome，在Chrome Developer Tools中查看应用布局，网络请求，sqlite，preference 等等。</p>
+
+<p>官网：<a href="http://facebook.github.io/stetho/">http://facebook.github.io/stetho/</a></p>
+
+<p>从官网可以看到 stetho 没有提供 releaseCompile 包 ， 情景1 的方案就不能用了。新的思路集成方案如下：</p>
+
+<pre><code class="language-text">dependencies {
+    debugCompile &#39;com.facebook.stetho:stetho:1.5.0&#39;
+}
+</code></pre>
+
+<p>在 src 目录下创建 debug 目录、release 目录 ，然后分别在 debug 目录 和 release 目录 创建 java 目录 ， 在 java 目录中创建包名，比如： com.app , 如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920663742117.png" alt="20171029150920663742117.png"/></p>
+
+<p>debug 目录下创建 SDKManage 类 ，如下 ：</p>
+
+<pre><code class="language-text">public class SDKManager {
+
+    public static void init(Context context) {
+        //初始化 Stetho
+        Stetho.initializeWithDefaults(context);
+    }
+}
+</code></pre>
+
+<p>release 目录下创建 SDKManage 类 ，如下 ：</p>
+
+<pre><code class="language-text">public class SDKManager {
+
+    public static void init(Context context) { 
+        //这是一个空方法，目的是不引入 Stetho 源码
+    }
+}
+</code></pre>
+
+<p>在住项目中的 MyApplication 类，并且完成 Stetho 的初始化，如下：</p>
+
+<pre><code class="language-text">public class MyApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        SDKManager.init(this);
+    }
+}
+</code></pre>
+
+<p>这样我们便完成了简单的差异化构建, 打出来的 release 包就没有 Stetho 源码。</p>
+
+<h2 id="toc_30">SourceSet</h2>
+
+<h3 id="toc_31">SourceSet 简介</h3>
+
+<p>SourceSet 可以定义项目结构，也可以修改项目结构。Java插件默认实现了两个SourceSet，main 和 test。每个 SourceSet 都提供了一系列的属性，通过这些属性，可以定义该 SourceSet 所包含的源文件。比如，java.srcDirs，resources.srcDirs 。Java 插件中定义的其他任务，就根据 main 和 test 的这两个 SourceSet 的定义来寻找产品代码和测试代码等。</p>
+
+<h3 id="toc_32">SourceSet 定义源码目录</h3>
+
+<p>在 Android 项目中，我们可以在 src/main/java 目录新建 Java 文件，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920668425492.png" alt="20171029150920668425492.png"/></p>
+
+<p>现在我们在 src 目录下，新建 test1 目录 ，发现不能在 test1 目录中新建 Java 文件，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920669347940.png" alt="20171029150920669347940.png"/></p>
+
+<p>为什么在 test1 目录不能新建 Java 文件，因为 Gradle 中 SourceSet 默认定义的源码文件路径是src/main/java , 其他的文件下下面的源码我们自然无法访问。解决这个问题也很简单，我们需要在 SourceSet 中增加一个源码路径即可。如下所示：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            java {
+                srcDir &#39;src/test1&#39; //指定源码目录
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>然后同步一下，就可以在 test1 目录中新建 Java 文件了。如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920675182396.png" alt="20171029150920675182396.png"/></p>
+
+<p>当然我们也可以同时指定多个源码目录，比如同时指定 test1 , test2 , test3 为源码目录。</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            java {
+                srcDir &#39;src/test1&#39; //指定 test1 为源码目录
+                srcDir &#39;src/test2&#39; //指定 test2 为源码目录
+                srcDir &#39;src/test3&#39; //指定 test3 为源码目录
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>或者 这样写 ：</p>
+
+<pre><code class="language-text">android {
+    sourceSets {
+        main {
+            java.srcDirs( &#39;src/test1&#39; , &#39;src/test2&#39; ,&#39;src/test3&#39; )
+        }
+    }
+}
+</code></pre>
+
+<p>效果如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920677817619.png" alt="20171029150920677817619.png"/></p>
+
+<h3 id="toc_33">SourceSet 定义资源目录</h3>
+
+<p>定义 test1 目录 Java 源代码路径、res 资源目录。目录结构如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920679824349.png" alt="20171029150920679824349.png"/></p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            java.srcDirs(&#39;src/test1/java&#39;)  //定义java 源代码
+            res.srcDirs(&#39;src/test1/res&#39;)    //定义资源目录（layout , drawable,values）
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_34">SourceSet 实现 layout 分包</h3>
+
+<p>对于一个大项目来说，页面太多，布局文件就很多，有时在众多布局文件中找某个模块的布局文件，很是痛苦，为了解决这个问题，我们可以在创建多个 layout 目录，不同模块的布局文件放在不同的 layout 目录中，这样查找起来，就容易很多。</p>
+
+<p>例子：</p>
+
+<p>比如我们的项目中，有两个模块分别为：登录、注册。</p>
+
+<ul>
+<li><p>第一步：把项目中 layout 文件夹改名字为 layouts</p></li>
+<li><p>第二步：在 layouts 目录下，分别创建 login 、register 目录 。</p></li>
+<li><p>第三步：分别在 login 、register 目录下创建 layout 目录。注意这一步是必须的，否则会报错。</p></li>
+<li><p>第四步：把 登录布局文件、注册布局文件 分别放在 第三步创建的对应的 layout 目录下。</p></li>
+</ul>
+
+<p>效果图如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920685572520.png" alt="20171029150920685572520.png"/></p>
+
+<p>SourceSet 实现如下：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            res.srcDirs &#39;src/main/res/layouts/login&#39;  //定义登录布局目录
+            res.srcDirs &#39;src/main/res/layouts/register&#39;  //定义注册布局目录
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_35">SourceSet 定义 AndroidManifest 文件</h3>
+
+<p>指定 test1 目录下的 AndroidManifest 文件。项目结构如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920687997782.png" alt="20171029150920687997782.png"/></p>
+
+<p>代码如下：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            manifest.srcFile &#39;src/test1/AndroidManifest.xml&#39;
+        }
+    }
+}
+</code></pre>
+
+<p>在组件化开发中, 我们需要针对 debug 与 release 模式下, 指定不同的 Manifest 文件, 代码如下：</p>
+
+<pre><code class="language-text">android {
+    def appDebug = false;
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            appDebug = false;
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            appDebug = false;
+        }
+    }
+
+    sourceSets {
+        main {
+            if (appDebug) {
+                manifest.srcFile &#39;src/test1/AndroidManifest.xml&#39;
+            } else {
+                manifest.srcFile &#39;src/main/AndroidManifest.xml&#39;
+            }
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_36">SourceSet 定义 assets 目录</h3>
+
+<p>Android Studio 项目目录中，assets 默认目录如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920691136995.png" alt="20171029150920691136995.png"/></p>
+
+<p>如何重新定义 assets 目录 。在项目的根目录下创建 assets 目录，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920691863996.png" alt="20171029150920691863996.png"/></p>
+
+<p>sourceSets 定义代码如下：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            assets.srcDirs = [&#39;assets&#39;]
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_37">SourceSet 定义其他资源</h3>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs  //定义 jni 目录
+            aidl.srcDirs  //定义 aidl 目录
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_38">applicationVariants</h2>
+
+<h3 id="toc_39">定义 versionName 、VersionCode</h3>
+
+<p>在打包的时候分 debug 、release 版本 , 需要控制 versionName</p>
+
+<pre><code class="language-text">android {
+
+     applicationVariants.all { variant -&gt;
+        def flavor = variant.mergedFlavor
+        def versionName = flavor.versionName
+        if (variant.buildType.isDebuggable()) {
+            versionName += &quot;_debug&quot;  //debug 名字
+        } else {
+            versionName += &quot;_release&quot; //release 名字
+        }
+        flavor.versionName = versionName
+    }
+}
+</code></pre>
+
+<h3 id="toc_40">定义 APK 包的名字</h3>
+
+<pre><code class="language-text">apply plugin: &#39;com.android.application&#39;
+
+android {
+
+    defaultConfig {
+        applicationId &quot;android.plugin&quot;
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+    }
+
+    //定义渠道
+    productFlavors {
+        xiaomi {
+            //小米
+        }
+        wandoujia {
+            // 豌豆荚
+        }
+    }
+
+    //打包命名
+    applicationVariants.all {
+        variant -&gt;
+            variant.outputs.each {
+                output -&gt;
+
+                    //定义一个新的apk 名字。
+                    // 新名字 = app 名字+ 渠道号 + 构建类型 + 版本号 + 当前构建时间
+                    def apkName = &quot;appName_${variant.flavorName}_${buildType.name}_v${variant.versionName}_${getTime()}.apk&quot;;
+                    output.outputFile = new File(output.outputFile.parent, apkName);
+            }
+    }
+
+}
+
+//获取当前时间
+def getTime() {
+    String today = new Date().format(&#39;YY年MM月dd日HH时mm分&#39;)
+    return today
+}
+</code></pre>
+
+<p>效果图如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017102915092069934597.png" alt="2017102915092069934597.png"/></p>
+
+<h2 id="toc_41">Task</h2>
+
+<h3 id="toc_42">定义 task</h3>
+
+<pre><code class="language-text">//定义任务1
+task task1&lt;&lt;{
+    println &#39;task1&#39;
+}
+
+//定义任务2
+task task2&lt;&lt;{
+    println &#39;task2&#39;
+}
+</code></pre>
+
+<h3 id="toc_43">mustRunAfter 定义 task 执行顺序</h3>
+
+<pre><code class="language-text">//task2 的执行顺讯在 task1 之后
+task2.mustRunAfter task1
+</code></pre>
+
+<ul>
+<li>测试1 ： gradlew task1<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+</code></pre>
+
+<ul>
+<li>测试2 ： gradlew task2<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task2
+task2
+</code></pre>
+
+<ul>
+<li>测试3 ： gradlew task1 task2<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<ul>
+<li>测试4 ： gradlew task2 task1<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<h3 id="toc_44">结论</h3>
+
+<p>如果单独执行 task1 就只会执行 task1 的任务；单独执行 task2 就只会执行 task2 的任务； <br/>
+如果同时执行 task1、task2 , 一定会先执行 task1 , 等 task1 执行完后，就会执行 task2 内容。</p>
+
+<h3 id="toc_45">扩展</h3>
+
+<p>上面 mustRunAfter 我们还有一种写法，如下图所示：</p>
+
+<p><code>task2 {}.mustRunAfter task1</code></p>
+
+<p>这个写法的效果和 mustRunAfter 是一样的，当然我们还可以在 花括号里面写一些任务，比如 ：</p>
+
+<pre><code class="language-text">task2 {
+    println &#39;我最先执行&#39;
+}.mustRunAfter task1
+</code></pre>
+
+<p>下面做个测试，测试命令如下：</p>
+
+<p><code>gradlew task2 task1</code></p>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">我最先执行
+
+:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<h3 id="toc_46">dependsOn 定义 task 依赖</h3>
+
+<p>task2 任务依赖于 task1 ,执行 task2 就会先执行 task1</p>
+
+<p><code>task2.dependsOn task1</code></p>
+
+<p>测试：</p>
+
+<p><code>gradlew task2</code></p>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<h2 id="toc_47">常用 Gradlew 命令</h2>
+
+<ul>
+<li>1、gradlew -v : 查看版本号</li>
+</ul>
+
+<pre><code class="language-text">------------------------------------------------------------
+Gradle 3.3
+------------------------------------------------------------
+
+Build time:   2017-01-03 15:31:04 UTC
+Revision:     075893a3d0798c0c1f322899b41ceca82e4e134b
+
+Groovy:       2.4.7
+Ant:          Apache Ant(TM) version 1.9.6 compiled on June 29 2015
+JVM:          1.8.0_112 (Oracle Corporation 25.112-b15)
+OS:           Windows 10 10.0 amd64
+</code></pre>
+
+<ul>
+<li>2、gradlew task ： 查看所有的 task</li>
+</ul>
+
+<h2 id="toc_48">参考资料</h2>
+
+<p><a href="http://www.jianshu.com/p/80e1f4a80d06#">Android 利用Gradle实现差异化构建</a></p>
+
+<p><a href="http://www.jianshu.com/p/011b8d63ba78">杨海 Android目录结构</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502774995.html">
+                
+                  <h1>Android机型适配</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">多机型 UI 适配</h2>
+
+<p>在 Android 开发的工作日常中，UI 适配是一件比较重要的事情。一般开发新的功能，有新的页面，最终开发完成发布之前，都需要让设计师来审 UI 效果。</p>
+
+<p>而有时候，明明我们已经在一款标准的 3 倍手机上，做到了让设计师小姐姐满意的效果，但是当换了另外一台手机的时候，效果又不那么如意。</p>
+
+<p>传统的做法是，拿到效果不对的手机，单独适配看看是不是哪里布局写的不对导致效果不正确，然后改正它。但是总能碰到我们拿不到真实设备的情况。</p>
+
+<p>本文就介绍一个命令，可以修改你当前设备的参数，来模拟出目标设备的显示效果，让你独立就把多机型 UI 效果确认的事情给做了。</p>
+
+<h2 id="toc_1">WM 命令</h2>
+
+<h3 id="toc_2">什么是 WM 命令</h3>
+
+<p>说的这么厉害，实际上需要使用的就是一行 wm 命令，可以通过 <code>adb shell</code> 来操作它。</p>
+
+<p>wm 命令主要用来帮助我们修改一些屏幕的参数，先来看看它的文档。使用 <code>adb shell wm</code> 命令，可以方便的查看 wm 的文档描述</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816609742581.jpg" alt="20171016150816609742581.jpg"/></p>
+
+<p>可以看到，wm 命令可以帮助我们修改当前设备的 size 、 density 等参数，而这两个参数就是决定了当前设备的显示效果。</p>
+
+<h3 id="toc_3">WM 的命令</h3>
+
+<p>从上面的文档可以看出，它其实支持的命令还是挺多的，但是有一些根本用不上，是需要系统权限的，所以正常来说我们是无法使用的。那么，还是介绍几个比较实用的命令。</p>
+
+<p>以下例子都是在一款标准 density 为 3 的设备上运行的，屏幕像素为 1080px * 1920px。</p>
+
+<h4 id="toc_4">wm size</h4>
+
+<p><code>wm size</code> 命令，可以用来查询和修改当前设备的尺寸，如果想要修改尺寸，可以使用 <strong>px</strong> 或者 <strong>dp</strong> 为单位（默认为 px），使用 <strong>x</strong> 进行连接，这个其实看看 <code>wm size</code> 的输出，你就清楚了。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816615239717.jpg" alt="20171016150816615239717.jpg"/></p>
+
+<p>在这里的例子中，做了几件事情：</p>
+
+<ul>
+<li>使用 wm size 命令查看当前设备的尺寸。</li>
+<li>使用 wm size 命令将当前尺寸修改成了 1000x2000。</li>
+<li>再次使用 wm size 命令查看当前设备的尺寸。</li>
+<li>最后使用 wm size reset 命令，将屏幕尺寸还原。</li>
+<li>再用 wm size 命令，查看还原后的尺寸。</li>
+</ul>
+
+<p>这几个步骤就已经涵盖了 wm size 命令的所有使用步骤，可以使用它查看当前屏幕尺寸，并且修改屏幕尺寸和还原它。</p>
+
+<h4 id="toc_5">wm density</h4>
+
+<p><code>wm density</code> 命令，可以用来查看和修改当前设备的 density 参数。</p>
+
+<p>使用起来很简单，直接上命令了。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816618347092.jpg" alt="20171016150816618347092.jpg"/></p>
+
+<p>在这个例子中，我做了几件事情：</p>
+
+<ul>
+<li>使用 wm density 查看当前设备的 density。</li>
+<li>在使用 wm density 命令，修改当前设备的 density 为 420。</li>
+<li>然后再使用 wm density 查看修改后的参数。</li>
+<li>最后使用 wm density reset 将设备的 density 还原。</li>
+<li>最后再查看一下还原后的值。</li>
+</ul>
+
+<h4 id="toc_6">wm overscan</h4>
+
+<p><code>wm overscan</code> 命令，可以修改当前设备的屏幕内边距。其实我觉得这个命令没什么用处，但是还是演示一下如何使用。</p>
+
+<pre><code class="language-shell">adb shell wm overscan 20,20,20,20
+adb shell wm overscan reset
+</code></pre>
+
+<p>在这个例子中，做了几件事情：</p>
+
+<ul>
+<li>使用 wm overscan 修改边距为 20 。</li>
+<li>然后使用 wm overscan reset 将其还原。</li>
+</ul>
+
+<h3 id="toc_7">WM 命令的原理</h3>
+
+<p>wm 命令的逻辑非常的简单，它实际上是和 WindowManagerService 进行交互，通过 WMS 来修改屏幕相关的一些参数。</p>
+
+<p>这里就不介绍完整的 wm 源码了，就以一个方法举例来看看 wm 的逻辑。这里就以 <code>wm size</code>命令举例好了。</p>
+
+<p>首先，看看 wm 命令的入口。</p>
+
+<pre><code class="language-java">@Override
+public void onRun() throws Exception {
+    mWm = IWindowManager.Stub.asInterface(ServiceManager.checkService(Context.WINDOW_SERVICE));
+    if (mWm == null){
+        System.err.println(NO_SYSTEM_ERROR_CODE);
+        throw new AndroidException(&quot;Can`t connect to window manager;is the system running?&quot;);
+    }
+    
+    String op = nextArgRequired();
+    
+    if (op.equals(&quot;size&quot;)) {
+        runDisplaySize();
+    } else if (op.equals(&quot;overscan&quot;)){
+        runDisplayOverscan();
+    } else if (op.equals(&quot;scaling&quot;)){
+        runDisplayScaling();
+    } else if (op.equals(&quot;screen-capture&quot;)){
+        runSetScreenCapture();
+    } else if (op.equals(&quot;dismiss-keyguard&quot;)){
+        runDismissKeyguard();
+    } else {
+        showError(&quot;Error: unknown command ` &quot; + op + &quot;`&quot;);
+        return;
+    }
+}
+</code></pre>
+
+<p>这里会初始化 mWm ，并且根据输入的参数，调用不同的方法，如果输入的是 size ，则会调用 <code>runDisplaySize()</code> 方法。</p>
+
+<pre><code class="language-java">private void runDisplaySize() throws Exception {
+    String size = nextArg();
+    int w,h;
+    if (size == null){
+        Point initialSize = new Point();
+        Point baseSize = new Point();
+        try {
+            mWm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
+            mWm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
+            System.out.println(&quot;Physical size:&quot; + initialSize.x + &quot;x&quot; + initialSize.y);
+            if (!initialSize.equals(baseSize)){
+                System.out.println(&quot;Override size:&quot; + baseSize.x + &quot;x&quot; + baseSize.y);
+            }
+        } catch (RemoteException e){
+        }
+        return;
+    } else if (&quot;reset&quot;.equals(size)){
+        w = h = -1;
+    } else {
+        int div = size.indexOf(&#39;x&#39;);
+        if (div &lt;= 0 || div &gt;= (size.length() - 1)){
+            System.err.println(&quot;Error: bad size&quot; + size);
+            return;
+        }
+        String wstr = size.substring(0,div);
+        String hstr = size.substring(div + 1);
+        try {
+            w = parseDimension(wstr);
+            h = parseDimension(hstr);
+        } catch (NumberFormatException e){
+            System.err.println(&quot;Error: bad number&quot; + e);
+            return;
+        }
+    }
+    
+    try {
+        if (w &gt;= 0 &amp;&amp; h &gt;= 0){
+            mWm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, w, h);
+        } else {
+            mWm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
+        }
+    } catch (RemoteException e) {
+    }
+}
+</code></pre>
+
+<p>在 <code>runDisplaySize()</code> 方法中，会先判断 size 命令后面有没有跟其它参数，如果没有，则认为是一次查询操作，会将查询到的结果输出。</p>
+
+<p>而如果是 reset 方法的话，就将 w 、h 这两个代表宽高的值，设置为 -1，最终会通过 <code>mWm.clearForcedDisplaySize()</code> 方法，将屏幕的 size 还原。</p>
+
+<p>否者就从输入的参数中，通过 x 进行分割，拿到我们输入的宽高。最终通过 <code>mWm.setForcedDisplaySize()</code> 方法，将当前屏幕的 size 修改成我们输入的结果。</p>
+
+<p>在设置size 的时候，还会通过 <code>parseDimens()</code> 方法，重新计算一下输入的尺寸。</p>
+
+<p>private int parseDimension(String s) throws NumberFormatException {<br/>
+    if (s.endsWith(&quot;px&quot;)) {<br/>
+        return Integer.parseInt(s.substring(0, s.length() - 2));<br/>
+    }<br/>
+    if (s.endsWith(&quot;dp&quot;)){<br/>
+        int density;<br/>
+        try {<br/>
+            density = mWm.getBaseDisplayDensity(Display.DEFAULT_DISPLAY);<br/>
+        } catch (RemoteException e) {<br/>
+            density = DisplayMetrics.DENSITY_DEFAULT;<br/>
+        }<br/>
+        return Integer.parseInt(s.substring(0,s.length() - 2)) * density / DisplayMetrics.DENSITY_DEFAULT;<br/>
+    }<br/>
+    return Integer.parseInt(s);<br/>
+}</p>
+
+<p>从这里可以看出，它支持两个尺寸，px 和 dp ，如果如果不指定尺寸，则默认认为是 px 。</p>
+
+<p>到这里就完成了一次通过 <code>wm size</code> 命令，修改设备屏幕参数的全过程，跟多细节可以自行查阅源码。</p>
+
+<p>源码的在线地址：</p>
+
+<p><a href="https://link.juejin.im/?target=http%3A%2F%2Fandroidxref.com%2F7.1.1_r6%2Fxref%2Fframeworks%2Fbase%2Fcmds%2Fwm%2Fsrc%2Fcom%2Fandroid%2Fcommands%2Fwm%2FWm.java">androidxref.com/7.1.1_r6/xr…</a></p>
+
+<h2 id="toc_8">实施修改设备参数</h2>
+
+<p>既然已经讲清楚 wm 命令的所有细节了，那么我们只需要拿到我们需要适配的设备的 size 和 density。就可以在我们自己的设备上模拟出对应的效果。</p>
+
+<p>我这里收集了一些比较常用的设备参数，可以供大家参考一下。</p>
+
+<ul>
+<li>魅族MX3：440，1080x1800</li>
+<li>一加5：420，1080x1920</li>
+<li>红米NOTE，320，720x1280</li>
+<li>华为MATE7，480，1080x1812</li>
+<li>MOTO-G5，480，1080x1920</li>
+<li>Moto-tx1095，432，1080x1790</li>
+<li>Nexus5x，420，1080x1794</li>
+<li>Nexus6p，560，1440x2392</li>
+<li>奇酷360，460，1080x1920</li>
+<li>VivoX5，320，720x1280</li>
+</ul>
+
+<p>当然，最重要的是拿到公司各种 CEO、CTO、CxO 正在使用的手机参数，进行一波适配，哈哈。</p>
+
+<p>下面，我们随便挑两个设备的参数进行修改，然后看看运行后的效果。</p>
+
+<p>命令如下:</p>
+
+<p>// 修改成 一加5</p>
+
+<p>adb shell wm density 420</p>
+
+<p>adb shell wm size 1080x1920</p>
+
+<p>// 修改成 Moto-tx1095</p>
+
+<p>adb shell wm density 432</p>
+
+<p>adb shell wm size 1080x1790</p>
+
+<p>下面，从做到右，分别是原本的尺寸、一加5、Moto-tx1095。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816770425798.jpg" alt="20171016150816770425798.jpg"/></p>
+
+<p>其实看着差异不大，只能说桌面布局写的挺好的，所以说，如果布局写的好的话，是可以避免在不同设备上看着很明显的不同的问题 ，就像现在这样。</p>
+
+<h2 id="toc_9">题外话</h2>
+
+<p>实际上 wm 命令，也是有一些其它问题的，例如有时候通过 wm 命令修改 UI 的的时候，刷新会不及时，会卡顿，所以选择一个性能比较好的手机是一个缓解的办法。或者修改参数之后，退出 App 重新进也是一个不错的办法。</p>
+
+<p>如果调整到一个太特殊的参数，例如 200x1000 这种，可能渲染起来会很奇怪。但是如果只是做一些常规设备参数的修改，只要修改值在合理的范围内，一般都是可以的。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="15626502775041.html">
+                
+                  <h1>Android项目从立项到上线</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>最近在组建项目组从0开始开发项目，从立项到上线，有一些心得，包括项目规范、结构、优化、三方等，与大家分享，一起修仙！</p>
+
+<p>接下来我会以自己写的两个项目为例，结合起来分析。代码已经上传github：</p>
+
+<ul>
+<li>Material Design风格项目 <a href="https://github.com/shuaijia/MaterialDesignProject">点击前往</a> 喜欢就给个star<sup>_^</sup></li>
+<li>UI、Base、网络等封装库项目 <a href="https://github.com/shuaijia/JSBaseDemo">点击前往</a> 喜欢也给个star喽</li>
+</ul>
+
+<p>先上图来看看吧：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981004338352.png" alt="20171104150981004338352.png"/></p>
+
+<p>项目采用<strong>MVP+Retrofit+RxJava+Gson+Glide+Material Design</strong>设计</p>
+
+<p>同时也使用了<strong>EventBus</strong>事件总线、<strong>GreenDao</strong>数据库、<strong>SurfaceView+MediaPlayer视频播放器</strong>等主要技术。</p>
+
+<p>ok！项目就简单介绍到这里，接下来开始我们的修仙之路。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981008811224.png" alt="20171104150981008811224.png"/></p>
+
+<h2 id="toc_0">项目整体分析</h2>
+
+<h3 id="toc_1">UI风格</h3>
+
+<h4 id="toc_2">logo</h4>
+
+<h4 id="toc_3">主题风格：</h4>
+
+<ul>
+<li>Material Design</li>
+<li>仿ios</li>
+<li>主界面–侧拉</li>
+<li>主界面–仿微信 选项卡等</li>
+</ul>
+
+<h3 id="toc_4">技术方案</h3>
+
+<h4 id="toc_5">整体分析项目，确定整体技术方案，之后的开发中按照技术方案执行，同时编写相关文档。</h4>
+
+<ul>
+<li>项目架构</li>
+<li>网络框架</li>
+<li>图片处理</li>
+<li>数据处理/接口格式</li>
+<li>三方使用：统计、推送、更新等</li>
+</ul>
+
+<h3 id="toc_6">可行性分析</h3>
+
+<p>邀请项目经理、技术负责人、产品经理、后端开发、测试等共同分析技术方案的可行性，并相应调整技术方案。</p>
+
+<h3 id="toc_7">工期</h3>
+
+<p>根据项目需求和技术方案，给出开发时长；</p>
+
+<p>根据工期要求，可适当调整技术方案。</p>
+
+<h3 id="toc_8">测试用例</h3>
+
+<p>测试人员开始整理、编写测试用例和项目标准文档；</p>
+
+<p>个人觉得开发人员应该参与到测试工作中，这样方便自己对业务逻辑和功能分析全面，也帮助测试人员分析项目功能和技术，便于写出更加全面的测试用例。</p>
+
+<h2 id="toc_9">开发规范</h2>
+
+<p>其实Android、Ios、Server等各端开发人员，都应该有完整的、严格的开发规范，这里我只说一下Android端的开发规范：</p>
+
+<p>以自己项目为例，涉及到以下几项：</p>
+
+<ul>
+<li>文档规范</li>
+<li>资源命名规范</li>
+<li>代码命名规范</li>
+<li>代码注释规范</li>
+<li>代码风格规范</li>
+<li>服务器数据规范 等</li>
+</ul>
+
+<h3 id="toc_10">文档</h3>
+
+<p>重要有以下几个文档：</p>
+
+<ul>
+<li>需求文档</li>
+<li>产品原型图</li>
+<li>完整UI图</li>
+<li>接口文档</li>
+<li>核心技术文档</li>
+<li>重点逻辑文档</li>
+<li>程序框架图</li>
+<li>ER图、数据字典、类图等</li>
+<li>测试文档</li>
+</ul>
+
+<h3 id="toc_11">资源文件命名规范</h3>
+
+<p>名字全部小写，最好不用数字，全部英文，单词中间下划线隔开</p>
+
+<h4 id="toc_12">drawable、anim等文件夹下</h4>
+
+<p>名称结构为“技术点模块点空间类型_功能名”结构，技术点主要有：selector、translate、alpha、scale等，模块名主要有：login、pay、mine、setting等，控件类型主要有：button、textview、imageview、dialog等，功能名主要有：findpwd、request、back、next等。 </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981042494432.png" alt="20171104150981042494432.png"/></p>
+
+<h4 id="toc_13">drawable-xhdpi等图片资源</h4>
+
+<p>名称为“技术点模块点功能名”结构，技术点主要有：activity、fragment、item、include等，模块点主要有：login、setting、mine、pay等，功能名主要有：head、title、back、sure等。 </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981047164097.png" alt="20171104150981047164097.png"/></p>
+
+<h4 id="toc_14">layout</h4>
+
+<p>布局名称为“技术点模块功能名”结构，技术点主要有：activity、fragment、item、include等，模块主要有：home、lesson、mine、loginregist等，功能名主要有：login、title、setting、pay、bar等。 </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981050013389.png" alt="20171104150981050013389.png"/></p>
+
+<h4 id="toc_15">values</h4>
+
+<p>布局名称为“技术点模块功能名”结构，技术点主要有：activity、fragment、item、include等，模块主要有：home、lesson、mine、loginregist等，功能名主要有：login、title、setting、pay、bar等。 </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981053458526.png" alt="20171104150981053458526.png"/></p>
+
+<h3 id="toc_16">代码命名规范</h3>
+
+<h4 id="toc_17">包名</h4>
+
+<p>包名为“根包名.技术点名.模块名”结构，<strong>全部小写</strong></p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981056272553.png" alt="20171104150981056272553.png"/></p>
+
+<h4 id="toc_18">类名</h4>
+
+<p>采用 <strong>大驼峰</strong> 命名法，单词直接拼接，所有单词首字母大写</p>
+
+<p>类名为“业务模块名 执行操作名 技术点名”结构，业务模块名主要有：home、lession、net、login，pay等，操作名主要有：Get、Set、Request、Login等，技术点名主要有：Activity、Fragment、View、Adapter等。 </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171104150981070542458.png" alt="20171104150981070542458.png"/></p>
+
+<h4 id="toc_19">普通变量</h4>
+
+<p>采用 <strong>小驼峰</strong> 命名法，第一个单词首字母小写，其他单词首字母大写。</p>
+
+<p>普通变量为“名字简写 类型 功能名”结构，名字简写有：js等，类型主要有：Int、Double、Boolean、String、Char等，功能名有：Login、Number、Content等。 </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017110515098119341868.png" alt="2017110515098119341868.png"/></p>
+
+<h4 id="toc_20">常亮</h4>
+
+<p>所有字母全部大写，中间下划线隔开</p>
+
+<p>常量为“功能名_标识”结构，功能名主要有：LOGIN、REQUEST、PERSONINFO等，标识有SUCCESS、ERROR、URL等。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981196443079.png" alt="20171105150981196443079.png"/></p>
+
+<h3 id="toc_21">方法名</h3>
+
+<p>名字能体现出功能即可。不再累赘重述。</p>
+
+<h2 id="toc_22">数据/接口定义</h2>
+
+<h3 id="toc_23">建议</h3>
+
+<ul>
+<li>服务器返回数据采用json格式</li>
+<li>json数据中无数据，必须返回空数组或空字符串，不可返回null</li>
+<li>Android端使用gson或fastjson或jackson等三方解析工具解析</li>
+<li>不建议使用官方JSONObject解析，容易出错</li>
+<li>实体类属性名与json中字段名完全一致</li>
+<li>json中字段名全部使用英文，不可英文、拼音夹杂</li>
+<li>用户表识建议使用Cookie</li>
+<li>建议使用POST解析，它对参数数量没有要求，也比较安全</li>
+<li>为了传输安全，使用https请求 等</li>
+<li>完善接口文档，建议每一版对应一个完整接口文档</li>
+</ul>
+
+<h2 id="toc_24">屏幕适配</h2>
+
+<p>安卓设备分辨率、屏幕尺寸五花八门，碎片化严重，重点对市面上主流的720 * 1280和1080 * 1920手机进行适配，同时对于其他类型手机也要适配。</p>
+
+<p>关于屏幕适配，之前写过一个Android屏幕完美适配方案，<a href="http://blog.csdn.net/jiashuai94/article/details/77639511">点击前往</a>，这里不再重复表述。</p>
+
+<h2 id="toc_25">程序架构MVP</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981206687113.png" alt="20171105150981206687113.png"/></p>
+
+<h3 id="toc_26">上图介绍：</h3>
+
+<p><strong>Contract</strong>：契约类，一个功能模块中View接口、Model接口和请求数据回调统一在对应模块的Contract中定义，便于管理。</p>
+
+<p><strong>ViewInterface</strong>： view层接口，定义了view中的UI操作</p>
+
+<p><strong>ModelInterface</strong>： model层接口，定义了model负责的数据操作方法，如请求接口，操作数据库等</p>
+
+<p><strong>CallbackInterface</strong>： model层操作数据完成后的回调</p>
+
+<p><strong>BasePersenter</strong>： Persenter父类，主要是对相关view的获取，销毁等操作</p>
+
+<p><strong>View</strong>： view层实现类，主要就是Activity或Fragment，负责UI展示和事件响应</p>
+
+<p><strong>Model</strong>： model层实现类，就是依据业务，请求对应接口或数据库，并将结果返给回调CallBack</p>
+
+<p><strong>Persenter</strong>： persenter层类，负责业务逻辑处理，view将响应传给persenter，persenter负责调用model，并将结果返回给view供其展示</p>
+
+<h3 id="toc_27">MVP：</h3>
+
+<p>MVP模式相当于在MVC模式中又加了一个Presenter用于处理模型和逻辑，将View和Model完全独立开，在android开发中的体现就是activity仅用于显示界面和交互，activity不参与模型结构和逻辑。</p>
+
+<p>使用MVP模式会使得代码多出一些接口但是使得代码逻辑更加清晰，尤其是在处理复杂界面和逻辑时，我们可以对同一个activity将每一个业务都抽离成一个Presenter，这样代码既清晰逻辑明确又方便我们扩展。当然如果我们的业务逻辑本身就比较简单的话使用MVP模式就显得，没那么必要。所以我们不需要为了用它而用它，具体的还是要要业务需要</p>
+
+<p>现在比较流行MVVM架构，后续我会将MVVM总结，大家期待一下。。</p>
+
+<h2 id="toc_28">package划分</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981211916250.png" alt="20171105150981211916250.png"/></p>
+
+<p>如上：主体按功能模块划分，同一级的还有一些技术点，如adapter、util、pay等；在功能模块下，按照mvp模式，又分为contract、model、presenter、fragment和activity；而在其他技术点包下面同样也按功能模块划分。</p>
+
+<p>总之，我们划分包时：以功能模块为主，以技术点为辅。</p>
+
+<h2 id="toc_29">Base、Util、UI类封装</h2>
+
+<h3 id="toc_30">Base类</h3>
+
+<ul>
+<li>BaseApplication</li>
+<li>BaseActivity</li>
+<li>BaseFragment</li>
+<li>BasePresenter 等</li>
+</ul>
+
+<h4 id="toc_31">BaseApplication：</h4>
+
+<p>主要进行一些例如：<strong>三方配置</strong>、<strong>热更新加载</strong>、<strong>文件配置</strong>、<strong>数据库配置</strong>等准备工作；同时也许定义全局性变量：如<strong>Application的Context</strong>、<strong>网络状态</strong>、<strong>主线程Looper</strong>、<strong>主线程Handler</strong>等。</p>
+
+<h4 id="toc_32">BaseActivity：</h4>
+
+<p>封装为抽象类，将各任务抽取成方法，有子类实现：比如<strong>findViewById(initView)</strong>、<strong>initData</strong>、<strong>setListener</strong>等；</p>
+
+<p>对友盟统计的封装：因为友盟统计或别的统计需要在所有Activity的各生命周期方法中调用api，所以应该将其封装到BaseActivity中。</p>
+
+<p>项目为MVP结构，所以设置了View和Presenter的泛型，如：</p>
+
+<p>其中定义了屏幕宽高度等设备信息，也定义了BasePresenter对象、并抽取抽象方法，由子类返回其对应presenter。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981225588056.png" alt="20171105150981225588056.png"/></p>
+
+<h4 id="toc_33">BaseFragment：</h4>
+
+<p>BaseFragment的封装如BaseActivity一样，添加View和Presenter的泛型和presenter对象，创建返回Presenter的抽象方法供子类事项；</p>
+
+<p>创建createView(创建跟视图view)、initChildView(子view findViewById)、initData(加载数据)抽象方法</p>
+
+<h4 id="toc_34">BasePresenter：</h4>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981228211507.png" alt="20171105150981228211507.png"/></p>
+
+<p>BasePresenter封装如上：内置view的软引用，在Activity或Fragment的onResume中调用presenter的attachView方法，将view实例传给presenter；在Activity或Fragment的onDestroy或onStop方法中调用detachView方法解除与view的绑定；而getView方法则是presenter在model返回数据后调用来操作对应view的展示UI方法。</p>
+
+<h3 id="toc_35">Utils类</h3>
+
+<h4 id="toc_36">只列举一些常用的工具类：</h4>
+
+<ul>
+<li>SharedPreferenceUtils</li>
+<li>ToastUtils</li>
+<li>StorageUtils</li>
+<li>FileUtils</li>
+<li>NetUtils</li>
+<li>deviceUtils</li>
+<li>DateUtils</li>
+<li>LogUtils</li>
+<li>AppUtils 等</li>
+</ul>
+
+<h3 id="toc_37">UI类</h3>
+
+<h4 id="toc_38">只列举一些常用的View类</h4>
+
+<ul>
+<li>下拉刷新、上拉加载</li>
+<li>圆形ImageView</li>
+<li>自定义Dialog</li>
+<li>Banner</li>
+<li>自定义ScrollView</li>
+<li>自定义RecyclerView</li>
+<li>项目相关的自定义View 等</li>
+</ul>
+
+<h2 id="toc_39">数据库</h2>
+
+<p>关于数据库操作，之前一直是自己写：也就是SQLiteOpenHelper结合相关SQL操作工具类来实现数据库操作。</p>
+
+<p>但随着业务逻辑的增加和复杂，需要进行大量的数据库操作时，编写大量的代码，既费时间、还会避免不了地出bug；</p>
+
+<p>所以我们只介绍几款流行的数据库框架：</p>
+
+<ul>
+<li>GreenDao</li>
+<li>OrmLite</li>
+<li>LitePal</li>
+<li>Realm</li>
+</ul>
+
+<h3 id="toc_40">GreenDao：</h3>
+
+<p><strong>特点</strong>：</p>
+
+<ol>
+<li>存取速度快; </li>
+<li>支持数据库加密; </li>
+<li>轻量级; </li>
+<li>激活实体;</li>
+<li>支持缓存; </li>
+<li>代码自动生成</li>
+</ol>
+
+<p><strong>地址</strong>：<a href="https://github.com/greenrobot/greenDAO">https://github.com/greenrobot/greenDAO</a></p>
+
+<h3 id="toc_41">OrmLite：</h3>
+
+<p><strong>优点</strong>： </p>
+
+<ol>
+<li>轻量级；</li>
+<li>使用简单，易上手；</li>
+<li>封装完善；</li>
+<li>文档全面。</li>
+</ol>
+
+<p><strong>缺点</strong>：</p>
+
+<ol>
+<li>基于反射，效率较低（本人还没有觉得效率低)</li>
+<li>缺少中文翻译文档</li>
+</ol>
+
+<p><strong>jar包地址</strong>：<a href="http://ormlite.com/releases/">http://ormlite.com/releases/</a></p>
+
+<h3 id="toc_42">LitePal：</h3>
+
+<p>LitePal 框架是郭大神开源的数据库框架，他的博客也比较详细的介绍了其用法。</p>
+
+<p>地址：<a href="https://github.com/LitePalFramework/LitePal">https://github.com/LitePalFramework/LitePal</a></p>
+
+<h3 id="toc_43">Realm：</h3>
+
+<ol>
+<li><p>易用：Ream 不是在SQLite基础上的ORM，它有自己的数据查询引擎。并且十分容易使用。</p></li>
+<li><p>快速：由于它是完全重新开始开发的数据库实现，所以它比任何的ORM速度都快很多，甚至比SLite速度都要快。</p></li>
+<li><p>跨平台：Realm 支持 iOS &amp; OS X (Objective‑C &amp; Swift) &amp; Android。我们可以在这些平台上共享Realm数据库文件，并且上层逻辑可以不用任何改动的情况下实现移植。</p></li>
+<li><p>高级：Ream支持加密，格式化查询，易于移植，支持JSON，流式api，数据变更通知等高级特性</p></li>
+<li><p>可视化</p></li>
+</ol>
+
+<p><a href="https://github.com/realm/realm-java">git地址</a></p>
+
+<p><a href="https://realm.io/docs/java/latest/#getting-started">官网</a></p>
+
+<p>自己项目中使用了GreenDao，它代码自动生成、存取速度快、支持加密、一个轻量级别的库，用着方便，推荐大家使用GreenDao。</p>
+
+<h2 id="toc_44">图片处理</h2>
+
+<p>之前有自己封装过图片处理框架，核心是使用HttpUrlConnection实现加载，仿LruCache（近期最少使用排序）算法实现图片缓存。</p>
+
+<p>但我们用的最多的还是ImageLoader、Glide、Picasso和Fresco四大主流框架，接下来主要比较一下四个框架的各自特点：</p>
+
+<h3 id="toc_45">ImageLoader：</h3>
+
+<p><strong>优点</strong>:</p>
+
+<ul>
+<li>多线程下载，线程管理。</li>
+<li>多级缓存架构设计和策略，内存缓存，磁盘缓存，缓存有效性处理。</li>
+<li>图片压缩，特效处理，动画处理。</li>
+<li>复杂网络情况下下载图片策略，例如弱网络等。</li>
+<li>内存管理，lru 算法、对象引用、GC回收等优化。</li>
+</ul>
+
+<p><strong>缺点</strong>：</p>
+
+<ul>
+<li>时间久，官方不再维护，出现bug需要自己修复。</li>
+</ul>
+
+<h3 id="toc_46">Glide：</h3>
+
+<p><strong>优点</strong>：</p>
+
+<ul>
+<li>更易用，因为Glide的with方法不光接受Context，还接受Activity 和 Fragment，Context会自动的从他们获取。同时将Activity/Fragment作为with()参数的好处是：图片加载会和Activity/Fragment的生命周期保持一致，比如Paused状态在暂停加载，在Resumed的时候又自动重新加载。所以我建议传参的时候传递Activity 和 Fragment给Glide，而不是Context。</li>
+<li>Glide可以加载GIF动态图。</li>
+<li>Glide缓存的是跟ImageView尺寸相同的。Glide的这种方式优点是加载显示非常快。</li>
+<li>默认使用HttpUrlConnection下载图片，可以配置为OkHttp或者Volley下载，也可以自定义下载方式。</li>
+<li>默认使用手机内置存储进行磁盘缓存，可以配置为外部存储，可以配置缓存大小，图片池大小。</li>
+<li>默认使用两个线程池来分别执行读取缓存和下载任务，都可以自定义。</li>
+</ul>
+
+<p><strong>缺点</strong>：</p>
+
+<ul>
+<li>Glide加载的图片质量要差于Picasso，这是因为Glide默认的Bitmap格式是RGB_565，比ARGB_8888格式的内存开销要小一半。</li>
+</ul>
+
+<h3 id="toc_47">Picasso：</h3>
+
+<p><strong>特点</strong>：</p>
+
+<ul>
+<li>在adapter中需要取消已经不在视野范围的ImageView图片资源的加载，否则会导致图片错位，Picasso已经解决了这个问题。</li>
+<li>使用复杂的图片压缩转换来尽可能的减少内存消耗</li>
+<li>自带内存和硬盘二级缓存功能</li>
+</ul>
+
+<h3 id="toc_48">Fresco：</h3>
+
+<p><strong>优点</strong>：</p>
+
+<ul>
+<li>最大的优势便在于5.0以下(最低2.3) bitmap的加载，在5.0以下系统，Fresco将图片放到一个特别的内存区域(Ashmem)，而且图片不显示时，占用的内存会自动被释放，这会使APP更加流畅，减少因图片内存占用而引发的OOM。5.0以后的系统默认存储在Ashmem区了</li>
+<li>图片的渐进式呈现，图片先呈现大致的轮廓，然后随着图片下载的继续，逐渐成仙清晰的图片，这对于慢网络对说，用户体验更好。</li>
+<li>支持加载Git动态图和Webp格式的图片。</li>
+</ul>
+
+<p><strong>缺点</strong>：</p>
+
+<ul>
+<li>框架体积比较大，3M左右，会增加APK的大小。</li>
+</ul>
+
+<p>总结：在项目开发中，要适当的选择图片框架，ImageLoader太老已过时，且官方不再维护，所以不再考虑使用ImageLoader；Picasso能做的，Glide都能做到，就是Glide的图片质量会稍差一些；而Fresco又体积偏大，但渐进式呈现，用户体验好。综上的话，一般项目建议使用Glide即可。</p>
+
+<h2 id="toc_49">网络框架</h2>
+
+<p>上一个项目中，网络框架自己封装：核心使用HttpUrlConnection实现，先封装请求参数相关类RequestVo，其中包含请求方式、url、参数、解析类、是否缓存、缓存时长等参数；缓存是将json字符串加密后与拼接过的url成对存储到File，并且设置有效时间，超过有效时间删除缓存并去网络请求，成功后重新保存。</p>
+
+<p>但现在市面上最流行的是Retrofit+RxJava+Gson，接下来我们大概介绍一下：</p>
+
+<h3 id="toc_50">添加依赖</h3>
+
+<pre><code class="language-text">compile &#39;io.reactivex:rxjava:x.y.z&#39;
+compile &#39;io.reactivex:rxandroid:1.0.1&#39;
+compile &#39;com.squareup.retrofit2:retrofit:2.0.2&#39;
+compile &#39;com.squareup.retrofit2:converter-gson:2.0.2&#39;
+compile &#39;com.squareup.retrofit2:adapter-rxjava:2.0.2&#39;
+</code></pre>
+
+<p>要注意：以上添加了Retrofit、RxJava和Gson依赖，版本号必须一致</p>
+
+<h3 id="toc_51">登录Service</h3>
+
+<pre><code class="language-text">interface BaseService {
+  @GET(&quot;user/login&quot; )
+  Observable&lt;User&gt; login(
+          @Query(&quot;username&quot;) String username,
+          @Query(&quot;password&quot;) String password
+  );
+}
+</code></pre>
+
+<p>login方法的返回值是Observable类型，就是RxJava中的被观察者。</p>
+
+<h3 id="toc_52">网络请求</h3>
+
+<pre><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+    .addConverterFactory(GsonConverterFactory.create()           
+    .addCallAdapterFactory(RxJavaCallAdapterFactory.create())//新的配置
+    .baseUrl(BASE_URL)
+    .build();
+BaseService service = retrofit.create(BaseService.class);
+
+service.login(phone, password)               //获取Observable对象
+    .subscribeOn(Schedulers.newThread())//请求在新的线程中执行
+    .observeOn(Schedulers.io())         //请求完成后在io线程中执行
+    .doOnNext(new Action1&lt;UserInfo&gt;() {
+        @Override
+        public void call(User user) {
+            saveUserInfo(user);//保存用户信息到本地
+        }
+    })
+    .observeOn(AndroidSchedulers.mainThread())//最后在主线程中执行
+    .subscribe(new Subscriber&lt;User&gt;() {
+        @Override
+        public void onCompleted() {
+
+        }
+
+        @Override
+        public void onError(Throwable e) {
+            //请求失败
+        }
+
+        @Override
+        public void onNext(User user) {
+            //请求成功
+        }
+});
+</code></pre>
+
+<p>RxJava + Retrofit 形式的时候，Retrofit 把请求封装进 Observable ，在请求结束后调用 onNext() 或在请求失败后调用 onError()。</p>
+
+<p>可以看到，调用了service的login方法后得到Observable对象，在新的线程中执行网络请求，请求成功后切换到io线程执行保存用户信息的动作，最后再切换到主线程执行请求失败onError()、请求成功onNext()。整体的逻辑十分清晰都在一条链中，就算还有别的要求还可以往里面添加，丝毫不影响代码的简洁。</p>
+
+<pre><code class="language-text">注意：Retrofit在创建的时候添了一下代码
+addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+</code></pre>
+
+<p>想了解更多关于RxJava，浏览<a href="http://gank.io/post/560e15be2dca930e00da1083#toc_1">http://gank.io/post/560e15be2dca930e00da1083#toc_1</a></p>
+
+<h2 id="toc_53">其他三方</h2>
+
+<p>在自己的开发过程中，还用到了如EventBus、Zxing、Zbar、Volley、Gson、LeakCanary等三方框架；</p>
+
+<p>也用到了如友盟统计、微信、支付宝支付、三方登录、极光推送、tinker热更新等三方sdk；</p>
+
+<p>就不再一一列举，附上一张图，大家有时间多去学习、多去了解。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171105150981301966614.png" alt="20171105150981301966614.png"/></p>
+
+<h2 id="toc_54">混淆、加固、上线</h2>
+
+<h3 id="toc_55">混淆</h3>
+
+<p>大家可以参考我的<a href="http://blog.csdn.net/jiashuai94/article/details/77991077">另一篇文章</a></p>
+
+<p>混淆是上线前挺重要的一个环节。Android使用的ProGuard，可以起到压缩，混淆，预检，优化的作用。</p>
+
+<h4 id="toc_56">坚持以下几项原则：</h4>
+
+<ul>
+<li>使用三方依赖，在混淆文件中添加官方提供的混淆代码，官方没有就google；</li>
+<li>实体类不混淆，因为实体类涉及到与服务端的交互，各种gson的交互如此等等，是要保留的；</li>
+<li>与js互调的类不混淆；</li>
+<li>与反射有关的类不混淆 等。</li>
+</ul>
+
+<h4 id="toc_57">具体语法：</h4>
+
+<pre><code class="language-text">-optimizationpasses 5 // 代码混淆的压缩比例，值在0-7之间
+-dontusemixedcaseclassnames // 混淆后类名都为小写
+-dontskipnonpubliclibraryclasses // 指定不去忽略非公共的库的类
+-dontskipnonpubliclibraryclassmembers // 指定不去忽略非公共的库的类的成员
+-dontpreverify // 不做预校验的操作
+
+-verbose
+-printmapping proguardMapping.txt // 生成原类名和混淆后的类名的映射文件
+
+-optimizations !code/simplification/cast,!field/*,!class/merging/* // 指定混淆时采用的算法
+-keepattributes *Annotation*,InnerClasses // 不混淆Annotation
+-keepattributes Signature // 不混淆泛型
+-keepattributes SourceFile,LineNumberTable // 抛出异常时保留代码行号
+-keep class XXXX // 保留类名不变，也就是类名不混淆，而类中的成员名不保证。当然也可以是继承XXX类的所有类名不混淆，具体代码不贴了，重在理解。
+-keepclasseswithmembers class XXXX // 保留类名和成员名。当然也可以是类中特定方法，代码不贴了，理由同上。
+</code></pre>
+
+<p><strong>加固</strong>：</p>
+
+<p>加固一般都使用三方加固：如果apk上百度应用市场，则使用百度加固，其他情况建议使用360加固，当然，加固前一定是混淆过的、并且签过名的apk。</p>
+
+<p>360加固还提供了一些其他服务，可根据项目情况操作（是需要花钱的..）</p>
+
+<p><strong>上线</strong>：</p>
+
+<p>也就是我们所说的发版，当你的apk测试通过，混淆过、签名过、也加固了，可以发版了。</p>
+
+<p>每个公司上线的市场要求不同，一般主要有应用宝、360、豌豆荚、百度市场、小米市场、华为市场、魅族市场等，当然还有官网了。</p>
+
+<p>发版时需要：apk当然要有、logo（第一次上线）、应用简介（第一次上线）、版本号、更新功能、介绍图、官网地址（第一次上线）等。</p>
+
+<p>ok，到这里，我们的一个阶段算是完成了，接下来还会有更多的业务和bug等着大家，哈哈！希望这篇文章能对大家有一点点帮助。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
                   </div>
                   <div class="more-right right">
                   <span class="comments">
@@ -1792,9 +4082,9 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -1811,6 +4101,10 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -1827,31 +4121,31 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -1906,6 +4200,213 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -1926,8 +4427,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

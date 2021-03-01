@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -121,7 +123,7 @@
           <h1>Android 界面性能调优</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/1/27</span>
+          <span class="date">2017/01/27</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -147,10 +149,10 @@
 <h3 id="toc_2">(一) 绘制原理</h3>
 
 <p>Android系统要求每一帧都要在 16ms 内绘制完成，平滑的完成一帧意味着任何特殊的帧需要执行所有的渲染代码（包括 framework 发送给 GPU 和 CPU 绘制到缓冲区的命令）都要在 16ms 内完成，保持流畅的体验。这个速度允许系统在动画和输入事件的过程中以约 60 帧每秒(1秒 / 0.016帧每秒 = 62.5帧/秒)的平滑帧率来渲染。<br/>
-<figure><img src="media/15561207868540/15713234372552.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713234372552.png" alt=""/></p>
 
 <p>如果你的应用没有在 16ms 内完成这一帧的绘制，假设你花了 24ms 来绘制这一帧，那么就会出现掉帧的情况。<br/>
-<figure><img src="media/15561207868540/15713234438260.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713234438260.png" alt=""/></p>
 
 <p>系统准备将新的一帧绘制到屏幕上，但是这一帧并没有准备好，所有就不会有绘制操作，画面也就不会刷新。反馈到用户身上，就是用户盯着同一张图看了 32ms 而不是 16ms ，也就是说掉帧发生了。</p>
 
@@ -162,11 +164,11 @@
 
 <ul>
 <li><p>花了非常多时间重新绘制界面中的大部分东西，这样非常浪费CPU周期.<br/>
-<figure><img src="media/15561207868540/15713234543583.png" alt=""/></figure></p></li>
+<img src="media/15561207868540/15713234543583.png" alt=""/></p></li>
 <li><p>过度绘制严重，在绘制用户看不到的对象上花费了太多的时间.<br/>
-<figure><img src="media/15561207868540/15713234666222.png" alt=""/></figure></p></li>
+<img src="media/15561207868540/15713234666222.png" alt=""/></p></li>
 <li><p>有一大堆动画重复了一遍又一遍，消耗 CPU 、 GPU 资源<br/>
-<figure><img src="media/15561207868540/15713234755965.png" alt=""/></figure></p></li>
+<img src="media/15561207868540/15713234755965.png" alt=""/></p></li>
 <li><p>频繁的触发垃圾回收</p></li>
 </ul>
 
@@ -200,7 +202,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
 <p>垂直同步是 Android4.1 通过 Project Butter 在 UI 架构中引入的新技术，同期引入的还有 Triple Buffer 和 HWComposer 等技术，都是为提高 UI 的流畅性而生。<br/><br/>
 举个例子，你拍了一张照片，然后旋转5度再拍另外一张照片，将两照片的中间剪开并拼接在一起，得到下图：<br/><br/>
-<figure><img src="media/15561207868540/15713234978012.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713234978012.png" alt=""/></p>
 
 <p>中间这部分有明显区别的部分，等价于设备刷新率和帧速率不一致的结果。<br/><br/>
 一般而言， GPU 的帧速率应高于刷新率，才不会卡顿或掉帧。如果屏幕刷新率比帧速率还快，屏幕会在两帧中显示同一个画面，这种断断续续情况持续发生时，用户将会很明显地感觉到动画的卡顿或者掉帧，然后又恢复正常，我们常称之为闪屏、跳帧、延迟。<br/><br/>
@@ -209,13 +211,13 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <h3 id="toc_8">(七) UI 绘制机制与栅格化</h3>
 
 <p>绝大多数渲染操作都依赖两个硬件： CPU 、 GPU 。 CPU 负责 Measure 、 layout 、 Record 、 Execute 的计算操作， GPU 负责栅格化（ Rasterization ）操作。 非必需的视图组件会带来多余的 CPU 计算操作，还会占用多余的 GPU 资源。<br/>
-<figure><img src="media/15561207868540/15713235105653.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713235105653.png" alt=""/></p>
 
 <p>栅格化（ Rasterization ）能将 Button 、 Shape 、 Path 、 Bitmap 等资源组件拆分到不同的像素上进行显示。这个操作很费时，所以引入了 GPU 来加快栅格化的操作。<br/>
-<figure><img src="media/15561207868540/15713235264231.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713235264231.png" alt=""/></p>
 
 <p>CPU 负责把 UI 组件计算成多边形（ Polygons ），纹理（ Texture ），然后交给 GPU 进行栅格化渲染，再将处理结果传到屏幕上显示。<br/>
-<figure><img src="media/15561207868540/15713235374268.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713235374268.png" alt=""/></p>
 
 <p>在 Android 里的那些资源组件的显示（比如 Bitmaps 、 Drawable ），都是一起打包到统一的纹理（ Texture ）当中，然后再传递到 GPU 里面。<br/><br/>
 图片的显示，则是先经过 CPU 的计算加载到内存中，再传给 GPU 进行渲染。<br/><br/>
@@ -250,7 +252,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
 <h4 id="toc_12">1、Hierarchy View</h4>
 
-<p><figure><img src="media/15561207868540/15713235536937.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713235536937.png" alt=""/></p>
 
 <p>Hierarchy View 在Android SDK里自带，常用来查看界面的视图结构是否过于复杂，用于了解哪些视图过度绘制，又该如何进行改进。详见官方使用教程（需要翻墙）:<a href="https://www.youtube.com/watch?v=URyoiAt8098">「戳我」</a>，官方介绍<a href="http://developer.android.com/tools/performance/hierarchy-viewer/index.html">「戳我」</a>。</p>
 
@@ -270,25 +272,25 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
 <h4 id="toc_14">3、Systrace</h4>
 
-<p><figure><img src="media/15561207868540/15713235708167.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713235708167.png" alt=""/></p>
 
 <p>Systrace 在Android DDMS 里自带，可以用来跟踪 graphics 、view 和 window 的信息，发现一些深层次的问题。很麻烦，限制大，实际调试中我基本用不到。官方介绍 <a href="http://developer.android.com/tools/help/systrace.html">「戳我」</a>和 <a href="http://developer.android.com/tools/debugging/systrace.html">「我」</a>。</p>
 
 <h4 id="toc_15">4、Track</h4>
 
-<p><figure><img src="media/15561207868540/15713235823132.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713235823132.png" alt=""/></p>
 
 <p>Track 在 Android DDMS里自带，是个很棒的用来跟踪构造视图的时候哪些方法费时，精确到每一个函数，无论是应用函数还是系统函数，我们可以很容易地看到掉帧的地方以及那一帧所有函数的调用情况，找出问题点进行优化。官方介绍 <a href="http://android-developers.blogspot.com/2009/02/track-memory-allocations.html">「戳我」</a>。</p>
 
 <h4 id="toc_16">5、OverDraw</h4>
 
-<p><figure><img src="media/15561207868540/15713235954296.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713235954296.png" alt=""/></p>
 
 <p>通过在 Android 设备的设置 APP 的开发者选项里打开 “ 调试 GPU 过度绘制 ” ，来查看应用所有界面及分支界面下的过度绘制情况，方便进行优化。官方介绍 <a href="http://developer.android.com/tools/performance/debug-gpu-overdraw/index.html">「戳我」</a>。</p>
 
 <h4 id="toc_17">6、GPU 呈现模式分析</h4>
 
-<p><figure><img src="media/15561207868540/15713236087507.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713236087507.png" alt=""/></p>
 
 <p>通过在 Android 设备的设置 APP 的开发者选项里启动 “ GPU 呈现模式分析 ” ，可以得到最近 128 帧 每一帧渲染的时间，分析性能渲染的性能及性能瓶颈。官方介绍 <a href="http://developer.android.com/tools/performance/profile-gpu-rendering/index.html">「戳我」</a>。</p>
 
@@ -323,7 +325,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <p>过度绘制是一个术语，表示某些组件在屏幕上的一个像素点的绘制次数超过 1 次。  </p>
 
 <p>通俗来讲，绘制界面可以类比成一个涂鸦客涂鸦墙壁，涂鸦是一件工作量很大的事情，墙面的每个点在涂鸦过程中可能被涂了各种各样的颜色，但最终呈现的颜色却只可能是 1 种。这意味着我们花大力气涂鸦过程中那些非最终呈现的颜色对路人是不可见的，是一种对时间、精力和资源的浪费，存在很大的改善空间。绘制界面同理，花了太多的时间去绘制那些堆叠在下面的、用户看不到的东西，这样是在浪费CPU周期和渲染时间！<br/><br/>
-<figure><img src="media/15561207868540/15713236220717.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713236220717.png" alt=""/></p>
 
 <blockquote>
 <p>官方例子，被用户激活的卡片在最上面,而那些没有激活的卡片在下面，在绘制用户看不到的对象上花费了太多的时间。</p>
@@ -332,7 +334,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <h3 id="toc_24">(二) 追踪过度绘制</h3>
 
 <p>通过在 Android 设备的设置 APP 的开发者选项里打开 “ 调试 GPU 过度绘制 ” ，来查看应用所有界面及分支界面下的过度绘制情况，方便进行优化。<br/>
-<figure><img src="media/15561207868540/15713236377748.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713236377748.png" alt=""/></p>
 
 <p>Android 会在屏幕上显示不同深浅的颜色来表示过度绘制：</p>
 
@@ -344,11 +346,11 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <li>深红色：4倍过度绘制及以上，即一个像素点绘制了 5 次及以上。</li>
 </ul>
 
-<p><figure><img src="media/15561207868540/15713236519068.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713236519068.png" alt=""/></p>
 
 <p>设备的硬件性能是有限的，当过度绘制导致应用需要消耗更多资源（超过了可用资源）的时候性能就会降低，表现为卡顿、不流畅、ANR 等。为了最大限度地提高应用的性能和体验，就需要尽可能地减少过度绘制，即更多的蓝色色块而不是红色色块。</p>
 
-<p><figure><img src="media/15561207868540/15713236632943.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713236632943.png" alt=""/></p>
 
 <p>实际测试，常用以下两点来作为过度绘制的测试指标，将过度绘制控制在一个约定好的合理范围内：</p>
 
@@ -361,7 +363,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
 <p>过度绘制很大程度上来自于视图相互重叠的问题，其次还有不必要的背景重叠。</p>
 
-<p><figure><img src="media/15561207868540/15713236763184.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713236763184.png" alt=""/></p>
 
 <blockquote>
 <p>官方例子，比如一个应用所有的View都有背景的话，就会看起来像第一张图中那样，而在去除这些不必要的背景之后（指的是Window的默认背景、Layout的背景、文字以及图片的可能存在的背景），效果就像第二张图那样，基本没有过度绘制的情况。</p>
@@ -377,7 +379,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
 <p>有能力且有兴趣看源码的童鞋，过度绘制的源码位置在: /frameworks/base/libs/hwui/OpenGLRenderer.cpp ，有兴趣的可以去研究查看。</p>
 
-<pre class="line-numbers"><code class="language-java">if (Properties::debugOverdraw &amp;&amp; getTargetFbo() == 0) {
+<pre><code class="language-java">if (Properties::debugOverdraw &amp;&amp; getTargetFbo() == 0) {
         const Rect* clip = &amp;mTilingClip;
         mRenderState.scissor().setEnabled(true);
         mRenderState.scissor().set(clip-&gt;left,
@@ -415,14 +417,14 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <h3 id="toc_30">(二) 追踪渲染性能</h3>
 
 <p>通过在 Android 设备的设置 APP 的开发者选项里打开 “ GPU 呈现模式分析 ” 选项，选择 ” 在屏幕上显示为条形图 “。<br/>
-<figure><img src="media/15561207868540/15713236940947.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713236940947.png" alt=""/></p>
 
 <p>这个工具会在Android 设备的屏幕上实时显示当前界面的最近 128 帧 的 GPU 绘制图形数据，包括 StatusBar 、 NavBar 、 当前界面的 GPU 绘制图形柱状图数据。我们一般只需关心当前界面的 GPU 绘制图形数据即可。<br/>
-<figure><img src="media/15561207868540/15713237110152.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713237110152.png" alt=""/></p>
 
 <p>界面上一共有 128 个小柱状图，代表的是当前界面最近的 128 帧 GPU 绘制图形数据。一个小柱状图代表的这一帧画面渲染的耗时，柱状图越高代表耗时越长。随着界面的刷新，柱状图信息也会实时滚动刷新。<br/><br/>
 中间有一条绿线，代表 16 ms ，保持动画流畅的关键就在于让这些垂直的柱状条尽可能地保持在绿线下面,任何时候超过绿线,你就有可能丢失一帧的内容。<br/><br/>
-<figure><img src="media/15561207868540/15713237228265.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713237228265.png" alt=""/></p>
 
 <p>每一个柱状图都是由三种颜色构成：蓝、红、黄。</p>
 
@@ -432,7 +434,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <li>黄色代表的是这一帧 CPU 等待 GPU 处理的时间。通俗来说，就是 CPU 等待 GPU 发出接到命令的回复的等待时间。用代码语言来说，就是这是一个阻塞调用。</li>
 </ul>
 
-<p><figure><img src="media/15561207868540/15713237318281.png" alt=""/></figure></p>
+<p><img src="media/15561207868540/15713237318281.png" alt=""/></p>
 
 <p>实际测试，常用以下两点来作为渲染性能的测试指标，将渲染性能控制在一个约定好的合理范围内：</p>
 
@@ -444,10 +446,10 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 <h3 id="toc_31">(三) 渲染性能差的根源</h3>
 
 <p>当你看到蓝色的线较高的时候，可能是由于你的视图突然无效了需要重新绘制，或者是自定义的视图过于复杂耗时过长。<br/>
-<figure><img src="media/15561207868540/15713237413638.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713237413638.png" alt=""/></p>
 
 <p>当你看到红色的线较高的时候，可能是由于你的视图重新提交了需要重新绘制导致的（比如屏幕从竖屏旋转成横屏后当前界面重新创建），或者是自定义的视图很复杂，绘制起来很麻烦，导致耗时过长。比如下面这种视图：<br/>
-<figure><img src="media/15561207868540/15713237577663.png" alt=""/></figure></p>
+<img src="media/15561207868540/15713237577663.png" alt=""/></p>
 
 <p>当你看到黄色的线较高的时候，那就意味着你给 GPU 太多的工作，太多的负责视图需要 OpenGL 命令去绘制和处理，导致 CPU 迟迟没等到 GPU 发出接到命令的回复。</p>
 
@@ -468,7 +470,7 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
 <p>如上面所说，布局和 UI 组件等都会先经过 CPU 计算成 GPU 能够识别并绘制的多边形（ Polygons ），纹理（ Texture ），然后交给 GPU 进行栅格化渲染，再将处理结果传到屏幕上显示。 “ CPU 计算成 GPU 能够识别并绘制的对象 ” 这个操作是在 DisplayList 的帮助下完成的。DisplayList 拥有要交给 GPU 栅格化渲染到屏幕上的数据信息。</p>
 
-<p><figure><img src="media/15561207868540/15713237734752.png" alt=""/></figure> </p>
+<p><img src="media/15561207868540/15713237734752.png" alt=""/> </p>
 
 <p>DisplayList 会在某个视图第一次需要渲染时创建。当该视图有类似位置被移动等变化而需要重新渲染这个视图的时候，则只需 GPU 额外执行一次渲染指令冰更新到屏幕上就够了。但如果视图中的绘制内容发生变化时（比如不可见了），那之间的 DisplayList 就无法继续使用了，这时系统就会重新执行一次重新创建 DisplayList 、渲染DisplayList 并更新到屏幕上。这个流程的表现性能取决于该视图的复杂程度。</p>
 
@@ -530,8 +532,8 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
         <div class="large-6 columns">
       <p class="text-right" style="padding:15px 0px;">
       
-          <a  href="15561207868504.html" 
-          title="Next Post: Android 快速开发框架">Android 快速开发框架 &raquo;</a>
+          <a  href="15561207868469.html" 
+          title="Next Post: Android View的工作流程">Android View的工作流程 &raquo;</a>
       
       </p>
         </div>
@@ -585,9 +587,9 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -604,6 +606,10 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -620,31 +626,31 @@ ART 虚拟机相对于 Dalvik 虚拟机来说的垃圾回收来说有一个很�
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -699,6 +705,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -719,8 +934,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

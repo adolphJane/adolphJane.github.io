@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -142,7 +144,7 @@
 
 <p>对于LayoutInflater之前一直只会用，却不知道LayoutInflater的加载原理，每次直接</p>
 
-<pre class="line-numbers"><code class="language-java">LayoutInflater.from(context).inflate(R.layout.activity_test, root, false);
+<pre><code class="language-java">LayoutInflater.from(context).inflate(R.layout.activity_test, root, false);
 
 //不行就这样，反正有一种能实现我要的效果
 LayoutInflater.from(context).inflate(R.layout.activity_test, null);
@@ -164,19 +166,19 @@ LayoutInflater.from(context).inflate(R.layout.activity_test, null);
 
 <h3 id="toc_3">在Activity中</h3>
 
-<pre class="line-numbers"><code class="language-java">LayoutInflater inflater = getLayoutInflater();
+<pre><code class="language-java">LayoutInflater inflater = getLayoutInflater();
 View view = inflater.inflate(R.layout.activity_main, null);
 </code></pre>
 
 <h3 id="toc_4">在Fragment中</h3>
 
-<pre class="line-numbers"><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
+<pre><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
 return view;
 </code></pre>
 
 <h3 id="toc_5">在Adapter中</h3>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public View getView(int position, View convertView, ViewGroup parent) {
     View view = LayoutInflater.from(convertView.getContext()).inflate(R.layout.activity_main, parent, false);
     return view;
@@ -197,7 +199,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 
 <p>LayoutInflater属于 android.view包下，在LayoutInflater的头部有一段关于LayoutInflater的介绍：</p>
 
-<p><figure><img src="media/15561207871831/15713348568693.png" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713348568693.png" alt=""/></p>
 
 <p>由于篇幅原因，这里只截取了一部分图片，总结一下：</p>
 
@@ -206,7 +208,7 @@ public View getView(int position, View convertView, ViewGroup parent) {
 <li>LayoutInflater在Android开发过程中，获取的方式不是直接new出来的，都是经过这两个方法得到的关联上下文的LayoutInflater：</li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">//在Activity中
+<pre><code class="language-java">//在Activity中
 LayoutInflater inflater = Activity#getLayoutInflater()
 //其他情况
 LayoutInflater inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE)
@@ -226,7 +228,7 @@ LayoutInflater inflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVI
 
 <p>其实，大家在使用LayoutInflater时，也会注意到无非就是将布局资源通过LayoutInflater转换为相对应的View，然后在进行一些其他操作,就是<strong>LayoutInflater常见场景</strong>中的几种情况：</p>
 
-<pre class="line-numbers"><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
+<pre><code class="language-java">View view = inflater.inflate(R.layout.fragment_guide_one, container, false);
 return view;
 </code></pre>
 
@@ -238,7 +240,7 @@ return view;
 
 <p>其实LayoutInflater.from()这个方法是官方帮我们封装了一层而已，底层还是调用getSystemService()方法，目的是使LayoutInflater与Context对象相绑定：</p>
 
-<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
+<pre><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -265,7 +267,7 @@ return view;
 
 <p>这里故意将结束符，写错</p>
 
-<pre class="line-numbers"><code class="language-markup">&lt;TextView
+<pre><code class="language-markup">&lt;TextView
     android:layout_width=&quot;wrap_content&quot;
     android:layout_height=&quot;wrap_content&quot;
     android:layout_gravity=&quot;center_horizontal&quot;
@@ -274,14 +276,14 @@ return view;
 
 <p>这里就会收到报错信息提示，每个XML都会有一个预编译的过程，这个过程发生在构建阶段（Build），而不是运行时。</p>
 
-<p><figure><img src="media/15561207871831/15713348644088.png" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713348644088.png" alt=""/></p>
 
 <h3 id="toc_13">LayoutInflater只能加载通过XmlPullParser解析的R文件资源</h3>
 
 <p>这里的R文件资源就是指这些资源文件<br/><br/>
 例如：</p>
 
-<pre class="line-numbers"><code class="language-text">R.layout.xxxx
+<pre><code class="language-text">R.layout.xxxx
 R.drawable.xxxx
 R.color.xxx
 R.string.xxx
@@ -298,14 +300,14 @@ R.string.xxx
 
 <h2 id="toc_15">LayoutInflater的构造方法</h2>
 
-<pre class="line-numbers"><code class="language-java">protected LayoutInflater(Context context) {
+<pre><code class="language-java">protected LayoutInflater(Context context) {
     mContext = context;
 }
 </code></pre>
 
 <p>这种是LayoutInflater常规的构造方法，将Context传入，最后生成的LayoutInflater与对应的Context相绑定。</p>
 
-<pre class="line-numbers"><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
+<pre><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
     mContext = newContext;
     mFactory = original.mFactory;
     mFactory2 = original.mFactory2;
@@ -320,14 +322,14 @@ R.string.xxx
 
 <p>根据介绍篇的内容，LayoutInflater在Android开发中一般是通过</p>
 
-<pre class="line-numbers"><code class="language-java">context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+<pre><code class="language-java">context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
 
 LayoutInflater.from(context);
 </code></pre>
 
 <p>因为第一种方式，已经是LayoutInflater介绍中声明获取的方式之一，那么这里我们看一下LayoutInflater#form的方法。</p>
 
-<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
+<pre><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
     if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -344,7 +346,7 @@ LayoutInflater.from(context);
 
 <p>Activity#getSystemService()这个方法：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public Object getSystemService(@ServiceName @NonNull String name) {
     if (getBaseContext() == null) {
         throw new IllegalStateException(
@@ -364,7 +366,7 @@ public Object getSystemService(@ServiceName @NonNull String name) {
 
 <p>从上面看到，在Activity中只处理了两种类型的服务，分别是获取WindowManager、获取SearchManager，那我们接着看其父类的SystemService()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public Object getSystemService(String name) {
     //找到我们要的东西，注意这是个单例
     if (LAYOUT_INFLATER_SERVICE.equals(name)) {
@@ -389,7 +391,7 @@ public Object getSystemService(String name) {
 
 <p>先看下，这个方法的介绍：</p>
 
-<p><figure><img src="media/15561207871831/15713349011719.png" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713349011719.png" alt=""/></p>
 
 <p>这个方法通过现有的LayoutInflater创建一个新的LayoutInflater副本，唯一变化的地方是指向不同的上下文对象。</p>
 
@@ -407,7 +409,7 @@ public Object getSystemService(String name) {
 
 <p>而Activity#getLayoutInflater方法：</p>
 
-<pre class="line-numbers"><code class="language-java">@NonNull
+<pre><code class="language-java">@NonNull
 public LayoutInflater getLayoutInflater() {
     return getWindow().getLayoutInflater();
 }
@@ -417,7 +419,7 @@ public LayoutInflater getLayoutInflater() {
 
 <p>这里给大家看下PhoneLayoutInflater的cloneInContext()方法：</p>
 
-<pre class="line-numbers"><code class="language-java">public LayoutInflater cloneInContext(Context newContext) {
+<pre><code class="language-java">public LayoutInflater cloneInContext(Context newContext) {
     return new PhoneLayoutInflater(this, newContext);
 }
 
@@ -436,7 +438,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p>其实这个过程即LayoutInflater.inflater()这个过程：</p>
 
-<pre class="line-numbers"><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
 
     final Resources res = getContext().getResources();
     if (DEBUG) {
@@ -456,7 +458,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p>这里只看一些关键的信息，具体代码大家自行查看</p>
 
-<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
 
     //》》》》》》》》》》》》》》》》》第一部分》》》》》》》》》》》》》》》》》》》
     try {
@@ -515,7 +517,7 @@ protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
 
 <p>下面给大家介绍下，几种常见的解析标识：</p>
 
-<pre class="line-numbers"><code class="language-text">XmlPullParser.START_DOCUMENT                                    文档开始
+<pre><code class="language-text">XmlPullParser.START_DOCUMENT                                    文档开始
 
 XmlPullParser.END_DOCUMENT                                      文档结束
 
@@ -544,7 +546,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>我们再看一下第三部分的代码，代码中会有一些简要的说明：</p>
 
-<pre class="line-numbers"><code class="language-java">//》》》》》》》》》》》》》》》》》第三部分》》》》》》》》》》》》》》》》》》》
+<pre><code class="language-java">//》》》》》》》》》》》》》》》》》第三部分》》》》》》》》》》》》》》》》》》》
 //createViewFromTag是一个根据name来创建View的方法
                     final View temp = createViewFromTag(root, name, inflaterContext, attrs);
 
@@ -583,7 +585,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>接下来，我们要介绍的是inflater()方法中的参数，到底有什么作用？</p>
 
-<pre class="line-numbers"><code class="language-java">
+<pre><code class="language-java">
                     ViewGroup.LayoutParams params = null;
                     //当Root存在
                     if (root != null) {
@@ -620,14 +622,14 @@ XmlPullParser.TEXT                                              XML标签的内�
 <li>当root不为null的话，attactToRoot的默认值是true。</li>
 </ol>
 
-<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root) {
+<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root) {
     return inflate(parser, root, root != null);
 }
 </code></pre>
 
 <p>上面的代码中，我们还少分析了一处代码rInflateChildren()，即解析子类：</p>
 
-<pre class="line-numbers"><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
+<pre><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
     rInflate(parser, parent, parent.getContext(), attrs, finishInflate);
 }
 </code></pre>
@@ -636,18 +638,18 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <h2 id="toc_22">流程图</h2>
 
-<p><figure><img src="media/15561207871831/15713349276858.png" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713349276858.png" alt=""/></p>
 
 <h2 id="toc_23">CreateViewFromTag源码解析</h2>
 
-<pre class="line-numbers"><code class="language-java">private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
+<pre><code class="language-java">private View createViewFromTag(View parent, String name, Context context, AttributeSet attrs) {
     return createViewFromTag(parent, name, context, attrs, false);
 }
 </code></pre>
 
 <p>createViewFromTag在LayoutInflater中存在重载，最终还是会调用5个参数的createViewFromTag方法。</p>
 
-<pre class="line-numbers"><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
+<pre><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
 
     //解析view标签
     if (name.equals(&quot;view&quot;)) {
@@ -716,7 +718,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>如果标签的名称是view，注意是小写的view，这个标签一般大家不太常用，具体的使用情况如下：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;view
+<pre><code class="language-text">&lt;view
     class=&quot;RelativeLayout&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;&gt;&lt;/view&gt;
@@ -734,7 +736,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>这个标签最后会被解析成BlinkLayout，BlinkLayout其实就是一个FrameLayout，这个控件最后会将包裹内容一直闪烁(就和电脑版QQ消息提示一样)，有空大家可以自行尝试下，很简单，下面贴一下用法：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;blink
+<pre><code class="language-text">&lt;blink
     android:layout_width=&quot;wrap_content&quot;
     android:layout_height=&quot;wrap_content&quot;&gt;
 
@@ -751,14 +753,14 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <h5 id="toc_29">Factory</h5>
 
-<pre class="line-numbers"><code class="language-java">public interface Factory {
+<pre><code class="language-java">public interface Factory {
     public View onCreateView(String name, Context context, AttributeSet attrs);
 }
 </code></pre>
 
 <h5 id="toc_30">Factory2</h5>
 
-<pre class="line-numbers"><code class="language-java">public interface Factory2 extends Factory {
+<pre><code class="language-java">public interface Factory2 extends Factory {
     public View onCreateView(View parent, String name, Context context, AttributeSet attrs);
 }
 </code></pre>
@@ -767,7 +769,7 @@ XmlPullParser.TEXT                                              XML标签的内�
 
 <p>这里我自定义了一个Factory，下面自定义解析View的过程：</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
     View view = null;
     try {
@@ -802,7 +804,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>setFactory()</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public void setFactory(Factory factory) {
+<pre><code class="language-java">public void setFactory(Factory factory) {
     //如果已经设置Factory，不可以继续设置Factory
     if (mFactorySet) {
         throw new IllegalStateException(&quot;A factory has already been set on this LayoutInflater&quot;);
@@ -822,7 +824,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>setFactory2()</strong></p>
 
-<pre class="line-numbers"><code class="language-java">public void setFactory2(Factory2 factory) {
+<pre><code class="language-java">public void setFactory2(Factory2 factory) {
     if (mFactorySet) {
         throw new IllegalStateException(&quot;A factory has already been set on this LayoutInflater&quot;);
     }
@@ -847,7 +849,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>如果Factory或者Factory2没有设置，或者返回View为null，才会使用默认解析方式。</p>
 
-<pre class="line-numbers"><code class="language-text">if (-1 == name.indexOf(&#39;.&#39;)) {
+<pre><code class="language-text">if (-1 == name.indexOf(&#39;.&#39;)) {
     view = onCreateView(parent, name, attrs);
 } else {
     view = createView(name, null, attrs);
@@ -856,27 +858,27 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>这段就是对自定义View和原生的控件进行判断，这里给大家说明下原生控件和自定义View的name区别：</p>
 
-<pre class="line-numbers"><code class="language-text">原生 ：  RelativeLayout
+<pre><code class="language-text">原生 ：  RelativeLayout
 自定义View ： com.demo.guidepagedemo.customview.CustomImageView
 </code></pre>
 
 <p>原生控件的解析方式 onCreateView ：</p>
 
-<pre class="line-numbers"><code class="language-java">protected View onCreateView(View parent, String name, AttributeSet attrs) throws ClassNotFoundException {
+<pre><code class="language-java">protected View onCreateView(View parent, String name, AttributeSet attrs) throws ClassNotFoundException {
     return onCreateView(name, attrs);
 }
 </code></pre>
 
 <p>然后调用的还是2个参数的onCreateView()方法</p>
 
-<pre class="line-numbers"><code class="language-java">protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
+<pre><code class="language-java">protected View onCreateView(String name, AttributeSet attrs) throws ClassNotFoundException {
     return createView(name, &quot;android.view.&quot;, attrs);
 }
 </code></pre>
 
 <p>可以看到最终方法的指向还是调用createView方法：</p>
 
-<pre class="line-numbers"><code class="language-java">public final View createView(String name, String prefix, AttributeSet attrs) throws ClassNotFoundException, InflateException {
+<pre><code class="language-java">public final View createView(String name, String prefix, AttributeSet attrs) throws ClassNotFoundException, InflateException {
     //判断构造器是否存在    
     Constructor&lt;? extends View&gt; constructor = sConstructorMap.get(name);
     if (constructor != null &amp;&amp; !verifyClassLoader(constructor)) {
@@ -941,7 +943,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>判断ClassLoader是否安全的verifyClassLoader ：</p>
 
-<pre class="line-numbers"><code class="language-java">private final boolean verifyClassLoader(Constructor&lt;? extends View&gt; constructor) {
+<pre><code class="language-java">private final boolean verifyClassLoader(Constructor&lt;? extends View&gt; constructor) {
     final ClassLoader constructorLoader = constructor.getDeclaringClass().getClassLoader();
     if (constructorLoader == BOOT_CLASS_LOADER) {
         //这里注意BootClassLoader是相当于所有派生出来的ClassLoader的原始基类，所有的ClassLoader都是根据其衍生的。
@@ -976,11 +978,11 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <h2 id="toc_32">流程图</h2>
 
-<p><figure><img src="media/15561207871831/15713350767455.jpg" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713350767455.jpg" alt=""/></p>
 
 <h2 id="toc_33">rInflate()的源码分析</h2>
 
-<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 
     //获取该标签的深度
     final int depth = parser.getDepth();
@@ -1037,7 +1039,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>requestFocus标签使用</strong>：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;EditText  
+<pre><code class="language-text">&lt;EditText  
     android:id=&quot;@+id/text&quot;  
     android:layout_width=&quot;match_parent&quot;  
     android:layout_height=&quot;wrap_content&quot; &gt;  
@@ -1047,7 +1049,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>parseRequestFocus方法</strong>：</p>
 
-<pre class="line-numbers"><code class="language-java">private void parseRequestFocus(XmlPullParser parser, View view) throws XmlPullParserException, IOException {
+<pre><code class="language-java">private void parseRequestFocus(XmlPullParser parser, View view) throws XmlPullParserException, IOException {
     //调用其父View的requestFocus（）方法
     view.requestFocus();
     consumeChildElements(parser);
@@ -1060,7 +1062,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>tag标签使用</strong>：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;Button
+<pre><code class="language-text">&lt;Button
     android:id=&quot;@+id/tag_btn&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;wrap_content&quot;
@@ -1075,7 +1077,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p><strong>parseViewTag</strong>方法 ：</p>
 
-<pre class="line-numbers"><code class="language-java">private void parseViewTag(XmlPullParser parser, View view, AttributeSet attrs) throws XmlPullParserException, IOException {
+<pre><code class="language-java">private void parseViewTag(XmlPullParser parser, View view, AttributeSet attrs) throws XmlPullParserException, IOException {
     final Context context = view.getContext();
     final TypedArray ta = context.obtainStyledAttributes(attrs, R.styleable.ViewTag);
     //这里设置tag的key
@@ -1102,7 +1104,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>所谓深度就是XML的层级关系，例如这样：</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;!-- outside --&gt;     
+<pre><code class="language-text">&lt;!-- outside --&gt;     
 &lt;root&gt;                     
    sometext                
    &lt;foobar&gt;                    
@@ -1118,7 +1120,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 <li><p>最后是其他标签，例如View，一起其他的一些标签</p></li>
 </ul>
 
-<pre class="line-numbers"><code class="language-java">final View view = createViewFromTag(parent, name, context, attrs);
+<pre><code class="language-java">final View view = createViewFromTag(parent, name, context, attrs);
 final ViewGroup viewGroup = (ViewGroup) parent;
 final ViewGroup.LayoutParams params = viewGroup.generateLayoutParams(attrs);
 rInflateChildren(parser, view, attrs, true);
@@ -1139,7 +1141,7 @@ viewGroup.addView(view, params);
 
 <h3 id="toc_35">第二阶段 ：rInflateChildren()</h3>
 
-<pre class="line-numbers"><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
+<pre><code class="language-java">final void rInflateChildren(XmlPullParser parser, View parent, AttributeSet attrs,boolean finishInflate) throws XmlPullParserException, IOException {
     rInflate(parser, parent, parent.getContext(), attrs, finishInflate);
 }
 </code></pre>
@@ -1161,11 +1163,11 @@ viewGroup.addView(view, params);
 
 <h2 id="toc_37">流程图</h2>
 
-<p><figure><img src="media/15561207871831/15713350890413.jpg" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713350890413.jpg" alt=""/></p>
 
 <h2 id="toc_38">parseInclude()是在哪里使用的？</h2>
 
-<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
     //----------------省略部分代码--------------------//
 
 } else if (TAG_INCLUDE.equals(name)) {
@@ -1182,7 +1184,7 @@ viewGroup.addView(view, params);
 
 <h2 id="toc_39">parseInclude()源码解析</h2>
 
-<pre class="line-numbers"><code class="language-java"> //参数说明：
+<pre><code class="language-java"> //参数说明：
  // parser      解析布局的解析器
  // context     当前加载布局的上下文对象
  // parent      父容器
@@ -1357,7 +1359,7 @@ LayoutInflater.consumeChildElements(parser);
 
 <p>一般来说theme（主题）一般出现在Activtiy的AndroidManifest文件下，来给Activity设置统一的布局效果，而且可以使用如下的操作来进行主题属性的使用。</p>
 
-<pre class="line-numbers"><code class="language-text">//  ?attr这样的形式，使用主题中的设置参数
+<pre><code class="language-text">//  ?attr这样的形式，使用主题中的设置参数
 android:background=&quot;?attr/colorPrimary&quot;
 </code></pre>
 
@@ -1371,7 +1373,7 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>先定义好两个基础Theme，一个是作为App的基础主题，另一个是include中的主题。</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
+<pre><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
     &lt;!-- BaseApplication theme --&gt;
     &lt;item name=&quot;colorPrimary&quot;&gt;@color/colorPrimary&lt;/item&gt;
     &lt;item name=&quot;colorPrimaryDark&quot;&gt;@color/colorPrimaryDark&lt;/item&gt;
@@ -1391,14 +1393,14 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>设置Activity的基础主题为AppTheme</p>
 
-<pre class="line-numbers"><code class="language-text">&lt;activity
+<pre><code class="language-text">&lt;activity
     android:name=&quot;com.demo.MainActivity&quot;
     android:theme=&quot;@style/AppTheme&quot;&gt;&lt;/activity&gt;
 </code></pre>
 
 <p><strong>activity_main.xml</strong></p>
 
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;
@@ -1426,7 +1428,7 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p><strong>test_toolbar.xml</strong></p>
 
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;wrap_content&quot;
@@ -1443,13 +1445,13 @@ android:background=&quot;?attr/colorPrimary&quot;
 
 <p>从上面的XML文件我们可以看出两个Toolbar调用的background都指向theme的colorPrimary属性，接下来看一下显示效果：</p>
 
-<p><figure><img src="media/15561207871831/15713351026853.jpg" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713351026853.jpg" alt=""/></p>
 
 <p>从效果图可以发现，Include Toolbar显示的颜色是粉色的，也就是Include额外设置的theme，这里也是从正面证明了这个概念。</p>
 
 <h2 id="toc_47">第一部分：Include Theme主题的设置</h2>
 
-<pre class="line-numbers"><code class="language-java">//------------------&lt;第一部分&gt;-------------------//
+<pre><code class="language-java">//------------------&lt;第一部分&gt;-------------------//
 //提取出Theme属性
 final TypedArray ta = context.obtainStyledAttributes(attrs, ATTRS_THEME);
 final int themeResId = ta.getResourceId(0, 0);
@@ -1465,7 +1467,7 @@ ta.recycle();
 
 <h2 id="toc_48">第二部分：Include 内容布局的设置</h2>
 
-<pre class="line-numbers"><code class="language-java">//------------------&lt;第二部分&gt;-------------------//
+<pre><code class="language-java">//------------------&lt;第二部分&gt;-------------------//
 //先获取 layout 属性（资源 id）是否设置
 int layout = attrs.getAttributeResourceValue(null, ATTR_LAYOUT, 0);
 if (layout == 0) {
@@ -1502,7 +1504,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <h4 id="toc_52">包裹Include标签的布局Theme（注意：这里不是Include设置的主题）：</h4>
 
-<pre class="line-numbers"><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
+<pre><code class="language-text">&lt;style name=&quot;AppTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
     &lt;item name=&quot;colorPrimary&quot;&gt;@color/colorPrimary&lt;/item&gt;
     &lt;item name=&quot;colorPrimaryDark&quot;&gt;@color/colorPrimaryDark&lt;/item&gt;
     &lt;item name=&quot;colorAccent&quot;&gt;@color/colorAccent&lt;/item&gt;
@@ -1515,7 +1517,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 
 <h3 id="toc_53">第三部分： Include标签的View处理</h3>
 
-<pre class="line-numbers"><code class="language-text">            //------------------&lt;第三部分&gt;-------------------//
+<pre><code class="language-text">            //------------------&lt;第三部分&gt;-------------------//
             //如果此时还找不到layout，那么必然异常~，会报找不到资源ID的layout异常
             if (layout == 0) {
                 final String value = attrs.getAttributeValue(null, ATTR_LAYOUT);
@@ -1607,7 +1609,7 @@ if (layout != 0 &amp;&amp; context.getTheme().resolveAttribute(layout, mTempValu
 <p>这里分成两块内容<br/><br/>
 <strong>第一块是设置LayoutParams</strong>：</p>
 
-<pre class="line-numbers"><code class="language-text">ViewGroup.LayoutParams params = null;
+<pre><code class="language-text">ViewGroup.LayoutParams params = null;
 try {
     //加载Include的父ViewGroup的LayoutParams
     params = group.generateLayoutParams(attrs);
@@ -1627,7 +1629,7 @@ view.setLayoutParams(params);
 
 <p><strong>第二块是在这里设置子ViewGroup的显隐性</strong>：</p>
 
-<pre class="line-numbers"><code class="language-java">// 加载include内容时，需要直接设置其 可见性
+<pre><code class="language-java">// 加载include内容时，需要直接设置其 可见性
 switch (visibility) {
     case 0:
         view.setVisibility(View.VISIBLE);
@@ -1647,13 +1649,13 @@ group.addView(view);
 
 <h2 id="toc_56">流程图</h2>
 
-<p><figure><img src="media/15561207871831/15713351149148.jpg" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713351149148.jpg" alt=""/></p>
 
 <h2 id="toc_57">效果</h2>
 
-<p><figure><img src="media/15561207871831/15713351244735.jpg" alt=""/></figure></p>
+<p><img src="media/15561207871831/15713351244735.jpg" alt=""/></p>
 
-<p><figure><img src="media/15561207871831/20171105150982283383132.gif" alt=""/></figure></p>
+<p><img src="media/15561207871831/20171105150982283383132.gif" alt=""/></p>
 
 <h2 id="toc_58">分析</h2>
 
@@ -1671,7 +1673,7 @@ group.addView(view);
 
 <p>同时考虑第二张Gif上，发现物体Y轴也存在移动，所以也得需要考虑Y轴方向的滑动，整理下：</p>
 
-<pre class="line-numbers"><code class="language-text">//进入时：
+<pre><code class="language-text">//进入时：
 view.setTranslateX((vpWidth - positionOffsetPixels) * xIn);
 view.setTranslateY((vpWidth - positionOffsetPixels) * yIn);
 
@@ -1718,7 +1720,7 @@ view.setTranslateY((0 - positionOffsetPixels) * yOut);
 
 <p>在介绍之前，先看一段代码：</p>
 
-<pre class="line-numbers"><code class="language-java">View view;
+<pre><code class="language-java">View view;
 //如果Factory2存在，就会调用其onCreateView方法
 if (mFactory2 != null) {
     view = mFactory2.onCreateView(parent, name, context, attrs);
@@ -1752,7 +1754,7 @@ if (view == null &amp;&amp; mPrivateFactory != null) {
 
 <h2 id="toc_61">自定义Factory还是Factory2 ？</h2>
 
-<pre class="line-numbers"><code class="language-java">View view;
+<pre><code class="language-java">View view;
 //如果Factory2存在，就会调用其onCreateView方法
 if (mFactory2 != null) {
     view = mFactory2.onCreateView(parent, name, context, attrs);
@@ -1766,14 +1768,14 @@ if (mFactory2 != null) {
 
 <p>我们能够从这段代码中得出，Factory2比Factory的优先级要高，即Factory2存在Factory就不可能会被调用，同理可以得出结论：</p>
 
-<pre class="line-numbers"><code class="language-text">优先级顺序:
+<pre><code class="language-text">优先级顺序:
 
 mFactory2  &gt; mFactory &gt; mPrivateFactory &gt; LayoutInflater默认处理方式
 </code></pre>
 
 <p>而且我们还能够发现mFactory2的onCreateView()方法与mFactory是不相同的：</p>
 
-<pre class="line-numbers"><code class="language-text">//mFactory2
+<pre><code class="language-text">//mFactory2
 mFactory2.onCreateView(parent, name, context, attrs);
 
 //mFactory
@@ -1782,7 +1784,7 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>根据上述的分析，我们可以得出结论：</p>
 
-<pre class="line-numbers"><code class="language-text">(1)Factory2的调用优先级比Factory要高
+<pre><code class="language-text">(1)Factory2的调用优先级比Factory要高
 
 (2)Factory2的onCreateView()方法，会比Factory多返回一个父View的参数。
 
@@ -1799,14 +1801,14 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>因为一般使用方式，是直接调用cloneInContext()方法，我们知道一般的默认解析器都是PhoneLayoutInflater，我们看下其实现方式：</p>
 
-<pre class="line-numbers"><code class="language-java">protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
+<pre><code class="language-java">protected PhoneLayoutInflater(LayoutInflater original, Context newContext) {
     super(original, newContext);
 }
 </code></pre>
 
 <p>本质就是调用LayoutInflater的两参构造方法：</p>
 
-<pre class="line-numbers"><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
+<pre><code class="language-java">protected LayoutInflater(LayoutInflater original, Context newContext) {
     mContext = newContext;
     mFactory = original.mFactory;
     mFactory2 = original.mFactory2;
@@ -1823,7 +1825,7 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>（1）自定义LayoutInflater，并且改写cloneInContext，使其不复制原LayoutInflater的Factory2以及Factory。</p>
 
-<pre class="line-numbers"><code class="language-java">public class CustomLayoutInflater extends LayoutInflater {
+<pre><code class="language-java">public class CustomLayoutInflater extends LayoutInflater {
 
     protected CustomLayoutInflater(Context context) {
         super(context);
@@ -1838,7 +1840,7 @@ view = mFactory.onCreateView(name, context, attrs);
 
 <p>（2）使用时，直接通过new出实例，然后setFactory</p>
 
-<pre class="line-numbers"><code class="language-java">CustomLayoutInflater newInflater = new CustomLayoutInflater(getActivity());
+<pre><code class="language-java">CustomLayoutInflater newInflater = new CustomLayoutInflater(getActivity());
 newInflater.setFactory2(new CustomAppFactory(newInflater, this));
 return newInflater.inflate(layoutId, null);
 </code></pre>
@@ -1847,7 +1849,7 @@ return newInflater.inflate(layoutId, null);
 
 <p>这是因为 AppCompatActivity 在初始化的时候，已经设置了 Factory，下面来看下这部分代码</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 protected void onCreate(@Nullable Bundle savedInstanceState) {
     final AppCompatDelegate delegate = getDelegate();
     //注意这个方法
@@ -1860,7 +1862,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
 
 <p>继续查看 installViewFactory（）方法</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public void installViewFactory() {
     LayoutInflater layoutInflater = LayoutInflater.from(mContext);
     if (layoutInflater.getFactory() == null) {
@@ -1874,7 +1876,7 @@ public void installViewFactory() {
 
 <p>可以发现，在onCreate 时 LayoutInflater 已经设置过一次 Factory 了，然后我再来看下 setFactory() 的源码：</p>
 
-<pre class="line-numbers"><code class="language-java">public void setFactory(Factory factory) {
+<pre><code class="language-java">public void setFactory(Factory factory) {
     if (mFactorySet) {
         //原因就是这一句
         throw new IllegalStateException(&quot;A factory has already been set on this LayoutInflater&quot;);
@@ -1894,7 +1896,7 @@ public void installViewFactory() {
 
 <p>在使用前，先使用 cloneInContext()克隆出一个新的 LayoutInflater，然后在进行设置操作。</p>
 
-<pre class="line-numbers"><code class="language-java">LayoutInflate  newInflater = LayoutInflater.cloneInContext(inflater,context);
+<pre><code class="language-java">LayoutInflate  newInflater = LayoutInflater.cloneInContext(inflater,context);
 
 newInflater.setFactory(new CustomFactory（）)；
 </code></pre>
@@ -1909,7 +1911,7 @@ newInflater.setFactory(new CustomFactory（）)；
 
 <h3 id="toc_66">使用方式</h3>
 
-<pre class="line-numbers"><code class="language-java">public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
+<pre><code class="language-java">public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
     Bundle bundle = getArguments();
     int layoutId = bundle.getInt(LAYOUT_ID);
     //注意需要调用cloneInContext方法生成新的LayoutInflater
@@ -1924,7 +1926,7 @@ newInflater.setFactory(new CustomFactory（）)；
 
 <p>那么就创建一个类CustomAppFactory来实现Factory2的接口，复写onCreateView的方法。</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
     View view = null;
     //&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;第一部分&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;
@@ -1972,7 +1974,7 @@ public View onCreateView(View parent, String name, Context context, AttributeSet
 
 <h2 id="toc_68">onCreateView第一部分内容</h2>
 
-<pre class="line-numbers"><code class="language-java">if (name.contains(&quot;.&quot;)) {
+<pre><code class="language-java">if (name.contains(&quot;.&quot;)) {
     String checkName = name.substring(name.lastIndexOf(&quot;.&quot;));
     String prefix = name.substring(0, name.lastIndexOf(&quot;.&quot;));
     view = defaultInflater(checkName, prefix, attrs);
@@ -1986,7 +1988,7 @@ if (name.equals(&quot;View&quot;) || name.equals(&quot;ViewGroup&quot;)) {
 
 <p>这里判断了name中是否包含“.”，是用来判断生成的View是否是自定义View，下面来看下自定义View和Android自带的组件的区别：</p>
 
-<pre class="line-numbers"><code class="language-text">//原生的组件
+<pre><code class="language-text">//原生的组件
 RelativeLayout
 //自定义View
 com.demo.guidepagedemo.customview.CustomImageView
@@ -1996,7 +1998,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 
 <p>而原生组件中View和ViewGroup是属于android.view包下，其他的例如：RelativeLayout，LinearLayout是属于android.widget包下。</p>
 
-<pre class="line-numbers"><code class="language-text">private final String[] sClassPrefix = {
+<pre><code class="language-text">private final String[] sClassPrefix = {
     &quot;android.widget.&quot;,
     &quot;android.view.&quot;
 };
@@ -2006,7 +2008,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 
 <p>而这里真正的解析过程最后还是交给LayoutInflater，调用LayoutInflater的onCreateView方法：</p>
 
-<pre class="line-numbers"><code class="language-java">private View defaultInflater(String name, String prefix, AttributeSet attrs) {
+<pre><code class="language-java">private View defaultInflater(String name, String prefix, AttributeSet attrs) {
     View view = null;
     try {
         view = mInflater.createView(name, prefix, attrs);
@@ -2019,7 +2021,7 @@ com.demo.guidepagedemo.customview.CustomImageView
 
 <h2 id="toc_69">onCreateView第二部分内容</h2>
 
-<pre class="line-numbers"><code class="language-java">//实例化完成
+<pre><code class="language-java">//实例化完成
 if (view != null) {
     //获取自定义属性,通过标签关联到视图上
     setViewTag(view, context, attrs);
@@ -2031,7 +2033,7 @@ if (view != null) {
 
 <p><strong>setViewTag方法</strong></p>
 
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
  * 将View的属性信息存储在Tag中
  */
 private void setViewTag(View view, Context context, AttributeSet attrs) {
@@ -2052,7 +2054,7 @@ private void setViewTag(View view, Context context, AttributeSet attrs) {
 
 <p>上面对应的是本文我们开始设置的4个系数：</p>
 
-<pre class="line-numbers"><code class="language-java">R.styleable.CustomImageView_in_value_x              --&gt;   进入时 x方向的系数
+<pre><code class="language-java">R.styleable.CustomImageView_in_value_x              --&gt;   进入时 x方向的系数
 
 R.styleable.CustomImageView_out_value_x             --&gt;   退出时 x方向的系数
 
@@ -2063,7 +2065,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>而这里的mInflaterView是一个抽象接口，让Fragment来实现的，通过在Fragment中内置一个List《View》，到时候可以遍历统一操作这些View，下面是实现过程：</p>
 
-<pre class="line-numbers"><code class="language-java">public interface InflaterViewImpl {
+<pre><code class="language-java">public interface InflaterViewImpl {
 
     /**
      * 获取View集合
@@ -2082,7 +2084,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p><strong>Fragment中的实现过程</strong>：</p>
 
-<pre class="line-numbers"><code class="language-java">public class PageFragment extends Fragment implements InflaterViewImpl {
+<pre><code class="language-java">public class PageFragment extends Fragment implements InflaterViewImpl {
 
     private List&lt;View&gt; views = new ArrayList&lt;&gt;();
 
@@ -2109,7 +2111,7 @@ R.styleable.CustomImageView_out_value_y             --&gt;   退出时 y方向�
 
 <p>因为本文主要介绍内容是自定义LayoutInflater.Factory，所以这里会简单叙述下：</p>
 
-<pre class="line-numbers"><code class="language-java">mInflaterVp.addOnPageChangeListener(new 
+<pre><code class="language-java">mInflaterVp.addOnPageChangeListener(new 
 ViewPager.OnPageChangeListener() {
     @Override
     public void onPageScrolled(int position, float positionOffset, int positionOffsetPixels) {
@@ -2184,7 +2186,7 @@ ViewPager.OnPageChangeListener() {
 
 <p><strong>小红书引导页</strong></p>
 
-<p><figure><img src="media/15561207871831/20171105150982288981203.gif" alt=""/></figure></p>
+<p><img src="media/15561207871831/20171105150982288981203.gif" alt=""/></p>
 
 
     
@@ -2258,9 +2260,9 @@ ViewPager.OnPageChangeListener() {
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -2277,6 +2279,10 @@ ViewPager.OnPageChangeListener() {
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -2293,31 +2299,31 @@ ViewPager.OnPageChangeListener() {
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -2372,6 +2378,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -2392,8 +2607,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

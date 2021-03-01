@@ -1,0 +1,808 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android机型适配 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android机型适配</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/10/31</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">多机型 UI 适配</h2>
+
+<p>在 Android 开发的工作日常中，UI 适配是一件比较重要的事情。一般开发新的功能，有新的页面，最终开发完成发布之前，都需要让设计师来审 UI 效果。</p>
+
+<p>而有时候，明明我们已经在一款标准的 3 倍手机上，做到了让设计师小姐姐满意的效果，但是当换了另外一台手机的时候，效果又不那么如意。</p>
+
+<p>传统的做法是，拿到效果不对的手机，单独适配看看是不是哪里布局写的不对导致效果不正确，然后改正它。但是总能碰到我们拿不到真实设备的情况。</p>
+
+<p>本文就介绍一个命令，可以修改你当前设备的参数，来模拟出目标设备的显示效果，让你独立就把多机型 UI 效果确认的事情给做了。</p>
+
+<h2 id="toc_1">WM 命令</h2>
+
+<h3 id="toc_2">什么是 WM 命令</h3>
+
+<p>说的这么厉害，实际上需要使用的就是一行 wm 命令，可以通过 <code>adb shell</code> 来操作它。</p>
+
+<p>wm 命令主要用来帮助我们修改一些屏幕的参数，先来看看它的文档。使用 <code>adb shell wm</code> 命令，可以方便的查看 wm 的文档描述</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816609742581.jpg" alt="20171016150816609742581.jpg"/></p>
+
+<p>可以看到，wm 命令可以帮助我们修改当前设备的 size 、 density 等参数，而这两个参数就是决定了当前设备的显示效果。</p>
+
+<h3 id="toc_3">WM 的命令</h3>
+
+<p>从上面的文档可以看出，它其实支持的命令还是挺多的，但是有一些根本用不上，是需要系统权限的，所以正常来说我们是无法使用的。那么，还是介绍几个比较实用的命令。</p>
+
+<p>以下例子都是在一款标准 density 为 3 的设备上运行的，屏幕像素为 1080px * 1920px。</p>
+
+<h4 id="toc_4">wm size</h4>
+
+<p><code>wm size</code> 命令，可以用来查询和修改当前设备的尺寸，如果想要修改尺寸，可以使用 <strong>px</strong> 或者 <strong>dp</strong> 为单位（默认为 px），使用 <strong>x</strong> 进行连接，这个其实看看 <code>wm size</code> 的输出，你就清楚了。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816615239717.jpg" alt="20171016150816615239717.jpg"/></p>
+
+<p>在这里的例子中，做了几件事情：</p>
+
+<ul>
+<li>使用 wm size 命令查看当前设备的尺寸。</li>
+<li>使用 wm size 命令将当前尺寸修改成了 1000x2000。</li>
+<li>再次使用 wm size 命令查看当前设备的尺寸。</li>
+<li>最后使用 wm size reset 命令，将屏幕尺寸还原。</li>
+<li>再用 wm size 命令，查看还原后的尺寸。</li>
+</ul>
+
+<p>这几个步骤就已经涵盖了 wm size 命令的所有使用步骤，可以使用它查看当前屏幕尺寸，并且修改屏幕尺寸和还原它。</p>
+
+<h4 id="toc_5">wm density</h4>
+
+<p><code>wm density</code> 命令，可以用来查看和修改当前设备的 density 参数。</p>
+
+<p>使用起来很简单，直接上命令了。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816618347092.jpg" alt="20171016150816618347092.jpg"/></p>
+
+<p>在这个例子中，我做了几件事情：</p>
+
+<ul>
+<li>使用 wm density 查看当前设备的 density。</li>
+<li>在使用 wm density 命令，修改当前设备的 density 为 420。</li>
+<li>然后再使用 wm density 查看修改后的参数。</li>
+<li>最后使用 wm density reset 将设备的 density 还原。</li>
+<li>最后再查看一下还原后的值。</li>
+</ul>
+
+<h4 id="toc_6">wm overscan</h4>
+
+<p><code>wm overscan</code> 命令，可以修改当前设备的屏幕内边距。其实我觉得这个命令没什么用处，但是还是演示一下如何使用。</p>
+
+<pre><code class="language-shell">adb shell wm overscan 20,20,20,20
+adb shell wm overscan reset
+</code></pre>
+
+<p>在这个例子中，做了几件事情：</p>
+
+<ul>
+<li>使用 wm overscan 修改边距为 20 。</li>
+<li>然后使用 wm overscan reset 将其还原。</li>
+</ul>
+
+<h3 id="toc_7">WM 命令的原理</h3>
+
+<p>wm 命令的逻辑非常的简单，它实际上是和 WindowManagerService 进行交互，通过 WMS 来修改屏幕相关的一些参数。</p>
+
+<p>这里就不介绍完整的 wm 源码了，就以一个方法举例来看看 wm 的逻辑。这里就以 <code>wm size</code>命令举例好了。</p>
+
+<p>首先，看看 wm 命令的入口。</p>
+
+<pre><code class="language-java">@Override
+public void onRun() throws Exception {
+    mWm = IWindowManager.Stub.asInterface(ServiceManager.checkService(Context.WINDOW_SERVICE));
+    if (mWm == null){
+        System.err.println(NO_SYSTEM_ERROR_CODE);
+        throw new AndroidException(&quot;Can`t connect to window manager;is the system running?&quot;);
+    }
+    
+    String op = nextArgRequired();
+    
+    if (op.equals(&quot;size&quot;)) {
+        runDisplaySize();
+    } else if (op.equals(&quot;overscan&quot;)){
+        runDisplayOverscan();
+    } else if (op.equals(&quot;scaling&quot;)){
+        runDisplayScaling();
+    } else if (op.equals(&quot;screen-capture&quot;)){
+        runSetScreenCapture();
+    } else if (op.equals(&quot;dismiss-keyguard&quot;)){
+        runDismissKeyguard();
+    } else {
+        showError(&quot;Error: unknown command ` &quot; + op + &quot;`&quot;);
+        return;
+    }
+}
+</code></pre>
+
+<p>这里会初始化 mWm ，并且根据输入的参数，调用不同的方法，如果输入的是 size ，则会调用 <code>runDisplaySize()</code> 方法。</p>
+
+<pre><code class="language-java">private void runDisplaySize() throws Exception {
+    String size = nextArg();
+    int w,h;
+    if (size == null){
+        Point initialSize = new Point();
+        Point baseSize = new Point();
+        try {
+            mWm.getInitialDisplaySize(Display.DEFAULT_DISPLAY, initialSize);
+            mWm.getBaseDisplaySize(Display.DEFAULT_DISPLAY, baseSize);
+            System.out.println(&quot;Physical size:&quot; + initialSize.x + &quot;x&quot; + initialSize.y);
+            if (!initialSize.equals(baseSize)){
+                System.out.println(&quot;Override size:&quot; + baseSize.x + &quot;x&quot; + baseSize.y);
+            }
+        } catch (RemoteException e){
+        }
+        return;
+    } else if (&quot;reset&quot;.equals(size)){
+        w = h = -1;
+    } else {
+        int div = size.indexOf(&#39;x&#39;);
+        if (div &lt;= 0 || div &gt;= (size.length() - 1)){
+            System.err.println(&quot;Error: bad size&quot; + size);
+            return;
+        }
+        String wstr = size.substring(0,div);
+        String hstr = size.substring(div + 1);
+        try {
+            w = parseDimension(wstr);
+            h = parseDimension(hstr);
+        } catch (NumberFormatException e){
+            System.err.println(&quot;Error: bad number&quot; + e);
+            return;
+        }
+    }
+    
+    try {
+        if (w &gt;= 0 &amp;&amp; h &gt;= 0){
+            mWm.setForcedDisplaySize(Display.DEFAULT_DISPLAY, w, h);
+        } else {
+            mWm.clearForcedDisplaySize(Display.DEFAULT_DISPLAY);
+        }
+    } catch (RemoteException e) {
+    }
+}
+</code></pre>
+
+<p>在 <code>runDisplaySize()</code> 方法中，会先判断 size 命令后面有没有跟其它参数，如果没有，则认为是一次查询操作，会将查询到的结果输出。</p>
+
+<p>而如果是 reset 方法的话，就将 w 、h 这两个代表宽高的值，设置为 -1，最终会通过 <code>mWm.clearForcedDisplaySize()</code> 方法，将屏幕的 size 还原。</p>
+
+<p>否者就从输入的参数中，通过 x 进行分割，拿到我们输入的宽高。最终通过 <code>mWm.setForcedDisplaySize()</code> 方法，将当前屏幕的 size 修改成我们输入的结果。</p>
+
+<p>在设置size 的时候，还会通过 <code>parseDimens()</code> 方法，重新计算一下输入的尺寸。</p>
+
+<p>private int parseDimension(String s) throws NumberFormatException {<br/>
+    if (s.endsWith(&quot;px&quot;)) {<br/>
+        return Integer.parseInt(s.substring(0, s.length() - 2));<br/>
+    }<br/>
+    if (s.endsWith(&quot;dp&quot;)){<br/>
+        int density;<br/>
+        try {<br/>
+            density = mWm.getBaseDisplayDensity(Display.DEFAULT_DISPLAY);<br/>
+        } catch (RemoteException e) {<br/>
+            density = DisplayMetrics.DENSITY_DEFAULT;<br/>
+        }<br/>
+        return Integer.parseInt(s.substring(0,s.length() - 2)) * density / DisplayMetrics.DENSITY_DEFAULT;<br/>
+    }<br/>
+    return Integer.parseInt(s);<br/>
+}</p>
+
+<p>从这里可以看出，它支持两个尺寸，px 和 dp ，如果如果不指定尺寸，则默认认为是 px 。</p>
+
+<p>到这里就完成了一次通过 <code>wm size</code> 命令，修改设备屏幕参数的全过程，跟多细节可以自行查阅源码。</p>
+
+<p>源码的在线地址：</p>
+
+<p><a href="https://link.juejin.im/?target=http%3A%2F%2Fandroidxref.com%2F7.1.1_r6%2Fxref%2Fframeworks%2Fbase%2Fcmds%2Fwm%2Fsrc%2Fcom%2Fandroid%2Fcommands%2Fwm%2FWm.java">androidxref.com/7.1.1_r6/xr…</a></p>
+
+<h2 id="toc_8">实施修改设备参数</h2>
+
+<p>既然已经讲清楚 wm 命令的所有细节了，那么我们只需要拿到我们需要适配的设备的 size 和 density。就可以在我们自己的设备上模拟出对应的效果。</p>
+
+<p>我这里收集了一些比较常用的设备参数，可以供大家参考一下。</p>
+
+<ul>
+<li>魅族MX3：440，1080x1800</li>
+<li>一加5：420，1080x1920</li>
+<li>红米NOTE，320，720x1280</li>
+<li>华为MATE7，480，1080x1812</li>
+<li>MOTO-G5，480，1080x1920</li>
+<li>Moto-tx1095，432，1080x1790</li>
+<li>Nexus5x，420，1080x1794</li>
+<li>Nexus6p，560，1440x2392</li>
+<li>奇酷360，460，1080x1920</li>
+<li>VivoX5，320，720x1280</li>
+</ul>
+
+<p>当然，最重要的是拿到公司各种 CEO、CTO、CxO 正在使用的手机参数，进行一波适配，哈哈。</p>
+
+<p>下面，我们随便挑两个设备的参数进行修改，然后看看运行后的效果。</p>
+
+<p>命令如下:</p>
+
+<p>// 修改成 一加5</p>
+
+<p>adb shell wm density 420</p>
+
+<p>adb shell wm size 1080x1920</p>
+
+<p>// 修改成 Moto-tx1095</p>
+
+<p>adb shell wm density 432</p>
+
+<p>adb shell wm size 1080x1790</p>
+
+<p>下面，从做到右，分别是原本的尺寸、一加5、Moto-tx1095。</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171016150816770425798.jpg" alt="20171016150816770425798.jpg"/></p>
+
+<p>其实看着差异不大，只能说桌面布局写的挺好的，所以说，如果布局写的好的话，是可以避免在不同设备上看着很明显的不同的问题 ，就像现在这样。</p>
+
+<h2 id="toc_9">题外话</h2>
+
+<p>实际上 wm 命令，也是有一些其它问题的，例如有时候通过 wm 命令修改 UI 的的时候，刷新会不及时，会卡顿，所以选择一个性能比较好的手机是一个缓解的办法。或者修改参数之后，退出 App 重新进也是一个不错的办法。</p>
+
+<p>如果调整到一个太特殊的参数，例如 200x1000 这种，可能渲染起来会很奇怪。但是如果只是做一些常规设备参数的修改，只要修改值在合理的范围内，一般都是可以的。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15626502774857.html" 
+          title="Previous Post: Android Gradle使用总结">&laquo; Android Gradle使用总结</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15626502775041.html" 
+          title="Next Post: Android项目从立项到上线">Android项目从立项到上线 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16136612078589.html">继承</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16127020620600.html">封装</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>

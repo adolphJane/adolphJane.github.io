@@ -15,9 +15,7 @@
     <link rel="stylesheet" href="asset/css/docs.css" />
     <script src="asset/js/vendor/modernizr.js"></script>
     <script src="asset/js/vendor/jquery.js"></script>
-  <script src="asset/highlightjs/highlight.pack.js"></script>
-  <link href="asset/highlightjs/styles/github.css" media="screen, projection" rel="stylesheet" type="text/css">
-  <script>hljs.initHighlightingOnLoad();</script>
+ 
 <script type="text/javascript">
   function before_search(){
     var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
@@ -77,9 +75,9 @@
     <li><label>Categories</label></li>
 
         
-            <li><a href="Android%E6%BA%90%E7%A0%81.html">Android源码</a></li>
-        
             <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
         
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
@@ -96,6 +94,10 @@
             <li><a href="Python.html">Python</a></li>
         
             <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
          
 
       </ul>
@@ -121,7 +123,7 @@
           <h1>Android-事件分发机制源码攻略</h1>
      
         <div class="read-more clearfix">
-          <span class="date">2017/11/2</span>
+          <span class="date">2017/11/02</span>
 
           <span>posted in&nbsp;</span> 
           
@@ -164,7 +166,7 @@ View  </p>
 
 <p>上述三个类是主要的事件分发对象，后期的讨论也是集中在这三个类里面。这里有个点得提一下就是ViewGroup是View的子类。这些事件会在这三者的dispatchTouchEvent、onTouchEvent这两个方法里面传递，还有一个ViewGroup特有的onInterceptTouchEvent方法。下面给出以上提到的类以及方法之间的关系。</p>
 
-<p><figure><img src="media/15561207872676/15713061935873.jpg" alt=""/></figure></p>
+<p><img src="media/15561207872676/15713061935873.jpg" alt=""/></p>
 
 <p>从这张图，我们可以看出，不同返回值，事件的分发方向不同，这里不做详细分析，这张图是否画得出来作为你对这次源码阅读的成绩。</p>
 
@@ -172,7 +174,7 @@ View  </p>
 
 <p><strong>Activity</strong></p>
 
-<pre class="line-numbers"><code class="language-java">    @Override
+<pre><code class="language-java">    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
@@ -189,7 +191,7 @@ View  </p>
 
 <p><strong>CusViewGroup</strong></p>
 
-<pre class="line-numbers"><code class="language-java">    @Override
+<pre><code class="language-java">    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
@@ -216,7 +218,7 @@ View  </p>
 
 <p><strong>View</strong></p>
 
-<pre class="line-numbers"><code class="language-java">    @Override
+<pre><code class="language-java">    @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         Log.i(TAG,&quot;dispatchTouchEvent&quot;+ev.getAction());
@@ -235,7 +237,7 @@ View  </p>
 
 <p><strong>布局</strong></p>
 
-<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;com.example.coffeetime.cusviewdemo.CusLineaLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
@@ -254,7 +256,7 @@ View  </p>
 
 <h2 id="toc_4">结果</h2>
 
-<p><figure><img src="media/15561207872676/15713062061426.jpg" alt=""/></figure></p>
+<p><img src="media/15561207872676/15713062061426.jpg" alt=""/></p>
 
 <blockquote>
 <p>ACTION_DOWN的值为0 <br/>
@@ -268,7 +270,7 @@ ACTION_MOVE的值为1</p>
 
 <p>从上述的结果，我们可以得出事件最先被拦截的地方是从Activity的dispatchTouchEvent方法开始，那我们的源码攻略也从这里开始。</p>
 
-<pre class="line-numbers"><code class="language-java"> /**
+<pre><code class="language-java"> /**
      * Called to process touch screen events.  You can override this to
      * intercept all touch screen events before they are dispatched to the
      * window.  Be sure to call this implementation for touch screen events
@@ -291,7 +293,7 @@ ACTION_MOVE的值为1</p>
 
 <p>这个方法首先判断事件类型，如果是ACTION_DOWN事件，则先执行onUserInteraction()方法；</p>
 
-<pre class="line-numbers"><code class="language-text">public void onUserInteraction() {
+<pre><code class="language-text">public void onUserInteraction() {
 }
 </code></pre>
 
@@ -301,12 +303,12 @@ ACTION_MOVE的值为1</p>
 
 <p>我们接着回到刚刚那个地方，判断完事件ACTION_DOWN事件之后，会执行getWindow().superDispatchTouchEvent(ev)这个方法，这个getWindow获取的是哪个Window呢，我们进去看看。</p>
 
-<pre class="line-numbers"><code class="language-java">public Window getWindow() {
+<pre><code class="language-java">public Window getWindow() {
     return mWindow;
 }
 </code></pre>
 
-<pre class="line-numbers"><code class="language-text">/**
+<pre><code class="language-text">/**
  * Abstract base class for a top-level window look and behavior policy.  An
  * instance of this class should be used as the top-level view added to the
  * window manager. It provides standard UI policies such as a background, title
@@ -321,7 +323,7 @@ public abstract class Window {}
 
 <p>通过这块注释，我们可以看出，window的实现类是phoneWindow。其实在Android里面很多都是可以通过阅读注释或者是官方文档去找出具体的实现类，不是只能依靠百度；好了，那我们可以直接进到phoneWindow类去看下superDispatchTouchEvent这个方法做了些什么</p>
 
-<pre class="line-numbers"><code class="language-java">   @Override
+<pre><code class="language-java">   @Override
     public boolean superDispatchTouchEvent(MotionEvent event) {
         return mDecor.superDispatchTouchEvent(event);
     }
@@ -331,13 +333,13 @@ public abstract class Window {}
 
 <p><strong>phoneWindow</strong></p>
 
-<pre class="line-numbers"><code class="language-text"> // This is the top-level view of the window, containing the window decor.
+<pre><code class="language-text"> // This is the top-level view of the window, containing the window decor.
     private DecorView mDecor;
 </code></pre>
 
 <p><strong>DecorView</strong></p>
 
-<pre class="line-numbers"><code class="language-text">    public boolean superDispatchTouchEvent(MotionEvent event) {
+<pre><code class="language-text">    public boolean superDispatchTouchEvent(MotionEvent event) {
         return super.dispatchTouchEvent(event);
     }
 </code></pre>
@@ -348,7 +350,7 @@ public abstract class Window {}
 
 <p>在Activity层事件的传递过程如下图</p>
 
-<p><figure><img src="media/15561207872676/15713062212732.jpg" alt=""/></figure></p>
+<p><img src="media/15561207872676/15713062212732.jpg" alt=""/></p>
 
 <p>从Activity的dispatchTouchEvent获取事件经过PhoneWindow、DecorView再到最终的ViewGroup，这一层代码比较简单，没有比较难分析的，只是经过的类比较多，其实只要把握的主线，分析起来还是比较简单的。这一篇比较少，下一篇是ViewGroup的分析，由于ViewGroup的源码比较多，所以才拆开来写，不然太长了。</p>
 
@@ -361,7 +363,7 @@ public abstract class Window {}
 
 <p>大致就这两个逻辑，虽说比较粗略，不过，这对于接下来看源码就足够了，并且源码有比较多的注释，基本上大致的方向是可以弄懂了。</p>
 
-<pre class="line-numbers"><code class="language-java">@Override
+<pre><code class="language-java">@Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
 
         ... 
@@ -598,7 +600,7 @@ public abstract class Window {}
 
 <p>上面的dispatchTouchEvent返回值是由handle决定，我们先来看第一处第8行代码</p>
 
-<pre class="line-numbers"><code class="language-java"> boolean handled = false;
+<pre><code class="language-java"> boolean handled = false;
         if (onFilterTouchEventForSecurity(ev)) {
             final int action = ev.getAction();
             final int actionMasked = action &amp; MotionEvent.ACTION_MASK;
@@ -617,7 +619,7 @@ public abstract class Window {}
 
 <p>这个onFilterTouchEventForSecurity方法如果返回false的话，基本上里面的代码都不用分析了，直接返回false。那我们进去看看这个方法做了什么。</p>
 
-<pre class="line-numbers"><code class="language-java">    /**
+<pre><code class="language-java">    /**
      * Filter the touch event to apply security policies.
      *
      * @param event The motion event to be filtered.
@@ -638,7 +640,7 @@ public abstract class Window {}
 
 <p>这是一个安全策略方面的过滤，我们来看下这两个变量FILTER_TOUCHES_WHEN_OBSCURED、MotionEvent.FLAG_WINDOW_IS_OBSCURED是什么意思</p>
 
-<pre class="line-numbers"><code class="language-text">    /**
+<pre><code class="language-text">    /**
      * Indicates that the view should filter touches when its window is obscured.
      * Refer to the class comments for more information about this security feature.
      * {@hide}
@@ -646,7 +648,7 @@ public abstract class Window {}
     static final int FILTER_TOUCHES_WHEN_OBSCURED = 0x00000400;
 </code></pre>
 
-<pre class="line-numbers"><code class="language-text">    /**
+<pre><code class="language-text">    /**
      * This flag indicates that the window that received this motion event is partly
      * or wholly obscured by another visible window above it.  This flag is set to true
      * even if the event did not directly pass through the obscured area.
@@ -662,7 +664,7 @@ public abstract class Window {}
 <p>从上面的代码注释可以看出来，这个View不能被其他的window遮挡住，这是谷歌的一个安全策略，避免被恶意程序误导用户或劫持触摸。<br/><br/>
 第二处handle的改变是在172行</p>
 
-<pre class="line-numbers"><code class="language-java">        if (mFirstTouchTarget == null) {
+<pre><code class="language-java">        if (mFirstTouchTarget == null) {
                // No touch targets so treat this as an ordinary view.
                handled = dispatchTransformedTouchEvent(ev, canceled, null,
                     TouchTarget.ALL_POINTER_IDS);
@@ -684,7 +686,7 @@ public abstract class Window {}
 
 <p>很明显handled的值又跟mFirstTouchTarget、alreadyDispatchedToNewTouchTarget这两个值有关，另外还跟dispatchTransformedTouchEvent（）这个方法有关，dispatchTransformedTouchEvent（）方法，我们留在后面分析，我们先来看看这两个值是在什么时候在哪里被改变的。</p>
 
-<pre class="line-numbers"><code class="language-java">         mLastTouchDownX = ev.getX();
+<pre><code class="language-java">         mLastTouchDownX = ev.getX();
          mLastTouchDownY = ev.getY();
          //给mFirstTouchTarget赋值，该事件已经被子View确认处理了
          newTouchTarget = addTouchTarget(child, idBitsToAssign);
@@ -696,7 +698,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>好了，如果是这样，我们再从上面的第13行开始分析。</p>
 
-<pre class="line-numbers"><code class="language-text"> // Handle an initial down.
+<pre><code class="language-text"> // Handle an initial down.
             if (actionMasked == MotionEvent.ACTION_DOWN) {
                 // Throw away all previous state when starting a new touch gesture.
                 // The framework may have dropped the up or cancel event for the previous
@@ -709,7 +711,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>这里先对该事件进行判断，如果是ACTION_DOWN事件会进到这个方法里面，做一些处理。我们来看下这两个方法都做了哪些。</p>
 
-<pre class="line-numbers"><code class="language-text">    /**
+<pre><code class="language-text">    /**
      * Cancels and clears all touch targets.
      */
     private void cancelAndClearTouchTargets(MotionEvent event) {
@@ -741,7 +743,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>从这个方法的名字可以看出来，这个方法做了两件事取消跟清除TouchTarget，首先是取消，这里的取消是指分发ACTION_CANCEL事件，在我上面注释代码的第18行，dispatchTransformedTouchEvent（）这个方法的第二个参数为true，这个值会在更改事件为ACTION_CANCEL，并分发给上次处理事件的View。这个分发事件的方法，我们留在后面分析，现在继续分析清除。</p>
 
-<pre class="line-numbers"><code class="language-text">    /**
+<pre><code class="language-text">    /**
      * Clears all touch targets.
      */
     private void clearTouchTargets() {
@@ -759,7 +761,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>这个方法很简单了，就对TouchTarget的next是回收，最后再把mFirstTouchTarget置null。好了，这两个方法分析完，我们再回到刚刚的那个地方，看到还有一个方法resetTouchState（）</p>
 
-<pre class="line-numbers"><code class="language-text">    /**
+<pre><code class="language-text">    /**
      * Resets all touch state in preparation for a new cycle.
      */
     private void resetTouchState() {
@@ -772,7 +774,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>这个方法除了clearTouchTargets（）、resetCancelNextUpFlag()这两个方法外，还对 mGroupFlags 这个标志做一个拦截方面的修改，这个标志可以让子View请求父布局不要去拦截某个事件（ACTION_DOWN除外），并且可通过getParent().requestDisallowInterceptTouchEvent()去修改这个值。</p>
 
-<pre class="line-numbers"><code class="language-text">  // Check for interception.
+<pre><code class="language-text">  // Check for interception.
             final boolean intercepted;
             //子View唯一一个可以用来控制父类事件传递
             //只有ACTION_DOWN事件跟mFirstTouchTarget不为空的情况，后面的讨论大多是围绕着mFirstTouchTarget来进行的
@@ -800,7 +802,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>按照我上面提供源码走下来，在87行处有着下面这个方法，这个方法主要是将子View按照Z轴的大小排序。</p>
 
-<pre class="line-numbers"><code class="language-text">  ArrayList&lt;View&gt; buildOrderedChildList() {
+<pre><code class="language-text">  ArrayList&lt;View&gt; buildOrderedChildList() {
         final int childrenCount = mChildrenCount;
         if (childrenCount &lt;= 1 || !hasChildWithZ()) return null;
 
@@ -834,7 +836,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>其中getAndVerifyPreorderedIndex只是对View的下标进行再次确定。这里面提到一个自定义排序的问题，正常情况的布局排序是根据xml的顺序或者addView的顺序决定的。当然google也提供了setChildrenDrawingOrderEnabled（），getChildDrawingOrder（）这两个方法进行自定义排序，有需求的可以去自行了解下，我们就不深入探讨了。</p>
 
-<pre class="line-numbers"><code class="language-text">  if (childWithAccessibilityFocus != null) {
+<pre><code class="language-text">  if (childWithAccessibilityFocus != null) {
         if (childWithAccessibilityFocus != child) {
               continue;
         }
@@ -845,7 +847,7 @@ mFirstTouchTarget赋值。</p>
 
 <p>现在是取到了所有的子View，那么接下来就是筛选哪些View可以处理了。首先是先获取到哪个是获取焦点的View，并且这个View是否在这些子View里面。如果找到了就走到下一步。</p>
 
-<pre class="line-numbers"><code class="language-text">//判断这个View是否具备处理的条件
+<pre><code class="language-text">//判断这个View是否具备处理的条件
 if (!canViewReceivePointerEvents(child)
         || !isTransformedTouchPointInView(x, y, child, null)) {
     ev.setTargetAccessibilityFocus(false);
@@ -855,7 +857,7 @@ if (!canViewReceivePointerEvents(child)
 
 <p><strong>我们来看看第一个判断方法</strong></p>
 
-<pre class="line-numbers"><code class="language-text">  /**
+<pre><code class="language-text">  /**
      * Returns true if a child view can receive pointer events.
      * @hide
      */
@@ -867,7 +869,7 @@ if (!canViewReceivePointerEvents(child)
 
 <p><strong>第二个方法</strong></p>
 
-<pre class="line-numbers"><code class="language-text">/**
+<pre><code class="language-text">/**
  * Returns true if a child view contains the specified point when transformed
  * into its coordinate space.
  * Child must not be null.
@@ -889,7 +891,7 @@ protected boolean isTransformedTouchPointInView(float x, float y, View child,
 
 <p>可见或者是正在执行动画的，并且位置是落在这个View的范围的。满足这些条件外，再判断这个View是否已经是在mFirstTouchTarget的子View里面了，如果是的话，也是结束循环了。</p>
 
-<pre class="line-numbers"><code class="language-text">newTouchTarget = getTouchTarget(child);
+<pre><code class="language-text">newTouchTarget = getTouchTarget(child);
 if (newTouchTarget != null) {
     // Child is already receiving touch within its bounds.
     // Give it the new pointer in addition to the ones it is handling.
@@ -900,7 +902,7 @@ if (newTouchTarget != null) {
 
 <p>以上条件都满足的话，我们就进行分发事件的方法，我们来看下这个方法做了什么操作。</p>
 
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
      * Transforms a motion event into the coordinate space of a particular child view,
      * filters out irrelevant pointer ids, and overrides its action if necessary.
      * If child is null, assumes the MotionEvent will be sent to this ViewGroup instead.
@@ -980,7 +982,7 @@ if (newTouchTarget != null) {
 
 <p>这个方法一看就有点长了，慌不慌~其实这个方法就做了两件事，第一件事，就是如果cancel为true的话，更改这个事件为ACTION_CANCEL；第二件事，就是child为null的话，调用super.dispatchTouchEvent(event);child不为空的话，就调用super.dispatchTouchEvent(event);好吧，其实这个方法，只需要看上面那部分就差不多了。</p>
 
-<pre class="line-numbers"><code class="language-text">...
+<pre><code class="language-text">...
 if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
             event.setAction(MotionEvent.ACTION_CANCEL);
             if (child == null) {
@@ -998,7 +1000,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>如果dispatchTransformedTouchEvent方法返回true的话，就代表了这个事件已经被子View消费了，接下来关键的方法就是调用addTouchTarget（）这个方法，给mFirstTouchTarget赋值。</p>
 
-<pre class="line-numbers"><code class="language-text"> /**
+<pre><code class="language-text"> /**
      * Adds a touch target for specified child to the beginning of the list.
      * Assumes the target child is not already present.
      */
@@ -1012,7 +1014,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>如果dispatchTransformedTouchEvent方法返回false的话，那么就代表这个事件没有View消费，那就是只能自己消费了</p>
 
-<pre class="line-numbers"><code class="language-text"> if (mFirstTouchTarget == null) {
+<pre><code class="language-text"> if (mFirstTouchTarget == null) {
            // No touch targets so treat this as an ordinary view.
            handled = dispatchTransformedTouchEvent(ev, canceled, null,
                    ouchTarget.ALL_POINTER_IDS);
@@ -1030,7 +1032,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>接着我们再来说下除了ACTION_DOWN以外的事件传递情况，从上面的demo我们可以得知，消费了ACTION_DOWN事件，后续的事件也将给这个View消费。也即是mFirstTouchTarget != null的情况。</p>
 
-<pre class="line-numbers"><code class="language-java">// Dispatch to touch targets, excluding the new touch target if we already
+<pre><code class="language-java">// Dispatch to touch targets, excluding the new touch target if we already
                 // dispatched to it.  Cancel touch targets if necessary.
                 //处理除了ACTION_DOWN以外的事件
                 TouchTarget predecessor = null;
@@ -1072,7 +1074,7 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
 <p>下面是整个dispatchTouchEvent()里面关键方法的调用流程，可以方便理解。</p>
 
-<p><figure><img src="media/15561207872676/15713062324461.jpg" alt=""/></figure></p>
+<p><img src="media/15561207872676/15713062324461.jpg" alt=""/></p>
 
 <p>好了，整个ViewGroup层dispatchTouchEvent传递到View层的dispatchTouchEvent或者传递给super.dispatchTouchEvent(event)，下一节将对View层的源码进行解析。</p>
 
@@ -1148,9 +1150,9 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 
       	<p class="cat-list">
         
-            <a href="Android%E6%BA%90%E7%A0%81.html"><strong>Android源码</strong></a>
-        
             <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
         
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
@@ -1167,6 +1169,10 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
             <a href="Python.html"><strong>Python</strong></a>
         
             <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
          
         </p>
 
@@ -1183,31 +1189,31 @@ if (cancel || oldAction == MotionEvent.ACTION_CANCEL) {
 	      
 		      
 			      <li class="post">
-			        <a href="15818619982581.html">IDEA 远程一键部署Spring Boot到Docker</a>
+			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15813395132789.html">Flutter VsCode插件</a>
+			        <a href="16127020620600.html">封装</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15809146907844.html">Flutter 组件小记</a>
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15808782889824.html">Flutter常用第三方库</a>
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="15767453112302.html">添加环境变量</a>
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
@@ -1262,6 +1268,215 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
   
     
 
@@ -1282,8 +1497,6 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
      
     </script>
 
-    
-<script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/MathJax.js?config=TeX-AMS_SVG-full"></script><script type="text/x-mathjax-config">MathJax.Hub.Config({TeX: { equationNumbers: { autoNumber: "AMS" } }});</script>
 
 
   </body>

@@ -1,0 +1,1738 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android Gradle使用总结 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="MySQL.html">MySQL</a></li>
+        
+            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android Gradle使用总结</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/10/31</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android.html'>Android</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2 id="toc_0">Android Gradle</h2>
+
+<p>Android项目使用 Gradle 作为构建框架，Gradle 又是以Groovy为脚本语言。所以学习Gradle之前需要先熟悉Groovy脚本语言。</p>
+
+<p>Groovy是基于Java语言的脚本语言，所以它的语法和Java非常相似，但是具有比java更好的灵活性。下面就列举一些和Java的主要区别。</p>
+
+<h2 id="toc_1">Android Gradle 的 Project 和 Tasks</h2>
+
+<p>这个Gradle中最重要的两个概念。每次构建（build）至少由一个project构成，一个project 由一到多个task构成。项目结构中的每个build.gradle文件代表一个project，在这编译脚本文件中可以定义一系列的task；task 本质上又是由一组被顺序执行的Action`对象构成，Action其实是一段代码块，类似于Java中的方法。</p>
+
+<h2 id="toc_2">Android Gradle 构建生命周期</h2>
+
+<p>每次构建的执行本质上执行一系列的Task。某些Task可能依赖其他Task。哪些没有依赖的Task总会被最先执行，而且每个Task只会被执行一遍。每次构建的依赖关系是在构建的配置阶段确定的。每次构建分为3个阶段：</p>
+
+<ul>
+<li>Initialization: 初始化阶段</li>
+</ul>
+
+<p>这是创建Project阶段，构建工具根据每个build.gradle文件创建出一个Project实例。初始化阶段会执行项目根目录下的settings.gradle文件，来分析哪些项目参与构建。</p>
+
+<p>所以这个文件里面的内容经常是：</p>
+
+<pre><code class="language-text">include &#39;:app&#39;
+include &#39;:libraries:someProject&#39;
+</code></pre>
+
+<p>这是告诉Gradle这些项目需要编译，所以我们引入一些开源的项目的时候，需要在这里填上对应的项目名称，来告诉Gradle这些项目需要参与构建。</p>
+
+<ul>
+<li>Configuration:配置阶段</li>
+</ul>
+
+<p>这个阶段，通过执行构建脚本来为每个project创建并配置Task。配置阶段会去加载所有参与构建的项目的build.gradle文件，会将每个build.gradle文件实例化为一个Gradle的project对象。然后分析project之间的依赖关系，下载依赖文件，分析project下的task之间的依赖关系。</p>
+
+<ul>
+<li>Execution:执行阶段</li>
+</ul>
+
+<p>这是Task真正被执行的阶段，Gradle会根据依赖关系决定哪些Task需要被执行，以及执行的先后顺序。 <br/>
+task是Gradle中的最小执行单元，我们所有的构建，编译，打包，debug，test等都是执行了某一个task，一个project可以有多个task，task之间可以互相依赖。例如我有两个task，taskA和taskB，指定taskA依赖taskB，然后执行taskA，这时会先去执行taskB，taskB执行完毕后在执行taskA。</p>
+
+<p>说到这可能会有疑问，我翻遍了build.gradle也没看见一个task长啥样，有一种被欺骗的赶脚！</p>
+
+<p>其实不是，你点击AndroidStudio右侧的一个Gradle按钮，会打开一个面板，内容差不多是这样的：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920575828.png" alt="20171028150920575828.png"/></p>
+
+<p>里面的每一个条目都是一个task，那这些task是哪来的呢？</p>
+
+<p>一个是根目录下的 build.gradle 中的</p>
+
+<pre><code class="language-text">dependencies {
+    classpath &#39;com.android.tools.build:gradle:2.2.2&#39;
+}
+</code></pre>
+
+<p>一个是 app 目录下的 build.gradle 中的</p>
+
+<p><code>apply plugin: &#39;com.android.application&#39;</code></p>
+
+<p>这两段代码决定的。也就是说，Gradle提供了一个框架，这个框架有一些运行的机制可以让你完成编译，但是至于怎么编译是由插件决定的。还好Google已经给我们写好了Android对应的Gradle工具，我们使用就可以了。</p>
+
+<p>根目录下的build.gradle中dependencies {classpath ‘com.android.tools.build:gradle:2.2.2’}是Android Gradle编译插件的版本。</p>
+
+<p>app目录下的build.gradle中的apply plugin: ‘com.android.application’是引入了Android的应用构建项目，还有com.android.library和com.android.test用来构建library和测试。</p>
+
+<p>所有Android构建需要执行的task都封装在工具里，如果你有一些特殊需求的话，也可以自己写一些task。那么对于开发一个Android应用来说，最关键的部分就是如何来用AndroidGradle的插件了。</p>
+
+<h2 id="toc_3">认知Gradle Wrapper</h2>
+
+<p>Android Studio中默认会使用 Gradle Wrapper 而不是直接使用Gradle。命令也是使用gradlew而不是gradle。这是因为gradle针对特定的开发环境的构建脚本，新的gradle可能不能兼容旧版的构建环境。为了解决这个问题，使用Gradle Wrapper 来间接使用 gradle。相当于在外边包裹了一个中间层。对开发者来说，直接使用Gradlew 即可，不需要关心 gradle的版本变化。Gradle Wrapper 会负责下载合适的的gradle版本来构建项目。</p>
+
+<h2 id="toc_4">Android 三个文件重要的 gradle 文件</h2>
+
+<p>Gradle项目有3个重要的文件需要深入理解：项目根目录的 build.gradle , settings.gradle 和模块目录的 build.gradle 。</p>
+
+<ul>
+<li><p>1.settings.gradle 文件会在构建的 initialization 阶段被执行，它用于告诉构建系统哪些模块需要包含到构建过程中。对于单模块项目， settings.gradle 文件不是必需的。对于多模块项目，如果没有该文件，构建系统就不能知道该用到哪些模块。</p></li>
+<li><p>2.项目根目录的 build.gradle 文件用来配置针对所有模块的一些属性。它默认包含2个代码块：buildscript{…}和allprojects{…}。前者用于配置构建脚本所用到的代码库和依赖关系，后者用于定义所有模块需要用到的一些公共属性。</p></li>
+</ul>
+
+<pre><code class="language-text">buildscript {
+    repositories {
+        jcenter()
+    }
+    dependencies {
+        classpath &#39;com.android.tools.build:gradle:2.3.2&#39;
+    }
+}
+
+allprojects {
+    repositories {
+        jcenter()
+    }
+}
+
+task clean(type: Delete) {
+    delete rootProject.buildDir
+}
+</code></pre>
+
+<p>buildscript：定义了 Android 编译工具的类路径。repositories中, jCenter是一个著名的 Maven 仓库。</p>
+
+<p>allprojects:中定义的属性会被应用到所有 moudle 中，但是为了保证每个项目的独立性，我们一般不会在这里面操作太多共有的东西。</p>
+
+<ul>
+<li>3.模块级配置文件 build.gradle 针对每个moudle 的配置，如果这里的定义的选项和顶层 build.gradle定义的相同。它有3个重要的代码块：plugin，android 和 dependencies。</li>
+</ul>
+
+<h2 id="toc_5">定制项目属性（project properties)</h2>
+
+<p>在项目根目录的build.gradle配置文件中，我们可以定制适用于所有模块的属性，通过ext 代码块来实现。如下所示：</p>
+
+<pre><code class="language-text">ext {
+    compileSdkVersion = 22
+    buildToolsVersion = &quot;22.0.1&quot;
+}
+</code></pre>
+
+<p>然后我们可以在模块目录的build.gradle配置文件中引用这些属性,引用语法为rootProject.ext.{属性名}。如下：</p>
+
+<pre><code class="language-text">android {
+    compileSdkVersion rootProject.ext.compileSdkVersion
+    buildToolsVersion rootProject.ext.buildToolsVersion
+}
+</code></pre>
+
+<h2 id="toc_6">Android studio gradle Task</h2>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920589712600.png" alt="20171028150920589712600.png"/></p>
+
+<pre><code class="language-text">//构建
+gradlew app:clean    //移除所有的编译输出文件，比如apk
+
+gradlew app:build   //构建 app module ，构建任务，相当于同时执行了check任务和assemble任务
+
+//检测
+gradlew app:check   //执行lint检测编译。
+
+//打包
+gradlew app:assemble //可以编译出release包和debug包，可以使用gradlew assembleRelease或者gradlew assembleDebug来单独编译一种包
+
+gradlew app:assembleRelease  //app module 打 release 包
+
+gradlew app:assembleDebug  //app module 打 debug 包
+
+//安装，卸载
+
+gradlew app:installDebug  //安装 app 的 debug 包到手机上
+
+gradlew app:uninstallDebug  //卸载手机上 app 的 debug 包
+
+gradlew app:uninstallRelease  //卸载手机上 app 的 release 包
+
+gradlew app:uninstallAll  //卸载手机上所有 app 的包
+</code></pre>
+
+<p>这些都是基本的命令，在实际项目中会根据不同的配置，会对这些task 设置不同的依赖。比如 默认的 assmeble 会依赖 assembleDebug 和assembleRelease，如果直接执行assmeble，最后会编译debug，和release 的所有版本出来。如果我们只需要编译debug 版本，我们可以运行assembleDebug。</p>
+
+<p>除此之外还有一些常用的新增的其他命令，比如 install命令，会将编译后的apk 安装到连接的设备。</p>
+
+<h2 id="toc_7">lint 检测</h2>
+
+<ul>
+<li>忽略编译器的 lint 检查</li>
+</ul>
+
+<pre><code class="language-text">android {
+
+  lintOptions {
+      abortOnError false
+  }
+}
+</code></pre>
+
+<h2 id="toc_8">buildTypes 定义了编译类型</h2>
+
+<pre><code class="language-text">android{
+
+  buildTypes {
+       release {
+           minifyEnabled true  //打开混淆
+           proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+       }
+        debug {
+           minifyEnabled false //关闭混淆
+           proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_9">productFlavors 多渠道打包</h2>
+
+<p>AndroidManifest.xml 里设置动态渠道变量</p>
+
+<pre><code class="language-text">&lt;meta-data
+    android:name=&quot;UMENG_CHANNEL&quot;
+    android:value=&quot;${UMENG_CHANNEL_VALUE}&quot; /&gt;
+</code></pre>
+
+<p>在 build.gradle 设置 productFlavors , 这里假定我们需要打包的渠道为酷安市场、360、小米、百度、豌豆荚。</p>
+
+<pre><code class="language-text">android {  
+
+    productFlavors {
+        kuan {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;kuan&quot;]
+        }
+        xiaomi {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;xiaomi&quot;]
+        }
+        qh360 {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;qh360&quot;]
+        }
+        baidu {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;baidu&quot;]
+        }
+        wandoujia {
+            manifestPlaceholders = [UMENG_CHANNEL_VALUE: &quot;wandoujia&quot;]
+        }
+    } 
+}
+</code></pre>
+
+<p>或者批量修改</p>
+
+<pre><code class="language-text">android {  
+
+    productFlavors {
+        kuan {}
+        xiaomi {}
+        qh360 {}
+        baidu {}
+        wandoujia {}
+    }  
+
+    productFlavors.all { 
+        flavor -&gt; flavor.manifestPlaceholders = [UMENG_CHANNEL_VALUE: name] 
+    }
+}
+</code></pre>
+
+<p>这样在打包的时候就可以选择渠道了</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920602392842.png" alt="20171028150920602392842.png"/></p>
+
+<p>或者用命令打包 ，比如：</p>
+
+<pre><code class="language-text">gradlew assembleWandoujiaRelease  //豌豆荚 release 包
+
+gradlew assembleWandoujiaDebug //豌豆荚 debug 包
+</code></pre>
+
+<h2 id="toc_10">多渠道设置包名</h2>
+
+<p>有时候我们需要分渠道设置 applicationId 、友盟的 appkey 、友盟渠道号。</p>
+
+<pre><code class="language-text">productFlavors {
+    google {
+        applicationId &quot;com.wifi.cool&quot;
+        manifestPlaceholders = [                
+            UMENG_APPKEY_VALUE : &quot;456789456789&quot;,
+            UMENG_CHANNEL_VALUE: &quot;google&quot;,            
+        ]
+    }
+
+    baidu{
+        applicationId &#39;com.wifi.hacker&#39;
+        manifestPlaceholders = [
+        UMENG_APPKEY_VALUE     : &quot;123456789789&quot;,
+        UMENG_CHANNEL_VALUE    : &quot;baidu&quot;,          
+        ]
+    }
+}
+</code></pre>
+
+<h2 id="toc_11">Signing 签名</h2>
+
+<p>在 android 标签下添加 signingConfigs 标签，如下：</p>
+
+<pre><code class="language-text">android {
+    signingConfigs {
+        config {
+           keyAlias &#39;yiba&#39;
+           keyPassword &#39;123456&#39;
+           storeFile file(&#39;C:/work/Key.jks&#39;)
+           storePassword &#39;1234567&#39;
+       }
+   }
+} 
+</code></pre>
+
+<p>可以在 release 和 debug 包中定义签名，如下：</p>
+
+<pre><code class="language-text">android {
+    signingConfigs {
+        config {
+            keyAlias &#39;yiba&#39;
+            keyPassword &#39;123456&#39;
+            storeFile file(&#39;C:/work/Key.jks&#39;)
+            storePassword &#39;1234567&#39;
+        }
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            signingConfig signingConfigs.config
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            signingConfig signingConfigs.config
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_12">依赖管理</h2>
+
+<h3 id="toc_13">依赖 jcenter 包</h3>
+
+<p>每个库名称包含三个元素：组名:库名称:版本号</p>
+
+<p><code>compile &#39;com.android.support:appcompat-v7:25.0.0&#39;</code></p>
+
+<h3 id="toc_14">依赖本地 module</h3>
+
+<p><code>compile project(&#39;:YibaAnalytics&#39;)</code></p>
+
+<h3 id="toc_15">依赖 jar 包</h3>
+
+<ul>
+<li>把 jar 包放在 libs 目录下</li>
+<li>在 build.gradle 中添加依赖</li>
+</ul>
+
+<pre><code class="language-text">dependencies {
+   compile files(&#39;libs/YibaAnalytics5.jar&#39;)
+}
+</code></pre>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920619455522.png" alt="20171028150920619455522.png"/></p>
+
+<h3 id="toc_16">依赖 aar 包</h3>
+
+<ul>
+<li>把 aar 包放到 libs 目录下</li>
+<li>在 build.gradle 中添加依赖</li>
+</ul>
+
+<pre><code class="language-text">repositories {
+    flatDir {
+        dirs &#39;libs&#39;
+    }
+}
+
+dependencies {
+    compile(name:&#39;YibaAnalytics-release&#39;, ext:&#39;aar&#39;)
+}
+</code></pre>
+
+<p>如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920622394032.png" alt="20171028150920622394032.png"/></p>
+
+<ul>
+<li>自定义依赖包目录</li>
+</ul>
+
+<p>当我们的 aar 包需要被多个 module 依赖时，我们就不能把 aar 包放在单一的 module 中，我们可以在项目的根目录创建一个目录，比如叫 aar 目录，然后把我们的 aar 包放进去，如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920623519197.png" alt="20171028150920623519197.png"/></p>
+
+<p>在项目的根目录的 build.gradle 的 allprojects 标签下的 repositories 添加 ：</p>
+
+<pre><code class="language-text"> flatDir {
+     dirs &#39;../aar&#39;
+}
+</code></pre>
+
+<p>../aar 表示根目录下的 aar 文件夹。</p>
+
+<p>如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920625348073.png" alt="20171028150920625348073.png"/></p>
+
+<p>然后就可以添加依赖了，如下所示：</p>
+
+<p><code>compile(name:&#39;YibaAnalytics-release&#39;, ext:&#39;aar&#39;)</code></p>
+
+<h3 id="toc_17">依赖配置</h3>
+
+<p>有些时候，你可能需要和sdk协调工作。为了能顺利编译你的代码，你需要添加SDK到你的编译环境。你不需要将sdk包含在你的APK中，因为它早已经存在于设备中，所以配置来啦，我们会有5个不同的配置：</p>
+
+<ul>
+<li>compile</li>
+<li>apk</li>
+<li>provided</li>
+<li>testCompile</li>
+<li>androidTestCompile</li>
+</ul>
+
+<p>compile是默认的那个，其含义是包含所有的依赖包，即在APK里，compile的依赖会存在。</p>
+
+<p>apk的意思是apk中存在，但是不会加入编译中，这个貌似用的比较少。</p>
+
+<p>provided的意思是提供编译支持，但是不会写入apk。</p>
+
+<h3 id="toc_18">排除依赖兼容包</h3>
+
+<p>有时候我们在引入依赖包的时候，会额外的引入 v7, v4 的包，对我们的项目造成额外的负担，我们需要把这个兼容包排除，可以使用 exclude 就能做到。</p>
+
+<pre><code class="language-text">compile(&#39;com.google.firebase:firebase-ads:11.0.4&#39;, {
+      exclude group: &#39;com.android.support&#39;   //排除v7 , v4 包
+})
+</code></pre>
+
+<h2 id="toc_19">native包（so包）</h2>
+
+<p>用c或者c++写的library会被叫做so包，Android插件默认情况下支持native包，你需要把.so文件放在对应的文件夹中：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920630815374.png" alt="20171028150920630815374.png"/></p>
+
+<p><strong>注意</strong></p>
+
+<p>jniLibs 目录应该和 Java 目录在同一级</p>
+
+<h2 id="toc_20">defaultConfig 详解</h2>
+
+<p>defaultConfig 对应的是 ProductFlavor 类。</p>
+
+<h2 id="toc_21">resConfigs ： 过滤语言</h2>
+
+<p>如果你的app中仅支持1,2种语言，但是可能引用的lib库包含多种其他语言的strings资源，这个时候我们可以通过resConfig指定我们需要的strings资源。</p>
+
+<pre><code class="language-text">android {
+
+    defaultConfig {
+        applicationId &quot;com.yiba.sharewe.lite.activity&quot;
+        minSdkVersion 14
+        targetSdkVersion 24
+        versionCode 46
+        versionName &quot;1.74&quot;
+        resConfigs &#39;en&#39;, &#39;zh-rCN&#39; ,&#39;es&#39;  //本次打包，只把 en(英文)、zh-rCN(中文简体)、es（西班牙语）打进保内，其他语言忽略
+    }
+}
+</code></pre>
+
+<h2 id="toc_22">resConfigs ： 过滤 drawable文件夹的资源</h2>
+
+<p>一般情况下，我们打完包，res 下面的资源如图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920635182429.png" alt="20171028150920635182429.png"/></p>
+
+<p>现在加上资源过滤规则：</p>
+
+<pre><code class="language-text">android {
+    defaultConfig {
+        applicationId &quot;com.wifi.analytics&quot;
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+        resConfigs &quot;hdpi&quot;  //打包的时候只保留 drawable-xhdpi 文件夹里面的资源
+    }
+}
+</code></pre>
+
+<p>这次我们打包效果如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171028150920637414691.png" alt="20171028150920637414691.png"/></p>
+
+<h2 id="toc_23">buildTypes 详解</h2>
+
+<p><a href="http://google.github.io/android-gradle-dsl/current/com.android.build.gradle.internal.dsl.BuildType.html">官方文档</a></p>
+
+<p>buildTypes{}对应的是 BuildType 类</p>
+
+<p><strong>继承关系</strong></p>
+
+<p>BuildType 继承 DefaultBuildType ； DefaultBuildType 继承 BaseConfigImpl ；</p>
+
+<pre><code class="language-text">BaseConfigImpl
+    --- DefaultBuildType 
+          --- BuildType
+</code></pre>
+
+<p><strong>buildTypes的属性</strong>：</p>
+
+<pre><code class="language-text">name：build type的名字
+
+applicationIdSuffix：应用id后缀
+
+versionNameSuffix：版本名称后缀
+
+debuggable：是否生成一个debug的apk
+
+minifyEnabled：是否混淆
+
+proguardFiles：混淆文件
+
+signingConfig：签名配置
+
+manifestPlaceholders：清单占位符
+
+shrinkResources：是否去除未利用的资源，默认false，表示不去除。
+
+zipAlignEnable：是否使用zipalign工具压缩。
+
+multiDexEnabled：是否拆成多个Dex
+
+multiDexKeepFile：指定文本文件编译进主Dex文件中
+
+multiDexKeepProguard：指定混淆文件编译进主Dex文件中
+</code></pre>
+
+<p><strong>buildType的方法</strong>：</p>
+
+<pre><code class="language-text">1.buildConfigField(type,name,value)：添加一个变量生成BuildConfig类。
+
+2.consumeProguardFile(proguardFile)：添加一个混淆文件进arr包。
+
+3.consumeProguardFile(proguardFiles)：添加混淆文件进arr包。
+
+4.externalNativeBuild(action)：配置本地的build选项。
+
+5.initWith：复制这个build类型的所有属性。
+
+6.proguardFile(proguardFile)：添加一个新的混淆配置文件。
+
+7.proguradFiles(files):添加新的混淆文件
+
+8.resValue(type,name,value)：添加一个新的生成资源
+
+9.setProguardFiles(proguardFileIterable):设置一个混淆配置文件。
+</code></pre>
+
+<h2 id="toc_24">initWith ：复制属性</h2>
+
+<pre><code class="language-text">android {
+    compileSdkVersion 25
+    buildToolsVersion &quot;25.0.2&quot;
+    defaultConfig {
+        applicationId &quot;com.wifi.analytics&quot;
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+
+        myType {
+            initWith debug  //完全复制 debug 的所有属性‘
+            minifyEnabled true //自定义打开混淆
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_25">applicationIdSuffix 、versionNameSuffix ：添加后缀</h2>
+
+<pre><code class="language-text">android {
+    compileSdkVersion 25
+    buildToolsVersion &quot;25.0.2&quot;
+    defaultConfig {
+        applicationId &quot;com.wifi.analytics&quot;
+        minSdkVersion 9
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            applicationIdSuffix &quot;zhao&quot;  //applicationId 追加后缀名 zhao
+            versionNameSuffix &quot;debug&quot;  //versionName 追加后缀名 debug1.0
+        }
+    }
+}
+</code></pre>
+
+<p>效果图，如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920649886369.png" alt="20171029150920649886369.png"/></p>
+
+<h2 id="toc_26">buildConfigField： 自定义属性</h2>
+
+<p>在 build.gradle 文件中定义 buildConfigField 属性</p>
+
+<pre><code class="language-text">android {
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://yiba.com\&quot;&quot;  //自定义String属性
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://yiba.com\&quot;&quot;  //自定义String属性
+        }
+    }
+}
+</code></pre>
+
+<p>然后点击同步按钮，然后就可以在 build 目录看到 debug 和 release 信息。</p>
+
+<p>debug 环境下的 BuildConfig 如下： </p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920652322417.png" alt="20171029150920652322417.png"/></p>
+
+<p>release 环境下的 BuildConfig 如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920653292275.png" alt="20171029150920653292275.png"/></p>
+
+<p>当然我们也可以在代码中获取自定义的值：</p>
+
+<pre><code class="language-text">//获取变量值
+String API = BuildConfig.API_ENV ;
+</code></pre>
+
+<p>上面演示了自定义 String 变量，也可以 自定义 int 、boolean</p>
+
+<pre><code class="language-text">android {
+
+    buildTypes {
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            buildConfigField &quot;String&quot;, &quot;API_ENV&quot;, &quot;\&quot;http://www.baidu.com\&quot;&quot; //自定义 String 值
+            buildConfigField &quot;Boolean&quot;, &quot;openLog&quot;, &quot;true&quot; //自定义 boolean 值
+            buildConfigField &quot;int&quot;, &quot;age&quot;, &quot;10&quot;   //自定义 int 值
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_27">Gradle 实现差异化构建</h2>
+
+<h3 id="toc_28">情景1</h3>
+
+<p>LeakCanary 是 square 公司出品的一个检测内存泄漏的开源库。</p>
+
+<p>GitHub ： <a href="https://github.com/square/leakcanary">https://github.com/square/leakcanary</a></p>
+
+<p>我们一般这样集成</p>
+
+<pre><code class="language-text">dependencies {
+    compile &#39;com.squareup.leakcanary:leakcanary-android:1.5.2&#39;
+}
+</code></pre>
+
+<p>然后我们在 Application 类中初始化：</p>
+
+<pre><code class="language-text">public class MyApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+
+        LeakCanary.install(this);
+    }
+}
+</code></pre>
+
+<p>但是这样集成有一个弊端，就是 debug 和 release 包都会把 LeakCanary 的源码打进去，如果我们在 release 包中不把 LeakCanary 源码打进去，怎么办？ 还好 LeakCanary 给我们提供了一个方法，方法如下：</p>
+
+<pre><code class="language-text">dependencies {
+
+ //打 debug 包
+ debugCompile &#39;com.squareup.leakcanary:leakcanary-android:1.5.1&#39;
+
+ //打 release 包
+ releaseCompile &#39;com.squareup.leakcanary:leakcanary-android-no-op:1.5.1&#39;
+
+}
+</code></pre>
+
+<p>leakcanary-android-no-op 是一个空壳，里面有2个空类，所以就可以避免把 LeakCanary 源码打进 release 包。但是这种方式有个缺陷，如果一些开源库没有提供 releaseCompile 库，那我们改怎么办了？下面的情景2 就会讲到解决方案。</p>
+
+<h3 id="toc_29">情景2</h3>
+
+<p>Stetho 是 Faceboo k开源的Andorid调试工具。当你的应用集成Stetho时，开发者可以访问Chrome，在Chrome Developer Tools中查看应用布局，网络请求，sqlite，preference 等等。</p>
+
+<p>官网：<a href="http://facebook.github.io/stetho/">http://facebook.github.io/stetho/</a></p>
+
+<p>从官网可以看到 stetho 没有提供 releaseCompile 包 ， 情景1 的方案就不能用了。新的思路集成方案如下：</p>
+
+<pre><code class="language-text">dependencies {
+    debugCompile &#39;com.facebook.stetho:stetho:1.5.0&#39;
+}
+</code></pre>
+
+<p>在 src 目录下创建 debug 目录、release 目录 ，然后分别在 debug 目录 和 release 目录 创建 java 目录 ， 在 java 目录中创建包名，比如： com.app , 如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920663742117.png" alt="20171029150920663742117.png"/></p>
+
+<p>debug 目录下创建 SDKManage 类 ，如下 ：</p>
+
+<pre><code class="language-text">public class SDKManager {
+
+    public static void init(Context context) {
+        //初始化 Stetho
+        Stetho.initializeWithDefaults(context);
+    }
+}
+</code></pre>
+
+<p>release 目录下创建 SDKManage 类 ，如下 ：</p>
+
+<pre><code class="language-text">public class SDKManager {
+
+    public static void init(Context context) { 
+        //这是一个空方法，目的是不引入 Stetho 源码
+    }
+}
+</code></pre>
+
+<p>在住项目中的 MyApplication 类，并且完成 Stetho 的初始化，如下：</p>
+
+<pre><code class="language-text">public class MyApplication extends Application {
+
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        SDKManager.init(this);
+    }
+}
+</code></pre>
+
+<p>这样我们便完成了简单的差异化构建, 打出来的 release 包就没有 Stetho 源码。</p>
+
+<h2 id="toc_30">SourceSet</h2>
+
+<h3 id="toc_31">SourceSet 简介</h3>
+
+<p>SourceSet 可以定义项目结构，也可以修改项目结构。Java插件默认实现了两个SourceSet，main 和 test。每个 SourceSet 都提供了一系列的属性，通过这些属性，可以定义该 SourceSet 所包含的源文件。比如，java.srcDirs，resources.srcDirs 。Java 插件中定义的其他任务，就根据 main 和 test 的这两个 SourceSet 的定义来寻找产品代码和测试代码等。</p>
+
+<h3 id="toc_32">SourceSet 定义源码目录</h3>
+
+<p>在 Android 项目中，我们可以在 src/main/java 目录新建 Java 文件，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920668425492.png" alt="20171029150920668425492.png"/></p>
+
+<p>现在我们在 src 目录下，新建 test1 目录 ，发现不能在 test1 目录中新建 Java 文件，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920669347940.png" alt="20171029150920669347940.png"/></p>
+
+<p>为什么在 test1 目录不能新建 Java 文件，因为 Gradle 中 SourceSet 默认定义的源码文件路径是src/main/java , 其他的文件下下面的源码我们自然无法访问。解决这个问题也很简单，我们需要在 SourceSet 中增加一个源码路径即可。如下所示：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            java {
+                srcDir &#39;src/test1&#39; //指定源码目录
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>然后同步一下，就可以在 test1 目录中新建 Java 文件了。如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920675182396.png" alt="20171029150920675182396.png"/></p>
+
+<p>当然我们也可以同时指定多个源码目录，比如同时指定 test1 , test2 , test3 为源码目录。</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            java {
+                srcDir &#39;src/test1&#39; //指定 test1 为源码目录
+                srcDir &#39;src/test2&#39; //指定 test2 为源码目录
+                srcDir &#39;src/test3&#39; //指定 test3 为源码目录
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>或者 这样写 ：</p>
+
+<pre><code class="language-text">android {
+    sourceSets {
+        main {
+            java.srcDirs( &#39;src/test1&#39; , &#39;src/test2&#39; ,&#39;src/test3&#39; )
+        }
+    }
+}
+</code></pre>
+
+<p>效果如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920677817619.png" alt="20171029150920677817619.png"/></p>
+
+<h3 id="toc_33">SourceSet 定义资源目录</h3>
+
+<p>定义 test1 目录 Java 源代码路径、res 资源目录。目录结构如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920679824349.png" alt="20171029150920679824349.png"/></p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            java.srcDirs(&#39;src/test1/java&#39;)  //定义java 源代码
+            res.srcDirs(&#39;src/test1/res&#39;)    //定义资源目录（layout , drawable,values）
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_34">SourceSet 实现 layout 分包</h3>
+
+<p>对于一个大项目来说，页面太多，布局文件就很多，有时在众多布局文件中找某个模块的布局文件，很是痛苦，为了解决这个问题，我们可以在创建多个 layout 目录，不同模块的布局文件放在不同的 layout 目录中，这样查找起来，就容易很多。</p>
+
+<p>例子：</p>
+
+<p>比如我们的项目中，有两个模块分别为：登录、注册。</p>
+
+<ul>
+<li><p>第一步：把项目中 layout 文件夹改名字为 layouts</p></li>
+<li><p>第二步：在 layouts 目录下，分别创建 login 、register 目录 。</p></li>
+<li><p>第三步：分别在 login 、register 目录下创建 layout 目录。注意这一步是必须的，否则会报错。</p></li>
+<li><p>第四步：把 登录布局文件、注册布局文件 分别放在 第三步创建的对应的 layout 目录下。</p></li>
+</ul>
+
+<p>效果图如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920685572520.png" alt="20171029150920685572520.png"/></p>
+
+<p>SourceSet 实现如下：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            res.srcDirs &#39;src/main/res/layouts/login&#39;  //定义登录布局目录
+            res.srcDirs &#39;src/main/res/layouts/register&#39;  //定义注册布局目录
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_35">SourceSet 定义 AndroidManifest 文件</h3>
+
+<p>指定 test1 目录下的 AndroidManifest 文件。项目结构如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920687997782.png" alt="20171029150920687997782.png"/></p>
+
+<p>代码如下：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            manifest.srcFile &#39;src/test1/AndroidManifest.xml&#39;
+        }
+    }
+}
+</code></pre>
+
+<p>在组件化开发中, 我们需要针对 debug 与 release 模式下, 指定不同的 Manifest 文件, 代码如下：</p>
+
+<pre><code class="language-text">android {
+    def appDebug = false;
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            appDebug = false;
+        }
+
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+            appDebug = false;
+        }
+    }
+
+    sourceSets {
+        main {
+            if (appDebug) {
+                manifest.srcFile &#39;src/test1/AndroidManifest.xml&#39;
+            } else {
+                manifest.srcFile &#39;src/main/AndroidManifest.xml&#39;
+            }
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_36">SourceSet 定义 assets 目录</h3>
+
+<p>Android Studio 项目目录中，assets 默认目录如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920691136995.png" alt="20171029150920691136995.png"/></p>
+
+<p>如何重新定义 assets 目录 。在项目的根目录下创建 assets 目录，如下图所示：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171029150920691863996.png" alt="20171029150920691863996.png"/></p>
+
+<p>sourceSets 定义代码如下：</p>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            assets.srcDirs = [&#39;assets&#39;]
+        }
+    }
+}
+</code></pre>
+
+<h3 id="toc_37">SourceSet 定义其他资源</h3>
+
+<pre><code class="language-text">android {
+
+    sourceSets {
+        main {
+            jniLibs.srcDirs  //定义 jni 目录
+            aidl.srcDirs  //定义 aidl 目录
+        }
+    }
+}
+</code></pre>
+
+<h2 id="toc_38">applicationVariants</h2>
+
+<h3 id="toc_39">定义 versionName 、VersionCode</h3>
+
+<p>在打包的时候分 debug 、release 版本 , 需要控制 versionName</p>
+
+<pre><code class="language-text">android {
+
+     applicationVariants.all { variant -&gt;
+        def flavor = variant.mergedFlavor
+        def versionName = flavor.versionName
+        if (variant.buildType.isDebuggable()) {
+            versionName += &quot;_debug&quot;  //debug 名字
+        } else {
+            versionName += &quot;_release&quot; //release 名字
+        }
+        flavor.versionName = versionName
+    }
+}
+</code></pre>
+
+<h3 id="toc_40">定义 APK 包的名字</h3>
+
+<pre><code class="language-text">apply plugin: &#39;com.android.application&#39;
+
+android {
+
+    defaultConfig {
+        applicationId &quot;android.plugin&quot;
+        minSdkVersion 14
+        targetSdkVersion 25
+        versionCode 1
+        versionName &quot;1.0&quot;
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+        debug {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&#39;
+        }
+    }
+
+    //定义渠道
+    productFlavors {
+        xiaomi {
+            //小米
+        }
+        wandoujia {
+            // 豌豆荚
+        }
+    }
+
+    //打包命名
+    applicationVariants.all {
+        variant -&gt;
+            variant.outputs.each {
+                output -&gt;
+
+                    //定义一个新的apk 名字。
+                    // 新名字 = app 名字+ 渠道号 + 构建类型 + 版本号 + 当前构建时间
+                    def apkName = &quot;appName_${variant.flavorName}_${buildType.name}_v${variant.versionName}_${getTime()}.apk&quot;;
+                    output.outputFile = new File(output.outputFile.parent, apkName);
+            }
+    }
+
+}
+
+//获取当前时间
+def getTime() {
+    String today = new Date().format(&#39;YY年MM月dd日HH时mm分&#39;)
+    return today
+}
+</code></pre>
+
+<p>效果图如下：</p>
+
+<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017102915092069934597.png" alt="2017102915092069934597.png"/></p>
+
+<h2 id="toc_41">Task</h2>
+
+<h3 id="toc_42">定义 task</h3>
+
+<pre><code class="language-text">//定义任务1
+task task1&lt;&lt;{
+    println &#39;task1&#39;
+}
+
+//定义任务2
+task task2&lt;&lt;{
+    println &#39;task2&#39;
+}
+</code></pre>
+
+<h3 id="toc_43">mustRunAfter 定义 task 执行顺序</h3>
+
+<pre><code class="language-text">//task2 的执行顺讯在 task1 之后
+task2.mustRunAfter task1
+</code></pre>
+
+<ul>
+<li>测试1 ： gradlew task1<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+</code></pre>
+
+<ul>
+<li>测试2 ： gradlew task2<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task2
+task2
+</code></pre>
+
+<ul>
+<li>测试3 ： gradlew task1 task2<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<ul>
+<li>测试4 ： gradlew task2 task1<br/></li>
+</ul>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<h3 id="toc_44">结论</h3>
+
+<p>如果单独执行 task1 就只会执行 task1 的任务；单独执行 task2 就只会执行 task2 的任务； <br/>
+如果同时执行 task1、task2 , 一定会先执行 task1 , 等 task1 执行完后，就会执行 task2 内容。</p>
+
+<h3 id="toc_45">扩展</h3>
+
+<p>上面 mustRunAfter 我们还有一种写法，如下图所示：</p>
+
+<p><code>task2 {}.mustRunAfter task1</code></p>
+
+<p>这个写法的效果和 mustRunAfter 是一样的，当然我们还可以在 花括号里面写一些任务，比如 ：</p>
+
+<pre><code class="language-text">task2 {
+    println &#39;我最先执行&#39;
+}.mustRunAfter task1
+</code></pre>
+
+<p>下面做个测试，测试命令如下：</p>
+
+<p><code>gradlew task2 task1</code></p>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">我最先执行
+
+:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<h3 id="toc_46">dependsOn 定义 task 依赖</h3>
+
+<p>task2 任务依赖于 task1 ,执行 task2 就会先执行 task1</p>
+
+<p><code>task2.dependsOn task1</code></p>
+
+<p>测试：</p>
+
+<p><code>gradlew task2</code></p>
+
+<p>效果如下：</p>
+
+<pre><code class="language-text">:app:task1
+task1
+:app:task2
+task2
+</code></pre>
+
+<h2 id="toc_47">常用 Gradlew 命令</h2>
+
+<ul>
+<li>1、gradlew -v : 查看版本号</li>
+</ul>
+
+<pre><code class="language-text">------------------------------------------------------------
+Gradle 3.3
+------------------------------------------------------------
+
+Build time:   2017-01-03 15:31:04 UTC
+Revision:     075893a3d0798c0c1f322899b41ceca82e4e134b
+
+Groovy:       2.4.7
+Ant:          Apache Ant(TM) version 1.9.6 compiled on June 29 2015
+JVM:          1.8.0_112 (Oracle Corporation 25.112-b15)
+OS:           Windows 10 10.0 amd64
+</code></pre>
+
+<ul>
+<li>2、gradlew task ： 查看所有的 task</li>
+</ul>
+
+<h2 id="toc_48">参考资料</h2>
+
+<p><a href="http://www.jianshu.com/p/80e1f4a80d06#">Android 利用Gradle实现差异化构建</a></p>
+
+<p><a href="http://www.jianshu.com/p/011b8d63ba78">杨海 Android目录结构</a></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15626502774735.html" 
+          title="Previous Post: 程序员开源协议">&laquo; 程序员开源协议</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15626502774995.html" 
+          title="Next Post: Android机型适配">Android机型适配 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="MySQL.html"><strong>MySQL</strong></a>
+        
+            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16136612078589.html">继承</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16127020620600.html">封装</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+
+
+  
+
+
+
+
+
+
+
+
+
+
+
+
+
+<script src="asset/prism.js"></script>
+
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>
