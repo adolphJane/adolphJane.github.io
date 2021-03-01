@@ -238,11 +238,11 @@
 
 <span id="more"></span><!-- more --> 
 
-<p><img src="media/16066640335833/16066691224038.jpg" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066691224038.jpg" alt=""/></figure></p>
 
 <p>当应用正在运行时，它会在当前的进程中启用一个子线程执行。应用没有运行的情况下启用，它则会自己选择一种合适的方式在后台运行。具体是什么方式和 Android 的版本和依赖环境有关：</p>
 
-<p><img src="media/16066640335833/16066687850496.png" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066687850496.png" alt=""/></figure></p>
 
 <p><strong>优点</strong></p>
 
@@ -275,7 +275,7 @@
 
 <p>在build.gradle中添加依赖:</p>
 
-<pre><code class="language-text">dependencies {
+<pre class="line-numbers"><code class="language-text">dependencies {
   def work_version = &quot;2.4.0&quot;
 
     // (Java only)
@@ -301,7 +301,7 @@
 
 <p>自定义Work类，继承Worker类。<code>doWork()</code> 方法在 <code>WorkManager</code> 提供的后台线程上同步运行。</p>
 
-<pre><code class="language-kotlin">class UploadWorker(appContext: Context, workerParams: WorkerParameters):
+<pre class="line-numbers"><code class="language-kotlin">class UploadWorker(appContext: Context, workerParams: WorkerParameters):
        Worker(appContext, workerParams) {
    override fun doWork(): Result {
 
@@ -330,7 +330,7 @@
 
 <p><code>WorkRequest</code> 本身是抽象基类。该类有两个派生实现，可用于创建 <code>OneTimeWorkRequest</code> 和 <code>PeriodicWorkRequest</code> 请求。顾名思义，<code>OneTimeWorkRequest</code> 适用于调度非重复性工作，而 <code>PeriodicWorkRequest</code> 则更适合调度以一定间隔重复执行的工作。</p>
 
-<pre><code class="language-java">Constraints constraints = new Constraints();
+<pre class="line-numbers"><code class="language-java">Constraints constraints = new Constraints();
 //设备存储空间充足的时候 才能执行 ,&gt;15%
 constraints.setRequiresStorageNotLow(true);
 //必须在执行的网络条件下才能好执行,不计流量 ,wifi
@@ -353,7 +353,7 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>通过创建Constraints ，设置具体的约束条件，在创建Request的时候，调用.setConstraints(constraints)即可。</p>
 
-<pre><code class="language-java"> OneTimeWorkRequest request = new OneTimeWorkRequest
+<pre class="line-numbers"><code class="language-java"> OneTimeWorkRequest request = new OneTimeWorkRequest
                 .Builder(UploadFileWorker.class)
                 .setInputData(inputData)
                 .setConstraints(constraints)
@@ -382,12 +382,12 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>对于无需额外配置的简单工作，请使用静态方法 from：</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequest.from(MyWork::class.java)
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequest.from(MyWork::class.java)
 </code></pre>
 
 <p>对于更复杂的工作，可以使用构建器。</p>
 
-<pre><code class="language-kotlin">val uploadWorkRequest: WorkRequest =
+<pre class="line-numbers"><code class="language-kotlin">val uploadWorkRequest: WorkRequest =
    OneTimeWorkRequestBuilder&lt;MyWork&gt;()
        // Additional configuration
        .build()
@@ -399,7 +399,7 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>使用 <code>PeriodicWorkRequest</code> 创建定期执行的 <code>WorkRequest</code> 对象</p>
 
-<pre><code class="language-kotlin">val saveRequest =
+<pre class="line-numbers"><code class="language-kotlin">val saveRequest =
        PeriodicWorkRequestBuilder&lt;SaveImageToFileWorker&gt;(1, TimeUnit.HOURS)
     // Additional configuration
            .build()
@@ -413,13 +413,13 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>如果您的工作的性质致使其对运行时间敏感，您可以将 <code>PeriodicWorkRequest</code> 配置为在每个时间间隔的灵活时间段内运行。</p>
 
-<p><img src="media/16066640335833/16066662472408.png" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066662472408.png" alt=""/></figure></p>
 
 <p>如需定义具有灵活时间段的定期工作，请在创建 <code>PeriodicWorkRequest</code> 时传递 <code>flexInterval</code> 以及 <code>repeatInterval</code>。灵活时间段从 <code>repeatInterval - flexInterval</code> 开始，一直到间隔结束。</p>
 
 <p>以下是可在每小时的最后 15 分钟内运行的定期工作的示例。</p>
 
-<pre><code class="language-kotlin">val myUploadWork = PeriodicWorkRequestBuilder&lt;SaveImageToFileWorker&gt;(
+<pre class="line-numbers"><code class="language-kotlin">val myUploadWork = PeriodicWorkRequestBuilder&lt;SaveImageToFileWorker&gt;(
        1, TimeUnit.HOURS, // repeatInterval (the period cycle)
        15, TimeUnit.MINUTES) // flexInterval
     .build()
@@ -471,7 +471,7 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>例如，以下代码会构建了一个工作请求，该工作请求仅在用户设备正在充电且连接到 Wi-Fi 网络时才会运行：</p>
 
-<pre><code class="language-kotlin">val constraints = Constraints.Builder()
+<pre class="line-numbers"><code class="language-kotlin">val constraints = Constraints.Builder()
    .setRequiredNetworkType(NetworkType.UNMETERED)
    .setRequiresCharging(true)
    .build()
@@ -490,7 +490,7 @@ val myWorkRequest: WorkRequest =
 
 <p>下面举例说明了如何将工作设置为在加入队列后至少经过 10 分钟后再运行。</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
    .setInitialDelay(10, TimeUnit.MINUTES)
    .build()
 </code></pre>
@@ -507,7 +507,7 @@ val myWorkRequest: WorkRequest =
 
 <p>以下是自定义退避延迟时间和政策的示例。</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
    .setBackoffCriteria(
        BackoffPolicy.LINEAR,
        OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
@@ -531,7 +531,7 @@ val myWorkRequest: WorkRequest =
 
 <p>以下代码展示了如何向工作添加“cleanup”标记：</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
    .addTag(&quot;cleanup&quot;)
    .build()
 </code></pre>
@@ -544,7 +544,7 @@ val myWorkRequest: WorkRequest =
 
 <p>输入值以键值对的形式存储在 Data 对象中，并且可以在工作请求中设置。WorkManager 会在执行工作时将输入 Data 传递给工作。Worker 类可通过调用 Worker.getInputData() 访问输入参数。以下代码展示了如何创建需要输入数据的 Worker 实例，以及如何在工作请求中发送该实例。</p>
 
-<pre><code class="language-kotlin">// Define the Worker requiring input
+<pre class="line-numbers"><code class="language-kotlin">// Define the Worker requiring input
 class UploadWork(appContext: Context, workerParams: WorkerParameters)
    : Worker(appContext, workerParams) {
 
@@ -570,7 +570,7 @@ val myUploadWork = OneTimeWorkRequestBuilder&lt;UploadWork&gt;()
 
 <p>定义 <code>Worker</code> 和 <code>WorkRequest</code> 后，最后一步是将工作加入队列。将工作加入队列的最简单方法是调用 <code>WorkManager enqueue()</code> 方法，然后传递要运行的 <code>WorkRequest</code>。</p>
 
-<pre><code class="language-kotlin">val myWork: WorkRequest = // ... OneTime or PeriodicWork
+<pre class="line-numbers"><code class="language-kotlin">val myWork: WorkRequest = // ... OneTime or PeriodicWork
 WorkManager.getInstance(requireContext()).enqueue(myWork)
 </code></pre>
 
@@ -597,7 +597,7 @@ WorkManager.getInstance(requireContext()).enqueue(myWork)
 
 <p>借助唯一工作，我们可以解决前面提到的重复调度问题。</p>
 
-<pre><code class="language-kotiln">val sendLogsWorkRequest =
+<pre class="line-numbers"><code class="language-kotiln">val sendLogsWorkRequest =
        PeriodicWorkRequestBuilder&lt;SendLogsWorker&gt;(24, TimeUnit.HOURS)
            .setConstraints(Constraints.Builder()
                .setRequiresCharging(true)
@@ -634,7 +634,7 @@ WorkManager.getInstance(this).enqueueUniquePeriodicWork(
 
 <p>在将工作加入队列后，您可以随时按其 <code>name</code>、<code>id</code> 或与其关联的 <code>tag</code> 在 <code>WorkManager</code> 中进行查询，以检查其状态。</p>
 
-<pre><code class="language-kotlin">
+<pre class="line-numbers"><code class="language-kotlin">
 // by id
 workManager.getWorkInfoById(syncWorker.id) // ListenableFuture&lt;WorkInfo&gt;
 
@@ -649,7 +649,7 @@ workManager.getWorkInfosByTag(&quot;syncTag&quot;) // ListenableFuture&lt;List&l
 
 <p>利用每个方法的 LiveData 变种，您可以通过注册监听器来观察 WorkInfo 的变化。例如，如果您想要在某项工作成功完成后向用户显示消息，您可以进行如下设置：</p>
 
-<pre><code class="language-kotlin">workManager.getWorkInfoByIdLiveData(syncWorker.id)
+<pre class="line-numbers"><code class="language-kotlin">workManager.getWorkInfoByIdLiveData(syncWorker.id)
                .observe(viewLifecycleOwner) { workInfo -&gt;
    if(workInfo?.state == WorkInfo.State.SUCCEEDED) {
        Snackbar.make(requireView(),
@@ -665,7 +665,7 @@ workManager.getWorkInfosByTag(&quot;syncTag&quot;) // ListenableFuture&lt;List&l
 
 <p>以下示例说明了如何查找带有“syncTag”标记、处于 FAILED 或 CANCELLED 状态，且唯一工作名称为“preProcess”或“sync”的所有工作。</p>
 
-<pre><code class="language-kotlin">val workQuery = WorkQuery.Builder
+<pre class="line-numbers"><code class="language-kotlin">val workQuery = WorkQuery.Builder
        .fromTags(listOf(&quot;syncTag&quot;))
        .addStates(listOf(WorkInfo.State.FAILED, WorkInfo.State.CANCELLED))
        .addUniqueWorkNames(listOf(&quot;preProcess&quot;, &quot;sync&quot;)
@@ -679,7 +679,7 @@ val workInfos: ListenableFuture&lt;List&lt;WorkInfo&gt;&gt; = workManager.getWor
 
 <p>如果您不再需要运行先前加入队列的工作，则可以要求将其取消。您可以按工作的 name、id 或与其关联的 tag 取消工作。</p>
 
-<pre><code class="language-kotlin">// by id
+<pre class="line-numbers"><code class="language-kotlin">// by id
 workManager.cancelWorkById(syncWorker.id)
 
 // by name
@@ -727,9 +727,9 @@ workManager.cancelAllWorkByTag(&quot;syncTag&quot;)
 
 <p>WorkManager 允许我们按照一定的顺序执行任务，比如我想 A、B、C 三个任务按先后顺序执行：</p>
 
-<p><img src="media/16066640335833/16066686325006.png" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066686325006.png" alt=""/></figure></p>
 
-<pre><code class="language-java"> OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
+<pre class="line-numbers"><code class="language-java"> OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
         OneTimeWorkRequest requestB = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
@@ -741,9 +741,9 @@ workManager.cancelAllWorkByTag(&quot;syncTag&quot;)
 <p>这样的话，上一个任务的 outputData 会成为下一个任务的 inputData。</p>
 
 <p>更复杂一点<br/>
-<img src="media/16066640335833/16066686969137.png" alt=""/></p>
+<figure><img src="media/16066640335833/16066686969137.png" alt=""/></figure></p>
 
-<pre><code class="language-java">OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
+<pre class="line-numbers"><code class="language-java">OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
 OneTimeWorkRequest requestB = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
@@ -774,7 +774,7 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 
 <p>此示例展示了一个简单的 ProgressWorker。该 Worker 启动时将进度设置为 0，完成时将进度值更新为 100。</p>
 
-<pre><code class="language-kotlin">    import android.content.Context
+<pre class="line-numbers"><code class="language-kotlin">    import android.content.Context
     import androidx.work.CoroutineWorker
     import androidx.work.Data
     import androidx.work.WorkerParameters
@@ -803,7 +803,7 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 
 <p>观察进度信息也很简单。您可以使用 getWorkInfoBy…() 或 getWorkInfoBy…LiveData() 方法，并引用 WorkInfo。</p>
 
-<pre><code class="language-kotlin"> WorkManager.getInstance(applicationContext)
+<pre class="line-numbers"><code class="language-kotlin"> WorkManager.getInstance(applicationContext)
         // requestId is the WorkRequest id
         .getWorkInfoByIdLiveData(requestId)
         .observe(observer, Observer { workInfo: WorkInfo? -&gt;
@@ -926,6 +926,12 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -945,12 +951,6 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

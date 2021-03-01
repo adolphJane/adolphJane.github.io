@@ -169,7 +169,7 @@
 
 <p>首先定义一些需要的属性，用于在布局文件中设置gif</p>
 
-<pre><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
+<pre class="line-numbers"><code class="language-text">  &lt;declare-styleable name=&quot;GIFVIEW&quot;&gt;
         &lt;!--gif文件引用--&gt;
         &lt;attr name=&quot;gifSrc&quot; format=&quot;reference&quot;  /&gt;
         &lt;!--是否加载完自动播放--&gt;
@@ -181,7 +181,7 @@
 
 <p>然后定义Gif的播放监听器,来监听各个时段的事件，命名的含义都很简单就不再介绍了：</p>
 
-<pre><code class="language-java">public interface OnPlayListener {
+<pre class="line-numbers"><code class="language-java">public interface OnPlayListener {
         void onPlayStart();
 
         void onPlaying(int percent);
@@ -196,7 +196,7 @@
 
 <p>声明类，直接继承ImageView，这样我们不仅可以显示Gif动画，也可以显示普通图片：public class GifImageView extends AppCompatImageView然后加载Gif图片资源</p>
 
-<pre><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
+<pre class="line-numbers"><code class="language-java"> public void setGifResource(int movieResourceId, OnPlayListener onPlayListener) {
         mOnPlayListener = onPlayListener;
         movie = Movie.decodeStream(getResources().openRawResource(movieResourceId));
         if (movie == null) {
@@ -214,7 +214,7 @@
 
 <p>调用requestLayout重新计算View大小，并重新绘制。如果是gif格式则View宽高等于movie的宽高，不是则调用父类的测量方法。</p>
 
-<pre><code class="language-text">   @Override
+<pre class="line-numbers"><code class="language-text">   @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
         if (movie != null) {
             int movieWidth = movie.width();
@@ -228,7 +228,7 @@
 
 <p>开始播放，其实就是调用invalidate从而调用onDraw方法就行UI绘制：</p>
 
-<pre><code class="language-text">    public void play(int counts) {
+<pre class="line-numbers"><code class="language-text">    public void play(int counts) {
         this.counts = counts;
         reset();
         if (mOnPlayListener != null) {
@@ -240,7 +240,7 @@
 
 <p>不断调用onDraw方法来绘制Gif当前时间的图片帧（同样需要判断是否是gif格式，不是则调用父类的绘制方法）：</p>
 
-<pre><code class="language-text"> @Override
+<pre class="line-numbers"><code class="language-text"> @Override
     protected void onDraw(Canvas canvas) {
         if (movie != null) {
             if (!mPaused &amp;&amp; hasStart) {
@@ -264,7 +264,7 @@
 
 <p>最核心的方法就是计算当前时间需要绘制处于movie中的对应时间的图片帧。</p>
 
-<pre><code class="language-text"> private int getCurrentFrameTime() {
+<pre class="line-numbers"><code class="language-text"> private int getCurrentFrameTime() {
         if (movieDuration == 0)
             return 0;
             //因为有暂停，所以需要减去暂停时间
@@ -287,7 +287,7 @@
 
 <p>暂停Gif播放：</p>
 
-<pre><code class="language-text">   public void pause() {
+<pre class="line-numbers"><code class="language-text">   public void pause() {
         if (movie != null &amp;&amp; !mPaused &amp;&amp; hasStart) {
             mPaused = true;
             invalidate();
@@ -305,7 +305,7 @@
 
 <p>继续Gif播放：</p>
 
-<pre><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
+<pre class="line-numbers"><code class="language-text">  if (mPaused &amp;&amp; mMoviePauseTime &gt; 0) {
                 mPaused = false;
                 dealyTime = dealyTime + SystemClock.uptimeMillis() - mMoviePauseTime;
                 invalidate();
@@ -323,7 +323,7 @@
 
 <p>相信看了上面GifImageView的实现原理后，倒叙播放的实现也是很容易的。</p>
 
-<pre><code class="language-text">    public void playReserver() {
+<pre class="line-numbers"><code class="language-text">    public void playReserver() {
         if (movie != null) {
             reset();
             reverse = true;
@@ -341,12 +341,12 @@
 
 <p>如下图，狗子的头已经从原来的左边转到右边变成了现在的右边转到左边（ಠᴗಠ）。</p>
 
-<p><img src="media/15561207872718/20171112151041826167420.gif" alt=""/></p>
+<p><figure><img src="media/15561207872718/20171112151041826167420.gif" alt=""/></figure></p>
 
 <p>像播放视频一样播放Gif动画<br/>
 这部分是我在写完GifView后想到的一点进阶功能，既然我们已经实现了播放和暂停，即能控制在某个时间点播放指定的Gif图片帧，如果再加入进度条，快进等功能，那么不就能做到和视频播放器一样的功能了吗？限于篇幅，我只简单实现了进度条功能，更多功能实现请移步Github，地址：<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Frenjianan%2FGifView">GifView</a></p>
 
-<p><img src="media/15561207872718/20171112151041830828970.gif" alt=""/></p>
+<p><figure><img src="media/15561207872718/20171112151041830828970.gif" alt=""/></figure></p>
 
 
     
@@ -459,6 +459,12 @@
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -478,12 +484,6 @@
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

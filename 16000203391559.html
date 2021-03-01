@@ -201,7 +201,7 @@
 
 <p>和 Box 布局使用 BoxConstraints 作为约束类似，Sliver 布局采用 SliverConstraints 作为约束，但相对于 Box 要复杂的多，可以理解为 SliverConstraints 描述了 Viewport 和它内部的 Slivers 之间的布局信息</p>
 
-<pre><code class="language-dart">class SliverConstraints extends Constraints {
+<pre class="line-numbers"><code class="language-dart">class SliverConstraints extends Constraints {
   // 主轴方向
   final AxisDirection axisDirection;
   // 窗口增长方向
@@ -227,7 +227,7 @@
 
 <p>Viewport 通过 SliverConstraints 告知它内部的 sliver 自己的约束信息，比如还有多少空间可用、offset 等，那么Sliver 则通过 SliverGeometry 反馈给 Viewport 需要占用多少空间量。</p>
 
-<pre><code class="language-dart">class SliverGeometry extends Diagnosticable {
+<pre class="line-numbers"><code class="language-dart">class SliverGeometry extends Diagnosticable {
   // sliver 可以滚动的范围，可以认为是 sliver 的高度（如果是 AxisDierction.Down） 
   final double scrollExtent;
   // 绘制起点（默认是 0.0），是相对于 sliver 开始 layout 的起点而言的，不会影响下一个 sliver 的 layoutExtent，会影响下一个 sliver 的paintExtent
@@ -256,7 +256,7 @@
 
 <p>ScrollPosition 决定了 Viewport 哪些区域是可见的，它包含了Viewport 的滚动信息。</p>
 
-<pre><code class="language-dart">abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
+<pre class="line-numbers"><code class="language-dart">abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   // 滚动偏移量
   double _pixels;
   // 设置滚动响应效果，比如滑动停止后的动画
@@ -273,7 +273,7 @@
 
 <p>ScrollPosition 的类继承关系如下</p>
 
-<pre><code class="language-text">|-- Listenable
+<pre class="line-numbers"><code class="language-text">|-- Listenable
 |---- ChangeNotifier
 |------ ScrollPosition
 |-------- ScrollPositionWithSingleContext
@@ -285,7 +285,7 @@
 
 <p>RenderViewport 在 layout 它内部的 slivers 的过程如下：</p>
 
-<p><img src="media/16000203391559/16000648579393.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000648579393.jpg" alt=""/></figure></p>
 
 <p>这个 layout 过程是一个自上而下的线性过程：</p>
 
@@ -313,7 +313,7 @@
 
 <p>通过ScrollView串联上面介绍的几个 Widget 之间的关系。 先来看 ScrollView 的 build 方法：</p>
 
-<pre><code class="language-dart">  @override
+<pre class="line-numbers"><code class="language-dart">  @override
   Widget build(BuildContext context) {
     final List&lt;Widget&gt; slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
@@ -337,11 +337,11 @@
 <p>可以看到 ScrollView 创建了一个 Scrollable，并传入了构造 ViewPort 的 buildViewPort 方法。<br/>
 上面讲过 Scrollable 负责手势监听，通过 buildViewPort 创建视图，在手势变化的时候不停的更新 ViewPort，大概流程如下：</p>
 
-<p><img src="media/16000203391559/16000671831906.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000671831906.jpg" alt=""/></figure></p>
 
 <h2 id="toc_7">列表的构建和复用</h2>
 
-<p><img src="media/16000203391559/%E6%88%AA%E5%B1%8F2020-09-14%20%E4%B8%8B%E5%8D%884.35.02.png" alt="截屏2020-09-14 下午4.35.02"/></p>
+<p><figure><img src="media/16000203391559/%E6%88%AA%E5%B1%8F2020-09-14%20%E4%B8%8B%E5%8D%884.35.02.png" alt="截屏2020-09-14 下午4.35.02"/><figcaption>截屏2020-09-14 下午4.35.02</figcaption></figure></p>
 
 <p>ListView和GridView的共同父类BoxScrollView和CustomScrollView都继承于ScrollView。</p>
 
@@ -359,7 +359,7 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 <h2 id="toc_8">滚动视图渲染逻辑</h2>
 
 <p>Flutter视图树中包含了以下三种树 Widget、Element、RenderObject<br/>
-<img src="media/16000203391559/16000685718840.jpg" alt=""/></p>
+<figure><img src="media/16000203391559/16000685718840.jpg" alt=""/></figure></p>
 
 <ul>
 <li>Widget树(配置信息的树)
@@ -393,11 +393,11 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 
 <p>常用的 List 如下，我们按照它包裹的内容分成了 3 类：</p>
 
-<p><img src="media/16000203391559/16000672865363.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000672865363.jpg" alt=""/></figure></p>
 
 <h3 id="toc_10">ListView</h3>
 
-<pre><code class="language-dart">    ListView.builder(
+<pre class="line-numbers"><code class="language-dart">    ListView.builder(
         itemCount: 50,
         itemBuilder: (context,index) {
           return Container(
@@ -410,7 +410,7 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 
 <h3 id="toc_11">CustomScrollView</h3>
 
-<pre><code class="language-dart">CustomScrollView(
+<pre class="line-numbers"><code class="language-dart">CustomScrollView(
       slivers: &lt;Widget&gt;[
         SliverAppBar(...),
         SliverToBoxAdapter(
@@ -426,7 +426,7 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 
 <p>NestedScrollView 其实里面是一个CustomScrollView，它的 headers 是 Sliver 的数组，body是被包裹在 SliverFillRemaining 中的，body 可以接受 Box。</p>
 
-<pre><code class="language-dart">
+<pre class="line-numbers"><code class="language-dart">
 NestedScrollView(
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return &lt;Widget&gt;[
@@ -456,7 +456,7 @@ NestedScrollView(
 
 <p>类似于 android 中 CollapsingToolbarLayout，可以根据滑动做伸缩布局，并提供了 actions，bottom 等提高效率的属性。</p>
 
-<p><img src="media/16000203391559/16000674699418.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000674699418.jpg" alt=""/></figure></p>
 
 <h3 id="toc_15"><a href="http://laomengit.com/flutter/widgets/SliverList.html#slivergrid">SliverList / SliverGrid</a></h3>
 
@@ -468,7 +468,7 @@ NestedScrollView(
 设计它的原因是在 item 高度/宽度全都一样的场景下使用，它的效率比 SliverList 高，因为它不用通过 item 的 layout 过程就可以知道每个 item 的范围。<br/>
 在使用的时候必须传入 itemExtent：</p>
 
-<pre><code class="language-dart">SliverFixedExtentList(
+<pre class="line-numbers"><code class="language-dart">SliverFixedExtentList(
   itemExtent: 50.0,
   delegate: SliverChildBuilderDelegate(
     ...
@@ -480,7 +480,7 @@ NestedScrollView(
 
 <h3 id="toc_17"><a href="http://laomengit.com/flutter/widgets/SliverPersistentHeader.html">SliverPersistentHeader</a></h3>
 
-<p><img src="media/16000203391559/16000675333675.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000675333675.jpg" alt=""/></figure></p>
 
 <p>SliverPersistentHeader 是一个可以固定/悬浮的 header，它可以设置在列表的任意位置，显示的内容需要设置 SliverPersistentHeaderDelegate。</p>
 
@@ -489,7 +489,7 @@ NestedScrollView(
 <p>将 BoxWidget 转变为 Sliver：由于 CustomScrollView 只能接受 Sliver 类型的 child，所以很多常用的 Widget 无法直接添加到 CustomScrollView 中，此时只需要将 Widget 用 SliverToBoxAdapter 包裹一下就可以了。<br/>
 最常见的使用就是 SliverList 不支持横向模式，但是又无法直接将 ListView 直接添加到 CustomScrollView 中，此时用 SliverToBoxAdapter 包裹一下：</p>
 
-<pre><code class="language-dart">
+<pre class="line-numbers"><code class="language-dart">
  CustomScrollView(
       slivers: &lt;Widget&gt;[
         SliverToBoxAdapter(
@@ -651,6 +651,12 @@ NestedScrollView(
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -670,12 +676,6 @@ NestedScrollView(
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

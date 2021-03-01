@@ -153,7 +153,7 @@
 <p>幸运的是，Android 4.4 版本开始，系统提供了相应的 API，支持状态栏全透明化，界面 Content View 可以延伸到状态栏上，填充状态栏背景色。而在 Android 5.0 版本开始，系统在此基础上做了进一步优化和规范，能够实现动态改变状态栏背景色，在透明度上默认呈现为半透明化，可定制化程度更高。</p>
 
 <p>在此基础上，最终要做到我们的应用呈现在 Android 各个系统版本上的效果如图所示：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785204419031.png" alt="20170223148785204419031.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785204419031.png" alt="20170223148785204419031.png"/><figcaption>20170223148785204419031.png</figcaption></figure></p>
 
 <p>关于 Android 4.4 版本开始的状态栏变化，许多人喜欢称之为“沉浸式状态栏”，但从系统提供的 API 命名上可以看出，核心词汇为 “Translucent”，故准确来讲，这种效果又应该称之为“透明状态栏”。知乎上对于这两种叫法也颇有争议，具体内容可参考话题：为什么在国内会有很多用户把「透明栏」（Translucent Bars）称作 「沉浸式顶栏」？。可能对于设计师而言，沉浸式还是透明式的称呼有所区别，但对于广大开发者而言，无足轻重，我们所关注的应该是如何实现这种效果，并能够很好的兼容到各个版本中。</p>
 
@@ -166,14 +166,14 @@
 <p><code>&lt;item name=&quot;android:windowTranslucentStatus&quot;&gt;true&lt;/item&gt;</code><br/>
 也可以在代码中实现（据说，在代码中实现兼容性更好，style 资源中设置的方式在某些国产手机厂商定制的系统中存在一些问题）:</p>
 
-<pre><code class="language-java">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.KITKAT) {
+<pre class="line-numbers"><code class="language-java">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.KITKAT) {
     WindowManager.LayoutParams localLayoutParams = getWindow().getAttributes();
     local LayoutParams.flags = (WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS | localLayoutParams.flags);
 }
 </code></pre>
 
 <p>顾名思义，该属性能够实现透明状态栏效果，是在 Android 4.4 版本引入的，也就是兼容至 API 19 及以上版本。使用该属性设置主题后，内容布局向上延伸至状态栏，并且在不同版本的系统中呈现效果也有所区别，如图所示：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785226694094.png" alt="20170223148785226694094.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785226694094.png" alt="20170223148785226694094.png"/><figcaption>20170223148785226694094.png</figcaption></figure></p>
 
 <p>显然，在 API 19 及更高版本上，Toolbar 内容延伸至状态栏上去了，出现重叠问题，此时，就需要使用到另一个属性了。</p>
 
@@ -191,21 +191,21 @@
 
 <p><strong>res/values/styles 文件中定义基础主题样式：</strong></p>
 
-<pre><code class="language-markup">    &lt;style name=&quot;BaseTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;/&gt;
+<pre class="line-numbers"><code class="language-markup">    &lt;style name=&quot;BaseTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;/&gt;
    &lt;style name=&quot;AppTheme&quot; parent=&quot;BaseTheme&quot;&gt;
    &lt;/style&gt;
 </code></pre>
 
 <p><strong>res/values-v19/styles 文件中定义兼容主题样式：</strong></p>
 
-<pre><code class="language-markup">    &lt;style name=&quot;AppTheme&quot; parent=&quot;BaseTheme&quot;&gt;
+<pre class="line-numbers"><code class="language-markup">    &lt;style name=&quot;AppTheme&quot; parent=&quot;BaseTheme&quot;&gt;
    &lt;item name=&quot;android:windowTranslucentStatus&quot;&gt;true&lt;/item&gt;
    &lt;/style&gt;
 </code></pre>
 
 <p><strong>然后在 AndroidManifest.xml 文件中使用全局主题样式：</strong></p>
 
-<pre><code class="language-markup">&lt;application
+<pre class="line-numbers"><code class="language-markup">&lt;application
         android:allowBackup=&quot;true&quot;
         android:icon=&quot;@mipmap/ic_launcher&quot;
         android:label=&quot;Samples&quot;
@@ -216,7 +216,7 @@
 
 <p>新建一个 layout 布局文件，单独定义 toolbar 内容，在应用中的其他 Activity 界面布局中使用 include 标签潜入引用：</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.v7.widget.Toolbar xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     android:id=&quot;@+id/tb_toolbar&quot;
@@ -237,7 +237,7 @@
 
 <p>基本上，做到这些就能够实现文章开头处图中的效果。值得注意的是，有时候如果想在 Android 5.0 及以上版本的系统中也做到全透明效果，或者说状态栏与导航栏的颜色一致，还可以做进一步兼容处理，毕竟自 5.0 版本开始，系统对于状态栏背景色的定制提供了更好的 API。如 res/values-v21/styles.xml 中定义：</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;resources&gt;
 
     &lt;style name=&quot;AppTheme&quot; parent=&quot;BaseTheme&quot;&gt;
@@ -256,10 +256,10 @@
 <p>前面我们说过，虽然说 4.4 版本开始，可以实现透明状态栏效果，也就是可以通过各种手段实现修改状态栏背景色，但是状态栏图标和文字的颜色默认为白色，这个是无法像 iOS 系统那样，根据应用的整体色调动态修改。如果恰好 Toolbar 的背景色为白色，为了保持一致，将状态栏背景色调为白色的话，就会与状态栏的白色内容发生冲突，导致其内容无法凸显，这个体验肯定无法被用户接受。  </p>
 
 <p>所以，遇见这种 Toolbar 或者说导航栏背景色为白色的情况，一般有两种处理方式：第一种，不修改状态栏背景色，通常默认为黑色背景白色内容；第二种，修改状态栏背景色为淡黑色，这样既能显示状态栏内容，又能与白色导航栏弱显衔接，比如支付宝 App 就是这么做的：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785322655441.png" alt="20170223148785322655441.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785322655441.png" alt="20170223148785322655441.png"/><figcaption>20170223148785322655441.png</figcaption></figure></p>
 
 <p>像上图这种处理方式较黑色状态栏来说，相对缓和一些，那能不能做到修改状态栏内容的颜色呢，比如白底黑字？大家知道，Android 系统是开源的，国内的各家手机厂商都做了一些自己的定制，像部分厂商定制的系统就提供了相应的 API 供开发人员做适配工作。比如，部分厂商就提供了相应的 API 来修改状态栏内容颜色，实现状态栏白底黑字效果，如图：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785324052944.png" alt="20170223148785324052944.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785324052944.png" alt="20170223148785324052944.png"/><figcaption>20170223148785324052944.png</figcaption></figure></p>
 
 <p>具体做法就是，在代码中判断系统类型，与提供修改状态内容颜色的系统匹配，使用其特定的 API 操作即可。目前开放这种定制 API 的系统已知有 MIUI 和 Flyme 系统，具体实现代码可参考：</p>
 
@@ -270,7 +270,7 @@
 
 <p>其实，在 Android 6.0（API 23）及更高的版本上，系统也开始提供了对应的 API 来实现浅色调背景的状态栏效果，可将状态栏图标和文字内容改为黑色样式，实现方式为：</p>
 
-<pre><code class="language-java">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) {
+<pre class="line-numbers"><code class="language-java">if (Build.VERSION.SDK_INT &gt;= Build.VERSION_CODES.M) {
     getWindow().getDecorView().setSystemUiVisibility(
         View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN|View.SYSTEM_UI_FLAG_LIGHT_STATUS_BAR);
         getWindow().setStatusBarColor(Color.TRANSPARENT);
@@ -282,16 +282,16 @@
 <h2 id="toc_7">注意事项</h2>
 
 <p>除了上述 Toolbar 与 状态栏在背景色上的衔接，App 中常见还有这样一种设计，以微博个人主页为例，如图所示：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785341741351.png" alt="20170223148785341741351.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785341741351.png" alt="20170223148785341741351.png"/><figcaption>20170223148785341741351.png</figcaption></figure></p>
 
 <p>页面顶部的图片内容延伸至状态栏中，这种做法其实就是单独使用 <code>&lt;item name=&quot;android:windowTranslucentStatus&quot;&gt;true&lt;/item&gt;</code> 样式，不在 layout 布局文件中添加 <code>android:fitsSystemWindows=&quot;true&quot;</code>属性即可。</p>
 
 <p>还有一点，通常我们会在资源文件中定义不同版本的主题样式，再在 <application> 标签中统一设置，然后所有的 Activity 都能使用这个主题样式。但存在这样一种情况，Activity 由不同的 Fragment 组成，然后不同 Fragment 在状态栏的呈现上有所不同，比如有的 Fragment 顶部使用 Toolbar 与状态栏衔接，有的顶部直接使用图片延伸至状态栏上甚至不会用到 Toolbar，如图所示：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785345291771.png" alt="20170223148785345291771.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785345291771.png" alt="20170223148785345291771.png"/><figcaption>20170223148785345291771.png</figcaption></figure></p>
 
 <p>由于 Fragment 是无法像 Activity 那样在 AndroidManifest.xml 中单独设置主题样式的，所以这里可以这样做：宿主 Activity 还是使用透明样式，以满足图片延伸的 Fragment 页面效果，其他使用 Toolbar 的 Fragment，在其 Layout 布局文件顶部单独定义一个 View，让其延伸至状态栏，然后在代码中根据不同版本系统设置其高度，4.4 版本以下设置该 View 高度为0，4.4 及以上版本设置为设备状态栏高度，通过代码获取状态高度的方式如下：</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * 获取状态栏高度
  * @param activity
  * @return
@@ -304,17 +304,17 @@ public static int getStatusBarHeight(Activity activity){
 </code></pre>
 
 <p>最后再补充一点，大家知道，长按 Toolbar 中 Menu Item 时会显示一个 Toast 提示，内容来自 Item 定义时对应的 title 属性，通常显示如图所示：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785352797212.png" alt="20170223148785352797212.png"/></p>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785352797212.png" alt="20170223148785352797212.png"/><figcaption>20170223148785352797212.png</figcaption></figure></p>
 
 <p>但是，如果你误将 fitsSystemWindows 属性设置在了 style 样式文件中，比如：</p>
 
-<pre><code class="language-java">&lt;style name=&quot;BaseTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
+<pre class="line-numbers"><code class="language-java">&lt;style name=&quot;BaseTheme&quot; parent=&quot;Theme.AppCompat.Light.NoActionBar&quot;&gt;
     &lt;item name=&quot;android:fitsSystemWindows&quot;&gt;true&lt;/item&gt;
 &lt;/style&gt;
 </code></pre>
 
 <p>将会导致下图效果：<br/>
-<img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785356810318.png" alt="20170223148785356810318.png"/><br/>
+<figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20170223148785356810318.png" alt="20170223148785356810318.png"/><figcaption>20170223148785356810318.png</figcaption></figure><br/>
 可见，Menu Options Item 长按时弹出的 Toast 样式没了内容间距，显然很丑。所以，记得将该属性设置在正确的布局文件中，不要设置成全局的。</p>
 
 <h2 id="toc_8">相关拓展</h2>
@@ -448,6 +448,12 @@ public static int getStatusBarHeight(Activity activity){
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -467,12 +473,6 @@ public static int getStatusBarHeight(Activity activity){
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

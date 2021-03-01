@@ -120,6 +120,126 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15620327900428.html">
+                
+                  <h1>Xposed开发</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Xposed原理</h2>
+
+<p>Xposed的底层原理是通过替换/system/bin/app_precesss 程序控制zygote进程，使得它在系统启动的过程中会加载Xposed framework的一个jar文件即XposedBridge.jar，从而完成对Zygote进程及其创建的Dalvik虚拟机的劫持，并且能够允许开发者独立的替代任何class。</p>
+
+<h2 id="toc_1">安装Xposed框架</h2>
+
+<p>可以选择使用太极阴或者VirtualXposed软件，来支持Xposed框架运行，相对比较省力，无需重启或者root。如果爱折腾，可以考虑使用太极阳或者EdXposed，获取更多权限。</p>
+
+<blockquote>
+<p>注意VirtualXposed软件0.18.2版本之后不支持32位应用。</p>
+</blockquote>
+
+<h2 id="toc_2">编写Hook应用</h2>
+
+<p>新建一个<code>Android</code>工程<code>XposedDemo</code></p>
+
+<h3 id="toc_3">引入Xposed Api</h3>
+
+<p>在<code>app build.gradle</code>文件中<br/>
+添加<code>de.robv.android.xposed:api:82</code>和<code>de.robv.android.xposed:api:82:source</code>依赖</p>
+
+<pre class="line-numbers"><code class="language-text">compileOnly &#39;de.robv.android.xposed:api:82&#39;
+compileOnly &#39;de.robv.android.xposed:api:82:sources&#39;
+</code></pre>
+
+<h3 id="toc_4">在AndroidManifest.xml文件配置xposed信息</h3>
+
+<pre class="line-numbers"><code class="language-text">&lt;!-- 标记xposed插件 start--&gt;
+&lt;meta-data
+    android:name=&quot;xposedmodule&quot;
+    android:value=&quot;true&quot;/&gt;
+&lt;!-- 模块描述 --&gt;
+&lt;meta-data
+    android:name=&quot;xposeddescription&quot;
+    android:value=&quot;测试Xposed&quot;/&gt;
+&lt;!-- 最低版本号 --&gt;
+&lt;meta-data
+    android:name=&quot;xposedminversion&quot;
+    android:value=&quot;54&quot;/&gt;
+&lt;!-- 标记xposed插件 end--&gt;
+</code></pre>
+
+<h3 id="toc_5">创建hook类，实现IXposedHookLoadPackage接口</h3>
+
+<pre class="line-numbers"><code class="language-text">public class HelloHook implements IXposedHookLoadPackage {
+    @Override
+    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
+        XposedBridge.log(&quot;===包名===&quot; + lpparam.packageName);
+       
+
+        if (lpparam.packageName.equals(&quot;com.zhuliyi.xposedapplication&quot;)) {
+            //混淆后方法名也变化了
+            XposedHelpers.findAndHookMethod(&quot;com.zhuliyi.xposedapplication.MainActivity&quot;, lpparam.classLoader, &quot;verifyLogin&quot;, String.class, String.class, new XC_MethodHook() {
+                @Override
+                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
+                    super.beforeHookedMethod(param);
+                }
+
+                @Override
+                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
+                    super.afterHookedMethod(param);
+                    param.setResult(true);
+                }
+            });
+        }
+    }
+}
+</code></pre>
+
+<p>handleLoadPackage方法回调是在目标应用加载时候调用，先通过LoadPackageParam参与判断目标应用的包名，然后通过XposedHelpers.findAndHookMethod() hook调用的方法，第一个参数是包名，第二个是classLoader,第三个是方法名，后面是方法参数，最后是XC_MethodHook回调，beforeHookedMethod是方法执行前调用 ，afterHookedMethod是方法执行后调用，通过param.setResult(true)，设置返回值为true,当然也可以通过进行其他操作，这里就不介绍了</p>
+
+<h3 id="toc_6">添加hook文件配置</h3>
+
+<p>我们需要在assets目录下面新建一个xposed_init文件，写上我们Hook文件的路径。</p>
+
+<p><figure><img src="media/15620327900428/16109471541886.jpg" alt=""/></figure></p>
+
+<p>接着 编译，运行，安装apk，最后在Xposed软件模块中添加XposedDemo框架，然后重启设置。</p>
+
+<p><a href="https://www.taichi-app.com/#/index">太极官网</a></p>
+
+<p><a href="https://github.com/android-hacker/VirtualXposed">VirtualXposed GitHub首页</a></p>
+
+<p><a href="http://dl-xda.xposed.info/framework/sdk21/x86/">Xposed SDK下载</a></p>
+
+<p><a href="https://api.xposed.info/reference/de/robv/android/xposed/XposedHelpers.html">Xposed API</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/07/02</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15620314685082.html">
                 
                   <h1>Genymotion-ARM-Translation.zip各安卓版本合集</h1>
@@ -212,7 +332,7 @@
 
 <h3 id="toc_1">生成bundle文件</h3>
 
-<pre><code class="language-text">react-native bundle --entry-file index.js --platform ios --dev false --bundle-output release_ios/main.jsbundle --assets-dest release_ios/
+<pre class="line-numbers"><code class="language-text">react-native bundle --entry-file index.js --platform ios --dev false --bundle-output release_ios/main.jsbundle --assets-dest release_ios/
 </code></pre>
 
                         
@@ -291,17 +411,17 @@ CodePush 是提供给 React Native 和 Cordova 开发者直接部署移动应用
 
 <h3 id="toc_1">查询keystore的MD5</h3>
 
-<pre><code class="language-text">keytool -list -v -keystore ***.jks
+<pre class="line-numbers"><code class="language-text">keytool -list -v -keystore ***.jks
 </code></pre>
 
-<p><img src="media/15597152983017/15597154233468.jpg" alt="" style="width:570px;"/><br/>
+<p><figure><img src="media/15597152983017/15597154233468.jpg" alt="" style="width:570px;"/></figure><br/>
 MD5值就是所要的应用签名，只是比下面提到的签名生成工具生成的多出了中间的冒号</p>
 
 <h3 id="toc_2">通过APK工具进行查看</h3>
 
 <p><a href="media/15597152983017/GenSignature.apk">GenSignature</a><br/>
 在该手机上安装正式打包的APK并运行，通过签名生成工具输入包名get signature获取应用签名，copy to clipboard即可。<br/>
-<img src="media/15597152983017/15597160146245.jpg" alt=""/></p>
+<figure><img src="media/15597152983017/15597160146245.jpg" alt=""/></figure></p>
 
                         
                       </div>
@@ -342,25 +462,25 @@ MD5值就是所要的应用签名，只是比下面提到的签名生成工具�
 
 <p>官方推荐使用Homebrew来安装node和Watchman</p>
 
-<pre><code class="language-text">brew install node
+<pre class="line-numbers"><code class="language-text">brew install node
 brew install watchman
 </code></pre>
 
 <p>设置npm镜像来加速后面的过程</p>
 
-<pre><code class="language-text">npm config set registry https://registry.npm.taobao.org --global
+<pre class="line-numbers"><code class="language-text">npm config set registry https://registry.npm.taobao.org --global
 npm config set disturl https://npm.taobao.org/dist --global
 </code></pre>
 
 <p>Watchman则是由 Facebook 提供的监视文件系统变更的工具。安装此工具可以提高开发时的性能（packager 可以快速捕捉文件的变化从而实现实时刷新）。<br/>
 Yarn是 Facebook 提供的替代 npm 的工具，可以加速 node 模块的下载。React Native 的命令行工具用于执行创建、初始化、更新项目、运行打包服务（packager）等任务。</p>
 
-<pre><code class="language-text">npm install -g yarn react-native-cli
+<pre class="line-numbers"><code class="language-text">npm install -g yarn react-native-cli
 </code></pre>
 
 <p>安装完 yarn 后同理也要设置镜像源：</p>
 
-<pre><code class="language-text">yarn config set registry https://registry.npm.taobao.org --global
+<pre class="line-numbers"><code class="language-text">yarn config set registry https://registry.npm.taobao.org --global
 yarn config set disturl https://npm.taobao.org/dist --global
 </code></pre>
 
@@ -370,12 +490,12 @@ yarn config set disturl https://npm.taobao.org/dist --global
 
 <p>使用 React Native 命令行工具来创建一个为&quot;AwesomeProject&quot;的新项目：</p>
 
-<pre><code class="language-text">react-native init AwesomeProject
+<pre class="line-numbers"><code class="language-text">react-native init AwesomeProject
 </code></pre>
 
 <h3 id="toc_3">运行项目</h3>
 
-<pre><code class="language-text">cd AwesomeProject
+<pre class="line-numbers"><code class="language-text">cd AwesomeProject
 react-native run-android
 </code></pre>
 
@@ -389,17 +509,17 @@ react-native run-android
 
 <p>在项目Terminal中输入命令行：</p>
 
-<pre><code class="language-text">yarn add react-navigation
+<pre class="line-numbers"><code class="language-text">yarn add react-navigation
 </code></pre>
 
 <p>然后在package.json文件中就可以看到，依赖库已经导入完毕：</p>
 
-<pre><code class="language-text">&quot;react-native-tab-navigator&quot;: &quot;^0.3.4&quot;,
+<pre class="line-numbers"><code class="language-text">&quot;react-native-tab-navigator&quot;: &quot;^0.3.4&quot;,
 </code></pre>
 
 <p><strong>注意</strong>适配IOS要导入<code>react-native-gesture-handler</code>库，并进行关联</p>
 
-<pre><code class="language-text">yarn add react-native-gesture-handler
+<pre class="line-numbers"><code class="language-text">yarn add react-native-gesture-handler
 react-native link
 </code></pre>
 
@@ -407,7 +527,7 @@ react-native link
 
 <p>在项目的入口中直接配置StackNavigator，StackNavigator中注册所有需要跳转的界面，在这个项目中还有注册登录功能，在效果图中没有展示，这里不作探讨。首先是入口文件：</p>
 
-<pre><code class="language-text">import React from &#39;react&#39;;
+<pre class="line-numbers"><code class="language-text">import React from &#39;react&#39;;
 import {StackNavigator} from &#39;react-navigation&#39;;
 import {TabNav} from &quot;./RootPage&quot;;
 import LoginPage from &quot;./page/Login/loginPage&quot;;
@@ -437,7 +557,7 @@ export default App;
 
 <p>接着进入到配置TabNavigator的RootPage中：</p>
 
-<pre><code class="language-text">import React from &#39;react&#39;;
+<pre class="line-numbers"><code class="language-text">import React from &#39;react&#39;;
 import {TabNavigator} from &#39;react-navigation&#39;;
 
 import HomePage from &#39;./page/Home/HomePage&#39;;
@@ -513,7 +633,7 @@ export const TabNav = TabNavigator(
 
 <p>在这个界面中导入了其他五个子界面，每个子界面效果可以设置成差不多，例如下面这样：</p>
 
-<pre><code class="language-text">import React, {Component} from &#39;react&#39;;
+<pre class="line-numbers"><code class="language-text">import React, {Component} from &#39;react&#39;;
 import {
     View,
     Text,
@@ -559,12 +679,12 @@ const styles = StyleSheet.create({
 </code></pre>
 
 <p>在子界面中可以设置icon图标样式，表示在点击前后颜色的改变，效果如下：<br/>
-<img src="media/15590521983066/15590527801185.jpg" alt=""/><br/>
-<img src="media/15590521983066/15590527846918.jpg" alt=""/></p>
+<figure><img src="media/15590521983066/15590527801185.jpg" alt=""/></figure><br/>
+<figure><img src="media/15590521983066/15590527846918.jpg" alt=""/></figure></p>
 
 <p>当然，我们也可以设置标题栏，只需要在下面代码中添加headerTitle属性：</p>
 
-<pre><code class="language-text">export default class FriendPage extends Component {
+<pre class="line-numbers"><code class="language-text">export default class FriendPage extends Component {
     static navigationOptions = {
         tabBarLabel: &#39;好友&#39;,
         headerTitle: &#39;好友&#39;,
@@ -573,7 +693,7 @@ const styles = StyleSheet.create({
 
 <p>别忘了，在StackNavigator配置TabNavigator时不要设置header为null即可。</p>
 
-<pre><code class="language-text">Main: {
+<pre class="line-numbers"><code class="language-text">Main: {
             screen: TabNav,
             navigationOptions: ({navigation}) =&gt; ({
              // header: null
@@ -756,47 +876,6 @@ const styles = StyleSheet.create({
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15586211809529.html">
-                
-                  <h1>Builder模式(建造者模式)</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">Builder模式介绍</h2>
-
-<ul>
-<li>建造者模式（Builder Pattern）也叫做生成器模式，Builder Design pattern 是一种创造型模式，Builder模式所解决的问题与对象的创建有关。它允许用户在不知道内部构建细节的情况下，可以更精细的控制对象的构造流程，Builder模式是为了将构造复杂对象的过程和他的部件解耦。Android 中我们最常用的Builder模式是AlterDialog.Builder。</li>
-<li>Builder 模式通常是以静态内部类的形式实现。</li>
-</ul>
-
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15586211809529.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2019/05/23</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95.html'>算法</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -888,6 +967,12 @@ const styles = StyleSheet.create({
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -907,12 +992,6 @@ const styles = StyleSheet.create({
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

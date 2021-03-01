@@ -120,6 +120,160 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207871379.html">
+                
+                  <h1>Android 四种启动模式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>此博文用来介绍一下Activity的四种启动模式和应用的场景。</p>
+
+<p>主要是对于Android Activity启动模式的梳理。</p>
+
+<h2 id="toc_0">返回栈</h2>
+
+<p>首先，在介绍之前，我们需要有一个返回栈的概念。栈，是一种数据结构，遵循的是先进后出的规则，而无论是什么APP，里面的N个Activity最终都会被压入栈（或弹出栈中），而与我们进行交互的就是处于栈顶的Activity，在这里就需要介绍一个返回栈的概念。上一张图。</p>
+
+<p><figure><img src="media/15561207871379/15713366435881.png" alt=""/></figure></p>
+
+<p>相信这张图片很清楚的说明，入栈的方式，所谓先进后出就是现在我们假设栈里面已经有abcd四个Activity了，并且都市默认的standard方式启动的。所谓先进后出就是，当我们不断按下back（返回键）的时候，后进去的d反而是最先谈栈的，a最后弹栈。</p>
+
+<p><strong>压栈</strong>：a-&gt;b-&gt;c-&gt;d(入栈顺序)</p>
+
+<p><strong>弹栈</strong>：b-&gt;c-&gt;b-&gt;a(弹出顺序)</p>
+
+<p>先有一个返回栈的概念才能更好的进行分析。</p>
+
+<h2 id="toc_1">为什么需要启动方式</h2>
+
+<p>比如说，现在栈里面已经有四个activity abcd,这个时候的需求是需要到一个Activity a,如果我们只是使用默认的启动方式，那么就会形成abcda，当用户点击back按键的时候，弹出a，abcd。再按弹出d，abc。以此类推，然后又看到了a，是不是很烦人，而且这样的设计也的确很不人性化，所以设计了四种启动方式，来优化更好的体验，和满足特定场景下的用户需求。</p>
+
+<h2 id="toc_2">四种启动的方式</h2>
+
+<p><strong>(1) standard</strong>: 标准的方式，也是系统默认的方式，每次启动一个activity，都会去创建一个新的activity的实例，并让该实例出于activity的栈顶位置，与用户交互，不管该实例存在不存在。</p>
+
+<pre class="line-numbers"><code class="language-java">button.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View view) {
+        Intent intent= new Intent(FirstActivity.this,FirstActivity.class);
+        startActivity(intent);
+    }
+});
+</code></pre>
+
+<p>这是一个很典型的例子，就是由FirstActivity，跳转到FirstActivity，我们直观的思维会认为FirstActivity已经存在了，那么直接复用就好了啊，但是事实却不是这样子的。点击button两下，算上本身创建的FirstActivity，现在栈里面相当于有三个FirstActivity的实例，必须要点击三次返回键，才能回到桌面。这就是standard模式。</p>
+
+<p><strong>(2) singleTop</strong> :栈顶复用模式，当一个新的Activity已经处于栈顶的时候，那么再次调用新的Activity将不会创建新的实例，因为新的Activity已经在栈顶了，可以直接复用。比如说是栈的情况是abcd，d的启动方式singleTop，那么当我们再次启动d的时候，并不会创建新的实例，还是abcd，因为栈顶已经是d了，如果是adbc那么创建以后就是adbcd。如果d是默认方式启动的话，得到的就是abcdd。</p>
+
+<p><strong>(3) singleTask</strong> ：栈内复用的模式，只要activity在一个栈中，那么多次启动此activity都不会重新创建实例，比如说只要Activity以singleTask的方式启动，系统首先会去找寻是否有A需要的栈s，来存放A实例。如果没有s，就会创建栈s。然后做判断，如果s中有A，那么就直接把A置于栈顶，并且清空A上面的所有实例。如果A已经在栈顶，那么就直接复用A。如果存在S，就看S中是否有A的实例，没有A的实例就直接创建并且入栈，如果已经有A的实例并且没有处于栈顶，那就清楚A之前的所有实例，让A处于栈顶。举个例子(D都是以singleTask启动)：</p>
+
+<ul>
+<li>比如目前S1中的情况为ABC，D以singleTask的启动方式入栈，并且请求的任务栈为S2，那么很显然，并不存在S2，所以就会创建S2，并且把D压入S2中。S1：ABC，S2：D。</li>
+<li>另一种情况，S1：ABC ，D请求的是S1，那么直接压入S1中。S1：ABCD.</li>
+<li>S1：ADBC ，D请求的是S1，那么最终的S1：AD。因为栈内复用方式默认有一个clearTop的方法，会导致D上所有的实例出栈。让D置为栈顶。</li>
+</ul>
+
+<p><strong>(4) singleInstance</strong>: 单实例模式。这是一个加强版本的singleTask模式，它除了具有singleTask模式的所有特性之外，还加强的了一点，就是次方式启动的Activity只能单独的位于一个任务栈中，由于栈复用的特性，后续均不会创建新的Activity，除非这个任务栈被系统的销毁了。</p>
+
+<h2 id="toc_3">特殊情况</h2>
+
+<p>比如说现在有前台任务栈s1：AB(A底，B顶),后台任务栈S2:CD（都是以singleTask的方式启动）。当s1请求D入栈的时候，最终得到的是ABCD，但是如果只是请求C入栈的时候，得到的是ABC.</p>
+
+<h2 id="toc_4">设置启动模式（两种）</h2>
+
+<p><strong>第一种：Xml文件中配置</strong></p>
+
+<pre class="line-numbers"><code class="language-text">&lt;activity
+    android:name=&quot;.FirstActivity&quot;
+    android:label=&quot;hello My First Activity&quot;
+    android:launchMode=&quot;singleTop&quot;/&gt;
+</code></pre>
+
+<p><strong>第二种：设置intent标志位的时候配置</strong></p>
+
+<pre class="line-numbers"><code class="language-text">Intent intent= new Intent();
+intent.setClass(FirstActivity.this,FirstActivity.class);
+intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+</code></pre>
+
+<p>第二种的优先级方式是高于第一种的，当两种都存在的时候，以第二种为准。</p>
+
+<h2 id="toc_5">指定栈和获取当前的activity的栈ID</h2>
+
+<p>指定栈就是在设置activity的时候指定taskAffinity的属性，要求一个字符串，用.来分包，如果不写，栈就是默认的包名。在这里我指定为了，yanshui.site.task01配合上singleTask使用</p>
+
+<pre class="line-numbers"><code class="language-text">&lt;activity
+    android:name=&quot;.FirstActivity&quot;
+    android:label=&quot;hello My First Activity&quot;
+    android:launchMode=&quot;singleTask&quot;
+    android:taskAffinity=&quot;yanshui.site.task01&quot;/&gt;
+</code></pre>
+
+<pre class="line-numbers"><code class="language-java">//当你想要知道你当前的activity处于栈的id的时候直接在该activity中调用此方法即可。
+Log.d(TAG, &quot;task id is &quot;+getTaskId());
+</code></pre>
+
+<h2 id="toc_6">使用场景</h2>
+
+<ul>
+<li>Standard 默认启动方式，每次都会创建一个新的实例，如果开发中需要就使用。但应该注意具体的情况，优化设计体验。</li>
+<li>singleTop 栈顶复用，适合接受推送消息的展示页。某些本应只展示一个的场景，比如一下子收到一堆推送消息，不能每个都弹出来吧。但凡是这样的都行。优酷的推荐视频，电商app推送一个活动。每次只是显示第一条消息。</li>
+<li>singleTask 栈复用模式适合程序入口，不需要启动后activity的是的，只能用在启动页了吧，首页，这种只允许有一个instance，如果有其他就移除掉它顶上的。从这个Activity进入的其他activity都抛弃掉了。用户要再操作一次。</li>
+<li>singleInstance 栈单实例模式，需要一个activity提供给多有的应用程序访问的，比如说闹钟，响过一次以后，不再提醒，然后就不会再响了。</li>
+</ul>
+
+<h2 id="toc_7">标志位</h2>
+
+<ul>
+<li><p>FLAG_ACTIVITY_NEW_TASK(xml中指定为singleTask)</p></li>
+<li><p>FLAG_ACTIVITY_SINGLE_TOP(xml中指定为singleTop)</p></li>
+</ul>
+
+<p>​</p>
+
+<h2 id="toc_8">简单小结一下</h2>
+
+<h3 id="toc_9">使用方式：</h3>
+
+<p>standard：怎么样都要创建<br/><br/>
+singleTop：顶上不是target Activity，new一个<br/><br/>
+singleTask：顶上不是target Activity，移除target之上的，把自己变成top。<br/><br/>
+singleInstance：开辟私有的task，完全独立于程序的其他activity的task。  </p>
+
+<h3 id="toc_10">使用场景：</h3>
+
+<p>standard：普通activity<br/><br/>
+singleTop：要展示推送过来的消息<br/><br/>
+singleTask：程序入口等启动页面<br/><br/>
+singleInstance：完全独立的，类似闹钟的提示  </p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/09/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207871139.html">
                 
                   <h1>Android-Fragment懒加载</h1>
@@ -131,7 +285,7 @@
 
 <p>附上生命周期，帮助下面的学习。</p>
 
-<p><img src="media/15561207871139/15713365181753.png" alt=""/></p>
+<p><figure><img src="media/15561207871139/15713365181753.png" alt=""/></figure></p>
 
 <h2 id="toc_1">何为懒加载</h2>
 
@@ -155,11 +309,11 @@
 <li>执行顺序：setUserVisibleHint 方法在Fragment的生命周期函数之前执行一次，此时isVisibleToUser是false，后续还会执行一次，此时isVisibleToUser是true，但是这次的时间是不确定的 。参考官方note说明</li>
 </ul>
 
-<p><img src="media/15561207871139/15713365285264.png" alt=""/></p>
+<p><figure><img src="media/15561207871139/15713365285264.png" alt=""/></figure></p>
 
 <h2 id="toc_5">实现代码</h2>
 
-<pre><code class="language-java">public class FriendFragment extends Fragment {
+<pre class="line-numbers"><code class="language-java">public class FriendFragment extends Fragment {
 
     private boolean isVisible;
     // 标志位，标志已经初始化完成，防止空指针的异常
@@ -212,7 +366,7 @@
 
 <p>1.进来就加载的这个Fragment，此时isVisibleToUser 和isViewCreated 两个标志位的值如下</p>
 
-<p><img src="media/15561207871139/15713365395269.png" alt=""/></p>
+<p><figure><img src="media/15561207871139/15713365395269.png" alt=""/></figure></p>
 
 <p>，无法加载数据 ，所以需要在onActivityCreated方法中调用加载数据</p>
 
@@ -255,7 +409,7 @@
 
 <p>关于性能优化我们可以不知道其他的，但一定要知道内存优化。因为内存泄漏可以Android的常客。那么什么是内存泄漏呢？内存不在GC的掌控范围之内了。那么java的GC内存回收机制是什么？某对象不在有任何引用的时候才会进行回收。那么GC回收机制的原理是什么？又或者说可以作为GC　Root引用点的是啥？或许有人听不懂我在讲啥。我们先来看张图。</p>
 
-<p><img src="media/15561207871067/15713656808791.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713656808791.png" alt=""/></figure></p>
 
 <p>当我们向上寻找，一直寻找到GC Root的时候，此对象不会进行回收，例如，一个Activity。那么如果我们向上寻找，直到找到GC Root对象的时候，就说明它是不可以回收的，例如，我定义了一个int a；但是这个数据，我整个页面或者说整个项目都没有用到，则这个对象会被GC掉。</p>
 
@@ -290,7 +444,7 @@
 
 <p>我们需要分析内存溢出的原因，我们先来看一张图： </p>
 
-<p><img src="media/15561207871067/15713656930534.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713656930534.png" alt=""/></figure></p>
 
 <p>内存泄漏一般导致应用卡顿，极端情况会导致项目boom。Boom的原因是因为超过内存的阈值。 <br/>
 原因主要有两方面：</p>
@@ -304,9 +458,9 @@
 
 <p>我们来看下下面两张图： </p>
 
-<p><img src="media/15561207871067/15713657020079.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657020079.png" alt=""/></figure></p>
 
-<p><img src="media/15561207871067/15713657095476.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657095476.png" alt=""/></figure></p>
 
 <p>对比两张图，我们可以在第一张的情况出现了oom情况，我们通过log打印发现，处理的好像没什么问题，换句话说，如果我不放那0.8M的图片。然后继续不停的操作同样会出现OOM，然而我们就蒙了。没什么图片加载怎么就这么崩掉了。</p>
 
@@ -321,11 +475,11 @@
 
 <p>就那我公司的项目举例把。首先，我们在这边可以看到memory。CPU和net的使用情况。 </p>
 
-<p><img src="media/15561207871067/15713657215613.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657215613.png" alt=""/></figure></p>
 
 <p>我们找到Object。看看我们内存的消耗情况。 </p>
 
-<p><img src="media/15561207871067/15713657297064.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657297064.png" alt=""/></figure></p>
 
 <p>随便这么一看，尼玛蛋，1300左右的view和一个Activity。还有3个context。可怕。。可以理解为一个Activity里面使用了将近1300个view。。。想都不敢想。。。</p>
 
@@ -333,11 +487,11 @@
 
 <p>我们可以更仔细的查找泄漏的位置，在AS里面使用 Heap SnapShot工具（堆栈快照）。如图所示： </p>
 
-<p><img src="media/15561207871067/15713657375160.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657375160.png" alt=""/></figure></p>
 
 <p>我们点击后，他会进行一段时间的监控，然后会生成一个文件。我们点击我们package tree view。 </p>
 
-<p><img src="media/15561207871067/15713657516723.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657516723.png" alt=""/></figure></p>
 
 <p>我们找到自己项目的包名。然后进行进一步的分析。首先看一下2个列表的列名到底指的什么。 </p>
 
@@ -385,7 +539,7 @@
 
 <p>我们来随便的看一下内存中的数量： </p>
 
-<p><img src="media/15561207871067/15713657609152.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657609152.png" alt=""/></figure></p>
 
 <p>这还是我们刚进手机，一个bean就被调用了这么多次。简直可怕。这个我们可以通过内存分析工具解决的。</p>
 
@@ -441,13 +595,13 @@
 
 <p>我们对于UI性能的优化还可以通过开发者选项中的GPU过度绘制工具来进行分析。在设置-&gt;开发者选项-&gt;调试GPU过度绘制（不同设备可能位置或者叫法不同）中打开调试后可以看见如下图（对settings当前界面过度绘制进行分析）： </p>
 
-<p><img src="media/15561207871067/15713657796585.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657796585.png" alt=""/></figure></p>
 
-<p><img src="media/15561207871067/15713657891069.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657891069.png" alt=""/></figure></p>
 
 <p>这图看着太乱，我们来一张简洁明了的图： </p>
 
-<p><img src="media/15561207871067/15713657982645.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713657982645.png" alt=""/></figure></p>
 
 <p>我们的目标就是尽量减少红色Overdraw，看到更多的蓝色区域。</p>
 
@@ -493,9 +647,9 @@
 
 <p>我们依旧打开设置–&gt;开发者选项–&gt;GPU呈现模式分析–&gt;在屏幕上显示为条形图，如图所示： </p>
 
-<p><img src="media/15561207871067/15713658134293.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658134293.png" alt=""/></figure></p>
 
-<p><img src="media/15561207871067/15713658216356.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658216356.png" alt=""/></figure></p>
 
 <p>当然，也可以在执行完UI滑动操作后在命令行输入如下命令查看命令行打印的GPU渲染数据（分析依据：Draw + Process + Execute = 完整的显示一帧时间 &lt; 16ms）：</p>
 
@@ -509,11 +663,11 @@
 
 <p>Android Studio和IntellJ idead都有自带的代码检查工具。打开Analyze-&gt;Run Inspection by Name… –&gt;unused resource 点击开始检测，等待一下后会发现如下结果： </p>
 
-<p><img src="media/15561207871067/15713658334886.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658334886.png" alt=""/></figure></p>
 
 <p>我们还可以这样，将鼠标放在代码区点击右键-&gt;Analyze-&gt;Inspect Code–&gt;界面选择你要检测的模块-&gt;点击确认开始检测，等待一下后会发现如下结果： </p>
 
-<p><img src="media/15561207871067/15713658538715.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658538715.png" alt=""/></figure></p>
 
 <p>当然，我这只是截取了少一部分，我们看下下面那个提示：@param v tag description is missing 。意味着v的类型缺少了，要么补上介绍，要么直接删除。</p>
 
@@ -535,13 +689,13 @@
 <p>线程是我们项目中不可缺少的重要部分，因为我们大多数数据都是从网络获取的。So，线程这个是必备用品。 <br/>
 我们依旧可以通过Memory下面的Net进行网络的监听： </p>
 
-<p><img src="media/15561207871067/15713658679996.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658679996.png" alt=""/></figure></p>
 
 <h2 id="toc_15">ANR问题</h2>
 
 <p>相信这个问题在座的各种没少遇到过，那么什么是ANR？application not responding。应用程序无响应。那么一般什么时候会出现ANR。Android官方规定：activity如果5s内无响应事件（屏幕触摸事件或者键盘输入事件）。BroadcastReceiver如果在10s内无法处理完成。Service如果20s内无法处理完成。这三种情况会导致ANR。用张简洁的图来介绍把。看起来方便~~ </p>
 
-<p><img src="media/15561207871067/15713658773357.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658773357.png" alt=""/></figure></p>
 
 <h2 id="toc_16">线程优化</h2>
 
@@ -628,15 +782,15 @@
 <p>我们先对比下三种启动的时间对比：<br/><br/>
 冷启动： </p>
 
-<p><img src="media/15561207871067/15713658903891.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658903891.png" alt=""/></figure></p>
 
 <p>暖启动 ： </p>
 
-<p><img src="media/15561207871067/15713658986268.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713658986268.png" alt=""/></figure></p>
 
 <p>热启动： </p>
 
-<p><img src="media/15561207871067/15713659065674.png" alt=""/></p>
+<p><figure><img src="media/15561207871067/15713659065674.png" alt=""/></figure></p>
 
 <p>我们可以看到三者的明显的差距，一个冷启动将近一分钟，反正我是不想看，每次跑项目都好慢~那么我们应该怎么做？看到有些人介绍说改变项目的theme。把它改成launcher的theme。但我觉得，这种做测试的确没问题。但是一般项目都会有闪屏页。然后从闪屏跳转到首页。我们可以按照大多数的项目来改善。怎么说的，我们可以看到一般项目都有倒计时显示。也就是说倒计时结束就自动进入首页。或者可以直接跳过进入首页。也就是说我们可以通过此方法来进行，也就是说只要他倒计时结束，不管请求是否全部获取完我们都直接进入首页。我们可以在闪屏页进行一些必要的加载，例如用户信息，定位等等，那么至于其他的，我们可以进入主页进行预加载。就和热更新一样，在用户不知情的情况下，默默的更新bug。So，对于一些网络请求，例如广告之类的。我们可以通过此方法进行预加载。</p>
 
@@ -710,7 +864,7 @@
 
 <p>手机桌面也是一个App，每一个应用的icon都罗列在Launcher上，点击icon触发onItemClick事件，下面例如我们要启动「淘宝」这个App，首先我们要在清单文件定义默认启动的Activity信息。</p>
 
-<pre><code class="language-markup">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
     &lt;intent-filter&gt;
         &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
         &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
@@ -720,7 +874,7 @@
 
 <p>然后Launcher获取到该信息之后，启动淘宝App</p>
 
-<pre><code class="language-java">//该应用的包名
+<pre class="line-numbers"><code class="language-java">//该应用的包名
 String pkg = info.activityInfo.packageName;
 //应用的主activity类
 String cls = info.activityInfo.name;
@@ -756,7 +910,7 @@ startActivity(i);
 <p>我们从Activity的startActivity方法开始分析。<br/><br/>
 <code>startActivity</code>方法有好几种重载方式，但它们最终都会调用<code>startActivityForResult</code>方法。</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public void startActivity(Intent intent, @Nullable Bundle options) {
     if (options != null) {
         startActivityForResult(intent, -1, options);
@@ -770,7 +924,7 @@ public void startActivity(Intent intent, @Nullable Bundle options) {
 
 <p>在<code>startActivityForResult</code>方法内，会调用<code>Instrumentation</code>的<code>execStartActivity</code>方法。</p>
 
-<pre><code class="language-java">public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,@Nullable Bundle options) {
+<pre class="line-numbers"><code class="language-java">public void startActivityForResult(@RequiresPermission Intent intent, int requestCode,@Nullable Bundle options) {
     ......
     Instrumentation.ActivityResult ar =mInstrumentation.execStartActivity(
                     this, mMainThread.getApplicationThread(), mToken, this,
@@ -785,7 +939,7 @@ public void startActivity(Intent intent, @Nullable Bundle options) {
 <p>Instrumentation从字面上来看是仪器盘的意思，具体到程序中是管理activity的一个工具类，包括创建和启动Activity，activity的生命周期方法都是由Instrumentation这个仪器来控制，一个进程中只用一个Instrumentation实例。</p>
 </blockquote>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  *
  *
  * @param who The Context from which the activity is being started.
@@ -834,7 +988,7 @@ public ActivityResult execStartActivity(Context who, IBinder contextThread, IBin
 <p>我们找到<code>ActivityThread</code>文件，其实这个<code>getApplicationThread</code>方法获取的是内部类<code>ApplicationThread</code>对象 <br/>
 而且<code>ApplicationThread</code>继承<code>ApplicationThreadNative</code></p>
 
-<pre><code class="language-java">public final class ActivityThread {//没有继承或者实现其他类。
+<pre class="line-numbers"><code class="language-java">public final class ActivityThread {//没有继承或者实现其他类。
 
     final ApplicationThread mAppThread = new ApplicationThread();
 
@@ -855,7 +1009,7 @@ public ActivityResult execStartActivity(Context who, IBinder contextThread, IBin
 通过构造方法我们就很清晰的可以得知原来这个<code>ApplicationThreadNative</code>就是相当于AIDL通讯中的Stub，也就是服务端，<code>ApplicationThreadProxy</code>即AIDL通讯中的Proxy，也就是客户端。所以ApplicationThread是通讯的具体实现类。<br/><br/>
 上面的介绍中我们也说过，Activity的启动实际上是多次进程间通讯的成果，看到这里我们就可以得出结论：<strong>ActivityThread通过内部类ApplicationThread来进行进程间通讯</strong></p>
 
-<pre><code class="language-java">public abstract class ApplicationThreadNative extends Binder implements IApplicationThread {
+<pre class="line-numbers"><code class="language-java">public abstract class ApplicationThreadNative extends Binder implements IApplicationThread {
 
     static public IApplicationThread asInterface(IBinder obj) {...}
 
@@ -885,7 +1039,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 <p>追溯到参数起源，这个<code>token</code>对象，是在<code>Activity</code>的<code>attach</code>方法中传入的，也就是<code>Activity</code>的创建与关联时候(下面的内容会提到)传入的<code>Activity</code>信息。<br/><br/>
 这也是个<code>Binder</code>对象，它代表了<code>Launcher</code>这个<code>Activity</code>，这里也通过<code>Instrumentation</code>传给AMS，AMS查询后，就知道是谁向AMS发起请求了。</p>
 
-<pre><code class="language-java">//Activity
+<pre class="line-numbers"><code class="language-java">//Activity
 
     private IBinder mToken;
 
@@ -909,7 +1063,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 
 <p>在<code>Instrumentation</code>中，启动<code>Activity</code>真正的实现是由<code>ActivityManagerNative.getDefault()</code>的<code>startActivity</code>方法来完成。</p>
 
-<pre><code class="language-java">int result = ActivityManagerNative.getDefault()
+<pre class="line-numbers"><code class="language-java">int result = ActivityManagerNative.getDefault()
                 .startActivity(whoThread, who.getBasePackageName(), intent,
                         intent.resolveTypeIfNeeded(who.getContentResolver()),
                         token, target != null ? target.mEmbeddedID : null,
@@ -922,7 +1076,7 @@ class ApplicationThreadProxy implements IApplicationThread {
 
 <p>我们先看代码，捋一捋上述所说的关系。</p>
 
-<pre><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
+<pre class="line-numbers"><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
 
 public abstract class ActivityManagerNative extends Binder implements IActivityManager{...}
 
@@ -931,7 +1085,7 @@ public interface IActivityManager extends IInterface {...}
 
 <p>首先我们来看这个命名方式，xxxNative，我们知道Stub持有Binder本地对象，Proxy持有的是Binder的代理对象。所以系统命名也是依据此因素（Native：本地的，土著的）作为命名规范。</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * Retrieve the system&#39;s default/global activity manager.
  */
 static public IActivityManager getDefault() {
@@ -968,7 +1122,7 @@ AMN通过getDefault方法，从ServiceManager中获取AMS中Binder的引用对�
 
 <p>类似AIDL中客户端的绑定代码，此时我们就可以通过ActivityManagerProxy（asInterface返回值为 IActivityManager），与AMS进行通讯。</p>
 
-<pre><code class="language-java">//ActivityManagerProxy
+<pre class="line-numbers"><code class="language-java">//ActivityManagerProxy
 
 public int startActivity(IApplicationThread caller, String callingPackage, Intent intent,String resolvedType, IBinder resultTo, String resultWho, int requestCode,int startFlags, ProfilerInfo profilerInfo, Bundle options) throws RemoteException {
 
@@ -1001,7 +1155,7 @@ public int startActivity(IApplicationThread caller, String callingPackage, Inten
 }
 </code></pre>
 
-<p><img src="media/15561207871029/15713362032570.png" alt=""/></p>
+<p><figure><img src="media/15561207871029/15713362032570.png" alt=""/></figure></p>
 
 <p>从上面的分析可以知道，Activity是由<code>AMN.getDefault()</code>来启动的，而<code>AMN.getDefault()</code>实际上是AMS，因此Activity的启动过程又转移到了AMS中，为了继续分析这个过程，只需要查看AMS的startActivity方法即可。</p>
 
@@ -1009,19 +1163,19 @@ public int startActivity(IApplicationThread caller, String callingPackage, Inten
 <p>Launcher通知AMS启动淘宝APP的MainActivity，也就是清单文件设置启动的Activity。</p>
 </blockquote>
 
-<p><img src="media/15561207871029/15713362127963.png" alt=""/></p>
+<p><figure><img src="media/15561207871029/15713362127963.png" alt=""/></figure></p>
 
 <h2 id="toc_7">AMS</h2>
 
 <p>上个图，先通俗易懂的总结一下Activity启动的整体流程，对整体框架有一个大概认识。</p>
 
-<p><img src="media/15561207871029/15713362240020.png" alt=""/></p>
+<p><figure><img src="media/15561207871029/15713362240020.png" alt=""/></figure></p>
 
 <h3 id="toc_8">AMS分析</h3>
 
 <p>再回顾一遍，通过对AMS 类的查看，我们可以知道AMS 也是一个Binder，并且它是<code>IActivityManager</code>的具体实现。</p>
 
-<pre><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
+<pre class="line-numbers"><code class="language-java">public final class ActivityManagerService extends ActivityManagerNative {...}
 
 public abstract class ActivityManagerNative extends Binder implements IActivityManager{...}
 
@@ -1030,7 +1184,7 @@ public interface IActivityManager extends IInterface {...}
 
 <p>接着我们继续分析AMS的<code>startActivity</code>方法，这个阶段比较复杂和繁琐，一不小心就绕晕了，我们了解大致过程，不深入代码细节，对整体流程建立足够认识即可。</p>
 
-<pre><code class="language-java">//AMS
+<pre class="line-numbers"><code class="language-java">//AMS
 
 @Override
 public final int startActivity(IApplicationThread caller, String callingPackage,Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,int startFlags, ProfilerInfo profilerInfo, Bundle bOptions) {
@@ -1051,7 +1205,7 @@ public final int startActivityAsUser(IApplicationThread caller, String callingPa
 
 <h3 id="toc_9">ActivityStarter</h3>
 
-<pre><code class="language-java">//ActivityStarter
+<pre class="line-numbers"><code class="language-java">//ActivityStarter
 
 final int startActivityMayWait(IApplicationThread caller, int callingUid,String callingPackage, Intent intent, String resolvedType,IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,IBinder resultTo, String resultWho, int requestCode, int startFlags,ProfilerInfo profilerInfo, IActivityManager.WaitResult outResult, Configuration config,Bundle bOptions, boolean ignoreTargetSecurity, int userId,IActivityContainer iContainer, TaskRecord inTask) {
 
@@ -1102,7 +1256,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>接下来调用ActivityStack的startActivityLocked将ActivityRecord加入到回退栈里</p>
 
-<pre><code class="language-java">//ActivityStarter
+<pre class="line-numbers"><code class="language-java">//ActivityStarter
 
     private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
             IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
@@ -1138,7 +1292,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <h3 id="toc_10">ActivityStackSupervisor</h3>
 
-<pre><code class="language-java">//ActivityStackSupervisor
+<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
 
     boolean resumeFocusedStackTopActivityLocked() {
         return resumeFocusedStackTopActivityLocked(null, null, null);
@@ -1163,7 +1317,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>接着跟进ActivityStack</p>
 
-<pre><code class="language-java">//ActivityStack
+<pre class="line-numbers"><code class="language-java">//ActivityStack
 
 
     boolean resumeTopActivityUncheckedLocked(ActivityRecord prev, ActivityOptions options) {
@@ -1233,7 +1387,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>接下来的操作就比较重要了，创建进程，启动Activity。</p>
 
-<pre><code class="language-java">//ActivityStackSupervisor
+<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
 
 
     void startSpecificActivityLocked(ActivityRecord r,
@@ -1278,7 +1432,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 <p>4.淘宝App未开启过，所以AMS启动新的进程，并且在新进程中创建ActivityThread对象，执行其中的main函数方法。</p>
 </blockquote>
 
-<pre><code class="language-java">//ActivityServiceManager
+<pre class="line-numbers"><code class="language-java">//ActivityServiceManager
 
         //Process.java的start函数，将通过socket发送消息给zygote
         //zygote将派生出一个子进程，子进程将通过反射调用ActivityThread的main函数
@@ -1290,7 +1444,7 @@ startActivityUnchecked方法调度task的算法非常复杂，和当前回退栈
 
 <p>Zygote进程孵化出新的应用进程后，通过反射执行ActivityThread类的main方法。在该方法里会先准备好Looper和消息队列，然后调用attach方法将应用进程绑定到AMS，然后进入loop循环，不断地读取消息队列里的消息，并分发消息。</p>
 
-<pre><code class="language-java">//ActivityThread
+<pre class="line-numbers"><code class="language-java">//ActivityThread
 
 public static void main(String[] args) {
     ``````
@@ -1343,7 +1497,7 @@ private void attach(boolean system) {
 <p>至此通过下图总结一下在AMS启动Activity的大致流程，各个方法函数像一台机器上的不同零件，各尽其责，分工明确。 <br/>
 虽然错综复杂，但是耦合性低，比如说启动模式需要优化，重新完善startActivityUnchecked方法函数即可。</p>
 
-<p><img src="media/15561207871029/15713362340361.png" alt=""/></p>
+<p><figure><img src="media/15561207871029/15713362340361.png" alt=""/></figure></p>
 
 <h3 id="toc_14">关联Activity</h3>
 
@@ -1352,7 +1506,7 @@ private void attach(boolean system) {
 
 <p>因为主线程main入口通过attach方法将 ApplicationThread 发送给 AMS ，所以通过applicationThread这个桥梁来通知ActivityThread创建/关联和启动Activity。</p>
 
-<pre><code class="language-java">//AMS
+<pre class="line-numbers"><code class="language-java">//AMS
 
 
     @Override
@@ -1369,7 +1523,7 @@ private void attach(boolean system) {
 
 <p>通过Binder获取proxy（ApplicationThread ）方的进程id，也就是获取目标(淘宝)进程的Pid。</p>
 
-<pre><code class="language-java">//Binder
+<pre class="line-numbers"><code class="language-java">//Binder
 
 
     /**
@@ -1384,7 +1538,7 @@ private void attach(boolean system) {
 
 <p>接下来重点分析attachApplicationLocked方法</p>
 
-<pre><code class="language-java">//AMS
+<pre class="line-numbers"><code class="language-java">//AMS
 
 
     private final boolean attachApplicationLocked(IApplicationThread thread,
@@ -1488,7 +1642,7 @@ private void attach(boolean system) {
 <p>在上面我们说道，ActivityThread通过ApplicationThread与AMS进行通讯，所以上面的thread.bindApplication（...）方法，就应该是通过ApplicationThread进行传达。<br/><br/>
 在ActivityThread的内部类ApplicationThread中，我们找到bindApplication方法</p>
 
-<pre><code class="language-java">//ActivityThread
+<pre class="line-numbers"><code class="language-java">//ActivityThread
 
     //内部类ApplicationThread
     private class ApplicationThread extends ApplicationThreadNative {
@@ -1512,7 +1666,7 @@ private void attach(boolean system) {
 
 <p>发送消息是通过H的<code>Handler</code>类来完成的，这个命名贼个性，很令人印象深刻。PS : 我怀疑是编写这个类的工程师词穷了…</p>
 
-<pre><code class="language-java">    private class H extends Handler {
+<pre class="line-numbers"><code class="language-java">    private class H extends Handler {
         public static final int LAUNCH_ACTIVITY         = 100;
         public static final int PAUSE_ACTIVITY          = 101;
         ``````
@@ -1566,7 +1720,7 @@ private void attach(boolean system) {
 
 <p>言归正传，上面ApplicationThread给H发送BIND_APPLICATION标识，在H中，通过handleBindApplication处理application的绑定事务。</p>
 
-<pre><code class="language-java">//ActivityThread
+<pre class="line-numbers"><code class="language-java">//ActivityThread
 
 
 
@@ -1667,7 +1821,7 @@ private void attach(boolean system) {
 
 <p>绑定了Application之后，我们就可以启动Activity(淘宝MainActivity)。 </p>
 
-<pre><code class="language-java">//ActivityStackSupervisor
+<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
 
 
     boolean attachApplicationLocked(ProcessRecord app) throws RemoteException {
@@ -1710,7 +1864,7 @@ private void attach(boolean system) {
 <p>大概系统工程师也觉得这个启动过程贼鸡儿绕了，最终启动的方法命名为realStartActivityLocked，意味着告诉你，大伙儿不要搞晕了，这个就是最后启动Activity的方法了。<br/><br/>
 最后我们直捣黄龙，在<code>ActivityStackSupervisor</code>方法中，我们找到如下代码</p>
 
-<pre><code class="language-java">//ActivityStackSupervisor
+<pre class="line-numbers"><code class="language-java">//ActivityStackSupervisor
 
 
             app.thread.scheduleLaunchActivity(new Intent(r.intent), r.appToken,
@@ -1726,7 +1880,7 @@ ApplicationThread—&gt; H—&gt; ActivityThread—&gt; 最终启动Activity的�
 
 <h3 id="toc_18">ActivityThread</h3>
 
-<pre><code class="language-java">//ActivityThread
+<pre class="line-numbers"><code class="language-java">//ActivityThread
 
 
     //内部类ApplicationThread
@@ -1773,7 +1927,7 @@ ApplicationThread—&gt; H—&gt; ActivityThread—&gt; 最终启动Activity的�
     }
 </code></pre>
 
-<pre><code class="language-java">//ActivityThread
+<pre class="line-numbers"><code class="language-java">//ActivityThread
 
 
 private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
@@ -1808,7 +1962,7 @@ private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
 
 <h4 id="toc_20">从ActivityClientRecord中获取待启动的Activity的组件信息。</h4>
 
-<pre><code class="language-java">//ActivityThread的performLaunchActivity方法
+<pre class="line-numbers"><code class="language-java">//ActivityThread的performLaunchActivity方法
 
 
         ActivityInfo aInfo = r.activityInfo;
@@ -1832,7 +1986,7 @@ private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
 
 <h4 id="toc_21">通过Instrumentation的newActivity方法使用类加载器创建Activity对象。</h4>
 
-<pre><code class="language-java">//ActivityThread的performLaunchActivity方法
+<pre class="line-numbers"><code class="language-java">//ActivityThread的performLaunchActivity方法
 
 
         Activity activity = null;
@@ -1853,7 +2007,7 @@ private void handleLaunchActivity(ActivityClientRecord r, Intent customIntent) {
 
 <h4 id="toc_22">通过LoadedApk的makeApplication方法来创建Application对象。</h4>
 
-<pre><code class="language-java">//ActivityThread的performLaunchActivity方法
+<pre class="line-numbers"><code class="language-java">//ActivityThread的performLaunchActivity方法
 
 
 Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.packageInfo为LoadedApk对象
@@ -1861,7 +2015,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 
 <p>其实在我们上面的bindApplication中，我们就有介绍到通过<code>LoadedApk</code>创建Application，并且创建完毕后，通过<code>Instrumentation的callApplicationOnCreate</code>来调用<code>Application</code>的onCreate方法</p>
 
-<pre><code class="language-java"> Application app = data.info.makeApplication(data.restrictedBackupMode, null);
+<pre class="line-numbers"><code class="language-java"> Application app = data.info.makeApplication(data.restrictedBackupMode, null);
 
     ``````
  mInstrumentation.callApplicationOnCreate(app);
@@ -1871,7 +2025,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 
 <h4 id="toc_23">创建ContextImpl对象，并通过Activity的attach方法来完成一些重要数据的初始化。</h4>
 
-<pre><code class="language-java">
+<pre class="line-numbers"><code class="language-java">
                 Context appContext = createBaseContextForActivity(r, activity);//创建ContextImpl对象
 
                 ``````
@@ -1899,7 +2053,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 
 <h4 id="toc_25">调用Activity的onStart,onResotreInstanceState方法</h4>
 
-<pre><code class="language-java">        mInstrumentation.callActivityOnCreate(activity, r.state);
+<pre class="line-numbers"><code class="language-java">        mInstrumentation.callActivityOnCreate(activity, r.state);
 
         ``````
         mInstrumentation.callActivityOnRestoreInstanceState(activity, r.state);
@@ -1918,7 +2072,7 @@ Application app = r.packageInfo.makeApplication(false, mInstrumentation);//r.pac
 <p>如果是淘宝MainActivity启动LoginActivity呢？<br/><br/>
 其实原理和上述过程大体一致，只是在<code>ActivityStackSupervisor</code>的<code>startSpecificActivityLocked</code>方法中，发现进程已经启动，直接调用<code>realStartActivityLocked</code>启动Activity。</p>
 
-<p><img src="media/15561207871029/15713362420977.png" alt=""/></p>
+<p><figure><img src="media/15561207871029/15713362420977.png" alt=""/></figure></p>
 
                         
                       </div>
@@ -2103,17 +2257,17 @@ AIDL、Messenger、Binder、多进程、动画、滑动冲突、自定义View、
                       
                       <div class="a-content-text">
                         
-                        	<p><img src="media/15561207870883/15713359653854.png" alt=""/></p>
+                        	<p><figure><img src="media/15561207870883/15713359653854.png" alt=""/></figure></p>
 
 <h2 id="toc_0">基础知识</h2>
 
-<p><img src="media/15561207870883/15713359733510.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870883/15713359733510.jpg" alt=""/></figure></p>
 
-<p><img src="media/15561207870883/15713359818799.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870883/15713359818799.jpg" alt=""/></figure></p>
 
-<p><img src="media/15561207870883/15713359891037.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870883/15713359891037.jpg" alt=""/></figure></p>
 
-<p><img src="media/15561207870883/15713359971568.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870883/15713359971568.jpg" alt=""/></figure></p>
 
 <p>{% post_link android-learning-path Android学习路线 %}  </p>
 
@@ -2121,7 +2275,7 @@ AIDL、Messenger、Binder、多进程、动画、滑动冲突、自定义View、
 
 <h3 id="toc_1">Java基础</h3>
 
-<p><img src="media/15561207870883/15713360098241.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870883/15713360098241.jpg" alt=""/></figure></p>
 
 <h4 id="toc_2">Java字符串(String、StringBuilder、StringBuffer)</h4>
 
@@ -2904,7 +3058,7 @@ AIDL、Messenger、Binder、多进程、动画、滑动冲突、自定义View、
 
 <p>首先写一个 HelloWorld 类：</p>
 
-<pre><code class="language-java">package jiuyou.hello.info;
+<pre class="line-numbers"><code class="language-java">package jiuyou.hello.info;
 
 public class HelloWorld {
     public static void main(String[] args){
@@ -2915,7 +3069,7 @@ public class HelloWorld {
 
 <p>然后生成 apk 再用 apktool 工具转成 smali 文件：</p>
 
-<pre><code class="language-text">.class public Ljiuyou/hello/info/HelloWorld;    #定义类名
+<pre class="line-numbers"><code class="language-text">.class public Ljiuyou/hello/info/HelloWorld;    #定义类名
 .super Ljava/lang/Object;                       #定义父类
 .source &quot;HelloWorld.java&quot;                       #源文件名
 
@@ -2952,13 +3106,13 @@ public class HelloWorld {
 
 <p>静态字段格式如下：</p>
 
-<pre><code class="language-text"># static fields
+<pre class="line-numbers"><code class="language-text"># static fields
 .field &lt;访问权限&gt; static [修饰关键字] &lt;字段名&gt;:&lt;字段类型&gt;
 </code></pre>
 
 <p>实例字段格式如下：</p>
 
-<pre><code class="language-text"># instance fields
+<pre class="line-numbers"><code class="language-text"># instance fields
 .field &lt;访问权限&gt; [修饰关键字] &lt;字段名&gt;:&lt;字段类型&gt;
 </code></pre>
 
@@ -2966,7 +3120,7 @@ public class HelloWorld {
 
 <p><strong>java</strong> ：</p>
 
-<pre><code class="language-java">private String name;
+<pre class="line-numbers"><code class="language-java">private String name;
 
 private final String sex=&quot;男&quot;;
 
@@ -2975,7 +3129,7 @@ public static int age;
 
 <p><strong>smali</strong> :</p>
 
-<pre><code class="language-text"># static fields
+<pre class="line-numbers"><code class="language-text"># static fields
 .field public static age:I
 
 # instance fields
@@ -2988,7 +3142,7 @@ public static int age;
 
 <p>方法有直接方法和虚方法两种，两者格式基本相同：</p>
 
-<pre><code class="language-text"># direct methods  (virtual methods)
+<pre class="line-numbers"><code class="language-text"># direct methods  (virtual methods)
 .method &lt;访问权限&gt; [修饰关键字] &lt;方法原型&gt;
     &lt;.locals&gt;
     [.parameter] or [.param]
@@ -3006,7 +3160,7 @@ public static int age;
 <p>举个栗子：<br/><br/>
 <strong>java</strong></p>
 
-<pre><code class="language-java">public String test(int a){
+<pre class="line-numbers"><code class="language-java">public String test(int a){
     int b=a+10;
     return &quot;test&quot;;
 }
@@ -3014,7 +3168,7 @@ public static int age;
 
 <p><strong>smali</strong></p>
 
-<pre><code class="language-text"># virtual methods
+<pre class="line-numbers"><code class="language-text"># virtual methods
 .method public test(I)Ljava/lang/String;
     .locals 2
     .param p1, &quot;a&quot;    # I
@@ -3035,14 +3189,14 @@ public static int age;
 
 <p>interface 格式如下：</p>
 
-<pre><code class="language-text"># interfaces
+<pre class="line-numbers"><code class="language-text"># interfaces
 .implements &lt;接口名&gt;
 </code></pre>
 
 <p>举个例子：<br/><br/>
 <strong>java</strong></p>
 
-<pre><code class="language-java">public interface If {
+<pre class="line-numbers"><code class="language-java">public interface If {
     int demo(String s);
 }
 
@@ -3058,14 +3212,14 @@ public class InterfaceTest implements If {
 
 <p>If.smali</p>
 
-<pre><code class="language-text"># virtual methods
+<pre class="line-numbers"><code class="language-text"># virtual methods
 .method public abstract demo(Ljava/lang/String;)I
 .end method
 </code></pre>
 
 <p>InterfaceTest.smali</p>
 
-<pre><code class="language-text"># interfaces
+<pre class="line-numbers"><code class="language-text"># interfaces
 .implements Ljiuyou/hello/info/If;
 
 # virtual methods
@@ -3085,7 +3239,7 @@ public class InterfaceTest implements If {
 
 <p>格式如下：</p>
 
-<pre><code class="language-text">.annotation [注解属性] &lt;注解类名&gt;
+<pre class="line-numbers"><code class="language-text">.annotation [注解属性] &lt;注解类名&gt;
     [注解字段 = 值]
 .end annotation
 </code></pre>
@@ -3095,7 +3249,7 @@ public class InterfaceTest implements If {
 <p>举个栗子：<br/><br/>
 <strong>java</strong>  </p>
 
-<pre><code class="language-java">@Deprecated
+<pre class="line-numbers"><code class="language-java">@Deprecated
 public class AnnotationTest {
     @At(value = &quot;tom&quot;)
     public String name;
@@ -3104,7 +3258,7 @@ public class AnnotationTest {
 
 <p><strong>smali</strong></p>
 
-<pre><code class="language-text"># annotations
+<pre class="line-numbers"><code class="language-text"># annotations
 .annotation runtime Ljava/lang/Deprecated;
 .end annotation
 
@@ -3156,7 +3310,7 @@ public class AnnotationTest {
 
 <p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子View的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子View的布局。我们先看一组动画图~</p>
 
-<p><img src="media/15561207870745/20171014150799569357936.gif" alt=""/></p>
+<p><figure><img src="media/15561207870745/20171014150799569357936.gif" alt=""/></figure></p>
 
 <p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色Button查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。</p>
 
@@ -3170,7 +3324,7 @@ public class AnnotationTest {
 
 <p>怎么使用<code>Behavior</code>呢，首先，我们定义一个类，继承<code>CoordinatorLayout.Behavior&lt;T&gt;</code>,其中，泛型参数T是我们要执行动作的<code>View</code>类，也就是<code>Child</code>。然后就是去实现<code>Behavior</code>的两个方法：</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
 * 判断child的布局是否依赖dependency
 */
    @Override
@@ -3198,7 +3352,7 @@ public boolean onDependentViewChanged(CoordinatorLayout parent, T child, View de
 
 <p>我们看看<code>Behavior</code>的使用：</p>
 
-<pre><code class="language-java">package com.hc.studyCoordinatorLayout;
+<pre class="line-numbers"><code class="language-java">package com.hc.studyCoordinatorLayout;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
@@ -3253,7 +3407,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>OK，现在我们为<code>Button</code>类指定了<code>Dependency</code>，并且定义好了跟随<code>Dependency</code>一直变化的动作（<code>Behavior</code>），接下来我们就要指定好为哪个具体的<code>Button</code>实例来绑定这些。方法很简单，直接在布局文件指定就好：</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
@@ -3323,7 +3477,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>在Android Studio中安装CMake非常简单，打开Tools-&gt;Android-&gt;SDK Manager，选择SDK Tools标签页，勾选CMake、LLDB、NDK，OK自动安装即可。其中LLDB可以使我们在Android Studio中调试C/C++程序。NDK为原生开发工具包，必不可少。</p>
 
-<p><img src="media/15561207870778/15713317710825.png" alt=""/></p>
+<p><figure><img src="media/15561207870778/15713317710825.png" alt=""/></figure></p>
 
 <h2 id="toc_1">为什么要做JNI/NDK开发</h2>
 
@@ -3342,7 +3496,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <h3 id="toc_4">配置C++支持</h3>
 
-<p><img src="media/15561207870778/15713317834823.png" alt=""/></p>
+<p><figure><img src="media/15561207870778/15713317834823.png" alt=""/></figure></p>
 
 <p>在Customize C++ Support界面默认即可,意为CMake/C++11环境</p>
 
@@ -3350,7 +3504,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>工程创建完毕之后Android Studio会在app目录下生成CMakeLists.txt文件。CMakeLists.txt是CMake的配置文件，用于表明版本、依赖、等信息，以下为Android Studio生成的CMakeLists（过滤注释）</p>
 
-<pre><code class="language-text">cmake_minimum_required(VERSION 3.4.1)
+<pre class="line-numbers"><code class="language-text">cmake_minimum_required(VERSION 3.4.1)
 
 add_library(native-lib SHARED src/main/cpp/native-lib.cpp)
 
@@ -3590,7 +3744,7 @@ CMake最小版本使用的是3.4.1。</li>
 
 <p>先来看看Android Studio为我们生成的示例</p>
 
-<pre><code class="language-java">JNIEXPORT jstring JNICALL
+<pre class="line-numbers"><code class="language-java">JNIEXPORT jstring JNICALL
 Java_com_glee_myapplication_MainActivity_stringFromJNI(
         JNIEnv* env,
         jobject /* this */) {
@@ -3646,7 +3800,7 @@ JNIEXPORT和JNICALL这两个宏（被定义在jni.h）确保这个函数在本�
 
 <p>请看注释</p>
 
-<pre><code class="language-java">JNIEXPORT void JNICALL
+<pre class="line-numbers"><code class="language-java">JNIEXPORT void JNICALL
 Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */, jobject bmp) {
     AndroidBitmapInfo info = {0};//初始化BitmapInfo结构体
     int *data=NULL;//初始化Bitmap图像数据指针
@@ -3666,7 +3820,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>请看注释</p>
 
-<pre><code class="language-java">public class MainActivity extends AppCompatActivity {
+<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
 
     static {
         //通过静态代码块加载so库
@@ -3698,11 +3852,11 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>上方的ImageView是没有进行高斯模糊处理的，下方的ImageView调用了JNI方法进行高斯模糊处理。</p>
 
-<p><img src="media/15561207870778/15713317952653.png" alt=""/></p>
+<p><figure><img src="media/15561207870778/15713317952653.png" alt=""/></figure></p>
 
 <h3 id="toc_18">高斯模糊算法</h3>
 
-<pre><code class="language-c">void gaussBlur1(int* pix, int w, int h, int radius)
+<pre class="line-numbers"><code class="language-c">void gaussBlur1(int* pix, int w, int h, int radius)
 {
     float sigma = (float) (1.0 * radius / 2.57);
     float deno  = (float) (1.0 / (sigma * sqrt(2.0 * PI)));
@@ -3823,7 +3977,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
 
-<pre><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
 &lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
 </code></pre>
 
@@ -3831,7 +3985,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
 
-<pre><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
+<pre class="line-numbers"><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
         android:id=&quot;@+id/toolbar&quot;
         android:layout_width=&quot;match_parent&quot;
         android:background=&quot;?attr/colorPrimary&quot;
@@ -3840,7 +3994,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>最后将Toobar作为“ActionBar”来用</p>
 
-<pre><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+<pre class="line-numbers"><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(&quot;这里是Title&quot;);
         toolbar.setSubtitle(&quot;这里是子标题&quot;);
         toolbar.setLogo(R.drawable.icon); 
@@ -3873,11 +4027,11 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>一张gif足以说明：</p>
 
-<p><img src="media/15561207870710/20171014150799488071606.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171014150799488071606.gif" alt=""/></figure></p>
 
 <p>对应的布局文件</p>
 
-<pre><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
+<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;&gt;
 
@@ -3896,7 +4050,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>看个动画片（Y(<sup>o<sup>)Y）（ToolBar高度设为：<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code>）：</sup></sup></p>
 
-<p><img src="media/15561207870710/20171014150799493830006.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171014150799493830006.gif" alt=""/></figure></p>
 
 <blockquote>
 <p>（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</p>
@@ -3904,14 +4058,14 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code>）：</p>
 
-<p><img src="media/15561207870710/20171014150799499853731.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171014150799499853731.gif" alt=""/></figure></p>
 
 <blockquote>
 <p>（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。<br/>
 来个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code>）：</p>
 </blockquote>
 
-<p><img src="media/15561207870710/20171014150799505696205.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171014150799505696205.gif" alt=""/></figure></p>
 
 <h3 id="toc_3">将AppBarLayout与ScrollView关联起来</h3>
 
@@ -3919,7 +4073,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
 
-<pre><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
+<pre class="line-numbers"><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
 
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;
@@ -3952,7 +4106,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>了解这些概念后，我们来看看布局吧~</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -4008,7 +4162,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
 
-<p><img src="media/15561207870710/20171014150799532425417.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171014150799532425417.gif" alt=""/></figure></p>
 
 <p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>&quot;，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
 
@@ -4029,7 +4183,7 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
 
 <p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
 
-<pre><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
+<pre class="line-numbers"><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
 AppBarLayout.LayoutParams params = 
     (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
 params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
@@ -4048,7 +4202,7 @@ params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 
 <p>示例XML代码：</p>
 
-<pre><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
+<pre class="line-numbers"><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
         android:id=&quot;@+id/appbar&quot;
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;
@@ -4071,7 +4225,7 @@ params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 
 <p>对应效果图：</p>
 
-<p><img src="media/15561207870710/20171019150842247229844.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171019150842247229844.gif" alt=""/></figure></p>
 
 <h3 id="toc_7">enterAlways</h3>
 
@@ -4083,7 +4237,7 @@ params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
 
 <p>示例XML代码：</p>
 
-<pre><code class="language-java">...
+<pre class="line-numbers"><code class="language-java">...
 app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
 ...
 
@@ -4091,7 +4245,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
 
 <p>对应效果图：</p>
 
-<p><img src="media/15561207870710/20171019150842251698266.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171019150842251698266.gif" alt=""/></figure></p>
 
 <h3 id="toc_8">enterAlwaysCollapsed</h3>
 
@@ -4103,7 +4257,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
 
 <p>示例XML代码：</p>
 
-<pre><code class="language-markup">...
+<pre class="line-numbers"><code class="language-markup">...
 android:layout_height=&quot;@dimen/dp_200&quot;
 android:minHeight=&quot;@dimen/dp_56&quot;
 ...
@@ -4113,7 +4267,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
 
 <p>对应效果图：</p>
 
-<p><img src="media/15561207870710/20171019150842256217688.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171019150842256217688.gif" alt=""/></figure></p>
 
 <h3 id="toc_9">exitUntilCollapsed</h3>
 
@@ -4125,7 +4279,7 @@ app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
 
 <p>示例SML代码：</p>
 
-<pre><code class="language-markup">...
+<pre class="line-numbers"><code class="language-markup">...
 android:layout_height=&quot;@dimen/dp_200&quot;
 android:minHeight=&quot;@dimen/dp_56&quot;
 ...
@@ -4135,7 +4289,7 @@ app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
 
 <p>对应效果图：</p>
 
-<p><img src="media/15561207870710/20171019150842260265572.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171019150842260265572.gif" alt=""/></figure></p>
 
 <h3 id="toc_10">snap</h3>
 
@@ -4147,7 +4301,7 @@ app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
 
 <p>示例XML代码：</p>
 
-<pre><code class="language-markup">...
+<pre class="line-numbers"><code class="language-markup">...
 android:layout_height=&quot;@dimen/dp_200&quot;
 ...
 app:layout_scrollFlags=&quot;scroll|snap&quot;
@@ -4156,7 +4310,7 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 
 <p>对应效果图：</p>
 
-<p><img src="media/15561207870710/20171019150842265497458.gif" alt=""/></p>
+<p><figure><img src="media/15561207870710/20171019150842265497458.gif" alt=""/></figure></p>
 
 <h3 id="toc_11">示例源码</h3>
 
@@ -4172,236 +4326,6 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
                   <div class="more-left left">
                   
                     <span class="date">2017/08/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207870673.html">
-                
-                  <h1>Android-Debug</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">一、 进入 debug 模式的两种姿势</h2>
-
-<p>第一种是点击运行按钮旁边的“绿色甲虫”(debug app)开始以调试模式编译运行。</p>
-
-<p><img src="media/15561207870673/15713320071550.png" alt=""/></p>
-
-<p>这个方式的特点是，一开始就进入了调试模式。适合希望尽早进入调试模式的场景，比如你想从头开始追踪问题，或者断点在启动页或首页之类的。它的弊端是每次需要从头跑一遍，且由于调试模式下应用程序略卡顿，等你到达调试页面时会觉得老费劲。</p>
-
-<p><img src="media/15561207870673/15713320153903.png" alt=""/></p>
-
-<p>第二种方式是在手机或模拟器已经跑起来应用程序后点击 <code>Run</code> -&gt; <code>Attach debugger to Android process</code>，选择应用程序主进程，即可进入调试模式。</p>
-
-<p>这种方式的特点是，随时随地自由进入调试模式，不需要重头开始跑应用程序，该方式适合绝大多数调试场景。需要注意的是，假如跑的是 <code>release</code> 版本且有混淆加固之类的话，该方式就无法正常调试。</p>
-
-<h2 id="toc_1">二、 常见的调试操作</h2>
-
-<h3 id="toc_2">1 典型的调试场景</h3>
-
-<p>一个最常见的调试场景如下：</p>
-
-<ol>
-<li>完成包括打开 Android Studio、打开需要调试的类、连接手机等准备工作</li>
-<li>在关键位置打上普通断点，进入调试模式后触发断点，将当前线程阻塞在断点处</li>
-<li>单步调试，一行一行往下运行</li>
-<li>碰到方法调用时进入方法内部</li>
-<li>用单步调试单步执行直到该方法结束回到方法调用的下一行，或者直接退出当前方法</li>
-<li>通过观察观察区的相关变量，推断出问题所在，结束本次调试</li>
-</ol>
-
-<p>以上是最常规的 debug 场景，下面介绍下调试界面。</p>
-
-<p><img src="media/15561207870673/15713320235325.png" alt=""/></p>
-
-<p>在 Android Studio 的 debug 标签（假如一开始没有，等触发断点后自然会出现）中有两个面板 debugger 和 console。debugger 又分为 Frames、Threads 和 Variables 三块，分别是堆栈内容、线程、变量区。</p>
-
-<p>在 debugger 标签右边有一些操作按钮，是我们常用的调试操作，下面会一一介绍。（可以用鼠标悬停在上面看每个按钮的具体名称）</p>
-
-<h3 id="toc_3">2 设置断点</h3>
-
-<p>断点有多种类型，我们这里先只谈普通断点。在每行的最前端单击一下即可<strong>添加断点</strong>，在断点上单击一下是<strong>取消断点</strong>。普通模式下断点只是一个普通的红点，但假如是在调试模式下，则红点上会有一个“√”或“✘”表示该行是否会被运行，例如，注释行前的断点会是“✘”。</p>
-
-<p><img src="media/15561207870673/15713320307577.png" alt=""/></p>
-
-<p>不管怎样，触发断点肯定是调试的起点。只有触发了断点，才会开始阻塞线程（注意是只会阻塞当前线程，这个后面会扩展一下详细介绍），此时当前代码行会被蓝色高亮，观察面板上的变量也会显示当前环境下的值。</p>
-
-<h3 id="toc_4">3 跳到下一个断点（F9）</h3>
-
-<p>一般情况下，在调试时我们可以根据我们的经验在几个关键的位置打上断点，这里就需要从一个断点直接跳到下一个断点。操作是继续以 debug 模式运行，快捷键是 F9（假如没改动的话应该都是这个快捷键，假如不同，可以把鼠标悬浮在该图标上看提示，下同）。</p>
-
-<h3 id="toc_5">4 单步调试（F8）</h3>
-
-<p>触发断点后，我们当然可以通过加 N 个断点来定位问题，但在较复杂的场景里可能没法判断出关键点。这时可以在比较靠前的位置添加断点作为起点，一行一行执行。操作是单步调试，快捷键是 F8。</p>
-
-<h3 id="toc_6">5 进入方法内部（F7）</h3>
-
-<p>在单步调试时方法调用语句会被看做一行，那么如何进入方法内部呢？用“进入内部”操作，快捷键是 F7.</p>
-
-<h3 id="toc_7">6 退出当前方法（上档键+F8）</h3>
-
-<p>既然有进入方法内部，就有退出当前方法的操作。当进入某个方法内部后觉得该方法后面的代码不需要看了，不需要猛按 F8 让它们跑完，可以直接退出当前方法去到该方法调用处的下一行。</p>
-
-<p>有了这些操作，基本可以应付常见的 80% 的调试场景了。但仅仅了解这些，在面对复杂场景时难免效率低下。下面介绍几种非常高效的断点。</p>
-
-<h2 id="toc_8">三、 几种高效断点</h2>
-
-<h3 id="toc_9">1 条件成立时才触发的条件断点</h3>
-
-<p>普通断点在每次运行到时都会被触发，这在多次调用、有“循环”的场景会比较麻烦，比如循环 100 次只希望停留在第 98 次。那么此刻就可以用上条件断点了。</p>
-
-<p>添加条件断点：先在需要的行前左键单击添加普通断点，右键点击该断点出现对话框，在“Condition”处填入条件即可，条件语法同 Java，如 i == 98。点击 Done，完成添加。这样当条件未满足时，不会阻塞程序运行；当条件满足时断点被触发。</p>
-
-<p><img src="media/15561207870673/15713320404295.png" alt=""/></p>
-
-<h3 id="toc_10">2 不会阻塞应用程序的日志断点</h3>
-
-<p>有时候我们仅仅希望在关键时刻输出一些 log，那么我们需要做这些工作：</p>
-
-<ol>
-<li>在代码里加上 log 代码</li>
-<li>重新运行程序</li>
-<li>重新触发断点</li>
-</ol>
-
-<p>那么有没有什么方法可以避免这些繁杂的操作呢？这时可以试试日志断点。</p>
-
-<p>在条件断点弹出的对话框里，将“suspend”设置为未选中状态，断点触发时就不会被阻塞。此时对话框会多出一些选项。</p>
-
-<p><img src="media/15561207870673/15713320484306.png" alt=""/></p>
-
-<p>我们选中“Evaluated and log”，并在里面填写希望输出的日志，点击 Done 即可。注意，日志将输出到 Console 而非 LogCat。</p>
-
-<h3 id="toc_11">3 被异常触发的异常断点</h3>
-
-<p>我们做 debug，一般面对的都是未崩溃的异常，例如 UI 状态不对、数值不对、代码执行逻辑不对等等。碰到直接 crash 的情况，我们往往不会去 debug，而是根据报错信息定位到某某行，然后解决问题。最典型的就是空指针异常了，只要看到报错位置，基本手到擒来。</p>
-
-<p>但日常开发难免碰到一些给出具体信息和抛异常的位置也没有头绪或者未给出具体位置的情况，比如某 API 抛了个状态异常，那么我们可能得去琢磨为何会状态不对。</p>
-
-<p>这时还是得调试，但我们也不能眼睁睁看着抛出的异常让应用程序崩了，可以用上“异常断点”。</p>
-
-<p>我们打开断点管理器，可以看到有一类是“Java Exception Breakpoints”，直接勾上是所有异常都会被触发。</p>
-
-<p>假如只想被某种异常触发，我们可以点击“+”，选中“Java Exception Breakpoints”，然后输出该种异常即可。</p>
-
-<p><img src="media/15561207870673/15713320567239.png" alt=""/></p>
-
-<p>有朋友可能注意到除了 “Java Exception Breakpoints” 外还有一个 “Exception Breakpoints”，两者区别主要是前者只支持 Java 本身的异常，后者可以支持自定义异常。</p>
-
-<h3 id="toc_12">4 追踪关键点的字段断点和方法断点</h3>
-
-<p>在诸如多线程等复杂场景下，超多的变量和超多的类再加上一些 native 方法和第三方库，调试的复杂度也直线上升。</p>
-
-<p><strong>这时可以尝试以点破面，抓住关键方法或字段来追踪应用程序的运行轨迹。</strong>于是关注某字段的字段断点和关注某方法的方法断点就派上用场了。</p>
-
-<p>顾名思义，字段断点的触发条件是字段值被更改，方法断点是方法被调用。</p>
-
-<p>添加方式：在字段那行、在方法声明的那行单击即可。</p>
-
-<p><img src="media/15561207870673/15713320679940.png" alt=""/></p>
-
-<h3 id="toc_13">5 注意事项</h3>
-
-<p>除了以上这些，还有其他断点未列出来，比如临时断点等。考虑到这类断点实用性不强，就不多加说明，有需求的朋友自然会去了解。</p>
-
-<p><strong>需要说明的是，给断点命名只是为了方便交流，各类型之间并没有特别边界。</strong> 实际上，断点只是某些操作的集合而已。比如日志断点是“不阻塞”和“输出日志”两个操作的集合，那么我们当然可以加上“设置条件”操作变成“条件日志断点”，诸如此类。我们设置断点的面板是允许我们将多种断点条件混合使用的。</p>
-
-<p>所以，<strong>断点名称和类型不重要，重要的是针对现场选用合适的操作。</strong></p>
-
-<h2 id="toc_14">四 调试中的变量</h2>
-
-<p>在设置了合适的断点后，我们就可以进行下一步操作 —— 观察变量，准确的说是观察变量的值。</p>
-
-<h3 id="toc_15">1 变量观测面板</h3>
-
-<p>众所周知，应用程序在运行期间元素都处于一种动态状态，此刻你是无法观测到具体变量的值的。只有当动态变成静态，即阻塞住应用程序，才能开始变量观测。</p>
-
-<p>这个“阻塞”操作也就是上文提到的断点触发。</p>
-
-<p>这里需要特别指出的是，当需要追踪某一个特定变量时，字段断点是一大利器。</p>
-
-<p><img src="media/15561207870673/15713320794441.png" alt=""/></p>
-
-<p>如上图所示，变量观察面板会列出所有当前能访问到的成员变量和局部变量。</p>
-
-<p>点击变量前的箭头，可以将该实例展开，列出所有字段。</p>
-
-<h3 id="toc_16">2 Add New Watch</h3>
-
-<p>将所有变量、所有字段列出来是比较直观，但当我们要去获取某些属性时就略蛋疼了。</p>
-
-<p>比如，获取某成员变量 View 的第一个 <code>child</code> 的 <code>measuredHeight</code>。假如是靠手动去一个个“打开”属性列表，拿得多麻烦。</p>
-
-<p>又比如，我们需要获取到两个属性相加后占另一个值的百分比。先去找到这两个属性的值然后额外拿计算器计算？</p>
-
-<p>这时就可以用上 “Add New Watch”了，添加一个观察表达式。通俗点就是在变量观测区执行一个表达式并得到它的值。</p>
-
-<p>在面试左侧点击绿色“+”，或者点击右键在菜单中选择“New Watch”, 就会出现一个框，输入表达式即可。</p>
-
-<p>举个例子：</p>
-
-<p>在示例中输入<code>toolbar.getChildAt(0).getMeasuredHeight()</code>，可得到如图的结果。</p>
-
-<p><img src="media/15561207870673/15713320865126.png" alt=""/></p>
-
-<h3 id="toc_17">3 设置变量的值</h3>
-
-<p><strong>变量的值除了能被观察外，还可以在运行时改变。</strong> 这个可以说是超酷的黑科技了。试想，碰到一个 <code>if else</code> 时，我们可以很轻松无成本地通过更改变量的值，让应用程序能跑到我们期望的分支上。</p>
-
-<p>设置变量的值有两种方式：方式一是在变量观测区右键单击变量，在菜单中选中“set value”；方式二是鼠标悬浮在代码区中的某个可访问的变量上，在弹出的浮层里更改值。</p>
-
-<p><img src="media/15561207870673/15713320950169.png" alt=""/></p>
-
-<h2 id="toc_18">五 犀利的小功能</h2>
-
-<p>除了以上那些常规的操作，还有一些“还有这种操作”的小功能。</p>
-
-<h3 id="toc_19">1 Force Run to Cursor</h3>
-
-<p>该操作可以忽视已存在的断点，直接跳到光标所在的行。有种脱离断点、繁琐操作的束缚轻松自由的感觉有木有。</p>
-
-<h3 id="toc_20">2 Drop frame</h3>
-
-<p>经过不懈努力，终于快到出错的那个时刻啦，你眉飞色舞手指按得飞快，结果小手一抖，多按了几个 F8 （单步调试快捷键），错过了出错的那个时刻。<strong>如果能回退到方法执行前？</strong></p>
-
-<p>Drop frame 功能能让你回到当前方法被调用的地方，并且当前上下文所有变量也都恢复到方法调用前 —— 时光回溯有木有？</p>
-
-<p><strong>当然别太兴奋，由于 DalvikVM 和 Android Runtime (ART) 不支持，大部分情况下你是用不到的，那个按钮长期处于不可点击状态。</strong>但如果你是在跑 JUnit 测试的话，是可以用上的。</p>
-
-<h3 id="toc_21">3 Log</h3>
-
-<p>在多线程环境下，光靠 debug 是不行的。有时 debug 本身会带来一些问题混淆了现场，比如因为 debug 时的卡顿造成环境不一致等等，这时应该学会使用打日志的形式帮忙调试。</p>
-
-<h3 id="toc_22">4 布局查看器</h3>
-
-<p>在 Android Studio 的 Android Device Monitor 里有一个 “Dump View Hierarchy for UI Automator” 功能，可以看到当前手机上应用的具体布局情况 —— 甚至布局元素的属性都会一一给出（仅可用于可调试的应用）。对 UI 调试非常有帮助。</p>
-
-<p><img src="media/15561207870673/15713321037475.png" alt=""/></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/08/25</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -4510,6 +4434,12 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -4529,12 +4459,6 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

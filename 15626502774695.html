@@ -147,34 +147,34 @@
 
 <p>Android 4.4.2 (API level 19)引入Transition框架，之后很多APP上都使用该框架做出很酷炫的效果，如 Google Play Newsstand app</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938495136462.gif" alt="20171031150938495136462.gif"/><figcaption>20171031150938495136462.gif</figcaption></figure></p>
 
 <p>还有github上很火的<a href="https://github.com/nickbutcher/plaid">plaid</a></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938501024243.gif" alt="20171031150938501024243.gif"/><figcaption>20171031150938501024243.gif</figcaption></figure></p>
 
 <p>在app中适当得使用上Transition能带来较好的用户体验，视频中介绍了该框架的基本使用以及其中核心的一些类和方法，只有学会这些基本的API才能在之后的Activity/Fragment过渡定制一些自己想要的效果。<br/>
 先看官网的一张关系图</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938504260266.jpg" alt="20171031150938504260266.jpg"/><figcaption>20171031150938504260266.jpg</figcaption></figure></p>
 
 <p>图中有三个核心的类，分别是Scene、Transition和TransitionManager，下面对这个三个核心类展开分析。</p>
 
 <h2 id="toc_1">Scene</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938508078450.png" alt="20171031150938508078450.png"/><figcaption>20171031150938508078450.png</figcaption></figure></p>
 
 <p>Scene场景，用于保存布局中所有View的属性值，创建Scene的方式可以通过getSceneForLayout方法<br/>
 <code>getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code><br/><br/>
 比如：  </p>
 
-<pre><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
+<pre class="line-numbers"><code class="language-java">mScene0 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene0,getContext());
 mScene1 = Scene.getSceneForLayout(mSceneRoot,R.layout.scene1,getContext());
 </code></pre>
 
 <p>也可以直接<code>new Scene(ViewGroup sceneRoot, View layout)</code></p>
 
-<pre><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
+<pre class="line-numbers"><code class="language-java">View view0 = inflater.inflate(R.layout.scene0,container,false);
 View view1 = inflater.inflate(R.layout.scene1,container,false);
 mScene0 = new Scene(mSceneRoot,view0);
 mScene1 = new Scene(mSceneRoot,view1);
@@ -184,7 +184,7 @@ mScene1 = new Scene(mSceneRoot,view1);
 
 <h2 id="toc_2">Transition</h2>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938533375766.jpg" alt="20171031150938533375766.jpg"/><figcaption>20171031150938533375766.jpg</figcaption></figure></p>
 
 <p>Transition过渡动画，前面创建了两个场景，分别保存了视图的一些属性，比如Visibility、position等，Transition就是对于这些属性值的改变定义过渡的效果。从上图可以看到系统内置了一些常用的Transition，Transition的创建可以通过加载xml，如：<br/>
 res/transition/fade_transition.xml</p>
@@ -193,7 +193,7 @@ res/transition/fade_transition.xml</p>
 
 <p>然后在代码中：</p>
 
-<pre><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
+<pre class="line-numbers"><code class="language-java">Transiton mFadeTransition = TransitionInflater.from(this).inflateTransition(R.transition.fade_transition);
 </code></pre>
 
 <p>或者直接在代码中：</p>
@@ -204,7 +204,7 @@ res/transition/fade_transition.xml</p>
 
 <p>TransitionManeger用于将Scene和Transition联系起来，它提供了一系列的方法如setTransition(Scene fromScene, Scene toScene, Transition transition)指明起始场景和结束场景、他们的过渡动画是什么，go(Scene scene, Transition transition)，到指定的场景所使用的过渡动画是什么，beginDelayedTransition(ViewGroup sceneRoot, Transition transition)，在当前场景到下一帧的过渡效果是什么。比如这里使用go()方法，效果:</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938549730496.gif" alt="20171031150938549730496.gif"/><figcaption>20171031150938549730496.gif</figcaption></figure></p>
 
 <p>注意这里两个Scene中红绿两个方块除了位置和大小不一样，id是一致的，transition记录下两个Scene前后属性值，根据属性值的改变执行过渡动画，默认情况下对SceneRoot下的所有View执行动画效果，我们可以通过Transition.addTarget和removeTarget方法选择性添加或移除执行动画的View。</p>
 
@@ -217,7 +217,7 @@ res/transition/fade_transition.xml</p>
 <p>AutoTransition默认的动画效果，对应xml tag为autoTransition<br/>
 其实是以下几个动画组合顺序执行：</p>
 
-<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;sequential&quot;&gt;
     &lt;fade android:fadingMode=&quot;fade_out&quot; /&gt;
     &lt;changeBounds/&gt;
@@ -227,7 +227,7 @@ res/transition/fade_transition.xml</p>
 
 <p>在代码中使用：</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new AutoTransition());
 if (mTextView.getVisibility() != View.VISIBLE){
     mTextView.setVisibility(View.VISIBLE);
 } else {
@@ -235,13 +235,13 @@ if (mTextView.getVisibility() != View.VISIBLE){
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938579060510.gif" alt="20171031150938579060510.gif"/><figcaption>20171031150938579060510.gif</figcaption></figure></p>
 
 <h3 id="toc_6">ChangeBounds</h3>
 
 <p>ChangeBounds对应xml tag为changeBounds，根据前后布局界限的变化执行动画。</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeBounds());
 FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams)mTarget.getLayoutParams();
 if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
     lp.gravity = Gravity.BOTTOM | Gravity.END;
@@ -251,13 +251,13 @@ if ((lp.gravity &amp; Gravity.START) == Gravity.START) {
 mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938627779470.gif" alt="20171031150938627779470.gif"/><figcaption>20171031150938627779470.gif</figcaption></figure></p>
 
 <h3 id="toc_7">ChangeClipBounds</h3>
 
 <p>ChangeClipBounds对应xml tag为changeClipBounds，作用对象：View的getClipBounds()值</p>
 
-<pre><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
+<pre class="line-numbers"><code class="language-java">Rect BOUNDS = new Rect(20,20,100,100);
 TransitionManager.beginDelayedTransition(mRoot,new ChangeClipBounds());
 if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
     ViewCompat.setClipBounds(mImageView,null);
@@ -266,33 +266,33 @@ if (BOUNDS.equals(ViewCompat.getClipBounds(mImageView))) {
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938645594705.gif" alt="20171031150938645594705.gif"/><figcaption>20171031150938645594705.gif</figcaption></figure></p>
 
 <h3 id="toc_8">ChangeImageTransform</h3>
 
 <p>对应xml tag为changeImageTransform，作用对象：ImageView的matrix</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeImageTransform());
 mImageView.setScaleType(ImageView.ScaleType.xxx);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938655679728.gif" alt="20171031150938655679728.gif"/><figcaption>20171031150938655679728.gif</figcaption></figure></p>
 
 <h3 id="toc_9">ChangeScroll</h3>
 
 <p>对应xml tag为changeScroll，作用对象：View的scroll属性值</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeScroll());
 mTarget.scrollBy(-100,-100);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938665356244.gif" alt="20171031150938665356244.gif"/><figcaption>20171031150938665356244.gif</figcaption></figure></p>
 
 <h3 id="toc_10">ChangeTransform</h3>
 
 <p>对应xml tag 为changeTransform，作用对象：View的scale和rotation</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new ChangeTransform());
 if (mContainer2.getChildCount() &gt; 0){
     mContainer2.removeAllViews();
     showRedSquare(mContainer1);
@@ -309,54 +309,54 @@ private void showRedSquare(FrameLayout container){
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938690499587.gif" alt="20171031150938690499587.gif"/><figcaption>20171031150938690499587.gif</figcaption></figure></p>
 
 <h3 id="toc_11">Explode</h3>
 
 <p>对应xml tag为explode，作用对象：View的Visibility</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Explode());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews){
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938702666553.gif" alt="20171031150938702666553.gif"/><figcaption>20171031150938702666553.gif</figcaption></figure></p>
 
 <h3 id="toc_12">Fade</h3>
 
 <p>对应xml tag为fade，作用对象：View的Visibility<br/><br/>
 可以在初始化是指定IN或者OUT分别对应淡入和淡出，若不指定默认为淡入淡出效果</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Fade());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews){
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938727625794.gif" alt="20171031150938727625794.gif"/><figcaption>20171031150938727625794.gif</figcaption></figure></p>
 
 <h3 id="toc_13">Slide</h3>
 
 <p>对应xml tag为slide，作用对象：View的Visibility</p>
 
-<pre><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
+<pre class="line-numbers"><code class="language-java">TransitionManager.beginDelayedTransition(mRoot,new Slide());
 int vis = mViews.get(0).getVisibility() == View.VISIBLE ? View.GONE : View.VISIBLE;
 for (View view : mViews){
     view.setVisibility(vis);
 }
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938732543238.gif" alt="20171031150938732543238.gif"/><figcaption>20171031150938732543238.gif</figcaption></figure></p>
 
 <h3 id="toc_14">TransitionSet</h3>
 
 <p>对应xml tag为transitionSet<br/><br/>
 可以在代码中创建transitionSet如：  </p>
 
-<pre><code class="language-java">mTransition = new TransitionSet();
+<pre class="line-numbers"><code class="language-java">mTransition = new TransitionSet();
 mTransition.addTransition(new ChangeImageTransform());
 mTransition.addTransition(new ChangeTransform());
 TransitionManager.beginDelayedTransition(mOUterFrame,mTransition);
@@ -372,7 +372,7 @@ if (mInnerFrame.getChildCount() &gt; 0){
 <p>也可以通过加载xml布局创建transitionSet：<br/><br/>
 xml布局长这样：  </p>
 
-<pre><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
+<pre class="line-numbers"><code class="language-text">&lt;transitionSet xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:transitionOrdering=&quot;together&quot;&gt;
     &lt;changeImageTransform/&gt;
     &lt;changeTransform/&gt;
@@ -382,7 +382,7 @@ xml布局长这样：  </p>
 <p>通过transitionOrdering属性设置动画执行的顺序，together表示同时执行，sequential表示顺序执行，在代码中可以调用TransitionSet的<code>setOrdering(int)</code>方法，属性值传ORDERING_SEQUENTIAL或者ORDERING_TOGETHER<br/><br/>
 在代码中：  </p>
 
-<pre><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
+<pre class="line-numbers"><code class="language-java">mTransition = (TransitionSet)TransitionInflater.from(getContext()).inflateTransition(R.transition.transition);
 TransitionManager.beginDelayedTransition(mOuterFrame,mTransition);
 if (mInnerFrame.getChildCount() &gt; 0){
     mInnerFrame.removeAllViews();
@@ -395,15 +395,15 @@ if (mInnerFrame.getChildCount() &gt; 0){
 
 <p>这里结合changeImageTransform和changeTransform，效果如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938791428154.gif" alt="20171031150938791428154.gif"/><figcaption>20171031150938791428154.gif</figcaption></figure></p>
 
 <h3 id="toc_15">PathMotion</h3>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093879453435.png" alt="2017103115093879453435.png"/><figcaption>2017103115093879453435.png</figcaption></figure></p>
 
 <p>Transition的辅助工具，以path的方式指定过渡效果，两个具体实现类ArcMotion和PatternPathMotion，看下ArcMotion的效果</p>
 
-<pre><code class="language-java">mTransition = new AutoTransition();
+<pre class="line-numbers"><code class="language-java">mTransition = new AutoTransition();
 TransitionManager.beginDelayedTransition(mRoot,mTransition);
 FrameLayout.LayoutParams lp = (FrameLayout.LayoutParams) mTarget.getLayoutParams();
 if ((lp.gravity &amp; Gravity.START) == START) {
@@ -414,17 +414,17 @@ if ((lp.gravity &amp; Gravity.START) == START) {
 mTarget.setLayoutParams(lp);
 </code></pre>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938816788360.gif" alt="20171031150938816788360.gif"/><figcaption>20171031150938816788360.gif</figcaption></figure></p>
 
 <p>它的运动轨迹是条曲线，有兴趣的可以研究下它的实现算法，在源码中有个很萌的图如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938819673207.jpg" alt="20171031150938819673207.jpg"/><figcaption>20171031150938819673207.jpg</figcaption></figure></p>
 
 <h3 id="toc_16">自定义Transition</h3>
 
 <p>除了系统内置的Transition，我们还可以自定义Transition效果，需要继承Transition</p>
 
-<pre><code class="language-java">public class CustomTransition extends Transition {
+<pre class="line-numbers"><code class="language-java">public class CustomTransition extends Transition {
     @Override
     public void captureStartValues(TransitionValues values){}
     @Override
@@ -438,11 +438,11 @@ mTarget.setLayoutParams(lp);
 package_name:transition_name:property_name<br/><br/>
 在createAnimator中创建动画，对比属性值的改变执行动画效果，如自定义修改颜色动画效果：  </p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017103115093883857329.gif" alt="2017103115093883857329.gif"/><figcaption>2017103115093883857329.gif</figcaption></figure></p>
 
 <p>在两个Scene中使用自定义过渡动画，效果如下：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171031150938841128073.gif" alt="20171031150938841128073.gif"/><figcaption>20171031150938841128073.gif</figcaption></figure></p>
 
 <h2 id="toc_17">Note</h2>
 
@@ -565,6 +565,12 @@ package_name:transition_name:property_name<br/><br/>
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -584,12 +590,6 @@ package_name:transition_name:property_name<br/><br/>
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

@@ -157,7 +157,7 @@
 
 <p>首先demo是基于videoView为基础,当然简单的开发,没有过多要求可以用原生的控制器可以可以解决,在这里控制都是自定义;首先为保证横竖屏幕的宽高不适配,需要自定义vieoView重写测量方法:</p>
 
-<pre><code class="language-java">public class AlpshVideo extends VideoView {
+<pre class="line-numbers"><code class="language-java">public class AlpshVideo extends VideoView {
     public AlpshVideo(Context context) {
         super(context);
     }
@@ -182,7 +182,7 @@
 
 <p>接着xml中嵌入自定义的vieoView:</p>
 
-<pre><code class="language-text">&lt;com.example.video.customView.AlpshVideo
+<pre class="line-numbers"><code class="language-text">&lt;com.example.video.customView.AlpshVideo
             android:id=&quot;@+id/videoView&quot;
             android:layout_width=&quot;match_parent&quot;
             android:layout_height=&quot;240dp&quot;
@@ -191,7 +191,7 @@
 
 <p>在MainActivity中加载本地或者网络视频:</p>
 
-<pre><code class="language-text"> //加载本地
+<pre class="line-numbers"><code class="language-text"> //加载本地
 mVideoView.setVideoPath(&quot;android.resource://&quot;+getPackageName()+&quot;/&quot;+R.raw.welcome);
 mVideoView.start();
 
@@ -205,7 +205,7 @@ mVideoView.start();
 
 <p>接下来看代码,xml比较简单,仅展示代码:</p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot; android:id=&quot;@+id/activity_main&quot;
     android:layout_width=&quot;match_parent&quot; android:layout_height=&quot;match_parent&quot;&gt;
@@ -334,7 +334,7 @@ mVideoView.start();
 
 <p>初始化音量进度条:</p>
 
-<pre><code class="language-java">//获取音频管理器
+<pre class="line-numbers"><code class="language-java">//获取音频管理器
 mAudioManager = (AudioManager) getSystemService(AUDIO_SERVICE);
 int streamMaxVolume = mAudioManager.getStreamMaxVolume(AudioManager.STREAM_MUSIC);
 int streamVolume = mAudioManager.getStreamVolume(AudioManager.STREAM_MUSIC);
@@ -345,7 +345,7 @@ mMediaSoundsProgress.setProgress(streamVolume);
 
 <p>点击事件的普片切换比较简单,通过按钮的图形化切换来控制videoView的开始和暂停:在播放过程中要实时更新播放时间和进度,这里用handler来实现:</p>
 
-<pre><code class="language-java">private void setPlayer() {
+<pre class="line-numbers"><code class="language-java">private void setPlayer() {
     mMediaActions.setOnClickListener(new View.OnClickListener() {
         @Override
         public void onClick(View view) {
@@ -365,7 +365,7 @@ mMediaSoundsProgress.setProgress(streamVolume);
 
 <p>在上面代码中看到,由播放状态改变为暂停状态,实时跟新的hanler停止,切换为播放再次开启;下面看下线程中实时更新的代码:</p>
 
-<pre><code class="language-java">private Handler mHandler = new Handler(){
+<pre class="line-numbers"><code class="language-java">private Handler mHandler = new Handler(){
     @Override
     public void handleMessage(Message msg) {
         super.handleMessage(msg);
@@ -400,7 +400,7 @@ mMediaSoundsProgress.setProgress(streamVolume);
             updateTime(mMediaTime,progress);<br/>
         }</p>
 
-<pre><code class="language-text">    @Override
+<pre class="line-numbers"><code class="language-text">    @Override
     public void onStartTrackingTouch(SeekBar seekBar) {
         mHandler.removeMessages(UpDate);
     }
@@ -421,7 +421,7 @@ mMediaSoundsProgress.setProgress(streamVolume);
 
 <p>手机翻转然后横竖屏自由切换,当然在第一步中有提到自定义videoView重新测量,也是为了横竖屏切换时候做准备,防止半屏显示不全的出现:首先在清单文件中配置:(而且切换横屏之后音量键开始显示)</p>
 
-<pre><code class="language-text">&lt;activity
+<pre class="line-numbers"><code class="language-text">&lt;activity
     android:configChanges=&quot;orientation|screenSize|keyboard|keyboardHidden&quot;
     android:name=&quot;.MainActivity&quot;&gt;
     &lt;intent-filter&gt;
@@ -434,7 +434,7 @@ mMediaSoundsProgress.setProgress(streamVolume);
 
 <p>这样设置之后可以全屏,但是videoView并不可以适配,所以需要MainActivity中重写onConfigurationChanged:</p>
 
-<pre><code class="language-text">@Override
+<pre class="line-numbers"><code class="language-text">@Override
 public void onConfigurationChanged(Configuration newConfig) {
     super.onConfigurationChanged(newConfig);
     //当为横屏时候
@@ -465,7 +465,7 @@ public void onConfigurationChanged(Configuration newConfig) {
 
 <p>在竖屏状态下,点击右下角的全屏按钮 也会显示横屏,所以需要设置其点击事件:</p>
 
-<pre><code class="language-java">private void setFullScreen() {
+<pre class="line-numbers"><code class="language-java">private void setFullScreen() {
     //设置全屏播放
     mMediaFullScreen.setOnClickListener(new View.OnClickListener() {
         @Override
@@ -490,7 +490,7 @@ public void onConfigurationChanged(Configuration newConfig) {
 
 <p>切换到横屏之后音量键显示,则需要显示器控制音量的功能:</p>
 
-<pre><code class="language-java">//声音调节进度条
+<pre class="line-numbers"><code class="language-java">//声音调节进度条
 mMediaSoundsProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
     @Override
     public void onProgressChanged(SeekBar seekBar, int progress, boolean b) {
@@ -519,7 +519,7 @@ mMediaSoundsProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListe
 
 <p>先来看手势的添加:</p>
 
-<pre><code class="language-java">private void setScrollScreen() {
+<pre class="line-numbers"><code class="language-java">private void setScrollScreen() {
     mVideoView.setOnTouchListener(new View.OnTouchListener() {
     @Override
     public boolean onTouch(View view, MotionEvent event) {
@@ -599,7 +599,7 @@ mMediaSoundsProgress.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListe
 
 <p>ok~接下来看屏幕亮度变化的代码:</p>
 
-<pre><code class="language-java">//控制亮度
+<pre class="line-numbers"><code class="language-java">//控制亮度
 public void changeBrightness(float absY){
     mDialogLl.setVisibility(View.VISIBLE);
 
@@ -627,7 +627,7 @@ public void changeBrightness(float absY){
 
 <p><strong>声音变化的代码</strong>:</p>
 
-<pre><code class="language-java">//控制声音
+<pre class="line-numbers"><code class="language-java">//控制声音
 public void changeVoice(float absY){
 
     mDialogLl.setVisibility(View.VISIBLE);
@@ -649,7 +649,7 @@ public void changeVoice(float absY){
 
 <p>这样就实现声音,屏幕亮度和手势的交互;当然不要忘了结束触摸要隐藏dialog窗口:</p>
 
-<pre><code class="language-text">case MotionEvent.ACTION_UP:
+<pre class="line-numbers"><code class="language-text">case MotionEvent.ACTION_UP:
     mDialogLl.setVisibility(View.GONE);
     break;
 </code></pre>
@@ -767,6 +767,12 @@ public void changeVoice(float absY){
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -786,12 +792,6 @@ public void changeVoice(float absY){
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

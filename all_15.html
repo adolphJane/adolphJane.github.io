@@ -120,6 +120,752 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207870240.html">
+                
+                  <h1>Android-Retrofit详细学习</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Retrofit入门</h2>
+
+<p>Retrofit 其实相当简单，简单到源码只有37个文件，其中22个文件是注解还都和HTTP有关，真正暴露给用户的类并不多。</p>
+
+<h3 id="toc_1">创建Retrofit实例</h3>
+
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+        .baseUrl(&quot;http://localhost:4567/&quot;)
+        .build();
+</code></pre>
+
+<p>创建Retrofit实例时需要通过<code>Retrofit.Builder</code>,并调用<code>baseUrl</code>方法设置URL。注： Retrofit2 的baseUlr 必须以 /（斜线） 结束，不然会抛出一个<code>IllegalArgumentException</code>。</p>
+
+<h3 id="toc_2">接口定义</h3>
+
+<p>以获取指定id的Blog为例:</p>
+
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
+    @GET(&quot;blog/{id}&quot;)
+    Call&lt;ResponseBody&gt; getBlog(@Path(&quot;id&quot;) int id);
+}
+</code></pre>
+
+<p>注意，这里是<code>interface</code>不是<code>class</code>，所以我们是无法直接调用该方法，我们需要用Retrofit创建一个<code>BlogService</code>的代理对象。<br/>
+<code>BlogService service = retrofit.create(BlogService.class);</code><br/>
+拿到代理对象之后，就可以调用该方法啦。</p>
+
+<h3 id="toc_3">接口调用</h3>
+
+<pre class="line-numbers"><code class="language-java">Call&lt;ResponseBody&gt; call = service.getBlog(2);
+// 用法和OkHttp的call如出一辙,
+// 不同的是如果是Android系统回调方法执行在主线程
+call.enqueue(new Callback&lt;ResponseBody&gt;() {
+    @Override
+    public void onResponse(Call&lt;ResponseBody&gt; call, Response&lt;ResponseBody&gt; response) {
+        try {
+            System.out.println(response.body().string());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onFailure(Call&lt;ResponseBody&gt; call, Throwable t) {
+        t.printStackTrace();
+    }
+});
+</code></pre>
+
+<p>打印结果:</p>
+
+<p><code>{&quot;code&quot;:200,&quot;msg&quot;:&quot;OK&quot;,&quot;data&quot;:{&quot;id&quot;:2,&quot;date&quot;:&quot;2016-04-15 03:17:50&quot;,&quot;author&quot;:&quot;怪盗kidou&quot;,&quot;title&quot;:&quot;Retrofit2 测试2&quot;,&quot;content&quot;:&quot;这里是 Retrofit2 Demo 测试服务器2&quot;},&quot;count&quot;:0,&quot;page&quot;:0}</code></p>
+
+<h2 id="toc_4">Retrofit注解详解</h2>
+
+<p>上面提到Retrofit 共22个注解，这节就专门介绍这22个注解，为帮助大家更好理解我将这22个注解分为三类，并用表格的形式展现出来,表格上说得并不完整，具体的见源码上的例子注释。</p>
+
+<h3 id="toc_5">第一类：HTTP请求方法</h3>
+
+<p><figure><img src="media/15561207870240/15713328600715.png" alt=""/></figure></p>
+
+<p>以上表格中的除HTTP以外都对应了HTTP标准中的请求方法，而HTTP注解则可以代替以上方法中的任意一个注解,有3个属性：<code>method</code>、<code>path</code>、<code>hasBody</code></p>
+
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
+    /**
+     * method 表示请求的方法，区分大小写
+     * path表示路径
+     * hasBody表示是否有请求体
+     */
+    @HTTP(method = &quot;GET&quot;, path = &quot;blog/{id}&quot;, hasBody = false)
+    Call&lt;ResponseBody&gt; getBlog(@Path(&quot;id&quot;) int id);
+}
+public static void main(String[] args){
+    Retrofit retrofit = new Retrofit.Builder()
+        .baseUrl(&quot;http://localhost:4567/&quot;)
+        .build();
+    BlogService service = retrofit.create(BlogService.class);
+    Call&lt;ResponseBody&gt; call = service.getBlog(2);
+    ResponseBodyPrinter.printResponseBody(call);
+}
+</code></pre>
+
+<h3 id="toc_6">第二类：标记类</h3>
+
+<p><figure><img src="media/15561207870240/15713328762764.png" alt=""/></figure></p>
+
+<p>Field、FieldMap、Part和PartMap 示例</p>
+
+<pre class="line-numbers"><code class="language-java">/**
+ * [Retrofit注解详解 之 FormUrlEncoded/Field/FieldMap/Multipart/Part/PartMap注解]源码
+ */
+public class Example03 {
+    public interface BlogService {
+
+        /**
+         * {@link FormUrlEncoded} 表明是一个表单格式的请求（Content-Type:application/x-www-form-urlencoded）
+         * &lt;code&gt;Field(&quot;username&quot;)&lt;/code&gt; 表示将后面的 &lt;code&gt;String name&lt;/code&gt; 中name的取值作为 username 的值
+         */
+        @POST(&quot;/form&quot;)
+        @FormUrlEncoded
+        Call&lt;ResponseBody&gt; testFormUrlEncoded1(@Field(&quot;username&quot;) String name, @Field(&quot;age&quot;) int age);
+
+        /**
+         * Map的key作为表单的键
+         */
+        @POST(&quot;/form&quot;)
+        @FormUrlEncoded
+        Call&lt;ResponseBody&gt; testFormUrlEncoded2(@FieldMap Map&lt;String, Object&gt; map);
+
+
+        /**
+         * {@link Part} 后面支持三种类型，{@link RequestBody}、{@link okhttp3.MultipartBody.Part} 、任意类型
+         * 除 {@link okhttp3.MultipartBody.Part} 以外，其它类型都必须带上表单字段({@link okhttp3.MultipartBody.Part} 中已经包含了表单字段的信息)，
+         */
+        @POST(&quot;/form&quot;)
+        @Multipart
+        Call&lt;ResponseBody&gt; testFileUpload1(@Part(&quot;name&quot;) RequestBody name, @Part(&quot;age&quot;) RequestBody age, @Part MultipartBody.Part file);
+
+        /**
+         * PartMap 注解支持一个Map作为参数，支持 {@link RequestBody } 类型，
+         * 如果有其它的类型，会被{@link retrofit2.Converter}转换，如后面会介绍的 使用{@link com.google.gson.Gson} 的 {@link retrofit2.converter.gson.GsonRequestBodyConverter}
+         * 所以{@link MultipartBody.Part} 就不适用了,所以文件只能用&lt;b&gt; @Part MultipartBody.Part &lt;/b&gt;
+         */
+        @POST(&quot;/form&quot;)
+        @Multipart
+        Call&lt;ResponseBody&gt; testFileUpload2(@PartMap Map&lt;String, RequestBody&gt; args, @Part MultipartBody.Part file);
+
+        @POST(&quot;/form&quot;)
+        @Multipart
+        Call&lt;ResponseBody&gt; testFileUpload3(@PartMap Map&lt;String, RequestBody&gt; args);
+    }
+
+    public static void main(String[] args) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(&quot;http://localhost:4567/&quot;)
+                .build();
+
+        BlogService service = retrofit.create(BlogService.class);
+
+
+        // 演示 @FormUrlEncoded 和 @Field
+        Call&lt;ResponseBody&gt; call1 = service.testFormUrlEncoded1(&quot;怪盗kidou&quot;, 24);
+        ResponseBodyPrinter.printResponseBody(call1);
+
+
+        //===================================================
+
+        // 演示 @FormUrlEncoded 和 @FieldMap
+        // 实现的效果与上面想同
+        Map&lt;String, Object&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;username&quot;, &quot;怪盗kidou&quot;);
+        map.put(&quot;age&quot;, 24);
+        Call&lt;ResponseBody&gt; call2 = service.testFormUrlEncoded2(map);
+        ResponseBodyPrinter.printResponseBody(call2);
+
+
+        //===================================================
+
+
+        MediaType textType = MediaType.parse(&quot;text/plain&quot;);
+        RequestBody name = RequestBody.create(textType, &quot;怪盗kidou&quot;);
+        RequestBody age = RequestBody.create(textType, &quot;24&quot;);
+        RequestBody file = RequestBody.create(MediaType.parse(&quot;application/octet-stream&quot;), &quot;这里是模拟文件的内容&quot;);
+
+        // 演示 @Multipart 和 @Part
+        MultipartBody.Part filePart = MultipartBody.Part.createFormData(&quot;file&quot;, &quot;test.txt&quot;, file);
+        Call&lt;ResponseBody&gt; call3 = service.testFileUpload1(name, age, filePart);
+        ResponseBodyPrinter.printResponseBody(call3);
+
+        //===================================================
+        // 演示 @Multipart 和 @PartMap
+        // 实现和上面同样的效果
+        Map&lt;String, RequestBody&gt; fileUpload2Args = new HashMap&lt;&gt;();
+        fileUpload2Args.put(&quot;name&quot;, name);
+        fileUpload2Args.put(&quot;age&quot;, age);
+        //这里并不会被当成文件，因为没有文件名(包含在Content-Disposition请求头中)，但上面的 filePart 有
+        //fileUpload2Args.put(&quot;file&quot;, file);
+        Call&lt;ResponseBody&gt; call4 = service.testFileUpload2(fileUpload2Args, filePart); //单独处理文件
+        ResponseBodyPrinter.printResponseBody(call4);
+
+        //===================================================
+        // 还有一种比较hack的方式可以实现文件上传，
+        // 上面说过被当成文件上传的必要条件就是 Content-Disposition 请求头中必须要有 filename=&quot;xxx&quot; 才会被当成文件
+        // 所有我们在写文件名的时候可以拼把 filename=&quot;XXX&quot; 也拼接上去，
+        // 即文件名变成  表单键名&quot;; filename=&quot;文件名  （两端的引号会自动加，所以这里不加）也可以实现，但是不推荐方式
+
+        Map&lt;String, RequestBody&gt; fileUpload3Args = new HashMap&lt;&gt;();
+        fileUpload3Args.put(&quot;name&quot;,name);
+        fileUpload3Args.put(&quot;age&quot;,age);
+        fileUpload3Args.put(&quot;file\&quot;; filename=\&quot;test.txt&quot;,file);
+        Call&lt;ResponseBody&gt; testFileUpload3 = service.testFileUpload3(fileUpload3Args);
+        ResponseBodyPrinter.printResponseBody(testFileUpload3);
+    }
+}
+</code></pre>
+
+<h3 id="toc_7">第三类：参数类</h3>
+
+<p><figure><img src="media/15561207870240/15713328860835.png" alt=""/></figure></p>
+
+<p>注1：{占位符}和<code>PATH</code>尽量只用在URL的path部分，url中的参数使用<code>Query</code>和<code>QueryMap</code> 代替，保证接口定义的简洁注2：<code>Query</code>、<code>Field</code>和<code>Part</code>这三者都支持数组和实现了<code>Iterable</code>接口的类型，如<code>List</code>，<code>Set</code>等，方便向后台传递数组。</p>
+
+<pre class="line-numbers"><code class="language-java">Call&lt;ResponseBody&gt; foo(@Query(&quot;ids[]&quot;) List&lt;Integer&gt; ids);
+//结果：ids[]=0&amp;ids[]=1&amp;ids[]=2
+</code></pre>
+
+<p>Header和Headers例子</p>
+
+<pre class="line-numbers"><code class="language-java">/**
+ * [Retrofit注解详解 之 FormUrlEncoded/Field/FieldMap注解]源码
+ */
+public class Example04 {
+    public interface BlogService {
+        @GET(&quot;/headers?showAll=true&quot;)
+        @Headers({&quot;CustomHeader1: customHeaderValue1&quot;, &quot;CustomHeader2: customHeaderValue2&quot;})
+        Call&lt;ResponseBody&gt; testHeader(@Header(&quot;CustomHeader3&quot;) String customHeaderValue3);
+
+    }
+
+    public static void main(String[] args) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(&quot;http://localhost:4567/&quot;)
+                .build();
+
+        BlogService service = retrofit.create(BlogService.class);
+
+        //演示 @Headers 和 @Header
+        Call&lt;ResponseBody&gt; call1 = service.testHeader(&quot;ikidou&quot;);
+        ResponseBodyPrinter.printResponseBody(call1);
+    }
+}
+</code></pre>
+
+<p>Query、QueryMap、Url 示例</p>
+
+<pre class="line-numbers"><code class="language-java">/**
+ * [Retrofit注解详解 之 FormUrlEncoded/Field/FieldMap注解]源码
+ */
+public class Example05 {
+    public interface BlogService {
+        /**
+         * 当GET、POST...HTTP等方法中没有设置Url时，则必须使用 {@link Url}提供
+         * 对于Query和QueryMap，如果不是String（或Map的第二个泛型参数不是String）时
+         * 会被默认会调用toString转换成String类型
+         * Url支持的类型有 okhttp3.HttpUrl, String, java.net.URI, android.net.Uri
+         * {@link retrofit2.http.QueryMap} 用法和{@link retrofit2.http.FieldMap} 用法一样，不再说明
+         */
+        @GET //当有URL注解时，这里的URL就省略了
+        Call&lt;ResponseBody&gt; testUrlAndQuery(@Url String url, @Query(&quot;showAll&quot;) boolean showAll);
+
+    }
+
+    public static void main(String[] args) {
+        Retrofit retrofit = new Retrofit.Builder()
+                .baseUrl(&quot;http://localhost:4567/&quot;)
+                .build();
+
+        BlogService service = retrofit.create(BlogService.class);
+
+        //演示 @Headers 和 @Header
+        Call&lt;ResponseBody&gt; call1 = service.testUrlAndQuery(&quot;headers&quot;,false);
+        ResponseBodyPrinter.printResponseBody(call1);
+    }
+}
+</code></pre>
+
+<h2 id="toc_8">Gson与Converter</h2>
+
+<p>在默认情况下Retrofit只支持将HTTP的响应体转换换为<code>ResponseBody</code>,这也是什么我在前面的例子接口的返回值都是 <code>Call&lt;ResponseBody&gt;</code>，但如果响应体只是支持转换为<code>ResponseBody</code>的话何必要引用泛型呢，返回值直接用一个<code>Call</code>就行了嘛，既然支持泛型，那说明泛型参数可以是其它类型的，而<code>Converter</code>就是Retrofit为我们提供用于将<code>ResponseBody</code>转换为我们想要的类型，有了<code>Converter</code>之后我们就可以写把我们的第一个例子的接口写成这个样子了：</p>
+
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
+  @GET(&quot;blog/{id}&quot;)
+  Call&lt;Result&lt;Blog&gt;&gt; getBlog(@Path(&quot;id&quot;) int id);
+}
+</code></pre>
+
+<p>当然只改变泛型的类型是不行的，我们在创建Retrofit时需要明确告知用于将<code>ResponseBody</code>转换我们泛型中的类型时需要使用的<code>Converter</code>引入Gson支持:<br/>
+<code>compile &#39;com.squareup.retrofit2:converter-gson:2.0.2&#39;</code></p>
+
+<p>通过<code>GsonConverterFactory</code>为<code>Retrofit</code>添加<code>Gson</code>支持：</p>
+
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
+      //配置你的Gson
+      .setDateFormat(&quot;yyyy-MM-dd hh:mm:ss&quot;)
+      .create();
+
+Retrofit retrofit = new Retrofit.Builder()
+      .baseUrl(&quot;http://localhost:4567/&quot;)
+      //可以接收自定义的Gson，当然也可以不传
+      .addConverterFactory(GsonConverterFactory.create(gson))
+      .build();
+</code></pre>
+
+<p>这样Retrofit就会使用Gson将<code>ResponseBody</code>转换我们想要的类型。这是时候我们终于可以演示如使创建一个Blog了！</p>
+
+<pre class="line-numbers"><code class="language-java">@POST(&quot;blog&quot;)
+Call&lt;Result&lt;Blog&gt;&gt; createBlog(@Body Blog blog);
+</code></pre>
+
+<p>被<code>@Body</code>注解的的Blog将会被Gson转换成RequestBody发送到服务器。</p>
+
+<pre class="line-numbers"><code class="language-java">BlogService service = retrofit.create(BlogService.class);
+Blog blog = new Blog();
+blog.content = &quot;新建的Blog&quot;;
+blog.title = &quot;测试&quot;;
+blog.author = &quot;怪盗kidou&quot;;
+Call&lt;Result&lt;Blog&gt;&gt; call = service.createBlog(blog);
+</code></pre>
+
+<p>结果：</p>
+
+<p><code>Result{code=200, msg=&#39;OK&#39;, data=Blog{id=20, date=&#39;2016-04-21 05:29:58&#39;, author=&#39;怪盗kidou&#39;, title=&#39;测试&#39;, content=&#39;新建的Blog&#39;}, count=0, page=0}</code></p>
+
+<h2 id="toc_9">RxJava与CallAdapter</h2>
+
+<p>说到Retrofit就不得说到另一个火到不行的库<code>RxJava</code>，网上已经不少文章讲如何与Retrofit结合，但这里还是会有一个RxJava的例子，不过这里主要目的是介绍使用<code>CallAdapter</code>所带来的效果。</p>
+
+<p>第3节介绍的<code>Converter</code>是对于<code>Call&lt;T&gt;</code>中<code>T</code>的转换，而<code>CallAdapter</code>则可以对<code>Call</code>转换，这样的话<code>Call&lt;T&gt;</code>中的<code>Call</code>也是可以被替换的，而返回值的类型就决定你后续的处理程序逻辑，同样Retrofit提供了多个<code>CallAdapter</code>，这里以<code>RxJava</code>的为例，用<code>Observable</code>代替<code>Call</code>：</p>
+
+<p>引入RxJava支持:</p>
+
+<pre class="line-numbers"><code class="language-java">compile &#39;com.squareup.retrofit2:adapter-rxjava:2.0.2&#39;
+// 针对rxjava2.x（adapter-rxjava2的版本要 &gt;= 2.2.0）
+compile &#39;com.squareup.retrofit2:adapter-rxjava2:2.3.0&#39;
+</code></pre>
+
+<p>通过RxJavaCallAdapterFactory为Retrofit添加RxJava支持：</p>
+
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+      .baseUrl(&quot;http://localhost:4567/&quot;)
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
+      // 针对rxjava2.x
+      .addCallAdapterFactory(RxJava2CallAdapterFactory.create()) 
+      .build();
+</code></pre>
+
+<p>接口设计：</p>
+
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
+  @POST(&quot;/blog&quot;)
+  Observable&lt;Result&lt;List&lt;Blog&gt;&gt;&gt; getBlogs();
+}
+</code></pre>
+
+<p>使用：</p>
+
+<pre class="line-numbers"><code class="language-java">BlogService service = retrofit.create(BlogService.class);
+service.getBlogs(1)
+  .subscribeOn(Schedulers.io())
+  .subscribe(new Subscriber&lt;Result&lt;List&lt;Blog&gt;&gt;&gt;() {
+      @Override
+      public void onCompleted() {
+        System.out.println(&quot;onCompleted&quot;);
+      }
+
+      @Override
+      public void onError(Throwable e) {
+        System.err.println(&quot;onError&quot;);
+      }
+
+      @Override
+      public void onNext(Result&lt;List&lt;Blog&gt;&gt; blogsResult) {
+        System.out.println(blogsResult);
+      }
+  });
+</code></pre>
+
+<p>结果：</p>
+
+<p><code>Result{code=200, msg=&#39;OK&#39;, data=[Blog{id=1, date=&#39;2016-04-15 03:17:50&#39;, author=&#39;怪盗kidou&#39;, title=&#39;Retrofit2 测试1&#39;, content=&#39;这里是 Retrofit2 Demo 测试服务器1&#39;},.....], count=20, page=1}</code></p>
+
+<p>像上面的这种情况最后我们无法获取到返回的Header和响应码的，如果我们需要这两者，提供两种方案：</p>
+
+<ol>
+<li>用<code>Observable&lt;Response&lt;T&gt;&gt;</code> 代替 <code>Observable&lt;T&gt;</code> ,这里的<code>Response</code>指<code>retrofit2.Response</code></li>
+<li>用<code>Observable&lt;Result&lt;T&gt;&gt;</code> 代替 <code>Observable&lt;T&gt;</code>，这里的<code>Result</code>是指<code>retrofit2.adapter.rxjava.Result</code>,这个Result中包含了<code>Response</code>的实例。</li>
+</ol>
+
+<h2 id="toc_10">自定义Converter</h2>
+
+<p>本节的内容是教大家实现在一简易的Converter，这里以返回格式为<code>Call&lt;String&gt;</code>为例。<br/><br/>
+在此之前先了解一下Converter接口及其作用：</p>
+
+<pre class="line-numbers"><code class="language-java">public interface Converter&lt;F, T&gt; {
+  // 实现从 F(rom) 到 T(o)的转换
+  T convert(F value) throws IOException;
+
+  // 用于向Retrofit提供相应Converter的工厂
+  abstract class Factory {
+    // 这里创建从ResponseBody其它类型的Converter，如果不能处理返回null
+    // 主要用于对响应体的处理
+    public Converter&lt;ResponseBody, ?&gt; responseBodyConverter(Type type, Annotation[] annotations,
+    Retrofit retrofit) {
+      return null;
+    }
+
+    // 在这里创建 从自定类型到ResponseBody 的Converter,不能处理就返回null，
+    // 主要用于对Part、PartMap、Body注解的处理
+    public Converter&lt;?, RequestBody&gt; requestBodyConverter(Type type,
+    Annotation[] parameterAnnotations, Annotation[] methodAnnotations, Retrofit retrofit) {
+      return null;
+    }
+
+    // 这里用于对Field、FieldMap、Header、Path、Query、QueryMap注解的处理
+    // Retrfofit对于上面的几个注解默认使用的是调用toString方法
+    public Converter&lt;?, String&gt; stringConverter(Type type, Annotation[] annotations,
+    Retrofit retrofit) {
+      return null;
+    }
+
+  }
+}
+</code></pre>
+
+<p>我们要想从<code>Call&lt;ResponseBody&gt;</code> 转换为 <code>Call&lt;String&gt;</code> 那么对应的F和T则分别对应<code>ResponseBody</code>和<code>String</code>，我们定义一个<code>StringConverter</code>并实现Converter接口。</p>
+
+<pre class="line-numbers"><code class="language-java">public static class StringConverter implements Converter&lt;ResponseBody, String&gt; {
+
+  public static final StringConverter INSTANCE = new StringConverter();
+
+  @Override
+  public String convert(ResponseBody value) throws IOException {
+    return value.string();
+  }
+}
+</code></pre>
+
+<p>我们需要一个<code>Fractory</code>来向Retrofit注册<code>StringConverter</code></p>
+
+<pre class="line-numbers"><code class="language-java">public static class StringConverterFactory extends Converter.Factory {
+
+  public static final StringConverterFactory INSTANCE = new StringConverterFactory();
+
+  public static StringConverterFactory create() {
+    return INSTANCE;
+  }
+
+  // 我们只关实现从ResponseBody 到 String 的转换，所以其它方法可不覆盖
+  @Override
+  public Converter&lt;ResponseBody, ?&gt; responseBodyConverter(Type type, Annotation[] annotations, Retrofit retrofit) {
+    if (type == String.class) {
+      return StringConverter.INSTANCE;
+    }
+    //其它类型我们不处理，返回null就行
+    return null;
+  }
+}
+</code></pre>
+
+<p>使用<code>Retrofit.Builder.addConverterFactory</code>向Retrofit注册我们<code>StringConverterFactory</code>：</p>
+
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+      .baseUrl(&quot;http://localhost:4567/&quot;)
+      // 如是有Gson这类的Converter 一定要放在其它前面
+      .addConverterFactory(StringConverterFactory.create())
+      .addConverterFactory(GsonConverterFactory.create())
+      .build();
+</code></pre>
+
+<p>注：<code>addConverterFactory</code>是有先后顺序的，如果有多个ConverterFactory都支持同一种类型，那么就是只有第一个才会被使用，而<code>GsonConverterFactory</code>是不判断是否支持的，所以这里交换了顺序还会有一个异常抛出，原因是类型不匹配。</p>
+
+<p>只要返回值类型的泛型参数就会由我们的<code>StringConverter</code>处理,不管是<code>Call&lt;String&gt;</code>还是<code>Observable&lt;String&gt;</code>有没有很简单?如果你有其它的需求处理的就自己实现吧。</p>
+
+<h2 id="toc_11">自定义CallAdapter</h2>
+
+<p>本节将介绍如何自定一个<code>CallAdapter</code>，并验证是否所有的String都会使用我们第5节中自定义的Converter。</p>
+
+<p>先看一下CallAdapter接口定义及各方法的作用：</p>
+
+<pre class="line-numbers"><code class="language-java">public interface CallAdapter&lt;T&gt; {
+
+  // 直正数据的类型 如Call&lt;T&gt; 中的 T
+  // 这个 T 会作为Converter.Factory.responseBodyConverter 的第一个参数
+  // 可以参照上面的自定义Converter
+  Type responseType();
+
+  &lt;R&gt; T adapt(Call&lt;R&gt; call);
+
+  // 用于向Retrofit提供CallAdapter的工厂类
+  abstract class Factory {
+    // 在这个方法中判断是否是我们支持的类型，returnType 即Call&lt;Requestbody&gt;和`Observable&lt;Requestbody&gt;`
+    // RxJavaCallAdapterFactory 就是判断returnType是不是Observable&lt;?&gt; 类型
+    // 不支持时返回null
+    public abstract CallAdapter&lt;?&gt; get(Type returnType, Annotation[] annotations,
+    Retrofit retrofit);
+
+    // 用于获取泛型的参数 如 Call&lt;Requestbody&gt; 中 Requestbody
+    protected static Type getParameterUpperBound(int index, ParameterizedType type) {
+      return Utils.getParameterUpperBound(index, type);
+    }
+
+    // 用于获取泛型的原始类型 如 Call&lt;Requestbody&gt; 中的 Call
+    // 上面的get方法需要使用该方法。
+    protected static Class&lt;?&gt; getRawType(Type type) {
+      return Utils.getRawType(type);
+    }
+  }
+}
+</code></pre>
+
+<p>了解了<code>CallAdapter</code>的结构和其作用之后，我们就可以开始自定义我们的<code>CallAdapter</code>了，本节以<code>CustomCall&lt;String&gt;</code>为例。<br/>
+在此我们需要定义一个<code>CustomCall</code>，不过这里的<code>CustomCall</code>作为演示只是对<code>Call</code>的一个包装，并没有实际的用途。</p>
+
+<pre class="line-numbers"><code class="language-java">public static class CustomCall&lt;R&gt; {
+
+  public final Call&lt;R&gt; call;
+
+  public CustomCall(Call&lt;R&gt; call) {
+    this.call = call;
+  }
+
+  public R get() throws IOException {
+    return call.execute().body();
+  }
+}
+</code></pre>
+
+<p>有了<code>CustomCall</code>，我们还需要一个<code>CustomCallAdapter</code>来实现 <code>Call&lt;T&gt;</code> 到 <code>CustomCall&lt;T&gt;</code>的转换，这里需要注意的是最后的泛型，是我们要返回的类型。</p>
+
+<pre class="line-numbers"><code class="language-java">public static class CustomCallAdapter implements CallAdapter&lt;CustomCall&lt;?&gt;&gt; {
+
+  private final Type responseType;
+
+  // 下面的 responseType 方法需要数据的类型
+  CustomCallAdapter(Type responseType) {
+    this.responseType = responseType;
+  }
+
+  @Override
+  public Type responseType() {
+    return responseType;
+  }
+
+  @Override
+  public &lt;R&gt; CustomCall&lt;R&gt; adapt(Call&lt;R&gt; call) {
+    // 由 CustomCall 决定如何使用
+    return new CustomCall&lt;&gt;(call);
+  }
+}
+</code></pre>
+
+<p>提供一个<code>CustomCallAdapterFactory</code>用于向Retrofit提供<code>CustomCallAdapter</code>：</p>
+
+<pre class="line-numbers"><code class="language-java">public static class CustomCallAdapterFactory extends CallAdapter.Factory {
+  public static final CustomCallAdapterFactory INSTANCE = new CustomCallAdapterFactory();
+
+  @Override
+  public CallAdapter&lt;?&gt; get(Type returnType, Annotation[] annotations, Retrofit retrofit) {
+    // 获取原始类型
+    Class&lt;?&gt; rawType = getRawType(returnType);
+    // 返回值必须是CustomCall并且带有泛型
+    if (rawType == CustomCall.class &amp;&amp; returnType instanceof ParameterizedType) {
+      Type callReturnType = getParameterUpperBound(0, (ParameterizedType) returnType);
+      return new CustomCallAdapter(callReturnType);
+    }
+    return null;
+  }
+}
+</code></pre>
+
+<p>使用<code>addCallAdapterFactory</code>向Retrofit注册<code>CustomCallAdapterFactory</code>。</p>
+
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+      .baseUrl(&quot;http://localhost:4567/&quot;)
+      .addConverterFactory(Example09.StringConverterFactory.create())
+      .addConverterFactory(GsonConverterFactory.create())
+      .addCallAdapterFactory(CustomCallAdapterFactory.INSTANCE)
+      .build();
+</code></pre>
+
+<p>注： <code>addCallAdapterFactory</code>与<code>addConverterFactory</code>同理，也有先后顺序。</p>
+
+<h2 id="toc_12">其它说明</h2>
+
+<h3 id="toc_13">Retrofit.Builder</h3>
+
+<p>前面用到了 <code>Retrofit.Builder</code> 中的<code>baseUrl</code>、<code>addCallAdapterFactory</code>、<code>addConverterFactory</code>、<code>build</code>方法，还有<code>callbackExecutor</code>、<code>callFactory</code>、<code>client</code>、<code>validateEagerly</code>这四个方法没有用到，这里简单的介绍一下。</p>
+
+<table>
+<thead>
+<tr>
+<th>方法</th>
+<th>用途</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>callbackExecutor(Executor)</td>
+<td>指定<code>Call.enqueue</code>时使用的<code>Executor</code>，所以该设置只对返回值为<code>Call</code>的方法有效</td>
+</tr>
+<tr>
+<td>callFactory(Factory)</td>
+<td>设置一个自定义的<code>okhttp3.Call.Factory</code>，那什么是Factory呢?<code>OkHttpClient</code>就实现了<code>okhttp3.Call.Factory</code>接口，下面的<code>client(OkHttpClient)</code>最终也是调用了该方法，也就是说两者不能共用</td>
+</tr>
+<tr>
+<td>client(OkHttpClient)</td>
+<td>设置自定义的<code>OkHttpClient</code>,以前的Retrofit版本中不同的<code>Retrofit</code>对象共用同<code>OkHttpClient</code>,在2.0各对象各自持有不同的<code>OkHttpClient</code>实例，所以当你需要共用<code>OkHttpClient</code>或需要自定义时则可以使用该方法，如：处理Cookie、使用 stetho  调式等<br/></td>
+</tr>
+<tr>
+<td>validateEagerly(boolean)</td>
+<td>是否在调用<code>create(Class)</code>时检测接口定义是否正确，而不是在调用方法才检测，适合在开发、测试时使用</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="toc_14">Retrofit的Url组合规则</h3>
+
+<table>
+<thead>
+<tr>
+<th>BaseUrl</th>
+<th>和URL有关的注解中提供的值</th>
+<th>最后结果</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td><a href="http://localhost:4567/path/to/other/">http://localhost:4567/path/to/other/</a></td>
+<td>/post</td>
+<td><a href="http://localhost:4567/post">http://localhost:4567/post</a></td>
+</tr>
+<tr>
+<td><a href="http://localhost:4567/path/to/other/">http://localhost:4567/path/to/other/</a></td>
+<td>post</td>
+<td><a href="http://localhost:4567/path/to/other/post">http://localhost:4567/path/to/other/post</a></td>
+</tr>
+<tr>
+<td><a href="http://localhost:4567/path/to/other/">http://localhost:4567/path/to/other/</a></td>
+<td><a href="https://github.com/ikidou">https://github.com/ikidou</a></td>
+<td><a href="https://github.com/ikidou">https://github.com/ikidou</a></td>
+</tr>
+</tbody>
+</table>
+
+<p>从上面不能难看出以下规则：</p>
+
+<ul>
+<li>如果你在注解中提供的url是完整的url，则url将作为请求的url。</li>
+<li>如果你在注解中提供的url是不完整的url，且不以 / 开头，则请求的url为baseUrl+注解中提供的值</li>
+<li>如果你在注解中提供的url是不完整的url，且以 / 开头，则请求的url为baseUrl的主机部分+注解中提供的值</li>
+</ul>
+
+<h3 id="toc_15">Retrofit提供的Converter</h3>
+
+<table>
+<thead>
+<tr>
+<th>Converter</th>
+<th>Gradle依赖</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>Gson</td>
+<td>com.squareup.retrofit2:converter-gson:2.0.2</td>
+</tr>
+<tr>
+<td>Jackson</td>
+<td>com.squareup.retrofit2:converter-jackson:2.0.2</td>
+</tr>
+<tr>
+<td>Moshi</td>
+<td>com.squareup.retrofit2:converter-moshi:2.0.2</td>
+</tr>
+<tr>
+<td>Protobuf</td>
+<td>com.squareup.retrofit2:converter-protobuf:2.0.2</td>
+</tr>
+<tr>
+<td>Wire</td>
+<td>com.squareup.retrofit2:converter-wire:2.0.2</td>
+</tr>
+<tr>
+<td>Simple XML</td>
+<td>com.squareup.retrofit2:converter-simplexml:2.0.2</td>
+</tr>
+<tr>
+<td>Scalars</td>
+<td>com.squareup.retrofit2:converter-scalars:2.0.2</td>
+</tr>
+</tbody>
+</table>
+
+<h3 id="toc_16">Retrofit提供的CallAdapter：</h3>
+
+<table>
+<thead>
+<tr>
+<th>CallAdapter</th>
+<th>Gradle依赖</th>
+</tr>
+</thead>
+
+<tbody>
+<tr>
+<td>guava</td>
+<td>com.squareup.retrofit2:adapter-guava:2.0.2</td>
+</tr>
+<tr>
+<td>Java8</td>
+<td>com.squareup.retrofit2:adapter-java8:2.0.2</td>
+</tr>
+<tr>
+<td>rxjava</td>
+<td>com.squareup.retrofit2:adapter-rxjava:2.0.2</td>
+</tr>
+</tbody>
+</table>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/07/30</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207870200.html">
                 
                   <h1>Android-Gson详细学习</h1>
@@ -172,7 +918,7 @@
 
 <p>基本数据类型的解析</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 int i = gson.fromJson(&quot;100&quot;, int.class);              //100
 double d = gson.fromJson(&quot;\&quot;99.99\&quot;&quot;, double.class);  //99.99
 boolean b = gson.fromJson(&quot;true&quot;, boolean.class);     // true
@@ -183,7 +929,7 @@ String str = gson.fromJson(&quot;String&quot;, String.class);   // String
 
 <p>基本数据类型的生成</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 String jsonNumber = gson.toJson(100);       // 100
 String jsonBoolean = gson.toJson(false);    // false
 String jsonString = gson.toJson(&quot;String&quot;); //&quot;String&quot;
@@ -191,7 +937,7 @@ String jsonString = gson.toJson(&quot;String&quot;); //&quot;String&quot;
 
 <p>POJO类的生成与解析</p>
 
-<pre><code class="language-java">public class User {
+<pre class="line-numbers"><code class="language-java">public class User {
     //省略其它
     public String name;
     public int age;
@@ -201,14 +947,14 @@ String jsonString = gson.toJson(&quot;String&quot;); //&quot;String&quot;
 
 <p>生成JSON：</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 User user = new User(&quot;怪盗kidou&quot;,24);
 String jsonObject = gson.toJson(user); // {&quot;name&quot;:&quot;怪盗kidou&quot;,&quot;age&quot;:24}
 </code></pre>
 
 <p>解析JSON：</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 String jsonString = &quot;{\&quot;name\&quot;:\&quot;怪盗kidou\&quot;,\&quot;age\&quot;:24}&quot;;
 User user = gson.fromJson(jsonString, User.class);
 </code></pre>
@@ -218,14 +964,14 @@ User user = gson.fromJson(jsonString, User.class);
 <p>上面了解的JSON中的Number、boolean、Object和String，现在说一下Array。<br/>
 例：JSON字符串数组</p>
 
-<pre><code class="language-java">[&quot;Android&quot;,&quot;Java&quot;,&quot;PHP&quot;]
+<pre class="line-numbers"><code class="language-java">[&quot;Android&quot;,&quot;Java&quot;,&quot;PHP&quot;]
 </code></pre>
 
 <p>当我们要通过Gson解析这个json时，一般有两种方式：使用数组，使用List。而List对于增删都是比较方便的，所以实际使用是还是List比较多。</p>
 
 <p>数组比较简单</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 String jsonArray = &quot;[\&quot;Android\&quot;,\&quot;Java\&quot;,\&quot;PHP\&quot;]&quot;;
 String[] strings = gson.fromJson(jsonArray, String[].class);
 </code></pre>
@@ -233,7 +979,7 @@ String[] strings = gson.fromJson(jsonArray, String[].class);
 <p>但对于List将上面的代码中的 <code>String[].class</code> 直接改为 <code>List&lt;String&gt;.class</code> 是行不通的。对于Java来说<code>List&lt;String&gt;</code> 和<code>List&lt;User&gt;</code> 这俩个的字节码文件只一个那就是<code>List.class</code>，这是Java泛型使用时要注意的问题 泛型擦除。<br/><br/>
 为了解决的上面的问题，Gson为我们提供了<code>TypeToken</code>来实现对泛型的支持，所以当我们希望使用将以上的数据解析<code>List&lt;String&gt;</code>时需要这样写。</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 String jsonArray = &quot;[\&quot;Android\&quot;,\&quot;Java\&quot;,\&quot;PHP\&quot;]&quot;;
 String[] strings = gson.fromJson(jsonArray, String[].class);
 List&lt;String&gt; stringList = gson.fromJson(jsonArray, new TypeToken&lt;List&lt;String&gt;&gt;() {}.getType());
@@ -241,15 +987,15 @@ List&lt;String&gt; stringList = gson.fromJson(jsonArray, new TypeToken&lt;List&l
 
 <p>注：<code>TypeToken</code>的构造方法是<code>protected</code>修饰的,所以上面才会写成<code>new TypeToken&lt;List&lt;String&gt;&gt;() {}.getType()</code> 而不是  <code>new TypeToken&lt;List&lt;String&gt;&gt;().getType()</code>泛型解析对接口POJO的设计影响泛型的引入可以减少无关的代码，如我现在所在公司接口返回的数据分为两类：</p>
 
-<pre><code class="language-javascript">{&quot;code&quot;:&quot;0&quot;,&quot;message&quot;:&quot;success&quot;,&quot;data&quot;:{}}
+<pre class="line-numbers"><code class="language-javascript">{&quot;code&quot;:&quot;0&quot;,&quot;message&quot;:&quot;success&quot;,&quot;data&quot;:{}}
 </code></pre>
 
-<pre><code class="language-javascript">{&quot;code&quot;:&quot;0&quot;,&quot;message&quot;:&quot;success&quot;,&quot;data&quot;:[]}
+<pre class="line-numbers"><code class="language-javascript">{&quot;code&quot;:&quot;0&quot;,&quot;message&quot;:&quot;success&quot;,&quot;data&quot;:[]}
 </code></pre>
 
 <p>我们真正需要的<code>data</code>所包含的数据，而<code>code</code>只使用一次，<code>message</code>则几乎不用。如果Gson不支持泛型或不知道Gson支持泛型的同学一定会这么定义POJO。</p>
 
-<pre><code class="language-java">public class UserResponse {
+<pre class="line-numbers"><code class="language-java">public class UserResponse {
     public int code;
     public String message;
     public User data;
@@ -258,7 +1004,7 @@ List&lt;String&gt; stringList = gson.fromJson(jsonArray, new TypeToken&lt;List&l
 
 <p>当其它接口的时候又重新定义一个<code>XXResponse</code>将<code>data</code>的类型改成XX，很明显<code>code</code>，和<code>message</code>被重复定义了多次，通过泛型的话我们可以将<code>code</code>和<code>message</code>字段抽取到一个<code>Result</code>的类中，这样我们只需要编写<code>data</code>字段所对应的POJO即可，更专注于我们的业务逻辑。如：</p>
 
-<pre><code class="language-java">public class Result&lt;T&gt; {
+<pre class="line-numbers"><code class="language-java">public class Result&lt;T&gt; {
     public int code;
     public String message;
     public T data;
@@ -271,7 +1017,7 @@ List&lt;String&gt; stringList = gson.fromJson(jsonArray, new TypeToken&lt;List&l
 
 <p>手动的方式就是使用<code>stream</code>包下的<code>JsonReader</code>类来手动实现反序列化，和Android中使用pull解析XML是比较类似的。</p>
 
-<pre><code class="language-java">String json = &quot;{\&quot;name\&quot;:\&quot;怪盗kidou\&quot;,\&quot;age\&quot;:\&quot;24\&quot;}&quot;;
+<pre class="line-numbers"><code class="language-java">String json = &quot;{\&quot;name\&quot;:\&quot;怪盗kidou\&quot;,\&quot;age\&quot;:\&quot;24\&quot;}&quot;;
 User user = new User();
 JsonReader reader = new JsonReader(new StringReader(json));
 reader.beginObject(); // throws IOException
@@ -297,26 +1043,26 @@ System.out.println(user.email); // ikidou@example.com
 
 <p>其实自动方式最终都是通过<code>JsonReader</code>来实现的，如果第一个参数是<code>String</code>类型，那么Gson会创建一个<code>StringReader</code>转换成流操作。</p>
 
-<p><img src="media/15561207870200/15713055100739.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055100739.jpg" alt=""/></figure></p>
 
 <h3 id="toc_7">Gson的流式序列化</h3>
 
 <h4 id="toc_8">自动方式</h4>
 
-<p><img src="media/15561207870200/15713055221921.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055221921.jpg" alt=""/></figure></p>
 
 <p>所以啊，学会利用IDE的自动完成是多么重要这下知道了吧！<br/>
 可以看出用红框选中的部分就是我们要找的东西。<br/><br/>
 提示：<code>PrintStream</code>(System.out) 、<code>StringBuilder</code>、<code>StringBuffer</code>和<code>*Writer</code>都实现了<code>Appendable</code>接口。</p>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 User user = new User(&quot;怪盗kidou&quot;,24,&quot;ikidou@example.com&quot;);
 gson.toJson(user,System.out); // 写到控制台
 </code></pre>
 
 <h4 id="toc_9">手动方式</h4>
 
-<pre><code class="language-java">JsonWriter writer = new JsonWriter(new OutputStreamWriter(System.out));
+<pre class="line-numbers"><code class="language-java">JsonWriter writer = new JsonWriter(new OutputStreamWriter(System.out));
 writer.beginObject() // throws IOException
         .name(&quot;name&quot;).value(&quot;怪盗kidou&quot;)
         .name(&quot;age&quot;).value(24)
@@ -335,14 +1081,14 @@ writer.flush(); // throws IOException
 
 <h4 id="toc_11"><strong>GsonBuilder用法</strong></h4>
 
-<pre><code class="language-java">Gson gson = new GsonBuilder()
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
                //各种配置
                .create(); //生成配置好的Gson
 </code></pre>
 
 <p>Gson在默认情况下是不动导出值<code>null</code>的键的，如：</p>
 
-<pre><code class="language-java">public class User {
+<pre class="line-numbers"><code class="language-java">public class User {
     //省略其它
     public String name;
     public int age;
@@ -350,7 +1096,7 @@ writer.flush(); // throws IOException
 }
 </code></pre>
 
-<pre><code class="language-java">Gson gson = new Gson();
+<pre class="line-numbers"><code class="language-java">Gson gson = new Gson();
 User user = new User(&quot;怪盗kidou&quot;,24);
 System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quot;,&quot;age&quot;:24}
 </code></pre>
@@ -359,7 +1105,7 @@ System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quo
 
 <p>使用方法：</p>
 
-<pre><code class="language-java">Gson gson = new GsonBuilder()
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
         .serializeNulls()
         .create();
 User user = new User(&quot;怪盗kidou&quot;, 24);
@@ -370,7 +1116,7 @@ System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quo
 
 <p>这些都比较简单就不一一分开写了。</p>
 
-<pre><code class="language-java">Gson gson = new GsonBuilder()
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
         //序列化null
         .serializeNulls()
         // 设置日期时间格式，另有2个重载方法
@@ -395,7 +1141,7 @@ System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quo
 
 <p>该注解能指定该字段在JSON中对应的字段名称</p>
 
-<pre><code class="language-java">public class Box {
+<pre class="line-numbers"><code class="language-java">public class Box {
 
   @SerializedName(&quot;w&quot;)
   private int width;
@@ -416,7 +1162,7 @@ System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quo
 
 <p>该注解能够指定该字段是否能够序列化或者反序列化，默认的是都支持（true）。简单说来就是需要导出的字段上加上@Expose 注解，不导出的字段不加。注意是不导出的不加。</p>
 
-<pre><code class="language-java">public class Account {
+<pre class="line-numbers"><code class="language-java">public class Account {
 
   @Expose(deserialize = false)
   private String accountNumber;
@@ -436,7 +1182,7 @@ System.out.println(gson.toJson(user)); //{&quot;name&quot;:&quot;怪盗kidou&quo
 
 <p>该注解在使用<code>new Gson()</code> 时是不会发生作用。毕竟最常用的API要最简单，所以该注解必须和<code>GsonBuilder</code>配合使用。需要注意的通过 <code>builder.excludeFieldsWithoutExposeAnnotation()</code>方法使该注解生效。</p>
 
-<pre><code class="language-java">final GsonBuilder builder = new GsonBuilder();
+<pre class="line-numbers"><code class="language-java">final GsonBuilder builder = new GsonBuilder();
 builder.excludeFieldsWithoutExposeAnnotation();
 final Gson gson = builder.create();
 </code></pre>
@@ -445,7 +1191,7 @@ final Gson gson = builder.create();
 
 <p>Since代表“自从”，Until 代表”一直到”。它们都是针对该字段生效的版本。比如说<code>@Since(1.2)</code>代表从版本1.2之后才生效，<code>@Until(0.9)</code>代表着在0.9版本之前都是生效的。</p>
 
-<pre><code class="language-java">public class SoccerPlayer {
+<pre class="line-numbers"><code class="language-java">public class SoccerPlayer {
 
   private String name;
 
@@ -463,7 +1209,7 @@ final Gson gson = builder.create();
 
 <p>也就是说我们利用方法<code>builder.setVersion(1.0)</code>定义版本1.0，如下：</p>
 
-<pre><code class="language-java">final GsonBuilder builder = new GsonBuilder();
+<pre class="line-numbers"><code class="language-java">final GsonBuilder builder = new GsonBuilder();
     builder.setVersion(1.0);
 
     final Gson gson = builder.create();
@@ -480,7 +1226,7 @@ final Gson gson = builder.create();
 
 <p>由于<code>shirtNumber</code>和<code>country</code>作用版本分别是1.2之后，和0.9之前，所以在这里都不会得到序列化，所以输出结果是：</p>
 
-<pre><code class="language-java">Serialised (version 1.0)
+<pre class="line-numbers"><code class="language-java">Serialised (version 1.0)
   {&quot;name&quot;:&quot;Albert Attard&quot;,&quot;teamName&quot;:&quot;Zejtun Corinthians&quot;}
 </code></pre>
 
@@ -488,7 +1234,7 @@ final Gson gson = builder.create();
 
 <p>什么是修饰符? <code>public</code>、<code>static</code> 、<code>final</code>、<code>private</code>、<code>protected</code> 这些就是，所以这种方式也是比较特殊的。使用方式：</p>
 
-<pre><code class="language-java">class ModifierSample {
+<pre class="line-numbers"><code class="language-java">class ModifierSample {
     final String finalField = &quot;final&quot;;
     static String staticField = &quot;static&quot;;
     public String publicField = &quot;public&quot;;
@@ -500,7 +1246,7 @@ final Gson gson = builder.create();
 
 <p>使用<code>GsonBuilder.excludeFieldsWithModifiers</code>构建gson,支持<code>int</code>形的可变参数，值由<code>java.lang.reflect.Modifier</code>提供，下面的程序排除了<code>privateField</code> 、 <code>finalField</code> 和<code>staticField</code> 三个字段。</p>
 
-<pre><code class="language-java">ModifierSample modifierSample = new ModifierSample();
+<pre class="line-numbers"><code class="language-java">ModifierSample modifierSample = new ModifierSample();
 Gson gson = new GsonBuilder()
         .excludeFieldsWithModifiers(Modifier.FINAL, Modifier.STATIC, Modifier.PRIVATE)
         .create();
@@ -517,7 +1263,7 @@ System.out.println(gson.toJson(modifierSample));
 <p>基于策略是利用Gson提供的<code>ExclusionStrategy</code>接口，同样需要使用<code>GsonBuilder</code>,相关API 2个，分别是<code>addSerializationExclusionStrategy</code> 和<code>addDeserializationExclusionStrategy</code> 分别针对序列化和反序化时。这里以序列化为例。<br/><br/>
 例如：</p>
 
-<pre><code class="language-java">Gson gson = new GsonBuilder()
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
         .addSerializationExclusionStrategy(new ExclusionStrategy() {
             @Override
             public boolean shouldSkipField(FieldAttributes f) {
@@ -540,7 +1286,7 @@ System.out.println(gson.toJson(modifierSample));
 
 <p>还是之前User的例子，已经去除所有注解：</p>
 
-<pre><code class="language-java">User user = new User(&quot;怪盗kidou&quot;, 24);
+<pre class="line-numbers"><code class="language-java">User user = new User(&quot;怪盗kidou&quot;, 24);
 user.emailAddress = &quot;ikidou@example.com&quot;;
 </code></pre>
 
@@ -586,7 +1332,7 @@ user.emailAddress = &quot;ikidou@example.com&quot;;
 
 <p>用法：</p>
 
-<pre><code class="language-java">Gson gson = new GsonBuilder()
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
         .setFieldNamingStrategy(new FieldNamingStrategy() {
             @Override
             public String translateName(Field f) {
@@ -603,7 +1349,7 @@ user.emailAddress = &quot;ikidou@example.com&quot;;
 
 <p>英文Serialize和format都对应序列化，这是一个Java对象到JSON字符串的过程。接着看一个例子,下面分别是java类和以及我们期望的JSON数据：</p>
 
-<pre><code class="language-java">public class Book {
+<pre class="line-numbers"><code class="language-java">public class Book {
   private String[] authors;
   private String isbn10;
   private String isbn13;
@@ -612,7 +1358,7 @@ user.emailAddress = &quot;ikidou@example.com&quot;;
 }
 </code></pre>
 
-<pre><code class="language-javascript">{
+<pre class="line-numbers"><code class="language-javascript">{
   &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
   &quot;isbn-10&quot;: &quot;032133678X&quot;,
   &quot;isbn-13&quot;: &quot;978-0321336781&quot;,
@@ -629,7 +1375,7 @@ user.emailAddress = &quot;ikidou@example.com&quot;;
 
 <p>采用上面提到的<code>@SerializedName</code>注解。</p>
 
-<pre><code class="language-java">public class Book {
+<pre class="line-numbers"><code class="language-java">public class Book {
   private String[] authors;
 
   @SerializedName(&quot;isbn-10&quot;)
@@ -646,7 +1392,7 @@ user.emailAddress = &quot;ikidou@example.com&quot;;
 
 <p>利用<code>JsonSerializer</code>类</p>
 
-<pre><code class="language-java">public class BookSerialiser implements JsonSerializer {
+<pre class="line-numbers"><code class="language-java">public class BookSerialiser implements JsonSerializer {
     @Override
     public JsonElement serialize(final Book book, final Type typeOfSrc, final JsonSerializationContext context) {
 
@@ -673,7 +1419,7 @@ user.emailAddress = &quot;ikidou@example.com&quot;;
 <li>JsonSerializer是一个接口，我们需要提供自己的实现，来满足自己的序列化要求。</li>
 </ul>
 
-<pre><code class="language-java">public interface JsonSerializer&lt;T&gt; {
+<pre class="line-numbers"><code class="language-java">public interface JsonSerializer&lt;T&gt; {
 
 /**
  *Gson 会在解析指定类型T数据的时候触发当前回调方法进行序列化
@@ -698,7 +1444,7 @@ jsonObject.add...
 <li>同样需要配置, </li>
 </ul>
 
-<pre><code class="language-java">// Configure GSON
+<pre class="line-numbers"><code class="language-java">// Configure GSON
   final GsonBuilder gsonBuilder = new GsonBuilder();
   gsonBuilder.registerTypeAdapter(Book.class, new BookSerialiser());
   gsonBuilder.setPrettyPrinting();
@@ -721,7 +1467,7 @@ jsonObject.add...
 
 <p>英文<code>parse</code>和<code>deserialise</code>对应反序列化，这是一个字符串转换成Java对象的过程。我们同样采用上面一小节的代码片段，只不过现在我们需要做的是将：</p>
 
-<pre><code class="language-javascript">{
+<pre class="line-numbers"><code class="language-javascript">{
   &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
   &quot;isbn-10&quot;: &quot;032133678X&quot;,
   &quot;isbn-13&quot;: &quot;978-0321336781&quot;,
@@ -738,7 +1484,7 @@ jsonObject.add...
 
 <p>利用<code>@SerializedName</code> 注解也就是说我们的实体类Book.java可以这么写：</p>
 
-<pre><code class="language-java">public class Book {
+<pre class="line-numbers"><code class="language-java">public class Book {
   private String[] authors;
 
   @SerializedName(&quot;isbn-10&quot;)
@@ -759,7 +1505,7 @@ jsonObject.add...
 
 <p>我们在序列化的时候使用的是<code>JsonSerialize</code> ,这里对应使用<code>JsonDeserializer</code>我们将解析到的json数据传递给Book的setter方法即可。</p>
 
-<pre><code class="language-java">public class BookDeserializer implements JsonDeserializer&lt;Book&gt; {
+<pre class="line-numbers"><code class="language-java">public class BookDeserializer implements JsonDeserializer&lt;Book&gt; {
 
   @Override
   public Book deserialize(final JsonElement json, final Type typeOfT, final JsonDeserializationContext context)
@@ -801,7 +1547,7 @@ jsonObject.add...
 <li>关于从本地流中读取Json数据可以使用  <code>InputStreamReader</code>完成</li>
 </ul>
 
-<pre><code class="language-java">// Configure Gson
+<pre class="line-numbers"><code class="language-java">// Configure Gson
   GsonBuilder gsonBuilder = new GsonBuilder();
   gsonBuilder.registerTypeAdapter(Book.class, new BookDeserializer());
   Gson gson = gsonBuilder.create();
@@ -821,7 +1567,7 @@ jsonObject.add...
 
 <p>之前在上一篇文中提到的<code>JsonSerializer</code>和<code>JsonDeserializer</code>解析的时候都利用到了一个中间件-<code>JsonElement</code>，比如下方的序列化过程。可以看到我们在把Java对象转化为JSON字符串的时候都会用到这个中间件<code>JsonElement</code></p>
 
-<p><img src="media/15561207870200/15713055343313.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055343313.jpg" alt=""/></figure></p>
 
 <p>而<code>TypeAdapter</code>的使用正是去掉了这个中间层，直接用流来解析数据，极大程度上提高了解析效率。</p>
 
@@ -832,7 +1578,7 @@ jsonObject.add...
 
 <p>如下图所示：</p>
 
-<p><img src="media/15561207870200/15713055475704.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055475704.jpg" alt=""/></figure></p>
 
 <p>下面就让我们来一起使用和了解TypeAdapter吧。</p>
 
@@ -841,7 +1587,7 @@ jsonObject.add...
 <p>为了便于理解，这里还是统 一 一 下，采用和上面一篇文章同样的例子。<br/><br/>
 <code>Book.java</code>实体类：</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part1;
 
 public class Book {
 
@@ -855,7 +1601,7 @@ public class Book {
 
 <p>直接贴代码，具体序列化和反序列化的<code>TypeAdapter</code>类，这里是<code>BookTypeAdapter.java</code>：  </p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part1;
 import java.io.IOException;
 import org.apache.commons.lang3.StringUtils;
 import com.google.gson.TypeAdapter;
@@ -900,7 +1646,7 @@ public class BookTypeAdapter extends TypeAdapter {
 
 <p>同样这里设置<code>TypeAdapter</code>之后还是需要配置（注册）,可以注意到的是<code>gsonBuilder.registerTypeAdapter(xxx)</code>方法进行注册在我们之前的<code>JsonSerializer</code>和<code>JsonDeserializer</code>中也有使用：</p>
 
-<pre><code class="language-java">final GsonBuilder gsonBuilder = new GsonBuilder();
+<pre class="line-numbers"><code class="language-java">final GsonBuilder gsonBuilder = new GsonBuilder();
     gsonBuilder.registerTypeAdapter(Book.class, new BookTypeAdapter());
     final Gson gson = gsonBuilder.create();
 </code></pre>
@@ -911,7 +1657,7 @@ public class BookTypeAdapter extends TypeAdapter {
 
 <p><code>write()</code>方法中会传入<code>JsonWriter</code>，和需要被序列化的<code>Book</code>对象的实例，采用和<code>PrintStream</code>类似的方式 写入到<code>JsonWriter</code>中。</p>
 
-<pre><code class="language-java">  @Override
+<pre class="line-numbers"><code class="language-java">  @Override
   public void write(final JsonWriter out, final Book book) throws IOException {
     out.beginObject();
     out.name(&quot;isbn&quot;).value(book.getIsbn());
@@ -935,14 +1681,14 @@ public class BookTypeAdapter extends TypeAdapter {
 <p>这里需要注意的是，如果没有调用 <code>out.endObject()</code>产生<code>}</code>,那么你的项目会报出 </p>
 </blockquote>
 
-<pre><code class="language-java">JsonSyntaxException`错误`Exception in thread &quot;main&quot; com.google.gson.JsonSyntaxException: java.io.EOFException: End of input at line 4 column 40  at com.google.gson.Gson.fromJson(Gson.java:813)  at com.google.gson.Gson.fromJson(Gson.java:768)  at com.google.gson.Gson.fromJson(Gson.java:717)  at com.google.gson.Gson.fromJson(Gson.java:689)  at com.javacreed.examples.gson.part1.Main.main(Main.java:41)Caused by: java.io.EOFException: End of input at line 4 column 40  at com.google.gson.stream.JsonReader.nextNonWhitespace(JsonReader.java:1377)  at com.google.gson.stream.JsonReader.doPeek(JsonReader.java:471)  at com.google.gson.stream.JsonReader.hasNext(JsonReader.java:403)  at com.javacreed.examples.gson.part1.BookTypeAdapter.read(BookTypeAdapter.java:33)  at com.javacreed.examples.gson.part1.BookTypeAdapter.read(BookTypeAdapter.java:1)  at com.google.gson.Gson.fromJson(Gson.java:803)  ... 4 more
+<pre class="line-numbers"><code class="language-java">JsonSyntaxException`错误`Exception in thread &quot;main&quot; com.google.gson.JsonSyntaxException: java.io.EOFException: End of input at line 4 column 40  at com.google.gson.Gson.fromJson(Gson.java:813)  at com.google.gson.Gson.fromJson(Gson.java:768)  at com.google.gson.Gson.fromJson(Gson.java:717)  at com.google.gson.Gson.fromJson(Gson.java:689)  at com.javacreed.examples.gson.part1.Main.main(Main.java:41)Caused by: java.io.EOFException: End of input at line 4 column 40  at com.google.gson.stream.JsonReader.nextNonWhitespace(JsonReader.java:1377)  at com.google.gson.stream.JsonReader.doPeek(JsonReader.java:471)  at com.google.gson.stream.JsonReader.hasNext(JsonReader.java:403)  at com.javacreed.examples.gson.part1.BookTypeAdapter.read(BookTypeAdapter.java:33)  at com.javacreed.examples.gson.part1.BookTypeAdapter.read(BookTypeAdapter.java:1)  at com.google.gson.Gson.fromJson(Gson.java:803)  ... 4 more
 </code></pre>
 
 <h4 id="toc_30">TypeAdapter中的read方法</h4>
 
 <p><code>read()</code>方法将会传入一个<code>JsonReader</code>对象实例并返回反序列化的对象。</p>
 
-<pre><code class="language-java">  @Override
+<pre class="line-numbers"><code class="language-java">  @Override
   public Book read(final JsonReader in) throws IOException {
     final Book book = new Book();
 
@@ -970,7 +1716,7 @@ public class BookTypeAdapter extends TypeAdapter {
 同样是通过<code>in.beginObject();</code>和<code>in.endObject();</code>对应解析<code>{</code>,<code>}</code><br/>
 通过<code>while (in.hasNext()) {switch (in.nextName()) {}}</code>来完成每个<code>JsonElement</code>的遍历,并且通过<code>switch...case</code>的方法获取Json对象中的键值对。并通过我们<code>Book实体类</code>的<code>Setter</code>方法进行设置。</p>
 
-<pre><code class="language-java">while (in.hasNext()) {    
+<pre class="line-numbers"><code class="language-java">while (in.hasNext()) {    
     switch (in.nextName()) {    
         case &quot;isbn&quot;:      
             book.setIsbn(in.nextString());      
@@ -989,12 +1735,12 @@ public class BookTypeAdapter extends TypeAdapter {
 <p>同样需要注意的是,如果没有执行<code>in.endObject()</code>，将会出现<code>JsonIOException</code>的错误：</p>
 </blockquote>
 
-<pre><code class="language-java">Exception in thread &quot;main&quot; com.google.gson.JsonIOException: JSON document was not fully consumed.  at   com.google.gson.Gson.assertFullConsumption(Gson.java:776)  at com.google.gson.Gson.fromJson(Gson.java:769)  at com.google.gson.Gson.fromJson(Gson.java:717)  at com.google.gson.Gson.fromJson(Gson.java:689)  at com.javacreed.examples.gson.part1.Main.main(Main.java:41)
+<pre class="line-numbers"><code class="language-java">Exception in thread &quot;main&quot; com.google.gson.JsonIOException: JSON document was not fully consumed.  at   com.google.gson.Gson.assertFullConsumption(Gson.java:776)  at com.google.gson.Gson.fromJson(Gson.java:769)  at com.google.gson.Gson.fromJson(Gson.java:717)  at com.google.gson.Gson.fromJson(Gson.java:689)  at com.javacreed.examples.gson.part1.Main.main(Main.java:41)
 </code></pre>
 
 <p>下面给出使用<code>TypeAdapter</code>的完整代码：</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part1;
 
 import java.io.IOException;
 
@@ -1027,7 +1773,7 @@ public class Main {
 
 <p>对应的编译结果为：</p>
 
-<pre><code class="language-java">Serialised
+<pre class="line-numbers"><code class="language-java">Serialised
 {
   &quot;isbn&quot;: &quot;978-0321336781&quot;,
   &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
@@ -1045,12 +1791,12 @@ Written by:
 
 <p>为了简化JSON数据，其实我们上面的JSON数据可以这么写：</p>
 
-<pre><code class="language-javascript">[&quot;978-0321336781&quot;,&quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,&quot;Joshua Bloch&quot;,&quot;Neal Gafter&quot;]
+<pre class="line-numbers"><code class="language-javascript">[&quot;978-0321336781&quot;,&quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,&quot;Joshua Bloch&quot;,&quot;Neal Gafter&quot;]
 </code></pre>
 
 <p>可以看到的是，这样采用的直接是值的形式。当然这样操作简化了JSON数据但是可能就让整个数据的稳定性下降了许多的，你需要按照一定的顺序来解析这个数据。对应的<code>write</code>和<code>read</code>方法如下：</p>
 
-<pre><code class="language-java">  @Override
+<pre class="line-numbers"><code class="language-java">  @Override
   public void write(final JsonWriter out, final Book book) throws IOException {
     out.beginArray();
     out.value(book.getIsbn());
@@ -1062,7 +1808,7 @@ Written by:
   }
 </code></pre>
 
-<pre><code class="language-java">  @Override
+<pre class="line-numbers"><code class="language-java">  @Override
   public Book read(final JsonReader in) throws IOException {
     final Book book = new Book();
 
@@ -1087,7 +1833,7 @@ Written by:
 <p>（这里将nested objects翻译为内置对象，其实就是在Book类）<br/>
 这里对上面的Book实体类进行修改如下，添加Author作者类，每本书可以有多个作者。</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part3;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part3;
 
 public class Book {
 
@@ -1108,7 +1854,7 @@ class Author {
 
 <p>这里提供JSON对象，</p>
 
-<pre><code class="language-java">{
+<pre class="line-numbers"><code class="language-java">{
   &quot;isbn&quot;: &quot;978-0321336781&quot;,
   &quot;title&quot;: &quot;Java Puzzlers: Traps, Pitfalls, and Corner Cases&quot;,
   &quot;authors&quot;: [
@@ -1126,7 +1872,7 @@ class Author {
 
 <p>下面分别展示write和read方法：</p>
 
-<pre><code class="language-java">  @Override
+<pre class="line-numbers"><code class="language-java">  @Override
   public void write(final JsonWriter out, final Book book) throws IOException {
     out.beginObject();
     out.name(&quot;isbn&quot;).value(book.getIsbn());
@@ -1143,7 +1889,7 @@ class Author {
   }
 </code></pre>
 
-<pre><code class="language-java"> @Override
+<pre class="line-numbers"><code class="language-java"> @Override
   public Book read(final JsonReader in) throws IOException {
     final Book book = new Book();
 
@@ -1190,7 +1936,7 @@ class Author {
 
 <p>首先来看看我们提供一个大一点的数据来论证下面一些方法的优缺点。 这里提供类<code>LargeData.java</code>,并分为四个部分进行内存消耗的分析：</p>
 
-<pre><code class="language-java">public class LargeData {
+<pre class="line-numbers"><code class="language-java">public class LargeData {
 
   private long[] numbers;
 
@@ -1212,7 +1958,7 @@ class Author {
 
 <p>看看下面的<code>JsonSerializer</code>:</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part1;
 
 import java.lang.reflect.Type;
 
@@ -1241,7 +1987,7 @@ public class LargeDataSerialiser implements JsonSerializer&lt;LargeData&gt; {
 
 <p>上面的代码实现了从<strong>java对象&gt;转化&gt;JSON数组</strong>的序列化过程。下面的代码实现了配置和初始化的过程，被写入文件。这里可以看到的是对<code>LargeData</code>初始化了<code>10485760</code>个元素：</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part1;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part1;
 
 import java.io.File;
 import java.io.IOException;
@@ -1278,11 +2024,11 @@ public class Main {
 
 <p>这个例子实现了创建java对象并且转化为JSON字符串并写入文件的整个过程。下面的图标展示了内存的消耗情况：</p>
 
-<p><img src="media/15561207870200/15713055592610.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055592610.jpg" alt=""/></figure></p>
 
 <p>上面的的LargeData在这里会消耗89MB的内存，从java对象转化为JSON字符串的过程将会消耗大概16s的时间并且需要超过1GB的内存。也就是说，序列化1MB的数据我们需要大约11MB的工作空间。1：11的确实是一个不小的比列。下面的 图片会展示整个过程的几个阶段。</p>
 
-<p><img src="media/15561207870200/15713055723682.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055723682.jpg" alt=""/></figure></p>
 
 <p>可以看到的是，这里有四个方块分别代表不同的阶段，（但是IO 缓冲区并没有在这里得到使用，所以以灰色进行标注。）整个过程从java对象（蓝色方块），然后由<code>LargeDataSerialiser</code>类创建的JSONElement对象（红色方块），然后这些临时的对象又被转化为JSON 字符串（绿色方块），上面的示例代码使用<code>PrintStream</code>将内容输出到文件中并没有使用任何缓冲区。<br/>
 完成了第1部分的分析，接下来下面的分析流程是一样的：</p>
@@ -1292,7 +2038,7 @@ public class Main {
 <p>之前的系列文章中都对Gson基础的使用进行了很好的讲解，可以回顾一下。<br/>
 <code>TypeAdapter</code>相比 于上面的方法，并没有使用JSONElement对象，而是直接将Java对象啊转化为了JSON对象。</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part2;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part2;
 
 import java.io.IOException;
 
@@ -1323,7 +2069,7 @@ public class LargeDataTypeAdapter extends TypeAdapter&lt;LargeData&gt; {
 
 <p>同样会需要配置，这里主要使用的方法是<code>gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataTypeAdapter());</code>：</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part2;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part2;
 
 import java.io.File;
 import java.io.IOException;
@@ -1360,11 +2106,11 @@ public class Main {
 
 <p>上面的代码完成的是从<strong>java对象 &gt;转化&gt;JSON 字符串</strong>并最终写入文件的过程。看看下面的性能分析图表：</p>
 
-<p><img src="media/15561207870200/15713055833702.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055833702.jpg" alt=""/></figure></p>
 
 <p>和最初的那个方法一样，这里的LargeData对象将会需要89MB的内存，从java对象转化为JSON字符串的过程需要消耗4s的时间，大概650MB的内存。也就是说，序列化1MB的数据，大概需要7.5MB的内存空间。相比于之前的第一种JsonSerializer方法，这里减少了接近一半的内存消耗。同样的，来看看这个方法的几个过程：</p>
 
-<p><img src="media/15561207870200/15713055920153.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713055920153.jpg" alt=""/></figure></p>
 
 <p>这里的序列化过程主要有两个阶段，相比于之前的<code>JSONSerializer</code>的序列化过程，这里没有了转化为JSONElement的过程，也就完成了内存消耗的减少。</p>
 
@@ -1372,7 +2118,7 @@ public class Main {
 
 <p>下面的代码，我们使用上面同样的TypeAdapter，只不过我们直接在main()方法中修改Gson的用法，以流的形式进行输出。</p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part3;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part3;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1410,11 +2156,11 @@ public class Main {
 
 <p>这个例子同样是将java对象转化为JSON字符串并且输出，也来看看下面的性能分析图表：</p>
 
-<p><img src="media/15561207870200/15713056023643.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713056023643.jpg" alt=""/></figure></p>
 
 <p>可以看到的是同样的最初产生的数据是89MB,序列化过程将java对象转化为JSON字符串花了大概三秒钟的时间，消耗大概160MB的内存。也就是说序列化1MB的数据我们需要大概2MB的内存空间。相比于之前的两种方法，有了很大的改进。</p>
 
-<p><img src="media/15561207870200/15713056123242.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713056123242.jpg" alt=""/></figure></p>
 
 <p>这个方法同样的是使用了两个阶段。不过在上面一个示例中的绿色方块部分在这里没有使用，这里直接完成了java对象到IO 缓冲区的转化并写入文件。<br/>
 虽然这里并不是Gson的关系，但是我们使用Gson的方法极大的减少了内存消耗，所以说在使用开源库的时候，能够正确高效的使用API也显得尤为重要。</p>
@@ -1423,7 +2169,7 @@ public class Main {
 
 <p>同样的使用第一个例子中的JsonSerializer，这里的配置需要注意的是<code>gsonBuilder.registerTypeAdapter(LargeData.class, new LargeDataSerialiser());</code></p>
 
-<pre><code class="language-java">package com.javacreed.examples.gson.part4;
+<pre class="line-numbers"><code class="language-java">package com.javacreed.examples.gson.part4;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -1461,9 +2207,9 @@ public class Main {
 
 <p>经过前面的分析，我们这里也可以这道这里主要分为三个阶段，下面提供性能分析图和JSONSerializer的阶段流程图：</p>
 
-<p><img src="media/15561207870200/15713056224094.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713056224094.jpg" alt=""/></figure></p>
 
-<p><img src="media/15561207870200/15713056309096.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870200/15713056309096.jpg" alt=""/></figure></p>
 
 <p>这里可以看到三个阶段完成的工作消耗了11s的时间，730MB的内存空间。也就是说1：8的比例。可以相比上面的例子，知道这里使用JSONSerializer产生了JSONElement对象消耗了很多的内存。</p>
 
@@ -1537,7 +2283,7 @@ Gson主要分成两部分,一个就是数据拆解,一个是数据封装。</p>
 
 <h2 id="toc_0">一、BackgroundColorSpan 背景色</h2>
 
-<pre><code class="language-java">SpannableString spanText = new SpannableString(&quot;萝卜白菜的博客 -- http://orgcent.com&quot;);
+<pre class="line-numbers"><code class="language-java">SpannableString spanText = new SpannableString(&quot;萝卜白菜的博客 -- http://orgcent.com&quot;);
 spanText.setSpan(new BackgroundColorSpan(Color.GREEN), 0, spanText.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText); 
@@ -1547,7 +2293,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_2">三、ForegroundColorSpan 文本颜色（前景色）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;萝卜白菜的博客 -- http://orgcent.com&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;萝卜白菜的博客 -- http://orgcent.com&quot;);
 spanText.setSpan(new ForegroundColorSpan(Color.BLUE), 6, spanText.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1555,7 +2301,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_3">四、MaskFilterSpan 修饰效果，如模糊(BlurMaskFilter)、浮雕(EmbossMaskFilter)</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;MaskFilterSpan -- http://orgcent.com&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;MaskFilterSpan -- http://orgcent.com&quot;);
 int length = spanText.length();
 //模糊(BlurMaskFilter)
 MaskFilterSpan maskFilterSpan = new MaskFilterSpan(new BlurMaskFilter(3, Blur.OUTER));
@@ -1571,7 +2317,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_4">六、RasterizerSpan 光栅效果</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;StrikethroughSpan&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;StrikethroughSpan&quot;);
 spanText.setSpan(new StrikethroughSpan(), 0, 7, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1581,7 +2327,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_5">七、StrikethroughSpan 删除线（中划线）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;StrikethroughSpan&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;StrikethroughSpan&quot;);
 spanText.setSpan(new StrikethroughSpan(), 0, 7, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1595,7 +2341,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_7">九、UnderlineSpan 下划线</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;UnderlineSpan&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;UnderlineSpan&quot;);
 spanText.setSpan(new UnderlineSpan(), 0, spanText.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1603,7 +2349,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_8">十、AbsoluteSizeSpan 绝对大小（文本字体）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;AbsoluteSizeSpan&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;AbsoluteSizeSpan&quot;);
 spanText.setSpan(new AbsoluteSizeSpan(20, true), 0, spanText.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1613,7 +2359,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_9">十一、DynamicDrawableSpan 设置图片，基于文本基线或底部对齐。</h2>
 
-<pre><code class="language-java">DynamicDrawableSpan drawableSpan = new DynamicDrawableSpan(DynamicDrawableSpan.ALIGN_BASELINE) {
+<pre class="line-numbers"><code class="language-java">DynamicDrawableSpan drawableSpan = new DynamicDrawableSpan(DynamicDrawableSpan.ALIGN_BASELINE) {
     @Override    
     public Drawable getDrawable() {        
         Drawable d = getResources().getDrawable(R.drawable.ic_launcher);
@@ -1639,7 +2385,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_10">十二、ImageSpan 图片</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;ImageSpan&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;ImageSpan&quot;);
 Drawable d = getResources().getDrawable(R.drawable.ic_launcher);
 d.setBounds(0, 0, 50, 50);
 spanText.setSpan(new ImageSpan(d), 3, 4, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
@@ -1651,7 +2397,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_11">十三、RelativeSizeSpan 相对大小（文本字体）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;RelativeSizeSpan&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;RelativeSizeSpan&quot;);
 //参数proportion:比例大小
 spanText.setSpan(new RelativeSizeSpan(2.5f), 3, 4,Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
@@ -1662,7 +2408,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_12">十四、ScaleXSpan 基于x轴缩放</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;ScaleXSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;ScaleXSpan -- 萝卜白菜的博客&quot;);
 //参数proportion:比例大小
 spanText.setSpan(new ScaleXSpan(3.8f), 3, 7,Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
@@ -1671,7 +2417,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_13">十五、StyleSpan 字体样式：粗体、斜体等</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;StyleSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;StyleSpan -- 萝卜白菜的博客&quot;);
 //Typeface.BOLD_ITALIC:粗体+斜体
 spanText.setSpan(new StyleSpan(Typeface.BOLD_ITALIC), 3, 7,Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
@@ -1680,7 +2426,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_14">十六、SubscriptSpan 下标（数学公式会用到）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;SubscriptSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;SubscriptSpan -- 萝卜白菜的博客&quot;);
 spanText.setSpan(new SubscriptSpan(), 6, 7,Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1688,7 +2434,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_15">十七、SuperscriptSpan 上标（数学公式会用到）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;SuperscriptSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;SuperscriptSpan -- 萝卜白菜的博客&quot;);
 spanText.setSpan(new SuperscriptSpan(), 6, 7,Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1696,7 +2442,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_16">十八、TextAppearanceSpan 文本外貌（包括字体、大小、样式和颜色）</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;TextAppearanceSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;TextAppearanceSpan -- 萝卜白菜的博客&quot;);
 //若需自定义TextAppearance，可以在系统样式上进行修改
 spanText.setSpan(new TextAppearanceSpan(this, android.R.style.TextAppearance_Medium),6, 7, Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
@@ -1707,7 +2453,7 @@ mTVText.append(spanText);
 
 <h2 id="toc_17">十九、TypefaceSpan 文本字体</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;TypefaceSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;TypefaceSpan -- 萝卜白菜的博客&quot;);
 //若需使用自定义字体，可能要重写类
 TypefaceSpanspanText.setSpan(new TypefaceSpan(&quot;monospace&quot;), 3, 10,Spannable.SPAN_INCLUSIVE_EXCLUSIVE);mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);;
@@ -1715,7 +2461,7 @@ mTVText.append(spanText);;
 
 <h2 id="toc_18">二十、URLSpan 文本超链接</h2>
 
-<pre><code class="language-java">spanText = new SpannableString(&quot;URLSpan -- 萝卜白菜的博客&quot;);
+<pre class="line-numbers"><code class="language-java">spanText = new SpannableString(&quot;URLSpan -- 萝卜白菜的博客&quot;);
 spanText.setSpan(new URLSpan(&quot;http://orgcent.com&quot;), 10, spanText.length(),Spannable.SPAN_INCLUSIVE_EXCLUSIVE);
 mTVText.append(&quot;\n&quot;);
 mTVText.append(spanText);
@@ -1785,7 +2531,7 @@ RxAndroid，用于 Android 开发，添加了 Android 用的接口。地址： 
 
 <p>假设有这样一个需求：界面上有一个自定义的视图 <code>imageCollectorView</code> ，它的作用是显示多张图片，并能使用 <code>addImage(Bitmap)</code> 方法来任意增加显示的图片。现在需要程序将一个给出的目录数组 <code>File[] folders</code> 中每个目录下的 png 图片都加载出来并显示在 <code>imageCollectorView</code> 中。需要注意的是，由于读取图片的这一过程较为耗时，需要放在后台执行，而图片的显示则必须在 UI 线程执行。常用的实现方式有多种，我这里贴出其中一种：</p>
 
-<pre><code class="language-java">new Thread() {
+<pre class="line-numbers"><code class="language-java">new Thread() {
     @Override
     public void run() {
         super.run();
@@ -1809,7 +2555,7 @@ RxAndroid，用于 Android 开发，添加了 Android 用的接口。地址： 
 
 <p>而如果使用 RxJava ，实现方式是这样的：</p>
 
-<pre><code class="language-java">Observable.from(folders)
+<pre class="line-numbers"><code class="language-java">Observable.from(folders)
     .flatMap(new Func1&lt;File, Observable&lt;File&gt;&gt;() {
         @Override
         public Observable&lt;File&gt; call(File file) {
@@ -1842,7 +2588,7 @@ RxAndroid，用于 Android 开发，添加了 Android 用的接口。地址： 
 
 <p>另外，如果你的 IDE 是 Android Studio ，其实每次打开某个 Java 文件的时候，你会看到被自动 Lambda 化的预览，这将让你更加清晰地看到程序逻辑：</p>
 
-<pre><code class="language-java">Observable.from(folders)
+<pre class="line-numbers"><code class="language-java">Observable.from(folders)
     .flatMap((Func1) (folder) -&gt; { Observable.from(file.listFiles()) })
     .filter((Func1) (file) -&gt; { file.getName().endsWith(&quot;.png&quot;) })
     .map((Func1) (file) -&gt; { getBitmapFromFile(file) })
@@ -1877,7 +2623,7 @@ RxAndroid，用于 Android 开发，添加了 Android 用的接口。地址： 
 RxJava 的观察者模式大致如下图：</li>
 </ul>
 
-<p><img src="media/15561207870123/15713053119606.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713053119606.jpg" alt=""/></figure></p>
 
 <h3 id="toc_6">基本实现</h3>
 
@@ -1887,7 +2633,7 @@ RxJava 的观察者模式大致如下图：</li>
 
 <p>Observer 即观察者，它决定事件触发的时候将有怎样的行为。 RxJava 中的 <code>Observer</code> 接口的实现方式：</p>
 
-<pre><code class="language-java">Observer&lt;String&gt; observer = new Observer&lt;String&gt;() {
+<pre class="line-numbers"><code class="language-java">Observer&lt;String&gt; observer = new Observer&lt;String&gt;() {
     @Override
     public void onNext(String s) {
         Log.d(tag, &quot;Item: &quot; + s);
@@ -1907,7 +2653,7 @@ RxJava 的观察者模式大致如下图：</li>
 
 <p>除了 <code>Observer</code> 接口之外，RxJava 还内置了一个实现了 <code>Observer</code> 的抽象类：<code>Subscriber</code>。 <code>Subscriber</code> 对 <code>Observer</code> 接口进行了一些扩展，但他们的基本使用方式是完全一样的：</p>
 
-<pre><code class="language-java">Subscriber&lt;String&gt; subscriber = new Subscriber&lt;String&gt;() {
+<pre class="line-numbers"><code class="language-java">Subscriber&lt;String&gt; subscriber = new Subscriber&lt;String&gt;() {
     @Override
     public void onNext(String s) {
         Log.d(tag, &quot;Item: &quot; + s);
@@ -1937,7 +2683,7 @@ RxJava 的观察者模式大致如下图：</li>
 
 <p>Observable 即被观察者，它决定什么时候触发事件以及触发怎样的事件。 RxJava 使用 <code>create()</code> 方法来创建一个 Observable ，并为它定义事件触发规则：</p>
 
-<pre><code class="language-java">Observable observable = Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
+<pre class="line-numbers"><code class="language-java">Observable observable = Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
     @Override
     public void call(Subscriber&lt;? super String&gt; subscriber) {
         subscriber.onNext(&quot;Hello&quot;);
@@ -1955,7 +2701,7 @@ RxJava 的观察者模式大致如下图：</li>
 <li><p><code>just(T...)</code>: 将传入的参数依次发送出来。</p></li>
 </ul>
 
-<pre><code class="language-java">Observable observable = Observable.just(&quot;Hello&quot;, &quot;Hi&quot;, &quot;Aloha&quot;);
+<pre class="line-numbers"><code class="language-java">Observable observable = Observable.just(&quot;Hello&quot;, &quot;Hi&quot;, &quot;Aloha&quot;);
 // 将会依次调用：
 // onNext(&quot;Hello&quot;);
 // onNext(&quot;Hi&quot;);
@@ -1967,7 +2713,7 @@ RxJava 的观察者模式大致如下图：</li>
 <li><code>from(T[])</code>/ <code>from(Iterable&lt;? extends T&gt;)</code>: 将传入的数组或 <code>Iterable</code> 拆分成具体对象后，依次发送出来。</li>
 </ul>
 
-<pre><code class="language-java">String[] words = {&quot;Hello&quot;, &quot;Hi&quot;, &quot;Aloha&quot;};
+<pre class="line-numbers"><code class="language-java">String[] words = {&quot;Hello&quot;, &quot;Hi&quot;, &quot;Aloha&quot;};
 Observable observable = Observable.from(words);
 // 将会依次调用：
 // onNext(&quot;Hello&quot;);
@@ -1980,7 +2726,7 @@ Observable observable = Observable.from(words);
 <li><code>defer( )</code>:有观察者订阅时才创建Observable，并且为每个观察者创建一个新的Observable：</li>
 </ul>
 
-<pre><code class="language-java">deferObservable = Observable.defer(new Func0&lt;Observable&lt;String&gt;&gt;() {
+<pre class="line-numbers"><code class="language-java">deferObservable = Observable.defer(new Func0&lt;Observable&lt;String&gt;&gt;() {
   @Override
   //注意此处的call方法没有Subscriber参数
   public Observable&lt;String&gt; call() {
@@ -1992,35 +2738,35 @@ Observable observable = Observable.from(words);
 <li><code>interval( )</code>:创建一个按固定时间间隔发射整数序列的Observable，可用作定时器：</li>
 </ul>
 
-<pre><code class="language-java">intervalObservable = Observable.interval(1, TimeUnit.SECONDS);//每隔一秒发送一次
+<pre class="line-numbers"><code class="language-java">intervalObservable = Observable.interval(1, TimeUnit.SECONDS);//每隔一秒发送一次
 </code></pre>
 
 <ul>
 <li><code>range( )</code>:创建一个发射特定整数序列的Observable，第一个参数为起始值，第二个为发送的个数，如果为0则不发送，负数则抛异常：</li>
 </ul>
 
-<pre><code class="language-java">rangeObservable = Observable.range(10, 5);//将发送整数10，11，12，13，14
+<pre class="line-numbers"><code class="language-java">rangeObservable = Observable.range(10, 5);//将发送整数10，11，12，13，14
 </code></pre>
 
 <ul>
 <li><code>timer( )</code>:创建一个Observable，它在一个给定的延迟后发射一个特殊的值，等同于Android中Handler的postDelay( )方法：</li>
 </ul>
 
-<pre><code class="language-java">timeObservable = Observable.timer(3, TimeUnit.SECONDS);  //3秒后发射一个值
+<pre class="line-numbers"><code class="language-java">timeObservable = Observable.timer(3, TimeUnit.SECONDS);  //3秒后发射一个值
 </code></pre>
 
 <ul>
 <li><code>repeat( )</code>:创建一个重复发射特定数据的Observable:</li>
 </ul>
 
-<pre><code class="language-java">repeatObservable = Observable.just(&quot;repeatObservable&quot;).repeat(3);//重复发射3次
+<pre class="line-numbers"><code class="language-java">repeatObservable = Observable.just(&quot;repeatObservable&quot;).repeat(3);//重复发射3次
 </code></pre>
 
 <h4 id="toc_9">Subscribe (订阅)</h4>
 
 <p>创建了 <code>Observable</code> 和 <code>Observer</code> 之后，再用 <code>subscribe()</code> 方法将它们联结起来，整条链子就可以工作了。代码形式很简单：</p>
 
-<pre><code class="language-java">observable.subscribe(observer);
+<pre class="line-numbers"><code class="language-java">observable.subscribe(observer);
 // 或者：
 observable.subscribe(subscriber);
 </code></pre>
@@ -2035,15 +2781,15 @@ observable.subscribe(subscriber);
 
 <p>整个过程中对象间的关系如下图：</p>
 
-<p><img src="media/15561207870123/15713053244741.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713053244741.jpg" alt=""/></figure></p>
 
 <p>或者可以看动图：</p>
 
-<p><img src="media/15561207870123/20171011150768262032561.gif" alt=""/></p>
+<p><figure><img src="media/15561207870123/20171011150768262032561.gif" alt=""/></figure></p>
 
 <p>除了 <code>subscribe(Observer)</code> 和<code>subscribe(Subscriber)</code> ，<code>subscribe()</code> 还支持不完整定义的回调，RxJava 会自动根据定义创建出 <code>Subscriber</code> 。形式如下：</p>
 
-<pre><code class="language-java">Action1&lt;String&gt; onNextAction = new Action1&lt;String&gt;() {
+<pre class="line-numbers"><code class="language-java">Action1&lt;String&gt; onNextAction = new Action1&lt;String&gt;() {
     // onNext()
     @Override
     public void call(String s) {
@@ -2080,13 +2826,13 @@ observable.subscribe(onNextAction, onErrorAction, onCompletedAction);
 
 <p>当调用<code>Observable.subscribe()</code>，会返回一个<code>Subscription</code>对象。这个对象代表了被观察者和订阅者之间的联系。</p>
 
-<pre><code class="language-java">Subscription subscription = Observable.just(&quot;Hello, World!&quot;)
+<pre class="line-numbers"><code class="language-java">Subscription subscription = Observable.just(&quot;Hello, World!&quot;)
 .subscribe(s -&gt; System.out.println(s)); 
 </code></pre>
 
 <p>你可以在后面使用这个<code>Subscription</code>对象来操作被观察者和订阅者之间的联系.</p>
 
-<pre><code class="language-java">subscription.unsubscribe();//接触订阅关系
+<pre class="line-numbers"><code class="language-java">subscription.unsubscribe();//接触订阅关系
 System.out.println(&quot;Unsubscribed=&quot; + subscription.isUnsubscribed());
 // Outputs &quot;Unsubscribed=true&quot; 
 </code></pre>
@@ -2099,7 +2845,7 @@ System.out.println(&quot;Unsubscribed=&quot; + subscription.isUnsubscribed());
 
 <p>将字符串数组 <code>names</code> 中的所有字符串依次打印出来：</p>
 
-<pre><code class="language-java">String[] names = ...;
+<pre class="line-numbers"><code class="language-java">String[] names = ...;
 Observable.from(names)
     .subscribe(new Action1&lt;String&gt;() {
         @Override
@@ -2113,7 +2859,7 @@ Observable.from(names)
 
 <p>由指定的一个 drawable 文件 id <code>drawableRes</code> 取得图片，并显示在 <code>ImageView</code> 中，并在出现异常的时候打印 Toast 报错：</p>
 
-<pre><code class="language-java">int drawableRes = ...;
+<pre class="line-numbers"><code class="language-java">int drawableRes = ...;
 ImageView imageView = ...;
 Observable.create(new OnSubscribe&lt;Drawable&gt;() {
     @Override
@@ -2163,7 +2909,7 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 <p>有了这几个 <code>Scheduler</code> ，就可以使用 <code>subscribeOn()</code> 和 <code>observeOn()</code> 两个方法来对线程进行控制了。 <code>subscribeOn()</code>: 指定 <code>subscribe()</code> 所发生的线程，即 <code>Observable.OnSubscribe</code> 被激活时所处的线程。或者叫做事件产生的线程。<code>observeOn()</code>: 指定 <code>Subscriber</code> 所运行在的线程。或者叫做事件消费的线程。<br/>
 文字叙述总归难理解，上代码：</p>
 
-<pre><code class="language-java">Observable.just(1, 2, 3, 4)
+<pre class="line-numbers"><code class="language-java">Observable.just(1, 2, 3, 4)
     .subscribeOn(Schedulers.io()) // 指定 subscribe() 发生在 IO 线程
     .observeOn(AndroidSchedulers.mainThread()) // 指定 Subscriber 的回调发生在主线程
     .subscribe(new Action1&lt;Integer&gt;() {
@@ -2177,7 +2923,7 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 <p>上面这段代码中，由于 <code>subscribeOn(Schedulers.io())</code> 的指定，被创建的事件的内容 <code>1</code>、<code>2</code>、<code>3</code>、<code>4</code> 将会在 IO 线程发出；而由于 <code>observeOn(AndroidScheculers.mainThread()</code>) 的指定，因此 <code>subscriber</code> 数字的打印将发生在主线程 。事实上，这种在 <code>subscribe()</code> 之前写上两句 <code>subscribeOn(Scheduler.io())</code> 和 <code>observeOn(AndroidSchedulers.mainThread())</code> 的使用方式非常常见，它适用于多数的 『后台线程取数据，主线程显示』的程序策略。<br/>
 而前面提到的由图片 id 取得图片并显示的例子，如果也加上这两句：</p>
 
-<pre><code class="language-java">int drawableRes = ...;
+<pre class="line-numbers"><code class="language-java">int drawableRes = ...;
 ImageView imageView = ...;
 Observable.create(new OnSubscribe&lt;Drawable&gt;() {
     @Override
@@ -2222,7 +2968,7 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 
 <p>首先看一个 <code>map()</code> 的例一：</p>
 
-<pre><code class="language-java">Observable.just(&quot;images/logo.png&quot;) // 输入类型 String
+<pre class="line-numbers"><code class="language-java">Observable.just(&quot;images/logo.png&quot;) // 输入类型 String
     .map(new Func1&lt;String, Bitmap&gt;() {
         @Override
         public Bitmap call(String filePath) { // 参数类型 String
@@ -2242,7 +2988,7 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 
 <p>例二：对数据进行预处理，最后得到理想型数据。实际开发过程中，从后台接口获取到的数据也许不符合我们想要的，这时候可以在获取过程中对得到的数据进行预处理（结合Retrofit）。</p>
 
-<pre><code class="language-java">Observable.just(&quot;12345678&quot;).map(new Func1&lt;String, String&gt;() {
+<pre class="line-numbers"><code class="language-java">Observable.just(&quot;12345678&quot;).map(new Func1&lt;String, String&gt;() {
   @Override
   public String call(String s) {
       return s.substring(0,4);//只要前四位
@@ -2258,13 +3004,13 @@ Observable.create(new OnSubscribe&lt;Drawable&gt;() {
 <li><code>map()</code>: 事件对象的直接变换，具体功能上面已经介绍过。它是 RxJava 最常用的变换。 <code>map()</code> 的示意图：</li>
 </ul>
 
-<p><img src="media/15561207870123/15713053605523.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713053605523.jpg" alt=""/></figure></p>
 
 <ul>
 <li><code>flatMap()</code>: 这是一个很有用但非常难理解的变换，因此我决定花多些篇幅来介绍它。 首先假设这么一种需求：假设有一个数据结构『学生』，现在需要打印出一组学生的名字。实现方式很简单：</li>
 </ul>
 
-<pre><code class="language-java">Student[] students = ...;
+<pre class="line-numbers"><code class="language-java">Student[] students = ...;
 Subscriber&lt;String&gt; subscriber = new Subscriber&lt;String&gt;() {
     @Override
     public void onNext(String name) {
@@ -2284,7 +3030,7 @@ Observable.from(students)
 
 <p>很简单。那么再假设：如果要打印出每个学生所需要修的所有课程的名称呢？（需求的区别在于，每个学生只有一个名字，但却有多个课程。）首先可以这样实现：</p>
 
-<pre><code class="language-java">Student[] students = ...;
+<pre class="line-numbers"><code class="language-java">Student[] students = ...;
 Subscriber&lt;Student&gt; subscriber = new Subscriber&lt;Student&gt;() {
     @Override
     public void onNext(Student student) {
@@ -2304,7 +3050,7 @@ Observable.from(students)
 
 <p>这个时候，就需要用 <code>flatMap()</code> 了：</p>
 
-<pre><code class="language-java">Student[] students = ...;
+<pre class="line-numbers"><code class="language-java">Student[] students = ...;
 Subscriber&lt;Course&gt; subscriber = new Subscriber&lt;Course&gt;() {
     @Override
     public void onNext(Course course) {
@@ -2325,11 +3071,11 @@ Observable.from(students)
 <p>从上面的代码可以看出， <code>flatMap()</code> 和 <code>map()</code> 有一个相同点：它也是把传入的参数转化之后返回另一个对象。但需要注意，和 <code>map()</code>不同的是， <code>flatMap()</code> 中返回的是个 <code>Observable</code> 对象，并且这个 <code>Observable</code> 对象并不是被直接发送到了 <code>Subscriber</code> 的回调方法中。 <code>flatMap()</code> 的原理是这样的：1. 使用传入的事件对象创建一个 <code>Observable</code> 对象；2. 并不发送这个 <code>Observable</code>, 而是将它激活，于是它开始发送事件；3. 每一个创建出来的 <code>Observable</code> 发送的事件，都被汇入同一个 <code>Observable</code> ，而这个 <code>Observable</code> 负责将这些事件统一交给 <code>Subscriber</code> 的回调方法。这三个步骤，把事件拆成了两级，通过一组新创建的 <code>Observable</code> 将初始的对象『铺平』之后通过统一路径分发了下去。而这个『铺平』就是 <code>flatMap()</code>所谓的 flat。<br/>
 <code>flatMap()</code>示意图：</p>
 
-<p><img src="media/15561207870123/15713053760755.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713053760755.jpg" alt=""/></figure></p>
 
 <p>扩展：由于可以在嵌套的 <code>Observable</code> 中添加异步代码， <code>flatMap()</code> 也常用于嵌套的异步操作，例如嵌套的网络请求。示例代码（Retrofit + RxJava）：</p>
 
-<pre><code class="language-java">networkClient.token() // 返回 Observable&lt;String&gt;，在订阅时请求 token，并在响应后发送 token
+<pre class="line-numbers"><code class="language-java">networkClient.token() // 返回 Observable&lt;String&gt;，在订阅时请求 token，并在响应后发送 token
     .flatMap(new Func1&lt;String, Observable&lt;Messages&gt;&gt;() {
         @Override
         public Observable&lt;Messages&gt; call(String token) {
@@ -2357,7 +3103,7 @@ Observable.from(students)
 
 <p>这些变换虽然功能各有不同，但实质上都是针对事件序列的处理和再发送。而在 RxJava 的内部，它们是基于同一个基础的变换方法： <code>lift(Operator)</code>。首先看一下 <code>lift()</code> 的内部实现（仅核心代码）：</p>
 
-<pre><code class="language-java">// 注意：这不是 lift() 的源码，而是将源码中与性能、兼容性、扩展性有关的代码剔除后的核心代码。
+<pre class="line-numbers"><code class="language-java">// 注意：这不是 lift() 的源码，而是将源码中与性能、兼容性、扩展性有关的代码剔除后的核心代码。
 // 如果需要看源码，可以去 RxJava 的 GitHub 仓库下载。
 public &lt;R&gt; Observable&lt;R&gt; lift(Operator&lt;? extends R, ? super T&gt; operator) {
     return Observable.create(new OnSubscribe&lt;R&gt;() {
@@ -2387,19 +3133,19 @@ public &lt;R&gt; Observable&lt;R&gt; lift(Operator&lt;? extends R, ? super T&gt;
 <p>精简掉细节的话，也可以这么说：在 <code>Observable</code> 执行了 <code>lift(Operator)</code> 方法之后，会返回一个新的 <code>Observable</code>，这个新的 <code>Observable</code> 会像一个代理一样，负责接收原始的 <code>Observable</code> 发出的事件，并在处理后发送给 <code>Subscriber</code>。<br/><br/>
 如果你更喜欢具象思维，可以看图：</p>
 
-<p><img src="media/15561207870123/15713053962421.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713053962421.jpg" alt=""/></figure></p>
 
 <p>或者可以看动图：</p>
 
-<p><img src="media/15561207870123/20171011150768288754019.gif" alt=""/></p>
+<p><figure><img src="media/15561207870123/20171011150768288754019.gif" alt=""/></figure></p>
 
 <p>两次和多次的 <code>lift()</code> 同理，如下图：</p>
 
-<p><img src="media/15561207870123/15713054269632.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713054269632.jpg" alt=""/></figure></p>
 
 <p>举一个具体的 <code>Operator</code> 的实现。下面这是一个将事件中的 <code>Integer</code> 对象转换成 <code>String</code> 的例子，仅供参考：</p>
 
-<pre><code class="language-java">observable.lift(new Observable.Operator&lt;String, Integer&gt;() {
+<pre class="line-numbers"><code class="language-java">observable.lift(new Observable.Operator&lt;String, Integer&gt;() {
     @Override
     public Subscriber&lt;? super Integer&gt; call(final Subscriber&lt;? super String&gt; subscriber) {
         // 将事件序列中的 Integer 对象转换为 String 对象
@@ -2427,7 +3173,7 @@ public &lt;R&gt; Observable&lt;R&gt; lift(Operator&lt;? extends R, ? super T&gt;
 
 <p>除了 <code>lift()</code> 之外， <code>Observable</code> 还有一个变换方法叫做 <code>compose(Transformer)</code>。它和 <code>lift()</code> 的区别在于， <code>lift()</code> 是针对事件项和事件序列的，而 <code>compose()</code> 是针对 <code>Observable</code> 自身进行变换。举个例子，假设在程序中有多个 <code>Observable</code>，并且他们都需要应用一组相同的 <code>lift()</code> 变换。你可以这么写：</p>
 
-<pre><code class="language-java">observable1
+<pre class="line-numbers"><code class="language-java">observable1
     .lift1()
     .lift2()
     .lift3()
@@ -2455,7 +3201,7 @@ observable4
 
 <p>你觉得这样太不软件工程了，于是你改成了这样：</p>
 
-<pre><code class="language-java">private Observable liftAll(Observable observable) {
+<pre class="line-numbers"><code class="language-java">private Observable liftAll(Observable observable) {
     return observable
         .lift1()
         .lift2()
@@ -2471,7 +3217,7 @@ liftAll(observable4).subscribe(subscriber4);
 
 <p>可读性、可维护性都提高了。可是 <code>Observable</code> 被一个方法包起来，这种方式对于 <code>Observale</code> 的灵活性似乎还是增添了那么点限制。怎么办？这个时候，就应该用 <code>compose()</code> 来解决了：</p>
 
-<pre><code class="language-java">public class LiftAllTransformer implements Observable.Transformer&lt;Integer, String&gt; {
+<pre class="line-numbers"><code class="language-java">public class LiftAllTransformer implements Observable.Transformer&lt;Integer, String&gt; {
     @Override
     public Observable&lt;String&gt; call(Observable&lt;Integer&gt; observable) {
         return observable
@@ -2495,7 +3241,7 @@ observable4.compose(liftAll).subscribe(subscriber4);
 
 <p>可以设置缓存大小，缓存满后，以list的方式将数据发送出去；例：</p>
 
-<pre><code class="language-java">Observable
+<pre class="line-numbers"><code class="language-java">Observable
 .just(1,2,3)
 .buffer(2)
 .subscribe(new Action1&lt;List&lt;Integer&gt;&gt;() {  
@@ -2508,12 +3254,12 @@ observable4.compose(liftAll).subscribe(subscriber4);
 
 <p>运行打印结果如下：</p>
 
-<pre><code class="language-text">11-02 20:49:58.370 23392-23392/? I/mytag: size:211-02 20:49:58.370 23392-23392/? I/mytag: size:1
+<pre class="line-numbers"><code class="language-text">11-02 20:49:58.370 23392-23392/? I/mytag: size:211-02 20:49:58.370 23392-23392/? I/mytag: size:1
 </code></pre>
 
 <p>在开发当中，个人经常将Buffer和Map一起使用，常发生在从后台取完数据，对一个List中的数据进行预处理后，再用Buffer缓存后一起发送，保证最后数据接收还是一个List，如下：</p>
 
-<pre><code class="language-java">List&lt;School&gt; schoolList = new ArrayList&lt;&gt;();
+<pre class="line-numbers"><code class="language-java">List&lt;School&gt; schoolList = new ArrayList&lt;&gt;();
 Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {  
     @Override  
     public School call(School school) {      
@@ -2531,7 +3277,7 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>发射前n项数据，还是用上面的例子，假设不要改所有学校的名称了，就改前四个学校的名称：</p>
 
-<pre><code class="language-java">Observable.from(schoolList).take(4).map(new Func1&lt;School, School&gt;() {  
+<pre class="line-numbers"><code class="language-java">Observable.from(schoolList).take(4).map(new Func1&lt;School, School&gt;() {  
     @Override  
     public School call(School school) {      
         school.setName(&quot;NB大学&quot;);      
@@ -2546,7 +3292,7 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>去掉重复的项，比较好理解：</p>
 
-<pre><code class="language-java">Observable.just(1, 2, 1, 1, 2, 3).distinct().subscribe(new Action1&lt;Integer&gt;() {          
+<pre class="line-numbers"><code class="language-java">Observable.just(1, 2, 1, 1, 2, 3).distinct().subscribe(new Action1&lt;Integer&gt;() {          
     @Override          
     public void call(Integer item) {              
         System.out.println(&quot;Next: &quot; + item);          
@@ -2556,14 +3302,14 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>输出</p>
 
-<pre><code class="language-java">Next: 1Next: 2Next: 3
+<pre class="line-numbers"><code class="language-java">Next: 1Next: 2Next: 3
 </code></pre>
 
 <h4 id="toc_24">Filter：过滤</h4>
 
 <p>通过谓词判断的项才会被发射，例如，发射小于4的数据：</p>
 
-<pre><code class="language-java">Observable.just(1, 2, 3, 4, 5).filter(new Func1&lt;Integer, Boolean&gt;() {          
+<pre class="line-numbers"><code class="language-java">Observable.just(1, 2, 3, 4, 5).filter(new Func1&lt;Integer, Boolean&gt;() {          
     @Override          
     public Boolean call(Integer item) {              
         return( item &lt; 4 );          
@@ -2578,7 +3324,7 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>输出：</p>
 
-<pre><code class="language-java">Next: 1Next: 2Next: 3
+<pre class="line-numbers"><code class="language-java">Next: 1Next: 2Next: 3
 </code></pre>
 
 <h3 id="toc_25">线程控制：Scheduler (二)</h3>
@@ -2591,7 +3337,7 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>答案是：能。因为 <code>observeOn()</code> 指定的是 <code>Subscriber</code> 的线程，而这个 <code>Subscriber</code> 并不是（严格说应该为『不一定是』，但这里不妨理解为『不是』）<code>subscribe()</code> 参数中的 <code>Subscriber</code> ，而是 <code>observeOn()</code> 执行时的当前 <code>Observable</code> 所对应的 <code>Subscriber</code> ，即它的直接下级 <code>Subscriber</code> 。换句话说，<code>observeOn()</code> 指定的是它之后的操作所在的线程。因此如果有多次切换线程的需求，只要在每个想要切换线程的位置调用一次 <code>observeOn()</code> 即可。上代码：</p>
 
-<pre><code class="language-java">Observable.just(1, 2, 3, 4) // IO 线程，由 subscribeOn() 指定
+<pre class="line-numbers"><code class="language-java">Observable.just(1, 2, 3, 4) // IO 线程，由 subscribeOn() 指定
     .subscribeOn(Schedulers.io())
     .observeOn(Schedulers.newThread())
     .map(mapOperator) // 新线程，由 observeOn() 指定
@@ -2611,17 +3357,17 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 <p>其实， <code>subscribeOn()</code> 和 <code>observeOn()</code> 的内部实现，也是用的 <code>lift()</code>。具体看图（不同颜色的箭头表示不同的线程）：<br/>
 <code>subscribeOn()</code> 原理图：</p>
 
-<p><img src="media/15561207870123/15713054408629.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713054408629.jpg" alt=""/></figure></p>
 
 <p><code>observeOn()</code> 原理图：</p>
 
-<p><img src="media/15561207870123/15713054500040.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713054500040.jpg" alt=""/></figure></p>
 
 <p>从图中可以看出，<code>subscribeOn()</code> 和 <code>observeOn()</code> 都做了线程切换的工作（图中的 &quot;schedule...&quot; 部位）。不同的是， <code>subscribeOn()</code>的线程切换发生在 <code>OnSubscribe</code> 中，即在它通知上一级 <code>OnSubscribe</code> 时，这时事件还没有开始发送，因此 <code>subscribeOn()</code> 的线程控制可以从事件发出的开端就造成影响；  而 <code>observeOn()</code> 的线程切换则发生在它内建的 <code>Subscriber</code> 中，即发生在它即将给下一级 <code>Subscriber</code> 发送事件时，因此 <code>observeOn()</code> 控制的是它后面的线程。</p>
 
 <p>最后，我用一张图来解释当多个 <code>subscribeOn()</code> 和 <code>observeOn()</code> 混合使用时，线程调度是怎么发生的（由于图中对象较多，相对于上面的图对结构做了一些简化调整）：  </p>
 
-<p><img src="media/15561207870123/15713054782891.jpg" alt=""/></p>
+<p><figure><img src="media/15561207870123/15713054782891.jpg" alt=""/></figure></p>
 
 <p>图中共有 5 处含有对事件的操作。由图中可以看出，①和②两处受第一个 <code>subscribeOn()</code> 影响，运行在红色线程；③和④处受第一个 <code>observeOn()</code> 的影响，运行在绿色线程；⑤处受第二个 <code>onserveOn()</code> 影响，运行在紫色线程；而第二个 <code>subscribeOn()</code> ，由于在通知过程中线程就被第一个 <code>subscribeOn()</code> 截断，因此对整个流程并没有任何影响。这里也就回答了前面的问题：当使用了多个 <code>subscribeOn()</code> 的时候，只有第一个 <code>subscribeOn()</code> 起作用。</p>
 
@@ -2635,7 +3381,7 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>示例代码：</p>
 
-<pre><code class="language-java">Observable.create(onSubscribe)
+<pre class="line-numbers"><code class="language-java">Observable.create(onSubscribe)
     .subscribeOn(Schedulers.io())
     .doOnSubscribe(new Action0() {
         @Override
@@ -2666,7 +3412,7 @@ Observable.from(schoolList).map(new Func1&lt;School, School&gt;() {
 
 <p>Observer会接收AsyncSubject的<code>onComplete()</code>之前的最后一个数据，如果因异常而终止，AsyncSubject将不会释放任何数据，但是会向Observer传递一个异常通知。示例代码如下：  </p>
 
-<pre><code class="language-java">AsyncSubject&lt;String&gt; asyncSubject = AsyncSubject.create();      asyncSubject.onNext(&quot;asyncSubject1&quot;);      
+<pre class="line-numbers"><code class="language-java">AsyncSubject&lt;String&gt; asyncSubject = AsyncSubject.create();      asyncSubject.onNext(&quot;asyncSubject1&quot;);      
 asyncSubject.onNext(&quot;asyncSubject2&quot;);      
 asyncSubject.onNext(&quot;asyncSubject3&quot;);        
 asyncSubject.onCompleted();      
@@ -2692,7 +3438,7 @@ asyncSubject.subscribe(new Observer&lt;String&gt;() {
 
 <p>Observer会接收到BehaviorSubject被订阅之前的最后一个数据，再接收其他发射过来的数据，如果BehaviorSubject被订阅之前没有发送任何数据，则会发送一个默认数据。（注意跟AsyncSubject的区别，AsyncSubject要手动调用onCompleted()，且它的Observer会接收到onCompleted()前发送的最后一个数据，之后不会再接收数据，而BehaviorSubject不需手动调用onCompleted()，它的Observer接收的是BehaviorSubject被订阅前发送的最后一个数据，两个的分界点不一样，且之后还会继续接收数据。）示例代码如下：</p>
 
-<pre><code class="language-java">BehaviorSubject&lt;String&gt; behaviorSubject = BehaviorSubject.create(&quot;default&quot;);  behaviorSubject.onNext(&quot;behaviorSubject1&quot;);  
+<pre class="line-numbers"><code class="language-java">BehaviorSubject&lt;String&gt; behaviorSubject = BehaviorSubject.create(&quot;default&quot;);  behaviorSubject.onNext(&quot;behaviorSubject1&quot;);  
 behaviorSubject.onNext(&quot;behaviorSubject2&quot;);      
 behaviorSubject.subscribe(new Observer&lt;String&gt;() {          
     @Override          
@@ -2718,7 +3464,7 @@ behaviorSubject.onNext(&quot;behaviorSubject4&quot;);
 
 <p>PublishSubject比较容易理解，相对比其他Subject常用，它的Observer只会接收到PublishSubject被订阅之后发送的数据。示例代码如下：</p>
 
-<pre><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();  
+<pre class="line-numbers"><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();  
 publishSubject.onNext(&quot;publishSubject1&quot;);  
 publishSubject.onNext(&quot;publishSubject2&quot;);  
 publishSubject.subscribe(new Observer&lt;String&gt;() {          
@@ -2741,7 +3487,7 @@ publishSubject.onNext(&quot;publishSubject4&quot;);
 
 <p>ReplaySubject会发射所有数据给观察者，无论它们是何时订阅的。也有其它版本的ReplaySubject，在重放缓存增长到一定大小的时候或过了一段时间后会丢弃旧的数据。示例代码如下：</p>
 
-<pre><code class="language-java">ReplaySubject&lt;String&gt;replaySubject = ReplaySubject.create(); //创建默认初始缓存容量大小为16的ReplaySubject，当数据条目超过16会重新分配内存空间，使用这种方式，不论ReplaySubject何时被订阅，Observer都能接收到数据
+<pre class="line-numbers"><code class="language-java">ReplaySubject&lt;String&gt;replaySubject = ReplaySubject.create(); //创建默认初始缓存容量大小为16的ReplaySubject，当数据条目超过16会重新分配内存空间，使用这种方式，不论ReplaySubject何时被订阅，Observer都能接收到数据
 //replaySubject = ReplaySubject.create(100);//创建指定初始缓存容量大小为100的ReplaySubject
 //replaySubject = ReplaySubject.createWithSize(2);//只缓存订阅前最后发送的2条数据 
 //replaySubject=ReplaySubject.createWithTime(1,TimeUnit.SECONDS,Schedulers.computation());  
@@ -2767,12 +3513,12 @@ replaySubject.onNext(&quot;replaySubject:after2&quot;);
 
 <h3 id="toc_35">创建Observable并发射数据：</h3>
 
-<pre><code class="language-java">Observable.create(new Observable.OnSubscribe&lt;String&gt;() {          @Override          public void call(Subscriber&lt;? super String&gt; subscriber) {              subscriber.onNext(&quot;I&#39;m Observable&quot;);              subscriber.onCompleted();          }      });
+<pre class="line-numbers"><code class="language-java">Observable.create(new Observable.OnSubscribe&lt;String&gt;() {          @Override          public void call(Subscriber&lt;? super String&gt; subscriber) {              subscriber.onNext(&quot;I&#39;m Observable&quot;);              subscriber.onCompleted();          }      });
 </code></pre>
 
 <p><em>用Subject实现为</em>：</p>
 
-<pre><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();publishSubject.onNext(&quot;as Observable&quot;);publishSubject.onCompleted();```
+<pre class="line-numbers"><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();publishSubject.onNext(&quot;as Observable&quot;);publishSubject.onCompleted();```
 
 ### 创建Observer订阅Observable并接收数据：
 
@@ -2790,7 +3536,7 @@ mObservable.subscribe(new Observer&lt;String&gt;() {
 
 <p><em>用Subject实现为</em>：</p>
 
-<pre><code class="language-java">publishSubject.subscribe(new Observer&lt;String&gt;() {          
+<pre class="line-numbers"><code class="language-java">publishSubject.subscribe(new Observer&lt;String&gt;() {          
     @Override          
     public void onCompleted() {}          
     @Override          
@@ -2802,7 +3548,7 @@ mObservable.subscribe(new Observer&lt;String&gt;() {
 
 <p>也许有人会问，不是说Subject也可以作为Observer，不能把Subject当作Observer传入subscribe()中吗？回答是：当然可以！就象这样：</p>
 
-<pre><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();
+<pre class="line-numbers"><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();
 Observable.create(new Observable.OnSubscribe&lt;String&gt;() {      
     @Override      
     public void call(Subscriber&lt;? super String&gt; subscriber) {          
@@ -2814,7 +3560,7 @@ Observable.create(new Observable.OnSubscribe&lt;String&gt;() {
 
 <p>有没有发现问题？publishSubject没有重写onNext()方法啊，在哪接收的数据？这就是前面说的“桥梁”的问题了，尽管把Subject作为Observer传入<code>subscribe()</code>，但接收数据还是要通过Observer来接收，借用Subject来连接Observable和Observer，整体代码如下：</p>
 
-<pre><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();   
+<pre class="line-numbers"><code class="language-java">PublishSubject&lt;String&gt; publishSubject = PublishSubject.create();   
 Observable.create(new Observable.OnSubscribe&lt;String&gt;() {          
     @Override          
     public void call(Subscriber&lt;? super String&gt; subscriber) {              
@@ -2841,13 +3587,13 @@ publishSubject.subscribe(new Observer&lt;String&gt;() {
 <p>Retrofit 除了提供了传统的 <code>Callback</code> 形式的 API，还有 RxJava 版本的 <code>Observable</code> 形式 API。下面我用对比的方式来介绍 Retrofit 的 RxJava 版 API 和传统版本的区别。<br/>
 以获取一个 <code>User</code>对象的接口作为例子。使用Retrofit 的传统 API，你可以用这样的方式来定义请求：</p>
 
-<pre><code class="language-java">@GET(&quot;/user&quot;)
+<pre class="line-numbers"><code class="language-java">@GET(&quot;/user&quot;)
 public void getUser(@Query(&quot;userId&quot;) String userId, Callback&lt;User&gt; callback);
 </code></pre>
 
 <p>在程序的构建过程中， Retrofit 会把自动把方法实现并生成代码，然后开发者就可以利用下面的方法来获取特定用户并处理响应：</p>
 
-<pre><code class="language-java">getUser(userId, new Callback&lt;User&gt;() {
+<pre class="line-numbers"><code class="language-java">getUser(userId, new Callback&lt;User&gt;() {
     @Override
     public void success(User user) {
         userView.setUser(user);
@@ -2863,13 +3609,13 @@ public void getUser(@Query(&quot;userId&quot;) String userId, Callback&lt;User&g
 
 <p>而使用 RxJava 形式的 API，定义同样的请求是这样的：</p>
 
-<pre><code class="language-java">@GET(&quot;/user&quot;)
+<pre class="line-numbers"><code class="language-java">@GET(&quot;/user&quot;)
 public Observable&lt;User&gt; getUser(@Query(&quot;userId&quot;) String userId);
 </code></pre>
 
 <p>使用的时候是这样的：</p>
 
-<pre><code class="language-java">getUser(userId)
+<pre class="line-numbers"><code class="language-java">getUser(userId)
     .observeOn(AndroidSchedulers.mainThread())
     .subscribe(new Observer&lt;User&gt;() {
         @Override
@@ -2898,7 +3644,7 @@ public Observable&lt;User&gt; getUser(@Query(&quot;userId&quot;) String userId);
 <p>因为它好用啊！从这个例子看不出来是因为这只是最简单的情况。而一旦情景复杂起来， <code>Callback</code> 形式马上就会开始让人头疼。比如：<br/>
 假设这么一种情况：你的程序取到的 <code>User</code> 并不应该直接显示，而是需要先与数据库中的数据进行比对和修正后再显示。使用 <code>Callback</code>方式大概可以这么写：</p>
 
-<pre><code class="language-java">getUser(userId, new Callback&lt;User&gt;() {
+<pre class="line-numbers"><code class="language-java">getUser(userId, new Callback&lt;User&gt;() {
     @Override
     public void success(User user) {
         processUser(user); // 尝试修正 User 数据
@@ -2917,7 +3663,7 @@ public Observable&lt;User&gt; getUser(@Query(&quot;userId&quot;) String userId);
 
 <p>很简便，但不要这样做。为什么？因为这样做会影响性能。数据库的操作很重，一次读写操作花费 10~20ms 是很常见的，这样的耗时很容易造成界面的卡顿。所以通常情况下，如果可以的话一定要避免在主线程中处理数据库。所以为了提升性能，这段代码可以优化一下：</p>
 
-<pre><code class="language-java">getUser(userId, new Callback&lt;User&gt;() {
+<pre class="line-numbers"><code class="language-java">getUser(userId, new Callback&lt;User&gt;() {
     @Override
     public void success(User user) {
         new Thread() {
@@ -2945,7 +3691,7 @@ public Observable&lt;User&gt; getUser(@Query(&quot;userId&quot;) String userId);
 
 <p>这时候，如果用 RxJava 的形式，就好办多了。 RxJava 形式的代码是这样的：</p>
 
-<pre><code class="language-java">getUser(userId)
+<pre class="line-numbers"><code class="language-java">getUser(userId)
     .doOnNext(new Action1&lt;User&gt;() {
         @Override
         public void call(User user) {
@@ -2975,7 +3721,7 @@ public Observable&lt;User&gt; getUser(@Query(&quot;userId&quot;) String userId);
 <p>再举一个例子：假设 <code>/user</code> 接口并不能直接访问，而需要填入一个在线获取的 <code>token</code>，代码应该怎么写？<br/>
 <code>Callback</code> 方式，可以使用嵌套的 <code>Callback</code>：</p>
 
-<pre><code class="language-java">@GET(&quot;/token&quot;)
+<pre class="line-numbers"><code class="language-java">@GET(&quot;/token&quot;)
 public void getToken(Callback&lt;String&gt; callback);
 
 @GET(&quot;/user&quot;)
@@ -3011,7 +3757,7 @@ getToken(new Callback&lt;String&gt;() {
 <p>倒是没有什么性能问题，可是迷之缩进毁一生，你懂我也懂，做过大项目的人应该更懂。<br/>
 而使用 RxJava 的话，代码是这样的：</p>
 
-<pre><code class="language-java">@GET(&quot;/token&quot;)
+<pre class="line-numbers"><code class="language-java">@GET(&quot;/token&quot;)
 public Observable&lt;String&gt; getToken();
 
 @GET(&quot;/user&quot;)
@@ -3052,7 +3798,7 @@ getToken()
 
 <p>举个设置点击监听的例子。使用 <code>RxBinding</code> ，可以把事件监听用这样的方法来设置：</p>
 
-<pre><code class="language-java">Button button = ...;
+<pre class="line-numbers"><code class="language-java">Button button = ...;
 RxView.clickEvents(button) // 以 Observable 形式来反馈点击事件
     .subscribe(new Action1&lt;ViewClickEvent&gt;() {
         @Override
@@ -3064,7 +3810,7 @@ RxView.clickEvents(button) // 以 Observable 形式来反馈点击事件
 
 <p>看起来除了形式变了没什么区别，实质上也是这样。甚至如果你看一下它的源码，你会发现它连实现都没什么惊喜：它的内部是直接用一个包裹着的 <code>setOnClickListener()</code> 来实现的。然而，仅仅这一个形式的改变，却恰好就是 <code>RxBinding</code> 的目的：扩展性。通过 <code>RxBinding</code> 把点击监听转换成 <code>Observable</code> 之后，就有了对它进行扩展的可能。扩展的方式有很多，根据需求而定。一个例子是前面提到过的 <code>throttleFirst()</code> ，用于去抖动，也就是消除手抖导致的快速连环点击：</p>
 
-<pre><code class="language-java">RxView.clickEvents(button)
+<pre class="line-numbers"><code class="language-java">RxView.clickEvents(button)
     .throttleFirst(500, TimeUnit.MILLISECONDS)
     .subscribe(clickAction);
 </code></pre>
@@ -3195,7 +3941,7 @@ draweeView.setImageURI(uri);
 
 <h2 id="toc_3">在XML中使用SimpleDraweeView</h2>
 
-<pre><code class="language-markup">&lt;com.facebook.drawee.view.SimpleDraweeView
+<pre class="line-numbers"><code class="language-markup">&lt;com.facebook.drawee.view.SimpleDraweeView
     android:id=&quot;@+id/my_image_view&quot;
     android:layout_width=&quot;20dp&quot;
     android:layout_height=&quot;20dp&quot;
@@ -3280,7 +4026,7 @@ draweeView.setImageURI(uri);
 <p>一般情况下，在XML设置显示效果即可, 如果想更多定制化，可以这样:<br/>
 创建一个 builder 然后设置给 SimpleDraweeView:</p>
 
-<pre><code class="language-java">List&lt;Drawable&gt; backgroundsList;
+<pre class="line-numbers"><code class="language-java">List&lt;Drawable&gt; backgroundsList;
 List&lt;Drawable&gt; overlaysList;
 GenericDraweeHierarchyBuilder builder =
     new GenericDraweeHierarchyBuilder(getResources());
@@ -3314,7 +4060,7 @@ mSimpleDraweeView.setHierarchy(hierarchy);
 如果你选择缩放类型为 focusCrop，需要指定一个居中点:<code>hierarchy.setActualImageFocusPoint(point);</code><br/>
 你可以为图像添加一个 color filter:</p>
 
-<pre><code class="language-java">ColorFilter filter;
+<pre class="line-numbers"><code class="language-java">ColorFilter filter;
 // 创建filter
 hierarchy.setActualImageColorFilter(filter);
 </code></pre>
@@ -3324,7 +4070,7 @@ hierarchy.setActualImageColorFilter(filter);
 <p>除了圆角显示方式（原来为圆角的不能修改为圆圈，反之亦然），其他圆角相关的呈现参数, 具体参见这里 是可以动态修改的。<br/>
 如下: 获取DraweeHierarchy的圆角显示参数，修改圆角半径为10。</p>
 
-<pre><code class="language-java">RoundingParams roundingParams = hierarchy.getRoundingParams();
+<pre class="line-numbers"><code class="language-java">RoundingParams roundingParams = hierarchy.getRoundingParams();
 roundingParams.setCornersRadius(10);
 hierarchy.setRoundingParams(roundingParams);
 </code></pre>
@@ -3368,14 +4114,14 @@ hierarchy.setRoundingParams(roundingParams);
 
 <p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
 
-<pre><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
 &lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
 </code></pre>
 
 <p>当然了，你也可以新建一个<code>&lt;style&gt;</code>标签，将上面两行代码加入，并且将这个新建的标签作为<code>&lt;application&gt;</code>的<code>theme</code>。还可以选择通过将AppTheme的parent设置为<code>Theme.AppCompat.Light.NoActionBar</code>的方式。方法很多，可以自己随便选。<br/><br/>
 接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
 
-<pre><code class="language-markup">&lt;android.support.v7.widget.Toolbar
+<pre class="line-numbers"><code class="language-markup">&lt;android.support.v7.widget.Toolbar
         android:id=&quot;@+id/toolbar&quot;
         android:layout_width=&quot;match_parent&quot;
         android:background=&quot;?attr/colorPrimary&quot;
@@ -3384,7 +4130,7 @@ hierarchy.setRoundingParams(roundingParams);
 
 <p>最后将Toobar作为<code>ActionBar</code>来用</p>
 
-<pre><code class="language-java">Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+<pre class="line-numbers"><code class="language-java">Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         toolbar.setTitle(&quot;这里是Title&quot;);
         toolbar.setSubtitle(&quot;这里是子标题&quot;);
         toolbar.setLogo(R.drawable.icon); 
@@ -3399,7 +4145,7 @@ hierarchy.setRoundingParams(roundingParams);
 <p>ToolBar中包含Nav Icon , Logo , Title , Sub Title , Menu Items 。<br/>
 我们可以通过代码设置上述ToolBar中的控件：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 protected void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
    setContentView(R.layout.activity_main);
@@ -3422,7 +4168,7 @@ protected void onCreate(Bundle savedInstanceState) {
 <p><strong>可选方案</strong><br/><br/>
 当然如果你喜欢，也可以在布局文件中去设置部分属性：</p>
 
-<pre><code class="language-java">&lt;android.support.v7.widget.Toolbar
+<pre class="line-numbers"><code class="language-java">&lt;android.support.v7.widget.Toolbar
         android:id=&quot;@+id/id_toolbar&quot;
         app:title=&quot;App Title&quot;
         app:subtitle=&quot;Sub Title&quot;
@@ -3438,7 +4184,7 @@ protected void onCreate(Bundle savedInstanceState) {
 <p><strong>可选方案</strong><br/><br/>
 也可以通过<code>toolbar.setOnMenuItemClickListener</code>实现点击MenuItem的回调。</p>
 
-<pre><code class="language-java">toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+<pre class="line-numbers"><code class="language-java">toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
     @Override
    public boolean onMenuItemClick(MenuItem item) {
         return false;
@@ -3488,7 +4234,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>什么意思呢？简单的说，就是当指定的ScrollView发生滚动时，该View也跟随一起滚动，就好像这个View也是属于这个ScrollView一样。</p>
 
-<pre><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
+<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;&gt;
 
@@ -3501,27 +4247,27 @@ protected void onCreate(Bundle savedInstanceState) {
 &lt;/android.support.design.widget.AppBarLayout&gt;
 </code></pre>
 
-<p><img src="media/15561207870050/20171010150764973485968.gif" alt=""/></p>
+<p><figure><img src="media/15561207870050/20171010150764973485968.gif" alt=""/></figure></p>
 
 <h4 id="toc_10">（2）<code>enterAlways</code>:值设为<code>enterAlways</code>的View,当ScrollView往下滚动时，该View会直接往下滚动。而不用考虑ScrollView是否在滚动。</h4>
 
 <p>ToolBar高度设为：（<code>?android:attr/actionBarSize</code>）<br/>
 <code>app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code></p>
 
-<p><img src="media/15561207870050/20171010150764977767320.gif" alt=""/></p>
+<p><figure><img src="media/15561207870050/20171010150764977767320.gif" alt=""/></figure></p>
 
 <h4 id="toc_11">（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</h4>
 
 <p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下 ,图中将高度设的比较大:200dp，并将最小高度设置为（<code>?android:attr/actionBarSize</code>）<br/>
 <code>app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code></p>
 
-<p><img src="media/15561207870050/20171010150764983431424.gif" alt=""/></p>
+<p><figure><img src="media/15561207870050/20171010150764983431424.gif" alt=""/></figure></p>
 
 <h4 id="toc_12">（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。</h4>
 
 <p>图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize</code>,<code>app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code></p>
 
-<p><img src="media/15561207870050/20171010150764986160489.gif" alt=""/></p>
+<p><figure><img src="media/15561207870050/20171010150764986160489.gif" alt=""/></figure></p>
 
 <h3 id="toc_13">将AppBarLayout与ScrollView关联起来</h3>
 
@@ -3529,7 +4275,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
 
-<pre><code class="language-text">&lt;android.support.v4.widget.NestedScrollView
+<pre class="line-numbers"><code class="language-text">&lt;android.support.v4.widget.NestedScrollView
 
         android:layout_width=&quot;match_parent&quot;
         android:layout_height=&quot;wrap_content&quot;
@@ -3545,7 +4291,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <h3 id="toc_14">XML 布局</h3>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
@@ -3586,7 +4332,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>在学习<code>CoordinatorLayout</code>之前，很有必要了解<code>CoordinatorLayout</code>能帮我们做什么，从名字上可以看出，就是帮我们协调子<code>View</code>的。怎么个协调法呢?就是它根据我们的定制，帮助我们协调各个子<code>View</code>的布局。</p>
 
-<p><img src="media/15561207870050/20171010150764992635490.gif" alt=""/></p>
+<p><figure><img src="media/15561207870050/20171010150764992635490.gif" alt=""/></figure></p>
 
 <p>稍微解释一下这个动画，蓝色的矩形是我们一个普通<code>View</code>，黄色的Hello是一个<code>Button</code>。我们水平拖动蓝色矩形时，黄色<code>Button</code>查着与蓝色矩形相反方向移动；竖直移动蓝色矩形时，黄色也跟着竖直。简而言之：它们在竖直方向同步移动，在水平方向相反。<br/><br/>
 这个效果如果让你不用<code>CoordinatorLayout</code>去实现，应该没有任何问题，但是代码的耦合度应该非常大，你的代码必须要持有2个<code>View</code>的引用，然后在<code>onTouchEvent</code>里面做各种判断。如果我们想要实现的功能是，有更多的<code>View</code>要根据蓝色的<code>View</code>的移动相应作出响应，那么那就得在蓝色<code>View</code>的<code>onTounchEvent</code>里面针对其他的View处理各种逻辑。这耦合度未免太伤感了~<br/>
@@ -3598,7 +4344,7 @@ protected void onCreate(Bundle savedInstanceState) {
 是指<code>Child</code>依赖的<code>View</code>。比如上面的gif图中，蓝色的<code>View</code>就是<code>Dependency</code>，黄色的<code>View</code>就是<code>Child</code>，因为黄色的View的动作是依赖于蓝色的<code>View</code>。简而言之，就是如过<code>Dependency</code>这个View发生了变化，那么<code>Child</code>这个<code>View</code>就要相应发生变化。发生变化是具体发生什么变化呢？这里就要引入<code>Behavior</code>，<code>Child</code>发生变化的具体执行的代码都是放在<code>Behavior</code>这个类里面。<br/><br/>
 怎么使用<code>Behavior</code>呢，首先，我们定义一个类，继承<code>CoordinatorLayout.Behavior&lt;T&gt;</code>,其中，泛型参数T是我们要执行动作的<code>View</code>类，也就是<code>Child</code>。然后就是去实现<code>Behavior</code>的两个方法：</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
 * 判断child的布局是否依赖dependency
 */
    @Override
@@ -3626,7 +4372,7 @@ public boolean onDependentViewChanged(CoordinatorLayout parent, T child, View de
 
 <p>我们看看Behavior的使用：</p>
 
-<pre><code class="language-java">package com.hc.studyCoordinatorLayout;
+<pre class="line-numbers"><code class="language-java">package com.hc.studyCoordinatorLayout;
 
 import android.content.Context;
 import android.support.design.widget.CoordinatorLayout;
@@ -3682,7 +4428,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>OK，现在我们为<code>Button</code>类指定了<code>Dependency</code>，并且定义好了跟随<code>Dependency</code>一直变化的动作（<code>Behavior</code>），接下来我们就要指定好为哪个具体的<code>Button</code>实例来绑定这些。方法很简单，直接在布局文件指定就好：</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
@@ -3724,7 +4470,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 了解这些概念后，我们来看看布局吧~</p>
 </blockquote>
 
-<pre><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
     android:layout_width=&quot;match_parent&quot;
@@ -3779,13 +4525,13 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
 
-<p><img src="media/15561207870050/20171010150765001948776.gif" alt=""/></p>
+<p><figure><img src="media/15561207870050/20171010150765001948776.gif" alt=""/></figure></p>
 
 <p>如果你希望拖动过程中状态栏是透明的，可以在CollapsingToolbarLayout中加 <code>app:statusBarScrim=&quot;@android:color/transparent&quot;</code>，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
 
 <h3 id="toc_18">XML布局文件</h3>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;android.support.design.widget.CoordinatorLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
@@ -3878,7 +4624,7 @@ public class MyBehavior extends CoordinatorLayout.Behavior&lt;Button&gt; {
 
 <h3 id="toc_1">方法一</h3>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public void onCreate(Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
     setStyle(STYLE_NO_FRAME, android.R.style.Theme_Holo_Light);
@@ -3889,7 +4635,7 @@ public void onCreate(Bundle savedInstanceState) {
 
 <p><strong>style</strong></p>
 
-<pre><code class="language-java">&lt;style name=&quot;style_dialog&quot; parent=&quot;android:style/Theme.Dialog&quot;&gt;
+<pre class="line-numbers"><code class="language-java">&lt;style name=&quot;style_dialog&quot; parent=&quot;android:style/Theme.Dialog&quot;&gt;
     &lt;item name=&quot;android:windowBackground&quot;&gt;@color/white&lt;/item&gt;
     &lt;item name=&quot;android:windowNoTitle&quot;&gt;true&lt;/item&gt;
     &lt;item name=&quot;android:windowIsFloating&quot;&gt;true&lt;/item&gt;
@@ -3907,7 +4653,7 @@ public void onCreate(Bundle savedInstanceState) {
 
 <p><strong>bottom_in bottom_out 进入进出动画</strong></p>
 
-<pre><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 
 &lt;translate
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
@@ -3925,7 +4671,7 @@ public void onCreate(Bundle savedInstanceState) {
 
 <p><strong>代码</strong></p>
 
-<pre><code class="language-java">@NonNull
+<pre class="line-numbers"><code class="language-java">@NonNull
 @Override
 public Dialog onCreateDialog(Bundle savedInstanceState) {
 
@@ -3968,7 +4714,7 @@ public Dialog onCreateDialog(Bundle savedInstanceState) {
 
 <h2 id="toc_4">设置背景为透明</h2>
 
-<pre><code class="language-java">View decorView = getDialog().getWindow().getDecorView();
+<pre class="line-numbers"><code class="language-java">View decorView = getDialog().getWindow().getDecorView();
 decorView.setBackground(new ColorDrawable(Color.TRANSPARENT));
 </code></pre>
 
@@ -3978,7 +4724,7 @@ decorView.setBackground(new ColorDrawable(Color.TRANSPARENT));
 
 <p>因为View是在window下面的，我们只需要让window的Grivaty属性是Bottom，这样，里面的元素都是居于底部即可。</p>
 
-<pre><code class="language-java">Window window = getDialog().getWindow();
+<pre class="line-numbers"><code class="language-java">Window window = getDialog().getWindow();
 WindowManager.LayoutParams layoutParams = window.getAttributes();
 layoutParams.gravity = Gravity.BOTTOM;
 window.setAttributes(layoutParams);
@@ -3990,7 +4736,7 @@ window.setAttributes(layoutParams);
 
 <p>改变window的宽度：</p>
 
-<pre><code class="language-java">Window window = getDialog().getWindow();
+<pre class="line-numbers"><code class="language-java">Window window = getDialog().getWindow();
 WindowManager.LayoutParams layoutParams = window.getAttributes();
 layoutParams.gravity = Gravity.BOTTOM;
 layoutParams.width = WindowManager.LayoutParams.MATCH_PARENT;
@@ -4019,7 +4765,7 @@ window.setAttributes(layoutParams);
 <li>弹框出现动画：</li>
 </ul>
 
-<pre><code class="language-java">Animation slide = new TranslateAnimation(
+<pre class="line-numbers"><code class="language-java">Animation slide = new TranslateAnimation(
       Animation.RELATIVE_TO_SELF, 0.0f,
       Animation.RELATIVE_TO_SELF, 0.0f, 
       Animation.RELATIVE_TO_SELF, 1.0f, 
@@ -4033,13 +4779,13 @@ view.startAnimation(slide);
 
 <p>我们来看TranslateAnimation，这里我们传了八个参数，一般大家用到的是只传四个参数：</p>
 
-<pre><code class="language-text">TranslateAnimation(float fromXDelta, float toXDelta, float fromYDelta, float toYDelta)
+<pre class="line-numbers"><code class="language-text">TranslateAnimation(float fromXDelta, float toXDelta, float fromYDelta, float toYDelta)
 </code></pre>
 
 <p>也就是从坐标<code>(fromXDelta,fromYDelta)</code>到<code>(toXDelta,toYDelta)</code>。<br/>
 我们可以点进去这个构造函数查看：</p>
 
-<pre><code class="language-java">public TranslateAnimation(float fromXDelta, float toXDelta, float fromYDelta, float toYDelta) {
+<pre class="line-numbers"><code class="language-java">public TranslateAnimation(float fromXDelta, float toXDelta, float fromYDelta, float toYDelta) {
       mFromXValue = fromXDelta;
       mToXValue = toXDelta;
       mFromYValue = fromYDelta;
@@ -4054,7 +4800,7 @@ view.startAnimation(slide);
 
 <p>之所以我们以前用的只传了四个参数，是因为他给我们把另外四个参数以及赋了默认值，也就是<code>ABSOLUTE</code>。我们继续看有哪几种可以选择：</p>
 
-<pre><code class="language-text">  /**
+<pre class="line-numbers"><code class="language-text">  /**
    * The specified dimension is an absolute number of pixels.
    */
   public static final int ABSOLUTE = 0;
@@ -4078,7 +4824,7 @@ view.startAnimation(slide);
 
 <p>刚开始超过屏幕，并且高度为弹框自身的高度，然后再回到原始位置,所以我们就用：</p>
 
-<pre><code class="language-java">Animation slide = new TranslateAnimation(
+<pre class="line-numbers"><code class="language-java">Animation slide = new TranslateAnimation(
       Animation.RELATIVE_TO_SELF, 0.0f,
       Animation.RELATIVE_TO_SELF, 0.0f, 
       Animation.RELATIVE_TO_SELF, 1.0f, 
@@ -4094,7 +4840,7 @@ view.startAnimation(slide);
 
 <p>只要跟上面反过来就可以了。同时这里我们要额外增加监听动画结束事件，因为我们让弹框往下移动结束后，要让这个弹框dismiss掉:</p>
 
-<pre><code class="language-java">Animation slide = new TranslateAnimation(
+<pre class="line-numbers"><code class="language-java">Animation slide = new TranslateAnimation(
       Animation.RELATIVE_TO_SELF, 0.0f,
       Animation.RELATIVE_TO_SELF, 0.0f, 
       Animation.RELATIVE_TO_SELF, 0.0f, 
@@ -4116,7 +4862,7 @@ slide.setAnimationListener(new Animation.AnimationListener() {
 
 <p>所以我们的动画的代码总结下就是：</p>
 
-<pre><code class="language-java">@Nullable
+<pre class="line-numbers"><code class="language-java">@Nullable
 @Override
 public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
     getDialog().requestWindowFeature(Window.FEATURE_NO_TITLE);
@@ -5399,7 +6145,7 @@ Returns whether or not this View draws on its own.</li>
 
 <h2 id="toc_9">获取上级View的方法汇总</h2>
 
-<pre><code class="language-java">getParent()                                                    //获取上一级View
+<pre class="line-numbers"><code class="language-java">getParent()                                                    //获取上一级View
 getRootView                                                    //获取跟布局
 getWindow().getDecorView()                                     
 findViewById(android.R.id.content)
@@ -5408,13 +6154,13 @@ findViewById(android.R.id.content)
 
 <h3 id="toc_10">方法介绍</h3>
 
-<p><img src="media/15561207869937/15713203742240.jpg" alt=""/></p>
+<p><figure><img src="media/15561207869937/15713203742240.jpg" alt=""/></figure></p>
 
 <h3 id="toc_11">getRootView特例</h3>
 
 <p><strong>布局(R.layout.list_empty)：</strong></p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:layout_width=&quot;match_parent&quot;
     android:layout_height=&quot;match_parent&quot;
@@ -5432,7 +6178,7 @@ findViewById(android.R.id.content)
 
 <p><strong>代码：</strong></p>
 
-<pre><code class="language-java">    final View view = View.inflate(this, R.layout.list_empty, null);
+<pre class="line-numbers"><code class="language-java">    final View view = View.inflate(this, R.layout.list_empty, null);
     final TextView name = (TextView) view.findViewById(R.id.name);
     System.out.println(&quot;before View.inflate name getParent &quot; + name.getParent());
     System.out.println(&quot;before View.inflate name getRootView &quot; + name.getRootView());
@@ -5441,7 +6187,7 @@ findViewById(android.R.id.content)
     System.out.println(&quot;after View.inflate name getRootView &quot; + name.getRootView());
 </code></pre>
 
-<pre><code class="language-java">结果：
+<pre class="line-numbers"><code class="language-java">结果：
 before View.inflate name getParent android.widget.RelativeLayout{3d679e31 V.E..... ......ID 0,0-0,0}
 before View.inflate name getRootView android.widget.RelativeLayout{3d679e31 V.E..... ......ID 0,0-0,0}
 after View.inflate name getParent android.widget.RelativeLayout{3d679e31 V.E..... ......ID 0,0-0,0}
@@ -5460,7 +6206,7 @@ after View.inflate name getRootView com.android.internal.policy.impl.MultiPhoneW
 
 <p><code>getDecorView</code>的<code>getWindowVisibleDisplayFrame</code>方法可以获取到程序显示的区域，包括标题栏，但不包括状态栏。 于是，我们就可以算出状态栏的高度了。</p>
 
-<pre><code class="language-java">Rect frame = new Rect();  
+<pre class="line-numbers"><code class="language-java">Rect frame = new Rect();  
 getWindow().getDecorView().getWindowVisibleDisplayFrame(frame);  
 int statusBarHeight = frame.top;
 </code></pre>
@@ -5469,7 +6215,7 @@ int statusBarHeight = frame.top;
 
 <p><code>findViewById(Android.R.id.content)</code>是不包括标题栏的，我们可以通过它获取标题栏的高度。</p>
 
-<pre><code class="language-java">int contentTop = findViewById(android.R.id.content).getTop();  
+<pre class="line-numbers"><code class="language-java">int contentTop = findViewById(android.R.id.content).getTop();  
 //statusBarHeight是上面所求的状态栏的高度  
 int titleBarHeight = contentTop - statusBarHeight;
 </code></pre>
@@ -5482,7 +6228,7 @@ int titleBarHeight = contentTop - statusBarHeight;
 <li>键盘的高度height1-height2</li>
 </ul>
 
-<pre><code class="language-java">private View globalView;
+<pre class="line-numbers"><code class="language-java">private View globalView;
 private int firstHeight;
 private boolean isFirst = true;
 
@@ -5616,7 +6362,7 @@ globalView.getViewTreeObserver().addOnGlobalLayoutListener(new ViewTreeObserver.
 
 <h2 id="toc_2">示例</h2>
 
-<pre><code class="language-java">private VelocityTracker mVelocityTracker;//生命变量  
+<pre class="line-numbers"><code class="language-java">private VelocityTracker mVelocityTracker;//生命变量  
 //在onTouchEvent(MotionEvent ev)中  
 if (mVelocityTracker == null) {  
     mVelocityTracker = VelocityTracker.obtain();//获得VelocityTracker类实例  
@@ -5677,19 +6423,19 @@ Log.i(&quot;test&quot;,&quot;velocityTraker&quot;+velocityTracker.getXVelocity()
 
 <p>2、让Activity继承自AppCompatActivity。  </p>
 
-<pre><code class="language-java">public class MyActivity extends AppCompatActivity {
+<pre class="line-numbers"><code class="language-java">public class MyActivity extends AppCompatActivity {
   // ...
 }
 </code></pre>
 
 <p>3、在AndroidManifest.xml文件中，设置元素使用appcompat中的某个NoActionBar主题，从而来去除使用ActionBar来提供操作栏。</p>
 
-<pre><code class="language-java">&lt;application android:theme=&quot;@style/Theme.AppCompat.Light.NoActionBar&quot;/&gt;
+<pre class="line-numbers"><code class="language-java">&lt;application android:theme=&quot;@style/Theme.AppCompat.Light.NoActionBar&quot;/&gt;
 </code></pre>
 
 <p>4、在activity的布局中添加Toolbar。</p>
 
-<pre><code class="language-java">&lt;android.support.v7.widget.Toolbar
+<pre class="line-numbers"><code class="language-java">&lt;android.support.v7.widget.Toolbar
  android:id=&quot;@+id/my_toolbar&quot;
  android:layout_width=&quot;match_parent&quot;
  android:layout_height=&quot;?attr/actionBarSize&quot;
@@ -5701,7 +6447,7 @@ Log.i(&quot;test&quot;,&quot;velocityTraker&quot;+velocityTracker.getXVelocity()
 
 <p>5、在activity的onCreate()方法中，调用setSupportActionBar()方法，并传入toolbar，这样就会将toolbar设置为activity的操作栏了。</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 protected void onCreate(Bundle savedInstanceState) {
   super.onCreate(savedInstanceState);
   setContentView(R.layout.activity_my);
@@ -5716,7 +6462,7 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>首先，在布局文件toolbar.xml中定义Toolbar。</p>
 
-<pre><code class="language-java">&lt;android.support.v7.widget.Toolbar
+<pre class="line-numbers"><code class="language-java">&lt;android.support.v7.widget.Toolbar
     android:id=&quot;@+id/toolbar&quot;
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
@@ -5738,13 +6484,13 @@ protected void onCreate(Bundle savedInstanceState) {
 
 <p>之后，在需要添加Toolbar的地方引入这个布局资源。</p>
 
-<pre><code class="language-java">&lt;include
+<pre class="line-numbers"><code class="language-java">&lt;include
   layout=&quot;@layout/toolbar&quot;/&gt;
 </code></pre>
 
 <p>最后，在BaseActivity(一般app都会有)中的onCreate()方法设置Toolbar。注意，这个时候Activity不再继承AppCompatActivity，而是继承BaseActivity，而BaseActivity继承AppCompatActivity。BaseActivity部分代码如下：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 protected void onCreate(@Nullable Bundle savedInstanceState) {
     super.onCreate(savedInstanceState);
 
@@ -5789,76 +6535,6 @@ public static class ToolbarHelper {
                   <div class="more-left left">
                   
                     <span class="date">2017/06/09</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869765.html">
-                
-                  <h1>Android-MotionEvent解析</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">一些常量</h2>
-
-<h3 id="toc_1">常见的动作常量：</h3>
-
-<ul>
-<li><code>public static final int ACTION_DOWN = 0;       //单点触摸动作</code></li>
-<li><code>public static final int ACTION_UP  = 1;        //单点触摸离开动作</code></li>
-<li><code>public static final int ACTION_MOVE = 2;       //触摸点移动动作</code></li>
-<li><code>public static final int ACTION_CANCEL = 3;     //触摸动作取消</code></li>
-<li><code>public static final int ACTION_OUTSIDE = 4;    //触摸动作超出边界</code></li>
-<li><code>public static final int ACTION_POINTER_DOWN = 5;//多点触摸动作</code>    </li>
-<li><code>public static final int ACTION_POINTER_UP = 6;  //多点离开动作</code>  
-### 以下是一些非touch事件    </li>
-<li><code>public static final int ACTION_HOVER_MOVE       = 7;</code></li>
-<li><code>public static final int ACTION_SCROLL           = 8;</code>    </li>
-<li><code>public static final int ACTION_HOVER_ENTER      = 9;</code>    </li>
-<li><code>public static final int ACTION_HOVER_EXIT       = 10;</code></li>
-</ul>
-
-<h3 id="toc_2">掩码常量</h3>
-
-<p><code>ACTION_MASK = 0X000000ff</code></p>
-
-<h3 id="toc_3">动作掩码</h3>
-
-<p><code>ACTION_POINTER_INDEX_MASK = 0X0000ff00</code></p>
-
-<h3 id="toc_4">触摸点索引掩码</h3>
-
-<p><code>ACTION_POINTER_INDEX_SHIFT = 8  //获取触摸点索引需要移动的位数</code></p>
-
-<h3 id="toc_5">getRawX()和getRawY()</h3>
-
-<p><code>相对于屏幕位置坐标</code></p>
-
-<h3 id="toc_6">X,Y 相对于View的位置坐标</h3>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/06/08</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -5967,6 +6643,12 @@ public static class ToolbarHelper {
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -5986,12 +6668,6 @@ public static class ToolbarHelper {
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

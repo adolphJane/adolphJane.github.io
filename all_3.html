@@ -120,6 +120,565 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15626502769430.html">
+                
+                  <h1>Builder模式(建造者模式)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">Builder模式介绍</h2>
+
+<ul>
+<li>建造者模式（Builder Pattern）也叫做生成器模式，Builder Design pattern 是一种创造型模式，Builder模式所解决的问题与对象的创建有关。它允许用户在不知道内部构建细节的情况下，可以更精细的控制对象的构造流程，Builder模式是为了将构造复杂对象的过程和他的部件解耦。Android 中我们最常用的Builder模式是AlterDialog.Builder。</li>
+<li>Builder 模式通常是以静态内部类的形式实现。</li>
+</ul>
+
+<h2 id="toc_1">Builder模式使用场景</h2>
+
+<ul>
+<li>需要太多的构造函数。</li>
+<li>当初始化一个对象特别复杂，如参数多，并且很多参数具有默认值时。</li>
+<li>配置类的构造器的构建，将配置与目标类隔离出来。</li>
+<li>相同的方法，不同的执行顺序，产生不同的事件结果时。</li>
+<li>多个部件或零件，都可以装配到一个对象中，但是产生的运行结果不同时。</li>
+<li>产品类非常复杂，或者产品类中的调用顺序不同产生了不同的效能。</li>
+</ul>
+
+<h2 id="toc_2">Builder模式通用UML类图</h2>
+
+<p><figure><img src="media/15626502769430/15586214879539.jpg" alt=""/></figure></p>
+
+<p><strong>说明</strong></p>
+
+<ul>
+<li><strong>Product产品类</strong>
+ConcreateBuilder 创建该产品的内部表示，并定义它的装配过程。</li>
+<li><strong>Builder抽象建造者</strong>
+规范产品的组建，一般是由子类实现。</li>
+<li><strong>ConcreateBuilder 具体建造者</strong>
+实现抽象类定义的所有方法，并且返回一个组建好的对象。</li>
+<li><strong>Director导演类</strong>
+负责安排已有模块的顺序，然后告诉Builder开始建造。</li>
+</ul>
+
+<h2 id="toc_3">Builder模式的优缺点</h2>
+
+<h3 id="toc_4">优点</h3>
+
+<ul>
+<li>封装性,使用建造者模式客户端不必知道产品内部的组成的细节,将产品本身与产品的创建过程解耦，使得相同的创建过程可以创建不同的产品对象。</li>
+<li>建造者独立，容易拓展</li>
+<li>增加新的具体建造者无须修改原有类库的代码，创建者类针对抽象建造者类编程，系统扩展方便，符合“开闭原则”<br/>
+### 缺点</li>
+<li>如果产品的内部变化复杂，可能会导致需要定义很多具体建造者类来实现这种变化，会导致具体建造者数量变得很多。</li>
+<li>建造者模式所创建的产品一般具有较多的共同点，其组成部分相似，如果产品之间的差异性很大，则不适合使用建造者模式，因此其使用范围受到一定的限制。</li>
+</ul>
+
+<h2 id="toc_5">使用实例</h2>
+
+<h3 id="toc_6">标准化的建造者（Builder）模式使用实例</h3>
+
+<p>我们以组建一台自己心仪的台式机电脑为例</p>
+
+<p><strong>电脑抽象类</strong></p>
+
+<pre class="line-numbers"><code class="language-java">  /**
+  * Created by iuni.life on 16/8/2.
+  * 组建一台简单的台式机电脑,电脑抽象类 即Product角色
+  */
+  public class Computer {
+     //cpu
+     protected String mCpu = &quot;intel i3-4150&quot;;
+     //显示器
+     protected String mDisplay = &quot;21寸&quot;;
+     //主板
+     protected String mBoard = &quot;华硕 B85&quot;;
+     //电源
+     protected String mPower = &quot;安钛克 220V&quot;;
+     //系统
+     protected String mSysOs = &quot;Dos&quot;;
+     //主机箱
+     protected String mMainBox = &quot;先马&quot;;
+     //鼠标
+     protected String mMouse = &quot;贱驴&quot;;
+     //键盘
+     protected String mKeyBoard = &quot;cherry&quot;;
+     //内存条
+     protected String mSimm = &quot;2*4G&quot;;
+     //硬盘
+     protected String mHardDisk = &quot;希捷 1T&quot;;
+
+     protected ComputerStant() {
+     }
+
+     public abstract void setSimm(String simm);
+
+     public abstract void setHardDisk(String hardDisk);
+
+     public abstract void setCpu(String cpu);
+
+     public abstract void setDisplay(String display);
+
+     public abstract void setBoard(String board);
+
+     public abstract void setPower(String power);
+
+     public abstract void setSysOs(String sysOs);
+
+     public abstract void setMainBox(String mainBox);
+
+     public abstract void setMouse(String mouse);
+
+     public abstract void setKeyBoard(String keyBoard);
+
+     @Override
+     public String toString() {
+         return &quot;ComputerStant{&quot; +
+                 &quot;mCpu=&#39;&quot; + mCpu + &#39;\&#39;&#39; +
+                 &quot;, mDisplay=&#39;&quot; + mDisplay + &#39;\&#39;&#39; +
+                 &quot;, mBoard=&#39;&quot; + mBoard + &#39;\&#39;&#39; +
+                 &quot;, mPower=&#39;&quot; + mPower + &#39;\&#39;&#39; +
+                 &quot;, mSysOs=&#39;&quot; + mSysOs + &#39;\&#39;&#39; +
+                 &quot;, mMainBox=&#39;&quot; + mMainBox + &#39;\&#39;&#39; +
+                 &quot;, mMouse=&#39;&quot; + mMouse + &#39;\&#39;&#39; +
+                 &quot;, mKeyBoard=&#39;&quot; + mKeyBoard + &#39;\&#39;&#39; +
+                 &quot;, mSimm=&#39;&quot; + mSimm + &#39;\&#39;&#39; +
+                 &quot;, mHardDisk=&#39;&quot; + mHardDisk + &#39;\&#39;&#39; +
+                 &#39;}&#39;;
+     }
+  }
+</code></pre>
+
+<p><strong>电脑抽象类的具体实现，我们以Mac电脑为例</strong></p>
+
+<pre class="line-numbers"><code class="language-java">/**
+  * Created by iuni.life on 16/8/2.
+  *
+  */
+  public class MacComputer extends Computer {
+
+     protected MacComputer() {
+     }
+
+     @Override
+     public void setSimm(String simm) {
+         mSimm = simm;
+     }
+
+     @Override
+     public void setHardDisk(String hardDisk) {
+         mHardDisk = hardDisk;
+     }
+
+     @Override
+     public void setCpu(String cpu) {
+         mCpu = cpu;
+     }
+
+     @Override
+     public void setDisplay(String display) {
+         mDisplay = display;
+     }
+
+     @Override
+     public void setBoard(String board) {
+         mBoard = board;
+     }
+
+     @Override
+     public void setPower(String power) {
+         mPower = power;
+     }
+
+     @Override
+     public void setSysOs(String sysOs) {
+         mSysOs = sysOs;
+     }
+
+     @Override
+     public void setMainBox(String mainBox) {
+         mMainBox = mainBox;
+     }
+
+     @Override
+     public void setMouse(String mouse) {
+         mMouse = mouse;
+     }
+
+     @Override
+     public void setKeyBoard(String keyBoard) {
+         mKeyBoard = keyBoard;
+     }
+}
+</code></pre>
+
+<p><strong>Builder抽象类</strong></p>
+
+<pre class="line-numbers"><code class="language-java">/**
+  * Created by iuni.life on 16/8/2.
+  * builder 抽象类
+  */
+  public abstract class Builder {
+     //创建显示器
+     public abstract Builder buildDisplay(String display);
+
+     //创建主板
+     public abstract Builder buildBoard(String board);
+
+     //创建电源
+     public abstract Builder buildPower(String power);
+
+     //创建cpu
+     public abstract Builder buildCpu(String cpu);
+
+     //创建系统
+     public abstract Builder buildSysOs(String sysOs);
+
+     //创建主机箱
+     public abstract Builder buildMainBox(String mainBox);
+
+     //创建鼠标
+     public abstract Builder buildMouse(String mouse);
+
+     //创建键盘
+     public abstract Builder buildKeyBoard(String keyBoard);
+
+     //创建内存条
+     public abstract Builder buildSimm(String simm);
+
+     //创建硬盘
+     public abstract Builder buildHardDisk(String hardDisk);
+
+     //创建Computer
+     public abstract ComputerStant create();
+}
+</code></pre>
+
+<p><strong>Builder 的具体实现，因为我们是要组装一个Mac 电脑，所以需要MacBuilder</strong></p>
+
+<pre class="line-numbers"><code class="language-java">/**
+  * Created by iuni.life on 16/8/2.
+  */
+   public class MacBuilder extends Builder {
+       MacComputer macComputer = new MacComputer();
+
+       @Override
+       public Builder buildDisplay(String display) {
+           macComputer.setDisplay(display);
+           return this;
+       }
+
+       @Override
+       public Builder buildBoard(String board) {
+           macComputer.setBoard(board);
+           return this;
+       }
+
+       @Override
+       public Builder buildPower(String power) {
+           macComputer.setPower(power);
+           return this;
+       }
+
+       @Override
+       public Builder buildCpu(String cpu) {
+           macComputer.setCpu(cpu);
+           return this;
+       }
+
+       @Override
+       public Builder buildSysOs(String sysOs) {
+           macComputer.setSysOs(sysOs);
+           return this;
+       }
+
+       @Override
+       public Builder buildMainBox(String mainBox) {
+           macComputer.setMainBox(mainBox);
+           return this;
+       }
+
+       @Override
+       public Builder buildMouse(String mouse) {
+           macComputer.setMouse(mouse);
+           return this;
+       }
+
+       @Override
+       public Builder buildKeyBoard(String keyBoard) {
+           macComputer.setKeyBoard(keyBoard);
+           return this;
+       }
+
+       @Override
+       public Builder buildSimm(String simm) {
+           macComputer.setSimm(simm);
+           return this;
+       }
+
+       @Override
+       public Builder buildHardDisk(String hardDisk) {
+           macComputer.setHardDisk(hardDisk);
+           return this;
+       }
+
+       @Override
+       public ComputerStant create() {
+           return macComputer;
+       }
+   }
+</code></pre>
+
+<p><strong>Director 导演类</strong></p>
+
+<pre class="line-numbers"><code class="language-java">/**
+  * Created by iuni.life on 16/8/2.
+  */
+public class Director {
+        Builder mBuilder = null;
+
+      public Director(Builder mBuilder) {
+           this.mBuilder = mBuilder;
+       }
+
+       //构建对象
+       public void constract(String mCpu, String mDisplay, String mBoard, String mPower, String mSysOs, String mMainBox, String mMouse, String mKeyBoard, String mSimm, String mHardDisk) {
+           mBuilder.buildCpu(mCpu);
+           mBuilder.buildDisplay(mDisplay);
+           mBuilder.buildBoard(mBoard);
+           mBuilder.buildPower(mPower);
+           mBuilder.buildSysOs(mSysOs);
+           mBuilder.buildMainBox(mMainBox);
+           mBuilder.buildMouse(mMouse);
+           mBuilder.buildKeyBoard(mKeyBoard);
+           mBuilder.buildSimm(mSimm);
+           mBuilder.buildHardDisk(mHardDisk);
+           //也可链式
+    //        mBuilder.buildMouse(mMouse).buildCpu(mCpu).buildPower(mPower);
+       }
+}
+</code></pre>
+
+<p><strong>测试类Test</strong></p>
+
+<pre class="line-numbers"><code class="language-java">/**
+  * Created by iuni.life on 16/8/2.
+  * 经典的Builder模式实现较为繁琐,文章后面会列举一个简单的
+  */
+public class Test {
+       public static void main(String[] args) {
+           //构造器
+           Builder builder = new MacBuilder();
+           //Director
+           Director director = new Director(builder);
+
+           //封装构建过程
+           director.constract(&quot;intel i7&quot;, &quot;25寸&quot;, &quot;华硕 B85&quot;, &quot;安钛克220V&quot;, &quot;Mac Os&quot;, &quot;先马&quot;, &quot;精灵 X5&quot;, &quot;cherry&quot;, &quot;2*8G&quot;, &quot;希捷500G&quot;);
+
+           //构建电脑,输出相关信息
+
+           System.out.println(&quot;My Mac Computer Info:&quot;+builder.create().toString());
+   //        通过Builder来构建产品对象, 而Director封装了构建复杂产品对象对象的过程，对外隐藏构建细节。
+       }
+}
+</code></pre>
+
+<p><strong>说明</strong><br/>
+通过Builder来构建产品对象, 而Director封装了构建复杂产品对象对象的过程，对外隐藏构建细节。但是这种经典的写法有点小烦，有点繁琐，在要求不是很苛刻的情况下，我们可以用下面的方式进行实现。</p>
+
+<h3 id="toc_7">一种简单的方式实现Builder模式</h3>
+
+<ul>
+<li>这种方式以Builder为静态内部类的方式实现，我们还是以组装一台自己的电脑为例</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">/**
+* Created by iuni.life on 16/8/2.
+* 组建一台简单的台式机电脑,电脑抽象类 即Product角色
+*/
+public class Computer {
+  //cpu
+  private String cpu;
+  //显示器
+  private String display;
+  //主板
+  private String board;
+  //电源
+  private String power;
+  //系统
+  private String sysOs;
+  //主机箱
+  private String mainBox;
+  //鼠标
+  private String mouse;
+  //键盘
+  private String keyBoard;
+
+  //私有化构造函数 使之不能从外部创建实例
+  private Computer() {
+  }
+
+  private void setCpu(String cpu) {
+      this.cpu = cpu;
+  }
+
+  private void setDisplay(String display) {
+      this.display = display;
+  }
+
+  private void setBoard(String board) {
+      this.board = board;
+  }
+
+  private void setPower(String power) {
+      this.power = power;
+  }
+
+  private void setSysOs(String sysOs) {
+      this.sysOs = sysOs;
+  }
+
+  private void setMainBox(String mainBox) {
+      this.mainBox = mainBox;
+  }
+
+  private void setMouse(String mouse) {
+      this.mouse = mouse;
+  }
+
+  private void setKeyBoard(String keyBoard) {
+      this.keyBoard = keyBoard;
+  }
+
+  @Override
+  public String toString() {
+      return &quot;Computer{&quot; +
+              &quot;cpu=&#39;&quot; + cpu + &#39;\&#39;&#39; +
+              &quot;, display=&#39;&quot; + display + &#39;\&#39;&#39; +
+              &quot;, board=&#39;&quot; + board + &#39;\&#39;&#39; +
+              &quot;, power=&#39;&quot; + power + &#39;\&#39;&#39; +
+              &quot;, sysOs=&#39;&quot; + sysOs + &#39;\&#39;&#39; +
+              &quot;, mainBox=&#39;&quot; + mainBox + &#39;\&#39;&#39; +
+              &quot;, mouse=&#39;&quot; + mouse + &#39;\&#39;&#39; +
+              &quot;, keyBoard=&#39;&quot; + keyBoard + &#39;\&#39;&#39; +
+              &#39;}&#39;;
+  }
+//Builder 静态内部类
+  public static class ComputerBuilder {
+      //创建computer实例
+      private Computer computer = new Computer();
+
+      //创建Cpu
+      public ComputerBuilder buildCpu(String cpu) {
+          computer.setCpu(cpu);
+          return this;
+      }
+
+    //创建显示器
+      public ComputerBuilder buildDisplay(String display) {
+          computer.setDisplay(display);
+          return this;
+
+      }
+    //创建主板
+      public ComputerBuilder buildBoard(String board) {
+          computer.setBoard(board);
+          return this;
+      }
+
+        //创建电源
+      public ComputerBuilder buildPower(String power) {
+          computer.setPower(power);
+          return this;
+      }
+
+      //创建系统
+      public ComputerBuilder buildSysOs(String sysOs) {
+          computer.setSysOs(sysOs);
+          return this;
+      }
+
+      //创建主机箱
+      public ComputerBuilder buildMainBox(String mainBox) {
+          computer.setMainBox(mainBox);
+          return this;
+      }
+
+      //创建鼠标
+      public ComputerBuilder buildMouse(String mouse) {
+          computer.setMouse(mouse);
+          return this;
+      }
+
+      //创建键盘
+      public ComputerBuilder buildKeyBoard(String keyBoard) {
+          computer.setKeyBoard(keyBoard);
+          return this;
+      }
+    //组装电脑，并返回创建好的电脑
+      public Computer create() {
+          //这里可以做一些初始化操作以及一些逻辑判断
+          if (computer==null){
+              throw  new IllegalStateException(&quot;computer is null&quot;);
+          }
+          return computer;
+      }
+  }
+}
+</code></pre>
+
+<ul>
+<li>测试类</li>
+</ul>
+
+<pre class="line-numbers"><code class="language-java">/**
+* Created by iuni.life on 16/8/2.
+*/
+public class main {
+  public static void main(String[] args) {
+      //创建Builder对象
+      Computer.ComputerBuilder computerBuilder = new Computer.ComputerBuilder();
+      //组装电脑,构建组装顺序
+      computerBuilder.buildBoard(&quot;华硕&quot;);
+      computerBuilder.buildCpu(&quot;intel i7&quot;);
+      computerBuilder.buildDisplay(&quot;三星&quot;);
+      computerBuilder.buildKeyBoard(&quot;cherry&quot;);
+      computerBuilder.buildMainBox(&quot;杀神&quot;).buildMouse(&quot;贱驴&quot;).buildPower(&quot;安钛克&quot;).buildSysOs(&quot;Windoes 10&quot;);
+      //组装成一个自己想要的的电脑。
+      // computerBuilder  只需要知道客户想组装成什么样的电脑,并对客户不关心的如何安装进行了隐藏。
+      Computer computer = computerBuilder.create();
+      System.out.printf(computer.toString());
+  }
+}
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2019/10/31</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95.html'>算法</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15626502769553.html">
                 
                   <h1>发布Android库至JCenter仓库</h1>
@@ -266,7 +825,7 @@
 
 <h4 id="toc_4">RecyclerView的初步用法(包括RecyclerView.Adapter用法)</h4>
 
-<pre><code class="language-java">recyclerView = (RecyclerView) findViewById(R.id.recyclerView);  
+<pre class="line-numbers"><code class="language-java">recyclerView = (RecyclerView) findViewById(R.id.recyclerView);  
 LinearLayoutManager layoutManager = new LinearLayoutManager(this );  
 //设置布局管理器  
 recyclerView.setLayoutManager(layoutManager);  
@@ -296,7 +855,7 @@ recyclerView.setItemAnimator( new DefaultItemAnimator());
 tips1:如果你调用了：</li>
 </ul>
 
-<pre><code class="language-text">viewHolder.setIsRecyclable(false);
+<pre class="line-numbers"><code class="language-text">viewHolder.setIsRecyclable(false);
 </code></pre>
 
 <p>那么这个Item的onViewRecycled将永远不会调用。<br/>
@@ -335,7 +894,7 @@ tips2:如果你的界面出现了错乱的现象，请调用如上代码可能�
 <p>从谷歌官方的介绍可以知道，ItemDecoration是用于给列表的item添加各种装饰效果，开发中最常见的就是为item添加分割线。<br/><br/>
 ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关心的方法只有三个：</p>
 
-<pre><code class="language-java">public static abstract class ItemDecoration {
+<pre class="line-numbers"><code class="language-java">public static abstract class ItemDecoration {
     public void onDraw(Canvas c, RecyclerView parent, State state) {
         onDraw(c, parent);
     }
@@ -356,7 +915,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 <li><code>getItemOffsets</code>：在每次测量item尺寸时被调用，将decoration的尺寸计算到item的尺寸中</li>
 </ul>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799957749046.png" alt="20171015150799957749046.png"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799957749046.png" alt="20171015150799957749046.png"/><figcaption>20171015150799957749046.png</figcaption></figure></p>
 
 <h3 id="toc_8">ItemDecoration三个方法的测试</h3>
 
@@ -364,7 +923,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <h4 id="toc_9">onDraw</h4>
 
-<pre><code class="language-java">private void drawVertical(Canvas canvas, RecyclerView parent) {
+<pre class="line-numbers"><code class="language-java">private void drawVertical(Canvas canvas, RecyclerView parent) {
     canvas.save();
    final int left;
    final int right;
@@ -394,7 +953,7 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <h4 id="toc_10">getItemOffsets</h4>
 
-<pre><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent,RecyclerView.State state) {
+<pre class="line-numbers"><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent,RecyclerView.State state) {
     if (mOrientation == VERTICAL) {
         outRect.set(0, 0, 0, mDivider.getIntrinsicHeight());
     } else {
@@ -412,13 +971,13 @@ ItemDecoration本身是一个抽象类，抛去废弃的方法，我们需要关
 
 <p>先上动图【注2】：</p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799983096582.gif" alt="20171015150799983096582.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799983096582.gif" alt="20171015150799983096582.gif"/><figcaption>20171015150799983096582.gif</figcaption></figure></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799985361609.gif" alt="20171015150799985361609.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799985361609.gif" alt="20171015150799985361609.gif"/><figcaption>20171015150799985361609.gif</figcaption></figure></p>
 
 <p>上图中，getItemOffsets方法里，返回outRect不同，而onDraw方法绘制的分割线高度初始值设为25，并通过外部增减来观察其UI效果。</p>
 
-<pre><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+<pre class="line-numbers"><code class="language-java">public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
     outRect.set(0, 0, 0, 50);// outRect.set(50,50,50,50);
 }
 
@@ -445,7 +1004,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <h4 id="toc_12">getItemOffsets &amp; onDrawOver</h4>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799996057841.gif" alt="20171015150799996057841.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/20171015150799996057841.gif" alt="20171015150799996057841.gif"/><figcaption>20171015150799996057841.gif</figcaption></figure></p>
 
 <p>将之前onDraw方法内代码完整拷贝到onDrawOver下，并注释掉之前onDraw中的方法，很容易验证出onDrawOver与onDraw的唯一不同之处。</p>
 
@@ -461,7 +1020,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <p>我们可以创建一个继承RecyclerView.ItemDecoration类来绘制分隔线，通过ItemDecoration可以让我们每一个Item从视觉上面相互分开来，例如ListView的divider非常相似的效果。也可以不设置ItemDecoration，那说明ItemDecoration我们并不是强制需要使用，作为我们开发者可以设置或者不设置Decoration的。实现一个ItemDecoration，系统提供的ItemDecoration是一个抽象类，内部除去已经废弃的方法以外，我们主要实现以下三个方法:</p>
 
-<pre><code class="language-java">public static abstract class ItemDecoration {   
+<pre class="line-numbers"><code class="language-java">public static abstract class ItemDecoration {   
     public void onDraw(Canvas c,RecyclerView parent,State state) {   
         onDraw(c,parent);   
     }   
@@ -482,7 +1041,7 @@ public void onDraw(Canvas c, RecyclerView parent, RecyclerView.State state) {
 
 <p>又因为当我们RecyclerView在进行绘制的时候会进行绘制Decoration,那么会去调用onDraw和onDrawOver方法，那么这边我们其实只要去重写onDraw和getItemOffsets这两个方法就可以实现啦。然后LayoutManager会进行Item布局的时候，会去调用getItemOffset方法来计算每个Item的Decoration合适的尺寸，下面我们来具体实现一个</p>
 
-<pre><code class="language-java">package com.example.reclerviewpractice;  
+<pre class="line-numbers"><code class="language-java">package com.example.reclerviewpractice;  
   
 import android.content.Context;  
 import android.content.res.TypedArray;  
@@ -570,7 +1129,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 
 <p>那么怎么更改分隔线的样式呢？在上面的DividerItemDecoration这个类中可以看到这个分隔线是跟ListView一样的，即系统的默认的样式，因此我们可以在styles的xml文件中进行更改，更改如下：</p>
 
-<pre><code class="language-java">&lt;!-- Application theme. --&gt;  
+<pre class="line-numbers"><code class="language-java">&lt;!-- Application theme. --&gt;  
 &lt;style name =&quot;AppTheme&quot; parent=&quot;AppBaseTheme&quot;&gt;  
     &lt;!-- All customizations that are NOT specific to a particular API-level can go here. --&gt;  
     &lt;item name= &quot;android:listDivider&quot;&gt;@drawable/divider &lt;/item &gt;   
@@ -579,7 +1138,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 
 <p>divider的内容如下：</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding= &quot;utf-8&quot;?&gt;  
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding= &quot;utf-8&quot;?&gt;  
 &lt;shape xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;  
     android:shape=&quot;rectangle&quot; &gt;  
      
@@ -603,11 +1162,11 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 <li>支持自定义View作为Decoration</li>
 </ul>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101515080000957381.gif" alt="2017101515080000957381.gif"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017101515080000957381.gif" alt="2017101515080000957381.gif"/><figcaption>2017101515080000957381.gif</figcaption></figure></p>
 
 <p>上图hoverGroup.gif的使用代码如下：</p>
 
-<pre><code class="language-java">recyclerView.addItemDecoration(new MKItemDecoration.Builder()
+<pre class="line-numbers"><code class="language-java">recyclerView.addItemDecoration(new MKItemDecoration.Builder()
 .height(50)
 .color(Color.parseColor(&quot;#525D97&quot;))
 .textSize(30)
@@ -690,7 +1249,7 @@ public class DividerItemDecoration extends RecyclerView.ItemDecoration { �
 
 <p>ListView给我们提供了onItemClickListener的监听器，但对于RecyclerView来讲，非常可惜的是，该控件没有给我们提供这样的内置监听器方法，不过我们可以进行改造实现，可以这样实现Item的点击事件的监听，在我们的adapter中增加这两个方法</p>
 
-<pre><code class="language-java">public interface OnItemClickListener{
+<pre class="line-numbers"><code class="language-java">public interface OnItemClickListener{
     void onClick( int position);
     void onLongClick( int position);
 }
@@ -702,7 +1261,7 @@ public void setOnItemClickListener(OnItemClickListener onItemClickListener ){
 
 <p>然后onBindViewHolder方法要做如下更改</p>
 
-<pre><code class="language-java">@Override  
+<pre class="line-numbers"><code class="language-java">@Override  
 public void onBindViewHolder(MyViewHolder holder, final int position) {  
     holder. tv.setText( mDatas.get(position));  
     if( mOnItemClickListener!= null){  
@@ -729,7 +1288,7 @@ public void onBindViewHolder(MyViewHolder holder, final int position) { 
 
 <p>RecyclerView addView调用的时候ViewGroup addView的源码，源码如下(如无特殊说明，以下源码均为api 25)</p>
 
-<pre><code class="language-java">public void addView(View child, int index, LayoutParams params) {
+<pre class="line-numbers"><code class="language-java">public void addView(View child, int index, LayoutParams params) {
     if (DBG) {
         System.out.println(this + &quot; addView&quot;);
     }
@@ -749,7 +1308,7 @@ public void onBindViewHolder(MyViewHolder holder, final int position) { 
 <p>也就是会调用requestLayout，这是一个全局刷新的函数，也就是说整个界面将会被刷新，有全局刷新在View层级较多较复杂的时必然存在卡顿<br/>
 那么RecyclerView 如何做到滑动时addView时不卡的呢，也就是说RecyclerView addView时候为什么没有引起RecyclerView 的onMeasure触发呢，答案就是RecyclerView 以下代码</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public void requestLayout() {
     if (mEatRequestLayout == 0 &amp;&amp; !mLayoutFrozen) {
         super.requestLayout();
@@ -767,7 +1326,7 @@ public void requestLayout() {
 
 <p>MainActivity布局如下</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;com.zjw.appmethodtime.MyRelativeLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     xmlns:tools=&quot;http://schemas.android.com/tools&quot;
@@ -794,7 +1353,7 @@ public void requestLayout() {
 
 <p>自定义一个RelativeLayout 用以看是否局部刷新是否生效，如果局部刷新无效则顶层onMeasure会调用（因为改变了控件大小嘛全局刷新肯定会调用到处于顶层的onMeasure）</p>
 
-<pre><code class="language-java">public class MyRelativeLayout extends RelativeLayout {
+<pre class="line-numbers"><code class="language-java">public class MyRelativeLayout extends RelativeLayout {
     public MyRelativeLayout(Context context) {
         super(context);
     }
@@ -817,7 +1376,7 @@ public void requestLayout() {
 <p>自定义一个MyLayout 继承自LinearLayout ，这里只是demo你想用什么ViewGroup可以自己改。<br/>
 这里MyLayout 就类似于RecyclerView 了，该子View宽高改变时会调用requestLayout，MyLayout 这里做拦截，然后自行处理。</p>
 
-<pre><code class="language-java">public class MyLayout extends LinearLayout {
+<pre class="line-numbers"><code class="language-java">public class MyLayout extends LinearLayout {
     private int mWidthMeasureSpec;
     private int mheightMeasureSpec;
     private int mLeft;
@@ -872,7 +1431,7 @@ public void requestLayout() {
 
 <p>以下代码就是在MainActivity里使用改变子View宽高局部刷新界面</p>
 
-<pre><code class="language-java">package com.zjw.appmethodtime;
+<pre class="line-numbers"><code class="language-java">package com.zjw.appmethodtime;
 
 import android.content.res.Resources;
 import android.os.Bundle;
@@ -959,7 +1518,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
                         
                         	<h2 id="toc_0">BaseActivity</h2>
 
-<pre><code class="language-java">public abstract class BaseActivity extends FragmentActivity {
+<pre class="line-numbers"><code class="language-java">public abstract class BaseActivity extends FragmentActivity {
 
     /** 用来保存所有已打开的Activity */
     private static Stack&lt;Activity&gt; listActivity = new Stack&lt;Activity&gt;();
@@ -1205,7 +1764,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 <h2 id="toc_1">BaseFragment</h2>
 
-<pre><code class="language-java">public abstract class BaseFragment extends Fragment {
+<pre class="line-numbers"><code class="language-java">public abstract class BaseFragment extends Fragment {
 
     protected Activity mActivity;
 
@@ -1294,7 +1853,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
 <p>Scroller是一个专门用于处理滚动效果的工具类，可能在大多数情况下，我们直接使用Scroller的场景并不多，但是很多大家所熟知的控件在内部都是使用Scroller来实现的，如ViewPager、ListView等。先撇开Scroller类不谈，其实任何一个控件都是可以滚动的，因为在View类当中有scrollTo()和scrollBy()这两个方法。这两个方法都是用于对View进行滚动的，那么它们之间有什么区别呢？简单点讲，scrollBy()方法是让View相对于当前的位置滚动某段距离，而scrollTo()方法则是让View相对于初始的位置滚动某段距离。<strong>注意，不管是scrollTo()还是scrollBy()方法，滚动的都是该View内部的内容</strong></p>
 
-<p><img src="http://ohtrrgyyd.bkt.clouddn.com/2017092315061662718986.jpg" alt="2017092315061662718986.jpg"/></p>
+<p><figure><img src="http://ohtrrgyyd.bkt.clouddn.com/2017092315061662718986.jpg" alt="2017092315061662718986.jpg"/><figcaption>2017092315061662718986.jpg</figcaption></figure></p>
 
 <p>第一个参数x表示相对于当前位置横向移动的距离，正值向左移动，负值向右移动，单位是像素。第二个参数y表示相对于当前位置纵向移动的距离，正值向上移动，负值向下移动，单位是像素。</p>
 
@@ -1339,7 +1898,7 @@ Scroller的基本用法其实还是比较简单的，主要可以分为以下几
 
 <p>在其内部完成平滑滚动的逻辑 。在整个后续的平滑滚动过程中，computeScroll()方法是会一直被调用的，因此我们需要不断调用Scroller的computeScrollOffset()方法来进行判断滚动操作是否已经完成了，如果还没完成的话，那就继续调用scrollTo()方法，并把Scroller的curX和curY坐标传入，然后刷新界面从而完成平滑滚动的操作。</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public void computeScroll() {
     // 第三步，重写computeScroll()方法，并在其内部完成平滑滚动的逻辑
     if (mScroller.computeScrollOffset()) {
@@ -1448,7 +2007,7 @@ public void computeScroll() {
 
 <p><strong>ExecutorService</strong></p>
 
-<pre><code class="language-java">public interface ExecutorService extends Executor{
+<pre class="line-numbers"><code class="language-java">public interface ExecutorService extends Executor{
     void shutdown();//顺次地关闭ExecutorService,停止接收新的任务，等待所有已经提交的任务执行完毕之后，关闭ExecutorService
 
     List&lt;Runnable&gt; shutdownNow();//阻止等待任务启动并试图停止当前正在执行的任务，停止接收新的任务，返回处于等待的任务列表
@@ -1486,7 +2045,7 @@ public void computeScroll() {
 
 <p><strong>Executor接口</strong></p>
 
-<pre><code class="language-java">public interface Executor {
+<pre class="line-numbers"><code class="language-java">public interface Executor {
 
     void execute(Runnable command);//执行已提交的 Runnable 任务对象。此接口提供一种将任务提交与每个任务将如何运行的机制（包括线程使用的细节、调度等）分离开来的方法
 }
@@ -1507,7 +2066,7 @@ public void computeScroll() {
 
 <h3 id="toc_8">1.ThreadPoolExecutor构造函数</h3>
 
-<pre><code class="language-java">ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue);
+<pre class="line-numbers"><code class="language-java">ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue);
 ThreadPoolExecutor(int corePoolSize, int maximumPoolSize,long keepAliveTime, TimeUnit unit,BlockingQueue workQueue,RejectedExecutionHandler handler);
 ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue,RejectedExecutionHandler handler) ;
 ThreadPoolExecutor(int corePoolSize,int maximumPoolSize,long keepAliveTime,TimeUnit unit,BlockingQueue&lt;Runnable&gt; workQueue,ThreadFactory threadFactory, RejectedExecutionHandler handler);
@@ -1657,7 +2216,7 @@ AsyncTask定义了三种泛型类型 Params，Progress和Result。</p>
 <code>sudo vi username.conf</code><br/><br/>
 贴入以下内容，注意修改 username 为你的账户名字  </p>
 
-<pre><code class="language-text">&lt;Directory &quot;/Users/username/Sites/&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;Directory &quot;/Users/username/Sites/&quot;&gt;
 Options Indexes MultiViews FollowSymLinks
 AllowOverride All
 Order allow,deny
@@ -1676,7 +2235,7 @@ Require all granted
 
 <p>编辑 <code>/etc/apache2/httpd.conf</code> 文件，删除下列这些代码前的注释符号： <code>#</code></p>
 
-<pre><code class="language-text">Include /private/etc/apache2/extra/httpd-userdir.conf
+<pre class="line-numbers"><code class="language-text">Include /private/etc/apache2/extra/httpd-userdir.conf
 LoadModule authz_core_module libexec/apache2/mod_authz_core.so
 LoadModule authz_host_module libexec/apache2/mod_authz_host.so
 LoadModule userdir_module libexec/apache2/mod_userdir.so
@@ -1695,7 +2254,7 @@ LoadModule userdir_module libexec/apache2/mod_userdir.so
 <p>~username看着的确比较累赘，所以我们重定向把他给去掉<br/><br/>
 进入<code>/Library/WebServer/Documents</code>文件夹中，找到<code>index.html.en</code>文件，在里面添加一行<code>&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;</code>。最后变成这个样子。  </p>
 
-<pre><code class="language-text">&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;
 &lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;
 </code></pre>
 
@@ -1710,151 +2269,6 @@ LoadModule userdir_module libexec/apache2/mod_userdir.so
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15626502771458.html">
-                
-                  <h1>Python-Crawler</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">总文件</h2>
-
-<pre><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;//table&#39;)
-        # for site in sties:
-        #   title = site.xpath(&#39;tr/td&#39;).extract()
-        #   print(site)
-        #   print(title)
-
-        #filename = &#39;school-%s.html&#39; % 1
-        #with open(filename, &#39;wb&#39;) as f:
-             #f.write(contents)
-        #self.log(&#39;Saved file %s&#39; % filename)
-</code></pre>
-
-<h2 id="toc_1">重点关注链接and标题</h2>
-
-<pre><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;//table&#39;)
-
-        title = sties[16].xpath(&#39;tr/td/a/text() | tr/td/a/@href | tr/td/text()&#39;).extract()
-        print(sties[10])
-        print(title)
-</code></pre>
-
-<h2 id="toc_2">日期时间</h2>
-
-<pre><code class="language-python">title = sties[25].xpath(&#39;tr/td/table/tr/td[@id=&quot;zb&quot;]/table/tr/td/span/text()&#39;).extract()
-        print(sties[10])
-        print(title)
-</code></pre>
-
-<h2 id="toc_3">通知公告</h2>
-
-<pre><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/index.php?c=Article&amp;a=idxnews&amp;lx=notice&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;/html/body/table/tr&#39;)
-        for site in sties:
-            title = site.xpath(&#39;td/a/@href | td/a/text()&#39;).extract()
-            print(site)
-            print(title)
-</code></pre>
-
-<h2 id="toc_4">新闻中心</h2>
-
-<pre><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/index.php?c=Article&amp;a=idxnews&amp;lx=news&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;/html/body/ul/li&#39;)
-        for site in sties:
-            title = site.xpath(&#39;a/@href | a/text()&#39;).extract()
-            print(site)
-            print(title)
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2019/10/31</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python.html'>Python</a></span>
           				   
                     
 
@@ -1960,6 +2374,12 @@ class QuotesSpider(scrapy.Spider):
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -1979,12 +2399,6 @@ class QuotesSpider(scrapy.Spider):
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

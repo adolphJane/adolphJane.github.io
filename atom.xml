@@ -4,13 +4,138 @@
   <title><![CDATA[MagicalRice的Blog]]></title>
   <link href="http://adolph.cc/atom.xml" rel="self"/>
   <link href="http://adolph.cc/"/>
-  <updated>2021-02-25T10:44:39+08:00</updated>
+  <updated>2021-03-02T00:33:42+08:00</updated>
   <id>http://adolph.cc/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[多态]]></title>
+    <link href="http://adolph.cc/16145671673295.html"/>
+    <updated>2021-03-01T10:52:47+08:00</updated>
+    <id>http://adolph.cc/16145671673295.html</id>
+    <content type="html"><![CDATA[
+<p>多态是面向对象的三个基本特征之一。</p>
+
+<span id="more"></span><!-- more -->
+
+<h2 id="toc_0">概述</h2>
+
+<p>一说多态这一词，就想到高中时期生物学中的多态性。生物学上指同在一个生物群体，各个体之间存在的形态学、生理学和生化学的差异，并非所有多态性都是可以遗传的。而广义上的意义就是指多种表现形式。</p>
+
+<p>面向对象中，多态同样代表着描述一个事物的多种形态。程序中定义的引用变量所指向的具体类型和通过该引用变量发出的方法调用在编程时并不确定，而是在程序运行期间才确定，即一个引用变量倒底会指向哪个类的实例对象，该引用变量发出的方法调用到底是哪个类中实现的方法，必须在由程序运行期间才能决定。用一句话简单概括就是: 同一操作作用于不同的对象，可以产生不同的效果，这就是多态。</p>
+
+<p>且就像之前继承中说的，继承为多态提供了前提。所以多态的必要条件就是类之间存在父子关系，重写父类方法、且父类引用变量可以指向子类对象(向上转型)。</p>
+
+<p>举个例子： 使用手机扫描二维码支付时，二维码并不知道客户是通过何种方式进行支付，只有通过二维码后才能判断是走哪种支付方式执行对应流程。</p>
+
+<p><figure><img src="media/16145671673295/16145702304465.jpg" alt=""/></figure></p>
+
+<h2 id="toc_1">多态中成员的特点</h2>
+
+<ul>
+<li><p>多态成员变量：编译运行看左边</p>
+<pre class="line-numbers"><code class="language-text">Fu f=new Zi();
+System.out.println(f.num);//f是Fu中的值，只能取到父中的值
+</code></pre></li>
+<li><p>多态成员方法：编译看左边，运行看右边</p>
+<pre class="line-numbers"><code class="language-text">Fu f1=new Zi();
+System.out.println(f1.show());//f1的门面类型是Fu,但实际类型是Zi,所以调用的是重写后的方法。
+</code></pre></li>
+</ul>
+
+<h2 id="toc_2">多态的转型</h2>
+
+<p>多态的转型分为向上转型和向下转型两种</p>
+
+<ul>
+<li><p>向上转型：多态本身就是向上转型过的过程<br/>
+使用格式：父类类型 变量名=new 子类类型();<br/>
+适用场景：当不需要面对子类类型时，通过提高扩展性，或者使用父类的功能就能完成相应的操作。</p></li>
+<li><p>向下转型：一个已经向上转型的子类对象可以使用强制类型转换的格式，将父类引用类型转为子类引用各类型<br/>
+使用格式：子类类型 变量名=（子类类型） 父类类型的变量；<br/>
+适用场景：当要使用子类特有功能时。</p></li>
+</ul>
+
+<h2 id="toc_3">多态类型</h2>
+
+<p>对面向对象来说，多态分为编译时多态和运行时多态。</p>
+
+<h3 id="toc_4">编译时多态</h3>
+
+<p><strong>编译时多态</strong>是<strong>静态</strong>的。</p>
+
+<p>主要是指方法的重载，它是根据实际参数的数据类型、个数和次序来区分不同的方法。通过编译之后会变成两个不同的方法，Java在编译时能够确定执行重载方法中的哪一个。</p>
+
+<p>方法覆盖表现出两种多态性，当对象引用本类实例时，为编译时多态，否则为运行时多态。例如，以下声明p、m引用本类实例，调用toString()方法是编译时多态。</p>
+
+<pre class="line-numbers"><code class="language-java">public class Test {  
+  
+    public static void main(String[] args) {  
+        Person p = new Person();         //对象引用本类实例  
+        Man m = new Man();               //编译时多态，执行Person类的toString()  
+        System.out.println(p.toString());  
+        System.out.println(m.toString()); //编译时多态，执行Man类的toString()  
+    }  
+}  
+  
+class Person{  
+    public String toString() {  
+        String name = &quot;Person&quot;;  
+        return name;  
+    }  
+}  
+  
+class Man extends Person{  
+    public String toString(){  
+        String name = &quot;Man&quot;;  
+        return name;  
+    }  
+} 
+</code></pre>
+
+<h3 id="toc_5">运行时多态</h3>
+
+<p><strong>运行时多态</strong>是<strong>动态</strong>的。</p>
+
+<p>运行时多态性是面向对象程序设计代码重用的一个最强大机制，动态性的概念也可以被说成“一个接口，多个方法”。Java实现运行时多态性的基础是动态方法调度，它是一种在运行时而不是在编译期调用重载方法的机制。</p>
+
+<pre class="line-numbers"><code class="language-java">Person p = new Man();     
+p.toString();  
+</code></pre>
+
+<p>Java支持运行时多态，意为p.toString()实际执行p所引用实例的toString()，究竟执行Person类还是Man类的方法，运行时再确定。如果Man类声明了toString()方法，则执行之；否则执行Person类的toString()方法。</p>
+
+<p>程序运行时，Java从实例所属的类（new 类）开始寻找匹配的方法执行，如果当前类中没有匹配的方法，则沿着继承关系逐层向上，依次在父类或各祖先类中寻找匹配方法，直到Object类。寻找p.toString()匹配执行方法的过程如下图所示。</p>
+
+<p><figure><img src="media/16145671673295/16145766899253.jpg" alt=""/></figure></p>
+
+<p>因此，父类对象只能执行那些在父类中声明、被子类覆盖了的子类方法，如toString()，不能执行子类增加的成员方法。</p>
+
+<p>下面就继承和接口实现两方面谈谈java运行时多态性的实现。 </p>
+
+<h4 id="toc_6">继承的运行时多态</h4>
+
+<p>另外，如果子类继承的超类是一个抽象类，虽然抽象类不能通过new操作符实例化，但是可以创建抽象类的对象引用指向子类对象，以实现运行时多态性。</p>
+
+<p>不过，抽象类的子类必须覆盖实现超类中的所有的抽象方法，否则子类必须被abstract修饰符修饰，当然也就不能被实例化了。 </p>
+
+<h4 id="toc_7">接口的运行时多态</h4>
+
+<p>可以充分体现“一个接口，多个方法”，展示了Java的动态多态性。 <br/>
+需要注意的一点是：Java在利用接口变量调用其实现类的对象的方法时，该方法必须已经在接口中被声明，而且在接口的实现类中该实现方法的类型和参数必须与接口中所定义的精确匹配。</p>
+
+<p>以上就是java运行时多态性的实现方法，大家在编程过程中可以灵活运用，但是在性能要求较高的代码中不提倡运用运行时多态，毕竟Java的运行时动态方法调用较之普通的方法调用的系统开销是比较大的。</p>
+
+<h2 id="toc_8">多态的好处</h2>
+
+<p>使用多态，我们可以很好的完成代码的解耦和工作，加强代码的可扩展性，使代码更加灵活，在不改变原有接口方法的情况下简化流程。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[继承]]></title>
@@ -61,7 +186,7 @@
 
 <p><strong>使用abstract class方式定义Door</strong></p>
 
-<pre><code class="language-java">abstract class Door {  
+<pre class="line-numbers"><code class="language-java">abstract class Door {  
  abstract void open();  
  abstract void close()；  
 }
@@ -69,7 +194,7 @@
 
 <p><strong>使用interface方式定义Door</strong></p>
 
-<pre><code class="language-java">interface Door {  
+<pre class="line-numbers"><code class="language-java">interface Door {  
  void open();  
  void close();  
 }
@@ -77,7 +202,7 @@
 
 <p>这样两种方式看起来没什么太大的区别,但如果要求Door还需要有报警功能，那我们该如何定义继承关系。</p>
 
-<pre><code class="language-java">abstract class Door {  
+<pre class="line-numbers"><code class="language-java">abstract class Door {  
  abstract void open();  
  abstract void close()；  
  abstract void alarm();  
@@ -86,7 +211,7 @@
 
 <p>或者</p>
 
-<pre><code class="language-java">interface Door {  
+<pre class="line-numbers"><code class="language-java">interface Door {  
  void open();  
  void close();  
  void alarm();  
@@ -95,7 +220,7 @@
 
 <p>那么具有报警功能的AlarmDoor的定义方式如下：  </p>
 
-<pre><code class="language-java">class AlarmDoor extends Door {  
+<pre class="line-numbers"><code class="language-java">class AlarmDoor extends Door {  
  void open() { … }  
  void close() { … }  
  void alarm() { … }  
@@ -104,7 +229,7 @@
 
 <p>或者  </p>
 
-<pre><code class="language-java">class AlarmDoor implements Door ｛  
+<pre class="line-numbers"><code class="language-java">class AlarmDoor implements Door ｛  
  void open() { … }  
  void close() { … }  
  void alarm() { … }  
@@ -115,7 +240,7 @@
 
 <p>所以需要分析所处理问题的本质，以及关联属性。AlarmDoor在概念本质上是Door，同时它有具有报警的功能。所以对于Door这个概念，我们应该使用abstarct class方式来定义。另外，AlarmDoor又具有报警功能，说明它又能够完成报警概念中定义的行为，所以报警概念可以通过interface方式定义。</p>
 
-<pre><code class="language-java">abstract class Door {  
+<pre class="line-numbers"><code class="language-java">abstract class Door {  
  abstract void open();  
  abstract void close()；  
 }  
@@ -207,7 +332,7 @@ class AlarmDoor extends Door implements Alarm {
 <p><strong>in : name ××××</strong></p>
 </blockquote>
 
-<p><img src="media/16106747969027/16106748188582.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106748188582.jpg" alt=""/></figure></p>
 
 <span id="more"></span><!-- more -->
 
@@ -217,7 +342,7 @@ class AlarmDoor extends Door implements Alarm {
 <p><strong>in : description ××××</strong></p>
 </blockquote>
 
-<p><img src="media/16106747969027/16106749305238.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106749305238.jpg" alt=""/></figure></p>
 
 <h2 id="toc_2">搜索readme</h2>
 
@@ -225,7 +350,7 @@ class AlarmDoor extends Door implements Alarm {
 <p><strong>in: readme ××××</strong></p>
 </blockquote>
 
-<p><img src="media/16106747969027/16106749707361.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106749707361.jpg" alt=""/></figure></p>
 
 <h2 id="toc_3">利用star,fork搜索</h2>
 
@@ -233,7 +358,7 @@ class AlarmDoor extends Door implements Alarm {
 <p><strong>stars : &gt;300 ×××× 和 fork : &gt;300 ××××</strong></p>
 </blockquote>
 
-<p><img src="media/16106747969027/16106750364902.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106750364902.jpg" alt=""/></figure></p>
 
 <h2 id="toc_4">利用仓库大小搜索</h2>
 
@@ -243,7 +368,7 @@ class AlarmDoor extends Door implements Alarm {
 
 <p>备注：数字的单位是k,3000表示3M</p>
 
-<p><img src="media/16106747969027/16106750923372.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106750923372.jpg" alt=""/></figure></p>
 
 <h2 id="toc_5">判断仓库是否还在更新维护</h2>
 
@@ -251,7 +376,7 @@ class AlarmDoor extends Door implements Alarm {
 <p><strong>pushed : &gt; 2019-01-19 ××××</strong></p>
 </blockquote>
 
-<p><img src="media/16106747969027/16106751416211.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106751416211.jpg" alt=""/></figure></p>
 
 <h2 id="toc_6">利用语言\地区搜索</h2>
 
@@ -259,7 +384,7 @@ class AlarmDoor extends Door implements Alarm {
 <p><strong>language : [语言] location: [地区] ××××</strong></p>
 </blockquote>
 
-<p><img src="media/16106747969027/16106752929090.jpg" alt=""/></p>
+<p><figure><img src="media/16106747969027/16106752929090.jpg" alt=""/></figure></p>
 
 <h2 id="toc_7">关注者</h2>
 
@@ -311,14 +436,14 @@ class AlarmDoor extends Door implements Alarm {
 
 <p>社区版的安装包里是不包含源码的，所以我们需要手动从github上clone一份：</p>
 
-<pre><code class="language-text">git clone --depth 1 git://git.jetbrains.org/idea/community.git idea
+<pre class="line-numbers"><code class="language-text">git clone --depth 1 git://git.jetbrains.org/idea/community.git idea
 </code></pre>
 
 <h2 id="toc_3">新建项目</h2>
 
 <h3 id="toc_4">配置项目类型</h3>
 
-<p><img src="media/16104540799826/16104548250513.jpg" alt=""/></p>
+<p><figure><img src="media/16104540799826/16104548250513.jpg" alt=""/></figure></p>
 
 <ul>
 <li>在左侧的项目类型窗格中，选择<code>Gradle</code>。</li>
@@ -344,7 +469,7 @@ class AlarmDoor extends Door implements Alarm {
 
 <h3 id="toc_6">项目结构</h3>
 
-<pre><code class="language-text">my_gradle_plugin
+<pre class="line-numbers"><code class="language-text">my_gradle_plugin
 ├── build.gradle
 ├── gradle
 │   └── wrapper
@@ -372,7 +497,7 @@ class AlarmDoor extends Door implements Alarm {
 
 <h4 id="toc_7">build.gradle</h4>
 
-<pre><code class="language-gradle">plugins {
+<pre class="line-numbers"><code class="language-gradle">plugins {
     id &#39;java&#39;
     id &#39;org.jetbrains.intellij&#39; version &#39;0.6.5&#39;
 }
@@ -416,7 +541,7 @@ patchPluginXml {
 
 <p>打开Gradle工具窗口找到并运行<code>runIde</code>任务</p>
 
-<p><img src="media/16104540799826/16104558761244.jpg" alt=""/></p>
+<p><figure><img src="media/16104540799826/16104558761244.jpg" alt=""/></figure></p>
 
 <p><a href="https://github.com/JetBrains/gradle-intellij-plugin#setup-dsl">org.jetbrains.intellij的Gradle配置</a><br/>
 <a href="https://github.com/JetBrains/intellij-sdk-code-samples">Intellij IDEA官方DEMO</a></p>
@@ -528,11 +653,11 @@ patchPluginXml {
 
 <span id="more"></span><!-- more --> 
 
-<p><img src="media/16066640335833/16066691224038.jpg" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066691224038.jpg" alt=""/></figure></p>
 
 <p>当应用正在运行时，它会在当前的进程中启用一个子线程执行。应用没有运行的情况下启用，它则会自己选择一种合适的方式在后台运行。具体是什么方式和 Android 的版本和依赖环境有关：</p>
 
-<p><img src="media/16066640335833/16066687850496.png" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066687850496.png" alt=""/></figure></p>
 
 <p><strong>优点</strong></p>
 
@@ -565,7 +690,7 @@ patchPluginXml {
 
 <p>在build.gradle中添加依赖:</p>
 
-<pre><code class="language-text">dependencies {
+<pre class="line-numbers"><code class="language-text">dependencies {
   def work_version = &quot;2.4.0&quot;
 
     // (Java only)
@@ -591,7 +716,7 @@ patchPluginXml {
 
 <p>自定义Work类，继承Worker类。<code>doWork()</code> 方法在 <code>WorkManager</code> 提供的后台线程上同步运行。</p>
 
-<pre><code class="language-kotlin">class UploadWorker(appContext: Context, workerParams: WorkerParameters):
+<pre class="line-numbers"><code class="language-kotlin">class UploadWorker(appContext: Context, workerParams: WorkerParameters):
        Worker(appContext, workerParams) {
    override fun doWork(): Result {
 
@@ -620,7 +745,7 @@ patchPluginXml {
 
 <p><code>WorkRequest</code> 本身是抽象基类。该类有两个派生实现，可用于创建 <code>OneTimeWorkRequest</code> 和 <code>PeriodicWorkRequest</code> 请求。顾名思义，<code>OneTimeWorkRequest</code> 适用于调度非重复性工作，而 <code>PeriodicWorkRequest</code> 则更适合调度以一定间隔重复执行的工作。</p>
 
-<pre><code class="language-java">Constraints constraints = new Constraints();
+<pre class="line-numbers"><code class="language-java">Constraints constraints = new Constraints();
 //设备存储空间充足的时候 才能执行 ,&gt;15%
 constraints.setRequiresStorageNotLow(true);
 //必须在执行的网络条件下才能好执行,不计流量 ,wifi
@@ -643,7 +768,7 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>通过创建Constraints ，设置具体的约束条件，在创建Request的时候，调用.setConstraints(constraints)即可。</p>
 
-<pre><code class="language-java"> OneTimeWorkRequest request = new OneTimeWorkRequest
+<pre class="line-numbers"><code class="language-java"> OneTimeWorkRequest request = new OneTimeWorkRequest
                 .Builder(UploadFileWorker.class)
                 .setInputData(inputData)
                 .setConstraints(constraints)
@@ -672,12 +797,12 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>对于无需额外配置的简单工作，请使用静态方法 from：</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequest.from(MyWork::class.java)
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequest.from(MyWork::class.java)
 </code></pre>
 
 <p>对于更复杂的工作，可以使用构建器。</p>
 
-<pre><code class="language-kotlin">val uploadWorkRequest: WorkRequest =
+<pre class="line-numbers"><code class="language-kotlin">val uploadWorkRequest: WorkRequest =
    OneTimeWorkRequestBuilder&lt;MyWork&gt;()
        // Additional configuration
        .build()
@@ -689,7 +814,7 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>使用 <code>PeriodicWorkRequest</code> 创建定期执行的 <code>WorkRequest</code> 对象</p>
 
-<pre><code class="language-kotlin">val saveRequest =
+<pre class="line-numbers"><code class="language-kotlin">val saveRequest =
        PeriodicWorkRequestBuilder&lt;SaveImageToFileWorker&gt;(1, TimeUnit.HOURS)
     // Additional configuration
            .build()
@@ -703,13 +828,13 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>如果您的工作的性质致使其对运行时间敏感，您可以将 <code>PeriodicWorkRequest</code> 配置为在每个时间间隔的灵活时间段内运行。</p>
 
-<p><img src="media/16066640335833/16066662472408.png" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066662472408.png" alt=""/></figure></p>
 
 <p>如需定义具有灵活时间段的定期工作，请在创建 <code>PeriodicWorkRequest</code> 时传递 <code>flexInterval</code> 以及 <code>repeatInterval</code>。灵活时间段从 <code>repeatInterval - flexInterval</code> 开始，一直到间隔结束。</p>
 
 <p>以下是可在每小时的最后 15 分钟内运行的定期工作的示例。</p>
 
-<pre><code class="language-kotlin">val myUploadWork = PeriodicWorkRequestBuilder&lt;SaveImageToFileWorker&gt;(
+<pre class="line-numbers"><code class="language-kotlin">val myUploadWork = PeriodicWorkRequestBuilder&lt;SaveImageToFileWorker&gt;(
        1, TimeUnit.HOURS, // repeatInterval (the period cycle)
        15, TimeUnit.MINUTES) // flexInterval
     .build()
@@ -761,7 +886,7 @@ constraints.setTriggerMaxContentDelay(0);
 
 <p>例如，以下代码会构建了一个工作请求，该工作请求仅在用户设备正在充电且连接到 Wi-Fi 网络时才会运行：</p>
 
-<pre><code class="language-kotlin">val constraints = Constraints.Builder()
+<pre class="line-numbers"><code class="language-kotlin">val constraints = Constraints.Builder()
    .setRequiredNetworkType(NetworkType.UNMETERED)
    .setRequiresCharging(true)
    .build()
@@ -780,7 +905,7 @@ val myWorkRequest: WorkRequest =
 
 <p>下面举例说明了如何将工作设置为在加入队列后至少经过 10 分钟后再运行。</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
    .setInitialDelay(10, TimeUnit.MINUTES)
    .build()
 </code></pre>
@@ -797,7 +922,7 @@ val myWorkRequest: WorkRequest =
 
 <p>以下是自定义退避延迟时间和政策的示例。</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
    .setBackoffCriteria(
        BackoffPolicy.LINEAR,
        OneTimeWorkRequest.MIN_BACKOFF_MILLIS,
@@ -821,7 +946,7 @@ val myWorkRequest: WorkRequest =
 
 <p>以下代码展示了如何向工作添加“cleanup”标记：</p>
 
-<pre><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
+<pre class="line-numbers"><code class="language-kotlin">val myWorkRequest = OneTimeWorkRequestBuilder&lt;MyWork&gt;()
    .addTag(&quot;cleanup&quot;)
    .build()
 </code></pre>
@@ -834,7 +959,7 @@ val myWorkRequest: WorkRequest =
 
 <p>输入值以键值对的形式存储在 Data 对象中，并且可以在工作请求中设置。WorkManager 会在执行工作时将输入 Data 传递给工作。Worker 类可通过调用 Worker.getInputData() 访问输入参数。以下代码展示了如何创建需要输入数据的 Worker 实例，以及如何在工作请求中发送该实例。</p>
 
-<pre><code class="language-kotlin">// Define the Worker requiring input
+<pre class="line-numbers"><code class="language-kotlin">// Define the Worker requiring input
 class UploadWork(appContext: Context, workerParams: WorkerParameters)
    : Worker(appContext, workerParams) {
 
@@ -860,7 +985,7 @@ val myUploadWork = OneTimeWorkRequestBuilder&lt;UploadWork&gt;()
 
 <p>定义 <code>Worker</code> 和 <code>WorkRequest</code> 后，最后一步是将工作加入队列。将工作加入队列的最简单方法是调用 <code>WorkManager enqueue()</code> 方法，然后传递要运行的 <code>WorkRequest</code>。</p>
 
-<pre><code class="language-kotlin">val myWork: WorkRequest = // ... OneTime or PeriodicWork
+<pre class="line-numbers"><code class="language-kotlin">val myWork: WorkRequest = // ... OneTime or PeriodicWork
 WorkManager.getInstance(requireContext()).enqueue(myWork)
 </code></pre>
 
@@ -887,7 +1012,7 @@ WorkManager.getInstance(requireContext()).enqueue(myWork)
 
 <p>借助唯一工作，我们可以解决前面提到的重复调度问题。</p>
 
-<pre><code class="language-kotiln">val sendLogsWorkRequest =
+<pre class="line-numbers"><code class="language-kotiln">val sendLogsWorkRequest =
        PeriodicWorkRequestBuilder&lt;SendLogsWorker&gt;(24, TimeUnit.HOURS)
            .setConstraints(Constraints.Builder()
                .setRequiresCharging(true)
@@ -924,7 +1049,7 @@ WorkManager.getInstance(this).enqueueUniquePeriodicWork(
 
 <p>在将工作加入队列后，您可以随时按其 <code>name</code>、<code>id</code> 或与其关联的 <code>tag</code> 在 <code>WorkManager</code> 中进行查询，以检查其状态。</p>
 
-<pre><code class="language-kotlin">
+<pre class="line-numbers"><code class="language-kotlin">
 // by id
 workManager.getWorkInfoById(syncWorker.id) // ListenableFuture&lt;WorkInfo&gt;
 
@@ -939,7 +1064,7 @@ workManager.getWorkInfosByTag(&quot;syncTag&quot;) // ListenableFuture&lt;List&l
 
 <p>利用每个方法的 LiveData 变种，您可以通过注册监听器来观察 WorkInfo 的变化。例如，如果您想要在某项工作成功完成后向用户显示消息，您可以进行如下设置：</p>
 
-<pre><code class="language-kotlin">workManager.getWorkInfoByIdLiveData(syncWorker.id)
+<pre class="line-numbers"><code class="language-kotlin">workManager.getWorkInfoByIdLiveData(syncWorker.id)
                .observe(viewLifecycleOwner) { workInfo -&gt;
    if(workInfo?.state == WorkInfo.State.SUCCEEDED) {
        Snackbar.make(requireView(),
@@ -955,7 +1080,7 @@ workManager.getWorkInfosByTag(&quot;syncTag&quot;) // ListenableFuture&lt;List&l
 
 <p>以下示例说明了如何查找带有“syncTag”标记、处于 FAILED 或 CANCELLED 状态，且唯一工作名称为“preProcess”或“sync”的所有工作。</p>
 
-<pre><code class="language-kotlin">val workQuery = WorkQuery.Builder
+<pre class="line-numbers"><code class="language-kotlin">val workQuery = WorkQuery.Builder
        .fromTags(listOf(&quot;syncTag&quot;))
        .addStates(listOf(WorkInfo.State.FAILED, WorkInfo.State.CANCELLED))
        .addUniqueWorkNames(listOf(&quot;preProcess&quot;, &quot;sync&quot;)
@@ -969,7 +1094,7 @@ val workInfos: ListenableFuture&lt;List&lt;WorkInfo&gt;&gt; = workManager.getWor
 
 <p>如果您不再需要运行先前加入队列的工作，则可以要求将其取消。您可以按工作的 name、id 或与其关联的 tag 取消工作。</p>
 
-<pre><code class="language-kotlin">// by id
+<pre class="line-numbers"><code class="language-kotlin">// by id
 workManager.cancelWorkById(syncWorker.id)
 
 // by name
@@ -1017,9 +1142,9 @@ workManager.cancelAllWorkByTag(&quot;syncTag&quot;)
 
 <p>WorkManager 允许我们按照一定的顺序执行任务，比如我想 A、B、C 三个任务按先后顺序执行：</p>
 
-<p><img src="media/16066640335833/16066686325006.png" alt=""/></p>
+<p><figure><img src="media/16066640335833/16066686325006.png" alt=""/></figure></p>
 
-<pre><code class="language-java"> OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
+<pre class="line-numbers"><code class="language-java"> OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
         OneTimeWorkRequest requestB = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
@@ -1031,9 +1156,9 @@ workManager.cancelAllWorkByTag(&quot;syncTag&quot;)
 <p>这样的话，上一个任务的 outputData 会成为下一个任务的 inputData。</p>
 
 <p>更复杂一点<br/>
-<img src="media/16066640335833/16066686969137.png" alt=""/></p>
+<figure><img src="media/16066640335833/16066686969137.png" alt=""/></figure></p>
 
-<pre><code class="language-java">OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
+<pre class="line-numbers"><code class="language-java">OneTimeWorkRequest requestA = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
 OneTimeWorkRequest requestB = new OneTimeWorkRequest.Builder(UploadFileWorker.class)
                 .build();
@@ -1064,7 +1189,7 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 
 <p>此示例展示了一个简单的 ProgressWorker。该 Worker 启动时将进度设置为 0，完成时将进度值更新为 100。</p>
 
-<pre><code class="language-kotlin">    import android.content.Context
+<pre class="line-numbers"><code class="language-kotlin">    import android.content.Context
     import androidx.work.CoroutineWorker
     import androidx.work.Data
     import androidx.work.WorkerParameters
@@ -1093,7 +1218,7 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 
 <p>观察进度信息也很简单。您可以使用 getWorkInfoBy…() 或 getWorkInfoBy…LiveData() 方法，并引用 WorkInfo。</p>
 
-<pre><code class="language-kotlin"> WorkManager.getInstance(applicationContext)
+<pre class="line-numbers"><code class="language-kotlin"> WorkManager.getInstance(applicationContext)
         // requestId is the WorkRequest id
         .getWorkInfoByIdLiveData(requestId)
         .observe(observer, Observer { workInfo: WorkInfo? -&gt;
@@ -1124,7 +1249,7 @@ WorkContinuation.combine(chains).then(requestE).enqueue();
 
 <p><em>添加以下内容</em></p>
 
-<pre><code class="language-text">Section &quot;ServerFlags&quot;
+<pre class="line-numbers"><code class="language-text">Section &quot;ServerFlags&quot;
         Option &quot;BlankTime&quot;   &quot;0&quot;
         Option &quot;StandbyTime&quot; &quot;0&quot;
         Option &quot;SuspendTime&quot; &quot;0&quot;
@@ -1151,7 +1276,7 @@ EndSection
 
 <p><strong>设置Docker服务自启动</strong></p>
 
-<pre><code class="language-text">systemctl enable docker.service
+<pre class="line-numbers"><code class="language-text">systemctl enable docker.service
 </code></pre>
 
 <span id="more"></span><!-- more -->
@@ -1264,7 +1389,7 @@ EndSection
 
 <p>和 Box 布局使用 BoxConstraints 作为约束类似，Sliver 布局采用 SliverConstraints 作为约束，但相对于 Box 要复杂的多，可以理解为 SliverConstraints 描述了 Viewport 和它内部的 Slivers 之间的布局信息</p>
 
-<pre><code class="language-dart">class SliverConstraints extends Constraints {
+<pre class="line-numbers"><code class="language-dart">class SliverConstraints extends Constraints {
   // 主轴方向
   final AxisDirection axisDirection;
   // 窗口增长方向
@@ -1290,7 +1415,7 @@ EndSection
 
 <p>Viewport 通过 SliverConstraints 告知它内部的 sliver 自己的约束信息，比如还有多少空间可用、offset 等，那么Sliver 则通过 SliverGeometry 反馈给 Viewport 需要占用多少空间量。</p>
 
-<pre><code class="language-dart">class SliverGeometry extends Diagnosticable {
+<pre class="line-numbers"><code class="language-dart">class SliverGeometry extends Diagnosticable {
   // sliver 可以滚动的范围，可以认为是 sliver 的高度（如果是 AxisDierction.Down） 
   final double scrollExtent;
   // 绘制起点（默认是 0.0），是相对于 sliver 开始 layout 的起点而言的，不会影响下一个 sliver 的 layoutExtent，会影响下一个 sliver 的paintExtent
@@ -1319,7 +1444,7 @@ EndSection
 
 <p>ScrollPosition 决定了 Viewport 哪些区域是可见的，它包含了Viewport 的滚动信息。</p>
 
-<pre><code class="language-dart">abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
+<pre class="line-numbers"><code class="language-dart">abstract class ScrollPosition extends ViewportOffset with ScrollMetrics {
   // 滚动偏移量
   double _pixels;
   // 设置滚动响应效果，比如滑动停止后的动画
@@ -1336,7 +1461,7 @@ EndSection
 
 <p>ScrollPosition 的类继承关系如下</p>
 
-<pre><code class="language-text">|-- Listenable
+<pre class="line-numbers"><code class="language-text">|-- Listenable
 |---- ChangeNotifier
 |------ ScrollPosition
 |-------- ScrollPositionWithSingleContext
@@ -1348,7 +1473,7 @@ EndSection
 
 <p>RenderViewport 在 layout 它内部的 slivers 的过程如下：</p>
 
-<p><img src="media/16000203391559/16000648579393.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000648579393.jpg" alt=""/></figure></p>
 
 <p>这个 layout 过程是一个自上而下的线性过程：</p>
 
@@ -1376,7 +1501,7 @@ EndSection
 
 <p>通过ScrollView串联上面介绍的几个 Widget 之间的关系。 先来看 ScrollView 的 build 方法：</p>
 
-<pre><code class="language-dart">  @override
+<pre class="line-numbers"><code class="language-dart">  @override
   Widget build(BuildContext context) {
     final List&lt;Widget&gt; slivers = buildSlivers(context);
     final AxisDirection axisDirection = getDirection(context);
@@ -1400,11 +1525,11 @@ EndSection
 <p>可以看到 ScrollView 创建了一个 Scrollable，并传入了构造 ViewPort 的 buildViewPort 方法。<br/>
 上面讲过 Scrollable 负责手势监听，通过 buildViewPort 创建视图，在手势变化的时候不停的更新 ViewPort，大概流程如下：</p>
 
-<p><img src="media/16000203391559/16000671831906.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000671831906.jpg" alt=""/></figure></p>
 
 <h2 id="toc_7">列表的构建和复用</h2>
 
-<p><img src="media/16000203391559/%E6%88%AA%E5%B1%8F2020-09-14%20%E4%B8%8B%E5%8D%884.35.02.png" alt="截屏2020-09-14 下午4.35.02"/></p>
+<p><figure><img src="media/16000203391559/%E6%88%AA%E5%B1%8F2020-09-14%20%E4%B8%8B%E5%8D%884.35.02.png" alt="截屏2020-09-14 下午4.35.02"/><figcaption>截屏2020-09-14 下午4.35.02</figcaption></figure></p>
 
 <p>ListView和GridView的共同父类BoxScrollView和CustomScrollView都继承于ScrollView。</p>
 
@@ -1422,7 +1547,7 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 <h2 id="toc_8">滚动视图渲染逻辑</h2>
 
 <p>Flutter视图树中包含了以下三种树 Widget、Element、RenderObject<br/>
-<img src="media/16000203391559/16000685718840.jpg" alt=""/></p>
+<figure><img src="media/16000203391559/16000685718840.jpg" alt=""/></figure></p>
 
 <ul>
 <li>Widget树(配置信息的树)
@@ -1456,11 +1581,11 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 
 <p>常用的 List 如下，我们按照它包裹的内容分成了 3 类：</p>
 
-<p><img src="media/16000203391559/16000672865363.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000672865363.jpg" alt=""/></figure></p>
 
 <h3 id="toc_10">ListView</h3>
 
-<pre><code class="language-dart">    ListView.builder(
+<pre class="line-numbers"><code class="language-dart">    ListView.builder(
         itemCount: 50,
         itemBuilder: (context,index) {
           return Container(
@@ -1473,7 +1598,7 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 
 <h3 id="toc_11">CustomScrollView</h3>
 
-<pre><code class="language-dart">CustomScrollView(
+<pre class="line-numbers"><code class="language-dart">CustomScrollView(
       slivers: &lt;Widget&gt;[
         SliverAppBar(...),
         SliverToBoxAdapter(
@@ -1489,7 +1614,7 @@ SliverChildListDelegate则是直接使用传入的children获取child。</p>
 
 <p>NestedScrollView 其实里面是一个CustomScrollView，它的 headers 是 Sliver 的数组，body是被包裹在 SliverFillRemaining 中的，body 可以接受 Box。</p>
 
-<pre><code class="language-dart">
+<pre class="line-numbers"><code class="language-dart">
 NestedScrollView(
       headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
         return &lt;Widget&gt;[
@@ -1519,7 +1644,7 @@ NestedScrollView(
 
 <p>类似于 android 中 CollapsingToolbarLayout，可以根据滑动做伸缩布局，并提供了 actions，bottom 等提高效率的属性。</p>
 
-<p><img src="media/16000203391559/16000674699418.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000674699418.jpg" alt=""/></figure></p>
 
 <h3 id="toc_15"><a href="http://laomengit.com/flutter/widgets/SliverList.html#slivergrid">SliverList / SliverGrid</a></h3>
 
@@ -1531,7 +1656,7 @@ NestedScrollView(
 设计它的原因是在 item 高度/宽度全都一样的场景下使用，它的效率比 SliverList 高，因为它不用通过 item 的 layout 过程就可以知道每个 item 的范围。<br/>
 在使用的时候必须传入 itemExtent：</p>
 
-<pre><code class="language-dart">SliverFixedExtentList(
+<pre class="line-numbers"><code class="language-dart">SliverFixedExtentList(
   itemExtent: 50.0,
   delegate: SliverChildBuilderDelegate(
     ...
@@ -1543,7 +1668,7 @@ NestedScrollView(
 
 <h3 id="toc_17"><a href="http://laomengit.com/flutter/widgets/SliverPersistentHeader.html">SliverPersistentHeader</a></h3>
 
-<p><img src="media/16000203391559/16000675333675.jpg" alt=""/></p>
+<p><figure><img src="media/16000203391559/16000675333675.jpg" alt=""/></figure></p>
 
 <p>SliverPersistentHeader 是一个可以固定/悬浮的 header，它可以设置在列表的任意位置，显示的内容需要设置 SliverPersistentHeaderDelegate。</p>
 
@@ -1552,7 +1677,7 @@ NestedScrollView(
 <p>将 BoxWidget 转变为 Sliver：由于 CustomScrollView 只能接受 Sliver 类型的 child，所以很多常用的 Widget 无法直接添加到 CustomScrollView 中，此时只需要将 Widget 用 SliverToBoxAdapter 包裹一下就可以了。<br/>
 最常见的使用就是 SliverList 不支持横向模式，但是又无法直接将 ListView 直接添加到 CustomScrollView 中，此时用 SliverToBoxAdapter 包裹一下：</p>
 
-<pre><code class="language-dart">
+<pre class="line-numbers"><code class="language-dart">
  CustomScrollView(
       slivers: &lt;Widget&gt;[
         SliverToBoxAdapter(
@@ -1626,7 +1751,7 @@ NestedScrollView(
 
 <span id="more"></span><!-- more -->
 
-<pre><code class="language-java">    public RecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
+<pre class="line-numbers"><code class="language-java">    public RecyclerView(@NonNull Context context, @Nullable AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
         //设置为滚动容器
         setScrollContainer(true);
@@ -1719,7 +1844,7 @@ NestedScrollView(
 <li>更新缓存大小，并请求重新布局</li>
 </ul>
 
-<pre><code class="language-java">    public void setLayoutManager(@Nullable LayoutManager layout) {
+<pre class="line-numbers"><code class="language-java">    public void setLayoutManager(@Nullable LayoutManager layout) {
         //过滤LayoutManager
         if (layout == mLayout) {
             return;
@@ -1777,7 +1902,7 @@ NestedScrollView(
 <li>设置新的Adapter，并触发一系列监听事件</li>
 </ul>
 
-<pre><code class="language-java">    public void setAdapter(@Nullable Adapter adapter) {
+<pre class="line-numbers"><code class="language-java">    public void setAdapter(@Nullable Adapter adapter) {
         // bail out if layout is frozen
         setLayoutFrozen(false);
         setAdapterInternal(adapter, false, true);
@@ -1794,7 +1919,7 @@ NestedScrollView(
 <li>removeAndRecycleViews: 如果为true，将会删除并回收所有现有的视图。如果compatibleWithPrevious为false，则忽略此参数。</li>
 </ul>
 
-<pre><code class="language-java">    private void setAdapterInternal(@Nullable Adapter adapter, boolean compatibleWithPrevious,boolean removeAndRecycleViews) {
+<pre class="line-numbers"><code class="language-java">    private void setAdapterInternal(@Nullable Adapter adapter, boolean compatibleWithPrevious,boolean removeAndRecycleViews) {
         //如果原先Adapter不为null，则解除关联
         if (mAdapter != null) {
             mAdapter.unregisterAdapterDataObserver(mObserver);
@@ -1831,7 +1956,7 @@ NestedScrollView(
 
 <p>监听子View的添加和释放，官方推荐使用过重的View资源可以在这个监听器里进行释放</p>
 
-<pre><code class="language-java">    public interface OnChildAttachStateChangeListener {
+<pre class="line-numbers"><code class="language-java">    public interface OnChildAttachStateChangeListener {
         void onChildViewAttachedToWindow(@NonNull View view);
 
         void onChildViewDetachedFromWindow(@NonNull View view);
@@ -1842,7 +1967,7 @@ NestedScrollView(
 
 <p>监听RecyclerView的快速滑动的事件，可以获取横向滑动或者纵向滑动的速度，并且可以进行拦截处理。</p>
 
-<pre><code class="language-java">    public abstract static class OnFlingListener {
+<pre class="line-numbers"><code class="language-java">    public abstract static class OnFlingListener {
         public abstract boolean onFling(int velocityX, int velocityY);
     }
 </code></pre>
@@ -1867,7 +1992,7 @@ NestedScrollView(
 
 <p>可用来更改RecyclerView子项的绘制顺序</p>
 
-<pre><code class="language-java">    public interface ChildDrawingOrderCallback {
+<pre class="line-numbers"><code class="language-java">    public interface ChildDrawingOrderCallback {
         int onGetChildDrawingOrder(int childCount, int i);
     }
 </code></pre>
@@ -1876,7 +2001,7 @@ NestedScrollView(
 
 <p>用来监听RecyclerView的滚动状态和滚动距离</p>
 
-<pre><code class="language-java">    public abstract static class OnScrollListener {
+<pre class="line-numbers"><code class="language-java">    public abstract static class OnScrollListener {
         
         public void onScrollStateChanged(@NonNull RecyclerView recyclerView, int newState){}
 
@@ -1900,7 +2025,7 @@ NestedScrollView(
 
 <p>处理Item触摸事件</p>
 
-<pre><code class="language-java">public interface OnItemTouchListener {
+<pre class="line-numbers"><code class="language-java">public interface OnItemTouchListener {
     
         boolean onInterceptTouchEvent(@NonNull RecyclerView rv, @NonNull MotionEvent e);
 
@@ -1914,7 +2039,7 @@ NestedScrollView(
 
 <h3 id="toc_18">measure</h3>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         //第一种情况当前LayoutManager为null
         if (mLayout == null) {
@@ -2008,7 +2133,7 @@ NestedScrollView(
 
 <p>直接调用defaultOnMeasure方法</p>
 
-<pre><code class="language-java">    void defaultOnMeasure(int widthSpec, int heightSpec) {
+<pre class="line-numbers"><code class="language-java">    void defaultOnMeasure(int widthSpec, int heightSpec) {
         // calling LayoutManager here is not pretty but that API is already public and it is better
         // than creating another method since this is internal.
         final int width = LayoutManager.chooseSize(widthSpec,
@@ -2024,7 +2149,7 @@ NestedScrollView(
 
 <p>直接调用LayoutManager.chooseSize来获取宽高，然后直接setMeasuredDimension</p>
 
-<pre><code class="language-java">        //通过RecyclerView的测量mode来获取不同的值
+<pre class="line-numbers"><code class="language-java">        //通过RecyclerView的测量mode来获取不同的值
         public static int chooseSize(int spec, int desired, int min) {
             final int mode = View.MeasureSpec.getMode(spec);
             final int size = View.MeasureSpec.getSize(spec);
@@ -2076,7 +2201,7 @@ NestedScrollView(
 <li>如有必要，则进行预布局并缓存信息</li>
 </ul>
 
-<pre><code class="language-java">    private void dispatchLayoutStep1() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep1() {
         mState.assertLayoutStep(State.STEP_START);
         fillRemainingScrollValues(mState);
         mState.mIsMeasuring = false;
@@ -2165,7 +2290,7 @@ NestedScrollView(
     }
 </code></pre>
 
-<pre><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
+<pre class="line-numbers"><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
         if (mDataSetHasChangedAfterLayout) {
             // Processing these items have no value since data set changed unexpectedly.
             // Instead, we just reset it.
@@ -2200,7 +2325,7 @@ NestedScrollView(
 
 <h5 id="toc_22">dispatchLayoutStep2</h5>
 
-<pre><code class="language-java">    private void dispatchLayoutStep2() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep2() {
         startInterceptRequestLayout();
         onEnterLayoutOrScroll();
         mState.assertLayoutStep(State.STEP_LAYOUT | State.STEP_ANIMATIONS);
@@ -2233,7 +2358,7 @@ NestedScrollView(
 
 <h3 id="toc_24">layout</h3>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         TraceCompat.beginSection(TRACE_ON_LAYOUT_TAG);
         dispatchLayout();
@@ -2246,7 +2371,7 @@ NestedScrollView(
 
 <p>这个方法保证RecyclerView必须经历三个过程--dispatchLayoutStep1、dispatchLayoutStep2、dispatchLayoutStep3。</p>
 
-<pre><code class="language-java">    void dispatchLayout() {
+<pre class="line-numbers"><code class="language-java">    void dispatchLayout() {
         //这边如果mAdapter为null，就不进行展示了
         if (mAdapter == null) {
             Log.e(TAG, &quot;No adapter attached; skipping layout&quot;);
@@ -2285,7 +2410,7 @@ NestedScrollView(
 
 <p>这是最后一步</p>
 
-<pre><code class="language-java">    private void dispatchLayoutStep3() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep3() {
         mState.assertLayoutStep(State.STEP_ANIMATIONS);
         startInterceptRequestLayout();
         onEnterLayoutOrScroll();
@@ -2382,7 +2507,7 @@ NestedScrollView(
 
 <h4 id="toc_28">LinearLayoutManager#onLayoutChildren</h4>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // ...
         // 找到锚点（具体过程等到分析 layout 时再说）
@@ -2406,7 +2531,7 @@ NestedScrollView(
 
 <h4 id="toc_29">LinearLayoutManager#fill</h4>
 
-<pre><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
 
         // 进行 layout 时 layoutState.mScrollingOffset 的值被设置为
@@ -2440,7 +2565,7 @@ NestedScrollView(
 
 <h4 id="toc_30">LinearLayoutManager#layoutChunk</h4>
 
-<pre><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
+<pre class="line-numbers"><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
             LayoutState layoutState, LayoutChunkResult result) {
         // （1）
         View view = layoutState.next(recycler);
@@ -2464,7 +2589,7 @@ NestedScrollView(
 
 <p>（2）处的 addView 方法就不多说了，该方法将得到的子 View 添加到 RecyclerView 中。主要看（1）处，看看子 View 从何而来</p>
 
-<pre><code class="language-java">    View next(RecyclerView.Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    View next(RecyclerView.Recycler recycler) {
         // ...
         
         final View view = recycler.getViewForPosition(mCurrentPosition);
@@ -2489,7 +2614,7 @@ NestedScrollView(
 <li>如果RecyclerView调用了setClipToPadding,会实现一种特殊的滑动效果--每个ItemView可以滑动到padding区域。</li>
 </ul>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void draw(Canvas c) {
         //第一步
         super.draw(c);
@@ -2556,7 +2681,7 @@ NestedScrollView(
 
 <p>关于Children的绘制和ItemDecoration的绘制，是在onDraw方法里面</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onDraw(Canvas c) {
         super.onDraw(c);
 
@@ -2653,7 +2778,7 @@ NestedScrollView(
 
 <p>首先，如果调用了Adapter的notifyItemChanged方法，会重新回调到LayoutManager的onLayoutChildren方法里面,而在onLayoutChildren方法里面，会将屏幕上所有的ViewHolder回收到mAttachedScrap和mChangedScrap。这个过程就是将ViewHolder分别放到mAttachedScrap和mChangedScrap，而什么条件下放在mAttachedScrap，什么条件放在mChangedScrap，这个就是他们俩的区别。</p>
 
-<pre><code class="language-java">    void scrapView(View view) {
+<pre class="line-numbers"><code class="language-java">    void scrapView(View view) {
             final ViewHolder holder = getChildViewHolderInt(view);
             //1.被同时标记为remove或invalid；2.完全没有改变的ViewHolder。这里还有第三个判断，这个跟RecyclerView的ItemAnimator有关，如果ItemAnimator为空或者ItemAnimator的canReuseUpdatedViewHolder方法为true，也会放入到mAttachedScrap。
             if (holder.hasAnyOfTheFlags(ViewHolder.FLAG_REMOVED | ViewHolder.FLAG_INVALID)
@@ -2680,7 +2805,7 @@ NestedScrollView(
 
 <p>RecyclerView对ViewHolder的复用，我们得从LayoutState的next方法开始。LayoutManager在布局itemView时，需要获取一个ViewHolder对象，就是通过这个方法来获取，具体的复用逻辑也是在这个方面开始调用的。</p>
 
-<pre><code class="language-java">    View next(RecyclerView.Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    View next(RecyclerView.Recycler recycler) {
         final View view = recycler.getViewForPosition(mCurrentPosition);
         mCurrentPosition += mItemDirection;
         return view;
@@ -2689,14 +2814,14 @@ NestedScrollView(
 
 <p>再来看Recycler的getViewForPosition</p>
 
-<pre><code class="language-java">    View getViewForPosition(int position, boolean dryRun) {
+<pre class="line-numbers"><code class="language-java">    View getViewForPosition(int position, boolean dryRun) {
         return tryGetViewHolderForPositionByDeadline(position, dryRun, FOREVER_NS).itemView;
     }
 </code></pre>
 
 <p>最后走到tryGetViewHolderForPositionByDeadline这个方法，RecyclerView真正复用的核心就在这个方法</p>
 
-<pre><code class="language-java">        @Nullable
+<pre class="line-numbers"><code class="language-java">        @Nullable
         ViewHolder tryGetViewHolderForPositionByDeadline(int position,
                 boolean dryRun, long deadlineNs) {
             //position和mState.getItemCount对不上就会抛出异常
@@ -2876,7 +3001,7 @@ NestedScrollView(
 
 <p>在RecyclerViewPool的内部，使用SparseArray来存储每个ViewType对应的ViewHolder数组，其中每个数组的最大size为5。</p>
 
-<pre><code class="language-java">        static class ScrapData {
+<pre class="line-numbers"><code class="language-java">        static class ScrapData {
             final ArrayList&lt;ViewHolder&gt; mScrapHeap = new ArrayList&lt;&gt;();
             int mMaxScrap = DEFAULT_MAX_SCRAP;
             long mCreateRunningAverageNs = 0;
@@ -2915,7 +3040,7 @@ NestedScrollView(
 
 <h5 id="toc_44">A. 复用方面</h5>
 
-<pre><code class="language-java">                if (mAdapter.hasStableIds()) {
+<pre class="line-numbers"><code class="language-java">                if (mAdapter.hasStableIds()) {
                     holder = getScrapOrCachedViewForId(mAdapter.getItemId(offsetPosition),
                             type, dryRun);
                     if (holder != null) {
@@ -2930,7 +3055,7 @@ NestedScrollView(
 
 <h5 id="toc_45">B. 回收方面</h5>
 
-<pre><code class="language-java">        private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">        private void scrapOrRecycleView(Recycler recycler, int index, View view) {
             final ViewHolder viewHolder = getChildViewHolderInt(view);
             if (viewHolder.shouldIgnore()) {
                 if (DEBUG) {
@@ -2956,7 +3081,7 @@ NestedScrollView(
 
 <p>先看Adapter源码</p>
 
-<pre><code class="language-java">    public abstract static class Adapter&lt;VH extends ViewHolder&gt; {
+<pre class="line-numbers"><code class="language-java">    public abstract static class Adapter&lt;VH extends ViewHolder&gt; {
         private final AdapterDataObservable mObservable = new AdapterDataObservable();
         private boolean mHasStableIds = false;
 
@@ -3124,7 +3249,7 @@ NestedScrollView(
 
 <p>在之前的tryGetViewHolderForPositionByDeadline方法中</p>
 
-<pre><code class="language-java">            boolean bound = false;
+<pre class="line-numbers"><code class="language-java">            boolean bound = false;
             if (mState.isPreLayout() &amp;&amp; holder.isBound()) {
                 // do not update unless we absolutely have to.
                 holder.mPreLayoutPosition = position;
@@ -3141,7 +3266,7 @@ NestedScrollView(
 
 <p>在tryBindViewHolderByDeadline中调用Adapter的bindViewHolder</p>
 
-<pre><code class="language-java">            private boolean tryBindViewHolderByDeadline(@NonNull ViewHolder holder, int offsetPosition,
+<pre class="line-numbers"><code class="language-java">            private boolean tryBindViewHolderByDeadline(@NonNull ViewHolder holder, int offsetPosition,
                 int position, long deadlineNs) {
             //...
             mAdapter.bindViewHolder(holder, offsetPosition);
@@ -3152,7 +3277,7 @@ NestedScrollView(
 
 <p>在执行onBindViewHolder方法前后，各自做了一些不同的操作。比如，在执行onBindViewHolder方法之前，更新了ViewHolder的mPosition属性和给ViewHolder设置了一些flag；在执行onBindViewHolder方法之后，清理了ViewHolder的payload，并且还是给ItemView的LayoutParams的mInsetsDirty属性设置为true。</p>
 
-<pre><code class="language-java">            public final void bindViewHolder(@NonNull VH holder, int position) {
+<pre class="line-numbers"><code class="language-java">            public final void bindViewHolder(@NonNull VH holder, int position) {
             holder.mPosition = position;
             if (hasStableIds()) {
                 holder.mItemId = getItemId(position);
@@ -3177,7 +3302,7 @@ NestedScrollView(
 
 <p><strong>先来看下getAdapterPosition方法</strong></p>
 
-<pre><code class="language-java">        public final int getAdapterPosition() {
+<pre class="line-numbers"><code class="language-java">        public final int getAdapterPosition() {
             if (mOwnerRecyclerView == null) {
                 return NO_POSITION;
             }
@@ -3190,7 +3315,7 @@ NestedScrollView(
 
 <p><strong>再来看看getLayoutPosition方法</strong></p>
 
-<pre><code class="language-java">        public final int getLayoutPosition() {
+<pre class="line-numbers"><code class="language-java">        public final int getLayoutPosition() {
             return mPreLayoutPosition == NO_POSITION ? mPosition : mPreLayoutPosition;
         }
 </code></pre>
@@ -3203,7 +3328,7 @@ NestedScrollView(
 
 <p>该方法最终调用了 RecyclerViewDataObserver 的 onChanged 方法</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onChanged() {
         // ...
 
@@ -3221,7 +3346,7 @@ NestedScrollView(
 
 <p>该方法会进行视图重绘，又来到了 layout 过程，继续以 LinearLayoutManager 为例，从它的 onLayoutChildren 方法看起，由于分析第一次 layout 时已经看过一遍了，这次主要看下不同之处：</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // ...
         
@@ -3235,7 +3360,7 @@ NestedScrollView(
 
 <h4 id="toc_51">LayoutManager#detachAndScrapAttachedViews</h4>
 
-<pre><code class="language-java">    public void detachAndScrapAttachedViews(@NonNull Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    public void detachAndScrapAttachedViews(@NonNull Recycler recycler) {
         final int childCount = getChildCount();
         for (int i = childCount - 1; i &gt;= 0; i--) {
             final View v = getChildAt(i);
@@ -3246,7 +3371,7 @@ NestedScrollView(
 
 <p>由于不是第一次 layout，RecyclerView 这时已经有子 View 了，该方法遍历子 View，调用 scrapOrRecycleView 方法：</p>
 
-<pre><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
         final ViewHolder viewHolder = getChildViewHolderInt(view);
         // 不能回收添加了 FLAG_IGNORE 标记的 ViewHolder
         // 可通过 LayoutManager 的 ignoreView 为相应的 View 添加该标记
@@ -3268,7 +3393,7 @@ NestedScrollView(
 
 <h4 id="toc_52">Recycler#recycleViewHolderInternal</h4>
 
-<pre><code class="language-java">        void recycleViewHolderInternal(ViewHolder holder) {
+<pre class="line-numbers"><code class="language-java">        void recycleViewHolderInternal(ViewHolder holder) {
             // ...
             boolean cached = false;
             boolean recycled = false;
@@ -3302,14 +3427,14 @@ NestedScrollView(
 
 <p>该方法传入一个 int 参数，表示要数据有更新的 item 的 position。</p>
 
-<pre><code class="language-java">    public final void notifyItemChanged(int position) {
+<pre class="line-numbers"><code class="language-java">    public final void notifyItemChanged(int position) {
         mObservable.notifyItemRangeChanged(position, 1);
     }
 </code></pre>
 
 <p>最终调用 RecyclerViewDataObserver 的 onItemRangeChanged 方法</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
         // 会在 mAdapterHelper 中创建一个 UpdateOp，将信息保存起来
         if (mAdapterHelper.onItemRangeChanged(positionStart, itemCount, payload)) {
@@ -3321,7 +3446,7 @@ NestedScrollView(
 
 <p>继续看 triggerUpdateProcessor 方法</p>
 
-<pre><code class="language-java">    void triggerUpdateProcessor() {
+<pre class="line-numbers"><code class="language-java">    void triggerUpdateProcessor() {
         // 判断条件默认为 false，执行 else 块
         if (POST_UPDATES_ON_ANIMATION &amp;&amp; mHasFixedSize &amp;&amp; mIsAttached) {
             // ...
@@ -3334,7 +3459,7 @@ NestedScrollView(
 
 <p>在保存了一些信息后，还是进行视图重绘。来到了 layout 过程后，还是以 LinearLayoutManager 为例，这次先看下布局过程的 step1，也就是 dispatchLayoutStep1 方法</p>
 
-<pre><code class="language-java">    private void dispatchLayoutStep1() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep1() {
         // ...
         
         processAdapterUpdatesAndSetAnimationFlags();
@@ -3345,7 +3470,7 @@ NestedScrollView(
 
 <p>主要看 processAdapterUpdatesAndSetAnimationFlags 方法，从名字也可以看出，它负责更新 adapter 的信息</p>
 
-<pre><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
+<pre class="line-numbers"><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
         // ...
 
         if (predictiveItemAnimationsEnabled()) {
@@ -3360,7 +3485,7 @@ NestedScrollView(
 
 <p>这里借助了 mAdapterHelper，它最终又通过接口回调（回调了 markViewHoldersUpdated 方法）调用了 RecyclerView 的 viewRangeUpdate 方法</p>
 
-<pre><code class="language-java">    void viewRangeUpdate(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">    void viewRangeUpdate(int positionStart, int itemCount, Object payload) {
         // ...
 
         for (int i = 0; i &lt; childCount; i++) {
@@ -3381,7 +3506,7 @@ NestedScrollView(
 
 <h4 id="toc_54">LayoutManager#scrapOrRecycleView</h4>
 
-<pre><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
         final ViewHolder viewHolder = getChildViewHolderInt(view);
         // ...
         
@@ -3401,7 +3526,7 @@ NestedScrollView(
 
 <p>首先将 View 从 RecyclerView 中 detach 掉（而不是 remove 掉）。然后在回收时，调用的是 Recycler 的 scrapView 方法。该方法在前面也分析过了，这里再看一次</p>
 
-<pre><code class="language-java">    void scrapView(View view) {
+<pre class="line-numbers"><code class="language-java">    void scrapView(View view) {
         final ViewHolder holder = getChildViewHolderInt(view);
         
         // 满足这几个条件中的一个就可以进入 if 循环
@@ -3448,19 +3573,19 @@ NestedScrollView(
 
 <p><strong>创建数据库</strong></p>
 
-<pre><code class="language-text">create database aa;
+<pre class="line-numbers"><code class="language-text">create database aa;
 </code></pre>
 
 <span id="more"></span><!-- more -->
 
 <p><strong>选择数据库</strong></p>
 
-<pre><code class="language-text">use aa;
+<pre class="line-numbers"><code class="language-text">use aa;
 </code></pre>
 
 <p><strong>创建表</strong></p>
 
-<pre><code class="language-text">create table tb_emp1 
+<pre class="line-numbers"><code class="language-text">create table tb_emp1 
 (
     id int(11),
     name varchar(25),
@@ -3471,7 +3596,7 @@ NestedScrollView(
 
 <p><strong>查看数据表</strong></p>
 
-<pre><code class="language-text">show tables
+<pre class="line-numbers"><code class="language-text">show tables
 </code></pre>
 
 <h2 id="toc_1">约束</h2>
@@ -3535,7 +3660,7 @@ NestedScrollView(
 
 <p>DESCRIBE/DESC语句可以查看表字段信息，其中包括：字段名、字段数据类型、是否为主键、是否有默认值。</p>
 
-<pre><code class="language-text">describe 表名
+<pre class="line-numbers"><code class="language-text">describe 表名
 或者 desc 表名
 </code></pre>
 
@@ -3954,19 +4079,19 @@ NestedScrollView(
 
 <h2 id="toc_0">RecyclerView类图</h2>
 
-<p><img src="media/15941143181398/15951790156416.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790156416.jpg" alt=""/></figure></p>
 
 <h2 id="toc_1">RecyclerView绘制流程图</h2>
 
-<p><img src="media/15941143181398/15951790392948.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790392948.jpg" alt=""/></figure></p>
 
 <h2 id="toc_2">RecyclerView滑动流程图</h2>
 
-<p><img src="media/15941143181398/15951790559208.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790559208.jpg" alt=""/></figure></p>
 
 <h2 id="toc_3">RecyclerView缓存介绍图</h2>
 
-<p><img src="media/15941143181398/15951790783646.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790783646.jpg" alt=""/></figure></p>
 
 <h2 id="toc_4">RecyclerView</h2>
 
@@ -3980,7 +4105,7 @@ NestedScrollView(
 <li>如果配置了LayoutManager 则通过反射方法创建它</li>
 </ul>
 
-<pre><code class="language-java"> public RecyclerView(Context context, @Nullable AttributeSet attrs, int defStyle) {
+<pre class="line-numbers"><code class="language-java"> public RecyclerView(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         ...
         // View配置相关属性设置
@@ -4047,7 +4172,7 @@ NestedScrollView(
 <li>更新缓存大小，并请求重新布局</li>
 </ul>
 
-<pre><code class="language-java">public void setLayoutManager(LayoutManager layout) {
+<pre class="line-numbers"><code class="language-java">public void setLayoutManager(LayoutManager layout) {
         if (layout == mLayout) {
             return;
         }
@@ -4083,7 +4208,7 @@ NestedScrollView(
 <li>设置新的Adapter，并触发一系列监听事件</li>
 </ul>
 
-<pre><code class="language-java">public void setAdapter(Adapter adapter) {
+<pre class="line-numbers"><code class="language-java">public void setAdapter(Adapter adapter) {
    // 解除frozen状态
    setLayoutFrozen(false);
    // 替换到当前Adapter，并触发监听
@@ -4129,7 +4254,7 @@ private void setAdapterInternal(Adapter adapter, boolean compatibleWithPrevious,
 <li>如果未指定确定宽高的尺寸规格，则会进行布局，继而获得子View的大小。此过程可能执行两次</li>
 </ul>
 
-<pre><code class="language-java">   @Override
+<pre class="line-numbers"><code class="language-java">   @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         // mLayout 是 LayoutManager，通过 setLayoutManager 方法设置，没有设置则为空
         if (mLayout == null) {
@@ -4202,7 +4327,7 @@ STEP_ANIMATIONS<br/>
 <li>根据不同State状态，分别执行Step1、Step2、Step3方法</li>
 </ul>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         TraceCompat.beginSection(TRACE_ON_LAYOUT_TAG);
         dispatchLayout();
@@ -4213,7 +4338,7 @@ STEP_ANIMATIONS<br/>
 
 <p>调用 dispatchLayout</p>
 
-<pre><code class="language-java">    void dispatchLayout() {
+<pre class="line-numbers"><code class="language-java">    void dispatchLayout() {
         // ...
         
         mState.mIsMeasuring = false;
@@ -4248,7 +4373,7 @@ STEP_ANIMATIONS<br/>
 <li>如有必要，则进行预布局并缓存信息</li>
 </ul>
 
-<pre><code class="language-java">    private void dispatchLayoutStep1() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep1() {
         //  State状态断言 
         mState.assertLayoutStep(State.STEP_START);
         mState.mIsMeasuring = false;
@@ -4308,7 +4433,7 @@ STEP_ANIMATIONS<br/>
 
 <h4 id="toc_11">RecyclerView#processAdapterUpdatesAndSetAnimationFlags</h4>
 
-<pre><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
+<pre class="line-numbers"><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
         // ...
         
         // mItemsAddedOrRemoved：当有 item 添加或删除的时候设置为 ture
@@ -4351,7 +4476,7 @@ STEP_ANIMATIONS<br/>
 <li>该方法可能会被多次执行</li>
 </ul>
 
-<pre><code class="language-java">private void dispatchLayoutStep2() {
+<pre class="line-numbers"><code class="language-java">private void dispatchLayoutStep2() {
    // 过滤掉 RequestLayout执行，需要过滤的时候 执行该方法，会使过滤次数+1。对应resumeRequestLayout方法进行消费
    eatRequestLayout();
    // 对应 onExitLayoutOrScroll
@@ -4389,7 +4514,7 @@ STEP_ANIMATIONS<br/>
 <li>该方法为LayoutManager布局核心执行方法，Child的测量和添加工作在fill这个重要方法执行，接下来会阐述</li>
 </ul>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // 确定是否需要反向布局
         // 确定锚点及偏移量 (1. 优先焦点child 2. 如果是反向布局，则找recycler里面最最接近尾部的child 3. 如果是正向，则找最接近头部的child)
@@ -4470,7 +4595,7 @@ STEP_ANIMATIONS<br/>
 
 <h6 id="toc_15">updateAnchorInfoForLayout</h6>
 
-<pre><code class="language-java">    private void updateAnchorInfoForLayout(RecyclerView.Recycler recycler, RecyclerView.State state,
+<pre class="line-numbers"><code class="language-java">    private void updateAnchorInfoForLayout(RecyclerView.Recycler recycler, RecyclerView.State state,
             AnchorInfo anchorInfo) {
         // 一般这里都是返回 false
         if (updateAnchorFromPendingData(state, anchorInfo)) {
@@ -4491,7 +4616,7 @@ STEP_ANIMATIONS<br/>
 
 <h6 id="toc_16">updateAnchorFromChildren</h6>
 
-<pre><code class="language-java">    private boolean updateAnchorFromChildren(RecyclerView.Recycler recycler,
+<pre class="line-numbers"><code class="language-java">    private boolean updateAnchorFromChildren(RecyclerView.Recycler recycler,
             RecyclerView.State state, AnchorInfo anchorInfo) {
         if (getChildCount() == 0) {
             return false;
@@ -4524,7 +4649,7 @@ STEP_ANIMATIONS<br/>
 
 <p>如果想要从下往上布局，可以这样设置</p>
 
-<pre><code class="language-java">    linearLayoutManager.setStackFromEnd(true);
+<pre class="line-numbers"><code class="language-java">    linearLayoutManager.setStackFromEnd(true);
 </code></pre>
 
 <p>这样的话，锚点会在尾部，数据加载完后首先显示的是底部的数据。</p>
@@ -4544,7 +4669,7 @@ STEP_ANIMATIONS<br/>
 <li>加载子View在 layoutChunk 中执行</li>
 </ul>
 
-<pre><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
         // ...
         // 可布局的位移
@@ -4604,7 +4729,7 @@ STEP_ANIMATIONS<br/>
 <li>获取目标View完毕后，进行含装饰的Margin计算，并执行布局</li>
 </ul>
 
-<pre><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,LayoutState layoutState, LayoutChunkResult result) {
+<pre class="line-numbers"><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,LayoutState layoutState, LayoutChunkResult result) {
         // （1） 获取下一个布局View （核心方法）
         View view = layoutState.next(recycler);
 
@@ -4664,7 +4789,7 @@ STEP_ANIMATIONS<br/>
 
 <p>先看注释（1）处，这里返回下一个要填充的 View，来看下具体过程</p>
 
-<pre><code class="language-java">    View next(RecyclerView.Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    View next(RecyclerView.Recycler recycler) {
         // ...
         // 除非定制View，不然为null
         if (mScrapList != null) { 
@@ -4682,7 +4807,7 @@ STEP_ANIMATIONS<br/>
 
 <p>继续看注释（2）处的 addView 方法</p>
 
-<pre><code class="language-java">    private void addViewInt(View child, int index, boolean disappearing) {
+<pre class="line-numbers"><code class="language-java">    private void addViewInt(View child, int index, boolean disappearing) {
         final ViewHolder holder = getChildViewHolderInt(child);
         
         // ...
@@ -4735,7 +4860,7 @@ STEP_ANIMATIONS<br/>
 
 <p>layout过程最后一步，执行相关动画和一些清理事项</p>
 
-<pre><code class="language-java">    private void dispatchLayoutStep3() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep3() {
         // ...
         
         // 将 layout 状态重置回 State.STEP_START
@@ -4787,7 +4912,7 @@ step2 真正进行布局，布局任务由 LayoutManager 负责，通过它的 o
 
 <p>主要涉及Item装饰的绘制和动画</p>
 
-<pre><code class="language-java">public void draw(Canvas c) {
+<pre class="line-numbers"><code class="language-java">public void draw(Canvas c) {
    super.draw(c);
 
    final int count = mItemDecorations.size();
@@ -4827,7 +4952,7 @@ public void onDraw(Canvas c) {
 
 <h3 id="toc_24">主要成员变量</h3>
 
-<pre><code class="language-java">final ArrayList&lt;ViewHolder&gt; mAttachedScrap = new ArrayList&lt;&gt;();
+<pre class="line-numbers"><code class="language-java">final ArrayList&lt;ViewHolder&gt; mAttachedScrap = new ArrayList&lt;&gt;();
 
 ArrayList&lt;ViewHolder&gt; mChangedScrap = null;
 
@@ -4863,11 +4988,11 @@ private ViewCacheExtension mViewCacheExtension;
 
 <p>RecycledViewPool 有一个重要的成员变量</p>
 
-<pre><code class="language-java">// SparseArray 类似于 key 为 int 类型 的 HashMap
+<pre class="line-numbers"><code class="language-java">// SparseArray 类似于 key 为 int 类型 的 HashMap
 SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 </code></pre>
 
-<pre><code class="language-java">static class ScrapData {
+<pre class="line-numbers"><code class="language-java">static class ScrapData {
     final ArrayList&lt;ViewHolder&gt; mScrapHeap = new ArrayList&lt;&gt;();
     int mMaxScrap = DEFAULT_MAX_SCRAP;
     long mCreateRunningAverageNs = 0;
@@ -4881,7 +5006,7 @@ SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 
 <p><code>getScrapDataForType</code>: 该方法根据 viewType 获取相应的 ScrapData，如果该 viewType 还没有绑定 ScrapData，就新创建一个 ScrapData 并绑定到该 viewType。</p>
 
-<pre><code class="language-java">private ScrapData getScrapDataForType(int viewType) {
+<pre class="line-numbers"><code class="language-java">private ScrapData getScrapDataForType(int viewType) {
     ScrapData scrapData = mScrap.get(viewType);
     if (scrapData == null) {
         scrapData = new ScrapData();
@@ -4893,7 +5018,7 @@ SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 
 <p><code>setMaxRecycledViews</code>: 该方法可以设置相应 viewType 的 View 容量，超出容量时，从后面开始删除，直到满足新的容量。</p>
 
-<pre><code class="language-java">public void setMaxRecycledViews(int viewType, int max) {
+<pre class="line-numbers"><code class="language-java">public void setMaxRecycledViews(int viewType, int max) {
     ScrapData scrapData = getScrapDataForType(viewType);
     scrapData.mMaxScrap = max;
     final ArrayList&lt;ViewHolder&gt; scrapHeap = scrapData.mScrapHeap;
@@ -4906,7 +5031,7 @@ SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 
 <p><code>getRecycledView</code>: 该方法根据 viewType 获取一个 ViewHolder，获取到的 ViewHolder 将会被移除出 Scrap 堆。获取不到则返回 null。</p>
 
-<pre><code class="language-java">@Nullable
+<pre class="line-numbers"><code class="language-java">@Nullable
 public ViewHolder getRecycledView(int viewType) {
     final ScrapData scrapData = mScrap.get(viewType);
     if (scrapData != null &amp;&amp; !scrapData.mScrapHeap.isEmpty()) {
@@ -4923,7 +5048,7 @@ public ViewHolder getRecycledView(int viewType) {
 
 <p><code>putRecycledView</code>: 该方法也很好理解，根据 ViewHolder 的 viewType 放入 RecycledViewPool 的相应集合中，如果集合已满，不再添加。</p>
 
-<pre><code class="language-java">public void putRecycledView(ViewHolder scrap) {
+<pre class="line-numbers"><code class="language-java">public void putRecycledView(ViewHolder scrap) {
     final int viewType = scrap.getItemViewType();
     final ArrayList&lt;ViewHolder&gt; scrapHeap = getScrapDataForType(viewType).mScrapHeap;
     if (mScrap.get(viewType).mMaxScrap &lt;= scrapHeap.size()) {
@@ -4941,7 +5066,7 @@ public ViewHolder getRecycledView(int viewType) {
 
 <p>ViewCacheExtension 是一个由开发者控制的 View 缓存帮助类</p>
 
-<pre><code class="language-java">public abstract static class ViewCacheExtension {
+<pre class="line-numbers"><code class="language-java">public abstract static class ViewCacheExtension {
     /**
       * Returns a View that can be binded to the given Adapter position.
       */
@@ -4962,7 +5087,7 @@ public ViewHolder getRecycledView(int viewType) {
 
 <p>getViewForPosition 方法比较重要，用于获取某个位置需要展示的 View,最终执行tryGetViewHolderForPositionByDeadline获取View</p>
 
-<pre><code class="language-java">public View getViewForPosition(int position) {
+<pre class="line-numbers"><code class="language-java">public View getViewForPosition(int position) {
     return getViewForPosition(position, false);
 }
     
@@ -4985,7 +5110,7 @@ View getViewForPosition(int position, boolean dryRun) {
 <li>最后直接创建VH</li>
 </ul>
 
-<pre><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
+<pre class="line-numbers"><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
                 boolean dryRun, long deadlineNs) {
     boolean fromScrapOrHiddenOrCache = false;
     ViewHolder holder = null;
@@ -5054,7 +5179,7 @@ View getViewForPosition(int position, boolean dryRun) {
     }
 </code></pre>
 
-<pre><code class="language-java">    // 如果是处于预布局阶段（先简单理解为执行 dispatchLayoutStep1 方法）
+<pre class="line-numbers"><code class="language-java">    // 如果是处于预布局阶段（先简单理解为执行 dispatchLayoutStep1 方法）
     // （其实下面方法要返回 ture 还需要开启“预处理动画”，这跟动画有关，先不多说）
     if (mState.isPreLayout()) {
         holder = getChangedScrapViewForPosition(position);
@@ -5069,7 +5194,7 @@ ScrapView：View仍然attach在其父RecyclerView上且可以被重复绑定数�
 mAttachedScrap：VH有ViewHolder.FLAG_REMOVED | ViewHolder.FLAG_INVALID这两个Flag，或者VH是没有被更新过的，或者是可以被重新更新的VH。<br/>
 其它则是mChangedScrap</p>
 
-<pre><code class="language-java">ViewHolder getChangedScrapViewForPosition(int position) {
+<pre class="line-numbers"><code class="language-java">ViewHolder getChangedScrapViewForPosition(int position) {
   // 必须是预布局状态，取mChangedScrap中的ViewHolder
   final int changedScrapSize;
   if (mChangedScrap == null || (changedScrapSize = mChangedScrap.size()) == 0) {
@@ -5131,7 +5256,7 @@ void scrapView(View view) {
 <li>从一级缓存CacheView中获取</li>
 </ul>
 
-<pre><code class="language-java">ViewHolder getScrapOrHiddenOrCachedHolderForPosition(int position, boolean dryRun) {
+<pre class="line-numbers"><code class="language-java">ViewHolder getScrapOrHiddenOrCachedHolderForPosition(int position, boolean dryRun) {
        final int scrapCount = mAttachedScrap.size();
 
        // 先从 mAttachedScrap中获取VH
@@ -5185,7 +5310,7 @@ void scrapView(View view) {
 <li>在尝试从Cache获取VH，将未命中的从Cache中移出，并加入到Pool缓存</li>
 </ul>
 
-<pre><code class="language-java">    // 如果用户设置了 ViewCacheExtension
+<pre class="line-numbers"><code class="language-java">    // 如果用户设置了 ViewCacheExtension
     if (holder == null &amp;&amp; mViewCacheExtension != null) {
         // We are NOT sending the offsetPosition because LayoutManager does not
         // know it.
@@ -5200,7 +5325,7 @@ void scrapView(View view) {
 
 <h5 id="toc_35">第四步 从用户设置的 ViewCacheExtension 中获取缓存，没有获取到就继续往下：</h5>
 
-<pre><code class="language-java">    if (holder == null) { // fallback to pool
+<pre class="line-numbers"><code class="language-java">    if (holder == null) { // fallback to pool
         holder = getRecycledViewPool().getRecycledView(type);
         // ...
     }
@@ -5210,7 +5335,7 @@ void scrapView(View view) {
 
 <p>RecycledViewPool 已经是最后一级缓存了，如果这里也没有获取到，只能通过 Adapter 的 createViewHolder 方法创建一个 ViewHolder：</p>
 
-<pre><code class="language-java">    if (holder == null) {
+<pre class="line-numbers"><code class="language-java">    if (holder == null) {
         holder = mAdapter.createViewHolder(RecyclerView.this, type);
         // ...
     }
@@ -5233,7 +5358,7 @@ void scrapView(View view) {
 
 <p>既然叫 Recycler，那肯定要做回收工作了，recycleView 方法就完成了这些工作，下面看一下该方法的实现：</p>
 
-<pre><code class="language-java">    public void recycleView(@NonNull View view) {
+<pre class="line-numbers"><code class="language-java">    public void recycleView(@NonNull View view) {
         ViewHolder holder = getChildViewHolderInt(view);
         // ...
         recycleViewHolderInternal(holder);
@@ -5242,7 +5367,7 @@ void scrapView(View view) {
 
 <p>继续看 recycleViewHolderInternal：</p>
 
-<pre><code class="language-java">    void recycleViewHolderInternal(ViewHolder holder) {
+<pre class="line-numbers"><code class="language-java">    void recycleViewHolderInternal(ViewHolder holder) {
         // ...
 
         if (forceRecycle || holder.isRecyclable()) {
@@ -5286,7 +5411,7 @@ void scrapView(View view) {
 
 <h4 id="toc_40">scrapView</h4>
 
-<pre><code class="language-java">    void scrapView(View view) {
+<pre class="line-numbers"><code class="language-java">    void scrapView(View view) {
         final ViewHolder holder = getChildViewHolderInt(view);
         
         // 满足这几个条件中的一个就可以进入 if 循环，有机会将 View 缓存到 mAttachedScrap
@@ -5334,7 +5459,7 @@ void scrapView(View view) {
 
 <h4 id="toc_43">LinearLayoutManager#onLayoutChildren</h4>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // ...
         // 找到锚点（具体过程等到分析 layout 时再说）
@@ -5358,7 +5483,7 @@ void scrapView(View view) {
 
 <h4 id="toc_44">LinearLayoutManager#fill</h4>
 
-<pre><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
 
         // 进行 layout 时 layoutState.mScrollingOffset 的值被设置为
@@ -5392,7 +5517,7 @@ void scrapView(View view) {
 
 <h4 id="toc_45">LinearLayoutManager#layoutChunk</h4>
 
-<pre><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
+<pre class="line-numbers"><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
             LayoutState layoutState, LayoutChunkResult result) {
         // （1）
         View view = layoutState.next(recycler);
@@ -5416,7 +5541,7 @@ void scrapView(View view) {
 
 <p>（2）处的 addView 方法就不多说了，该方法将得到的子 View 添加到 RecyclerView 中。主要看（1）处，看看子 View 从何而来</p>
 
-<pre><code class="language-java">    View next(RecyclerView.Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    View next(RecyclerView.Recycler recycler) {
         // ...
         
         final View view = recycler.getViewForPosition(mCurrentPosition);
@@ -5437,7 +5562,7 @@ void scrapView(View view) {
 
 <p>该方法最终调用了 RecyclerViewDataObserver 的 onChanged 方法</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onChanged() {
         // ...
 
@@ -5455,7 +5580,7 @@ void scrapView(View view) {
 
 <p>该方法会进行视图重绘，又来到了 layout 过程，继续以 LinearLayoutManager 为例，从它的 onLayoutChildren 方法看起，由于分析第一次 layout 时已经看过一遍了，这次主要看下不同之处：</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // ...
         
@@ -5469,7 +5594,7 @@ void scrapView(View view) {
 
 <h4 id="toc_48">LayoutManager#detachAndScrapAttachedViews</h4>
 
-<pre><code class="language-java">    public void detachAndScrapAttachedViews(@NonNull Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    public void detachAndScrapAttachedViews(@NonNull Recycler recycler) {
         final int childCount = getChildCount();
         for (int i = childCount - 1; i &gt;= 0; i--) {
             final View v = getChildAt(i);
@@ -5480,7 +5605,7 @@ void scrapView(View view) {
 
 <p>由于不是第一次 layout，RecyclerView 这时已经有子 View 了，该方法遍历子 View，调用 scrapOrRecycleView 方法：</p>
 
-<pre><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
         final ViewHolder viewHolder = getChildViewHolderInt(view);
         // 不能回收添加了 FLAG_IGNORE 标记的 ViewHolder
         // 可通过 LayoutManager 的 ignoreView 为相应的 View 添加该标记
@@ -5502,7 +5627,7 @@ void scrapView(View view) {
 
 <h4 id="toc_49">Recycler#recycleViewHolderInternal</h4>
 
-<pre><code class="language-java">        void recycleViewHolderInternal(ViewHolder holder) {
+<pre class="line-numbers"><code class="language-java">        void recycleViewHolderInternal(ViewHolder holder) {
             // ...
             boolean cached = false;
             boolean recycled = false;
@@ -5536,14 +5661,14 @@ void scrapView(View view) {
 
 <p>该方法传入一个 int 参数，表示要数据有更新的 item 的 position。</p>
 
-<pre><code class="language-java">    public final void notifyItemChanged(int position) {
+<pre class="line-numbers"><code class="language-java">    public final void notifyItemChanged(int position) {
         mObservable.notifyItemRangeChanged(position, 1);
     }
 </code></pre>
 
 <p>最终调用 RecyclerViewDataObserver 的 onItemRangeChanged 方法</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
         // 会在 mAdapterHelper 中创建一个 UpdateOp，将信息保存起来
         if (mAdapterHelper.onItemRangeChanged(positionStart, itemCount, payload)) {
@@ -5555,7 +5680,7 @@ void scrapView(View view) {
 
 <p>继续看 triggerUpdateProcessor 方法</p>
 
-<pre><code class="language-java">    void triggerUpdateProcessor() {
+<pre class="line-numbers"><code class="language-java">    void triggerUpdateProcessor() {
         // 判断条件默认为 false，执行 else 块
         if (POST_UPDATES_ON_ANIMATION &amp;&amp; mHasFixedSize &amp;&amp; mIsAttached) {
             // ...
@@ -5568,7 +5693,7 @@ void scrapView(View view) {
 
 <p>在保存了一些信息后，还是进行视图重绘。来到了 layout 过程后，还是以 LinearLayoutManager 为例，这次先看下布局过程的 step1，也就是 dispatchLayoutStep1 方法</p>
 
-<pre><code class="language-java">    private void dispatchLayoutStep1() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep1() {
         // ...
         
         processAdapterUpdatesAndSetAnimationFlags();
@@ -5579,7 +5704,7 @@ void scrapView(View view) {
 
 <p>主要看 processAdapterUpdatesAndSetAnimationFlags 方法，从名字也可以看出，它负责更新 adapter 的信息</p>
 
-<pre><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
+<pre class="line-numbers"><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
         // ...
 
         if (predictiveItemAnimationsEnabled()) {
@@ -5594,7 +5719,7 @@ void scrapView(View view) {
 
 <p>这里借助了 mAdapterHelper，它最终又通过接口回调（回调了 markViewHoldersUpdated 方法）调用了 RecyclerView 的 viewRangeUpdate 方法</p>
 
-<pre><code class="language-java">    void viewRangeUpdate(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">    void viewRangeUpdate(int positionStart, int itemCount, Object payload) {
         // ...
 
         for (int i = 0; i &lt; childCount; i++) {
@@ -5615,7 +5740,7 @@ void scrapView(View view) {
 
 <h4 id="toc_51">LayoutManager#scrapOrRecycleView</h4>
 
-<pre><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
         final ViewHolder viewHolder = getChildViewHolderInt(view);
         // ...
         
@@ -5635,7 +5760,7 @@ void scrapView(View view) {
 
 <p>首先将 View 从 RecyclerView 中 detach 掉（而不是 remove 掉）。然后在回收时，调用的是 Recycler 的 scrapView 方法。该方法在前面也分析过了，这里再看一次</p>
 
-<pre><code class="language-java">    void scrapView(View view) {
+<pre class="line-numbers"><code class="language-java">    void scrapView(View view) {
         final ViewHolder holder = getChildViewHolderInt(view);
         
         // 满足这几个条件中的一个就可以进入 if 循环
@@ -5670,7 +5795,7 @@ void scrapView(View view) {
 <p>根据View事件机制可以直接来看onTouchEvent方法。<br/>
 重点查看move事件。move事件执行了scrollByInternal方法。该方法最后会执行LayoutManager的Scroll方法，以LinearLayoutManager为例，它的ScrollBy方法最终执行到fill方法。也就是上文提到的ItemView填充方法，滑动过程中会不断执行获取对应位置的ViewHolder，然后进行View的展示。从而实现RecyclerView的滑动</p>
 
-<pre><code class="language-java">public boolean onTouchEvent(MotionEvent e) {
+<pre class="line-numbers"><code class="language-java">public boolean onTouchEvent(MotionEvent e) {
    ...
 
    switch (action) {
@@ -5722,7 +5847,7 @@ void scrapView(View view) {
 <li>其它处罚Nested、OnScroll等事件</li>
 </ul>
 
-<pre><code class="language-java">
+<pre class="line-numbers"><code class="language-java">
 boolean scrollByInternal(int x, int y, MotionEvent ev) {
    int unconsumedX = 0, unconsumedY = 0;
    int consumedX = 0, consumedY = 0;
@@ -5772,7 +5897,7 @@ boolean scrollByInternal(int x, int y, MotionEvent ev) {
 <li>平移整个View的child，实现滑动效果</li>
 </ul>
 
-<pre><code class="language-java">public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler,
+<pre class="line-numbers"><code class="language-java">public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler,
        RecyclerView.State state) {
    if (mOrientation == HORIZONTAL) {
        return 0;
@@ -5801,7 +5926,7 @@ int scrollBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 }
 </code></pre>
 
-<pre><code class="language-java">int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
     ...
     // 执行回收流程
@@ -5819,7 +5944,7 @@ int scrollBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 <li>计算位移limit值，根据limit</li>
 </ul>
 
-<pre><code class="language-java">private void recycleByLayoutState(RecyclerView.Recycler recycler, LayoutState layoutState) {
+<pre class="line-numbers"><code class="language-java">private void recycleByLayoutState(RecyclerView.Recycler recycler, LayoutState layoutState) {
    // 假设是 初始方向布局，则开始末尾View回收。反之亦然
    if (layoutState.mLayoutDirection == LayoutState.LAYOUT_START) {
        recycleViewsFromEnd(recycler, layoutState.mScrollingOffset);
@@ -5866,7 +5991,7 @@ private void recycleChildren(RecyclerView.Recycler recycler, int startIndex, int
 <li>执行Recycler回收方法</li>
 </ul>
 
-<pre><code class="language-java">public void removeAndRecycleViewAt(int index, Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">public void removeAndRecycleViewAt(int index, Recycler recycler) {
   final View view = getChildAt(index); // 获取目标View
   removeViewAt(index); // 执行ChildHelper移出
   recycler.recycleView(view); // 回收View
@@ -5903,7 +6028,7 @@ public void recycleView(View view) {
 <li>如果没有Cache成功，则直接缓存到Pool中</li>
 </ul>
 
-<pre><code class="language-java"> void recycleViewHolderInternal(ViewHolder holder) {  
+<pre class="line-numbers"><code class="language-java"> void recycleViewHolderInternal(ViewHolder holder) {  
       if (mViewCacheMax &gt; 0
               &amp;&amp; !holder.hasAnyOfTheFlags(ViewHolder.FLAG_INVALID
               | ViewHolder.FLAG_REMOVED
@@ -5944,7 +6069,7 @@ public void recycleView(View view) {
 <li>下面介绍下 ItemChanged操作</li>
 </ul>
 
-<pre><code class="language-java">   public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">   public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
        assertNotInLayoutOrScroll(null);
        if (mAdapterHelper.onItemRangeChanged(positionStart, itemCount, payload)) {
            triggerUpdateProcessor();
@@ -5968,7 +6093,7 @@ public void recycleView(View view) {
 
 <h4 id="toc_61">AdapterHelper.onItemRangeChanged</h4>
 
-<pre><code class="language-java">boolean onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">boolean onItemRangeChanged(int positionStart, int itemCount, Object payload) {
    // 添加一个更新操作 ，标志为update、记录pos、item相关信息
    mPendingUpdates.add(obtainUpdateOp(UpdateOp.UPDATE, positionStart, itemCount, payload));
    mExistingUpdateTypes |= UpdateOp.UPDATE;
@@ -5984,7 +6109,7 @@ public void recycleView(View view) {
 <li>否则直接走requestLayout方式更新，即重新走绘制流程 onMeasure、onLayout等</li>
 </ul>
 
-<pre><code class="language-java">void triggerUpdateProcessor() {
+<pre class="line-numbers"><code class="language-java">void triggerUpdateProcessor() {
   if (POST_UPDATES_ON_ANIMATION &amp;&amp; mHasFixedSize &amp;&amp; mIsAttached) {
       // RecyclerView有固定大小的时候 会执行mUpdateChildViewsRunnable 来处理更新
       ViewCompat.postOnAnimation(RecyclerView.this, mUpdateChildViewsRunnable);
@@ -6001,7 +6126,7 @@ public void recycleView(View view) {
 <p>requestLayout下 onMeasure -&gt; dispatchLayout -&gt; dispatchLayoutStep2 -&gt; layoutChildren -&gt; fill -&gt; layoutChunk -&gt; next -&gt; tryGetViewHolderForPositionByDeadline<br/>
 最终对Item进行重新绑定 实现局部刷新逻辑</p>
 
-<pre><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
+<pre class="line-numbers"><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
                 boolean dryRun, long deadlineNs) {
                 
            if (mState.isPreLayout() &amp;&amp; holder.isBound()) {
@@ -6018,7 +6143,7 @@ public void recycleView(View view) {
 
 <p>当RecyclerView有固定大小时，则不需要Measure，直接走dispatchLayout方法进行刷新操作</p>
 
-<pre><code class="language-java">final Runnable mUpdateChildViewsRunnable = new Runnable() {
+<pre class="line-numbers"><code class="language-java">final Runnable mUpdateChildViewsRunnable = new Runnable() {
    @Override
    public void run() {
         ...
@@ -6075,7 +6200,7 @@ void consumePendingUpdateOperations() {
 
 <h3 id="toc_1">生成ca密钥和证书</h3>
 
-<pre><code class="language-text">#生成ca私钥(使用aes256加密)
+<pre class="line-numbers"><code class="language-text">#生成ca私钥(使用aes256加密)
 read -s PASSWORD
 openssl genrsa -aes256 -passout pass:$PASSWORD  -out ca-key.pem 2048
 #生成ca证书，填写配置信息
@@ -6084,7 +6209,7 @@ openssl req -new -x509 -passin &quot;pass:$PASSWORD&quot; -days 365 -key ca-key.
 
 <h3 id="toc_2">生成server密钥和证书</h3>
 
-<pre><code class="language-text">#生成server证书私钥文件
+<pre class="line-numbers"><code class="language-text">#生成server证书私钥文件
 openssl genrsa -out server-key.pem 2048
 #生成server证书请求文件
 openssl req -subj &quot;/CN=$SERVER&quot; -new -key server-key.pem -out server.csr
@@ -6094,7 +6219,7 @@ openssl x509 -req -days 365 -in server.csr -CA ca.pem -CAkey ca-key.pem -passin 
 
 <h3 id="toc_3">生成client密钥和证书</h3>
 
-<pre><code class="language-text">#生成client证书RSA私钥文件
+<pre class="line-numbers"><code class="language-text">#生成client证书RSA私钥文件
 openssl genrsa -out key.pem 2048
 #生成client证书请求文件
 openssl req -subj &#39;/CN=client&#39; -new -key key.pem -out client.csr
@@ -6108,7 +6233,7 @@ openssl x509 -req -days 365 -in client.csr -CA ca.pem -CAkey ca-key.pem  -passin
 
 <p>上面大概介绍了一下，下面直接上代码比较容易懂，在服务器上创建一个create_tls_certs.sh的文件，执行sh create_tls_certs.sh即可</p>
 
-<pre><code class="language-text">#创建 Docker TLS 证书
+<pre class="line-numbers"><code class="language-text">#创建 Docker TLS 证书
 #!/bin/bash
 
 #相关配置信息
@@ -6160,9 +6285,9 @@ echo &quot;生成文件完成&quot;
 
 <p>执行结束我们可以在/etc/docker 目录下看到相应的证书文件</p>
 
-<p><img src="media/15917531926388/15917534392105.jpg" alt=""/></p>
+<p><figure><img src="media/15917531926388/15917534392105.jpg" alt=""/></figure></p>
 
-<p><img src="media/15917531926388/15917534462818.jpg" alt=""/></p>
+<p><figure><img src="media/15917531926388/15917534462818.jpg" alt=""/></figure></p>
 
 <blockquote>
 <p>注：req指令 new/x509<br/>
@@ -6188,15 +6313,15 @@ OOP提倡的是将功能模块化，对象化，每个模块专心干自己的�
 <p>AOP（面向切面编程）则是针对业务处理过程中的切面进行提取，它所面对的是处理过程中的某个步骤或阶段，以获得逻辑过程中各部分之间低耦合性的隔离效果。这两种设计思想在目标上有着本质的差异。<br/>
 在OOP中有些功能是横跨并嵌入众多模块中的，比如日志埋点，动态权限检查等。利用AOP可以对业务逻辑的各个部分进行隔离，从而使得业务逻辑各部分之间的耦合度降低，提高程序的可重用性，同时提高了开发的效率。</p>
 
-<p><img src="media/15867044458821/24F447C6FF8E994CC48F26899110086D.png" alt="24F447C6FF8E994CC48F26899110086D"/></p>
+<p><figure><img src="media/15867044458821/24F447C6FF8E994CC48F26899110086D.png" alt="24F447C6FF8E994CC48F26899110086D"/><figcaption>24F447C6FF8E994CC48F26899110086D</figcaption></figure></p>
 
 <h3 id="toc_1">OOP和AOP对比</h3>
 
-<p><img src="media/15867044458821/15867670275659.jpg" alt=""/></p>
+<p><figure><img src="media/15867044458821/15867670275659.jpg" alt=""/></figure></p>
 
-<p><img src="media/15867044458821/15867670461523.jpg" alt=""/></p>
+<p><figure><img src="media/15867044458821/15867670461523.jpg" alt=""/></figure></p>
 
-<p><img src="media/15867044458821/15867670530094.jpg" alt=""/></p>
+<p><figure><img src="media/15867044458821/15867670530094.jpg" alt=""/></figure></p>
 
 <h2 id="toc_2">AspectJ</h2>
 
@@ -6221,7 +6346,7 @@ OOP提倡的是将功能模块化，对象化，每个模块专心干自己的�
 <li>在项目的根目录的<code>build.gradle</code>文件中添加依赖，修改后文件如下</li>
 </ul>
 
-<pre><code class="language-text">repositories {
+<pre class="line-numbers"><code class="language-text">repositories {
     jcenter()
 }
 dependencies {
@@ -6234,14 +6359,14 @@ dependencies {
 <li>在项目或者库的build.gradle文件中添加AspectJ的依赖</li>
 </ul>
 
-<pre><code class="language-text">implementation &#39;org.aspectj:aspectjrt:1.8.9&#39;    //注意不能直接引用最新的AspectJ
+<pre class="line-numbers"><code class="language-text">implementation &#39;org.aspectj:aspectjrt:1.8.9&#39;    //注意不能直接引用最新的AspectJ
 </code></pre>
 
 <ul>
 <li>同时在该文件中加入AspectJX模块</li>
 </ul>
 
-<pre><code class="language-text">apply plugin: &#39;android-aspectjx&#39;
+<pre class="line-numbers"><code class="language-text">apply plugin: &#39;android-aspectjx&#39;
 </code></pre>
 
 <ul>
@@ -6250,7 +6375,7 @@ dependencies {
 
 <p>AspectJX默认会处理所有的二进制代码文件和库，为了提升编译效率及规避部分第三方库出现的编译兼容性问题，AspectJX提供include,exclude命令来过滤需要处理的文件及排除某些文件(包括class文件及jar文件)。</p>
 
-<pre><code class="language-text">aspectjx {
+<pre class="line-numbers"><code class="language-text">aspectjx {
     //排除所有package路径中包含`android.support`的class文件及库（jar文件）
     exclude &#39;android.support&#39;
     //忽略所有的class文件及jar文件，相当于AspectJX不生效
@@ -6348,7 +6473,7 @@ dependencies {
 
 <p>例如</p>
 
-<pre><code class="language-text">pointcut anyCall(): call(* *.println(..)) &amp;&amp; !within(TestAspect);
+<pre class="line-numbers"><code class="language-text">pointcut anyCall(): call(* *.println(..)) &amp;&amp; !within(TestAspect);
 </code></pre>
 
 <p>在 AspectJ 的语言中定义一个 Pointcout 需要用关键词 pointcut . 上面的这里是</p>
@@ -6494,7 +6619,7 @@ dependencies {
 
 <p>例子, 用 AspectJ 打印成员变量赋值前后的值</p>
 
-<pre><code class="language-java">// TraceAspect.java　set field 的切面
+<pre class="line-numbers"><code class="language-java">// TraceAspect.java　set field 的切面
 private static final String POINTCUT_FILEED =
         &quot;set(int org.android10.viewgroupperformance.activity.MainActivity.mTest) &amp;&amp; args(newValue) &amp;&amp; target(t)&quot;;
 
@@ -6526,7 +6651,7 @@ protected void onResume() {
 
 <p>打印结果</p>
 
-<pre><code class="language-text">onFiled value = 100 fieldSignature =int org.android10.viewgroupperformance.activity.MainActivity.mTest field = private int org.android10.viewgroupperformance.activity.MainActivity.mTest +
+<pre class="line-numbers"><code class="language-text">onFiled value = 100 fieldSignature =int org.android10.viewgroupperformance.activity.MainActivity.mTest field = private int org.android10.viewgroupperformance.activity.MainActivity.mTest +
 FileName = mTest clazzName = int oldValue = -1
 </code></pre>
 
@@ -6598,7 +6723,7 @@ FileName = mTest clazzName = int oldValue = -1
 
 <p>对于 call 来讲</p>
 
-<pre><code class="language-text">call(Before)
+<pre class="line-numbers"><code class="language-text">call(Before)
 Pointcut {
     Pointcut Method
 }
@@ -6607,7 +6732,7 @@ call(After)
 
 <p>对于 execution 来说</p>
 
-<pre><code class="language-text">Pointcut {
+<pre class="line-numbers"><code class="language-text">Pointcut {
    Execution(Before)
    Pointcut Method
    Execution(After)
@@ -6620,7 +6745,7 @@ call(After)
 <li>通过声明参数语法arg()显示获取参数</li>
 </ul>
 
-<pre><code class="language-text">@Around(value = &quot;execution(* BitmapFacade.picasso.init(java.lang.String,java.lang.String)) &amp;&amp; args(arg1,arg2)&quot;
+<pre class="line-numbers"><code class="language-text">@Around(value = &quot;execution(* BitmapFacade.picasso.init(java.lang.String,java.lang.String)) &amp;&amp; args(arg1,arg2)&quot;
 public Object aroundArgs(String arg1,String arg2,ProceedingJoinPoint joinPoint){
    System.out.println(&quot;aspects arg = &quot; + arg1.toString()+&quot; &quot; + arg2);
    Object resutObject = null;
@@ -6637,7 +6762,7 @@ public Object aroundArgs(String arg1,String arg2,ProceedingJoinPoint joinPoint){
 <li>通过joinPoint.getArg()获取参数列表</li>
 </ul>
 
-<pre><code class="language-text">@Around(&quot;execution(static * tBitmapFacade.picasso.init(..)) &amp;&amp; !within(aspectj.*) &quot;)
+<pre class="line-numbers"><code class="language-text">@Around(&quot;execution(static * tBitmapFacade.picasso.init(..)) &amp;&amp; !within(aspectj.*) &quot;)
 public void pointCutAround(ProceedingJoinPoint joinPoint){
    Object resutObject = null;
    try {
@@ -6653,7 +6778,7 @@ public void pointCutAround(ProceedingJoinPoint joinPoint){
 
 <h5 id="toc_14">异常匹配</h5>
 
-<pre><code class="language-text">/**
+<pre class="line-numbers"><code class="language-text">/**
 * 截获Exception及其子类报出的异常。
 * @param e 异常参数
 */
@@ -6704,7 +6829,7 @@ public void handle(Exception e) {}
 
 <p>例子： 我们需要在 Activity 中的 onResume 方法调用前后输出</p>
 
-<pre><code class="language-java">// MainActivity.java
+<pre class="line-numbers"><code class="language-java">// MainActivity.java
 @Override
 protected void onResume() {
     super.onResume();
@@ -6735,7 +6860,7 @@ public void onMethLog(JoinPoint joinPoint){
 
 <p>改成 Around 的方式</p>
 
-<pre><code class="language-java">// TraceAspect.java
+<pre class="line-numbers"><code class="language-java">// TraceAspect.java
 private static final String POINTCUT_ONMETHOD =
         &quot;execution(* android.app.Activity.on**(..))&quot;;
 @Pointcut(POINTCUT_ONMETHOD)
@@ -6777,7 +6902,7 @@ public Object weaveOnMethodJoinPoint(ProceedingJoinPoint joinPoint) throws Throw
 
 <p>下面是例子说明 我们在 MainActivity 定义一个成员变量 mTest, 初始值为 -1，在 OnResume() 方法对它进行赋值，用 target 和 args 对 mTest 赋值前后的值进行监听</p>
 
-<pre><code class="language-java">// MainActivity.java
+<pre class="line-numbers"><code class="language-java">// MainActivity.java
 private int mTest = -1;
 @Override
 protected void onResume() {
@@ -6846,7 +6971,7 @@ public void onFiled(JoinPoint joinPoint, Object newValue, Object t) throws Illeg
 
 <p><strong>例子：</strong></p>
 
-<pre><code class="language-java">@Around(&quot;methodAnnotatedWithDebugTrace() || constructorAnnotatedDebugTrace()&quot;)
+<pre class="line-numbers"><code class="language-java">@Around(&quot;methodAnnotatedWithDebugTrace() || constructorAnnotatedDebugTrace()&quot;)
 public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
     // joint 对象信息
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
@@ -6869,7 +6994,7 @@ public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
 
 <p><strong>截获某类异常例子</strong></p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
 * 异常处理
 */
 @Aspect
@@ -6897,7 +7022,7 @@ public class ExceptionHandleAspect {
 
 <p><strong>截获指定方法的异常例子</strong></p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
 * 异常处理
 */
 @Aspect
@@ -6979,7 +7104,7 @@ public class ExceptionHandleAspect {
 
 <p><strong>下载 repo 工具</strong></p>
 
-<pre><code class="language-text">mkdir ~/bin
+<pre class="line-numbers"><code class="language-text">mkdir ~/bin
 PATH=~/bin:$PATH
 curl https://storage.googleapis.com/git-repo-downloads/repo &gt; ~/bin/repo
 chmod a+x ~/bin/repo
@@ -6993,7 +7118,7 @@ chmod a+x ~/bin/repo
 
 <p>使用方法如下:</p>
 
-<pre><code class="language-text">wget -c https://mirrors.tuna.tsinghua.edu.cn/aosp-monthly/aosp-latest.tar # 下载初始化包
+<pre class="line-numbers"><code class="language-text">wget -c https://mirrors.tuna.tsinghua.edu.cn/aosp-monthly/aosp-latest.tar # 下载初始化包
 tar xf aosp-latest.tar
 cd AOSP   # 解压得到的 AOSP 工程目录
 # 这时 ls 的话什么也看不到，因为只有一个隐藏的 .repo 目录
@@ -7028,12 +7153,12 @@ repo sync # 正常同步一遍即可得到完整目录
 
 <p>Mac默认是bash shell 配置变量在跟目录中，编辑：</p>
 
-<pre><code class="language-text">vi ~/.bash_profile
+<pre class="line-numbers"><code class="language-text">vi ~/.bash_profile
 </code></pre>
 
 <p>通过export将变量导出去</p>
 
-<pre><code class="language-text">export ANDROID_HOME=~/Library/Android/sdk
+<pre class="line-numbers"><code class="language-text">export ANDROID_HOME=~/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 </code></pre>
 
@@ -7043,7 +7168,7 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 
 <h2 id="toc_1">zsh shell</h2>
 
-<pre><code class="language-text">vi ~/.zshrc
+<pre class="line-numbers"><code class="language-text">vi ~/.zshrc
 // 如果跟目录没有.zshrc的话，执行下面的命令
 cash  ~/.zshrc
 vi ~/.zshrc
@@ -7051,7 +7176,7 @@ vi ~/.zshrc
 
 <p>在最下面添加</p>
 
-<pre><code class="language-text">export ANDROID_HOME=~/Library/Android/sdk
+<pre class="line-numbers"><code class="language-text">export ANDROID_HOME=~/Library/Android/sdk
 export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 </code></pre>
 
@@ -7078,7 +7203,7 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 
 <p>以比较简单的EmptyActivity为例</p>
 
-<p><img src="media/15777558791342/15777850172541.jpg" alt=""/></p>
+<p><figure><img src="media/15777558791342/15777850172541.jpg" alt=""/></figure></p>
 
 <p>每一个模板存在于root文件夹下，其中：</p>
 
@@ -7095,7 +7220,7 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 <p>打开 root 目录，能够看到里面的文件除了图片资源文件都是以<code>.ftl</code>结尾的，而<code>.ftl</code>是标准的 FreeMarker的文件。FreeMarker 是类似于 Velocity 的一种模板框架，据说对于多文件处理时它具有更好的性能，大概也是 Android Studio 选择 Velocity 作为单文件模板，选择 <a href="http://freemarker.org/">FreeMarker</a> 作为文件组模板的原因吧。有兴趣的可以去 FreeMarker 官网学习一下，它的自定义标签功能还是很强大的，个人感觉比 Velocity 的更加接地气。</p>
 
 <p>globals文件中可以看到每一个变量的定义形式，id作为唯一标识，type标识变量类型，value表示变量值。<br/>
-<img src="media/15777558791342/15777871331393.jpg" alt=""/></p>
+<figure><img src="media/15777558791342/15777871331393.jpg" alt=""/></figure></p>
 
 <p>recipe.xml.ftl文件即使不懂freemarker引擎应该也可以大概看懂，</p>
 
@@ -7107,7 +7232,7 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 </ul>
 
 <p>这里if判断可以轻松看出是根据用户选择生成的文件类型来生成Java文件或者kotlin文件。<br/>
-<img src="media/15777558791342/15777871999672.jpg" alt=""/></p>
+<figure><img src="media/15777558791342/15777871999672.jpg" alt=""/></figure></p>
 
 <p><code>template.xml</code>文件就是模板界面了，主要由<code>parameter</code>标签获取用户输入的参数：</p>
 
@@ -7131,9 +7256,9 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 </ul></li>
 </ul>
 
-<p><img src="media/15777558791342/15777873288052.jpg" alt=""/></p>
+<p><figure><img src="media/15777558791342/15777873288052.jpg" alt=""/></figure></p>
 
-<p><img src="media/15777558791342/15777873353828.jpg" alt=""/></p>
+<p><figure><img src="media/15777558791342/15777873353828.jpg" alt=""/></figure></p>
 
 <p>如果了解FreeMarker模板引擎，看过template目录下的官方模板代码，基本就能写出基础的模板代码。</p>
 
@@ -7144,20 +7269,20 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 <h3 id="toc_4">安装</h3>
 
 <p>打开 Android Studio，<code>Preferences</code> – <code>Plugins</code> – <code>Brown Repositories</code>, 搜索<code>TemplateBuilder</code>并下载，下载之后重启 IDE 即可使用。<br/>
-<img src="media/15777558791342/15777877567549.jpg" alt=""/></p>
+<figure><img src="media/15777558791342/15777877567549.jpg" alt=""/></figure></p>
 
 <h3 id="toc_5">使用</h3>
 
 <p><code>导出：</code> 选择待导出的文件或文件夹，按下<code>ALT + T</code>，在弹出界面中更改模板名称（MVP Test）和描述后直接<code>Finish</code>，然后重启 IDE；<br/>
-<img src="media/15777558791342/img2.gif" alt="img2"/></p>
+<figure><img src="media/15777558791342/img2.gif" alt="img2"/><figcaption>img2</figcaption></figure></p>
 
 <p><code>导入：</code> 选择一个包，按下<code>Command + N</code>键，输入模板分类名（默认为电脑用户名），选择MVP Test模板进行导入。<br/>
-<img src="media/15777558791342/img7.gif" alt="img7"/></p>
+<figure><img src="media/15777558791342/img7.gif" alt="img7"/><figcaption>img7</figcaption></figure></p>
 
 <h3 id="toc_6">快速制作</h3>
 
 <p>这里我们拿对一个 MVP 模板的抽取来举例，首先选中需要制作为模板的类文件（如果需要选中某个文件夹里的全部文件，可以直接选中该文件夹），然后按下启动改插件的快捷键ALT + T，便能看到如下界面<br/>
-<img src="media/15777558791342/15777879209820.jpg" alt=""/></p>
+<figure><img src="media/15777558791342/15777879209820.jpg" alt=""/></figure></p>
 
 <ul>
 <li><code>Template Category</code> 对应模板的分类，对应选择导入模板时的模板分类，这里默认值是电脑的用户名。</li>
@@ -7165,14 +7290,14 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 <li><code>Template Description</code> 对应模板描述信息，对应导入模板时弹出的导入界面的文字描述，默认为空。</li>
 <li><code>Template Folder</code> 对应生成模板所存放的位置，如果是 Mac 操作系统则默认为<code>/Applications/Android Studio.app/Contents/plugins/android/lib/templates</code>， Windows 系统的话由于差异比较大，就默认为空了，可以自行配置<code>[Android Studio安装目录]/plugins/android/lib/templates</code>（这里只需要配置一次即可，插件将自动保存该位置）。</li>
 <li><code>Input data区域</code> （见下图）
-<img src="media/15777558791342/15777888673006.jpg" alt=""/></li>
+<figure><img src="media/15777558791342/15777888673006.jpg" alt=""/></figure></li>
 </ul>
 
 <p>如果你只是想简单抽取你写的这个模板，你只需要输入下<code>Template Name</code>和<code>Template Description</code>即可，当然如果你不想输入的话这也可以省略掉。接下来直接点击<code>Finish</code>，就能在 IDE 底部看到弹出如下图所示的提示，此时你已经制作成功，重启 IDE 即可使用该模板。<br/>
-<img src="media/15777558791342/15777880379810.jpg" alt=""/></p>
+<figure><img src="media/15777558791342/15777880379810.jpg" alt=""/></figure></p>
 
 <p>到这里，如果你了解<code>Android Studio Template</code>制作流程的话，你可能觉得相对于完全自己手动去做这样固然简单，但是灵活性上降低了不少。例如模板中有组价依赖关系的时候，你需要在<code>build.gradle.ftl</code>中去添加对应的依赖；导入模板之后你想自动打开某个文件时，你需要编辑<code>recipe.xml.ftl</code>；选择模板适用于哪个版本时，你需要编辑<code>template.xml</code>等等。如果你有这方面的需求，可以点击<code>Next</code>来代替<code>Finish</code>，点击之后你就能看到如下界面，在这里提供了所有你需要关注的配置文件的编辑，编辑完成直接点击OK开始自动生成。<br/>
-<img src="media/15777558791342/15777881050138.jpg" alt=""/></p>
+<figure><img src="media/15777558791342/15777881050138.jpg" alt=""/></figure></p>
 
 <h3 id="toc_7">配置模板变量</h3>
 
@@ -7192,7 +7317,7 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 
 <p>假设待导出的模板文件是<code>UserActivity</code>类，代码如下：</p>
 
-<pre><code class="language-java">public class UserActivity extends Activity {
+<pre class="line-numbers"><code class="language-java">public class UserActivity extends Activity {
     
     private TextView mUserName;
 
@@ -7207,7 +7332,7 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 
 <p>代码很简单，假设我们想让引入模板时<code>mUserName</code>属性名是可配的，并且在 <code>Activity</code> 中是否调用 <code>setContentView</code> 方法也是可配的，那我们就需要这样改写该类：</p>
 
-<pre><code class="language-java">public class UserActivity extends Activity {
+<pre class="line-numbers"><code class="language-java">public class UserActivity extends Activity {
 
     private TextView ${textViewName};
 
@@ -7264,13 +7389,13 @@ export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools
 
 <p>添加完模板变量后导出，重启 IDE 选择导入该模板，此时便能看到刚才配置的两个变量，你可以输入不同的值来验证模板的正确性。</p>
 
-<p><img src="media/15777558791342/15777884999670.jpg" alt=""/></p>
+<p><figure><img src="media/15777558791342/15777884999670.jpg" alt=""/></figure></p>
 
 <h3 id="toc_9">添加模板依赖</h3>
 
 <p>模板中需要添加 <code>gradle</code> 依赖时，点击Next在第二个页面中<code>build.gradle.ftl</code>添加如下所示对应的仓库和依赖即可。</p>
 
-<pre><code class="language-text">repositories {
+<pre class="line-numbers"><code class="language-text">repositories {
     // 如果仓库是jcenter()，则可省略
     jcenter()
 }
@@ -7285,7 +7410,7 @@ dependencies {
 
 <p>template.xml这个是模板配置文件，打开可以看到:</p>
 
-<pre><code class="language-markup">&lt;?xml version=&quot;1.0&quot;?&gt;
+<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot;?&gt;
 &lt;template
     format=&quot;5&quot;
     revision=&quot;6&quot;
@@ -7380,14 +7505,14 @@ minBuildApi=&quot;14&quot;&gt;
 
 <p>为方便用户输入Activity名称或Layout名称，自动提示Layout或Activity名称，需要在parameter中添加两个属性：  </p>
 
-<pre><code class="language-text">constraints=&quot;class|unique|nonempty&quot;
+<pre class="line-numbers"><code class="language-text">constraints=&quot;class|unique|nonempty&quot;
 suggest=&quot;${layoutToActivity(layoutName)}&quot;
 suggest=&quot;${activityToLayout(activityClass)}&quot;
 </code></pre>
 
 <p><strong>示例</strong></p>
 
-<pre><code class="language-markup">&lt;parameter
+<pre class="line-numbers"><code class="language-markup">&lt;parameter
         id=&quot;activityClass&quot;
         name=&quot;活动类名&quot;
         type=&quot;string&quot;
@@ -7437,7 +7562,7 @@ suggest=&quot;${activityToLayout(activityClass)}&quot;
 <p>还要引入的依赖和包。<br/>
 定义了全局变量，并引用了一个内置的通用globals.xml.ftl</p>
 
-<pre><code class="language-text">&lt;globals&gt;
+<pre class="line-numbers"><code class="language-text">&lt;globals&gt;
     &lt;global id=&quot;hasNoActionBar&quot; type=&quot;boolean&quot; value=&quot;false&quot; /&gt;
     &lt;global id=&quot;isLauncher&quot; type=&quot;boolean&quot; value=&quot;${isNewProject?string}&quot; /&gt;
     &lt;global id=&quot;includePermissionCheck&quot; type=&quot;boolean&quot; value=&quot;${(targetApi gte 23)?string}&quot; /&gt;
@@ -7450,7 +7575,7 @@ suggest=&quot;${activityToLayout(activityClass)}&quot;
 
 <p>指定资源文件的路径并相应的生成到我们的项目目录去：</p>
 
-<pre><code class="language-text">&lt;recipe&gt;
+<pre class="line-numbers"><code class="language-text">&lt;recipe&gt;
    &lt;#if appCompat &amp;&amp; !(hasDependency(&#39;com.android.support:appcompat-v7&#39;))&gt;
        &lt;dependency mavenUrl=&quot;com.android.support:appcompat-v7:${buildApi}.+&quot; /&gt;
     &lt;/#if&gt;
@@ -7497,7 +7622,7 @@ suggest=&quot;${activityToLayout(activityClass)}&quot;
 <p><strong>2. 修改recipe.xml.ftl</strong><br/>
 打开recipe.xml.ftl将<code>java</code>改为<code>${ktOrJavaExt}</code>变量。</p>
 
-<pre><code class="language-text">&lt;recipe&gt;
+<pre class="line-numbers"><code class="language-text">&lt;recipe&gt;
     &lt;instantiate from=&quot;root/src/app_package/LinActivity.${ktOrJavaExt}.ftl&quot;
         to=&quot;${escapeXmlAttribute(srcOut)}/${activityClass}.${ktOrJavaExt}&quot; /&gt;
 
@@ -7509,7 +7634,7 @@ suggest=&quot;${activityToLayout(activityClass)}&quot;
 <p><strong>3. 修改globals.xml.ftl</strong><br/>
 打开<code>globals.xml.ftl</code>添加<code>ktOrJavaExt</code>变量声明：</p>
 
-<pre><code class="language-text">&lt;#assign generateKotlin=(((includeKotlinSupport!false) ||(language!&#39;Java&#39;)?string == &#39;Kotlin&#39;))&gt;
+<pre class="line-numbers"><code class="language-text">&lt;#assign generateKotlin=(((includeKotlinSupport!false) ||(language!&#39;Java&#39;)?string == &#39;Kotlin&#39;))&gt;
 &lt;global id=&quot;generateKotlin&quot; type=&quot;boolean&quot; value=&quot;${generateKotlin?string}&quot; /&gt;
 &lt;global id=&quot;ktOrJavaExt&quot; type=&quot;string&quot; value=&quot;${generateKotlin?string(&#39;kt&#39;,&#39;java&#39;)}&quot; /&gt;
 </code></pre>
@@ -7528,32 +7653,32 @@ suggest=&quot;${activityToLayout(activityClass)}&quot;
 <h2 id="toc_0">普通断点</h2>
 
 <p>开发过程中普通断点在 Debug 过程中使用的算是最频繁的，只要在代码处添加该类型的断点，在 Debug 模式下，一旦代码执行到改行，程序将进入挂起状态，此时我们能查看到当前的运行状态，如图<br/>
-<img src="media/15779319049745/15779319732376.jpg" alt=""/></p>
+<figure><img src="media/15779319049745/15779319732376.jpg" alt=""/></figure></p>
 
 <span id="more"></span><!-- more -->
 
 <h2 id="toc_1">条件断点</h2>
 
 <p>当添加断点的方法会被多次执行到，而我们只希望程序在特定的一些特定的地方（如只有在当前的 user 是黑寡妇时）断下来，此时我们可以借助条件断点，如下<br/>
-<img src="media/15779319049745/condition_breakpoint.gif" alt="condition_breakpoint"/><br/>
+<figure><img src="media/15779319049745/condition_breakpoint.gif" alt="condition_breakpoint"/><figcaption>condition_breakpoint</figcaption></figure><br/>
 <strong>注意看一下Condition部分，此处需要返回一个boolean类型的值，该值就是为了告诉程序当执行到该行代码时是否进行断点，true 表示进行断点，false 反之。</strong>上面只需要对黑寡妇进行断点，所以添加的Condition是&quot;黑寡妇&quot;.equals(user.getName())。</p>
 
 <h2 id="toc_2">改变变量状态</h2>
 
 <p>有时需要对断点时的变量赋值操作，已更改此时变量的值，这时可以使用<code>Set Value</code>方式，如下<br/>
-<img src="media/15779319049745/set_value.gif" alt="set_value"/></p>
+<figure><img src="media/15779319049745/set_value.gif" alt="set_value"/><figcaption>set_value</figcaption></figure></p>
 
 <p>除了<code>Set Value</code>，还可以通过估值器进行改变值状态，如下<br/>
-<img src="media/15779319049745/evaluate.gif" alt="evaluate"/></p>
+<figure><img src="media/15779319049745/evaluate.gif" alt="evaluate"/><figcaption>evaluate</figcaption></figure></p>
 
 <h2 id="toc_3">条件断点 + 代码植入</h2>
 
 <p>改变变量状态能够动态地设置变量值，条件断点可以控制断点是能在此处挂起，那将两者结合就能达到在程序不挂起的情况下进行动态代码植入的效果。<br/>
-<img src="media/15779319049745/insert_code.gif" alt="insert_code"/></p>
+<figure><img src="media/15779319049745/insert_code.gif" alt="insert_code"/><figcaption>insert_code</figcaption></figure></p>
 
 <p><code>Condition</code>里插入的代码如下</p>
 
-<pre><code class="language-java">if (&quot;黑寡妇&quot;.equals(user.getName())) {
+<pre class="line-numbers"><code class="language-java">if (&quot;黑寡妇&quot;.equals(user.getName())) {
     user.setSex(&quot;女&quot;);
 }
 // 此处返回false为了告诉IDE在该断点出不对程序执行挂起操作
@@ -7561,7 +7686,7 @@ return false;
 </code></pre>
 
 <p>这就相当于提供了运行期代码的动态植入功能，而且可以通过Enable/Disable断点的状态来进行开启 / 关闭该部分动态代码是否执行。我们可以通过这种方式添加任何希望添加的代码，比如在每个 user 对象 print 之前添加自定一段 print<br/>
-<img src="media/15779319049745/insert_print.gif" alt="insert_print"/></p>
+<figure><img src="media/15779319049745/insert_print.gif" alt="insert_print"/><figcaption>insert_print</figcaption></figure></p>
 
 <h2 id="toc_4">应用场景</h2>
 
@@ -7569,7 +7694,7 @@ return false;
 
 <p>以 Android 场景为例，如下的代码，接收一个<code>imageUrl</code>参数并加载出来</p>
 
-<pre><code class="language-java">public class ImageActivity extends Activity {
+<pre class="line-numbers"><code class="language-java">public class ImageActivity extends Activity {
 
     private static final String KEY_CONTENT = &quot;imageUrl&quot;;
 
@@ -7593,14 +7718,14 @@ return false;
 
 <p>未植入代码之前，跳转到当前页面是这样的</p>
 
-<p><img src="media/15779319049745/15779322770179.jpg" alt=""/></p>
+<p><figure><img src="media/15779319049745/15779322770179.jpg" alt=""/></figure></p>
 
 <p>此时如果需要动态改变当前的<code>imageUrl</code>参数，可以进行 Debug 模式，并通过动态代码植入方式进行<code>imageUrl</code>变量的重赋值，如下<br/>
-<img src="media/15779319049745/insert_image_url.gif" alt="insert_image_ur"/></p>
+<figure><img src="media/15779319049745/insert_image_url.gif" alt="insert_image_ur"/><figcaption>insert_image_ur</figcaption></figure></p>
 
 <p>添加植入的复制代码之后，进入 Debug 模式，然后重新进入该页面，显示的图片便替换为修改后的了。</p>
 
-<p><img src="media/15779319049745/15779323353887.jpg" alt=""/></p>
+<p><figure><img src="media/15779319049745/15779323353887.jpg" alt=""/></figure></p>
 
 ]]></content>
   </entry>
@@ -7615,7 +7740,7 @@ return false;
 
 <span id="more"></span><!-- more -->
 
-<pre><code class="language-text">// &lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;[A]&quot;&gt;
+<pre class="line-numbers"><code class="language-text">// &lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;[A]&quot;&gt;
 [B]
 // &lt;/editor-fold&gt;
 </code></pre>
@@ -7624,7 +7749,7 @@ return false;
 
 <p>根据上述规则我们来对MainActivity进行打标操作，代码如下</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * @author zijiao
  * @version 17/3/21
  */
@@ -7664,16 +7789,16 @@ public class MainActivity extends Activity {
 </code></pre>
 
 <p>可以看到我们将各个代码块按照逻辑进行分类并添加对应的描述标签，当我们下次再打开该类时，查看或修改某部分代码就会一目了然（当代码庞大时，其优点将会尤为明显），参见下图<br/>
-<img src="media/15779324219058/img1.gif" alt="img1"/></p>
+<figure><img src="media/15779324219058/img1.gif" alt="img1"/><figcaption>img1</figcaption></figure></p>
 
 <p>可以看到代码块打标是很方便，但是有一点不好，就是当我们需要给某一个代码块打标时我们总是要在代码块之前添加</p>
 
-<pre><code class="language-text">// &lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;[A]&quot;&gt;
+<pre class="line-numbers"><code class="language-text">// &lt;editor-fold defaultstate=&quot;collapsed&quot; desc=&quot;[A]&quot;&gt;
 </code></pre>
 
 <p>然后在代码块之后添加</p>
 
-<pre><code class="language-text">// &lt;/editor-fold&gt;
+<pre class="line-numbers"><code class="language-text">// &lt;/editor-fold&gt;
 </code></pre>
 
 <p>这个步骤很繁琐，但好消息是我们可以结合 AS 提供给我们的<code>LiveTempalte</code>，将这个过程封装成一个打标模板，来看看具体操作</p>
@@ -7692,10 +7817,10 @@ $SELECTION$<br/>
 
 <p>这个时候你的界面应该是这样，可以核对下</p>
 
-<p><img src="media/15779324219058/15779326947038.jpg" alt=""/></p>
+<p><figure><img src="media/15779324219058/15779326947038.jpg" alt=""/></figure></p>
 
 <p>到这里，打标模板已经完成了，你可以随便找一个类进行测试，选中一个代码块，按下快捷键<code>Command + Option + J</code>（Windows 系统可以在Preferences — Keymap 中搜索<code>Surround with Live Template...</code>对应的快捷键）来选择<code>Mark Code Block</code>模板，此时我们就可以快速进行代码块打标操作了，如下图<br/>
-<img src="media/15779324219058/img3.gif" alt="img3"/></p>
+<figure><img src="media/15779324219058/img3.gif" alt="img3"/><figcaption>img3</figcaption></figure></p>
 
 ]]></content>
   </entry>
@@ -7711,21 +7836,21 @@ $SELECTION$<br/>
 <span id="more"></span><!-- more -->
 
 <p>我们开发的过程中可能会遇到有些类在不同的工程下都需要使用，单独抽成 jar 包可能又有点小题大做了，而且还得在下次使用的时候去依赖它，这个时候我们 AS 中的 FileTemplate 便派上用场了。<br/>
-<img src="media/15779341495897/fileTemplate1.gif" alt="fileTemplate1"/></p>
+<figure><img src="media/15779341495897/fileTemplate1.gif" alt="fileTemplate1"/><figcaption>fileTemplate1</figcaption></figure></p>
 
 <p>我们开发中可能经常去写一个继承 BaseAdapter 的子 Adapter，而且里面有一大串无脑代码，于是我写了这个 DataAdapter 的模板。</p>
 
 <p>Android Studio 给我提供了创建模板的快捷方式，我们可以打开任意一个类，然后选择顶部的 <code>Tools</code> — <code>Save File As Template</code> 便可以快速创建一个当前类的模板文件</p>
 
-<p><img src="media/15779341495897/fileTemplate2.gif" alt="fileTemplate2"/></p>
+<p><figure><img src="media/15779341495897/fileTemplate2.gif" alt="fileTemplate2"/><figcaption>fileTemplate2</figcaption></figure></p>
 
 <p>或者直接通过 <code>Preferences</code> — <code>Editor</code> — <code>File and Code Templates</code>右边的加号创建</p>
 
-<p><img src="media/15779341495897/15779342797674.jpg" alt=""/></p>
+<p><figure><img src="media/15779341495897/15779342797674.jpg" alt=""/></figure></p>
 
 <p>然后 IDE 会自动打开这个界面</p>
 
-<p><img src="media/15779341495897/15779343035255.jpg" alt=""/></p>
+<p><figure><img src="media/15779341495897/15779343035255.jpg" alt=""/></figure></p>
 
 <p>大致说下这几个区域</p>
 
@@ -7738,7 +7863,7 @@ $SELECTION$<br/>
 接下来我们编辑模板，把这段模板内容直接粘贴到编辑区，然后给模板命名为 User 即保存关闭该弹窗</li>
 </ul>
 
-<pre><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME};#end
+<pre class="line-numbers"><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME};#end
 
 /**
  * @author ${USER}
@@ -7751,21 +7876,21 @@ public class ${NAME} {
 
 <p>现在我们来引入刚写的模板，<code>右键选择待添加模板的包</code> — <code>New</code> — <code>User</code></p>
 
-<p><img src="media/15779341495897/15779343664551.jpg" alt=""/></p>
+<p><figure><img src="media/15779341495897/15779343664551.jpg" alt=""/></figure></p>
 
 <p>也可以 New 一个 Java Class 然后在弹窗中通过上下方向键或者下拉列表来选择找到创建的 User 模板</p>
 
-<p><img src="media/15779341495897/15779343806654.jpg" alt=""/></p>
+<p><figure><img src="media/15779341495897/15779343806654.jpg" alt=""/></figure></p>
 
 <p>还可以直接在 New 下面选择</p>
 
-<p><img src="media/15779341495897/fileTemplate4.gif" alt="fileTemplate4"/></p>
+<p><figure><img src="media/15779341495897/fileTemplate4.gif" alt="fileTemplate4"/><figcaption>fileTemplate4</figcaption></figure></p>
 
 <p>创建模板之后的引入方式有很多，我们可以使用自己比较喜欢的方式去引入。最终输入文件名点确定，代码直接生成出来。</p>
 
 <p>上面说的是最基本的文件模板需求，当我们的文件需要多个参数时，例如 User 这个模板的 name 属性名可能是多边的，只有引入模板时才能确定下来，这时我们可以用自定义变量来表示，如下</p>
 
-<pre><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME};#end
+<pre class="line-numbers"><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME};#end
 
 /**
  * @author ${USER}
@@ -7778,103 +7903,11 @@ public class ${NAME} {
 
 <p>这个时候我们再引入模板时，IDE 会扫描有没有自定义变量，如果有的并且没有被初始化赋值的话就在弹出的对话框中多一个可编辑的区域，如下图</p>
 
-<p><img src="media/15779341495897/15779344367462.jpg" alt=""/></p>
+<p><figure><img src="media/15779341495897/15779344367462.jpg" alt=""/></figure></p>
 
 <p>这便支持自定义参数的场景，到这一步为止，一般的文件模板需求我们都可以自己满足了。下面介绍一些相对深一点的使用方式，有兴趣的可以看看。</p>
 
 <p>Android Studio 的 FileTemplate 使用 Velocity Template Language（简称 VTL）进行逻辑判断和流程控制，有兴趣的可以直接看下 Velocity 的<a href="http://velocity.apache.org/engine/devel/user-guide.html#Velocity_Template_Language_VTL:_An_Introduction">官方文档</a>。</p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Studio 模板之代码片段]]></title>
-    <link href="http://adolph.cc/15779345043093.html"/>
-    <updated>2020-01-02T11:08:24+08:00</updated>
-    <id>http://adolph.cc/15779345043093.html</id>
-    <content type="html"><![CDATA[
-<p>代码片段是 Template 上的最小单位，因此它也具有最大的灵活性，支持多参数配置、TAB 切换、代码块包装等多种特性（IDEA 同样适用）。</p>
-
-<p>创建一个单例类<br/>
-<img src="media/15779345043093/LiveTemplate1.gif" alt="LiveTemplate1"/></p>
-
-<span id="more"></span><!-- more -->
-
-<p>自定义具体位置我们可以进入 IDE，<code>Preserences</code> - <code>Editor</code> - <code>Live Templates</code>，我们可以在右边栏看到一些列 IDE 预设的 template，如下图</p>
-
-<p><img src="media/15779345043093/15779345903837.jpg" alt=""/></p>
-
-<p>这里我们展开 Android，可以看到下图</p>
-
-<p><img src="media/15779345043093/15779346084021.jpg" alt=""/></p>
-
-<p>这里面所有的我们都可以使用，括号后面的内容是为了描述该模板的，你也可以取消前面的勾选来取消该模板。</p>
-
-<p>其实系统预设的有很多都是很实用的，有兴趣的可以去试一试，不多说。这里主要看一下如何自定义模板，把一些常用的代码片段 DIY 到自己的模板库中，当下次再需要同样代码的时候只需要一个标识符就能迅速自动生成。</p>
-
-<p>我们点击右上角的加号，我们可以看到两个选项一个是 Live Template，这个表示一个模板，另一个是 Template Group，这个表示一个模板所属的分组，就像上面看到的 Android，它就属于一个分组。</p>
-
-<p><img src="media/15779345043093/15779346294137.jpg" alt=""/></p>
-
-<p>接下来我们先创建一个自己的 Template Group，名称随便取，不要与已有的分组重名就行，这里就取为 Custom。然后我们选中新建的这个 Custom 分组再创建 Live Template，会看到如下界面</p>
-
-<p><img src="media/15779345043093/15779346544960.jpg" alt=""/></p>
-
-<p>我对这个界面做了数字标志，大致说下每个区域代表的含义</p>
-
-<ul>
-<li>区域 1：表示模板的缩写，也是我们最终使用时在编辑区输入的指令</li>
-<li>区域 2：表示模板的提示，当输入对应缩写时，就会弹出这个提示</li>
-<li>区域 3：这里就是最关键的模板区了，模板区包含两部分，一个是模板内容，它可以是任意字符串，另一个是模板变量，它有自己特殊的含义并且格式固定，首尾都是”\(” 符。模板变量又包含预设变量和自定义变量，比如”\)END$” 就是一个预设变量，它指定了模板导入结束后鼠标光标最终要停留的位置，而自定义变量则表示模板中一些动态性的部分，比如类名，它在不同的类中引入的结果是不同的。在多个自定义变量的情况下引入模板时，默认按 TAB 键切换至下个自定义变量位置。</li>
-<li>区域 4：自定义变量的配置入口，可以给我们的自定义变量添加一些约束条件</li>
-<li>区域 5：指定该模板的作用域，例如指定用于 Java 还是 groovy 等等</li>
-<li>区域 6：提供一些引入模板的可选操作<br/>
-这里我们来写一个生成单例的模板，我们按照下图定义好缩写，描述与模板内容</li>
-</ul>
-
-<p><img src="media/15779345043093/15779346837212.jpg" alt=""/></p>
-
-<p>模板内容的代码如下</p>
-
-<pre><code class="language-text">private static final byte[] sInstanceLock = new byte[0];
-private static $className$ sInstance;
-
-private $className$() {
-}
-
-public static $className$ instance() {
-    if (sInstance == null) {
-        synchronized (sInstanceLock) {
-            if (sInstance == null) {
-                sInstance = new $className$();
-            }
-        }
-    }
-    return sInstance;
-}
-</code></pre>
-
-<p>然后我们选择区域 4 来编辑我们的自定义变量，我们进去后可以看到如下弹窗</p>
-
-<p><img src="media/15779345043093/15779347128525.jpg" alt=""/></p>
-
-<ul>
-<li>Name 为自定义的变量名称</li>
-<li>Expression 表示系统提供的一些方法</li>
-<li>Default value 为改变量的默认值</li>
-<li>Skip if define 勾选后，如果该变量被赋值则跳过，相当于引入过程中一次手动的 TAB<br/>
-接着我们在 Expression 中选择 className()，并勾选 Skip if define，并点击确定</li>
-</ul>
-
-<p><img src="media/15779345043093/15779347348794.jpg" alt=""/></p>
-
-<p>最后我们点击区域 5 来选择模板的作用域，我们选择 <code>Java</code> — <code>Declaration</code></p>
-
-<p><img src="media/15779345043093/15779347538507.jpg" alt=""/></p>
-
-<p>然后保存，我们的单例模板便生成成功了。测试下，在 IDE 中新建个 Java 类，在类的内部输入 single 便出现最上面的那个 UserManager 的效果。</p>
-
-<p>当然除此之外还有使用”\(SELECTION\)” 来包装代码块的模板，这个使用场景相对较少这里就不举例了，主要使用的就是这种直接的模板模式。感觉一些常用的，特别是工具类中静态方法相关的，我们都可以抽取成模板，提高开发效率。</p>
 
 ]]></content>
   </entry>

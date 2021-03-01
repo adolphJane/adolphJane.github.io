@@ -146,19 +146,19 @@
 
 <h2 id="toc_0">RecyclerView类图</h2>
 
-<p><img src="media/15941143181398/15951790156416.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790156416.jpg" alt=""/></figure></p>
 
 <h2 id="toc_1">RecyclerView绘制流程图</h2>
 
-<p><img src="media/15941143181398/15951790392948.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790392948.jpg" alt=""/></figure></p>
 
 <h2 id="toc_2">RecyclerView滑动流程图</h2>
 
-<p><img src="media/15941143181398/15951790559208.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790559208.jpg" alt=""/></figure></p>
 
 <h2 id="toc_3">RecyclerView缓存介绍图</h2>
 
-<p><img src="media/15941143181398/15951790783646.jpg" alt=""/></p>
+<p><figure><img src="media/15941143181398/15951790783646.jpg" alt=""/></figure></p>
 
 <h2 id="toc_4">RecyclerView</h2>
 
@@ -172,7 +172,7 @@
 <li>如果配置了LayoutManager 则通过反射方法创建它</li>
 </ul>
 
-<pre><code class="language-java"> public RecyclerView(Context context, @Nullable AttributeSet attrs, int defStyle) {
+<pre class="line-numbers"><code class="language-java"> public RecyclerView(Context context, @Nullable AttributeSet attrs, int defStyle) {
         super(context, attrs, defStyle);
         ...
         // View配置相关属性设置
@@ -239,7 +239,7 @@
 <li>更新缓存大小，并请求重新布局</li>
 </ul>
 
-<pre><code class="language-java">public void setLayoutManager(LayoutManager layout) {
+<pre class="line-numbers"><code class="language-java">public void setLayoutManager(LayoutManager layout) {
         if (layout == mLayout) {
             return;
         }
@@ -275,7 +275,7 @@
 <li>设置新的Adapter，并触发一系列监听事件</li>
 </ul>
 
-<pre><code class="language-java">public void setAdapter(Adapter adapter) {
+<pre class="line-numbers"><code class="language-java">public void setAdapter(Adapter adapter) {
    // 解除frozen状态
    setLayoutFrozen(false);
    // 替换到当前Adapter，并触发监听
@@ -321,7 +321,7 @@ private void setAdapterInternal(Adapter adapter, boolean compatibleWithPrevious,
 <li>如果未指定确定宽高的尺寸规格，则会进行布局，继而获得子View的大小。此过程可能执行两次</li>
 </ul>
 
-<pre><code class="language-java">   @Override
+<pre class="line-numbers"><code class="language-java">   @Override
     protected void onMeasure(int widthSpec, int heightSpec) {
         // mLayout 是 LayoutManager，通过 setLayoutManager 方法设置，没有设置则为空
         if (mLayout == null) {
@@ -394,7 +394,7 @@ STEP_ANIMATIONS<br/>
 <li>根据不同State状态，分别执行Step1、Step2、Step3方法</li>
 </ul>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     protected void onLayout(boolean changed, int l, int t, int r, int b) {
         TraceCompat.beginSection(TRACE_ON_LAYOUT_TAG);
         dispatchLayout();
@@ -405,7 +405,7 @@ STEP_ANIMATIONS<br/>
 
 <p>调用 dispatchLayout</p>
 
-<pre><code class="language-java">    void dispatchLayout() {
+<pre class="line-numbers"><code class="language-java">    void dispatchLayout() {
         // ...
         
         mState.mIsMeasuring = false;
@@ -440,7 +440,7 @@ STEP_ANIMATIONS<br/>
 <li>如有必要，则进行预布局并缓存信息</li>
 </ul>
 
-<pre><code class="language-java">    private void dispatchLayoutStep1() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep1() {
         //  State状态断言 
         mState.assertLayoutStep(State.STEP_START);
         mState.mIsMeasuring = false;
@@ -500,7 +500,7 @@ STEP_ANIMATIONS<br/>
 
 <h4 id="toc_11">RecyclerView#processAdapterUpdatesAndSetAnimationFlags</h4>
 
-<pre><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
+<pre class="line-numbers"><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
         // ...
         
         // mItemsAddedOrRemoved：当有 item 添加或删除的时候设置为 ture
@@ -543,7 +543,7 @@ STEP_ANIMATIONS<br/>
 <li>该方法可能会被多次执行</li>
 </ul>
 
-<pre><code class="language-java">private void dispatchLayoutStep2() {
+<pre class="line-numbers"><code class="language-java">private void dispatchLayoutStep2() {
    // 过滤掉 RequestLayout执行，需要过滤的时候 执行该方法，会使过滤次数+1。对应resumeRequestLayout方法进行消费
    eatRequestLayout();
    // 对应 onExitLayoutOrScroll
@@ -581,7 +581,7 @@ STEP_ANIMATIONS<br/>
 <li>该方法为LayoutManager布局核心执行方法，Child的测量和添加工作在fill这个重要方法执行，接下来会阐述</li>
 </ul>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // 确定是否需要反向布局
         // 确定锚点及偏移量 (1. 优先焦点child 2. 如果是反向布局，则找recycler里面最最接近尾部的child 3. 如果是正向，则找最接近头部的child)
@@ -662,7 +662,7 @@ STEP_ANIMATIONS<br/>
 
 <h6 id="toc_15">updateAnchorInfoForLayout</h6>
 
-<pre><code class="language-java">    private void updateAnchorInfoForLayout(RecyclerView.Recycler recycler, RecyclerView.State state,
+<pre class="line-numbers"><code class="language-java">    private void updateAnchorInfoForLayout(RecyclerView.Recycler recycler, RecyclerView.State state,
             AnchorInfo anchorInfo) {
         // 一般这里都是返回 false
         if (updateAnchorFromPendingData(state, anchorInfo)) {
@@ -683,7 +683,7 @@ STEP_ANIMATIONS<br/>
 
 <h6 id="toc_16">updateAnchorFromChildren</h6>
 
-<pre><code class="language-java">    private boolean updateAnchorFromChildren(RecyclerView.Recycler recycler,
+<pre class="line-numbers"><code class="language-java">    private boolean updateAnchorFromChildren(RecyclerView.Recycler recycler,
             RecyclerView.State state, AnchorInfo anchorInfo) {
         if (getChildCount() == 0) {
             return false;
@@ -716,7 +716,7 @@ STEP_ANIMATIONS<br/>
 
 <p>如果想要从下往上布局，可以这样设置</p>
 
-<pre><code class="language-java">    linearLayoutManager.setStackFromEnd(true);
+<pre class="line-numbers"><code class="language-java">    linearLayoutManager.setStackFromEnd(true);
 </code></pre>
 
 <p>这样的话，锚点会在尾部，数据加载完后首先显示的是底部的数据。</p>
@@ -736,7 +736,7 @@ STEP_ANIMATIONS<br/>
 <li>加载子View在 layoutChunk 中执行</li>
 </ul>
 
-<pre><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
         // ...
         // 可布局的位移
@@ -796,7 +796,7 @@ STEP_ANIMATIONS<br/>
 <li>获取目标View完毕后，进行含装饰的Margin计算，并执行布局</li>
 </ul>
 
-<pre><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,LayoutState layoutState, LayoutChunkResult result) {
+<pre class="line-numbers"><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,LayoutState layoutState, LayoutChunkResult result) {
         // （1） 获取下一个布局View （核心方法）
         View view = layoutState.next(recycler);
 
@@ -856,7 +856,7 @@ STEP_ANIMATIONS<br/>
 
 <p>先看注释（1）处，这里返回下一个要填充的 View，来看下具体过程</p>
 
-<pre><code class="language-java">    View next(RecyclerView.Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    View next(RecyclerView.Recycler recycler) {
         // ...
         // 除非定制View，不然为null
         if (mScrapList != null) { 
@@ -874,7 +874,7 @@ STEP_ANIMATIONS<br/>
 
 <p>继续看注释（2）处的 addView 方法</p>
 
-<pre><code class="language-java">    private void addViewInt(View child, int index, boolean disappearing) {
+<pre class="line-numbers"><code class="language-java">    private void addViewInt(View child, int index, boolean disappearing) {
         final ViewHolder holder = getChildViewHolderInt(child);
         
         // ...
@@ -927,7 +927,7 @@ STEP_ANIMATIONS<br/>
 
 <p>layout过程最后一步，执行相关动画和一些清理事项</p>
 
-<pre><code class="language-java">    private void dispatchLayoutStep3() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep3() {
         // ...
         
         // 将 layout 状态重置回 State.STEP_START
@@ -979,7 +979,7 @@ step2 真正进行布局，布局任务由 LayoutManager 负责，通过它的 o
 
 <p>主要涉及Item装饰的绘制和动画</p>
 
-<pre><code class="language-java">public void draw(Canvas c) {
+<pre class="line-numbers"><code class="language-java">public void draw(Canvas c) {
    super.draw(c);
 
    final int count = mItemDecorations.size();
@@ -1019,7 +1019,7 @@ public void onDraw(Canvas c) {
 
 <h3 id="toc_24">主要成员变量</h3>
 
-<pre><code class="language-java">final ArrayList&lt;ViewHolder&gt; mAttachedScrap = new ArrayList&lt;&gt;();
+<pre class="line-numbers"><code class="language-java">final ArrayList&lt;ViewHolder&gt; mAttachedScrap = new ArrayList&lt;&gt;();
 
 ArrayList&lt;ViewHolder&gt; mChangedScrap = null;
 
@@ -1055,11 +1055,11 @@ private ViewCacheExtension mViewCacheExtension;
 
 <p>RecycledViewPool 有一个重要的成员变量</p>
 
-<pre><code class="language-java">// SparseArray 类似于 key 为 int 类型 的 HashMap
+<pre class="line-numbers"><code class="language-java">// SparseArray 类似于 key 为 int 类型 的 HashMap
 SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 </code></pre>
 
-<pre><code class="language-java">static class ScrapData {
+<pre class="line-numbers"><code class="language-java">static class ScrapData {
     final ArrayList&lt;ViewHolder&gt; mScrapHeap = new ArrayList&lt;&gt;();
     int mMaxScrap = DEFAULT_MAX_SCRAP;
     long mCreateRunningAverageNs = 0;
@@ -1073,7 +1073,7 @@ SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 
 <p><code>getScrapDataForType</code>: 该方法根据 viewType 获取相应的 ScrapData，如果该 viewType 还没有绑定 ScrapData，就新创建一个 ScrapData 并绑定到该 viewType。</p>
 
-<pre><code class="language-java">private ScrapData getScrapDataForType(int viewType) {
+<pre class="line-numbers"><code class="language-java">private ScrapData getScrapDataForType(int viewType) {
     ScrapData scrapData = mScrap.get(viewType);
     if (scrapData == null) {
         scrapData = new ScrapData();
@@ -1085,7 +1085,7 @@ SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 
 <p><code>setMaxRecycledViews</code>: 该方法可以设置相应 viewType 的 View 容量，超出容量时，从后面开始删除，直到满足新的容量。</p>
 
-<pre><code class="language-java">public void setMaxRecycledViews(int viewType, int max) {
+<pre class="line-numbers"><code class="language-java">public void setMaxRecycledViews(int viewType, int max) {
     ScrapData scrapData = getScrapDataForType(viewType);
     scrapData.mMaxScrap = max;
     final ArrayList&lt;ViewHolder&gt; scrapHeap = scrapData.mScrapHeap;
@@ -1098,7 +1098,7 @@ SparseArray&lt;ScrapData&gt; mScrap = new SparseArray&lt;&gt;();
 
 <p><code>getRecycledView</code>: 该方法根据 viewType 获取一个 ViewHolder，获取到的 ViewHolder 将会被移除出 Scrap 堆。获取不到则返回 null。</p>
 
-<pre><code class="language-java">@Nullable
+<pre class="line-numbers"><code class="language-java">@Nullable
 public ViewHolder getRecycledView(int viewType) {
     final ScrapData scrapData = mScrap.get(viewType);
     if (scrapData != null &amp;&amp; !scrapData.mScrapHeap.isEmpty()) {
@@ -1115,7 +1115,7 @@ public ViewHolder getRecycledView(int viewType) {
 
 <p><code>putRecycledView</code>: 该方法也很好理解，根据 ViewHolder 的 viewType 放入 RecycledViewPool 的相应集合中，如果集合已满，不再添加。</p>
 
-<pre><code class="language-java">public void putRecycledView(ViewHolder scrap) {
+<pre class="line-numbers"><code class="language-java">public void putRecycledView(ViewHolder scrap) {
     final int viewType = scrap.getItemViewType();
     final ArrayList&lt;ViewHolder&gt; scrapHeap = getScrapDataForType(viewType).mScrapHeap;
     if (mScrap.get(viewType).mMaxScrap &lt;= scrapHeap.size()) {
@@ -1133,7 +1133,7 @@ public ViewHolder getRecycledView(int viewType) {
 
 <p>ViewCacheExtension 是一个由开发者控制的 View 缓存帮助类</p>
 
-<pre><code class="language-java">public abstract static class ViewCacheExtension {
+<pre class="line-numbers"><code class="language-java">public abstract static class ViewCacheExtension {
     /**
       * Returns a View that can be binded to the given Adapter position.
       */
@@ -1154,7 +1154,7 @@ public ViewHolder getRecycledView(int viewType) {
 
 <p>getViewForPosition 方法比较重要，用于获取某个位置需要展示的 View,最终执行tryGetViewHolderForPositionByDeadline获取View</p>
 
-<pre><code class="language-java">public View getViewForPosition(int position) {
+<pre class="line-numbers"><code class="language-java">public View getViewForPosition(int position) {
     return getViewForPosition(position, false);
 }
     
@@ -1177,7 +1177,7 @@ View getViewForPosition(int position, boolean dryRun) {
 <li>最后直接创建VH</li>
 </ul>
 
-<pre><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
+<pre class="line-numbers"><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
                 boolean dryRun, long deadlineNs) {
     boolean fromScrapOrHiddenOrCache = false;
     ViewHolder holder = null;
@@ -1246,7 +1246,7 @@ View getViewForPosition(int position, boolean dryRun) {
     }
 </code></pre>
 
-<pre><code class="language-java">    // 如果是处于预布局阶段（先简单理解为执行 dispatchLayoutStep1 方法）
+<pre class="line-numbers"><code class="language-java">    // 如果是处于预布局阶段（先简单理解为执行 dispatchLayoutStep1 方法）
     // （其实下面方法要返回 ture 还需要开启“预处理动画”，这跟动画有关，先不多说）
     if (mState.isPreLayout()) {
         holder = getChangedScrapViewForPosition(position);
@@ -1261,7 +1261,7 @@ ScrapView：View仍然attach在其父RecyclerView上且可以被重复绑定数�
 mAttachedScrap：VH有ViewHolder.FLAG_REMOVED | ViewHolder.FLAG_INVALID这两个Flag，或者VH是没有被更新过的，或者是可以被重新更新的VH。<br/>
 其它则是mChangedScrap</p>
 
-<pre><code class="language-java">ViewHolder getChangedScrapViewForPosition(int position) {
+<pre class="line-numbers"><code class="language-java">ViewHolder getChangedScrapViewForPosition(int position) {
   // 必须是预布局状态，取mChangedScrap中的ViewHolder
   final int changedScrapSize;
   if (mChangedScrap == null || (changedScrapSize = mChangedScrap.size()) == 0) {
@@ -1323,7 +1323,7 @@ void scrapView(View view) {
 <li>从一级缓存CacheView中获取</li>
 </ul>
 
-<pre><code class="language-java">ViewHolder getScrapOrHiddenOrCachedHolderForPosition(int position, boolean dryRun) {
+<pre class="line-numbers"><code class="language-java">ViewHolder getScrapOrHiddenOrCachedHolderForPosition(int position, boolean dryRun) {
        final int scrapCount = mAttachedScrap.size();
 
        // 先从 mAttachedScrap中获取VH
@@ -1377,7 +1377,7 @@ void scrapView(View view) {
 <li>在尝试从Cache获取VH，将未命中的从Cache中移出，并加入到Pool缓存</li>
 </ul>
 
-<pre><code class="language-java">    // 如果用户设置了 ViewCacheExtension
+<pre class="line-numbers"><code class="language-java">    // 如果用户设置了 ViewCacheExtension
     if (holder == null &amp;&amp; mViewCacheExtension != null) {
         // We are NOT sending the offsetPosition because LayoutManager does not
         // know it.
@@ -1392,7 +1392,7 @@ void scrapView(View view) {
 
 <h5 id="toc_35">第四步 从用户设置的 ViewCacheExtension 中获取缓存，没有获取到就继续往下：</h5>
 
-<pre><code class="language-java">    if (holder == null) { // fallback to pool
+<pre class="line-numbers"><code class="language-java">    if (holder == null) { // fallback to pool
         holder = getRecycledViewPool().getRecycledView(type);
         // ...
     }
@@ -1402,7 +1402,7 @@ void scrapView(View view) {
 
 <p>RecycledViewPool 已经是最后一级缓存了，如果这里也没有获取到，只能通过 Adapter 的 createViewHolder 方法创建一个 ViewHolder：</p>
 
-<pre><code class="language-java">    if (holder == null) {
+<pre class="line-numbers"><code class="language-java">    if (holder == null) {
         holder = mAdapter.createViewHolder(RecyclerView.this, type);
         // ...
     }
@@ -1425,7 +1425,7 @@ void scrapView(View view) {
 
 <p>既然叫 Recycler，那肯定要做回收工作了，recycleView 方法就完成了这些工作，下面看一下该方法的实现：</p>
 
-<pre><code class="language-java">    public void recycleView(@NonNull View view) {
+<pre class="line-numbers"><code class="language-java">    public void recycleView(@NonNull View view) {
         ViewHolder holder = getChildViewHolderInt(view);
         // ...
         recycleViewHolderInternal(holder);
@@ -1434,7 +1434,7 @@ void scrapView(View view) {
 
 <p>继续看 recycleViewHolderInternal：</p>
 
-<pre><code class="language-java">    void recycleViewHolderInternal(ViewHolder holder) {
+<pre class="line-numbers"><code class="language-java">    void recycleViewHolderInternal(ViewHolder holder) {
         // ...
 
         if (forceRecycle || holder.isRecyclable()) {
@@ -1478,7 +1478,7 @@ void scrapView(View view) {
 
 <h4 id="toc_40">scrapView</h4>
 
-<pre><code class="language-java">    void scrapView(View view) {
+<pre class="line-numbers"><code class="language-java">    void scrapView(View view) {
         final ViewHolder holder = getChildViewHolderInt(view);
         
         // 满足这几个条件中的一个就可以进入 if 循环，有机会将 View 缓存到 mAttachedScrap
@@ -1526,7 +1526,7 @@ void scrapView(View view) {
 
 <h4 id="toc_43">LinearLayoutManager#onLayoutChildren</h4>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // ...
         // 找到锚点（具体过程等到分析 layout 时再说）
@@ -1550,7 +1550,7 @@ void scrapView(View view) {
 
 <h4 id="toc_44">LinearLayoutManager#fill</h4>
 
-<pre><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">    int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
 
         // 进行 layout 时 layoutState.mScrollingOffset 的值被设置为
@@ -1584,7 +1584,7 @@ void scrapView(View view) {
 
 <h4 id="toc_45">LinearLayoutManager#layoutChunk</h4>
 
-<pre><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
+<pre class="line-numbers"><code class="language-java">    void layoutChunk(RecyclerView.Recycler recycler, RecyclerView.State state,
             LayoutState layoutState, LayoutChunkResult result) {
         // （1）
         View view = layoutState.next(recycler);
@@ -1608,7 +1608,7 @@ void scrapView(View view) {
 
 <p>（2）处的 addView 方法就不多说了，该方法将得到的子 View 添加到 RecyclerView 中。主要看（1）处，看看子 View 从何而来</p>
 
-<pre><code class="language-java">    View next(RecyclerView.Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    View next(RecyclerView.Recycler recycler) {
         // ...
         
         final View view = recycler.getViewForPosition(mCurrentPosition);
@@ -1629,7 +1629,7 @@ void scrapView(View view) {
 
 <p>该方法最终调用了 RecyclerViewDataObserver 的 onChanged 方法</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onChanged() {
         // ...
 
@@ -1647,7 +1647,7 @@ void scrapView(View view) {
 
 <p>该方法会进行视图重绘，又来到了 layout 过程，继续以 LinearLayoutManager 为例，从它的 onLayoutChildren 方法看起，由于分析第一次 layout 时已经看过一遍了，这次主要看下不同之处：</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onLayoutChildren(RecyclerView.Recycler recycler, RecyclerView.State state) {
         // ...
         
@@ -1661,7 +1661,7 @@ void scrapView(View view) {
 
 <h4 id="toc_48">LayoutManager#detachAndScrapAttachedViews</h4>
 
-<pre><code class="language-java">    public void detachAndScrapAttachedViews(@NonNull Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">    public void detachAndScrapAttachedViews(@NonNull Recycler recycler) {
         final int childCount = getChildCount();
         for (int i = childCount - 1; i &gt;= 0; i--) {
             final View v = getChildAt(i);
@@ -1672,7 +1672,7 @@ void scrapView(View view) {
 
 <p>由于不是第一次 layout，RecyclerView 这时已经有子 View 了，该方法遍历子 View，调用 scrapOrRecycleView 方法：</p>
 
-<pre><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
         final ViewHolder viewHolder = getChildViewHolderInt(view);
         // 不能回收添加了 FLAG_IGNORE 标记的 ViewHolder
         // 可通过 LayoutManager 的 ignoreView 为相应的 View 添加该标记
@@ -1694,7 +1694,7 @@ void scrapView(View view) {
 
 <h4 id="toc_49">Recycler#recycleViewHolderInternal</h4>
 
-<pre><code class="language-java">        void recycleViewHolderInternal(ViewHolder holder) {
+<pre class="line-numbers"><code class="language-java">        void recycleViewHolderInternal(ViewHolder holder) {
             // ...
             boolean cached = false;
             boolean recycled = false;
@@ -1728,14 +1728,14 @@ void scrapView(View view) {
 
 <p>该方法传入一个 int 参数，表示要数据有更新的 item 的 position。</p>
 
-<pre><code class="language-java">    public final void notifyItemChanged(int position) {
+<pre class="line-numbers"><code class="language-java">    public final void notifyItemChanged(int position) {
         mObservable.notifyItemRangeChanged(position, 1);
     }
 </code></pre>
 
 <p>最终调用 RecyclerViewDataObserver 的 onItemRangeChanged 方法</p>
 
-<pre><code class="language-java">    @Override
+<pre class="line-numbers"><code class="language-java">    @Override
     public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
         // 会在 mAdapterHelper 中创建一个 UpdateOp，将信息保存起来
         if (mAdapterHelper.onItemRangeChanged(positionStart, itemCount, payload)) {
@@ -1747,7 +1747,7 @@ void scrapView(View view) {
 
 <p>继续看 triggerUpdateProcessor 方法</p>
 
-<pre><code class="language-java">    void triggerUpdateProcessor() {
+<pre class="line-numbers"><code class="language-java">    void triggerUpdateProcessor() {
         // 判断条件默认为 false，执行 else 块
         if (POST_UPDATES_ON_ANIMATION &amp;&amp; mHasFixedSize &amp;&amp; mIsAttached) {
             // ...
@@ -1760,7 +1760,7 @@ void scrapView(View view) {
 
 <p>在保存了一些信息后，还是进行视图重绘。来到了 layout 过程后，还是以 LinearLayoutManager 为例，这次先看下布局过程的 step1，也就是 dispatchLayoutStep1 方法</p>
 
-<pre><code class="language-java">    private void dispatchLayoutStep1() {
+<pre class="line-numbers"><code class="language-java">    private void dispatchLayoutStep1() {
         // ...
         
         processAdapterUpdatesAndSetAnimationFlags();
@@ -1771,7 +1771,7 @@ void scrapView(View view) {
 
 <p>主要看 processAdapterUpdatesAndSetAnimationFlags 方法，从名字也可以看出，它负责更新 adapter 的信息</p>
 
-<pre><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
+<pre class="line-numbers"><code class="language-java">    private void processAdapterUpdatesAndSetAnimationFlags() {
         // ...
 
         if (predictiveItemAnimationsEnabled()) {
@@ -1786,7 +1786,7 @@ void scrapView(View view) {
 
 <p>这里借助了 mAdapterHelper，它最终又通过接口回调（回调了 markViewHoldersUpdated 方法）调用了 RecyclerView 的 viewRangeUpdate 方法</p>
 
-<pre><code class="language-java">    void viewRangeUpdate(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">    void viewRangeUpdate(int positionStart, int itemCount, Object payload) {
         // ...
 
         for (int i = 0; i &lt; childCount; i++) {
@@ -1807,7 +1807,7 @@ void scrapView(View view) {
 
 <h4 id="toc_51">LayoutManager#scrapOrRecycleView</h4>
 
-<pre><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
+<pre class="line-numbers"><code class="language-java">    private void scrapOrRecycleView(Recycler recycler, int index, View view) {
         final ViewHolder viewHolder = getChildViewHolderInt(view);
         // ...
         
@@ -1827,7 +1827,7 @@ void scrapView(View view) {
 
 <p>首先将 View 从 RecyclerView 中 detach 掉（而不是 remove 掉）。然后在回收时，调用的是 Recycler 的 scrapView 方法。该方法在前面也分析过了，这里再看一次</p>
 
-<pre><code class="language-java">    void scrapView(View view) {
+<pre class="line-numbers"><code class="language-java">    void scrapView(View view) {
         final ViewHolder holder = getChildViewHolderInt(view);
         
         // 满足这几个条件中的一个就可以进入 if 循环
@@ -1862,7 +1862,7 @@ void scrapView(View view) {
 <p>根据View事件机制可以直接来看onTouchEvent方法。<br/>
 重点查看move事件。move事件执行了scrollByInternal方法。该方法最后会执行LayoutManager的Scroll方法，以LinearLayoutManager为例，它的ScrollBy方法最终执行到fill方法。也就是上文提到的ItemView填充方法，滑动过程中会不断执行获取对应位置的ViewHolder，然后进行View的展示。从而实现RecyclerView的滑动</p>
 
-<pre><code class="language-java">public boolean onTouchEvent(MotionEvent e) {
+<pre class="line-numbers"><code class="language-java">public boolean onTouchEvent(MotionEvent e) {
    ...
 
    switch (action) {
@@ -1914,7 +1914,7 @@ void scrapView(View view) {
 <li>其它处罚Nested、OnScroll等事件</li>
 </ul>
 
-<pre><code class="language-java">
+<pre class="line-numbers"><code class="language-java">
 boolean scrollByInternal(int x, int y, MotionEvent ev) {
    int unconsumedX = 0, unconsumedY = 0;
    int consumedX = 0, consumedY = 0;
@@ -1964,7 +1964,7 @@ boolean scrollByInternal(int x, int y, MotionEvent ev) {
 <li>平移整个View的child，实现滑动效果</li>
 </ul>
 
-<pre><code class="language-java">public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler,
+<pre class="line-numbers"><code class="language-java">public int scrollVerticallyBy(int dy, RecyclerView.Recycler recycler,
        RecyclerView.State state) {
    if (mOrientation == HORIZONTAL) {
        return 0;
@@ -1993,7 +1993,7 @@ int scrollBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 }
 </code></pre>
 
-<pre><code class="language-java">int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
+<pre class="line-numbers"><code class="language-java">int fill(RecyclerView.Recycler recycler, LayoutState layoutState,
             RecyclerView.State state, boolean stopOnFocusable) {
     ...
     // 执行回收流程
@@ -2011,7 +2011,7 @@ int scrollBy(int dy, RecyclerView.Recycler recycler, RecyclerView.State state) {
 <li>计算位移limit值，根据limit</li>
 </ul>
 
-<pre><code class="language-java">private void recycleByLayoutState(RecyclerView.Recycler recycler, LayoutState layoutState) {
+<pre class="line-numbers"><code class="language-java">private void recycleByLayoutState(RecyclerView.Recycler recycler, LayoutState layoutState) {
    // 假设是 初始方向布局，则开始末尾View回收。反之亦然
    if (layoutState.mLayoutDirection == LayoutState.LAYOUT_START) {
        recycleViewsFromEnd(recycler, layoutState.mScrollingOffset);
@@ -2058,7 +2058,7 @@ private void recycleChildren(RecyclerView.Recycler recycler, int startIndex, int
 <li>执行Recycler回收方法</li>
 </ul>
 
-<pre><code class="language-java">public void removeAndRecycleViewAt(int index, Recycler recycler) {
+<pre class="line-numbers"><code class="language-java">public void removeAndRecycleViewAt(int index, Recycler recycler) {
   final View view = getChildAt(index); // 获取目标View
   removeViewAt(index); // 执行ChildHelper移出
   recycler.recycleView(view); // 回收View
@@ -2095,7 +2095,7 @@ public void recycleView(View view) {
 <li>如果没有Cache成功，则直接缓存到Pool中</li>
 </ul>
 
-<pre><code class="language-java"> void recycleViewHolderInternal(ViewHolder holder) {  
+<pre class="line-numbers"><code class="language-java"> void recycleViewHolderInternal(ViewHolder holder) {  
       if (mViewCacheMax &gt; 0
               &amp;&amp; !holder.hasAnyOfTheFlags(ViewHolder.FLAG_INVALID
               | ViewHolder.FLAG_REMOVED
@@ -2136,7 +2136,7 @@ public void recycleView(View view) {
 <li>下面介绍下 ItemChanged操作</li>
 </ul>
 
-<pre><code class="language-java">   public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">   public void onItemRangeChanged(int positionStart, int itemCount, Object payload) {
        assertNotInLayoutOrScroll(null);
        if (mAdapterHelper.onItemRangeChanged(positionStart, itemCount, payload)) {
            triggerUpdateProcessor();
@@ -2160,7 +2160,7 @@ public void recycleView(View view) {
 
 <h4 id="toc_61">AdapterHelper.onItemRangeChanged</h4>
 
-<pre><code class="language-java">boolean onItemRangeChanged(int positionStart, int itemCount, Object payload) {
+<pre class="line-numbers"><code class="language-java">boolean onItemRangeChanged(int positionStart, int itemCount, Object payload) {
    // 添加一个更新操作 ，标志为update、记录pos、item相关信息
    mPendingUpdates.add(obtainUpdateOp(UpdateOp.UPDATE, positionStart, itemCount, payload));
    mExistingUpdateTypes |= UpdateOp.UPDATE;
@@ -2176,7 +2176,7 @@ public void recycleView(View view) {
 <li>否则直接走requestLayout方式更新，即重新走绘制流程 onMeasure、onLayout等</li>
 </ul>
 
-<pre><code class="language-java">void triggerUpdateProcessor() {
+<pre class="line-numbers"><code class="language-java">void triggerUpdateProcessor() {
   if (POST_UPDATES_ON_ANIMATION &amp;&amp; mHasFixedSize &amp;&amp; mIsAttached) {
       // RecyclerView有固定大小的时候 会执行mUpdateChildViewsRunnable 来处理更新
       ViewCompat.postOnAnimation(RecyclerView.this, mUpdateChildViewsRunnable);
@@ -2193,7 +2193,7 @@ public void recycleView(View view) {
 <p>requestLayout下 onMeasure -&gt; dispatchLayout -&gt; dispatchLayoutStep2 -&gt; layoutChildren -&gt; fill -&gt; layoutChunk -&gt; next -&gt; tryGetViewHolderForPositionByDeadline<br/>
 最终对Item进行重新绑定 实现局部刷新逻辑</p>
 
-<pre><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
+<pre class="line-numbers"><code class="language-java">ViewHolder tryGetViewHolderForPositionByDeadline(int position,
                 boolean dryRun, long deadlineNs) {
                 
            if (mState.isPreLayout() &amp;&amp; holder.isBound()) {
@@ -2210,7 +2210,7 @@ public void recycleView(View view) {
 
 <p>当RecyclerView有固定大小时，则不需要Measure，直接走dispatchLayout方法进行刷新操作</p>
 
-<pre><code class="language-java">final Runnable mUpdateChildViewsRunnable = new Runnable() {
+<pre class="line-numbers"><code class="language-java">final Runnable mUpdateChildViewsRunnable = new Runnable() {
    @Override
    public void run() {
         ...
@@ -2359,6 +2359,12 @@ void consumePendingUpdateOperations() {
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -2378,12 +2384,6 @@ void consumePendingUpdateOperations() {
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

@@ -144,7 +144,7 @@
 首先，在自定义 LayoutInflate 之前，我们要先分析一下 LayoutInflate 的源码，了解了源码的实现方式，才能定制嘛~~~~<br/>
 好了，怕你们无聊跑了，先放效果图出来镇贴</p>
 
-<p><img src="media/15561207871588/20171104150978927436317.gif" alt=""/></p>
+<p><figure><img src="media/15561207871588/20171104150978927436317.gif" alt=""/></figure></p>
 
 <p>好了，效果看完了，</p>
 
@@ -152,7 +152,7 @@
 
 <h2 id="toc_0">LayoutInflate</h2>
 
-<p><img src="media/15561207871588/15713651711430.jpg" alt=""/></p>
+<p><figure><img src="media/15561207871588/15713651711430.jpg" alt=""/></figure></p>
 
 <p>还是提取一下关键信息吧。</p>
 
@@ -169,7 +169,7 @@
 
 <p>我们给 Activity 设置 布局 xml 都是调用这个方法，现在我们就来看看这个方法到底干了什么事。</p>
 
-<pre><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
+<pre class="line-numbers"><code class="language-java">public void setContentView(@LayoutRes int layoutResID) {
   getWindow().setContentView(layoutResID);
   initWindowDecorActionBar();
 }
@@ -212,7 +212,7 @@ public PhoneWindow(Context context) {
 
 <p>同样是调用了LayoutInflate.inflate()方法</p>
 
-<pre><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
+<pre class="line-numbers"><code class="language-java">public static View inflate(Context context, @LayoutRes int resource, ViewGroup root) {
     LayoutInflater factory = LayoutInflater.from(context);
     return factory.inflate(resource, root);
 }
@@ -227,7 +227,7 @@ public PhoneWindow(Context context) {
 <p>我们再来看看怎么获取到 LayoutInflate 的实例。<br/>
 上面三个xml 解析成 view 的方法都是用LayoutInflate.from(context)来获取 LayoutInflate 实例的。</p>
 
-<pre><code class="language-java">public static LayoutInflater from(Context context) {
+<pre class="line-numbers"><code class="language-java">public static LayoutInflater from(Context context) {
     LayoutInflater LayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
    if (LayoutInflater == null) {
         throw new AssertionError(&quot;LayoutInflater not found.&quot;);
@@ -247,7 +247,7 @@ public PhoneWindow(Context context) {
 
 <p>通过 Resources 获取 xml 解析器XmlResourceParser。</p>
 
-<pre><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre class="line-numbers"><code class="language-java">public View inflate(@LayoutRes int resource, @Nullable ViewGroup root, boolean attachToRoot) {
     final Resources res = getContext().getResources();
     if (DEBUG) {
         Log.d(TAG, &quot;INFLATING from resource: \&quot;&quot; + res.getResourceName(resource) + &quot;\&quot; (&quot;
@@ -265,7 +265,7 @@ public PhoneWindow(Context context) {
 
 <p>XmlResourceParser解析 xml，并且返回 view</p>
 
-<pre><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
+<pre class="line-numbers"><code class="language-java">public View inflate(XmlPullParser parser, @Nullable ViewGroup root, boolean attachToRoot) {
     synchronized (mConstructorArgs) {
         //写入跟踪信息，用于 Debug 相关，先不关心这个
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, &quot;inflate&quot;);
@@ -371,7 +371,7 @@ public PhoneWindow(Context context) {
 
 <p>我们先来看看 createViewFromTag</p>
 
-<pre><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
+<pre class="line-numbers"><code class="language-java">View createViewFromTag(View parent, String name, Context context, AttributeSet attrs,boolean ignoreThemeAttr) {
     //获取命名空间
    if (name.equals(&quot;view&quot;)) {
         name = attrs.getAttributeValue(null, &quot;class&quot;);
@@ -440,7 +440,7 @@ public PhoneWindow(Context context) {
 
 <p>接下来继续去看子 View 的解析rInflateChildren</p>
 
-<pre><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
+<pre class="line-numbers"><code class="language-java">void rInflate(XmlPullParser parser, View parent, Context context,AttributeSet attrs, boolean finishInflate) throws XmlPullParserException, IOException {
 //获取布局层级
     final int depth = parser.getDepth();
     int type;
@@ -507,7 +507,7 @@ public PhoneWindow(Context context) {
 
 <p>源码看了很久，我们再来重新看一遍动画吧</p>
 
-<p><img src="media/15561207871588/20171104150979091135893.gif" alt=""/></p>
+<p><figure><img src="media/15561207871588/20171104150979091135893.gif" alt=""/></figure></p>
 
 <ol>
 <li>翻页</li>
@@ -559,7 +559,7 @@ You can use this to customize the tag names available in your XML layout files.<
 
 <p>关键代码如下：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View onCreateView(String name, Context context, AttributeSet attrs) {
  //创建一个 View
     View view = createViewOrFailQuietly(name, context, attrs);
@@ -577,7 +577,7 @@ public View onCreateView(String name, Context context, AttributeSet attrs) {
 
 <p>创建 view 的方法，这里注意一下，xml 标签里面系统的 view只有类名，自定义 view 是全路径。如：,而可以省略路径的 View 又分为 &quot;android.widget.&quot;和&quot;android.view.&quot;包下，所以对于只写缩写的 view，需要遍历这两个路径。</p>
 
-<pre><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
+<pre class="line-numbers"><code class="language-java">private View createViewOrFailQuietly(String name, Context context,
                                      AttributeSet attrs) {
     //1.自定义控件标签名称带点，所以创建时不需要前缀
     if (name.contains(&quot;.&quot;)) {
@@ -605,7 +605,7 @@ private View createViewOrFailQuietly(String name, String prefix, Context context
 
 <p>读取 attrs 里面的属性，给含有特点 attrs 属性的 view设置 tag 并保存起来。</p>
 
-<pre><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
+<pre class="line-numbers"><code class="language-java">private void setViewTag(View view, Context context, AttributeSet attrs) {
     //所有自定义的属性
     TypedArray a = context.obtainStyledAttributes(attrs, R.styleable.AnimationView);
     if (a != null &amp;&amp; a.length() &gt; 0) {
@@ -625,7 +625,7 @@ private View createViewOrFailQuietly(String name, String prefix, Context context
 
 <p>好了，我们自定义LayoutInflater.Factory已经结束了，so，我们可以直接调用 LayoutInflate.cloneInContext(context)获取一个新的 LayoutInflate，然后再setFactor(customFactor)就可以了。代码如下：</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
 public View onCreateView(LayoutInflater original, ViewGroup container,
                          Bundle savedInstanceState) {
     Bundle args = getArguments();
@@ -761,6 +761,12 @@ public View onCreateView(LayoutInflater original, ViewGroup container,
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -780,12 +786,6 @@ public View onCreateView(LayoutInflater original, ViewGroup container,
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

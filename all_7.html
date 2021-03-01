@@ -120,6 +120,44 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15711208032276.html">
+                
+                  <h1>外观模式(门面模式)</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">外观模式介绍</h2>
+
+<p>外观模式(Facade)在开发过程中的运用频率非常高，尤其是在现阶段各种第三方SDK充斥在我们的周边，而这些SDK很大概率会使用外观模式。通过一个外观类使得整个系统的接口只有一个统一的高层接口，这样能够降低用户的使用成本，也对用户屏蔽了很多实现细节。当然，在我们的开发过程中，外观模式也是我们封装API的常用手段，例如网络模块、ImageLoader模块等。</p>
+
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                   <a href="15711208032276.html">Read more</a>&nbsp;&nbsp; 
+                    <span class="date">2019/10/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95.html'>算法</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15711023020774.html">
                 
                   <h1>装饰模式</h1>
@@ -366,7 +404,7 @@
 
 <p>Protobuf Support插件可以支持Protobuf文件高亮语法显示</p>
 
-<p><img src="media/15662718181666/15662727464652.png" alt="" style="width:582px;"/></p>
+<p><figure><img src="media/15662718181666/15662727464652.png" alt="" style="width:582px;"/></figure></p>
 
 
                         
@@ -452,126 +490,6 @@
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='JavaWeb.html'>JavaWeb</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15620327900428.html">
-                
-                  <h1>Xposed开发</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">Xposed原理</h2>
-
-<p>Xposed的底层原理是通过替换/system/bin/app_precesss 程序控制zygote进程，使得它在系统启动的过程中会加载Xposed framework的一个jar文件即XposedBridge.jar，从而完成对Zygote进程及其创建的Dalvik虚拟机的劫持，并且能够允许开发者独立的替代任何class。</p>
-
-<h2 id="toc_1">安装Xposed框架</h2>
-
-<p>可以选择使用太极阴或者VirtualXposed软件，来支持Xposed框架运行，相对比较省力，无需重启或者root。如果爱折腾，可以考虑使用太极阳或者EdXposed，获取更多权限。</p>
-
-<blockquote>
-<p>注意VirtualXposed软件0.18.2版本之后不支持32位应用。</p>
-</blockquote>
-
-<h2 id="toc_2">编写Hook应用</h2>
-
-<p>新建一个<code>Android</code>工程<code>XposedDemo</code></p>
-
-<h3 id="toc_3">引入Xposed Api</h3>
-
-<p>在<code>app build.gradle</code>文件中<br/>
-添加<code>de.robv.android.xposed:api:82</code>和<code>de.robv.android.xposed:api:82:source</code>依赖</p>
-
-<pre><code class="language-text">compileOnly &#39;de.robv.android.xposed:api:82&#39;
-compileOnly &#39;de.robv.android.xposed:api:82:sources&#39;
-</code></pre>
-
-<h3 id="toc_4">在AndroidManifest.xml文件配置xposed信息</h3>
-
-<pre><code class="language-text">&lt;!-- 标记xposed插件 start--&gt;
-&lt;meta-data
-    android:name=&quot;xposedmodule&quot;
-    android:value=&quot;true&quot;/&gt;
-&lt;!-- 模块描述 --&gt;
-&lt;meta-data
-    android:name=&quot;xposeddescription&quot;
-    android:value=&quot;测试Xposed&quot;/&gt;
-&lt;!-- 最低版本号 --&gt;
-&lt;meta-data
-    android:name=&quot;xposedminversion&quot;
-    android:value=&quot;54&quot;/&gt;
-&lt;!-- 标记xposed插件 end--&gt;
-</code></pre>
-
-<h3 id="toc_5">创建hook类，实现IXposedHookLoadPackage接口</h3>
-
-<pre><code class="language-text">public class HelloHook implements IXposedHookLoadPackage {
-    @Override
-    public void handleLoadPackage(XC_LoadPackage.LoadPackageParam lpparam) throws Throwable {
-        XposedBridge.log(&quot;===包名===&quot; + lpparam.packageName);
-       
-
-        if (lpparam.packageName.equals(&quot;com.zhuliyi.xposedapplication&quot;)) {
-            //混淆后方法名也变化了
-            XposedHelpers.findAndHookMethod(&quot;com.zhuliyi.xposedapplication.MainActivity&quot;, lpparam.classLoader, &quot;verifyLogin&quot;, String.class, String.class, new XC_MethodHook() {
-                @Override
-                protected void beforeHookedMethod(MethodHookParam param) throws Throwable {
-                    super.beforeHookedMethod(param);
-                }
-
-                @Override
-                protected void afterHookedMethod(MethodHookParam param) throws Throwable {
-                    super.afterHookedMethod(param);
-                    param.setResult(true);
-                }
-            });
-        }
-    }
-}
-</code></pre>
-
-<p>handleLoadPackage方法回调是在目标应用加载时候调用，先通过LoadPackageParam参与判断目标应用的包名，然后通过XposedHelpers.findAndHookMethod() hook调用的方法，第一个参数是包名，第二个是classLoader,第三个是方法名，后面是方法参数，最后是XC_MethodHook回调，beforeHookedMethod是方法执行前调用 ，afterHookedMethod是方法执行后调用，通过param.setResult(true)，设置返回值为true,当然也可以通过进行其他操作，这里就不介绍了</p>
-
-<h3 id="toc_6">添加hook文件配置</h3>
-
-<p>我们需要在assets目录下面新建一个xposed_init文件，写上我们Hook文件的路径。</p>
-
-<p><img src="media/15620327900428/16109471541886.jpg" alt=""/></p>
-
-<p>接着 编译，运行，安装apk，最后在Xposed软件模块中添加XposedDemo框架，然后重启设置。</p>
-
-<p><a href="https://www.taichi-app.com/#/index">太极官网</a></p>
-
-<p><a href="https://github.com/android-hacker/VirtualXposed">VirtualXposed GitHub首页</a></p>
-
-<p><a href="http://dl-xda.xposed.info/framework/sdk21/x86/">Xposed SDK下载</a></p>
-
-<p><a href="https://api.xposed.info/reference/de/robv/android/xposed/XposedHelpers.html">Xposed API</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2019/07/02</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
           				   
                     
 
@@ -677,6 +595,12 @@ compileOnly &#39;de.robv.android.xposed:api:82:sources&#39;
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -696,12 +620,6 @@ compileOnly &#39;de.robv.android.xposed:api:82:sources&#39;
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

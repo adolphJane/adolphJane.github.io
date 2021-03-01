@@ -146,7 +146,7 @@
 
 <h3 id="toc_1">创建Retrofit实例</h3>
 
-<pre><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
         .baseUrl(&quot;http://localhost:4567/&quot;)
         .build();
 </code></pre>
@@ -157,7 +157,7 @@
 
 <p>以获取指定id的Blog为例:</p>
 
-<pre><code class="language-java">public interface BlogService {
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
     @GET(&quot;blog/{id}&quot;)
     Call&lt;ResponseBody&gt; getBlog(@Path(&quot;id&quot;) int id);
 }
@@ -169,7 +169,7 @@
 
 <h3 id="toc_3">接口调用</h3>
 
-<pre><code class="language-java">Call&lt;ResponseBody&gt; call = service.getBlog(2);
+<pre class="line-numbers"><code class="language-java">Call&lt;ResponseBody&gt; call = service.getBlog(2);
 // 用法和OkHttp的call如出一辙,
 // 不同的是如果是Android系统回调方法执行在主线程
 call.enqueue(new Callback&lt;ResponseBody&gt;() {
@@ -199,11 +199,11 @@ call.enqueue(new Callback&lt;ResponseBody&gt;() {
 
 <h3 id="toc_5">第一类：HTTP请求方法</h3>
 
-<p><img src="media/15561207870240/15713328600715.png" alt=""/></p>
+<p><figure><img src="media/15561207870240/15713328600715.png" alt=""/></figure></p>
 
 <p>以上表格中的除HTTP以外都对应了HTTP标准中的请求方法，而HTTP注解则可以代替以上方法中的任意一个注解,有3个属性：<code>method</code>、<code>path</code>、<code>hasBody</code></p>
 
-<pre><code class="language-java">public interface BlogService {
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
     /**
      * method 表示请求的方法，区分大小写
      * path表示路径
@@ -224,11 +224,11 @@ public static void main(String[] args){
 
 <h3 id="toc_6">第二类：标记类</h3>
 
-<p><img src="media/15561207870240/15713328762764.png" alt=""/></p>
+<p><figure><img src="media/15561207870240/15713328762764.png" alt=""/></figure></p>
 
 <p>Field、FieldMap、Part和PartMap 示例</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * [Retrofit注解详解 之 FormUrlEncoded/Field/FieldMap/Multipart/Part/PartMap注解]源码
  */
 public class Example03 {
@@ -338,17 +338,17 @@ public class Example03 {
 
 <h3 id="toc_7">第三类：参数类</h3>
 
-<p><img src="media/15561207870240/15713328860835.png" alt=""/></p>
+<p><figure><img src="media/15561207870240/15713328860835.png" alt=""/></figure></p>
 
 <p>注1：{占位符}和<code>PATH</code>尽量只用在URL的path部分，url中的参数使用<code>Query</code>和<code>QueryMap</code> 代替，保证接口定义的简洁注2：<code>Query</code>、<code>Field</code>和<code>Part</code>这三者都支持数组和实现了<code>Iterable</code>接口的类型，如<code>List</code>，<code>Set</code>等，方便向后台传递数组。</p>
 
-<pre><code class="language-java">Call&lt;ResponseBody&gt; foo(@Query(&quot;ids[]&quot;) List&lt;Integer&gt; ids);
+<pre class="line-numbers"><code class="language-java">Call&lt;ResponseBody&gt; foo(@Query(&quot;ids[]&quot;) List&lt;Integer&gt; ids);
 //结果：ids[]=0&amp;ids[]=1&amp;ids[]=2
 </code></pre>
 
 <p>Header和Headers例子</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * [Retrofit注解详解 之 FormUrlEncoded/Field/FieldMap注解]源码
  */
 public class Example04 {
@@ -375,7 +375,7 @@ public class Example04 {
 
 <p>Query、QueryMap、Url 示例</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * [Retrofit注解详解 之 FormUrlEncoded/Field/FieldMap注解]源码
  */
 public class Example05 {
@@ -410,7 +410,7 @@ public class Example05 {
 
 <p>在默认情况下Retrofit只支持将HTTP的响应体转换换为<code>ResponseBody</code>,这也是什么我在前面的例子接口的返回值都是 <code>Call&lt;ResponseBody&gt;</code>，但如果响应体只是支持转换为<code>ResponseBody</code>的话何必要引用泛型呢，返回值直接用一个<code>Call</code>就行了嘛，既然支持泛型，那说明泛型参数可以是其它类型的，而<code>Converter</code>就是Retrofit为我们提供用于将<code>ResponseBody</code>转换为我们想要的类型，有了<code>Converter</code>之后我们就可以写把我们的第一个例子的接口写成这个样子了：</p>
 
-<pre><code class="language-java">public interface BlogService {
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
   @GET(&quot;blog/{id}&quot;)
   Call&lt;Result&lt;Blog&gt;&gt; getBlog(@Path(&quot;id&quot;) int id);
 }
@@ -421,7 +421,7 @@ public class Example05 {
 
 <p>通过<code>GsonConverterFactory</code>为<code>Retrofit</code>添加<code>Gson</code>支持：</p>
 
-<pre><code class="language-java">Gson gson = new GsonBuilder()
+<pre class="line-numbers"><code class="language-java">Gson gson = new GsonBuilder()
       //配置你的Gson
       .setDateFormat(&quot;yyyy-MM-dd hh:mm:ss&quot;)
       .create();
@@ -435,13 +435,13 @@ Retrofit retrofit = new Retrofit.Builder()
 
 <p>这样Retrofit就会使用Gson将<code>ResponseBody</code>转换我们想要的类型。这是时候我们终于可以演示如使创建一个Blog了！</p>
 
-<pre><code class="language-java">@POST(&quot;blog&quot;)
+<pre class="line-numbers"><code class="language-java">@POST(&quot;blog&quot;)
 Call&lt;Result&lt;Blog&gt;&gt; createBlog(@Body Blog blog);
 </code></pre>
 
 <p>被<code>@Body</code>注解的的Blog将会被Gson转换成RequestBody发送到服务器。</p>
 
-<pre><code class="language-java">BlogService service = retrofit.create(BlogService.class);
+<pre class="line-numbers"><code class="language-java">BlogService service = retrofit.create(BlogService.class);
 Blog blog = new Blog();
 blog.content = &quot;新建的Blog&quot;;
 blog.title = &quot;测试&quot;;
@@ -461,14 +461,14 @@ Call&lt;Result&lt;Blog&gt;&gt; call = service.createBlog(blog);
 
 <p>引入RxJava支持:</p>
 
-<pre><code class="language-java">compile &#39;com.squareup.retrofit2:adapter-rxjava:2.0.2&#39;
+<pre class="line-numbers"><code class="language-java">compile &#39;com.squareup.retrofit2:adapter-rxjava:2.0.2&#39;
 // 针对rxjava2.x（adapter-rxjava2的版本要 &gt;= 2.2.0）
 compile &#39;com.squareup.retrofit2:adapter-rxjava2:2.3.0&#39;
 </code></pre>
 
 <p>通过RxJavaCallAdapterFactory为Retrofit添加RxJava支持：</p>
 
-<pre><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
       .baseUrl(&quot;http://localhost:4567/&quot;)
       .addConverterFactory(GsonConverterFactory.create())
       .addCallAdapterFactory(RxJavaCallAdapterFactory.create())
@@ -479,7 +479,7 @@ compile &#39;com.squareup.retrofit2:adapter-rxjava2:2.3.0&#39;
 
 <p>接口设计：</p>
 
-<pre><code class="language-java">public interface BlogService {
+<pre class="line-numbers"><code class="language-java">public interface BlogService {
   @POST(&quot;/blog&quot;)
   Observable&lt;Result&lt;List&lt;Blog&gt;&gt;&gt; getBlogs();
 }
@@ -487,7 +487,7 @@ compile &#39;com.squareup.retrofit2:adapter-rxjava2:2.3.0&#39;
 
 <p>使用：</p>
 
-<pre><code class="language-java">BlogService service = retrofit.create(BlogService.class);
+<pre class="line-numbers"><code class="language-java">BlogService service = retrofit.create(BlogService.class);
 service.getBlogs(1)
   .subscribeOn(Schedulers.io())
   .subscribe(new Subscriber&lt;Result&lt;List&lt;Blog&gt;&gt;&gt;() {
@@ -524,7 +524,7 @@ service.getBlogs(1)
 <p>本节的内容是教大家实现在一简易的Converter，这里以返回格式为<code>Call&lt;String&gt;</code>为例。<br/><br/>
 在此之前先了解一下Converter接口及其作用：</p>
 
-<pre><code class="language-java">public interface Converter&lt;F, T&gt; {
+<pre class="line-numbers"><code class="language-java">public interface Converter&lt;F, T&gt; {
   // 实现从 F(rom) 到 T(o)的转换
   T convert(F value) throws IOException;
 
@@ -557,7 +557,7 @@ service.getBlogs(1)
 
 <p>我们要想从<code>Call&lt;ResponseBody&gt;</code> 转换为 <code>Call&lt;String&gt;</code> 那么对应的F和T则分别对应<code>ResponseBody</code>和<code>String</code>，我们定义一个<code>StringConverter</code>并实现Converter接口。</p>
 
-<pre><code class="language-java">public static class StringConverter implements Converter&lt;ResponseBody, String&gt; {
+<pre class="line-numbers"><code class="language-java">public static class StringConverter implements Converter&lt;ResponseBody, String&gt; {
 
   public static final StringConverter INSTANCE = new StringConverter();
 
@@ -570,7 +570,7 @@ service.getBlogs(1)
 
 <p>我们需要一个<code>Fractory</code>来向Retrofit注册<code>StringConverter</code></p>
 
-<pre><code class="language-java">public static class StringConverterFactory extends Converter.Factory {
+<pre class="line-numbers"><code class="language-java">public static class StringConverterFactory extends Converter.Factory {
 
   public static final StringConverterFactory INSTANCE = new StringConverterFactory();
 
@@ -592,7 +592,7 @@ service.getBlogs(1)
 
 <p>使用<code>Retrofit.Builder.addConverterFactory</code>向Retrofit注册我们<code>StringConverterFactory</code>：</p>
 
-<pre><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
       .baseUrl(&quot;http://localhost:4567/&quot;)
       // 如是有Gson这类的Converter 一定要放在其它前面
       .addConverterFactory(StringConverterFactory.create())
@@ -610,7 +610,7 @@ service.getBlogs(1)
 
 <p>先看一下CallAdapter接口定义及各方法的作用：</p>
 
-<pre><code class="language-java">public interface CallAdapter&lt;T&gt; {
+<pre class="line-numbers"><code class="language-java">public interface CallAdapter&lt;T&gt; {
 
   // 直正数据的类型 如Call&lt;T&gt; 中的 T
   // 这个 T 会作为Converter.Factory.responseBodyConverter 的第一个参数
@@ -644,7 +644,7 @@ service.getBlogs(1)
 <p>了解了<code>CallAdapter</code>的结构和其作用之后，我们就可以开始自定义我们的<code>CallAdapter</code>了，本节以<code>CustomCall&lt;String&gt;</code>为例。<br/>
 在此我们需要定义一个<code>CustomCall</code>，不过这里的<code>CustomCall</code>作为演示只是对<code>Call</code>的一个包装，并没有实际的用途。</p>
 
-<pre><code class="language-java">public static class CustomCall&lt;R&gt; {
+<pre class="line-numbers"><code class="language-java">public static class CustomCall&lt;R&gt; {
 
   public final Call&lt;R&gt; call;
 
@@ -660,7 +660,7 @@ service.getBlogs(1)
 
 <p>有了<code>CustomCall</code>，我们还需要一个<code>CustomCallAdapter</code>来实现 <code>Call&lt;T&gt;</code> 到 <code>CustomCall&lt;T&gt;</code>的转换，这里需要注意的是最后的泛型，是我们要返回的类型。</p>
 
-<pre><code class="language-java">public static class CustomCallAdapter implements CallAdapter&lt;CustomCall&lt;?&gt;&gt; {
+<pre class="line-numbers"><code class="language-java">public static class CustomCallAdapter implements CallAdapter&lt;CustomCall&lt;?&gt;&gt; {
 
   private final Type responseType;
 
@@ -684,7 +684,7 @@ service.getBlogs(1)
 
 <p>提供一个<code>CustomCallAdapterFactory</code>用于向Retrofit提供<code>CustomCallAdapter</code>：</p>
 
-<pre><code class="language-java">public static class CustomCallAdapterFactory extends CallAdapter.Factory {
+<pre class="line-numbers"><code class="language-java">public static class CustomCallAdapterFactory extends CallAdapter.Factory {
   public static final CustomCallAdapterFactory INSTANCE = new CustomCallAdapterFactory();
 
   @Override
@@ -703,7 +703,7 @@ service.getBlogs(1)
 
 <p>使用<code>addCallAdapterFactory</code>向Retrofit注册<code>CustomCallAdapterFactory</code>。</p>
 
-<pre><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
+<pre class="line-numbers"><code class="language-java">Retrofit retrofit = new Retrofit.Builder()
       .baseUrl(&quot;http://localhost:4567/&quot;)
       .addConverterFactory(Example09.StringConverterFactory.create())
       .addConverterFactory(GsonConverterFactory.create())
@@ -964,6 +964,12 @@ service.getBlogs(1)
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -983,12 +989,6 @@ service.getBlogs(1)
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

@@ -292,7 +292,7 @@
 
 <p>首先新建一个类覆写ItemDecoration里面有三个方法:</p>
 
-<pre><code class="language-java">public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
+<pre class="line-numbers"><code class="language-java">public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
 
     public SimpleItemDecoration(Context context) {
 
@@ -329,7 +329,7 @@
 
 <p>所以画一条分割线需要的代码是这样的:</p>
 
-<pre><code class="language-java">    private int wight;
+<pre class="line-numbers"><code class="language-java">    private int wight;
     private int height;
     private int item_height;
     private int item_padding;
@@ -363,17 +363,17 @@ public SimpleItemDecoration(Context context) {
 
 <p>运行后得到如下图的效果.</p>
 
-<p><img src="media/15561207872230/15713345820801.png" alt=""/></p>
+<p><figure><img src="media/15561207872230/15713345820801.png" alt=""/></figure></p>
 
 <p>接着把<code>item_height=DensityUtil.dip2px(context, 1);</code>的1改成30,你会发现item的内容和黑色的分割线重合了</p>
 
-<p><img src="media/15561207872230/15713345905617.png" alt=""/></p>
+<p><figure><img src="media/15561207872230/15713345905617.png" alt=""/></figure></p>
 
 <p>因为上面说了item和内容和onDraw中画的内容在同一图层,当然会被出现重合的情况.这个时候getItemOffsets就能派上用场了.只要在原来的item的加个偏移值(效果和在Adpater中为item设置padding的效果是一样的,只是在ItemDecoration统一处理比较合适)onDraw中画的分割线有多高,我就paddingBottom多少.</p>
 
 <p>所以代码是是这样的:</p>
 
-<pre><code class="language-java">  public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
+<pre class="line-numbers"><code class="language-java">  public void getItemOffsets(Rect outRect, View view, RecyclerView parent, RecyclerView.State state) {
         super.getItemOffsets(outRect, view, parent, state);
         outRect.bottom=item_height;
     }
@@ -381,13 +381,13 @@ public SimpleItemDecoration(Context context) {
 
 <p>再次运行代码item被挡住的问题就解决了,RecyclerView的自定义ItemDecoration就是这么简单.有点自定义View经验的人理解起来都不会难</p>
 
-<p><img src="media/15561207872230/15713346036776.png" alt=""/></p>
+<p><figure><img src="media/15561207872230/15713346036776.png" alt=""/></figure></p>
 
 <p>分割线不要占满,要有和Left,Right有间距啊?</p>
 
 <p>添加如下代码:</p>
 
-<pre><code class="language-java">    private int wight;
+<pre class="line-numbers"><code class="language-java">    private int wight;
     private int height;
     private int item_height;
     private Paint paint;
@@ -419,7 +419,7 @@ public SimpleItemDecoration(Context context) {
     }
 </code></pre>
 
-<p><img src="media/15561207872230/15713346158297.png" alt=""/></p>
+<p><figure><img src="media/15561207872230/15713346158297.png" alt=""/></figure></p>
 
 <p>一般用到的分割线根据以上的代码再自己的按照需求稍微修改一下基本都能满足需求了.</p>
 
@@ -427,7 +427,7 @@ public SimpleItemDecoration(Context context) {
 
 <p>先来看最终效果图:</p>
 
-<p><img src="media/15561207872230/2017110815101479719495.gif" alt=""/></p>
+<p><figure><img src="media/15561207872230/2017110815101479719495.gif" alt=""/></figure></p>
 
 <p>要实现吸顶的效果需要完成这些步骤:</p>
 
@@ -441,7 +441,7 @@ public SimpleItemDecoration(Context context) {
 
 <p>先来实现1和2的要求,主要代码部分如下:</p>
 
-<pre><code class="language-java">private int wight;
+<pre class="line-numbers"><code class="language-java">private int wight;
     private int height;
     private int item_height;
     private Paint paint;
@@ -487,7 +487,7 @@ public SimpleItemDecoration(Context context) {
 
 <p>最终实现的效果如图:</p>
 
-<p><img src="media/15561207872230/15713346513616.png" alt=""/></p>
+<p><figure><img src="media/15561207872230/15713346513616.png" alt=""/></figure></p>
 
 <p>注意看陈奕迅这个item的分割线是在item的上面的,并且分割线的高度已经足够容下我们稍后要绘制的内容了.</p>
 
@@ -496,7 +496,7 @@ public SimpleItemDecoration(Context context) {
 <p>这个时候就需要用到代码中一直没覆写的onDrawOver方法了,先来实现固定不动的分割线,代码也是非常的简单,在原来的代码上覆写onDrawOver方法<br/>
 (这里new了新的画笔paint2,把固定的分割线用半透明红色来作为背景,方便理解效果):</p>
 
-<pre><code class="language-java">paint2=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
+<pre class="line-numbers"><code class="language-java">paint2=new Paint(Paint.ANTI_ALIAS_FLAG|Paint.DITHER_FLAG);
 paint2.setColor(Color.parseColor(&quot;#52ff0000&quot;));
   
 @Override
@@ -505,11 +505,11 @@ public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) 
 }
 </code></pre>
 
-<p><img src="media/15561207872230/20171108151014817074489.gif" alt=""/></p>
+<p><figure><img src="media/15561207872230/20171108151014817074489.gif" alt=""/></figure></p>
 
 <p>接着来实现实现: 当前屏幕可见的第一个item的Bottom&lt;=item_height(分割线的高度)让第一条分割线随着RecyclerView向上滑动直到滑出屏幕,代码如下:</p>
 
-<pre><code class="language-java">@Override
+<pre class="line-numbers"><code class="language-java">@Override
     public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) {
         super.onDrawOver(c, parent, state);
         View child0 = parent.getChildAt(0);
@@ -526,7 +526,7 @@ public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) 
     }
 </code></pre>
 
-<p><img src="media/15561207872230/20171108151014821936037.gif" alt=""/></p>
+<p><figure><img src="media/15561207872230/20171108151014821936037.gif" alt=""/></figure></p>
 
 <p>可以看到滑动时当第二item的顶部和第一个item的底部相互接触到后继续滑动的话第一个item就会慢慢向上滑动,直到第一个item完全画出屏幕,固定分割线立马回到最开始的位置和item2分割线重叠了在一起<br/>
 ,现在可以把paint2换回paint效果会更直观,不上效果图了,可以自己去测试.</p>
@@ -537,7 +537,7 @@ public void onDrawOver(Canvas c, RecyclerView parent, RecyclerView.State state) 
 
 <p>自定义ItemDecoration的代码:</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * Created by Lipt0n on 2017/8/26.
  */
 
@@ -664,7 +664,7 @@ public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
 
 <p><strong>Activity中调用的代码:</strong></p>
 
-<pre><code class="language-java">recyclerView.addItemDecoration(new SimpleItemDecoration(this, new SimpleItemDecoration.ObtainTextCallback() {
+<pre class="line-numbers"><code class="language-java">recyclerView.addItemDecoration(new SimpleItemDecoration(this, new SimpleItemDecoration.ObtainTextCallback() {
     @Override
     public String getText(int position) {
         return dataList.get(position).substring(0,1);
@@ -713,7 +713,7 @@ public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
 
 <p>首先我们应该先把问题抛出，如果我们在xml把控件的宽度和高度写死，比如</p>
 
-<pre><code class="language-text"> &lt;TextView
+<pre class="line-numbers"><code class="language-text"> &lt;TextView
             android:layout_width=&quot;100dp&quot;
             android:layout_height=&quot;50dp&quot;
             android:gravity=&quot;center&quot;
@@ -726,7 +726,7 @@ public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
 
 <p>我们写这样的一段代码，然后看一下xml的预览效果：</p>
 
-<pre><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
+<pre class="line-numbers"><code class="language-text">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
 &lt;LinearLayout
     xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
     android:orientation=&quot;vertical&quot;
@@ -738,17 +738,17 @@ public class SimpleItemDecoration extends RecyclerView.ItemDecoration {
 &lt;/LinearLayout&gt;
 </code></pre>
 
-<p><img src="media/15561207872163/15713348283425.png" alt=""/></p>
+<p><figure><img src="media/15561207872163/15713348283425.png" alt=""/></figure></p>
 
-<p><img src="media/15561207872163/15713348348639.png" alt=""/></p>
+<p><figure><img src="media/15561207872163/15713348348639.png" alt=""/></figure></p>
 
-<p><img src="media/15561207872163/15713348413021.png" alt=""/></p>
+<p><figure><img src="media/15561207872163/15713348413021.png" alt=""/></figure></p>
 
 <h2 id="toc_1">关于java动态写控件大小的思考</h2>
 
 <p>我们看到360dp在不同设备的所表现的占屏比是不同的。如果我们写数值比较小的dp相信直接写死的问题不大。但是如果设计稿上某个控件的宽度你换算完刚好是340dp怎么，肯定不能写340dp。其实我们可以用match_parent然后用padding margin之类的东西，在左右留一个小数值dp的距离，来实现效果。但是如果这个控件要求是高度和宽度的比例是固定的，比如展示一个广告浮层的图片，那么xml估计就无法锁定宽高比了，我们就必须借助java代码来决定这个控件高度：</p>
 
-<pre><code class="language-java">RelativeLayout.LayoutParams mLayoutParams = 
+<pre class="line-numbers"><code class="language-java">RelativeLayout.LayoutParams mLayoutParams = 
 new RelativeLayout.LayoutParams (mHeight,mWidth);
 mLayoutParams.addRule(RelativeLayout.ALIGN_TOP, R.id.supernatant);
 mLayoutParams.addRule(RelativeLayout.ALIGN_LEFT, R.id.supernatant);
@@ -759,7 +759,7 @@ bigImg.setLayoutParams(mLayoutParams);
 <p>类似这样宽度和高度都是活的，我们可以通过获取屏幕的实际宽高像素，来通过等比，相似等一些算法，转换出比例和UI设计图一样的UI，但是最大的弊端应该就是，这么书写会让java代码比较多，比较乱。因此会有一些百分百布局框架等，其实思路都类似，等比缩放就是很核心思路。 <br/>
 有个轻量的方法也就是写个工具类算出设计图到手机屏幕的转换关系：</p>
 
-<pre><code class="language-java">public static int getHeightByValue720(int mValue) {
+<pre class="line-numbers"><code class="language-java">public static int getHeightByValue720(int mValue) {
 return (int) ((float) (DPITools.getHeight() * nDesignValue) / (float) 1280);
     }
 
@@ -777,7 +777,7 @@ return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
 
 <p>如果按照上述方式我们在三星Galaxy S8上运行效果会是如何呢？结果是200X462。控件已经倍拉伸了，原因就是S8的屏幕比例不是16比9所以，按照原来的方式缩放，就会造成拉伸，为此市面上也有解决方案：</p>
 
-<pre><code class="language-java">public static int getValueByValue720(int mValue) {
+<pre class="line-numbers"><code class="language-java">public static int getValueByValue720(int mValue) {
 return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
     }
 </code></pre>
@@ -790,7 +790,7 @@ return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
 
 <p>这样面临一个问题，如果在16比10的手机上，其实每次计算出的高度都是大于手机比例的，因此cardview后面的几个控件可能无法正常显示，或被拉伸。在18.5比9的手机上，cardview下面可能有空余，或者根据不同layout方式，可能其他地方有空余。我认为这还是可以接受的，比较这种手机是少数，但是控件被挤压就难以接受了。归纳起来也就说，如果这种不能上下滑动的view，可以让它有空余，但是不能让它挤压。我们可以使用一个保守的方法，判断手机是否是大于16比9，如果大于就说明手机比较瘦高，如果小于就说明手机比较胖。我们就可以用相对充裕的方法计算控件宽高，来保证控件不被挤压。</p>
 
-<pre><code class="language-java">public static boolean bigThan169() {
+<pre class="line-numbers"><code class="language-java">public static boolean bigThan169() {
         float h = DPIUtil.getHeight();
         float w = DPIUtil.getWidth();
         if ((h / w) &gt; 1.78f) return true;
@@ -798,7 +798,7 @@ return (int) ((float) (DPITools.getWidth() * nDesignValue) / (float) 720);
     }
 </code></pre>
 
-<pre><code class="language-java">if (bigThan169())
+<pre class="line-numbers"><code class="language-java">if (bigThan169())
 newWidth = DPIUtil.getWidthByDesignValue720(DesignWidth);（以宽度为基准）
 else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为基准 从而保证控件上下高度够用）
 </code></pre>
@@ -856,7 +856,7 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <h3 id="toc_2">7zip打开APK后的视图</h3>
 
-<p><img src="media/15561207872093/15713347055136.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347055136.png" alt=""/></figure></p>
 
 <h3 id="toc_3">各个文件或文件夹的功能</h3>
 
@@ -902,7 +902,7 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <h3 id="toc_4">爱奇艺 APK各组成部分的占比情况</h3>
 
-<p><img src="media/15561207872093/15713347172308.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347172308.png" alt=""/></figure></p>
 
 <p>通过爱奇艺Android客户端APK组成的饼状图可以看出，APK里面占较大比重的是libs,res,dex这三块。</p>
 
@@ -924,7 +924,7 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <p>下面，我们来解压APK，重新用7zip进行压缩，就会发现几乎所有文件都变小了，特别是.arsc文件，减小的比较多。</p>
 
-<p><img src="media/15561207872093/15713347270901.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347270901.png" alt=""/></figure></p>
 
 <p>对比7zip压缩前和压缩后APK里面文件的变化，可以看出通过7zip压缩，.arsc文件大概减小了2M多，其它文件/文件夹体积也减小了5%左右。</p>
 
@@ -934,13 +934,13 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <p>我们来看一下两种不同签名方式所带来的APK体积变化</p>
 
-<p><img src="media/15561207872093/15713347376656.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347376656.png" alt=""/></figure></p>
 
 <p>第一个APK是未签名的，第二个是使用jarsigner签名的，第三个是使用apksigner签名生成。可以看出，使用apksigner签名比使用jarsigner签名生成的APK减小了1.1M。</p>
 
 <p>那么再来看一下这两种APK签名后的文件大小差异在哪里</p>
 
-<p><img src="media/15561207872093/15713347472494.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347472494.png" alt=""/></figure></p>
 
 <p>上图中间是未签名的APK,左边是jarsigner签名的,右边是apksigner签名的。</p>
 
@@ -954,7 +954,7 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <p>在不同的版本通过不同方式进行APK瘦身的详情图，如下：</p>
 
-<p><img src="media/15561207872093/15713347558686.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347558686.png" alt=""/></figure></p>
 
 <p>插件化是2年前所做的优化，7zip压缩和签名方式都是最近的优化方案，并且通过jenkins自动化脚本实现的。</p>
 
@@ -980,7 +980,7 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <p>当Lint工具扫描发现无用资源的时候，会输出如下的信息，就可以删除这种资源。</p>
 
-<pre><code class="language-text">res/layout/preferences.xml: Warning: The resource R.layout.preferences appears
+<pre class="line-numbers"><code class="language-text">res/layout/preferences.xml: Warning: The resource R.layout.preferences appears
     to be unused [UnusedResources]
 </code></pre>
 
@@ -990,7 +990,7 @@ else newWidth = DPIUtil.getHeightByDesignValue720(DesignWidth);（以高度为�
 
 <p>如果工程比较大，由主工程和多个子工程组成的话，子工程里面也可能包含很多的无用资源。可以通过设置shrinkResources=true让Gradle移走无用的资源，否则默认情况下，Gradle编译只会移除无用代码，而不会关心无用资源。</p>
 
-<pre><code class="language-text">android {
+<pre class="line-numbers"><code class="language-text">android {
     // Other settings
  
     buildTypes {
@@ -1084,7 +1084,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>爱奇艺客户端使用到的资源优化方案详情如图所示</p>
 
-<p><img src="media/15561207872093/15713347635420.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347635420.png" alt=""/></figure></p>
 
 <p>目前爱奇艺客户端使用了这四种资源优化方式。</p>
 
@@ -1098,7 +1098,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>在gradle使用minifyEnabled进行Proguard混淆的配置，可大大减小APP大小：</p>
 
-<pre><code class="language-text">android {
+<pre class="line-numbers"><code class="language-text">android {
     buildTypes {
         release {
             minifyEnabled true
@@ -1109,7 +1109,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>下面是代码混淆前后APK的详情</p>
 
-<p><img src="media/15561207872093/15713347745661.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347745661.png" alt=""/></figure></p>
 
 <p>尤其需要注意的是：在proguard中，是否保留符号表对APP的大小是有显著的影响的，可酌情不保留，但是建议尽量保留用于调试。</p>
 
@@ -1127,11 +1127,11 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <h5 id="toc_29">字符串资源在.arsc文件里面的存储方式</h5>
 
-<p><img src="media/15561207872093/15713347846488.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347846488.png" alt=""/></figure></p>
 
 <h5 id="toc_30">Layout下面的Xml资源文件在.arsc文件里面的存储方式</h5>
 
-<p><img src="media/15561207872093/15713347928420.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713347928420.png" alt=""/></figure></p>
 
 <p>通过这两张截图我们可以看出，直接用ID替换资源访问代码R.XXX.XXX，这样R.class文件就没有任何作用了，可以删除它，并且代码里面的资源访问字符串也变成了常量，两个方面都减小了dex的大小。</p>
 
@@ -1143,7 +1143,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>枚举类型源码</p>
 
-<pre><code class="language-java">public enum MarkViewType3{
+<pre class="line-numbers"><code class="language-java">public enum MarkViewType3{
     SIMPLE_TEXT_MARK,
     DO_LIKE_MARK,
     BOTTOM_BANNER1,
@@ -1162,7 +1162,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>编译生成dex后的class文件</p>
 
-<pre><code class="language-java">public enum MarkViewType3
+<pre class="line-numbers"><code class="language-java">public enum MarkViewType3
 {
   static
   {
@@ -1181,7 +1181,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>注解的实现源码</p>
 
-<pre><code class="language-java">public class MarkViewType1{
+<pre class="line-numbers"><code class="language-java">public class MarkViewType1{
     public static final int SIMPLE_TEXT_MARK = 0;
     public static final int DO_LIKE_MARK = 1;
     public static final int BOTTOM_BANNER1 = 2;
@@ -1205,7 +1205,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>生成的class文件</p>
 
-<pre><code class="language-java">public class MarkViewType1
+<pre class="line-numbers"><code class="language-java">public class MarkViewType1
 {
   public static final int BOTTOM_BANNER1 = 2;
   public static final int BOTTOM_BANNER2 = 3;
@@ -1230,7 +1230,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>爱奇艺客户端代码优化详情如图所示</p>
 
-<p><img src="media/15561207872093/15713348021070.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713348021070.png" alt=""/></figure></p>
 
 <p>由上图可以看出，代码混淆可以很大程度的减小包体积，尤其是引入了比较多点的第三方库的情况。所以打包的时候，应该开启代码混淆，以及资源混淆。</p>
 
@@ -1244,7 +1244,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>增加如下配置：</p>
 
-<pre><code class="language-text">android {
+<pre class="line-numbers"><code class="language-text">android {
     defaultConfig {
         ...
             resConfigs &quot;zh&quot;, &quot;zh_CN&quot;, &quot;zh_HK&quot;, &quot;zh_MO&quot;, &quot;zh_TW&quot;, &quot;en&quot;
@@ -1264,7 +1264,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>通过上面所有方式进行瘦身，APK变化详情，如下图所示：</p>
 
-<p><img src="media/15561207872093/15713348131985.png" alt=""/></p>
+<p><figure><img src="media/15561207872093/15713348131985.png" alt=""/></figure></p>
 
 <p>由上图可以看出，经过代码优化，资源优化，lib库优化，.arsc文件优化，及整体优化，包体积由54.2M缩减到28.2M。</p>
 
@@ -1361,7 +1361,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>这里首先要感谢郭霖大神的 《 Android桌面悬浮窗效果实现，仿360手机卫士悬浮窗效果》，这部分我参考了这篇文章，成功的将悬浮球添加到了桌面。</p>
 
-<pre><code class="language-java">public static void addBallView(Context context) {
+<pre class="line-numbers"><code class="language-java">public static void addBallView(Context context) {
     if (mBallView == null) {
         WindowManager windowManager = getWindowManager(context);
         int screenWidth = windowManager.getDefaultDisplay().getWidth();
@@ -1391,7 +1391,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>按下时，隐藏小球，展现大球，并记录按下位置和按下时间。</p>
 
-<pre><code class="language-java">case MotionEvent.ACTION_DOWN:
+<pre class="line-numbers"><code class="language-java">case MotionEvent.ACTION_DOWN:
        mIsTouching = true;
        mImgBall.setVisibility(INVISIBLE);
        mImgBigBall.setVisibility(VISIBLE);
@@ -1416,7 +1416,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>这时要判断是否是处于长按状态，如果是，那么进入MOVE模式，移动悬浮球，如果不是，则判断操作手势，即下拉还是上拉等其他手势。</p>
 
-<pre><code class="language-java">case MotionEvent.ACTION_MOVE:
+<pre class="line-numbers"><code class="language-java">case MotionEvent.ACTION_MOVE:
       if (!mIsLongTouch &amp;&amp; isTouchSlop(event)) {
               return true;
       }
@@ -1435,7 +1435,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>进行手势操作的代码如下，主要是根据当前坐标与按下时记录的坐标进行计算，判断手势，并更新大球位置。</p>
 
-<pre><code class="language-java">private void doGesture(MotionEvent event) {
+<pre class="line-numbers"><code class="language-java">private void doGesture(MotionEvent event) {
     float offsetX = event.getX() - mLastDownX;
     float offsetY = event.getY() - mLastDownY;
 
@@ -1493,7 +1493,7 @@ getDefaultProguardFile(&#39;proguard-android.txt&#39;), &#39;proguard-rules.pro&
 
 <p>手指抬起后，先要判断是否是长按模式，不是的话再判断是否是单击，都不是的话就根据当前状态触发对应功能。</p>
 
-<pre><code class="language-java">case MotionEvent.ACTION_CANCEL:
+<pre class="line-numbers"><code class="language-java">case MotionEvent.ACTION_CANCEL:
 case MotionEvent.ACTION_UP:
        mIsTouching = false;
        if (mIsLongTouch) {
@@ -1550,7 +1550,7 @@ case MotionEvent.ACTION_UP:
 
 <p>在美团App 7.4~7.7版本期间，美食业务的OOM数量居高不下，远高于历史水平，主要都是DECODE本地的资源出错。</p>
 
-<p><img src="media/15561207872056/15713351740374.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713351740374.png" alt=""/></figure></p>
 
 <p>图中OOM数量为各版本发版后第一个月的统计量，包含新发版本及历史版本。对比了同时期其他业务的情况，也有类似OOM。由于美食业务的访问量占美团App的比重较大，因此，OOM的数量相对其他业务也多一些。</p>
 
@@ -1703,21 +1703,21 @@ OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二�
 
 <p>选取byte数组，右击-&gt;list objects-&gt;with incoming references，降序排列可以看到有很多大小一致的byte[]实例。</p>
 
-<p><img src="media/15561207872056/15713351847042.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713351847042.png" alt=""/></figure></p>
 
 <p>右击其中一个数组-&gt;Path to GC Roots-&gt; exclude xxx references</p>
 
-<p><img src="media/15561207872056/15713351917312.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713351917312.png" alt=""/></figure></p>
 
 <p>如上图所示，这些byte[]都是系统的EdgeEffect的drawable所持有，drawable对应的bitmap占用的空间为1566 * 406 * 4 = 2543184，与byte数组的大小一致。</p>
 
 <p>再看另外一个：</p>
 
-<p><img src="media/15561207872056/15713352000259.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713352000259.png" alt=""/></figure></p>
 
 <p>这些byte[]是被App的一个背景图所持有，如下图：</p>
 
-<p><img src="media/15561207872056/15713352074955.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713352074955.png" alt=""/></figure></p>
 
 <p>通过ImageView的ID（如图）及build目录下的R.txt反查可知该ImageView的ID名称，即可知其设置的背景图的大小为720 * 200（xhdpi），加载到内存并考虑density，size刚好是1080 * 300 * 4 = 1296000，与byte数组大小一致。</p>
 
@@ -1725,7 +1725,7 @@ OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二�
 
 <p>为什么会出现这些大小一致的byte数组，或者说，为什么会创建多份EdgeEffect的drawable？查看EdgeEffect的源码（4.2.2）可知，其drawable成员也是通过<code>Resources.getDrawable</code>系统调用获取的。</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * Construct a new EdgeEffect with a theme appropriate for the provided context.
  * @param context Context used to provide theming and resource information for the EdgeEffect
  */
@@ -1743,7 +1743,7 @@ public EdgeEffect(Context context) {
 
 <p>ImageView(View)获取background对应的drawable的过程类似。</p>
 
-<pre><code class="language-text">for (int i = 0; i &lt; N; i++) {
+<pre class="line-numbers"><code class="language-text">for (int i = 0; i &lt; N; i++) {
     int attr = a.getIndex(i);
     switch (attr) {
         case com.android.internal.R.styleable.View_background:
@@ -1758,14 +1758,14 @@ public EdgeEffect(Context context) {
 
 <p>既然drawable的加载机制并没有问题，那么drawable所在的缓存实例或者获取drawable的Resources实例是否是同一个呢？通过下面的代码，打印出每个Activity的Resources实例及Resources实例的drawable cache。</p>
 
-<pre><code class="language-java">//noinspection unchecked
+<pre class="line-numbers"><code class="language-java">//noinspection unchecked
 LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt; cache = (LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt;) Hack.into(Resources.class).field(&quot;mDrawableCache&quot;).get(getResources());
 Object appCache = Hack.into(Resources.class).field(&quot;mDrawableCache&quot;).get(getApplication().getResources());
 Log.e(&quot;oom&quot;, &quot;Resources: {application=&quot; + getApplication().getResources() + &quot;, activity=&quot; + getResources() + &quot;}&quot;);
 Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + appCache + &quot;, activity=&quot; + cache + &quot;}&quot;);
 </code></pre>
 
-<p><img src="media/15561207872056/15713352192193.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713352192193.png" alt=""/></figure></p>
 
 <p>这也进一步解释了另外一个现象，即这些大小相同的数组的个数基本和启动Activity的数量成正比。</p>
 
@@ -1774,7 +1774,7 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 
 <p>7.8版本关闭了此标志，发版后第一个月的OOM数量（包含历史版本）为153，如下图。</p>
 
-<p><img src="media/15561207872056/15713352268703.png" alt=""/></p>
+<p><figure><img src="media/15561207872056/15713352268703.png" alt=""/></figure></p>
 
 <p>其中新版本发生的OOM数量为22。</p>
 
@@ -1828,7 +1828,7 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 
 <h2 id="toc_1">目录</h2>
 
-<p><img src="media/15561207872019/15713358440242.png" alt=""/></p>
+<p><figure><img src="media/15561207872019/15713358440242.png" alt=""/></figure></p>
 
 <h2 id="toc_2">定义</h2>
 
@@ -1865,7 +1865,7 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 
 <p>那么，该 Application 类有什么作用呢？下面，我将介绍Application 类的方法使用</p>
 
-<p><img src="media/15561207872019/15713358574307.png" alt=""/></p>
+<p><figure><img src="media/15561207872019/15713358574307.png" alt=""/></figure></p>
 
 <h3 id="toc_8">onCreate（）</h3>
 
@@ -1895,7 +1895,7 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 <li>具体使用</li>
 </ul>
 
-<pre><code class="language-java">// 复写方法需要在Application子类里实现
+<pre class="line-numbers"><code class="language-java">// 复写方法需要在Application子类里实现
 
 private static final String VALUE = &quot;Carson&quot;;
     // 初始化全局变量
@@ -1922,7 +1922,7 @@ private static final String VALUE = &quot;Carson&quot;;
 <li>具体使用</li>
 </ul>
 
-<pre><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
 // 接口里方法下面会继续介绍
             @Override
             public void onTrimMemory(int level) {
@@ -1951,7 +1951,7 @@ private static final String VALUE = &quot;Carson&quot;;
 <p>Android 4.0 后提供的一个API</p>
 </blockquote>
 
-<p><img src="media/15561207872019/15713358678777.png" alt=""/></p>
+<p><figure><img src="media/15561207872019/15713358678777.png" alt=""/></figure></p>
 
 <ul>
 <li>应用场景：根据当前内存使用情况进行自身的内存资源的不同程度释放，以避免被系统直接杀掉 &amp; 优化应用程序的性能体验</li>
@@ -1971,13 +1971,13 @@ private static final String VALUE = &quot;Carson&quot;;
 
 <p>典型的应用场景有两个：</p>
 
-<p><img src="media/15561207872019/15713358785812.png" alt=""/></p>
+<p><figure><img src="media/15561207872019/15713358785812.png" alt=""/></figure></p>
 
 <ul>
 <li>具体使用</li>
 </ul>
 
-<pre><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
 
 @Override
   public void onTrimMemory(int level) {
@@ -1999,7 +1999,7 @@ private static final String VALUE = &quot;Carson&quot;;
 <li>可回调对象 &amp; 对应方法</li>
 </ul>
 
-<pre><code class="language-java">Application.onTrimMemory()
+<pre class="line-numbers"><code class="language-java">Application.onTrimMemory()
 Activity.onTrimMemory()
 Fragment.OnTrimMemory()
 Service.onTrimMemory()
@@ -2029,7 +2029,7 @@ ContentProvider.OnTrimMemory()
 <li>调用时刻：Android系统整体内存较低时</li>
 </ul>
 
-<pre><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
 
   @Override
             public void onLowMemory() {
@@ -2064,7 +2064,7 @@ ContentProvider.OnTrimMemory()
 <li>具体使用</li>
 </ul>
 
-<pre><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
+<pre class="line-numbers"><code class="language-java">registerComponentCallbacks(new ComponentCallbacks2() {
 
             @Override
             public void onConfigurationChanged(Configuration newConfig) {
@@ -2078,7 +2078,7 @@ ContentProvider.OnTrimMemory()
 <li>该配置信息是指 ：Manifest.xml文件下的 Activity标签属性android:configChanges的值，如下：</li>
 </ul>
 
-<pre><code class="language-text">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
+<pre class="line-numbers"><code class="language-text">&lt;activity android:name=&quot;.MainActivity&quot;&gt;
       android:configChanges=&quot;keyboardHidden|orientation|screenSize&quot;
 // 设置该配置属性会使 Activity在配置改变时不重启，只执行onConfigurationChanged（）
 // 上述语句表明，设置该配置属性可使 Activity 在屏幕旋转时不重启
@@ -2100,7 +2100,7 @@ ContentProvider.OnTrimMemory()
 <li>具体使用</li>
 </ul>
 
-<pre><code class="language-java">// 实际上需要复写的是ActivityLifecycleCallbacks接口里的方法
+<pre class="line-numbers"><code class="language-java">// 实际上需要复写的是ActivityLifecycleCallbacks接口里的方法
 registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
             @Override
             public void onActivityCreated(Activity activity, Bundle savedInstanceState) {
@@ -2175,7 +2175,7 @@ registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 
 <p>即继承 Application 类</p>
 
-<pre><code class="language-java">public class CarsonApplication extends Application
+<pre class="line-numbers"><code class="language-java">public class CarsonApplication extends Application
   {
     ...
     // 根据自身需求，并结合上述介绍的方法进行方法复写实现
@@ -2201,7 +2201,7 @@ registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 
 <p>Manifest.xml</p>
 
-<pre><code class="language-text">&lt;application
+<pre class="line-numbers"><code class="language-text">&lt;application
 
         android:name=&quot;.CarsonApplication&quot;
         // 此处自定义Application子类的名字 = CarsonApplication
@@ -2211,7 +2211,7 @@ registerActivityLifecycleCallbacks(new ActivityLifecycleCallbacks() {
 
 <p><strong>步骤3：使用自定义的Application类实例</strong></p>
 
-<pre><code class="language-java">private CarsonApplicaiton app;
+<pre class="line-numbers"><code class="language-java">private CarsonApplicaiton app;
 
 // 只需要调用Activity.getApplication（） 或Context.getApplicationContext（）就可以获得一个Application对象
 app = (CarsonApplication) getApplication();
@@ -2226,7 +2226,7 @@ app.exitApp();
 
 <p>我用一张图总结上述文章</p>
 
-<p><img src="media/15561207872019/15713358886403.png" alt=""/></p>
+<p><figure><img src="media/15561207872019/15713358886403.png" alt=""/></figure></p>
 
                         
                       </div>
@@ -2344,6 +2344,12 @@ app.exitApp();
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -2363,12 +2369,6 @@ app.exitApp();
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

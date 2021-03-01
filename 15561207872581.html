@@ -150,7 +150,7 @@
 
 <p>　　Detector的意思就是探测者，所以GestureDetector就是用来监听手势的发生。它内部有3个Listener接口，用来回调不同类型的触摸事件，用一个简略的类图来显示：<br/>
 　　<br/>
-<img src="media/15561207872581/15713059947377.jpg" alt=""/></p>
+<figure><img src="media/15561207872581/15713059947377.jpg" alt=""/></figure></p>
 
 <p>里面这些接口的方法，就是相应触摸事件的回调，实现了这些方法，就能实现传入触摸事件之后做出相应的回调。</p>
 
@@ -190,7 +190,7 @@
 
 <p>GestureDetector的使用很简单，因为它的功能就是定义为识别手势，所以使用的话就是输入完整的触摸事件（完整的意思就是用户所有的触摸操作都是输入给它。为什么要强调完整，因为我上一篇博客就是分享如何拦截子View的部分触摸事件），识别然后进行相应的回调：</p>
 
-<pre><code class="language-java">    private void init(Context context){
+<pre class="line-numbers"><code class="language-java">    private void init(Context context){
         mOnGestureListener = new MyOnGestureListener();
         mGestureDetector = new GestureDetector(context,mOnGestureListener);
 //        mGestureDetector.setIsLongpressEnabled(false);
@@ -225,7 +225,7 @@
 
 <p>　　GestureDetector的源码接近800行，这在Android源码中已经算是比较短的了（毕竟注释也占一两百行了），所以说它的实现也不是很复杂的。从它的构造方法开始：</p>
 
-<pre><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
+<pre class="line-numbers"><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
         this(context, listener, null);
     }
 
@@ -282,7 +282,7 @@
 
 <p>　　可见GestureDetector的创建就是初始化一些属性，然后就是把对应的Listener设置好，还有初始化Handler，而这里的GestureHandler，是控制onShowPress()，onLongPress()，onSingleTapConfirmed()`回调的关键：</p>
 
-<pre><code class="language-java">  private class GestureHandler extends Handler {
+<pre class="line-numbers"><code class="language-java">  private class GestureHandler extends Handler {
         //省略构造函数...
 
         @Override
@@ -329,7 +329,7 @@
 
 <p>　　初始化完之后，就是看它的如何处理输入了，这是它的核心逻辑：</p>
 
-<pre><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
+<pre class="line-numbers"><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
         //检查事件输入的一致性,log出来一致性的信息，如：有事件只有up没有down
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTouchEvent(ev, 0);
@@ -410,7 +410,7 @@
 
 <p>　　下面进入DOWN事件的处理：</p>
 
-<pre><code class="language-java">    //...
+<pre class="line-numbers"><code class="language-java">    //...
         case MotionEvent.ACTION_DOWN:
             if (mDoubleTapListener != null) {
                 //处理双击
@@ -496,7 +496,7 @@
 
 <p>然后再看看对MOVE事件的处理：</p>
 
-<pre><code class="language-java">    //...
+<pre class="line-numbers"><code class="language-java">    //...
         case MotionEvent.ACTION_MOVE:
             //如果是正在长按和点击了鼠标右键
             if (mInLongPress || mInContextClick) {
@@ -549,7 +549,7 @@
 
 <p>接下来再看UP事件：</p>
 
-<pre><code class="language-java">    //...
+<pre class="line-numbers"><code class="language-java">    //...
         case MotionEvent.ACTION_UP:
             mStillDown = false;
             MotionEvent currentUpEvent = MotionEvent.obtain(ev);
@@ -611,7 +611,7 @@
 <li>onSingleTapConfirmed()回调：从前面GestureHandler里面的TAP消息的实现可以看到：</li>
 </ul>
 
-<pre><code class="language-java">            case TAP:
+<pre class="line-numbers"><code class="language-java">            case TAP:
                 // If the user&#39;s finger is still down, do not count it as a tap
                 //这里控制SingleTapConfirmed的回调，
                 if (mDoubleTapListener != null) {
@@ -636,7 +636,7 @@
 
 <p>　　对于多个手指落下，前面的统一处理已经是把所有手指的坐标值加起来然后算平均值了，所以我们多根手指触摸的时候，其实滑动的实际点是这些手指的中心焦点。回看上面的MOVE事件处理，中心焦点的位置值FocusX和FocusY决定onScroll(onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY))的后两个参数值，所以处理多点触控的话就使用它们比较方便。因为MotionEvent是使用数组装着当前屏幕上所有指针的动作的，使用前两个参数的话还要循环用getX(int pointerIndex)和getY(int pointerIndex)方法取出各个指针的值再自己处理。</p>
 
-<pre><code class="language-java">    //...
+<pre class="line-numbers"><code class="language-java">    //...
         case MotionEvent.ACTION_POINTER_DOWN:
             mDownFocusX = mLastFocusX = focusX;
             mDownFocusY = mLastFocusY = focusY;
@@ -694,7 +694,7 @@
 
 <p>　　ContextClick的事件是由onGenericMotionEvent()传入：</p>
 
-<pre><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
+<pre class="line-numbers"><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(ev, 0);
         }
@@ -923,6 +923,12 @@
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -942,12 +948,6 @@
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  

@@ -146,7 +146,7 @@
 
 <p>实现AOP的方式很多种，像APT，AspectJ，Javassist。这些技术适用的编译时期也不同。</p>
 
-<p><img src="media/15846871094959/15846200462440.jpg" alt="15846200462440"/></p>
+<p><figure><img src="media/15846871094959/15846200462440.jpg" alt="15846200462440"/><figcaption>15846200462440</figcaption></figure></p>
 
 <h2 id="toc_0">Android APT</h2>
 
@@ -155,7 +155,7 @@
 <h3 id="toc_1">创建Annotation Module</h3>
 
 <p>首先，我们需要创建一个Java Library，库名最好为annotation，见名知意。注意，库一定要为Java Library，因为android Library不会引入javax.annotation等包。此库的build.gradle文件如下:<br/>
-<img src="media/15846871094959/15847073196361.jpg" alt=""/></p>
+<figure><img src="media/15846871094959/15847073196361.jpg" alt=""/></figure></p>
 
 <p>可根据自己的需求，修改jdk版本。</p>
 
@@ -165,7 +165,7 @@
 
 <p>配置build.gradle</p>
 
-<pre><code class="language-java">apply plugin: &#39;java&#39;
+<pre class="line-numbers"><code class="language-java">apply plugin: &#39;java&#39;
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
 dependencies {
@@ -189,14 +189,14 @@ dependencies {
 
 <p>在annotation库新建一个Test接口，定义注解</p>
 
-<pre><code class="language-java">@Target(ElementType.TYPE)
+<pre class="line-numbers"><code class="language-java">@Target(ElementType.TYPE)
 @Retention(RetentionPolicy.CLASS) 
 public @interface Test {   }
 </code></pre>
 
 <h3 id="toc_4">定义Processor类</h3>
 
-<pre><code class="language-java">@AutoService(Processor.class)//自动生成 javax.annotation.processing.IProcessor 文件
+<pre class="line-numbers"><code class="language-java">@AutoService(Processor.class)//自动生成 javax.annotation.processing.IProcessor 文件
 @SupportedSourceVersion(SourceVersion.RELEASE_8)//java版本支持
 @SupportedAnnotationTypes({&quot;com.tuodao.annotation.Test&quot;})//标注注解处理器支持的注解类型，就是我们刚才定义的接口Test，可以写入多个注解类型。
 public class AnnotationProcessor extends AbstractProcessor {
@@ -238,7 +238,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
 <p>配置app的build.gradle</p>
 
-<pre><code class="language-text">dependencies {
+<pre class="line-numbers"><code class="language-text">dependencies {
     //..
     implement project(&#39;:annotation&#39;)
     annotationProcessor project(&#39;:apt&#39;)//核心，有了这个app才会处理apt的代码
@@ -247,7 +247,7 @@ public class AnnotationProcessor extends AbstractProcessor {
 
 <p>在随意一个类添加@Test注解</p>
 
-<pre><code class="language-java">@Test
+<pre class="line-numbers"><code class="language-java">@Test
 public class MainActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -261,7 +261,7 @@ public class MainActivity extends AppCompatActivity {
 
 <p>如下 ：</p>
 
-<pre><code class="language-java">/**
+<pre class="line-numbers"><code class="language-java">/**
  * @  此方法由apt自动生成 
  */
 public final class HelloWorld {
@@ -282,7 +282,7 @@ public final class HelloWorld {
 
 <p>在项目的根目录的build.gradle文件中添加依赖，修改后文件如下</p>
 
-<pre><code class="language-text">repositories {
+<pre class="line-numbers"><code class="language-text">repositories {
     jcenter()
 }
 dependencies {
@@ -293,19 +293,19 @@ dependencies {
 
 <p>然后在项目或者库的build.gradle文件中添加AspectJ的依赖</p>
 
-<pre><code class="language-text">implementation &#39;org.aspectj:aspectjrt:1.8.9&#39;    //注意不能直接引用最新的AspectJ
+<pre class="line-numbers"><code class="language-text">implementation &#39;org.aspectj:aspectjrt:1.8.9&#39;    //注意不能直接引用最新的AspectJ
 </code></pre>
 
 <p>同时在该文件中加入AspectJX模块</p>
 
-<pre><code class="language-text">apply plugin: &#39;android-aspectjx&#39;
+<pre class="line-numbers"><code class="language-text">apply plugin: &#39;android-aspectjx&#39;
 </code></pre>
 
 <p>aspectjx默认会遍历项目编译后所有的.class文件和依赖的第三方库去查找符合织入条件的切点，为了提升编译效率，可以加入过滤条件指定遍历某些库或者不遍历某些库。</p>
 
 <p>includeJarFilter和excludeJarFilter可以支持groupId过滤，artifactId过滤，或者依赖路径匹配过滤</p>
 
-<pre><code class="language-text">aspectjx {
+<pre class="line-numbers"><code class="language-text">aspectjx {
     //织入遍历符合条件的库
     includeJarFilter &#39;universal-image-loader&#39;, &#39;AspectJX-Demo/library&#39;
     //排除包含‘universal-image-loader’的库
@@ -397,7 +397,7 @@ dependencies {
 
 <p>例如</p>
 
-<pre><code class="language-text">pointcut anyCall(): call(* *.println(..)) &amp;&amp; !within(TestAspect);
+<pre class="line-numbers"><code class="language-text">pointcut anyCall(): call(* *.println(..)) &amp;&amp; !within(TestAspect);
 </code></pre>
 
 <p>在 AspectJ 的语言中定义一个 Pointcout 需要用关键词 pointcut . 上面的这里是</p>
@@ -500,7 +500,7 @@ dependencies {
 
 <p>例子, 用 AspectJ 打印成员变量赋值前后的值</p>
 
-<pre><code class="language-java">// TraceAspect.java　set field 的切面
+<pre class="line-numbers"><code class="language-java">// TraceAspect.java　set field 的切面
 private static final String POINTCUT_FILEED =
         &quot;set(int org.android10.viewgroupperformance.activity.MainActivity.mTest) &amp;&amp; args(newValue) &amp;&amp; target(t)&quot;;
 
@@ -532,7 +532,7 @@ protected void onResume() {
 
 <p>打印结果</p>
 
-<pre><code class="language-text">onFiled value = 100 fieldSignature =int org.android10.viewgroupperformance.activity.MainActivity.mTest field = private int org.android10.viewgroupperformance.activity.MainActivity.mTest +
+<pre class="line-numbers"><code class="language-text">onFiled value = 100 fieldSignature =int org.android10.viewgroupperformance.activity.MainActivity.mTest field = private int org.android10.viewgroupperformance.activity.MainActivity.mTest +
 FileName = mTest clazzName = int oldValue = -1
 </code></pre>
 
@@ -593,7 +593,7 @@ cflow 的条件是一个 pointcut|  cflow(call Test.testMethod)<br/>
 
 <p>对于 call 来讲</p>
 
-<pre><code class="language-text">call(Before)
+<pre class="line-numbers"><code class="language-text">call(Before)
 Pointcut {
     Pointcut Method
 }
@@ -602,7 +602,7 @@ call(After)
 
 <p>对于 execution 来说</p>
 
-<pre><code class="language-text">Pointcut {
+<pre class="line-numbers"><code class="language-text">Pointcut {
    Execution(Before)
    Pointcut Method
    Execution(After)
@@ -652,7 +652,7 @@ call(After)
 
 <p>例子： 我们需要在 Activity 中的 onResume 方法调用前后输出</p>
 
-<pre><code class="language-java">// MainActivity.java
+<pre class="line-numbers"><code class="language-java">// MainActivity.java
 @Override
 protected void onResume() {
     super.onResume();
@@ -683,7 +683,7 @@ public void onMethLog(JoinPoint joinPoint){
 
 <p>改成 Around 的方式</p>
 
-<pre><code class="language-java">// TraceAspect.java
+<pre class="line-numbers"><code class="language-java">// TraceAspect.java
 private static final String POINTCUT_ONMETHOD =
         &quot;execution(* android.app.Activity.on**(..))&quot;;
 @Pointcut(POINTCUT_ONMETHOD)
@@ -725,7 +725,7 @@ public Object weaveOnMethodJoinPoint(ProceedingJoinPoint joinPoint) throws Throw
 
 <p>下面是例子说明 我们在 MainActivity 定义一个成员变量 mTest, 初始值为 -1，在 OnResume() 方法对它进行赋值，用 target 和 args 对 mTest 赋值前后的值进行监听</p>
 
-<pre><code class="language-java">// MainActivity.java
+<pre class="line-numbers"><code class="language-java">// MainActivity.java
 private int mTest = -1;
 @Override
 protected void onResume() {
@@ -794,7 +794,7 @@ public void onFiled(JoinPoint joinPoint, Object newValue, Object t) throws Illeg
 
 <p>例子：</p>
 
-<pre><code class="language-java">@Around(&quot;methodAnnotatedWithDebugTrace() || constructorAnnotatedDebugTrace()&quot;)
+<pre class="line-numbers"><code class="language-java">@Around(&quot;methodAnnotatedWithDebugTrace() || constructorAnnotatedDebugTrace()&quot;)
 public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
     // joint 对象信息
     MethodSignature methodSignature = (MethodSignature) joinPoint.getSignature();
@@ -940,6 +940,12 @@ public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
 	      
 		      
 			      <li class="post">
+			        <a href="16145671673295.html">多态</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16136612078589.html">继承</a>
 			      </li>
 		     
@@ -959,12 +965,6 @@ public Object weaveJoinPoint(ProceedingJoinPoint joinPoint) throws Throwable {
 		      
 			      <li class="post">
 			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16066640335833.html">Jetpack学习 - WorkManager</a>
 			      </li>
 		     
 		  
