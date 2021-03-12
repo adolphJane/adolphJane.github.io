@@ -4,13 +4,202 @@
   <title><![CDATA[MagicalRice的Blog]]></title>
   <link href="http://adolph.cc/atom.xml" rel="self"/>
   <link href="http://adolph.cc/"/>
-  <updated>2021-03-02T00:33:42+08:00</updated>
+  <updated>2021-03-03T20:05:22+08:00</updated>
   <id>http://adolph.cc/</id>
   <author>
     <name><![CDATA[]]></name>
     
   </author>
   <generator uri="http://www.mweb.im/">MWeb</generator>
+  
+  <entry>
+    <title type="html"><![CDATA[混入（mixin）]]></title>
+    <link href="http://adolph.cc/16155265432695.html"/>
+    <updated>2021-03-12T13:22:23+08:00</updated>
+    <id>http://adolph.cc/16155265432695.html</id>
+    <content type="html"><![CDATA[
+<h2 id="toc_0">mixin是什么</h2>
+
+<p>对于使用Java作为基础语言的开发来说，MixIn是一个新概念。所以，想要深入了解混入的概念和作用，首先从单词入手(～￣▽￣)～。</p>
+
+<p>mixin即mix in，中文翻译过来是“混入”，就是在类中混入其他功能。</p>
+
+<span id="more"></span><!-- more -->
+
+<p>在Dart官网中的定义是<strong>Mixins are a way of reusing code in multiple class hierarchies.</strong>翻译过来就是“Mixins是一种在多类层次结构中复用代码的一种方式”。</p>
+
+<p><strong>在维基百科中Mixin的定义如下：</strong></p>
+
+<p>Mixin是面向对象程序设计语言中的类，提供了方法的实现。其他类可以访问mixin类的方法而不必成为其子类。Mixin有时被称作&quot;included&quot;而不是&quot;inherited&quot;。mixin为使用它的class提供额外的功能，但自身却不单独使用（<strong>不能单独生成实例对象，属于抽象类</strong>）。因为有以上限制，<strong>Mixin类通常作为功能模块使用</strong>，在需要该功能时“混入”，而且<strong>不会使类的关系变得复杂</strong>。使用者与Mixin不是“is-a”的关系，而是「-able」关系<br/>
+<strong>Mixin有利于代码复用又避免了多继承的复杂</strong>。使用Mixin享有单一继承的单纯性和多重继承的共有性。接口与mixin相同的地方是都可以多继承，不同的地方在于 mixin 是带实现的。Mixin也可以看作是带实现的interface。这种设计模式实现了依赖反转原则。</p>
+
+<h2 id="toc_1">为什么使用</h2>
+
+<p>Mixin最核心的功能就是代码复用，但是代码复用有多种方法，例如Java中有如下几种代码复用方法，为何要用Mixin呢？</p>
+
+<p><strong>继承</strong>：继承可以复用父类的代码，但是java里只支持单继承，而mixin可以混入多个类。</p>
+
+<p><strong>接口</strong>：接口可以实现多继承，但是接口里的方法未实现，不同子类有不同实现，严格来说并未实现代码的复用，而Mixin除了支持多继承外，可以包含实现的方法。</p>
+
+<p><strong>组合</strong>：在类里包含某个类，使用其方法达到代码复用。但是这种方法比较繁琐，每个类里还需额外多一个或多个成员变量。Mixin就比较简洁，只需在类定义时用with关键字混入Mixin类即可。</p>
+
+<h2 id="toc_2">限制条件</h2>
+
+<h3 id="toc_3">1.Mixins除了继承Object外，不可以继承任何其他类</h3>
+
+<p>例如: 如下代码Mixin A继承类Clz，就会报错</p>
+
+<pre class="line-numbers"><code class="language-text">class Clz {}
+mixin A extends Clz {
+  void a() {
+    print(&#39;A&#39;);
+  }
+}
+</code></pre>
+
+<p>报如下错误</p>
+
+<pre class="line-numbers"><code class="language-text">
+Expected &#39;on&#39; instead of this.
+&#39;A&#39; can&#39;t be mixed onto &#39;Object&#39; because &#39;Object&#39; doesn&#39;t implement &#39;Clz&#39;.
+</code></pre>
+
+<h3 id="toc_4">2.Mixins不可以定义构造方法</h3>
+
+<p>例如: 如下Mixin定义中有构造方法，会报Mixins can&#39;t declare constructors.错误</p>
+
+<pre class="line-numbers"><code class="language-text">mixin A {
+  A() {
+  }
+  void a() {
+    print(&#39;A&#39;);
+  }
+}
+</code></pre>
+
+<h2 id="toc_5">方法覆盖</h2>
+
+<p>既然Mixins支持多混入，那么</p>
+
+<ol>
+<li>如果混入的多个Mixin中定义了相同的方法，那么调用谁的</li>
+<li>如果Minxin中定义了与被混入类中相同的方法，那么调用谁的</li>
+<li>如果Minxin中定义了与被混入类的父类相同的方法，那么调用谁的</li>
+</ol>
+
+<pre class="line-numbers"><code class="language-dart">mixin A {
+  void p() {
+    print(&#39;A&#39;);
+  }
+}
+mixin B {
+  void p() {
+    print(&#39;B&#39;);
+  }
+}
+class C {
+  void p() {
+    print(&#39;C&#39;);
+  }
+}
+ 
+class Mix1 with A, B {}
+class Mix2 with B, A {}
+class Mix3 with A, B {
+  void p() {
+    print(&#39;Mix3&#39;);
+  }
+}
+ 
+class Mix4 extends C with A, B {}
+class Mix5 extends C with B, A {}
+class Mix6 extends C with A, B {
+  void p() {
+    print(&#39;Mix3&#39;);
+  }
+}
+ 
+ 
+void main() {
+  Mix1 m1 = Mix1();
+  Mix2 m2 = Mix2();
+  Mix3 m3 = Mix3();
+  Mix4 m4 = Mix4();
+  Mix5 m5 = Mix5();
+  Mix6 m6 = Mix6();
+  
+  m1.p();
+  m2.p();
+  m3.p();
+  m4.p();
+  m5.p();
+  m6.p();
+}
+</code></pre>
+
+<p>输出结果如下</p>
+
+<pre class="line-numbers"><code class="language-text">B
+A
+Mix3
+B
+A
+Mix3
+</code></pre>
+
+<p>分析：</p>
+
+<ol>
+<li>对比Mix1和Mix2的输出结果可知，后面混入的覆盖前面混入的类的同名方法</li>
+<li>由Mix3的结果可知 ，混入并不会覆盖被混入类自带的同名方法</li>
+<li>由Mix4和Mix5的的结果可知，混入会覆盖被混入类的父类同名方法</li>
+<li>Mix6的结论与第二条一样，混入并不会覆盖被混入类自带的同名方法</li>
+</ol>
+
+<p><strong>所以结论是</strong></p>
+
+<ol>
+<li>后面混入的覆盖前面混入的Mixin的同名方法</li>
+<li>Mixin不会覆盖被混入类自带的同名方法</li>
+<li>Mixin会覆盖被混入类的父类同名方法</li>
+</ol>
+
+<h2 id="toc_6">mixin on</h2>
+
+<p>mixin on并不表示继承，而是表示一种限制条件，表示被混入的类必须是on后面限定的类的子类。</p>
+
+<p>如下所示Mix并不是Clz的子类，会报<code>&#39;A&#39; can&#39;t be mixed onto &#39;Object&#39; because &#39;Object&#39; doesn&#39;t implement &#39;Clz&#39;.</code>错误</p>
+
+<pre class="line-numbers"><code class="language-text">class Clz {}
+mixin A on Clz {
+  void a() {
+    print(&#39;A&#39;);
+  }
+}
+ 
+class Mix with A { 
+}
+</code></pre>
+
+<p>让Mix继承Clz即可</p>
+
+<pre class="line-numbers"><code class="language-text">class Clz {}
+mixin A on Clz {
+  void a() {
+    print(&#39;A&#39;);
+  }
+}
+ 
+class Mix extends Clz with A {
+}
+</code></pre>
+
+<h2 id="toc_7">dart中的mixin与Java中的interface对比</h2>
+
+<p>dart中的mixin所做的其实也是为面向对象提供一条面向组合编程的道路。Java在这方面的表现力就弱很多，Java8之前的interface也只是提供了定义方法的功能，不过Java8官方提供了default方法，可以在接口内实现方法功能，并支持覆写。但由于基础还是interface，所以他不能有字段定义，同时所有方法也只能定义为public。组合编程只能基于类来进行，扩展性不强。</p>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[多态]]></title>
@@ -133,6 +322,15 @@ p.toString();
 <h2 id="toc_8">多态的好处</h2>
 
 <p>使用多态，我们可以很好的完成代码的解耦和工作，加强代码的可扩展性，使代码更加灵活，在不改变原有接口方法的情况下简化流程。</p>
+
+<ul>
+<li>消除类型之间的耦合关系</li>
+<li>可替换性</li>
+<li>可扩充性</li>
+<li>接口性</li>
+<li>灵活性</li>
+<li>简化性</li>
+</ul>
 
 ]]></content>
   </entry>
@@ -7821,93 +8019,6 @@ $SELECTION$<br/>
 
 <p>到这里，打标模板已经完成了，你可以随便找一个类进行测试，选中一个代码块，按下快捷键<code>Command + Option + J</code>（Windows 系统可以在Preferences — Keymap 中搜索<code>Surround with Live Template...</code>对应的快捷键）来选择<code>Mark Code Block</code>模板，此时我们就可以快速进行代码块打标操作了，如下图<br/>
 <figure><img src="media/15779324219058/img3.gif" alt="img3"/><figcaption>img3</figcaption></figure></p>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Android Studio 模板之文件]]></title>
-    <link href="http://adolph.cc/15779341495897.html"/>
-    <updated>2020-01-02T11:02:29+08:00</updated>
-    <id>http://adolph.cc/15779341495897.html</id>
-    <content type="html"><![CDATA[
-<p>文件模板是指以一个文件为基础的模板，这种形式的模板比代码片段级别的模板要复杂一些，模板中设计到 VTL(Velocity Template Language) 语法。文件级别比代码级别能够存储更多的代码内容，而且能够通过 VTL 很大程度上提高模板的灵活度，让模板不再是一个不变的文本字符串。</p>
-
-<span id="more"></span><!-- more -->
-
-<p>我们开发的过程中可能会遇到有些类在不同的工程下都需要使用，单独抽成 jar 包可能又有点小题大做了，而且还得在下次使用的时候去依赖它，这个时候我们 AS 中的 FileTemplate 便派上用场了。<br/>
-<figure><img src="media/15779341495897/fileTemplate1.gif" alt="fileTemplate1"/><figcaption>fileTemplate1</figcaption></figure></p>
-
-<p>我们开发中可能经常去写一个继承 BaseAdapter 的子 Adapter，而且里面有一大串无脑代码，于是我写了这个 DataAdapter 的模板。</p>
-
-<p>Android Studio 给我提供了创建模板的快捷方式，我们可以打开任意一个类，然后选择顶部的 <code>Tools</code> — <code>Save File As Template</code> 便可以快速创建一个当前类的模板文件</p>
-
-<p><figure><img src="media/15779341495897/fileTemplate2.gif" alt="fileTemplate2"/><figcaption>fileTemplate2</figcaption></figure></p>
-
-<p>或者直接通过 <code>Preferences</code> — <code>Editor</code> — <code>File and Code Templates</code>右边的加号创建</p>
-
-<p><figure><img src="media/15779341495897/15779342797674.jpg" alt=""/></figure></p>
-
-<p>然后 IDE 会自动打开这个界面</p>
-
-<p><figure><img src="media/15779341495897/15779343035255.jpg" alt=""/></figure></p>
-
-<p>大致说下这几个区域</p>
-
-<ul>
-<li>区域 1：模板的名称，唯一标识一个文件模板</li>
-<li>区域 2：模板的后缀名，填写当前属于哪种文件的模板</li>
-<li>区域 3：模板编辑区</li>
-<li>区域 4：一些可选配置</li>
-<li>区域 5：官方对 FileTemplate 的简单描述，往下滑我们可以看到系统的预设变量（类似于上一章中的预设变量），这里的内容不是很多但营养价值很高，建议看一下<br/>
-接下来我们编辑模板，把这段模板内容直接粘贴到编辑区，然后给模板命名为 User 即保存关闭该弹窗</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME};#end
-
-/**
- * @author ${USER}
- * @version ${DATE}
- */
-public class ${NAME} {
-    public String[] name = {};
-}
-</code></pre>
-
-<p>现在我们来引入刚写的模板，<code>右键选择待添加模板的包</code> — <code>New</code> — <code>User</code></p>
-
-<p><figure><img src="media/15779341495897/15779343664551.jpg" alt=""/></figure></p>
-
-<p>也可以 New 一个 Java Class 然后在弹窗中通过上下方向键或者下拉列表来选择找到创建的 User 模板</p>
-
-<p><figure><img src="media/15779341495897/15779343806654.jpg" alt=""/></figure></p>
-
-<p>还可以直接在 New 下面选择</p>
-
-<p><figure><img src="media/15779341495897/fileTemplate4.gif" alt="fileTemplate4"/><figcaption>fileTemplate4</figcaption></figure></p>
-
-<p>创建模板之后的引入方式有很多，我们可以使用自己比较喜欢的方式去引入。最终输入文件名点确定，代码直接生成出来。</p>
-
-<p>上面说的是最基本的文件模板需求，当我们的文件需要多个参数时，例如 User 这个模板的 name 属性名可能是多边的，只有引入模板时才能确定下来，这时我们可以用自定义变量来表示，如下</p>
-
-<pre class="line-numbers"><code class="language-text">#if (${PACKAGE_NAME} &amp;&amp; ${PACKAGE_NAME} != &quot;&quot;)package ${PACKAGE_NAME};#end
-
-/**
- * @author ${USER}
- * @version ${DATE}
- */
-public class ${NAME} {
-    public String[] ${fieldName} = {};
-}
-</code></pre>
-
-<p>这个时候我们再引入模板时，IDE 会扫描有没有自定义变量，如果有的并且没有被初始化赋值的话就在弹出的对话框中多一个可编辑的区域，如下图</p>
-
-<p><figure><img src="media/15779341495897/15779344367462.jpg" alt=""/></figure></p>
-
-<p>这便支持自定义参数的场景，到这一步为止，一般的文件模板需求我们都可以自己满足了。下面介绍一些相对深一点的使用方式，有兴趣的可以看看。</p>
-
-<p>Android Studio 的 FileTemplate 使用 Velocity Template Language（简称 VTL）进行逻辑判断和流程控制，有兴趣的可以直接看下 Velocity 的<a href="http://velocity.apache.org/engine/devel/user-guide.html#Velocity_Template_Language_VTL:_An_Introduction">官方文档</a>。</p>
 
 ]]></content>
   </entry>

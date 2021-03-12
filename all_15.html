@@ -120,6 +120,114 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207870279.html">
+                
+                  <h1>Android-getViewTreeObserver()</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">前言</h2>
+
+<p>我们知道在<code>oncreate</code>中<code>View.getWidth</code>和<code>View.getHeight</code>无法获得一个view的高度和宽度，这是因为View组件布局要在<code>onResume</code>回调后完成。所以现在需要使用<code>getViewTreeObserver().addOnGlobalLayoutListener()</code>来获得宽度或者高度。这是获得一个view的宽度和高度的方法之一。</p>
+
+<h2 id="toc_1">OnGlobalLayoutListener</h2>
+
+<p><code>OnGlobalLayoutListener</code> 是<code>ViewTreeObserver</code>的内部类，当一个视图树的布局发生改变时，可以被<code>ViewTreeObserver</code>监听到，这是一个注册监听视图树的观察者(observer)，在视图树的全局事件改变时得到通知。<code>ViewTreeObserver</code>不能直接实例化，而是通过<code>getViewTreeObserver()</code>获得。</p>
+
+<h2 id="toc_2">其他</h2>
+
+<p>除了<code>OnGlobalLayoutListener</code> ，<code>ViewTreeObserver</code>还有如下内部类：</p>
+
+<h3 id="toc_3">interface <code>ViewTreeObserver.OnGlobalFocusChangeListener</code></h3>
+
+<p>当在一个视图树中的焦点状态发生改变时，所要调用的回调函数的接口类</p>
+
+<h3 id="toc_4">interface <code>ViewTreeObserver.OnGlobalLayoutListener</code></h3>
+
+<p>当在一个视图树中全局布局发生改变或者视图树中的某个视图的可视状态发生改变时，所要调用的回调函数的接口类</p>
+
+<h3 id="toc_5">interface <code>ViewTreeObserver.OnPreDrawListener</code></h3>
+
+<p>当一个视图树将要绘制时，所要调用的回调函数的接口类</p>
+
+<h3 id="toc_6">interface <code>ViewTreeObserver.OnScrollChangedListener</code></h3>
+
+<p>当一个视图树中的一些组件发生滚动时，所要调用的回调函数的接口类</p>
+
+<h3 id="toc_7">interface <code>ViewTreeObserver.OnTouchModeChangeListener</code></h3>
+
+<p>当一个视图树的触摸模式发生改变时，所要调用的回调函数的接口类</p>
+
+<h2 id="toc_8">实例</h2>
+
+<p>其中，我们可以利用<code>OnGlobalLayoutListener</code>来获得一个视图的真实高度。</p>
+
+<pre class="line-numbers"><code class="language-java">int mHeaderViewHeight;  
+mHeaderView.getViewTreeObserver().addOnGlobalLayoutListener(  
+    new OnGlobalLayoutListener() {  
+    @Override  
+    public void onGlobalLayout() {  
+                                                                                                                                                                                                                                        m    HeaderViewHeight = mHeaderView.getHeight();  
+    getViewTreeObserver().removeGlobalOnLayoutListener(this);  
+    }  
+});
+</code></pre>
+
+<p><strong>但是需要注意的是OnGlobalLayoutListener可能会被多次触发，因此在得到了高度之后，要将OnGlobalLayoutListener注销掉。另外mHeaderViewHeight和mHeaderView都需要写在当前java文件类（比如Activity）的成员变量中。不能直接在onCreate中定义否则会编译不通过：</strong></p>
+
+<p><code>Cannot refer to a non-final variable sHeight inside an inner class defined in a different method</code></p>
+
+<p>有时候需要在<code>onCreate</code>方法中知道某个View组件的宽度和高度等信息，而直接调用View组件的<code>getWidth()</code>、<code>getHeight()</code>、<code>getMeasuredWidth()</code>、<code>getMeasuredHeight()</code>、<code>getTop()</code>、<code>getLeft()</code>等方法是无法获取到真实值的，只会得到0。这是因为View组件布局要在onResume回调后完成。下面提供实现方法，onGlobalLayout回调会在view布局完成时自动调用:</p>
+
+<pre class="line-numbers"><code class="language-java">// This listener is used to get the final width of the GridView and then calculate the  
+// number of columns and the width of each column. The width of each column is variable  
+// as the GridView has stretchMode=columnWidth. The column width is used to set the height  
+// of each view so we get nice square thumbnails.  
+mGridView.getViewTreeObserver().addOnGlobalLayoutListener( //view 布局完成时调用，每次view改变时都会调用  
+    new ViewTreeObserver.OnGlobalLayoutListener() {  
+    @Override  
+    public void onGlobalLayout() {  
+        if (mAdapter.getNumColumns() == 0) {  
+            final int numColumns = (int) Math.floor(mGridView.getWidth() / (mImageThumbSize + mImageThumbSpacing));  
+            if (numColumns &gt; 0) {  
+                final int columnWidth = (mGridView.getWidth() / numColumns) - mImageThumbSpacing;  
+                mAdapter.setNumColumns(numColumns);   //设置 列数  
+                mAdapter.setItemHeight(columnWidth);  //设置 高度  
+            }  
+        } 
+    }  
+});
+</code></pre>
+
+<p><strong>在gridview布局完成后，根据girdview的宽和高设置adapter列数和每个item高度</strong></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/08/05</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207870240.html">
                 
                   <h1>Android-Retrofit详细学习</h1>
@@ -6408,150 +6516,6 @@ Log.i(&quot;test&quot;,&quot;velocityTraker&quot;+velocityTracker.getXVelocity()
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207869807.html">
-                
-                  <h1>Android-Toolbar详细学习</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">Toolbar是简单使用</h2>
-
-<p>1、在应用的build.gradle中添加v7 appcompat支持库。<br/><br/>
-<code>com.android.support:appcompat-v7:24.1.1</code></p>
-
-<p>2、让Activity继承自AppCompatActivity。  </p>
-
-<pre class="line-numbers"><code class="language-java">public class MyActivity extends AppCompatActivity {
-  // ...
-}
-</code></pre>
-
-<p>3、在AndroidManifest.xml文件中，设置元素使用appcompat中的某个NoActionBar主题，从而来去除使用ActionBar来提供操作栏。</p>
-
-<pre class="line-numbers"><code class="language-java">&lt;application android:theme=&quot;@style/Theme.AppCompat.Light.NoActionBar&quot;/&gt;
-</code></pre>
-
-<p>4、在activity的布局中添加Toolbar。</p>
-
-<pre class="line-numbers"><code class="language-java">&lt;android.support.v7.widget.Toolbar
- android:id=&quot;@+id/my_toolbar&quot;
- android:layout_width=&quot;match_parent&quot;
- android:layout_height=&quot;?attr/actionBarSize&quot;
- android:background=&quot;?attr/colorPrimary&quot;
- android:elevation=&quot;4dp&quot;
- android:theme=&quot;@style/ThemeOverlay.AppCompat.ActionBar&quot;  
- app:popupTheme=&quot;@style/ThemeOverlay.AppCompat.Light&quot;/&gt;
-</code></pre>
-
-<p>5、在activity的onCreate()方法中，调用setSupportActionBar()方法，并传入toolbar，这样就会将toolbar设置为activity的操作栏了。</p>
-
-<pre class="line-numbers"><code class="language-java">@Override
-protected void onCreate(Bundle savedInstanceState) {
-  super.onCreate(savedInstanceState);
-  setContentView(R.layout.activity_my);
-  Toolbar toolbar = (Toolbar) findViewById(R.id.my_toolbar);
-  setSupportActionBar(toolbar);
-}
-</code></pre>
-
-<h2 id="toc_1">Toolber复用</h2>
-
-<p>应用中有很多界面，每个Activity一般都需要操作栏，且大多数activity的操作栏的元素是一致的，那每个布局文件里面都写这么多资源文件是累赘的。因此可以对Toolbar进行复用，使得布局文件看起来更精炼，更改Toolbar整体效果，如背景之类的可以更方便。</p>
-
-<p>首先，在布局文件toolbar.xml中定义Toolbar。</p>
-
-<pre class="line-numbers"><code class="language-java">&lt;android.support.v7.widget.Toolbar
-    android:id=&quot;@+id/toolbar&quot;
-    xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;?attr/actionBarSize&quot;
-    android:background=&quot;?attr/colorPrimary&quot;
-    android:contentInsetLeft=&quot;0dp&quot;
-    android:contentInsetStart=&quot;0dp&quot;
-    android:elevation=&quot;4dp&quot;
-    android:theme=&quot;@style/ToolbarTheme&quot;
-    app:navigationIcon=&quot;@drawable/icon_back&quot;
-    app:popupTheme=&quot;@style/ThemeOverlay.AppCompat.Light&quot;
-    app:titleTextAppearance=&quot;@style/Toolbar.TitleText&quot;&gt;
-
-    &lt;!--  any custom view --&gt;
-
-&lt;/android.support.v7.widget.Toolbar&gt;
-</code></pre>
-
-<p>之后，在需要添加Toolbar的地方引入这个布局资源。</p>
-
-<pre class="line-numbers"><code class="language-java">&lt;include
-  layout=&quot;@layout/toolbar&quot;/&gt;
-</code></pre>
-
-<p>最后，在BaseActivity(一般app都会有)中的onCreate()方法设置Toolbar。注意，这个时候Activity不再继承AppCompatActivity，而是继承BaseActivity，而BaseActivity继承AppCompatActivity。BaseActivity部分代码如下：</p>
-
-<pre class="line-numbers"><code class="language-java">@Override
-protected void onCreate(@Nullable Bundle savedInstanceState) {
-    super.onCreate(savedInstanceState);
-
-    Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-    if (toolbar != null) {
-        setSupportActionBar(toolbar);
-
-        mToolbarHelper = new ToolbarHelper(toolbar);
-
-        hanldeToolbar(mToolbarHelper);
-    }
-}
-
-protected void hanldeToolbar(ToolbarHelper toolbarHelper) {}
-
-public static class ToolbarHelper {
-
-    private Toolbar mToolbar;
-
-    public ToolbarHelper(Toolbar toolbar) {
-        this.mToolbar = toolbar;
-    }
-
-    public Toolbar getToolbar() {
-        return mToolbar;
-    }
-
-    public void setTitle(String title) {
-        TextView titleTV = (TextView) mToolbar.findViewById(R.id.toolbar_title);
-        titleTV.setText(title);
-    }
-}
-</code></pre>
-
-<p>代码中首先获取到Toolbar将其设置为操作栏，之后创建了一个ToolbarHelper对象，ToobarHelper主要是封装了下Toolbar，并提供操作自定义View的方法。然后调用hanldeToolbar()方法，子Activity通过重写这个方法，可以对Toolbar进行定制操作。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/06/09</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -6643,6 +6607,12 @@ public static class ToolbarHelper {
 	      
 		      
 			      <li class="post">
+			        <a href="16155265432695.html">混入（mixin）</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16145671673295.html">多态</a>
 			      </li>
 		     
@@ -6662,12 +6632,6 @@ public static class ToolbarHelper {
 		      
 			      <li class="post">
 			        <a href="16106747969027.html">GitHub搜索技巧</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  

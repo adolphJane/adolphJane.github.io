@@ -120,6 +120,300 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
+                <a class="clearlink" href="15561207871451.html">
+                
+                  <h1>Android 为什么不该使用Timer</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2 id="toc_0">概述</h2>
+
+<p>在Java开发中，用过定时功能的同学一定不会对Timer感到陌生。不过，除了Timer，在Java 5之后又引入了一个定时工具ScheduledThreadPoolExecutor，那么我们应该如何在这两个定时工具之间进行选择呢？</p>
+
+<p>一般情况下我们都建议使用ScheduledThreadPoolExecutor而不是Timer，主要原因有以下3点：</p>
+
+<ol>
+<li>Timer使用的是绝对时间，系统时间的改变会对Timer产生一定的影响；而ScheduledThreadPoolExecutor使用的是相对时间，所以不会有这个问题。</li>
+<li>Timer使用单线程来处理任务，长时间运行的任务会导致其他任务的延时处理，而ScheduledThreadPoolExecutor可以自定义线程数量。</li>
+<li>Timer没有对运行时异常进行处理，一旦某个任务触发运行时异常，会导致整个Timer崩溃，而ScheduledThreadPoolExecutor对运行时异常做了捕获（可以在afterExecute()回调方法中进行处理），所以更加安全。</li>
+</ol>
+
+<p>下面我们就来通过了解Timer与ScheduledThreadPoolExecutor的运行原理来理解上面几个问题出现的原因。</p>
+
+<h2 id="toc_1">Timer的运行机制</h2>
+
+<p><figure><img src="media/15561207871451/15713367067259.jpg" alt=""/></figure></p>
+
+<ul>
+<li>TimerTask：任务类。内部持有<code>nextExecutionTime</code>变量，表示任务实际执行时间点，单位为毫秒，使用<code>System.currentTimeMillis()</code> + <code>delay</code>计算得出。</li>
+<li><code>TimerQueue</code>：使用小根堆实现的优先队列。按照<code>TimerTask</code>的实际执行时间点由小到大排序。</li>
+<li><code>TimerThread</code>：顾名思义，这是实际执行任务的线程。</li>
+</ul>
+
+<p><code>TimerThread</code>会在<code>Timer</code>初始化后启动，之后会进入<code>mainLoop()</code>方法，该方法会不断从<code>TimerQueue</code>中取出时间点最小的<code>TimerTask</code>。如果该<code>TimerTask</code>的执行时间点已到，则直接调用<code>TimerTask.run()</code>执行；否则，调用<code>wait()</code>方法，等待相应的时间。</p>
+
+<p>而我们调用<code>Timer.schedule()</code>方法，实际上是通过<code>TimerQueue.add()</code>方法，将TimerTask加入任务等待队列。</p>
+
+<p>这里还有一个需要注意的地方是：当加入任务的执行时间点是优先队列中最小的时，就调用<code>notify()</code>方法唤醒<code>TimerThread</code>，而<code>TimerThread</code>在被唤醒后会重新调用<code>TimerQueue.getMin()</code>方法，再次调用<code>wait()</code>，不过这次的等待时间就变成了新加入任务的时间点。</p>
+
+<h2 id="toc_2">ScheduledThreadPoolExecutor的运行机制</h2>
+
+<p>ScheduledThreadPoolExecutor继承自ThreadPoolExecutor，对线程池的原理不了解的同学，可以看一下我的这篇文章：<a href="https://link.juejin.im/?target=http%3A%2F%2Fwww.jianshu.com%2Fp%2F1fe47a3e8f4c">从零实现ImageLoader（三）—— 线程池详解</a>。</p>
+
+<p>ScheduledThreadPoolExecutor的实现比Timer要复杂一些，不过要是理解了线程池的运行原理，其实也不难。它只不过是在ThreadPoolExecutor的基础上使用自定义的阻塞队列DelayedWorkQueue来实现任务定时功能。所以ScheduledThreadPoolExecutor的运行流程其实和ThreadPoolExecutor是差不多的。</p>
+
+<p><figure><img src="media/15561207871451/15713367175739.jpg" alt=""/></figure></p>
+
+<ul>
+<li><strong>ScheduledFutureTask</strong>：任务类。内部持有time变量，单位为纳秒，通过<code>System.nanoTime()</code> + <code>delay</code>计算得出。</li>
+<li><strong>DelayedWorkQueue</strong>：使用小根堆实现的优先阻塞队列，将ScheduledFutureTask按照从小到大的顺序排列，同时在take()方法内实现阻塞操作。</li>
+<li><strong>WorkerThread</strong>：这里为了简单起见，我将线程池的核心线程和临时线程统一写成WorkerThread，但需要注意的是<code>ScheduledThreadPoolExecutor</code>是线程池的一个子类，所以线程池的那一套东西在<code>ScheduledThreadPoolExecutor</code>里也是有的。</li>
+</ul>
+
+<p>光从这两个图上看，好像ScheduledThreadPoolExecutor和Timer的实现都大同小异，不过是换了一些名字，但实际上这两个的实现还是有很大的不同的，不止因为ScheduledThreadPoolExecutor使用的是多线程。</p>
+
+<p>在Timer里定时功能的实现主要依靠TimerThread.mainLoop()的等待，而ScheduledThreadPoolExecutor使用的是多线程，在每个线程里都单独实现定时功能是不现实的，因此，<code>ScheduledThreadPoolExecutor</code>将定时功能放在了<code>DelayedWorkQueue</code>类里，而由于<code>DelayedWorkQueue</code>是阻塞队列，所以定时任务的实现实际上就在<code>DelayedWorkQueue.take()</code>方法中。下面我们就来分析一下<code>DelayedWorkQueue.take()</code>到底做了什么。</p>
+
+<h3 id="toc_3">Leader/Follower模式</h3>
+
+<p>在多线程网络编程中，我们一般使用一个线程监听端口，在接收到事件后再使用其他的线程去完成操作。这种情况下，在两个线程之间的上下文切换开销其实是很大的，于是我们有了Leader/Follower模式：</p>
+
+<p><figure><img src="media/15561207871451/15713367286186.png" alt=""/></figure></p>
+
+<p>在Leader/Follower模式中，不存在一个专门用来监听的线程，所有的线程都是等价的，而这些线程会不断在Leader、Follower和Processor这三个状态之间来回切换。</p>
+
+<p>在程序中会保证每个时刻有且只有一个Leader，这个Leader就暂时充当了之前用来监听端口线程的作用。而当有一个新的事件发生时，Leader不再是重新找一个线程去处理连接，而是自己转化为Processor处理事件，并且重新指定一个Follower作为新的Leader。当事件处理完毕后，Processor又会转化为Follower等待重新成为Leader。</p>
+
+<h3 id="toc_4">take()方法的原理</h3>
+
+<p>这里的<code>take()</code>方法就借助了<code>Leader/Follower</code>模式的思想，同一时刻只有一个<code>Leader</code>线程，不过这里由于任务执行的时间点是已经确定了的，所以不再是等待一个触发事件，而是等待最小任务所对应的延迟时间。其他的<code>Follower</code>线程则处于无限等待的状态，直到当前<code>Leader</code>到达指定时间后转化为<code>Processor</code>去处理任务，这时就会唤醒一个<code>Follower</code>作为下一任的<code>Leader</code>。而Processor在处理完任务后又会重新加入<code>Follower</code>进行等待。</p>
+
+<h2 id="toc_5">绝对时间与相对时间</h2>
+
+<p>了解了Timer与ScheduledThreadPoolExecutor的运行机制，下面我们就来看一下Timer的这些缺陷究竟是怎么回事。</p>
+
+<p>首先是绝对时间与相对时间的问题，可能有人已经发现，不管是TimerTask还是ScheduledFutureTask都是存储的实际执行时间点，只不过一个是毫秒，一个是纳秒，难道时间单位还会对这些有影响？确实，时间单位是不会对任务的执行有影响的，不过这里的玄机就在于这个时间的计算方式：<code>System.currentTimeMillis()</code>与<code>System.nanoTime()</code>。</p>
+
+<p><code>System.currentTimeMillis()</code>大家已经很清楚了，就是当前时间与1970年1月1日午夜的时间差的毫秒数，而<code>System.nanoTime()</code>又是什么呢？官方文档里是这么说的：</p>
+
+<blockquote>
+<p>此方法只能用于测量已过的时间，与系统或钟表时间的其他任何时间概念无关。返回值表示从某一固定但任意的时间算起的毫微秒数。<br/>
+这就是Timer与ScheduledThreadPoolExecutor一个是基于绝对时间而另一个是基于相对时间的原因。下面我们写个例子来测试一下：</p>
+</blockquote>
+
+<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+    System.out.println(&quot;Start:\t&quot; + new Date());
+
+    Executors.newSingleThreadScheduledExecutor().schedule(() -&gt; {
+        System.out.println(&quot;Executor:\t&quot; + new Date());
+    }, 60, TimeUnit.SECONDS);
+
+    new Timer().schedule(new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println(&quot;Timer:\t&quot; + new Date());
+        }
+    }, 60000);
+}
+</code></pre>
+
+<p>输出：</p>
+
+<pre class="line-numbers"><code class="language-text">Start:    Sun Oct 08 10:51:44 CST 2017
+Executor:    Sun Oct 08 10:51:41 CST 2017
+Timer:    Sun Oct 08 10:52:45 CST 2017
+</code></pre>
+
+<p>这里，我在启动之后将系统的时钟向后调了一分钟，所以实际的启动时间应该是10:50:44，由于ScheduledThreadPoolExecutor的等待时间与系统无关，所以在一分钟后执行；而Timer是基于绝对时间的所以在10:52:45执行，实际上这时已经过去两分钟了。</p>
+
+<h2 id="toc_6">单线程与多线程</h2>
+
+<p>Timer的第二个缺陷是，由于它使用的是单线程，所以长时间执行的任务会对其他任务产生影响。</p>
+
+<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+    System.out.println(&quot;Start:\t\t\t&quot; + new Date());
+
+    ScheduledExecutorService service = Executors.newScheduledThreadPool(3);
+
+    service.schedule(() -&gt; {
+        System.out.println(&quot;Executor 任务1:\t&quot; + new Date());
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }, 60, TimeUnit.SECONDS);
+    service.schedule(() -&gt; {
+        System.out.println(&quot;Executor 任务2:\t&quot; + new Date());
+        try {
+            Thread.sleep(30000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+    }, 60, TimeUnit.SECONDS);
+
+    Timer timer = new Timer();
+
+    timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println(&quot;Timer 任务1:\t\t&quot; + new Date());
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }, 60000);
+    timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            System.out.println(&quot;Timer 任务2:\t\t&quot; + new Date());
+            try {
+                Thread.sleep(30000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        }
+    }, 60000);
+}
+</code></pre>
+
+<p>输出：</p>
+
+<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:10:34 CST 2017
+Executor 任务1:    Sun Oct 08 11:11:34 CST 2017
+Executor 任务2:    Sun Oct 08 11:11:34 CST 2017
+Timer 任务1:        Sun Oct 08 11:11:34 CST 2017
+Timer 任务2:        Sun Oct 08 11:12:04 CST 2017
+</code></pre>
+
+<p>可以看到ScheduledThreadPoolExecutor中的两个任务在等待一分钟之后同时执行；而在Timer中的任务2却因任务1长达半分钟的执行时间，总共等了一分半钟才得以执行。</p>
+
+<h2 id="toc_7">异常处理</h2>
+
+<p>最后我们来看一下Timer与ScheduledThreadPoolExecutor对异常的处理情况：</p>
+
+<h3 id="toc_8">Timer</h3>
+
+<p>Timer内部没有对异常做任何处理，如果任务执行发生运行时异常，整个TimerThread都会崩溃：</p>
+
+<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+    System.out.println(&quot;Start:\t\t\t&quot; + new Date());
+
+    Timer timer = new Timer();
+
+    timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            throw new RuntimeException(&quot;Timer 任务1&quot;);
+        }
+    }, 60000);
+    timer.schedule(new TimerTask() {
+        @Override
+        public void run() {
+            try {
+                Thread.sleep(1000);
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            System.out.println(&quot;Timer 任务2:\t\t&quot; + new Date());
+        }
+    }, 60000);
+}
+</code></pre>
+
+<p>输出：</p>
+
+<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:53:05 CST 2017
+Exception in thread &quot;Timer-0&quot; java.lang.RuntimeException: Timer 任务1
+    at main.Main$1.run(Main.java:32)
+    at java.util.TimerThread.mainLoop(Timer.java:555)
+    at java.util.TimerThread.run(Timer.java:505)
+</code></pre>
+
+<p>可以看到，任务1抛出的运行时异常导致整个Timer线程崩溃，任务2自然也没有执行。</p>
+
+<h3 id="toc_9">ScheduledThreadPoolExecutor</h3>
+
+<p>ScheduledThreadPoolExecutor中对异常的处理实际上是ThreadPoolExecutor类完成的，ThreadPoolExecutor在任务运行时对异常做了捕获，并且将异常传入了afterExecute()方法：</p>
+
+<pre class="line-numbers"><code class="language-java">public class ThreadPoolExecutor extends AbstractExecutorService {
+    final void runWorker(Worker w) {
+        ...
+        Throwable thrown = null;
+        try {
+            task.run();
+        } catch (RuntimeException x) {
+            thrown = x; throw x;
+        } catch (Error x) {
+            thrown = x; throw x;
+        } catch (Throwable x) {
+            thrown = x; throw new Error(x);
+        } finally {
+            afterExecute(task, thrown);
+        }
+        ...
+    }
+}
+</code></pre>
+
+<p>我们来验证一下：</p>
+
+<pre class="line-numbers"><code class="language-java">public static void main(String[] args) {
+    System.out.println(&quot;Start:\t\t\t&quot; + new Date());
+
+    ScheduledExecutorService service = Executors.newSingleThreadScheduledExecutor();
+
+    service.schedule(() -&gt; {
+        throw new RuntimeException(&quot;Executor 任务1&quot;);
+    }, 60, TimeUnit.SECONDS);
+    service.schedule(() -&gt; {
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+            e.printStackTrace();
+        }
+        System.out.println(&quot;Executor 任务2:\t&quot; + new Date());
+    }, 60, TimeUnit.SECONDS);
+}
+</code></pre>
+
+<p>输出：</p>
+
+<pre class="line-numbers"><code class="language-text">Start:            Sun Oct 08 11:33:35 CST 2017
+Executor 任务2:    Sun Oct 08 11:34:36 CST 2017
+</code></pre>
+
+<p>可以看到这里虽然任务1抛出了运行时异常，但由于线程池内部完善的异常处理机制，任务2得以成功执行。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/09/29</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
                 <a class="clearlink" href="15561207871379.html">
                 
                   <h1>Android 四种启动模式</h1>
@@ -3963,386 +4257,6 @@ Java_com_glee_ndkroad1006_MainActivity_gaussBlur(JNIEnv *env, jobject /* this */
                 </div>
               </div><!-- article -->
         
-			<div class="article">
-                <a class="clearlink" href="15561207870710.html">
-                
-                  <h1>Android-AppBarLayout</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">Toolbar</h2>
-
-<p>Toobar主要是用来替换ActionBar的，换句话说，ActionBar能做的，Toolbar都能做。如果你对ActionBar的使用比较熟悉，你会发现Toolbar使用起来非常简单。ok，既然是替换，当然用Toolbar的时候就得先去把ActionBar给隐藏掉啦~</p>
-
-<p>隐藏ActionBar的方法有很多，可以通过代码的方式隐藏，也可以通过配置文件的方式，我们主要是通过配置文件的方式来隐藏。在我们的styles.xml文件中的AppTheme标签中加入如下两行：</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;item name=&quot;windowActionBar&quot;&gt;false&lt;/item&gt;
-&lt;item name=&quot;windowNoTitle&quot;&gt;true&lt;/item&gt;
-</code></pre>
-
-<p>当然了，你也可以新建一个<code>&lt;style&gt;</code>标签，将上面两行代码加入，并且将这个新建的标签作为<code>&lt;application&gt;</code>的<code>theme</code>。还可以选择通过将<code>AppTheme</code>的<code>parent</code>设置为<code>Theme.AppCompat.Light.NoActionBar</code>的方式。方法很多，可以自己随便选。</p>
-
-<p>接下来就是将Toolbar放入到布局文件（没啥好解释的）：</p>
-
-<pre class="line-numbers"><code class="language-markup">  &lt;android.support.v7.widget.Toolbar
-        android:id=&quot;@+id/toolbar&quot;
-        android:layout_width=&quot;match_parent&quot;
-        android:background=&quot;?attr/colorPrimary&quot;
-        android:layout_height=&quot;?android:attr/actionBarSize&quot;  /&gt;
-</code></pre>
-
-<p>最后将Toobar作为“ActionBar”来用</p>
-
-<pre class="line-numbers"><code class="language-java"> Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
-        toolbar.setTitle(&quot;这里是Title&quot;);
-        toolbar.setSubtitle(&quot;这里是子标题&quot;);
-        toolbar.setLogo(R.drawable.icon); 
-        setSupportActionBar(toolbar);
-</code></pre>
-
-<p>可以对Toolbar设置Logo、标题、子标题等等~还有很多其他的设置，自己去慢慢玩，这里不提啦~。当然了，也可以在布局文件中设置这些，在布局文件设置就不写啦，hongyang大神有篇博客写的挺好的<a href="http://blog.csdn.net/lmj623565791/article/details/45303349">《 Android 5.x Theme 与 ToolBar 实战 》</a>可以去参考一下。</p>
-
-<p>如果Toolbar仅仅是用来对以往的ActionBar做一次替换，那也太没创意啦！完全没必要去替换了，因为它们表现出来的都是一样的，而且并没有让我们觉得用起来比ActionBar方便。那为啥要替换呢，总应该有他的理由吧：ActionBar是固定在顶部，并不能移动，我觉得这是最大的不好，而我们的ToolBar可以让我们随便摆放，就就可以带来很多灵活性和效果啦！</p>
-
-<p>正如你所看的这样，Toolbar根本就不够看的，一点都不复杂。接下来我们继续学习在Toolbar上面再套一层父View，让Toolbar更有互动性。</p>
-
-<h2 id="toc_1">AppBarLayout</h2>
-
-<blockquote>
-<p>AppBarLayout继承自LinearLayout，布局方向为垂直方向。所以你可以把它当成垂直布局的LinearLayout来使用。AppBarLayout是在LinearLayou上加了一些材料设计的概念，它可以让你定制当<strong>某个可滚动View</strong>的滚动手势发生变化时，其内部的子View实现何种动作。</p>
-</blockquote>
-
-<p>请注意：上面提到的<strong>某个可滚动View</strong>，可以理解为某个ScrollView。怎么理解上面的话呢？就是说，当某个ScrollView发生滚动时，你可以定制你的“顶部栏”应该执行哪些动作（如跟着一起滚动、保持不动等等）。那某个可移动的View到底是哪个可移动的View呢？这是由你自己指定的！如何指定，我们后面说。</p>
-
-<h3 id="toc_2">AppBarLayout子View的动作</h3>
-
-<p>内部的子View通过在布局中加<code>app:layout_scrollFlags</code>设置执行的动作，那么<code>app:layout_scrollFlags</code>可以设置哪些动作呢？分别如下：</p>
-
-<blockquote>
-<p>（1） scroll:值设为scroll的View会跟随滚动事件一起发生移动。</p>
-</blockquote>
-
-<p>什么意思呢？简单的说，就是当指定的ScrollView发生滚动时，该View也跟随一起滚动，就好像这个View也是属于这个ScrollView一样。</p>
-
-<p>一张gif足以说明：</p>
-
-<p><figure><img src="media/15561207870710/20171014150799488071606.gif" alt=""/></figure></p>
-
-<p>对应的布局文件</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;android.support.design.widget.AppBarLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;&gt;
-
-        &lt;android.support.v7.widget.Toolbar
-            android:id=&quot;@+id/toolbar&quot;
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;?android:attr/actionBarSize&quot;
-            android:background=&quot;?attr/colorPrimary&quot;
-            app:layout_scrollFlags=&quot;scroll&quot; /&gt;
-&lt;/android.support.design.widget.AppBarLayout&gt;
-</code></pre>
-
-<blockquote>
-<p>（2） enterAlways:值设为enterAlways的View,当ScrollView往下滚动时，该View会直接往下滚动。而不用考虑ScrollView是否在滚动。</p>
-</blockquote>
-
-<p>看个动画片（Y(<sup>o<sup>)Y）（ToolBar高度设为：<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enterAlways&quot;</code>）：</sup></sup></p>
-
-<p><figure><img src="media/15561207870710/20171014150799493830006.gif" alt=""/></figure></p>
-
-<blockquote>
-<p>（3） <code>exitUntilCollapsed</code>：值设为<code>exitUntilCollapsed</code>的View，当这个View要往上逐渐“消逝”时，会一直往上滑动，直到剩下的的高度达到它的最小高度后，再响应ScrollView的内部滑动事件。</p>
-</blockquote>
-
-<p>怎么理解呢？简单解释：在ScrollView往上滑动时，首先是View把滑动事件“夺走”，由View去执行滑动，直到滑动最小高度后，把这个滑动事件“还”回去，让ScrollView内部去上滑。看个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;</code>）：</p>
-
-<p><figure><img src="media/15561207870710/20171014150799499853731.gif" alt=""/></figure></p>
-
-<blockquote>
-<p>（4） <code>enterAlwaysCollapsed</code>：是<code>enterAlways</code>的附加选项，一般跟<code>enterAlways</code>一起使用，它是指，View在往下“出现”的时候，首先是<code>enterAlways</code>效果，当View的高度达到最小高度时，View就暂时不去往下滚动，直到ScrollView滑动到顶部不再滑动时，View再继续往下滑动，直到滑到View的顶部结束。<br/>
-来个gif感受一下（图中将高度设的比较大:200dp，并将最小高度设置为<code>?android:attr/actionBarSize,app:layout_scrollFlags=&quot;scroll|enerAlways|enterAlwaysCollapsed&quot;</code>）：</p>
-</blockquote>
-
-<p><figure><img src="media/15561207870710/20171014150799505696205.gif" alt=""/></figure></p>
-
-<h3 id="toc_3">将AppBarLayout与ScrollView关联起来</h3>
-
-<p>前面说了一直反复说“当ScrollView发生滚动时”，那么怎么将AppBarLayout与ScrollView关联起来呢？我们注意到，AppBarLayout与ScrollView之间动作“相互依赖”，这不就是我们上一篇<a href="http://blog.csdn.net/huachao1001/article/details/51554608">《CoordinateLayout的使用如此简单 》</a>所学的内容吗？把ScrollView和AppBarLayout作为CoordinateLayout的子View，然后编写一个Behavior，在这个Behavior里面判断当前的操作是应该让ScrollView时刻保持在AppBarLayout之下（即只要改变AppBarLayout的位置就可以一起滑动），还是应该让ScrollView内部滚动而不让AppBarLayout位置发生变化等等这些需求，都是可以在Behavior里面处理的。你可以去针对你的ScrollView编写Behavior。然而，我们看到我们的AppBarLayout事先的功能比较复杂，如果我们自己去定义这样的效果，代码非常复杂，还要考虑很多方面，好在Android帮我们写好啦，我们直接用就是了，这个ScrollView就是NestedScrollView，请注意，它并没有继承ScrollView，它继承的是FrameLayout，但是它实现的效果把它可以看成是ScrollView。</p>
-
-<p>把NestedScrollView放入到我们的layout文件里面就可以啦~~~，很方便~</p>
-
-<pre class="line-numbers"><code class="language-markup"> &lt;android.support.v4.widget.NestedScrollView
-
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
-
-       &lt;!--将你的内容放在这里--&gt;
-
-&lt;/android.support.v4.widget.NestedScrollView&gt;
-</code></pre>
-
-<p>有没有注意到有个属性：<code>app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;</code>,它就是指定Behavior的，<code>appbar_scrolling_view_behavior</code>对应的类的名称是：<code>android.support.design.widget.AppBarLayout$ScrollingViewBehavior</code>感兴趣的可以去分析源码。</p>
-
-<p>好了，我们现在会用AppBarLayout啦~是不是发现用起来so easy!接下来我们把剩下<code>CollapsingToolbarLayout</code>的给&quot;消化&quot;掉！</p>
-
-<h2 id="toc_4">CollapsingToolbarLayout</h2>
-
-<p>CollapsingToolbarLayout是用来对Toolbar进行再次包装的ViewGroup，主要是用于实现折叠（其实就是看起来像伸缩~）的App Bar效果。它需要放在AppBarLayout布局里面，并且作为AppBarLayout的直接子View。CollapsingToolbarLayout主要包括几个功能（参照了官方网站上内容，略加自己的理解进行解释）：</p>
-
-<blockquote>
-<p>(1) 折叠Title（Collapsing title）：当布局内容全部显示出来时，title是最大的，但是随着View逐步移出屏幕顶部，title变得越来越小。你可以通过调用<code>setTitle</code>函数来设置title。  </p>
-
-<p>(2)内容纱布（Content scrim）：根据滚动的位置是否到达一个阀值，来决定是否对View“盖上纱布”。可以通过<code>setContentScrim(Drawable)</code>来设置纱布的图片.  </p>
-
-<p>(3)状态栏纱布（Status bar scrim)：根据滚动位置是否到达一个阀值决定是否对状态栏“盖上纱布”，你可以通过<code>setStatusBarScrim(Drawable)</code>来设置纱布图片，但是只能在LOLLIPOP设备上面有作用。  </p>
-
-<p>(4)视差滚动子<code>View(Parallax scrolling children)</code>:子View可以选择在当前的布局当时是否以“视差”的方式来跟随滚动。<strong>（PS:其实就是让这个View的滚动的速度比其他正常滚动的View速度稍微慢一点）</strong>。将布局参数<code>app:layout_collapseMode</code>设为<code>parallax</code> </p>
-
-<p>(5)将子View位置固定(Pinned position children)：子View可以选择是否在全局空间上固定位置，这对于Toolbar来说非常有用，因为当布局在移动时，可以将Toolbar固定位置而不受移动的影响。 将app:layout_collapseMode设为pin。</p>
-</blockquote>
-
-<p>了解这些概念后，我们来看看布局吧~</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;android.support.design.widget.CoordinatorLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-    android:layout_width=&quot;match_parent&quot;
-    android:layout_height=&quot;match_parent&quot; &gt;
-
-
-    &lt;android.support.design.widget.AppBarLayout
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
-
-        &lt;android.support.design.widget.CollapsingToolbarLayout
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            app:expandedTitleMarginEnd=&quot;64dp&quot;
-            app:expandedTitleMarginStart=&quot;48dp&quot;
-            app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;&gt;
-
-            &lt;ImageView
-                android:id=&quot;@+id/main.backdrop&quot;
-                android:layout_width=&quot;wrap_content&quot;
-                android:layout_height=&quot;300dp&quot;
-                android:scaleType=&quot;centerCrop&quot;
-                android:src=&quot;@drawable/material_img&quot;
-                app:layout_collapseMode=&quot;parallax&quot; /&gt;
-
-            &lt;android.support.v7.widget.Toolbar
-                android:id=&quot;@+id/toolbar&quot;
-                android:layout_width=&quot;match_parent&quot;
-                android:layout_height=&quot;?android:attr/actionBarSize&quot;
-                app:layout_collapseMode=&quot;pin&quot;  /&gt;
-
-        &lt;/android.support.design.widget.CollapsingToolbarLayout&gt;
-    &lt;/android.support.design.widget.AppBarLayout&gt;
-
-    &lt;android.support.v4.widget.NestedScrollView
-
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:paddingTop=&quot;50dp&quot;
-        app:layout_behavior=&quot;@string/appbar_scrolling_view_behavior&quot;&gt;
-
-        &lt;TextView
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;wrap_content&quot;
-            android:text=&quot;@string/my_txt&quot;
-            android:textSize=&quot;20sp&quot; /&gt;
-
-    &lt;/android.support.v4.widget.NestedScrollView&gt;
-
-&lt;/android.support.design.widget.CoordinatorLayout&gt;
-</code></pre>
-
-<p>上面的都看得懂吧，每个陌生的属性都是讲过的哦，忘记了的话回头看，稍微解释一下，图片被设置为有视差的滑动，Toolbar设置为固定不动，另外，CollapsingToolbarLayout会对title进行放大和缩小，我们看看效果吧~</p>
-
-<p><figure><img src="media/15561207870710/20171014150799532425417.gif" alt=""/></figure></p>
-
-<p>如果你希望拖动过程中状态栏是透明的，可以在<code>CollapsingToolbarLayout</code>中加 <code>app:statusBarScrim=&quot;@android:color/transparent</code>&quot;，并且在onCreate中调用<code>getWindow().addFlags(WindowManager.LayoutParams.FLAG_TRANSLUCENT_STATUS)</code>将状态栏设置为透明就好啦~</p>
-
-<p>献上<a href="http://download.csdn.net/detail/huachao1001/9538934">源码</a></p>
-
-<h2 id="toc_5">AppBarLayout的ScrollFlags属性</h2>
-
-<p>在前面两篇MD系列的文章中，通过两个案例基本上能够掌握了CoordinatorLayout与AppBarLayout的配合使用。本文我们回过头来详细聊聊AppBarLayout的ScrollFlags属性，了解一下不同值之间的区别。至此，Android Material Design系列的学习已进行到第七篇，大家可以点击以下链接查看之前的文章：</p>
-
-<ul>
-<li><a href="http://www.jianshu.com/p/39a66373498c">Android TabLayout 分分钟打造一个滑动标签页</a></li>
-<li><a href="http://www.jianshu.com/p/9eb3b17b0e77">Android 一文告诉你到底是用Dialog，Snackbar，还是Toast</a></li>
-<li><a href="http://www.jianshu.com/p/5328b2eee827">Android FloatingActionButton 重要的操作不要太多，一个就好</a></li>
-<li><a href="http://www.jianshu.com/p/ab04627cce58">Android 初识AppBarLayout 和 CoordinatorLayout</a></li>
-<li><a href="http://www.jianshu.com/p/4b0f3c80ebc9">Android CoordinatorLayout实战案例学习《一》</a></li>
-<li><a href="http://www.jianshu.com/p/360fd368936d">Android CoordinatorLayout 实战案例学习《二》</a></li>
-</ul>
-
-<p>ScrollFlags共有五种常量值供AppBarLayout的Children View使用，在xml布局文件中通过<code>app:layout_scrollFlags</code>设置，对应的值为：scroll，enterAlways，enterAlwaysCollapsed，snap，exitUntilCollapsed；也可以在代码中通过<code>setScrollFlags(int)</code>方法使用，比如：</p>
-
-<pre class="line-numbers"><code class="language-java">Toolbar toolbar = ... // your toolbar within an AppBarLayout
-AppBarLayout.LayoutParams params = 
-    (AppBarLayout.LayoutParams) toolbar.getLayoutParams();
-params.setScrollFlags(AppBarLayout.LayoutParams.SCROLL_FLAG_SCROLL
-    | AppBarLayout.LayoutParams.SCROLL_FLAG_ENTER_ALWAYS);
-</code></pre>
-
-<p>下面我们通过官网介绍、XML代码和对应的效果图分别分析这五种值的使用（备注：代码中设置也一样，不再赘述）：</p>
-
-<h3 id="toc_6">scroll</h3>
-
-<blockquote>
-<p>The view will be scroll in direct relation to scroll events. This flag needs to be set for any of the other flags to take effect. If any sibling views before this one do not have this flag, then this value has no effect.</p>
-</blockquote>
-
-<p>Child View 伴随着滚动事件而滚出或滚进屏幕。注意两点：第一点，如果使用了其他值，必定要使用这个值才能起作用；第二点：如果在这个child View前面的任何其他Child View没有设置这个值，那么这个Child View的设置将失去作用。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">    &lt;android.support.design.widget.AppBarLayout
-        android:id=&quot;@+id/appbar&quot;
-        android:layout_width=&quot;match_parent&quot;
-        android:layout_height=&quot;wrap_content&quot;
-        android:theme=&quot;@style/ThemeOverlay.AppCompat.Dark.ActionBar&quot;&gt;
-
-        &lt;android.support.v7.widget.Toolbar
-            xmlns:app=&quot;http://schemas.android.com/apk/res-auto&quot;
-            android:id=&quot;@+id/tb_toolbar&quot;
-            android:layout_width=&quot;match_parent&quot;
-            android:layout_height=&quot;@dimen/dp_56&quot;
-            app:titleTextColor=&quot;@color/white&quot;
-            app:title=&quot;@string/app_name&quot;
-            app:theme=&quot;@style/OverFlowMenuTheme&quot;
-            app:popupTheme=&quot;@style/AppTheme&quot;
-            android:background=&quot;@color/blue&quot;
-            app:layout_scrollFlags=&quot;scroll|enterAlways&quot;/&gt;
-
-    &lt;/android.support.design.widget.AppBarLayout&gt;
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842247229844.gif" alt=""/></figure></p>
-
-<h3 id="toc_7">enterAlways</h3>
-
-<blockquote>
-<p>When entering (scrolling on screen) the view will scroll on any downwards scroll event, regardless of whether the scrolling view is also scrolling. This is commonly referred to as the &#39;quick return&#39; pattern.</p>
-</blockquote>
-
-<p>快速返回模式。其实就是向下滚动时Scrolling View和Child View之间的滚动优先级问题。对比<code>scroll</code>和<code>scroll | enterAlways</code>设置，发生向下滚动事件时，前者优先滚动Scrolling View，后者优先滚动Child View，当优先滚动的一方已经全部滚进屏幕之后，另一方才开始滚动。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-java">...
-app:layout_scrollFlags=&quot;scroll|enterAlways&quot;
-...
-
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842251698266.gif" alt=""/></figure></p>
-
-<h3 id="toc_8">enterAlwaysCollapsed</h3>
-
-<blockquote>
-<p>An additional flag for &#39;enterAlways&#39; which modifies the returning view to only initially scroll back to it&#39;s collapsed height. Once the scrolling view has reached the end of it&#39;s scroll range, the remainder of this view will be scrolled into view. The collapsed height is defined by the view&#39;s minimum height.</p>
-</blockquote>
-
-<p>enterAlways的附加值。这里涉及到Child View的高度和最小高度，向下滚动时，Child View先向下滚动最小高度值，然后Scrolling View开始滚动，到达边界时，Child View再向下滚动，直至显示完全。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">...
-android:layout_height=&quot;@dimen/dp_200&quot;
-android:minHeight=&quot;@dimen/dp_56&quot;
-...
-app:layout_scrollFlags=&quot;scroll|enterAlways|enterAlwaysCollapsed&quot;
-...
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842256217688.gif" alt=""/></figure></p>
-
-<h3 id="toc_9">exitUntilCollapsed</h3>
-
-<blockquote>
-<p>When exiting (scrolling off screen) the view will be scrolled until it is &#39;collapsed&#39;. The collapsed height is defined by the view&#39;s minimum height.</p>
-</blockquote>
-
-<p>这里也涉及到最小高度。发生向上滚动事件时，Child View向上滚动退出直至最小高度，然后Scrolling View开始滚动。也就是，Child View不会完全退出屏幕。</p>
-
-<p>示例SML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">...
-android:layout_height=&quot;@dimen/dp_200&quot;
-android:minHeight=&quot;@dimen/dp_56&quot;
-...
-app:layout_scrollFlags=&quot;scroll|exitUntilCollapsed&quot;
-...
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842260265572.gif" alt=""/></figure></p>
-
-<h3 id="toc_10">snap</h3>
-
-<blockquote>
-<p>Upon a scroll ending, if the view is only partially visible then it will be snapped and scrolled to it&#39;s closest edge. For example, if the view only has it&#39;s bottom 25% displayed, it will be scrolled off screen completely. Conversely, if it&#39;s bottom 75% is visible then it will be scrolled fully into view.</p>
-</blockquote>
-
-<p>简单理解，就是Child View滚动比例的一个吸附效果。也就是说，Child View不会存在局部显示的情况，滚动Child View的部分高度，当我们松开手指时，Child View要么向上全部滚出屏幕，要么向下全部滚进屏幕，有点类似ViewPager的左右滑动。</p>
-
-<p>示例XML代码：</p>
-
-<pre class="line-numbers"><code class="language-markup">...
-android:layout_height=&quot;@dimen/dp_200&quot;
-...
-app:layout_scrollFlags=&quot;scroll|snap&quot;
-...
-</code></pre>
-
-<p>对应效果图：</p>
-
-<p><figure><img src="media/15561207870710/20171019150842265497458.gif" alt=""/></figure></p>
-
-<h3 id="toc_11">示例源码</h3>
-
-<p>我在GitHub上建立了一个Repository，用来存放整个Android Material Design系列控件的学习案例，会伴随着文章逐渐更新完善，欢迎大家补充交流，Star地址：</p>
-
-<p><a href="https://github.com/Mike-bel/MDStudySamples">https://github.com/Mike-bel/MDStudySamples</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/08/26</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
               
 
 
@@ -4434,6 +4348,12 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 	      
 		      
 			      <li class="post">
+			        <a href="16155265432695.html">混入（mixin）</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
 			        <a href="16145671673295.html">多态</a>
 			      </li>
 		     
@@ -4453,12 +4373,6 @@ app:layout_scrollFlags=&quot;scroll|snap&quot;
 		      
 			      <li class="post">
 			        <a href="16106747969027.html">GitHub搜索技巧</a>
-			      </li>
-		     
-		  
-		      
-			      <li class="post">
-			        <a href="16104540799826.html">Intellij IDEA插件开发入门</a>
 			      </li>
 		     
 		  
