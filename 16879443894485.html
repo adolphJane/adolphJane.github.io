@@ -1,0 +1,942 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Flutter框架分析（四）-RenderObject - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="_self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="_self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Flutter框架分析（四）-RenderObject</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2023/06/28</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='%E6%A1%86%E6%9E%B6%E5%88%86%E6%9E%90.html'>框架分析</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <span id="more"></span><!-- more -->
+<h2><a id="1%E5%89%8D%E8%A8%80" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1. 前言</h2>
+<p>Flutter中，RenderObject的主要职责是布局和绘制。通过上篇文章介绍的Element Tree，Flutter Framework会生成一棵RenderObject Tree. 其主要功能如下：</p>
+<ul>
+<li><strong>布局</strong>，从<code>RenderBox</code>开始，对<code>RenderObject Tree</code>从上至下进行布局。</li>
+<li><strong>绘制</strong>，通过<code>Canvas</code>对象，<code>RenderObject</code>可以绘制自身以及其在<code>RenderObject Tree</code>中的子节点。</li>
+<li><strong>点击测试</strong>，<code>RenderObject</code>从上至下传递点击事件，并通过其位置和behavior来控制是否响应点击事件。</li>
+</ul>
+<p><code>RenderObject Tree</code>是底层的布局和绘制系统。大多数Flutter开发者并不需要直接和<code>RenderObject Tree</code>交互，而是使用<code>Widget</code>，然后<code>Flutter Framework</code>会自动构建<code>RenderObject Tree</code>。</p>
+<p><code>RenderObject</code>拥有一个<code>parent</code>和一个<code>ParentData</code>插槽（Slot），所谓插槽，就是指预留的一个接口或位置，这个接口和位置是由其它对象来接入或占据的，这个接口或位置在软件中通常用预留变量来表示，而<code>ParentData</code>正是一个预留变量，它正是由<code>parent</code>来赋值的，<code>parent</code>通常会通过子<code>RenderObject</code>的<code>ParentData</code>存储一些和子元素相关的数据，如在<code>Stack</code>布局中，<code>RenderStack</code>就会将子元素的偏移数据存储在子元素的<code>ParentData</code>中（具体可以查看Positioned实现）。</p>
+<h2><a id="2-renderobject%E5%88%86%E7%B1%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2. RenderObject分类</h2>
+<p><figure><img src="media/16879443894485/16879445367801.jpg" alt="" /></figure></p>
+<p>如上图所示，RenderObject主要分为四类：</p>
+<ul>
+<li><strong>RenderView</strong> <code>RenderView</code>是整个<code>RenderObject Tree</code>的根节点，代表了整个输出界面。</li>
+<li><strong>RenderAbstractViewport</strong> <code>RenderAbstractViewport</code>是一类接口，此类接口为只展示其部分内容的<code>RenderObject</code>设计。</li>
+<li><strong>RenderSliver</strong> <code>RenderSliver</code>是所有实现了滑动效果的<code>RenderObject</code>基类，其常用子类有<code>RenderSliverSingleBoxAdapter</code>等。</li>
+<li><strong>RenderBox</strong> <code>RenderBox</code>是一个采用2D笛卡尔坐标系的<code>RenderObject</code>的基类，一般的<code>RenderOBject</code>都是继承自<code>RenderBox</code>，例如<code>RenderStack</code>等，它也是一般自定义<code>RenderObject</code>的基类。</li>
+</ul>
+<h2><a id="3%E6%A0%B8%E5%BF%83%E6%B5%81%E7%A8%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>3. 核心流程</h2>
+<p><code>RenderObject</code>主要负责布局，绘制，及命中测试，下面会对这几个核心流程分别进行讲解。</p>
+<ul>
+<li><strong>布局</strong> 布局对应的函数是<code>layout</code>，该函数主要作用是通过上级节点传过来的<code>Constraints</code>和<code>parentUsesSize</code>等控制参数，对本节点和其子节点进行布局。<code>Constraints</code>是对于节点布局的约束，其原则是，<code>Constraints</code>向下，<code>Sizes</code>向上，父节点设置本节点的位置。即：
+<ol>
+<li>一个<code>Widget</code>从它的父节点获取<code>Constraints</code>，并将其传递给子节点。</li>
+<li>该<code>Widget</code>对其子节点进行布局。</li>
+<li>最终，该节点告诉其父节点它的<code>Sizes</code>。</li>
+</ol>
+</li>
+</ul>
+<p>当本节点的布局依赖于其子节点的布局时，<code>parentUsesSize</code>的值是<code>true</code>，此时，子节点被标记为需要布局时，本节点也将被标记为需要布局。这样当下一帧绘制时本节点和子节点都将被重新布局。反之，如果<code>parentUsesSize</code>的值是<code>false</code>，子节点被重新布局时不需要通知本节点。</p>
+<p><code>RenderObject</code>的子类不应该直接重写<code>RenderObject</code>的<code>layout</code>函数，而是重写<code>performResize</code>和<code>performLayout</code>函数，这两个函数才是真正负责具体布局的函数。<br />
+<code>RenderObject</code>中<code>layout</code>函数的源码如下：</p>
+<pre class="line-numbers"><code class="language-dart">void layout(Constraints constraints, { bool parentUsesSize = false }) {
+//1. 根据relayoutBoundary判断是否需要重新布局
+  RenderObject relayoutBoundary;
+  if (!parentUsesSize || sizedByParent || constraints.isTight || parent is! RenderObject) {
+    relayoutBoundary = this;
+  } else {
+    relayoutBoundary = (parent as RenderObject)._relayoutBoundary;
+  }
+  if (!_needsLayout &amp;&amp; constraints == _constraints &amp;&amp; relayoutBoundary == _relayoutBoundary) {
+    return;
+  }
+  _constraints = constraints;
+//2. 更新子节点的relayout boundary	
+  if (_relayoutBoundary != null &amp;&amp; relayoutBoundary != _relayoutBoundary) {
+    // The local relayout boundary has changed, must notify children in case
+    // they also need updating. Otherwise, they will be confused about what
+    // their actual relayout boundary is later.
+    visitChildren(_cleanChildRelayoutBoundary);
+  }
+  _relayoutBoundary = relayoutBoundary;
+//3. 重新计算大小，重新布局
+  if (sizedByParent) {
+    try {
+      performResize();
+    } catch (e, stack) {
+      _debugReportException('performResize', e, stack);
+    }
+  }
+  try {
+    performLayout();
+    markNeedsSemanticsUpdate();
+  } catch (e, stack) {
+    _debugReportException('performLayout', e, stack);
+  }
+  _needsLayout = false;
+  markNeedsPaint();
+}
+</code></pre>
+<p>从源码可以看到，<code>relayoutBoundary</code>是<code>layout</code>函数中一个重要参数。当一个组件的大小被改变时，其<code>parent</code>的大小可能也会被影响，因此需要通知其父节点。如果这样迭代上去，需要通知整棵<code>RenderObject Tree</code>重新布局，必然会影响布局效率。因此，<code>Flutter</code>通过<code>relayoutBoundary</code>将<code>RenderObject Tree</code>分段，如果遇到了<code>relayoutBoundary</code>，则不去通知其父节点重新布局，因为其大小不会影响父节点的大小。这样就只需要对<code>RenderObject Tree</code>中的一段重新布局，提高了布局效率。关于<code>relayoutBoundary</code>将在之后的文章中详细讲解，目前只需要了解<code>relayoutBoundary</code>会将<code>RenderObject Tree</code>分段，提高布局效率。</p>
+<ul>
+<li><strong>绘制</strong></li>
+</ul>
+<p>绘制对应的函数是<code>paint</code>，其主要作用是将本<code>RenderObject</code>和子<code>RenderObject</code>绘制在<code>Canvas</code>上。<code>RenderObject</code>的子类应该重写这个函数，在该函数中添加绘制的逻辑。</p>
+<p><code>RenderObject</code>的子类<code>RenderFlex</code>的<code>paint</code>函数源码如下：</p>
+<pre class="line-numbers"><code class="language-dart">void paint(PaintingContext context, Offset offset) {
+//1. 未溢出，直接绘制
+  if (!_hasOverflow) {
+    defaultPaint(context, offset);
+    return;
+  }
+
+//2. 空的，不需要绘制
+  // There's no point in drawing the children if we're empty.
+  if (size.isEmpty)
+    return;
+
+//3. 根据clipBehavior判断是否需要对溢出边界部分进行裁剪
+  if (clipBehavior == Clip.none) {
+    defaultPaint(context, offset);
+  } else {
+    // We have overflow and the clipBehavior isn't none. Clip it.
+    context.pushClipRect(needsCompositing, offset, Offset.zero &amp; size, defaultPaint, clipBehavior: clipBehavior);
+  }
+
+//4. 绘制溢出错误提示
+  assert(() {
+    // Only set this if it's null to save work. It gets reset to null if the
+    // _direction changes.
+    final List&lt;DiagnosticsNode&gt; debugOverflowHints = &lt;DiagnosticsNode&gt;[
+      ErrorDescription(
+        'The overflowing $runtimeType has an orientation of $_direction.'
+      ),
+      ErrorDescription(
+        'The edge of the $runtimeType that is overflowing has been marked '
+        'in the rendering with a yellow and black striped pattern. This is '
+        'usually caused by the contents being too big for the $runtimeType.'
+      ),
+      ErrorHint(
+        'Consider applying a flex factor (e.g. using an Expanded widget) to '
+        'force the children of the $runtimeType to fit within the available '
+        'space instead of being sized to their natural size.'
+      ),
+      ErrorHint(
+        'This is considered an error condition because it indicates that there '
+        'is content that cannot be seen. If the content is legitimately bigger '
+        'than the available space, consider clipping it with a ClipRect widget '
+        'before putting it in the flex, or using a scrollable container rather '
+        'than a Flex, like a ListView.'
+      ),
+    ];
+
+    // Simulate a child rect that overflows by the right amount. This child
+    // rect is never used for drawing, just for determining the overflow
+    // location and amount.
+    Rect overflowChildRect;
+    switch (_direction) {
+      case Axis.horizontal:
+        overflowChildRect = Rect.fromLTWH(0.0, 0.0, size.width + _overflow, 0.0);
+        break;
+      case Axis.vertical:
+        overflowChildRect = Rect.fromLTWH(0.0, 0.0, 0.0, size.height + _overflow);
+        break;
+    }
+    paintOverflowIndicator(context, offset, Offset.zero &amp; size, overflowChildRect, overflowHints: debugOverflowHints);
+    return true;
+  }());
+}
+</code></pre>
+<p>这部分代码逻辑为，先判断是否溢出，没有溢出则调用<code>defaultPaint</code>完成绘制，再看是否为空，<code>size</code>是空的话直接返回，最后绘制溢出信息。</p>
+<p>其中<code>defaultPaint</code>的源码如下：</p>
+<pre class="line-numbers"><code class="language-dart">void defaultPaint(PaintingContext context, Offset offset) {
+  ChildType child = firstChild;
+  while (child != null) {
+    final ParentDataType childParentData = child.parentData as ParentDataType;
+    context.paintChild(child, childParentData.offset + offset);
+    child = childParentData.nextSibling;
+  }
+}
+</code></pre>
+<p>可见<code>defaultPaint</code>会调用<code>paintChild</code>绘制子节点，而如果子节点还有子节点，则<code>paintChild</code>最终又会调用到其<code>paint</code>然后调用到<code>defaultPaint</code>，从而形成循环递归调用，绘制整棵<code>RenderObject Tree</code>。</p>
+<ul>
+<li><strong>命中测试</strong></li>
+</ul>
+<p>命中测试是为了判断某个组件是否需要响应一个点击事件，其入口是<code>RenderObject Tree</code>的根节点<code>RenderView</code>的<code>hitTest</code>函数。下面是该函数的源码：</p>
+<pre class="line-numbers"><code class="language-plain_text">bool hitTest(HitTestResult result, { Offset position }) {
+  if (child != null)
+    child.hitTest(BoxHitTestResult.wrap(result), position: position);
+  result.add(HitTestEntry(this));
+  return true;
+}
+</code></pre>
+<p>从RenderView的构造函数可以看出，child是RenderBox类，因此我们再看RenderBox的hitTest函数。</p>
+<pre class="line-numbers"><code class="language-dart">bool hitTest(BoxHitTestResult result, { @required Offset position }) {
+  if (_size.contains(position)) {
+    if (hitTestChildren(result, position: position) || hitTestSelf(position)) {
+      result.add(BoxHitTestEntry(this, position));
+      return true;
+    }
+  }
+  return false;
+}
+</code></pre>
+<p>代码逻辑很简单，如果点击事件位置处于<code>RenderObject</code>之内，如果在其内，并且<code>hitTestSelf</code>或者<code>hitTestChildren</code>返回<code>true</code>，则表示该<code>RenderObject</code>通过了命中测试，需要响应事件，此时需要将被点击的<code>RenderObject</code>加入<code>BoxHitTestResult</code>列表，同时点击事件不再向下传递。否则认为没有通过命中测试，事件继续向下传递。其中，<code>hitTestSelf</code>函数表示本节点是否通过命中测试，<code>hitTestChildren</code>表示子节点是否通过命中测试。</p>
+<h2><a id="4%E6%A0%B8%E5%BF%83%E5%87%BD%E6%95%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>4. 核心函数</h2>
+<p><code>RenderObject</code>的核心函数有很多，难以一一列举，在核心流程中已经详细讲解了<code>RenderObject</code>三个核心函数。为了便于理解各个核心函数的作用，这里将<code>RenderObject</code>的核心函数和<code>Android View</code>的核心函数进行比较。以下是比较的表格。</p>
+<table>
+<thead>
+<tr>
+<th>作用</th>
+<th>Flutter RenderObject</th>
+<th>Android View</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>绘制</td>
+<td>paint()</td>
+<td>draw()/onDraw()</td>
+</tr>
+<tr>
+<td>布局</td>
+<td>performLayout()/layout()</td>
+<td>measure()/onMeasure(), layout()/onLayout()</td>
+</tr>
+<tr>
+<td>布局约束</td>
+<td>Constraints</td>
+<td>MeasureSpec</td>
+</tr>
+<tr>
+<td>布局协议1</td>
+<td>performLayout() 的 Constraints 参数表示父节点对子节点的布局限制</td>
+<td>measure() 的两个参数表示父节点对子节点的布局限制</td>
+</tr>
+<tr>
+<td>布局协议2</td>
+<td>performLayout() 应调用各子节点的 layout()</td>
+<td>onLayout() 应调用各子节点的 layout()</td>
+</tr>
+<tr>
+<td>布局参数</td>
+<td>parentData</td>
+<td>mLayoutParams</td>
+</tr>
+<tr>
+<td>请求布局</td>
+<td>markNeedsLayout()</td>
+<td>requestLayout()</td>
+</tr>
+<tr>
+<td>请求绘制</td>
+<td>markNeedsPaint()</td>
+<td>invalidate()</td>
+</tr>
+<tr>
+<td>添加 child</td>
+<td>adoptChild()</td>
+<td>addView()</td>
+</tr>
+<tr>
+<td>移除 child</td>
+<td>dropChild()</td>
+<td>removeView()</td>
+</tr>
+<tr>
+<td>关联到窗口/树</td>
+<td>attach()</td>
+<td>onAttachedToWindow()</td>
+</tr>
+<tr>
+<td>从窗口/树取消关联</td>
+<td>detach()</td>
+<td>onDetachedFromWindow()</td>
+</tr>
+<tr>
+<td>获取 parent</td>
+<td>parent</td>
+<td>getParent()</td>
+</tr>
+<tr>
+<td>触摸事件</td>
+<td>hitTest()</td>
+<td>onTouch()</td>
+</tr>
+<tr>
+<td>用户输入事件</td>
+<td>handleEvent()</td>
+<td>onKey()</td>
+</tr>
+<tr>
+<td>旋转事件</td>
+<td>rotate()</td>
+<td>onConfigurationChanged()</td>
+</tr>
+</tbody>
+</table>
+<p>可见，RenderObject和Android View有很多函数是对应起来的，RenderObject相对于将Android View中的布局渲染等功能单独拆了出来，简化了View的逻辑。</p>
+<h2><a id="5%E5%B0%8F%E7%BB%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>5. 小结</h2>
+<p>本文主要介绍了<code>RenderObject</code>相关知识，重点介绍了其分类，核心流程，和核心函数。重点如下：</p>
+<ul>
+<li><code>RenderObject</code>主要负责绘制，布局，命中测试等。</li>
+<li><code>RenderObject</code>布局的原则是，<code>Constraints</code>向下，<code>Sizes</code>向上，父节点设置本节点的位置。</li>
+<li><code>RenderView</code>是整个<code>RenderObject Tree</code>的根节点，其<code>child</code>是一个<code>RenderBox</code>类型的<code>RenderObject</code>。</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="16879453396661.html" 
+          title="Previous Post: Flutter框架分析（五）-Widget，Element，RenderObject树">&laquo; Flutter框架分析（五）-Widget，Element，RenderObject树</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="16879423743637.html" 
+          title="Next Post: Flutter框架分析（三）-- Element">Flutter框架分析（三）-- Element &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
+
+
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style><script>window.MathJax = {     tex: { tags: 'ams', inlineMath: [ ['$','$'], ['\\(','\\)'] ] } ,     startup: {     pageReady() {       return MathJax.startup.defaultPageReady().then(function () {          window.mweb_mathjax_ready_val = 'yes';          if(window.mweb_mathjax_ready !== undefined){ mweb_mathjax_ready(); }       });     }   }};document.addEventListener('DOMContentLoaded', function(event) {    if (typeof Prism != 'undefined') {         Prism.highlightAll();     }});window.mweb_mathjax_ready_val = '';function theMWebMathJaxRenderIsReady(key){ return window.mweb_mathjax_ready_val; }</script><script>window.MathJax = { tex: { tags: 'ams', inlineMath: [ ['$','$'], ['\\(','\\)'] ] } }; </script><script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml-full.js"></script>
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>

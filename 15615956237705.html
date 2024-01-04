@@ -1,0 +1,798 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  CodePush集成与热更新 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="_self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="_self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>CodePush集成与热更新</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2019/06/27</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='ReactNative.html'>ReactNative</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2><a id="%E5%89%8D%E8%A8%80" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>前言</h2>
+<p>CodePush 是微软提供的一套用于热更新 React Native 和 Cordova 应用的服务。<br />
+CodePush 是提供给 React Native 和 Cordova 开发者直接部署移动应用更新给用户设备的云服务。CodePush 作为一个中央仓库，开发者可以推送更新 (JS, HTML, CSS and images)，应用可以从客户端 SDK 里面查询更新。CodePush 可以让应用有更多的可确定性，也可以让你直接接触用户群。在修复一些小问题和添加新特性的时候，不需要经过二进制打包，可以直接推送代码进行实时更新。</p>
+<span id="more"></span><!-- more -->
+<h2><a id="%E5%AE%89%E8%A3%85%E4%B8%8E%E4%BD%BF%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>安装与使用</h2>
+<p>使用CodePush之前首先要安装CodePush客户端。</p>
+<h3><a id="%E5%AE%89%E8%A3%85codepush-cli" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>安装 CodePush CLI</h3>
+<ul>
+<li>安装客户端<code>npm install -g code-push-cli</code></li>
+<li>查看版本号<code>code-push -v</code></li>
+<li>注册CodePush账号<code>code-push register</code>授权通过之后，CodePush会告诉你“access key”，复制此key到终端即可完成注册。</li>
+<li>登录<code>code-push login</code>登陆成功后，你的session文件将会写在 /Users/你的用户名/.code-push.config。</li>
+</ul>
+<p>PS.相关命令</p>
+<ul>
+<li><code>code-push login</code> 登陆</li>
+<li><code>code-push logout</code> 注销</li>
+<li><code>code-push access-key ls</code> 列出登陆的token</li>
+<li><code>code-push access-key rm &lt;accessKye&gt;</code> 删除某个 access-key</li>
+</ul>
+<h3><a id="%E5%9C%A8codepush%E6%9C%8D%E5%8A%A1%E5%99%A8%E6%B3%A8%E5%86%8Capp" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>在CodePush服务器注册app</h3>
+<p>为了让CodePush服务器知道你的app，我们需要向它注册app</p>
+<ul>
+<li>添加应用平台<code>code-push app add &lt;app_name&gt; &lt;os&gt; &lt;platform&gt;</code></li>
+<li>添加部署环境<code>code-push deployment add &lt;app_name&gt; test</code></li>
+</ul>
+<p>PS.相关命令</p>
+<ul>
+<li><code>code-push app add</code> 在账号里面添加一个新的app</li>
+<li><code>code-push app remove</code> 或者 <code>rm</code> 在账号里移除一个app</li>
+<li><code>code-push app rename</code> 重命名一个存在app</li>
+<li><code>code-push app list</code> 或者 <code>ls</code> 列出账号下面的所有app</li>
+<li><code>code-push app transfer</code> 把app的所有权转移到另外一个账号</li>
+<li><code>code-push deployment list &lt;app_name&gt; --format json</code> 查看APP的环境信息</li>
+<li><code>code-push deployment clear &lt;app-name&gt;</code> 部署环境</li>
+</ul>
+<h4><a id="%E5%8F%91%E5%B8%83codepush%E6%9B%B4%E6%96%B0%E5%8C%85" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>发布CodePush更新包</h4>
+<p><code>code-push release-react &lt;Appname&gt; &lt;Platform&gt; --t &lt;本更新包面向的旧版本号&gt; --des &lt;本次更新说明&gt;</code></p>
+<blockquote>
+<p>注意： CodePush默认是更新Staging 环境的，如果发布生产环境的更新包，需要指定--d参数：--d Production，如果发布的是强制更新包，需要加上 --m true强制更新</p>
+</blockquote>
+<p><code>$ code-push release-react iOSRNHybrid ios --t 1.0.0 --dev false --d Production --des &quot;这是第一个更新包&quot; --m true </code></p>
+<ul>
+<li>发布更新包命令中的 -- t 对应的参数是和我们项目中的版本号一致的，这个不要误理解为是更新包的版本号，例如项目中的版本号为1.0.0， 这时如果我们需要对这个1.0.0 版本的项目进行第一次热更新，那么命令中的 -- t 也为1.0.0，第二次热更新任然为1.0.0, --dev为是否启用开发者模式(默认为false), --d是要发布更新的环境分Production与Staging(默认为Staging)；--des为更新说明；--m 是强制更新。</li>
+<li>项目的版本号需要改为三位的，默认是两位的，但是CodePush需要三位数的版本号</li>
+<li>发布更新应用时，应用的名称必须要和之前注册过的应用名称一致</li>
+</ul>
+<h5><a id="%E6%9F%A5%E8%AF%A2production" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>查询Production</h5>
+<p><code>code-push deployment history projectName Production</code></p>
+<h5><a id="%E6%9F%A5%E8%AF%A2staging" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>查询Staging</h5>
+<p><code>code-push deployment history projectName Staging</code></p>
+<h3><a id="reactnative%E9%9B%86%E6%88%90code-push" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>ReactNative集成code-push</h3>
+<h4><a id="%E5%AE%89%E8%A3%85%E7%BB%84%E4%BB%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>安装组件</h4>
+<p>项目根目录下 <code>yarn add react-native-code-push</code></p>
+<h4><a id="%E6%B7%BB%E5%8A%A0%E4%BE%9D%E8%B5%96" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>添加依赖</h4>
+<p><code>react-native react-native-code-push</code></p>
+<h4><a id="rn%E7%AB%AF%E4%BB%A3%E7%A0%81" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>RN端代码</h4>
+<pre class="line-numbers"><code class="language-plain_text">import CodePush from &quot;react-native-code-push&quot;;
+let codePushOptions = { checkFrequency: CodePush.CheckFrequency.ON_APP_RESUME };
+const deploymentKey = Platform.select({
+    ios: 'XgBtruRnRtJKOjkwEZub2Q60mFys4ksvOXqog',
+    android: 'fmrp3d8KiGKSyp23cXe26a9xEkHF4ksvOXqog',
+});
+
+class App extends Component&lt;Props&gt; {
+
+    componentWillMount() {
+        CodePush.disallowRestart();//禁止重启
+        this.syncImmediate(); //开始检查更新
+    }
+
+    componentDidMount() {
+        CodePush.allowRestart();//在加载完了，允许重启
+    }
+
+    //如果有更新的提示
+    syncImmediate() {
+        CodePush.sync( {
+                //安装模式
+                //ON_NEXT_RESUME 下次恢复到前台时
+                //ON_NEXT_RESTART 下一次重启时
+                //IMMEDIATE 马上更新
+                installMode : CodePush.InstallMode.ON_NEXT_RESUME ,
+                //对话框
+                updateDialog : {
+                    //是否显示更新描述
+                    appendReleaseDescription : true ,
+                    //更新描述的前缀。 默认为&quot;Description&quot;
+                    descriptionPrefix : &quot;更新内容：&quot; ,
+                    //强制更新按钮文字，默认为continue
+                    mandatoryContinueButtonLabel : &quot;立即更新&quot; ,
+                    //强制更新时的信息. 默认为&quot;An update is available that must be installed.&quot;
+                    mandatoryUpdateMessage : &quot;必须更新后才能使用&quot; ,
+                    //非强制更新时，按钮文字,默认为&quot;ignore&quot;
+                    optionalIgnoreButtonLabel : '稍后' ,
+                    //非强制更新时，确认按钮文字. 默认为&quot;Install&quot;
+                    optionalInstallButtonLabel : '后台更新' ,
+                    //非强制更新时，检查到更新的消息文本
+                    optionalUpdateMessage : '有新版本了，是否更新？' ,
+                    //Alert窗口的标题
+                    title : '更新提示'
+                } ,
+                deploymentKey: deploymentKey,
+            } ,
+        );
+    }
+}
+
+App = CodePush(codePushOptions)(App);
+
+export default App;
+</code></pre>
+<h5><a id="%E6%9B%B4%E6%96%B0%E6%98%AF%E5%90%A6%E8%A6%81%E6%B1%82%E5%8D%B3%E6%97%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>更新是否要求即时</h5>
+<p>在更新配置中通过指定installMode来决定安装完成的重启时机，亦即更新生效时机</p>
+<ul>
+<li><code>codePush.InstallMode.IMMEDIATE</code> ：安装完成立即重启更新</li>
+<li><code>codePush.InstallMode.ON_NEXT_RESTART</code> ：安装完成后会在下次重启后进行更新</li>
+<li><code>codePush.InstallMode.ON_NEXT_RESUME</code> ：安装完成后会在应用进入后台后重启更新</li>
+</ul>
+<h4><a id="%E5%8E%9F%E7%94%9F%E7%AB%AF%E9%85%8D%E7%BD%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>原生端配置</h4>
+<p>通过之前的ReactNative添加依赖配置<code>react-native react-native-code-push</code>,原生代码会自动生成。<br />
+无需手动配置。</p>
+<h2><a id="%E7%A7%81%E6%9C%89%E5%8C%96%E9%85%8D%E7%BD%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>私有化配置</h2>
+<h3><a id="%E6%9C%8D%E5%8A%A1%E7%AB%AF" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>服务端</h3>
+<p>参照文档进行配置<br />
+<a href="https://github.com/lisong/code-push-server">code-push-server</a></p>
+<h3><a id="%E5%AE%A2%E6%88%B7%E7%AB%AF" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>客户端</h3>
+<ul>
+<li>登录私有化服务器访问地址，端口号3000,输入账号密码(默认为admin,123456),获取token，登陆之后输入</li>
+<li><code>code-push login http://api.code-push.com</code> login后面跟上服务端访问地址</li>
+<li>Android配置(<code>MyApplication</code>类中<code>getPackages</code>方法中<code>CodePush</code>实例化的时候前面不变，自动从RN端获取deploymentKey,加上第四个参数，私有化服务器的访问地址)</li>
+<li>iOS配置(info.plist文件中有<code>CodePushDeploymentKey</code>是<code>deploymentKey</code>，再添加一个参数<code>CodePushServerURL</code>，填上私有化服务器的访问地址)</li>
+</ul>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="15615956474579.html" 
+          title="Previous Post: ReactNative打包与发布">&laquo; ReactNative打包与发布</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="15597152983017.html" 
+          title="Next Post: Android 开发小记">Android 开发小记 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
+
+
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>
