@@ -1,0 +1,1051 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android的JNI开发全面介绍与最佳实践 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:www.ifantastic.ink ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="_self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="_self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android的JNI开发全面介绍与最佳实践</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2022/05/27</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='JNI%E5%BC%80%E5%8F%91.html'>JNI开发</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>JNI全称是<strong>Java Native Interface</strong>，为Java本地接口，是连接Java层与Native层的桥梁。在Android进行JNI开发时，可能会遇到 <em>couldn't find &quot;xxx.so&quot;</em> 问题，或者内存泄漏问题，或者令人头疼的JNI底层崩溃问题。Java层如何调用Native方法？Java方法的参数如何传递给Native层？而Native层又如何反射调用Java方法？这些问题在本文将得到答案，带着问题去阅读会事半功倍，接下来我们开始全方位介绍与最佳代码实践。</p>
+<span id="more"></span><!-- more -->
+<div class="mweb_toc"><ul>
+<li><a href="#jni%E6%95%B4%E4%BD%93%E8%AE%BE%E8%AE%A1">JNI整体设计</a>
+<ul>
+<li><a href="#1%E5%BA%93%E7%9A%84%E5%8A%A0%E8%BD%BD">1.库的加载</a></li>
+<li><a href="#2%E5%8A%A8%E6%80%81%E6%B3%A8%E5%86%8C%E4%B8%8E%E9%9D%99%E6%80%81%E6%B3%A8%E5%86%8C">2.动态注册与静态注册</a></li>
+<li><a href="#3-jni%E6%96%B9%E6%B3%95%E5%8F%82%E6%95%B0">3.JNI方法参数</a></li>
+<li><a href="#4%E5%85%A8%E5%B1%80%E5%BC%95%E7%94%A8%E4%B8%8E%E5%B1%80%E9%83%A8%E5%BC%95%E7%94%A8">4.全局引用与局部引用</a></li>
+<li><a href="#5%E5%BC%82%E5%B8%B8%E6%A3%80%E6%B5%8B%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86">5.异常检测与异常处理</a></li>
+</ul>
+</li>
+<li><a href="#jni%E7%B1%BB%E5%9E%8B%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84">JNI类型与数据结构</a>
+<ul>
+<li><a href="#1%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B%E4%B8%8E%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B">1.基本类型与引用类型</a></li>
+<li><a href="#2%E5%8F%98%E9%87%8F-id%E4%B8%8E%E6%96%B9%E6%B3%95id">2.变量id与方法id</a></li>
+<li><a href="#3%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D">3.函数签名</a></li>
+</ul>
+</li>
+<li><a href="#jni%E5%87%BD%E6%95%B0">JNI函数</a>
+<ul>
+<li><a href="#1%E8%8E%B7%E5%8F%96%E7%B1%BB%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%AF%B9%E8%B1%A1">1.获取类的实例对象</a></li>
+<li><a href="#2%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%93%8D%E4%BD%9C">2.对象的操作</a></li>
+<li><a href="#3%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8-java%E5%8F%98%E9%87%8F">3.反射调用Java变量</a></li>
+<li><a href="#4%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8-java%E6%96%B9%E6%B3%95">4.反射调用Java方法</a></li>
+<li><a href="#5%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%93%8D%E4%BD%9C">5.字符串的操作</a></li>
+<li><a href="#6%E6%95%B0%E7%BB%84%E7%9A%84%E6%93%8D%E4%BD%9C">6.数组的操作</a></li>
+<li><a href="#7-nio%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%A4%84%E7%90%86">7.NIO的创建与处理</a></li>
+<li><a href="#8%E6%96%B9%E6%B3%95%E4%B8%8E-id%E7%9A%84%E8%BD%AC%E6%8D%A2">8.方法与ID的转换</a></li>
+</ul>
+</li>
+<li><a href="#%E5%BA%93%E5%8A%A0%E8%BD%BD%E5%9B%9E%E8%B0%83%E4%B8%8Ejavavm%E8%B0%83%E7%94%A8">库加载回调与JavaVM调用</a>
+<ul>
+<li><a href="#1%E5%BA%93%E5%8A%A0%E8%BD%BD%E5%9B%9E%E8%B0%83">1.库加载回调</a></li>
+<li><a href="#2-javavm%E8%B0%83%E7%94%A8">2.JavaVM调用</a>
+<ul>
+<li><a href="#2-1%E5%88%9B%E5%BB%BA-javavm">2.1 创建JavaVM</a></li>
+<li><a href="#2-2%E5%85%B3%E8%81%94-javavm">2.2 关联JavaVM</a></li>
+<li><a href="#2-3%E8%84%B1%E7%A6%BB-javavm">2.3 脱离JavaVM</a></li>
+<li><a href="#2-4%E9%94%80%E6%AF%81-javavm">2.4 销毁JavaVM</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li><a href="#%E5%A0%86%E6%A0%88%E5%B4%A9%E6%BA%83%E6%8E%92%E6%9F%A5">堆栈崩溃排查</a>
+<ul>
+<li><a href="#1-ndk-stack%E6%9F%A5%E7%9C%8B%E5%A0%86%E6%A0%88">1.ndk-stack查看堆栈</a></li>
+<li><a href="#2-addr2line%E6%9F%A5%E7%9C%8B%E4%BB%A3%E7%A0%81%E4%BD%8D%E7%BD%AE">2.addr2line查看代码位置</a></li>
+<li><a href="#3-objdump%E6%9F%A5%E7%9C%8B%E7%AC%A6%E5%8F%B7%E8%A1%A8">3.objdump查看符号表</a></li>
+<li><a href="#4-readelf%E6%9F%A5%E7%9C%8B%E4%BE%9D%E8%B5%96%E5%BA%93%E4%B8%8E%E7%AC%A6%E5%8F%B7%E8%A1%A8">4.readelf查看依赖库与符号表</a></li>
+</ul>
+</li>
+</ul>
+</div>
+<h2><a id="jni%E6%95%B4%E4%BD%93%E8%AE%BE%E8%AE%A1" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>JNI整体设计</h2>
+<h3><a id="1%E5%BA%93%E7%9A%84%E5%8A%A0%E8%BD%BD" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1.库的加载</h3>
+<p>在Android提供<code>System.loadLibrary()</code>或者<code>System.load()</code>来加载库。示例如下：</p>
+<pre class="line-numbers"><code class="language-java">    static {
+        try {
+            System.loadLibrary(&quot;hello&quot;);
+        } catch (UnsatisfiedLinkError error) {
+            Log.e(TAG, &quot;load library error=&quot; + error.getMessage());
+        }
+    }
+</code></pre>
+<p>需要注意的是，如果.so动态库或.a静态库不存在时，会抛出 <em>couldn't find &quot;libxxx.so&quot;</em> 异常：</p>
+<pre class="line-numbers"><code class="language-plain_text">    load library error=dalvik.system.PathClassLoader[DexPathList[[
+    zip file &quot;/data/app/com.frank.ffmpeg/base.apk&quot;],
+    nativeLibraryDirectories=[/data/app/com.frank.ffmpeg/lib/arm64,
+    data/app/com.frank.ffmpeg/base.apk!/lib/arm64-v8a,/system/lib64, /vendor/lib64, /product/lib64]]]
+    couldn't find &quot;libhello.so&quot;
+</code></pre>
+<p>如果期待加载的是64bit的库，却加载到32bit的，会报错如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">java.lang.UnsatisfiedLinkError: dlopen failed: &quot;xxx.so&quot; is 32-bit instead of 64-bit
+</code></pre>
+<p><code>System.loadLibrary()</code>内部调用<code>Runtime.getRuntime().loadLibrary0()</code>，源码如下：</p>
+<pre class="line-numbers"><code class="language-java">    synchronized void loadLibrary0(ClassLoader loader, String libraryName) {
+        if (loader != null) {
+            // 1、调用classLoader查找库
+            String filename = loader.findLibrary(libraryName);
+            if (filename == null) {
+                throw new UnsatisfiedLinkError(loader + &quot; couldn't find \&quot;&quot; +
+                        System.mapLibraryName(libraryName) + &quot;\&quot;&quot;);
+            }
+            // 2、调用native方法来加载
+            String error = nativeLoad(filename, loader);
+            if (error != null) {
+                throw new UnsatisfiedLinkError(error);
+            }
+            return;
+        }
+        // 3、拼接完整库名，比如由hello拼接成libhello.so
+        String filename = System.mapLibraryName(libraryName);
+        List&lt;String&gt; candidates = new ArrayList&lt;String&gt;();
+        String lastError = null;
+        for (String directory : getLibPaths()) {
+            String candidate = directory + filename;
+            candidates.add(candidate);
+            if (IoUtils.canOpenReadOnly(candidate)) {
+                // 4、调用native方法来加载
+                String error = nativeLoad(candidate, loader);
+                if (error == null) {
+                    return; // 加载library成功
+                }
+                lastError = error;
+            }
+        }
+ 
+        if (lastError != null) {
+            throw new UnsatisfiedLinkError(lastError);
+        }
+        throw new UnsatisfiedLinkError(&quot;Library &quot; + libraryName + &quot; not found; tried &quot; + candidates);
+    }
+</code></pre>
+<p>这里的<code>nativeLoad()</code>属于<code>runtime</code>底层的jni方法，接着调用<code>art/runtime/java_vm_ext.cc</code>的<code>load_NativeLibrary()</code>，最终调用<code>dlopen()</code>来打开so库或a库。 调用过程如下图：</p>
+<p><figure><img src="media/16536308854682/16536312585355.jpg" alt="" /></figure></p>
+<h3><a id="2%E5%8A%A8%E6%80%81%E6%B3%A8%E5%86%8C%E4%B8%8E%E9%9D%99%E6%80%81%E6%B3%A8%E5%86%8C" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.动态注册与静态注册</h3>
+<p>java层调用带native关键字的JNI方法，需要注册java层与native层的对应关系，有<strong>静态注册</strong>和<strong>动态注册</strong>两种方式。静态注册一般是应用层使用，绑定包名+类名+方法名，在调用JNI方法时，通过类加载器查找对应的函数。动态注册一般是framework层使用，在JNI_OnLoad()回调时，把JNINativeMethod注册到函数表。<em>静态注册的缺点是包名、类名或方法名发生修改时，native层的jni方法名也得对应修改。</em></p>
+<p>以java层声明的函数名为hello的JNI方法为例：</p>
+<pre class="line-numbers"><code class="language-plain_text">    private native void hello(int num);
+</code></pre>
+<p><strong>静态注册的示例</strong>(如果是c++文件(.cpp/.cc/.cxx)，需要加extern &quot;C&quot;关键字)：</p>
+<pre class="line-numbers"><code class="language-plain_text">#ifdef __cplusplus
+extern &quot;C&quot; {
+#endif
+JNIEXPORT void JNICALL Java_com_frank_ffmpeg_FFmpegCmd_hello(JNIEnv *env, jclass thiz, jint num) {
+ 
+}
+#ifdef __cplusplus
+}
+#endif
+</code></pre>
+<p>如果觉得每个JNI方法都这样写比较麻烦，我们可以写个宏定义：</p>
+<pre class="line-numbers"><code class="language-plain_text">#define FFMPEG_FUNC(RETURN_TYPE, FUNC_NAME, ...) \
+    JNIEXPORT RETURN_TYPE JNICALL Java_com_frank_ffmpeg_FFmpegCmd_ ## FUNC_NAME \
+    (JNIEnv *env, jclass thiz, ##__VA_ARGS__)\
+</code></pre>
+<p><strong>动态注册的示例</strong>：</p>
+<pre class="line-numbers"><code class="language-plain_text">JNINativeMethod nativeMethods[] {
+        {&quot;hello&quot;, &quot;(I)V&quot;, (void *)&quot;native_hello&quot;},
+        {&quot;world&quot;, &quot;(J)V&quot;, (void *)&quot;native_world&quot;}
+};
+ 
+jint JNI_OnLoad(JavaVM* vm, void* reserved) {
+    JNIEnv *env = NULL;
+    vm-&gt;GetEnv((void **)&amp;env, JNI_VERSION_1_6);
+    jclass clazz = env-&gt;FindClass(&quot;com/frank/ffmpeg/handler/FFmpegHandler&quot;);
+    int numMethods = sizeof(nativeMethods) / sizeof(nativeMethods[0]);
+    // 注册本地方法到函数表
+    env-&gt;RegisterNatives(clazz, nativeMethods, numMethods);
+    env-&gt;DeleteLocalRef(clazz);
+    return JNI_VERSION_1_6;
+}
+</code></pre>
+<p>JNINativeMethod的结构体位于jni.h，定义如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">typedef struct {
+    const char* name;
+    const char* signature;
+    void*       fnPtr;
+} JNINativeMethod;
+</code></pre>
+<h3><a id="3-jni%E6%96%B9%E6%B3%95%E5%8F%82%E6%95%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.JNI方法参数</h3>
+<p>JNI方法前两个参数分别是JNIEnv和jclass，其中JNIEnv是上下文环境，而jclass是类的实例对象。其他参数为带j开头，比如jint、jstring。</p>
+<h3><a id="4%E5%85%A8%E5%B1%80%E5%BC%95%E7%94%A8%E4%B8%8E%E5%B1%80%E9%83%A8%E5%BC%95%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>4.全局引用与局部引用</h3>
+<p>JNI提供局部引用和全局引用，还有全局弱引用。顾名思义，局部引用的作用域为局部，在本地方法返回时被GC主动回收，通过如下方法创建：</p>
+<pre class="line-numbers"><code class="language-plain_text">jobject NewLocalRef(JNIEnv *env, jobject ref);
+</code></pre>
+<p>全局引用的作用域为全局，不会被GC回收，需要手动释放引用资源，否则导致内存泄漏。全局引用的创建与释放如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">// new global reference
+jobject NewGlobalRef(JNIEnv *env, jobject obj);
+// delete global reference
+void DeleteGlobalRef(JNIEnv *env, jobject globalRef);
+</code></pre>
+<p>全局弱引用与全局引用不同的是，它可以被GC回收。另外，它关联到虚引用，用于感知何时被GC回收。全局弱引用的创建与释放如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">// new weak global reference
+jweak NewWeakGlobalRef(JNIEnv *env, jobject obj);
+// delete weak global reference
+void DeleteWeakGlobalRef(JNIEnv *env, jweak obj);
+</code></pre>
+<h3><a id="5%E5%BC%82%E5%B8%B8%E6%A3%80%E6%B5%8B%E4%B8%8E%E5%BC%82%E5%B8%B8%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>5.异常检测与异常处理</h3>
+<p>JNI提供检测异常、抛出异常和清除异常。使用ExceptionOccurred()进行异常检测。在检测到异常后通过ThrowNew()抛出异常，方法如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jint ThrowNew(JNIEnv *env, jclass clazz, const char *message);
+</code></pre>
+<p>最后是清除异常，使用ExceptionClear()。完整的示例代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">    // 检测异常
+    if (env-&gt;ExceptionOccurred() != NULL) {
+        // 抛出异常
+        jclass clazz = env-&gt;FindClass(&quot;java/lang/NullPointerException&quot;);
+        env-&gt;ThrowNew(clazz, &quot;This is a null pointer...&quot;);
+        // 清除异常
+        env-&gt;ExceptionClear();
+    }
+</code></pre>
+<h2><a id="jni%E7%B1%BB%E5%9E%8B%E4%B8%8E%E6%95%B0%E6%8D%AE%E7%BB%93%E6%9E%84" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>JNI类型与数据结构</h2>
+<h3><a id="1%E5%9F%BA%E6%9C%AC%E7%B1%BB%E5%9E%8B%E4%B8%8E%E5%BC%95%E7%94%A8%E7%B1%BB%E5%9E%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1.基本类型与引用类型</h3>
+<p>JNI类型包括基本类型和引用(对象)类型。基本类型包括：jint、jbyte、jshort、jlong、jdouble、jboolean、jchar、jfloat等，如下图所示：</p>
+<p><figure><img src="media/16536308854682/16536316983673.jpg" alt="" /></figure></p>
+<p>引用类型的父类是jobject，包含jclass、jstring、jarray，而jarray又包含各种基本类型对应的数组。层级关系如下图所示：</p>
+<p><figure><img src="media/16536308854682/16536317258151.jpg" alt="" /></figure></p>
+<h3><a id="2%E5%8F%98%E9%87%8F-id%E4%B8%8E%E6%96%B9%E6%B3%95id" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.变量id与方法id</h3>
+<p>变量id用<code>jfieldID</code>表示，方法id用<code>jmethodID</code>表示。使用场景为反射Java变量或Java方法。比如，在反射Java方法时，先获取对应的<code>jmethodID</code>，再调用对应的method。</p>
+<h3><a id="3%E5%87%BD%E6%95%B0%E7%AD%BE%E5%90%8D" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.函数签名</h3>
+<p>函数签名由参数类型和返回值组成，用参数个数、参数类型和返回值来区分同名方法，即解决方法重载问题。java基本类型对应的签名如下：</p>
+<p><figure><img src="media/16536308854682/16536318319626.jpg" alt="" /></figure></p>
+<p>至于引用对象类型，使用类的全限定名作为签名。 比如String对应签名为Ljava/lang/String;</p>
+<h2><a id="jni%E5%87%BD%E6%95%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>JNI函数</h2>
+<h3><a id="1%E8%8E%B7%E5%8F%96%E7%B1%BB%E7%9A%84%E5%AE%9E%E4%BE%8B%E5%AF%B9%E8%B1%A1" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1.获取类的实例对象</h3>
+<p>我们该如何反射调用java方法呢？首先要获取类的实例对象，然后获取方法id，最后根据方法id来调用方法。获取类的实例对象有两种方式：GetObjectClass()和FindClass()，示例如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">void get_class(JNIEnv *env, jobject object) {
+    // 通过类的实例获取
+    jclass clazz = env-&gt;GetObjectClass(object);
+    // 通过类加载器查找指定的类
+    jclass claxx = env-&gt;FindClass(&quot;java/lang/NullPointerException&quot;);
+}
+</code></pre>
+<h3><a id="2%E5%AF%B9%E8%B1%A1%E7%9A%84%E6%93%8D%E4%BD%9C" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.对象的操作</h3>
+<p>我们可以通过GetObjectRefType()获取引用类型，包括如下引用类型：</p>
+<pre class="line-numbers"><code class="language-plain_text">JNIInvalidRefType    = 0
+JNILocalRefType      = 1
+JNIGlobalRefType     = 2
+JNIWeakGlobalRefType = 3
+</code></pre>
+<p>如果要判断是否属于某个类的实例，方法如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jboolean IsInstanceOf(JNIEnv *env, jobject obj, jclass clazz);
+</code></pre>
+<p>如果要判断两个对象是否相同，方法如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jboolean IsSameObject(JNIEnv *env, jobject ref1, jobject ref2);
+</code></pre>
+<h3><a id="3%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8-java%E5%8F%98%E9%87%8F" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.反射调用Java变量</h3>
+<p>反射Java的变量分为两步，首先获取变量的jfieldID，然后获取/设置变量值，示例如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">    jclass clazz = env-&gt;GetObjectClass(object);
+    jfieldID fieldId = env-&gt;GetFieldID(clazz, &quot;level&quot;, &quot;I&quot;);
+    env-&gt;SetIntField(object, fieldId, 8);
+</code></pre>
+<h3><a id="4%E5%8F%8D%E5%B0%84%E8%B0%83%E7%94%A8-java%E6%96%B9%E6%B3%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>4.反射调用Java方法</h3>
+<p>反射Java的方法也分为两步，首先获取方法的jmethodID，然后调用方法，示例如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">    jclass clazz = env-&gt;GetObjectClass(object);
+    jmethodID methodId = env-&gt;GetMethodID(clazz, &quot;setLevel&quot;, &quot;(I)V&quot;);
+    env-&gt;CallIntMethod(object, methodId, 8);
+</code></pre>
+<h3><a id="5%E5%AD%97%E7%AC%A6%E4%B8%B2%E7%9A%84%E6%93%8D%E4%BD%9C" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>5.字符串的操作</h3>
+<p>如果要读取来自Java层的字符串，可以调用GetStringUTFChars()，使用完毕不要忘记释放资源，否则导致内存泄漏。示例代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">void get_string_from_java(JNIEnv *env, jobject object, jstring jstr) {
+    const char *str = env-&gt;GetStringUTFChars(jstr, JNI_FALSE);
+    int len = env-&gt;GetStringUTFLength(jstr);
+    printf(&quot;from java str=%s, len=%d&quot;, str, len);
+    env-&gt;ReleaseStringUTFChars(jstr, str);
+}
+</code></pre>
+<p>如果要返回字符串给Java层，使用NewStringUTF()，示例代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jstring set_string_to_java(JNIEnv *env, jobject object) {
+    const char *str = &quot;hello, world&quot;;
+    return env-&gt;NewStringUTF(str);
+}
+</code></pre>
+<h3><a id="6%E6%95%B0%E7%BB%84%E7%9A%84%E6%93%8D%E4%BD%9C" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>6.数组的操作</h3>
+<p>如果要读取来自Java层的数组，可以调用GetXxxArrayElements()。也可以调用GetXxxArrayRegion()，该函数比较灵活，支持指定数组区间。还有没有第三种方式呢？答案是有的，可以调用GetPrimitiveArrayCritical()获取原始数组，采用内存映射实现。示例代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">void get_array_from_java(JNIEnv *env, jobject object, jintArray jarray) {
+    int len = env-&gt;GetArrayLength(jarray);
+    // 1、使用GetIntArrayElements，使用完释放内存
+    jint *array = env-&gt;GetIntArrayElements(jarray, JNI_FALSE);
+    for (int i = 0; i &lt; len; ++i) {
+        printf(&quot;from java array=%d&quot;, array[i]);
+    }
+    env-&gt;ReleaseIntArrayElements(jarray, array, JNI_ABORT);
+    // 2、使用GetIntArrayRegion，内部会释放内存
+    env-&gt;GetIntArrayRegion(jarray, 0, len, array);
+    // 3、使用GetPrimitiveArrayCritical获取原始数组
+    array = (jint*) env-&gt;GetPrimitiveArrayCritical(jarray, JNI_FALSE);
+}
+</code></pre>
+<p>如果要返回数组给Java层，先创建JNI数组，然后把数据拷贝给数据，示例代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jintArray set_array_to_java(JNIEnv *env, jobject object) {
+    jint data[] = {1, 2, 3, 4, 5, 6};
+    int size = sizeof(data)/sizeof(data[0]);
+    jintArray array = env-&gt;NewIntArray(size);
+    env-&gt;SetIntArrayRegion(array, 0, size, data);
+    return array;
+}
+</code></pre>
+<h3><a id="7-nio%E7%9A%84%E5%88%9B%E5%BB%BA%E4%B8%8E%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>7.NIO的创建与处理</h3>
+<p>我们可以在本地方法访问java.nio的DirectBuffer。先科普一下，DirectBuffer为堆外内存，实现零拷贝，提升Java层与native层的传输效率。而HeapBuffer为堆内存，在native层多一次拷贝，效率相对低。两者对比如下：</p>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>内存位置</th>
+<th>使用场景</th>
+<th>优点</th>
+<th>缺点</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>DirectBuffer</td>
+<td>堆外内存</td>
+<td>调用频率高、数据多</td>
+<td>零拷贝，效率高</td>
+<td>创建耗时</td>
+</tr>
+<tr>
+<td>HeapBuffer</td>
+<td>堆内存	调用频率低、数据少</td>
+<td>创建相对快</td>
+<td>存在拷贝，效率低</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>DirectBuffer在Native层的使用，可以在Java层创建，然后把对象传递到Native层。获取到内存地址后，把数据拷贝给DirectBuffer。整个过程如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">void copy_to_directBuffer(JNIEnv *env, jobject object, jobject buf) {
+    uint8_t data[] = {1, 2, 3, 4, 5, 6};
+    uint8_t *buf_addr = (uint8_t *) (env-&gt;GetDirectBufferAddress(buf));
+    int buf_size = env-&gt;GetDirectBufferCapacity(buf);
+    int data_size = sizeof(data)/sizeof(data[0]);
+    int size = data_size &gt; buf_size ? buf_size : data_size;
+    memcpy(buf_addr, data, size);
+}
+</code></pre>
+<h3><a id="8%E6%96%B9%E6%B3%95%E4%B8%8E-id%E7%9A%84%E8%BD%AC%E6%8D%A2" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>8.方法与ID的转换</h3>
+<p>上面提及到反射调用Java方法，如果要根据method去获取对应id，API方法如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jmethodID FromReflectedMethod(JNIEnv *env, jobject method);
+</code></pre>
+<p>相反地，如果要根据id去获取对应method，API方法如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jobject ToReflectedMethod(JNIEnv *env, jclass cls, jmethodID methodID, jboolean isStatic);
+</code></pre>
+<h2><a id="%E5%BA%93%E5%8A%A0%E8%BD%BD%E5%9B%9E%E8%B0%83%E4%B8%8Ejavavm%E8%B0%83%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>库加载回调与JavaVM调用</h2>
+<h3><a id="1%E5%BA%93%E5%8A%A0%E8%BD%BD%E5%9B%9E%E8%B0%83" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1.库加载回调</h3>
+<p>调用System.loadLibrary()时，系统在加载库成功后，会回调JNI_OnLoad(JavaVM *vm, void *reserved)。带有JavaVM参数可以保存为全局变量，返回值为JNI版本号。示例代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">jint JNI_OnLoad(JavaVM *vm, void *reserved) {
+    javaVM = vm;
+    return JNI_VERSION_1_6;
+}
+</code></pre>
+<p>当类加载器包含的本地库已经被垃圾回收器回收了，虚拟机会回调JNI_OnUnload()方法。 在该方法回调时，我们可以做内存清理工作。</p>
+<h3><a id="2-javavm%E8%B0%83%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.JavaVM调用</h3>
+<h4><a id="2-1%E5%88%9B%E5%BB%BA-javavm" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.1 创建JavaVM</h4>
+<p>创建JavaVM需要传入JavaVM指针、JNIEnv指针和VM参数。当前线程变成主线程，得到的env作为主线程的上下文环境。创建JVM方法为JNI_CreateJavaVM()。</p>
+<h4><a id="2-2%E5%85%B3%E8%81%94-javavm" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.2 关联JavaVM</h4>
+<p>当工作线程需要使用env时，必须先调用AttachCurrentThread()方法来关联JVM，因为env是线程私有的上下文环境。如果已经关联，不执行任何操作。需要注意的是，一个本地线程不能关联两个JVM。</p>
+<h4><a id="2-3%E8%84%B1%E7%A6%BB-javavm" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.3 脱离JavaVM</h4>
+<p>当使用完env时，调用DetachCurrentThread()方法来脱离JVM。</p>
+<h4><a id="2-4%E9%94%80%E6%AF%81-javavm" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.4 销毁JavaVM</h4>
+<p>当不再需要使用JavaVM时，调用DestroyJavaVM()方法用于卸载JVM和清除内存。任何线程，不管有没关联JVM，都可以调用该方法。</p>
+<p>JavaVM的完整使用过程如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">void callJVM() {
+    JNIEnv *env = nullptr;
+    JavaVM *jvm = nullptr;
+    // 1、创建jvm
+    JNI_CreateJavaVM(&amp;jvm, &amp;env, nullptr);
+    // 2、关联jvm
+    jvm-&gt;AttachCurrentThread(&amp;env, nullptr);
+    // 3、do something with env
+    // 4、脱离jvm
+    jvm-&gt;DetachCurrentThread();
+    // 5、销毁jvm
+    jvm-&gt;DestroyJavaVM();
+}
+</code></pre>
+<h2><a id="%E5%A0%86%E6%A0%88%E5%B4%A9%E6%BA%83%E6%8E%92%E6%9F%A5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>堆栈崩溃排查</h2>
+<p>做JNI/NDK开发时，经常遇到堆栈崩溃问题，只有一堆杂乱地址，实在让人摸不着头脑。堆栈信息包括：ABI架构、pid进程号、出错信号、崩溃原因、寄存器状态、堆栈地址。空指针引起的崩溃如下图所示：</p>
+<p><figure><img src="media/16536308854682/16536366832562.jpg" alt="" /></figure></p>
+<p>字符串编码不同而引起的崩溃如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">Abort message: 'JNI DETECTED ERROR IN APPLICATION: input is not valid Modified UTF-8: illegal continuation byte 0
+string: '�'
+input: '0xf4'
+</code></pre>
+<h3><a id="1-ndk-stack%E6%9F%A5%E7%9C%8B%E5%A0%86%E6%A0%88" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1.ndk-stack查看堆栈</h3>
+<p>遇到native层崩溃时，我们可用ndk-stack查看堆栈地址，命令如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">adb logcat | ndk-stack -sym xxx/libxxx.so
+</code></pre>
+<h3><a id="2-addr2line%E6%9F%A5%E7%9C%8B%E4%BB%A3%E7%A0%81%E4%BD%8D%E7%BD%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.addr2line查看代码位置</h3>
+<pre class="line-numbers"><code class="language-plain_text">// 0x12345678为堆栈地址，替换为实际崩溃地址
+aarch64-linux-android-addr2line -e libxxx.so 0x12345678
+</code></pre>
+<h3><a id="3-objdump%E6%9F%A5%E7%9C%8B%E7%AC%A6%E5%8F%B7%E8%A1%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.objdump查看符号表</h3>
+<p>objdump可以用-syms查看符号表，命令如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">objdump -syms libxxx.so
+</code></pre>
+<h3><a id="4-readelf%E6%9F%A5%E7%9C%8B%E4%BE%9D%E8%B5%96%E5%BA%93%E4%B8%8E%E7%AC%A6%E5%8F%B7%E8%A1%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>4.readelf查看依赖库与符号表</h3>
+<p>readelf是用来查看ELF文件的工具，ELF(Executable and Linkable Format)是一种可执行、可重定向的二进制目标文件。命令参数选项如下：</p>
+<p><figure><img src="media/16536308854682/16536368224631.jpg" alt="" /></figure></p>
+<p>使用readelf -d libxxx.so查看其依赖库：</p>
+<p><figure><img src="media/16536308854682/16536368329970.jpg" alt="" /></figure></p>
+<p>使用readelf -s libxxx.so查看其符号表：</p>
+<p><figure><img src="media/16536308854682/16536368413343.jpg" alt="" /></figure></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="16536371707508.html" 
+          title="Previous Post: 音视频知识汇总">&laquo; 音视频知识汇总</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="16536296729135.html" 
+          title="Next Post: JNI开发 - 规范">JNI开发 - 规范 &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="media/17043409056338/logo.jpeg" /></div>
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+<a target="_blank" class="github" target="_blank" href="https://github.com/adolphJane" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:adolphdeveloper@gmail.com" title="Email">Email</a>
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
+
+
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>
