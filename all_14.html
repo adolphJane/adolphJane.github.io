@@ -18,7 +18,7 @@
  
 <script type="text/javascript">
   function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    var searchVal = 'site:www.ifantastic.ink ' + document.getElementById('search_input').value;
     document.getElementById('search_q').value = searchVal;
     return true;
   }
@@ -135,601 +135,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="16484579043712.html">
-                
-                  <h1>Class 文件结构剖析</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>Java虚拟机规定用<strong>u1、u2、u4</strong>三种数据结构来表示<strong>1、2、4字节无符号整数</strong>，相同类型的若干条数据集合用<strong>表(table)的形式来存储</strong>。表是一个<strong>变长</strong>的结构，由代表<strong>长度的表头n</strong>和紧随着的<strong>n个数据项</strong>组成。<strong>class文件</strong>采用类似<strong>C语言的结构体</strong>来存储数据，如下所示</p>
-<pre class="line-numbers"><code class="language-plain_text"># 类
-classFile {
-    u4 magic;
-    u2 minor_version;
-    u2 major_version;
-    u2 constant_pool_count;
-    cp_info constant_pool[ constant_pool_count - 1];
-    u2 access_flags;
-    u2 this_class;
-    u2 super_class;
-    u2 interfaces_count;
-    u2 interfaces[ interfaces_count];
-    u2 fields_count;
-    field_info fields[ fields_count];
-    u2 methods_count;
-    method_info methods[ methods_count];
-    u2 attributes_count;
-    attribute_info attributes[ attributes_count];
-}
-   
-# 字段 
-field_info {
-    u2             access_flags;
-    u2             name_index;
-    u2             descriptor_index;
-    u2             attributes_count;
-    attribute_info attributes[attributes_count];
-}
-
-# 方法
-method_info {
-    u2             access_flags;
-    u2             name_index;
-    u2             descriptor_index;
-    u2             attributes_count;
-    attribute_info attributes[attributes_count];
-}
-
-# 方法当中方法体
-Code_attribute {
-    u2 attribute_name_index;
-    u4 attribute_length;
-    u2 max_stack;
-    u2 max_locals;
-    u4 code_length;
-    u1 code[code_length];
-    u2 exception_table_length;
-    {   u2 start_pc;
-        u2 end_pc;
-        u2 handler_pc;
-        u2 catch_type;
-    } exception_table[exception_table_length];
-    u2 attributes_count;
-    attribute_info attributes[attributes_count];
-}
-</code></pre>
-<ul>
-<li>u1: 表示占用1个字节</li>
-<li>u2: 表示占用2个字节</li>
-<li>u4: 表示占用4个字节</li>
-<li>u8: 表示占用8个字节</li>
-</ul>
-<p>class文件由下面十个部分组成:</p>
-<ul>
-<li>魔数(Magic Number)</li>
-<li>版本号(Minor&amp;Major Version)</li>
-<li>常量池(Constant Pool)</li>
-<li>类访问标记(Access Flag)</li>
-<li>类索引(This Class)</li>
-<li>超类索引(Super Class)</li>
-<li>接口表索引(Interface)</li>
-<li>字段表(Field)</li>
-<li>方法表(Method)</li>
-<li>属性表(Attribute)</li>
-</ul>
-<h2><a id="%E9%AD%94%E6%95%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>魔数</h2>
-<p>人们经常通过文件名后缀来识别文件类型，比如看到一个.jpg后缀的文件，我们就知道这是一个jpg图片文件。但使用文件名后缀来区分文件类型很不靠谱，后缀可以被随便修改，那如何根据文件内容本身来标识文件的类型呢？可以用魔数（Magic Number）实现。</p>
-<p>很多文件都以固定的几字节开头作为魔数，比如PDF文件的魔数是 %PDF-（十六进制0x255044462D）, png文件的魔数是 \x89PNG（十六进制0x89504E47）。文件格式的制定者可以自由地选择魔数值，只要魔数值还没有被广泛采用过且不会引起混淆即可。</p>
-<p>使用十六进制工具打开class文件，首先看到的是充满浪漫气息的魔数0xCAFEBABE（咖啡宝贝），从Java的图标也可以看出，Java从诞生之初就和咖啡这个词有千丝万缕的关系。class文件的魔数如图1-5所示。</p>
-<p><figure><img src="media/16484579043712/16484597085764.jpg" alt="图1-5 class文件魔数" /><figcaption>图1-5 class文件魔数<figcaption></figure></p>
-<p>魔数<code>0xCAFEBABE</code>是JVM识别．class文件的标志，虚拟机在加载类文件之前会先检查这4个字节，如果不是<code>0xCAFEBABE</code>，则会抛出<code>java.lang.ClassFormatError</code>异常。</p>
-<h2><a id="%E7%89%88%E6%9C%AC%E5%8F%B7" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>版本号</h2>
-<p>在魔数之后的四个字节分别表示副版本号（Minor Version）和主版本号（MajorVersion）,如图1-7所示。</p>
-<p><figure><img src="media/16484579043712/16484598597359.jpg" alt="图1-7 class文件版本号" /><figcaption>图1-7 class文件版本号<figcaption></figure></p>
-<p>这里的主版本号是52（0x34），虚拟机解析这个类时就知道这是一个Java 8编译出的类，如果类文件的版本号高于JVM自身的版本号，加载该类会被直接抛出java.lang. UnsupportedClassVersionError异常。</p>
-<p>每次Java发布大版本，主版本会加1，目前常用的Java主版本号对应的关系如表1-1所示。</p>
-<p><figure><img src="media/16484579043712/16484607690800.jpg" alt="表1-1 Java版本与Major Version的关系" /><figcaption>表1-1 Java版本与Major Version的关系<figcaption></figure></p>
-<h2><a id="%E5%B8%B8%E9%87%8F%E6%B1%A0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>常量池</h2>
-<p>紧随版本号之后的是常量池数据区域，常量池是类文件中最复杂的数据结构。对于JVM字节码来说，如果操作数是很常用的数字，比如0，这些操作数是内嵌到字节码中的。如果是字符串常量和较大的整数等，class文件则会把这些操作数存储在常量池（Constant Pool）中，当使用这些操作数时，会根据常量池的索引位置来查找。</p>
-<p>常量池的作用类似于C语言中的符号表（Symbol Table），但是比符号表要强大很多。常量池结构如下面的代码所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">struct {
-    u2                constant_pool_count;
-    cp_info          constant_pool[constant_pool_count-1];
-}
-</code></pre>
-<p>由上面的伪代码可知，常量池分为两部分。</p>
-<ol>
-<li><strong>常量池大小（cp_info_count）</strong>：常量池是class文件中第一个出现的<strong>变长结构</strong>。既然是池，就有大小，常量池大小由两个字节表示。假设常量池大小为 n，常量池真正有效的索引是1～n-1。也就是说，如果constant_pool_count等于10,constant_pool数组的有效索引值是1～9。0属于保留索引，可供特殊情况使用。</li>
-<li><strong>常量池项（cp_info）集合</strong>：最多包含 n-1个元素。为什么是最多呢？<strong>long和double类型的常量会占用两个索引位置</strong>，如果常量池包含了这两种类型的元素，<strong>实际的常量池项的元素个数比n-1要小</strong>。</li>
-</ol>
-<p>常量池组成结构如图1-9所示。</p>
-<p><figure><img src="media/16484579043712/16484614077348.jpg" alt="图1-9 常量池组成结构" /><figcaption>图1-9 常量池组成结构<figcaption></figure></p>
-<p>常量池中的每个常量项cp_info的数据结构如下面的伪代码所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">cp_info {
-    u1 tag;
-    u1 info[];
-}
-</code></pre>
-<p>每个cp_info的第一个字节表示常量项的类型（tag），接下来的几个字节表示常量项的具体内容。</p>
-<p>Java虚拟机目前一共定义了14种常量项tag类型，这些常量名都以CONSTANT开头，以info结尾，如表1-2所示。</p>
-<p><figure><img src="media/16484579043712/16484615406299.jpg" alt="表1-2 常量池类型" /><figcaption>表1-2 常量池类型<figcaption></figure></p>
-<p>如果想查看类文件的常量池，可以在javap命令中加上 -v选项，如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">javap -v HelloWorld
-
-Constant pool:
-    #1 = Methodref       #6.#15      // java/lang/Object.&quot;&lt;init&gt;&quot;:()V
-    #2 = Fieldref        #16.#17     // java/lang/System.out:Ljava/io/PrintStream;
-    #3 = String           #18          // Hello, World
-    ...
-    #27 = Utf8             println
-    #28 = Utf8             (Ljava/lang/String; )V
-</code></pre>
-<h3><a id="constant-integer-info%E5%92%8Cconstant-float-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_Integer_info和CONSTANT_Float_info</h3>
-<p>CONSTANT_Integer_info和CONSTANT_Float_info这两种结构分别用来表示int和float类型的常量，两者的结构很类似，都用4个字节来表示具体的数值常量，它们的结构定义如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">        CONSTANT_Integer_info {
-            u1 tag;
-            u4 bytes;
-        }
-
-       CONSTANT_Float_info {
-            u1 tag;
-            u4 bytes;
-        }
-</code></pre>
-<p>以整型常量18（0x12）为例，它在常量池中的布局结构为如图1-10所示。</p>
-<p><figure><img src="media/16484579043712/16484668736599.jpg" alt="图1-10 整型常量项结构" /><figcaption>图1-10 整型常量项结构<figcaption></figure></p>
-<p>其中第一个字节0x03表示常量的类型为CONSTANT_Integer_info，接下来的四个字节是整型常量的值0x12。</p>
-<h3><a id="constant-long-info%E5%92%8Cconstant-double-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_Long_info和CONSTANT_Double_info</h3>
-<p>CONSTANT_Long_info和CONSTANT_Double_info这两种结构分别用来表示long和double类型的常量，二者都用8个字节表示具体的常量数值，它们的结构如下面的代码所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_Long_info {
-    u1 tag;
-    u4 high_bytes;
-    u4 low_bytes;
-}
-
-CONSTANT_Double_info {
-    u1 tag;
-    u4 high_bytes;
-    u4 low_bytes;
-}
-</code></pre>
-<p>以下面代码中的long型常量a为例。</p>
-<pre class="line-numbers"><code class="language-plain_text">public class HelloWorldMain {
-    public final long a = Long.MAX_VALUE;
-}
-</code></pre>
-<p>对应的结构如图1-12所示。</p>
-<p><figure><img src="media/16484579043712/16484672481831.jpg" alt="图1-12 long型常量项结构" /><figcaption>图1-12 long型常量项结构<figcaption></figure></p>
-<p>其中第1个字节0 x05表示常量的类型为CONSTANT_Long_info，接下来的8个字节是long型常量的值Long.MAX_VALUE。</p>
-<p>使用javap输出的常量池信息如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">Constant pool:
-#1 = Methodref            #7.#17           // java/lang/Object.&quot;&lt;init&gt;&quot;:()V
-#2 = Class                 #18              // java/lang/Long
-#3 = Long                  9223372036854775807l
-#5 = Fieldref             #6.#19           // Hello.a:J
-// ... 省略部分常量项
-#21 = Utf8                  java/lang/Object
-</code></pre>
-<p>前面提到过，CONSTANT_Long_info和CONSTANT_Double_info占用两个常量池位置，可以看到常量池大小为22，常量a占用了 #3和 #4两个位置，下一个常量项Fieldref从索引值5开始，如图1-13所示。</p>
-<p><figure><img src="media/16484579043712/16484673406163.jpg" alt="图1-13 long型常量在常量池的位置" /><figcaption>图1-13 long型常量在常量池的位置<figcaption></figure></p>
-<h3><a id="constant-utf8-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_Utf8_info</h3>
-<p>CONSTANT_Utf8_info存储了字符串的内容，结构如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_Utf8_info {
-    u1 tag;
-    u2 length;
-    u1 bytes[length];
-}
-</code></pre>
-<p>它由三部分构成：第一个字节是tag，值为固定值1; tag之后的两个字节length并不是表示字符串有多少个字符，而是表示第三部分byte数组的长度；第三部分是采用MUTF-8编码的长度为length的字节数组。</p>
-<p>如果要存储的字符串是&quot;hello&quot;，存储结构如图1-14所示。</p>
-<p><figure><img src="media/16484579043712/16484674580611.jpg" alt="图1-14 UTF8类型常量项的结构" /><figcaption>图1-14 UTF8类型常量项的结构<figcaption></figure></p>
-<h3><a id="constant-string-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_String_info</h3>
-<p>CONSTANT_String_info用来表示java.lang.String类型的常量对象。它与CONSTANT_Utf8_info的区别是CONSTANT_Utf8_info存储了字符串真正的内容，而CONSTANT_String_info并不包含字符串的内容，<strong>仅仅包含一个指向常量池中CONSTANT_Utf8_info常量类型的索引</strong>。</p>
-<p>CONSTANT_String_info用来表示java.lang.String类型的常量对象。它与CONSTANT_Utf8_info的区别是CONSTANT_Utf8_info存储了字符串真正的内容，而CONSTANT_String_info并不包含字符串的内容，仅仅包含一个指向常量池中CONSTANT_Utf8_info常量类型的索引。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_String_info {
-    u1 tag;
-    u2 string_index;
-}
-</code></pre>
-<p>以下面代码中的字符串a为例。</p>
-<pre class="line-numbers"><code class="language-plain_text">public class Hello {
-    private String a = &quot;hello&quot;;
-}
-</code></pre>
-<p>这一部分在class文件中对应的区域如图1-17所示。</p>
-<p><figure><img src="media/16484579043712/16484678050638.jpg" alt="图1-17 CONSTANT_String_info示例" /><figcaption>图1-17 CONSTANT_String_info示例<figcaption></figure></p>
-<p>对应的CONSTANT_String_info的存储布局方式如图1-18所示</p>
-<p><figure><img src="media/16484579043712/16484678308500.jpg" alt="图1-18 string类型常量项结构" /><figcaption>图1-18 string类型常量项结构<figcaption></figure></p>
-<h3><a id="constant-class-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_Class_info</h3>
-<p>CONSTANT_Class_info结构用来表示类或接口，它的结构与CONSTANT_String_info非常类似，可用下面的伪代码表示。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_Class_info {
-    u1 tag;
-    u2 name_index;
-}
-</code></pre>
-<p>它由两部分组成，第一个字节是tag，值固定为7 , tag后面的两个字节name_index是一个常量池索引，指向CONSTANT_Utf8_info常量，这个字符串存储的是类或接口的全限定名，如图1-19所示。</p>
-<p><figure><img src="media/16484579043712/16484679908119.jpg" alt="图1-19 class类型常量项的结构" /><figcaption>图1-19 class类型常量项的结构<figcaption></figure></p>
-<h3><a id="constant-nameandtype-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_NameAndType_info</h3>
-<p>CONSTANT_NameAndType_info结构用来表示字段或者方法，可以用下面的伪代码表示。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_NameAndType_info{
-    u1 tag;
-    u2 name_index;
-    u2 descriptor_index;
-}
-</code></pre>
-<p>CONSTANT_NameAndType_info结构由三部分组成，</p>
-<ul>
-<li>第一部分tag值固定为<strong>12</strong></li>
-<li>后面的两个部分name_index和descriptor_index都指向常量池中的CONSTANT_Utf8_info的索引，<strong>name_index表示字段或方法的名字</strong>，<strong>descriptor_index是字段或方法的描述符</strong>，用来表示一个字段或方法的类型，字段和方法描述符在本章后面会有详细介绍。</li>
-</ul>
-<p>以下面代码中的testMethod为例。</p>
-<pre class="line-numbers"><code class="language-plain_text">    public void testMethod(int id, String name) {
-    }
-</code></pre>
-<p>对应的CONSTANT_NameAndType_info的结构布局示意图如图1-20所示。</p>
-<p><figure><img src="media/16484579043712/16484708367832.jpg" alt="图1-20 NameAndType类型常量项结构" /><figcaption>图1-20 NameAndType类型常量项结构<figcaption></figure></p>
-<h3><a id="constant-fieldref-info%E3%80%81constant-methodref-info%E5%92%8Cconstant-interfacemethodref-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_Fieldref_info、CONSTANT_Methodref_info和CONSTANT_InterfaceMethodref_info</h3>
-<p>这三种常量类型结构比较类似，结构用伪代码表示如下。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_Fieldref_info {
-    u1 tag;
-    u2 class_index;
-    u2 name_and_type_index;
-}
-
-CONSTANT_Methodref_info {
-    u1 tag;
-    u2 class_index;
-    u2 name_and_type_index;
-}
-
-CONSTANT_InterfaceMethodref_info {
-    u1 tag;
-    u2 class_index;
-    u2 name_and_type_index;
-}
-</code></pre>
-<p>下面以CONSTANT_Methodref_info为例来进行讲解，它用来描述一个方法。它由三部分组成：</p>
-<ul>
-<li>第一部分是tag值，固定为10；</li>
-<li>第二部分是class_index，是一个指向CONSTANT_Class_info的常量池索引值，表示方法所在的类信息；</li>
-<li>第三部分是name_and_type_index，是一个指向CONSTANT_NameAndType_info的常量池索引值，表示方法的方法名、参数和返回值类型。以下面的代码清单1-3为例。</li>
-</ul>
-<pre class="line-numbers"><code class="language-plain_text">public class HelloWorldMain {
-    public static void main(String[] args) {
-        new HelloWorldMain().testMethod(1, &quot;hi&quot;);
-    }
-    public void testMethod(int id, String name) {
-    }
-}
-
-Constant pool:
-#2 = Class        #18       // HelloWorldMain
-#5 = Methodref    #2.#20    // HelloWorldMain.testMethod:(ILjava/lang/String; )V
-#20 = NameAndType #13:#14  // testMethod:(ILjava/lang/String; )V
-</code></pre>
-<p>testMethod对应的Methodref的class_index为2，指向类名为“HelloWorldMain”的类，name_and_type_index为20，指向常量池中下标为20的NameAndType索引项，对应的方法名为“testMethod”，方法类型为“（ILjava/lang/String;）V”。</p>
-<p>testMethod的Methodref信息可以用图1-21表示。</p>
-<p><figure><img src="media/16484579043712/16484711309607.jpg" alt="图1-21 Methodref类型常量项结构" /><figcaption>图1-21 Methodref类型常量项结构<figcaption></figure></p>
-<h3><a id="constant-methodtype-info%E3%80%81constant-methodhandle-info%E5%92%8Cconstant-invokedynamic-info" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>CONSTANT_MethodType_info、CONSTANT_MethodHandle_info和CONSTANT_InvokeDynamic_info</h3>
-<p>从JDK1.7开始，为了更好地支持动态语言调用，新增了3种常量池类型（CONSTANT_MethodType_info、CONSTANT_MethodHandle_info和CONSTANT_InvokeDynamic_info）。以CONSTANT_InvokeDynamic_info为例，CONSTANT_InvokeDynamic_info的主要作用是为invokedynamic指令提供启动引导方法，它的结构如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">CONSTANT_InvokeDynamic_info {
-    u1 tag;
-    u2 bootstrap_method_attr_index;
-    u2 name_and_type_index;
-}
-</code></pre>
-<ul>
-<li>第一部分为tag，值固定为18；</li>
-<li>第二部分为bootstrap_method_attr_index，是指向引导方法表bootstrap_methods[] 数组的索引。</li>
-<li>第三部分为name_and_type_index，是指向索引类常量池里的CONSTANT_NameAndType_info的索引，表示方法描述符。以下面的代码清单1-4为例。</li>
-</ul>
-<pre class="line-numbers"><code class="language-plain_text">public void foo() {
-    new Thread (()-&gt; {
-        System.out.println(&quot;hello&quot;);
-    }).start();
-}
-
-javap输出的常量池的部分如下：
-
-Constant pool:
-#3 = InvokeDynamic       #0:#25           // #0:run:()Ljava/lang/Runnable;
-...
-#25 = NameAndType          #37:#38          // run:()Ljava/lang/Runnable;
-
-BootstrapMethods:
-0: #22 invokestatic java/lang/invoke/LambdaMetafactory.metafactory:(Ljava/lang/
-invoke/MethodHandles$Lookup; Ljava/lang/String; Ljava/lang/invoke/MethodType; Ljava/
-lang/invoke/MethodType; Ljava/lang/invoke/MethodHandle; Ljava/lang/invoke/MethodType; )
-Ljava/lang/invoke/CallSite;
-Method arguments:
-#23 ()V
-#24 invokestatic HelloWorldMain.lambda$foo$0:()V
-#23 ()V
-</code></pre>
-<p>整体的结构如图1-22所示。</p>
-<p><figure><img src="media/16484579043712/16484712813462.jpg" alt="图1-22 InvokeDynamic类型常量项结构" /><figcaption>图1-22 InvokeDynamic类型常量项结构<figcaption></figure></p>
-<h2><a id="%E7%B1%BB%E8%AE%BF%E9%97%AE%E6%A0%87%E8%AE%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>类访问标记</h2>
-<p>紧随常量池之后的区域是访问标记（Access flags），用来标识一个类为final、abstract等，由两个字节表示，总共有16个标记位可供使用，目前只使用了其中的8个</p>
-<p><figure><img src="media/16484579043712/16484713725785.jpg" alt="图1-23 类访问标记" /><figcaption>图1-23 类访问标记<figcaption></figure></p>
-<p>完整的访问标记含义如表1-3所示。</p>
-<p><figure><img src="media/16484579043712/16484713933789.jpg" alt="表1-3 类访问标记" /><figcaption>表1-3 类访问标记<figcaption></figure></p>
-<p>本例中类的访问标记为0 x0021（ACC_SUPER | ACC_PUBLIC），表示是一个public的类，如图1-24所示。</p>
-<p><figure><img src="media/16484579043712/16484714493080.jpg" alt="图1-24 类访问标记" /><figcaption>图1-24 类访问标记<figcaption></figure></p>
-<p>这些访问标记并不是可以随意组合的，比如ACC_PUBLIC、ACC_PRIVATE、ACC_PROTECTED不能同时设置，ACC_FINAL和ACC_ABSTRACT也不能同时设置，否则会违背语义。更多的规则可以在javac源码的com.sun.tools.javac.comp.Check.java文件中找到。</p>
-<h2><a id="%E7%B1%BB%E7%B4%A2%E5%BC%95%E3%80%81%E8%B6%85%E7%B1%BB%E7%B4%A2%E5%BC%95%E3%80%81%E6%8E%A5%E5%8F%A3%E8%A1%A8%E7%B4%A2%E5%BC%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>类索引、超类索引、接口表索引</h2>
-<p>这三部分用来确定类的继承关系，this_class表示类索引，super_name表示直接父类的索引，interfaces表示类或者接口的直接父接口。</p>
-<p>类索引是一个指向常量池的索引，表示类或者接口的名字，用两字节表示，以下面的代码清单1-5为例。</p>
-<pre class="line-numbers"><code class="language-plain_text">public class Hello {
-    public static void main(String[] args) {
-    }
-}
-
-Constant pool:
-// ...
-#2 = Class                 #13              // Hello
-// ...
-#13 = Utf8                  Hello
-</code></pre>
-<p>本例中this_class为0x0002，指向常量池中下标为2的元素，这个元素是CONSTANT_Class_info类型，它的name_index指向常量池中下标为13、类型为CONSTANT_Utf8_info的元素，表示类名为“Hello”，如图1-25所示。</p>
-<p><figure><img src="media/16484579043712/16484716594226.jpg" alt="图1-25 类索引分析" /><figcaption>图1-25 类索引分析<figcaption></figure></p>
-<h2><a id="%E5%AD%97%E6%AE%B5%E8%A1%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>字段表</h2>
-<p>类中定义的字段会被存储到这个集合中，包括静态和非静态的字段，它的结构可以用下面的伪代码表示。</p>
-<pre class="line-numbers"><code class="language-plain_text">{
-    u2                fields_count;
-    field_info      fields[fields_count];
-}
-</code></pre>
-<p>字段表也是一个变长的结构，fields_count表示field的数量，接下来的fields表示字段集合，共有fields_count个，每一个字段用field_info结构表示，稍后会进行介绍。</p>
-<h3><a id="%E5%AD%97%E6%AE%B5field-info%E7%BB%93%E6%9E%84" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>字段field_info结构</h3>
-<p>每个字段field_info的格式如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">field_info {
-    u2                access_flags;
-    u2                name_index;
-    u2                descriptor_index;
-    u2                attributes_count;
-    attribute_info attributes[attributes_count];
-}
-</code></pre>
-<p>字段结构分为4个部分：</p>
-<ul>
-<li>第一部分access_flags表示字段的访问标记，用来标识是public、private还是protected，是否是static，是否是final等；</li>
-<li>第二部分name_index用来表示字段名，指向常量池的字符串常量；</li>
-<li>第三部分descriptor_index是字段描述符的索引，指向常量池的字符串常量；</li>
-<li>最后的attributes_count、attribute_info表示属性的个数和属性集合。</li>
-</ul>
-<p>如图1-26所示。</p>
-<p><figure><img src="media/16484579043712/16484719403708.jpg" alt="图1-26 field_info组成结构示意" /><figcaption>图1-26 field_info组成结构示意<figcaption></figure></p>
-<h3><a id="%E5%AD%97%E6%AE%B5%E8%AE%BF%E9%97%AE%E6%A0%87%E8%AE%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>字段访问标记</h3>
-<p>与类一样，字段也拥有自己的字段访问标记，但字段的访问标记更丰富，共有9种，详细的列表如表1-4所示。</p>
-<p><figure><img src="media/16484579043712/16484720024342.jpg" alt="表1-4 字段访问标记" /><figcaption>表1-4 字段访问标记<figcaption></figure></p>
-<p>如果在类中定义了字段public static final int DEFAULT_SIZE = 128，编译后DEFAULT_SIZE字段在类文件中存储的访问标记值为0 x0019，则它的访问标记为ACC_PUBLIC |ACC_STATIC | ACC_FINAL，表示它是一个public static final类型的变量，如图1-27所示。</p>
-<p><figure><img src="media/16484579043712/16484720802260.jpg" alt="图1-27 字段访问标记示例" /><figcaption>图1-27 字段访问标记示例<figcaption></figure></p>
-<p>同之前介绍的类访问标记一样，字段访问标记并不是可以随意组合的，比如ACC_FINAL和ACC_VOLATILE也不能同时设置，否则会违背语义。</p>
-<h3><a id="%E5%AD%97%E6%AE%B5%E6%8F%8F%E8%BF%B0%E7%AC%A6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>字段描述符</h3>
-<p>字段描述符（field descriptor）用来表示某个field的类型，在JVM中定义一个int类型的字段时，类文件中存储的类型并不是字符串int，而是更精简的字母I。</p>
-<p>根据类型的不同，字段描述符分为三大类。</p>
-<ol>
-<li>原始类型，byte、int、char、float等这些简单类型使用一个字符来表示，比如J对应long类型，B对应byte类型。</li>
-<li>引用类型使用L；的方式来表示，为了防止多个连续的引用类型描述符出现混淆，引用类型描述符最后都加了一个“;”作为结束，比如字符串类型String的描述符为“Ljava/lang/String;”。</li>
-<li>JVM使用一个前置的“[”来表示数组类型，如int[] 类型的描述符为“[I”，字符串数组String[] 的描述符为“[Ljava/lang/String;”。而多维数组描述符只是多加了几个“[”而已，比如Object[][][] 类型的描述符为“[[[Ljava/lang/Object;”。</li>
-</ol>
-<p>完整的字段类型描述符映射表如表1-5所示。</p>
-<p><figure><img src="media/16484579043712/16484722378772.jpg" alt="表1-5 字段类型描述符映射表" /><figcaption>表1-5 字段类型描述符映射表<figcaption></figure></p>
-<h3><a id="%E5%AD%97%E6%AE%B5%E5%B1%9E%E6%80%A7" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>字段属性</h3>
-<p>与字段相关的属性包括ConstantValue、Synthetic 、Signature、Deprecated、Runtime-Visible Annotations和RuntimeInvisibleAnnotations这6个，比较常见的是ConstantValue属性，用来表示一个常量字段的值。</p>
-<h2><a id="%E6%96%B9%E6%B3%95%E8%A1%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>方法表</h2>
-<p>方法表的作用与前面介绍的字段表非常类似，类中定义的方法会被存储在这里，方法表也是一个变长结构，如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">{
-    u2                methods_count;
-    method_info     methods[methods_count];
-}
-</code></pre>
-<p>其中methods_count表示方法的数量，接下来的methods表示方法的集合，共有methods_count个，每一个方法用method_info结构表示。</p>
-<h3><a id="%E6%96%B9%E6%B3%95method-info%E7%BB%93%E6%9E%84" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>方法method_info结构</h3>
-<p>对于每个方法method_info而言，它的结构如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">method_info {
-    u2                access_flags;
-    u2                name_index;
-    u2                descriptor_index;
-    u2                attributes_count;
-    attribute_info attributes[attributes_count];
-}
-</code></pre>
-<p>方法method_info结构分为四部分：</p>
-<ul>
-<li>第一部分access_flags表示方法的访问标记，用来标记是public、private还是protected，是否是static，是否是final等；</li>
-<li>接下来的name_index、descriptor_index分别表示方法名和方法描述符的索引值，指向常量池的字符串常量；</li>
-<li>attributes_count和attribute_info表示方法相关属性的个数和属性集合，包含了很多有用的信息，比如方法内部的字节码就存放在Code属性中。</li>
-</ul>
-<p>field_info的结构如图1-28所示。</p>
-<p><figure><img src="media/16484579043712/16484724160858.jpg" alt="图1-28 field_info结构" /><figcaption>图1-28 field_info结构<figcaption></figure></p>
-<h3><a id="%E6%96%B9%E6%B3%95%E8%AE%BF%E9%97%AE%E6%A0%87%E8%AE%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>方法访问标记</h3>
-<p>方法的访问标记比类和字段的访问标记类型更丰富，一共有12种，完整的映射表如表1-6所示。</p>
-<p><figure><img src="media/16484579043712/16484724636741.jpg" alt="表1-6 方法访问标记映射表" /><figcaption>表1-6 方法访问标记映射表<figcaption></figure></p>
-<p>以下面的代码为例：</p>
-<pre class="line-numbers"><code class="language-plain_text">private static synchronized void foo() {
-}
-</code></pre>
-<p>生成的类文件中，foo方法的访问标记等于0 x002a（ACC_PRIVATE |ACC_STATIC|ACC_SYNCHRONIZED），表示这是一个private staticsynchronized的方法，如图1-29所示。</p>
-<p><figure><img src="media/16484579043712/16485397620768.jpg" alt="图1-29 方法访问标记" /><figcaption>图1-29 方法访问标记<figcaption></figure></p>
-<p>同前面的字段访问标记一样，不是所有的方法访问标记都可以随意组合设置，比如ACC_ABSTRACT、ACC_FINAL在方法描述符中不能同时设置，ACC_ABSTRACT和ACC_SYNCHRONIZED也不能同时设置。</p>
-<h3><a id="%E6%96%B9%E6%B3%95%E5%90%8D%E4%B8%8E%E6%8F%8F%E8%BF%B0%E7%AC%A6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>方法名与描述符</h3>
-<p>紧随方法访问标记的是方法名索引name_index，指向常量池中CONSTANT_Utf8_info类型的字符串常量，比如有这样一个方法定义private voidfoo（），编译器会生成一个类型为CONSTANT_Utf8_info的字符串常量项，里面存储了“foo”，方法名索引name_index指向了这个常量项。</p>
-<p>方法描述符索引descriptor_index也是指向常量池中类型为CONSTANT_Utf8_info的字符串常量项。方法描述符用来表示一个方法所需的参数和返回值，格式如下：</p>
-<pre class="line-numbers"><code class="language-plain_text">    (参数1类型 参数2类型 参数3类型 ...)返回值类型
-</code></pre>
-<p>比如，方法<code>Object foo（int i, double d, Thread t）</code>的描述符为“（IDLjava/lang/Thread;）Ljava/lang/Object;”，其中“I”表示第一个参数i的参数类型int,“D”表示第二个参数d的类型double,“Ljava/lang/Thread;”表示第三个参数t的类型Thread,“Ljava/lang/Object;”表示返回值类型Object，如图1-30所示。</p>
-<p><figure><img src="media/16484579043712/16485399190714.jpg" alt="图1-30 方法描述符" /><figcaption>图1-30 方法描述符<figcaption></figure></p>
-<h3><a id="%E6%96%B9%E6%B3%95%E5%B1%9E%E6%80%A7%E8%A1%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>方法属性表</h3>
-<p>方法属性表是method_info结构的最后一部分。前面介绍了方法的访问标记和方法签名，还有一些重要的信息没有出现，如方法声明抛出的异常，方法的字节码，方法是否被标记为deprecated等，属性表就是用来存储这些信息的。与方法相关的属性有很多，其中比较重要的是Code和Exceptions属性，其中Code属性存放方法体的字节码指令，Exceptions属性用于存储方法声明抛出的异常。</p>
-<h2><a id="%E5%B1%9E%E6%80%A7%E8%A1%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>属性表</h2>
-<p>在方法表之后的结构是class文件的最后一部分——属性表。属性出现的地方比较广泛，不只出现在字段和方法中，在顶层的class文件中也会出现。相比于常量池只有14种固定的类型，属性表的类型更加灵活，不同的虚拟机实现厂商可以自定义属性，属性表的结构如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">        {
-            u2                attributes_count;
-            attribute_info attributes[attributes_count];
-        }
-</code></pre>
-<p>与其他结构类似，属性表使用两个字节表示属性的个数attributes_count，接下来是若干个属性项的集合，可以看作是一个数组，数组的每一项都是一个属性项attribute_info，数组的大小为attributes_count。每个属性项的attribute_info的结构如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">        attribute_info{
-            u2 attribute_name_index;
-            u4 attribute_length;
-            u1 info[attribute_length];
-        }
-</code></pre>
-<p>attribute_name_index是指向常量池的索引，根据这个索引可以得到attribute的名字，接下来的两部分表示info数组的长度和具体byte数组的内容。</p>
-<p>虚拟机预定义了20多种属性，下面我们挑选字段表相关的ConstantValue属性和方法表相关的Code属性进行介绍。</p>
-<h3><a id="constantvalue%E5%B1%9E%E6%80%A7" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>ConstantValue属性</h3>
-<p>ConstantValue属性出现在字段field_info中，用来表示静态变量的初始值，它的结构如下所示。</p>
-<pre class="line-numbers"><code class="language-plain_text">        ConstantValue_attribute {
-            u2 attribute_name_index;
-            u4 attribute_length;
-            u2 constantvalue_index;
-        }
-</code></pre>
-<p>其中attribute_name_index是指向常量池中值为“ConstantValue”的字符串常量项，attribute_length值固定为2，因为接下来的具体内容只会有两个字节大小。constantvalue_index指向常量池中具体的常量值索引，根据变量的类型不同，constantvalue_index指向不同的常量项。如果变量为long类型，则constantvalue_index指向CONSTANT_Long_info类型的常量项。</p>
-<p>以代码public static final int DEFAULT_SIZE = 128为例，字段对应的class文件如图1-31高亮部分所示。</p>
-<p><figure><img src="media/16484579043712/16496452404231.jpg" alt="图1-31 字段DEFAULT_SIZE在class文件中的表示" /><figcaption>图1-31 字段DEFAULT_SIZE在class文件中的表示<figcaption></figure></p>
-<p>它对应的字段结构如图1-32所示。</p>
-<p><figure><img src="media/16484579043712/16496453777854.jpg" alt="图1-32 完整的field_info字段结构" /><figcaption>图1-32 完整的field_info字段结构<figcaption></figure></p>
-<h3><a id="code%E5%B1%9E%E6%80%A7" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Code属性</h3>
-<p>Code属性是类文件中最重要的组成部分，它包含方法的字节码，除native和abstract方法以外，每个method都有且仅有一个Code属性，它的结构如下。</p>
-<pre class="line-numbers"><code class="language-plain_text">        Code_attribute {
-            u2 attribute_name_index;
-            u4 attribute_length;
-            u2 max_stack;
-            u2 max_locals;
-            u4 code_length;
-            u1 code[code_length];
-            u2 exception_table_length;
-            {    u2 start_pc;
-                u2 end_pc;
-                u2 handler_pc;
-                u2 catch_type;
-            } exception_table[exception_table_length];
-            u2 attributes_count;
-            attribute_info attributes[attributes_count];
-        }
-</code></pre>
-<p>下面开始介绍Code属性表的各个字段含义。</p>
-<ol>
-<li>
-<p>属性名索引（attribute_name_index）占2个字节，指向常量池中CONSTANT_Utf8_info常量，表示属性的名字，比如这里对应的常量池的字符串常量“Code”。</p>
-</li>
-<li>
-<p>属性长度（attribute_length）占用2个字节，表示属性值长度大小。</p>
-</li>
-<li>
-<p>max_stack表示操作数栈的最大深度，方法执行的任意期间操作数栈的深度都不会超过这个值。它的计算规则是：有入栈的指令stack增加，有出栈的指令stack减少，在整个过程中stack的最大值就是max_stack的值，增加和减少的值一般都是1，但也有例外：LONG和DOUBLE相关的指令入栈stack会增加2 , VOID相关的指令则为0。</p>
-</li>
-<li>
-<p>max_locals表示局部变量表的大小，它的值并不等于方法中所有局部变量的数量之和。当一个局部作用域结束，它内部的局部变量占用的位置就可以被接下来的局部变量复用了。</p>
-</li>
-<li>
-<p>code_length和code用来表示字节码相关的信息。其中，code_length表示字节码指令的长度，占用4个字节；code是一个长度为code_length的字节数组，存储真正的字节码指令。</p>
-</li>
-<li>
-<p>exception_table_length和exception_table用来表示代码内部的异常表信息，如我们熟知的try-catch语法就会生成对应的异常表。exception_table_length表示接下来exception_table数组的长度，每个异常项包含四个部分，可以用下面的结构表示。</p>
-<pre class="line-numbers"><code class="language-plain_text">    {
-        u2 start_pc;
-        u2 end_pc;
-        u2 handler_pc;
-        u2 catch_type;
-    }
-</code></pre>
-<p>其中start_pc、end_pc、handler_pc都是指向code字节数组的索引值，start_pc和end_pc表示异常处理器覆盖的字节码开始和结束的位置，是左闭右开区间[start_pc, end_pc），包含start_pc，不包含end_pc。handler_pc表示异常处理handler在code字节数组的起始位置，异常被捕获以后该跳转到何处继续执行。catch_type表示需要处理的catch的异常类型是什么，它用两个字节表示，指向常量池中类型为CONSTANT_Class_info的常量项。如果catch_type等于0，则表示可处理任意异常，可用来实现finally语义。当JVM执行到这个方法 [start_pc, end_pc）范围内的字节码发生异常时，如果发生的异常是这个catch_type对应的异常类或者它的子类，则跳转到code字节数组handler_pc处继续处理。</p>
-</li>
-<li>
-<p>attributes_count和attributes[] 用来表示Code属性相关的附属属性，Java虚拟机规定Code属性只能包含这四种可选属性：LineNumberTable、LocalVariableTable、LocalVariableTypeTable、StackMapTable。以LineNumberTable为例，LineNumberTable用来存放源码行号和字节码偏移量之间的对应关系，属于调试信息，不是类文件运行的必需属性，默认情况下都会生成。如果没有这个属性，那么在调试时就没有办法在源码中设置断点，也没有办法在代码抛出异常时在错误堆栈中显示出错的行号信息。</p>
-<p>接下来以代码清单1-6为例来看Code属性。</p>
-<pre class="line-numbers"><code class="language-plain_text">     public class HelloWorldMain {
-         public static void main(String[] args) {
-             try {
-                 foo();
-             } catch (NullPointerException e) {
-                 System.out.println(e);
-             } catch (IOException e) {
-                 System.out.println(e);
-             }
-
-            try {
-                 foo();
-             } catch (Exception e) {
-                 System.out.println(e);
-             }
-         }
-         public static void foo() throws IOException {
-         }
-     }
-</code></pre>
-<p>编译后使用十六进制工具查看Code区域，如图1-33所示。</p>
-<p><figure><img src="media/16484579043712/16496461345360.jpg" alt="图1-33 Code属性布局" /><figcaption>图1-33 Code属性布局<figcaption></figure></p>
-<p>其中attribute_name_index为0 x0C，指向常量池中下标为12的字符串“Code”。attribute_length等于154（0x9A），表示属性值的长度大小。max_stack和max_locals都等于2，表示最大栈深度和局部变量表的大小都等于2 , code_length等于40（0x28），表示接下来code字节数组的长度为40。exception_table_length等于3（0x03），表示接下来会有3个异常表项目。最后的attributes_count为2，表示接下来会有2个相关的属性项，这里是LineNumberTable和StackMapTable。根据前面的介绍，可以画出的Code属性结构如图1-34所示。</p>
-<p><figure><img src="media/16484579043712/16496461706970.jpg" alt="图1-34 Code属性结构" /><figcaption>图1-34 Code属性结构<figcaption></figure></p>
-</li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2022/03/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%AD%97%E8%8A%82%E7%A0%81.html'>字节码</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="16457572239797.html">
-                
-                  <h1>算法 - 数组</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2><a id="%E6%95%B0%E7%BB%84%E7%90%86%E8%AE%BA%E5%9F%BA%E7%A1%80" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>数组理论基础</h2>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2022/02/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E7%AE%97%E6%B3%95.html'>算法</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="16416967458604.html">
                 
@@ -1293,6 +698,292 @@ Constant pool:
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="16432746488334.html">
+                
+                  <h1>基础组件之Container</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2><a id="container%E7%AE%80%E4%BB%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Container简介</h2>
+<p>一个拥有绘制、定位、调整大小的 widget。</p>
+<h2><a id="%E7%BB%84%E6%88%90" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>组成</h2>
+<p><strong>Container的组成</strong><br />
+最里层的是child元素；child元素首先会被padding包着；然后添加额外的constraints限制；最后添加margin。</p>
+<p><strong>Container的绘制的过程</strong><br />
+首先会绘制transform效果；接着绘制decoration；然后绘制child；最后绘制foregroundDecoration。</p>
+<p><strong>Container自身尺寸的调节分两种情况</strong><br />
+Container在没有子节点（children）的时候，会试图去变得足够大。除非constraints是unbounded限制，在这种情况下，Container会试图去变得足够小。带子节点的Container，会根据子节点尺寸调节自身尺寸，但是Container构造器中如果包含了width、height以及constraints，则会按照构造器中的参数来进行尺寸的调节。</p>
+<h2><a id="%E5%B8%83%E5%B1%80" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>布局</h2>
+<p>由于Container组合了一系列的widget，这些widget都有自己的布局行为，因此Container的布局行为有时候是比较复杂的。</p>
+<p>一般情况下，Container会遵循如下顺序去尝试布局：对齐（alignment）；调节自身尺寸适合子节点；采用width、height以及constraints布局；扩展自身去适应父节点；调节自身到足够小。进一步说：如果没有子节点、没有设置width、height以及constraints，并且父节点没有设置unbounded的限制，Container会将自身调整到足够小。</p>
+<p>如果没有子节点、对齐方式（alignment），但是提供了width、height或者constraints，那么Container会根据自身以及父节点的限制，将自身调节到足够小。</p>
+<p>如果没有子节点、width、height、constraints以及alignment，但是父节点提供了bounded限制，那么Container会按照父节点的限制，将自身调整到足够大。</p>
+<p>如果有alignment，父节点提供了unbounded限制，那么Container将会调节自身尺寸来包住child；</p>
+<p>如果有alignment，并且父节点提供了bounded限制，那么Container会将自身调整的足够大（在父节点的范围内），然后将child根据alignment调整位置；含有child，但是没有width、height、constraints以及alignment，Container会将父节点的constraints传递给child，并且根据child调整自身。</p>
+<h2><a id="%E5%B1%9E%E6%80%A7" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>属性</h2>
+<ul>
+<li><code>key</code>：Container唯一标识符，用于查找更新。</li>
+<li><code>alignment</code>：控制child的对齐方式，如果container或者container父节点尺寸大于child的尺寸，这个属性设置会起作用，有很多种对齐方式。</li>
+<li><code>padding</code>：decoration内部的空白区域，如果有child的话，child位于padding内部。padding与margin的不同之处在于，padding是包含在content内，而margin则是外部边界，设置点击事件的话，padding区域会响应，而margin区域不会响应。</li>
+<li><code>color</code>：用来设置container背景色，如果foregroundDecoration设置的话，可能会遮盖color效果。</li>
+<li><code>decoration</code>：绘制在child后面的装饰，设置了decoration的话，就不能设置color属性，否则会报错，此时应该在decoration中进行颜色的设置。</li>
+<li><code>foregroundDecoration</code>：绘制在child前面的装饰。</li>
+<li><code>width</code>：container的宽度，设置为double.infinity可以强制在宽度上撑满，不设置，则根据child和父节点两者一起布局。</li>
+<li><code>height</code>：container的高度，设置为double.infinity可以强制在高度上撑满。</li>
+<li><code>constraints</code>：添加到child上额外的约束条件。</li>
+<li><code>margin</code>：围绕在decoration和child之外的空白区域，不属于内容区域。</li>
+<li><code>transform</code>：设置container的变换矩阵，类型为Matrix4。</li>
+<li><code>child</code>：container中的内容widget。</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2022/01/27</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E7%BB%84%E4%BB%B6%E5%BA%93.html'>组件库</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16431658645321.html">
+                
+                  <h1>Flutter 语法小记</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2><a id="future" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Future</h2>
+<p><code>future</code>是代表可能还没有发生的运算结果的对象。结果可能在未来的某个时间是可知的，因此被称为“future”。</p>
+<p>简而言之，就是通过<code>future</code>来实现异步。正如<code>isolate</code>与进程类似，<code>future</code>也与线程类似。但也仅类似而已，毕竟<code>future</code>中还是与线程有很大区别的，比如线程既可执行IO密集型任务，也可执行计算密集型任务，而<code>future</code>仅能执行IO密集型任务。</p>
+<p>Future和Stream会在耗时操作执行完毕前直接返回而不会等待耗时操作执行完毕。</p>
+<p>可以通过下面两种方式，获得Future执行完成的结果：</p>
+<ul>
+<li>使用<code>async</code>和<code>await</code>；</li>
+<li>使用Future API；</li>
+</ul>
+<h2><a id="async" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>async</h2>
+<p>用于声明异步函数</p>
+<p>定义异步函数只需在普通方法上加上async关键字即可。<br />
+将关键字async添加到函数并让其返回一个Future 对象。假设有如下返回String对象的方法：</p>
+<pre class="line-numbers"><code class="language-dart">String lookUpVersion() =&gt; '1.0.0';
+</code></pre>
+<p>将其改为异步函数，返回值是Future：</p>
+<pre class="line-numbers"><code class="language-dart">Future&lt;String&gt; lookUpVersion() async =&gt; '1.0.0';
+</code></pre>
+<p>注意，函数体不需要使用Future API。如有必要，Dart会创建Future对象。<br />
+如果函数没有返回有效值，需要设置其返回类型为 <code>Future&lt;void&gt;</code></p>
+<h2><a id="await" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>await</h2>
+<p>await表达式的返回值通常是一个Future对象；<br />
+如果不是的话也会自动将其包裹在一个Future对象里。Future对象代表一个&quot;承诺&quot;,await表达式会阻塞直到需要的对象返回。</p>
+<p>必须在带有async关键字的异步函数中使用 await：</p>
+<pre class="line-numbers"><code class="language-dart">Future checkVersion() async {
+  var version = await lookUpVersion();
+  // 使用 version 继续处理逻辑
+}
+</code></pre>
+<p>尽管异步函数可以处理耗时操作，但是它并不会等待这些耗时操作完成，异步函数执行时会在其遇到第一个 <code>await</code>表达式的时候返回一个Future对象，然后等待<code>await</code>表达式执行完毕后继续执行。</p>
+<p>如果在使用await时导致编译错误，请确保await在一个异步函数中使用。</p>
+<p>使用try、catch以及finally来处理使用await导致的异常：</p>
+<pre class="line-numbers"><code class="language-dart">try {
+  version = await lookUpVersion();
+} catch (e) {
+  // 无法找到版本时做出的反应
+}
+</code></pre>
+<h2><a id="stream" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Stream</h2>
+<p><code>Stream</code>也是用于接收异步事件数据，和<code>Future</code>不同的是，它可以接收多个异步操作的结果（成功或失败）。 也就是说，在执行异步任务时，可以通过多次触发成功或失败事件来传递结果数据或错误异常。<code>Stream</code>常用于会多次读取数据的异步任务场景，如网络内容下载、文件读写等。举个例子：</p>
+<pre class="line-numbers"><code class="language-dart">Stream.fromFutures([
+  // 1秒后返回结果
+  Future.delayed(new Duration(seconds: 1), () {
+    return &quot;hello 1&quot;;
+  }),
+  // 抛出一个异常
+  Future.delayed(new Duration(seconds: 2),(){
+    throw AssertionError(&quot;Error&quot;);
+  }),
+  // 3秒后返回结果
+  Future.delayed(new Duration(seconds: 3), () {
+    return &quot;hello 3&quot;;
+  })
+]).listen((data){
+   print(data);
+}, onError: (e){
+   print(e.message);
+},onDone: (){
+
+});
+</code></pre>
+<p>上面的代码依次会输出：</p>
+<pre class="line-numbers"><code class="language-plain_text">hello 1
+Error
+hello 3
+</code></pre>
+<h2><a id="typedef" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>typedef</h2>
+<p>首先<code>typedef</code>是一个关键字或修饰符，因为<code>dart</code>一切皆对象，方法也可理解为对象，所以<code>typedef</code>也可理解为对象的修饰符，具体意思为： 使用<code>typedef</code> 定义一个函数(或匿名函数)，可以使用此函数作为其他函数的参数或返回值.</p>
+<pre class="line-numbers"><code class="language-dart">import 'package:flutter/material.dart';
+
+class CallBackHomePage extends StatefulWidget {
+  @override
+  _CallBackHomePageState createState() =&gt; _CallBackHomePageState();
+}
+
+class _CallBackHomePageState extends State&lt;CallBackHomePage&gt; {
+  String sexStr = '';
+  int ageInt;
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(
+        title: Text('回调方法demo'),
+      ),
+      body: Column(
+        children: [
+          Container(
+            child: Text('张三的性别是:$sexStr'),
+          ),
+          Container(
+            child: Text(ageInt == null ? '张三的年龄是:' : '张三的年龄是:$ageInt'),
+          ),
+          BottomView('张三', (sex) {
+            setState(() {
+              sexStr = sex;
+            });
+          },
+              (age) =&gt; setState(() {
+                    ageInt = age;
+                  }))
+        ],
+      ),
+    );
+  }
+}
+
+typedef SexFunc = void Function(String sex);
+typedef AgeFunc(int age);
+
+class BottomView extends StatelessWidget {
+  final SexFunc sexCallBack;
+  final AgeFunc ageCallBack;
+  BottomView(String name, this.sexCallBack, this.ageCallBack);
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      color: Colors.yellow,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          RaisedButton(
+            onPressed: () {
+              sexCallBack('男');
+            },
+            child: Text('调查性别'),
+          ),
+          RaisedButton(
+            onPressed: () {
+              ageCallBack(23);
+            },
+            child: Text('调查年龄'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+</code></pre>
+<p>其中可以看到这两行：</p>
+<pre class="line-numbers"><code class="language-dart">typedef SexFunc = void Function(String sex);
+typedef AgeFunc(int age);
+</code></pre>
+<p>其实这是dart的语法糖，SexFuc方法的缩写就是下面的AgeFunc的写法，同样在回调传参的地方也是一个语法糖，如下</p>
+<pre class="line-numbers"><code class="language-dart">BottomView('张三', 
+        (sex) {
+            setState(() {
+              sexStr = sex;
+            });
+        },
+          //等价于上面的写法
+        (age) =&gt; setState(() {
+                    ageInt = age;
+                 })
+          )
+</code></pre>
+<p>能做回调的还有<code>VoidCallback</code>、<code>ValueChanged</code>，但看源码可知</p>
+<pre class="line-numbers"><code class="language-dart">typedef VoidCallback = void Function()
+
+typedef ValueSetter&lt;T&gt; = void Function(T value)
+</code></pre>
+<p>本质上VoidCallback、ValueChanged 就是typedef的一种写法而已，只是Flutter帮我们做了一层封装</p>
+<h2><a id="overlay%E5%92%8C-overlayentry" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Overlay 和 OverlayEntry</h2>
+<p><code>Overlay</code>是一个可以管理的堆栈。我们可以通过将一个<code>Widget</code>插入这个堆栈中，这样就可以让此<code>Widget</code>浮在其他的<code>Widget</code>之上，从而实现悬浮窗效果。我们可以通过<code>OverlayEntry</code>对象的配置来管理<code>Overlay</code>的层级关系。</p>
+<p><figure><img src="media/16431658645321/16432512578634.jpg" alt="" /></figure></p>
+<p>​通过追踪构造方法，我们可以发现它被<code>Navigator</code>所创建，而<code>Navigator</code>又被<code>WidgetsApp</code>所创建。通常我们<code>runApp</code>启动的<code>page</code>里会创建的<code>CupertinoApp</code>或者<code>MaterialApp</code>都会创建<code>WidgetsApp</code>，因此我们在项目中可以直接使用这个创建好的<code>Overlay</code>。<br />
+​</p>
+<pre class="line-numbers"><code class="language-dart">  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addPostFrameCallback(
+      (timeStamp) {
+        OverlayEntry entry = OverlayEntry(
+          builder: (_) {
+            return IgnorePointer(
+              child: Center(
+                child: Text('OverlayEntry'),
+              ),
+            );
+          },
+        );
+        Overlay.of(context).insert(entry);
+      },
+    );
+  }
+</code></pre>
+<p>​<code>Overlay</code>的使用很简单，通过<code>Overlay.of(context)</code>方法向上查找到<code>OverlayState</code>，然后通过<code>insert</code>或者<code>insertAll</code>方法插入一个或多个悬浮<code>Widget</code>。如果想要移除此悬浮<code>Widget</code>，我们可以通过<code>OverlayEntry</code>的<code>remove()</code>方法<br />
+​</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2022/01/26</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Flutter.html'>Flutter</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -1316,7 +1007,7 @@ Constant pool:
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
-                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+                <div class="site-a-logo"><img src="media/17043409056338/logo.jpeg" /></div>
             
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
@@ -1330,8 +1021,8 @@ Constant pool:
 
 
 
-
-
+<a target="_blank" class="github" target="_blank" href="https://github.com/adolphJane" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:adolphdeveloper@gmail.com" title="Email">Email</a>
   <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
                 
               	 </div>

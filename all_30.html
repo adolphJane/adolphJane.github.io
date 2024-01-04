@@ -18,7 +18,7 @@
  
 <script type="text/javascript">
   function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    var searchVal = 'site:www.ifantastic.ink ' + document.getElementById('search_input').value;
     document.getElementById('search_q').value = searchVal;
     return true;
   }
@@ -135,46 +135,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="15561207872340.html">
-                
-                  <h1>Android-RecyclerViewItemDecoration的进阶使用</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<ol>
-<li>ItemDecoration实现padding</li>
-<li>ItemDecoration实现下划线</li>
-<li>ItemDecoration实现酷炫吸顶效果</li>
-<li>ItemDecoration实现item的拖拽，平移等操作</li>
-</ol>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15561207872340.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2017/10/29</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="15561207872263.html">
                 
@@ -2598,6 +2558,111 @@ SortedSet s = Collections.synchronizedSortedSet(new TreeSet(...));</li>
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="15561207871867.html">
+                
+                  <h1>Android-粒子变幻、隧道散列、组合文字</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2><a id="%E6%95%88%E6%9E%9C%E8%A7%86%E9%A2%91%E5%9B%BE%E7%89%87" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>效果视频 &amp; 图片</h2>
+<h3><a id="%E7%AC%AC%E4%B8%80%E4%B8%AA%E8%A7%86%E9%A2%91%EF%BC%8C%E6%97%A0%E6%95%A3%E5%88%97" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>第一个视频，无散列</h3>
+<p><figure><img src="media/15561207871867/20171105150982542062457.gif" alt="" /></figure></p>
+<h3><a id="%E7%AC%AC%E4%BA%8C%E4%B8%AA%E8%A7%86%E9%A2%91%EF%BC%8C%E5%85%B7%E5%A4%87%E6%95%A3%E5%88%97" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>第二个视频，具备散列</h3>
+<p><figure><img src="media/15561207871867/20171105150982545476983.gif" alt="" /></figure></p>
+<p><figure><img src="media/15561207871867/15713656610386.png" alt="" /></figure></p>
+<p><figure><img src="media/15561207871867/15713656692040.png" alt="" /></figure></p>
+<h2><a id="%E6%A6%82%E8%BF%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>概述</h2>
+<p>跟随早前开源的 XView (<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Faf913337456%2FXView">github.com/af913337456…</a>) 项目，本次在原基础上添加了 粒子变幻 自定义View。目前我在代码里面的设置它可以做到：</p>
+<ol>
+<li>根据你输入文字，将被粒子组合而成。</li>
+<li>粒子流具备多种属性，目前我拓展了缩放，圆形与矩形，墙壁碰撞，等等。</li>
+<li>粒子每个互不影响，可以分批设置粒子特性，视频中就有 方形 和 圆形</li>
+<li>所有的半径，坐标什么的参数都是可自定义的。</li>
+<li>因为锚边是根据 bitmap 而来的，也就是说，你可以输入图片，然后由粒子组合</li>
+<li>XView 项目早前已经开源了碰撞球，可以加入粒子相互碰撞</li>
+</ol>
+<h2><a id="%E5%8E%9F%E7%90%86%E5%8F%8A%E5%85%B6%E9%9A%BE%E7%82%B9" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>原理及其难点</h2>
+<ol>
+<li>根据 bitmap 找出文字或图像的边。这步骤要减少 o(n)</li>
+<li>根据边路径，进行粒子填充</li>
+<li>变幻算法，例如运动中的缩放</li>
+<li>高效率的刷新，摒弃 View，采用 SurfaceView</li>
+</ol>
+<h2><a id="%E9%83%A8%E5%88%86%E4%BB%A3%E7%A0%81%E7%AE%80%E8%BF%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>部分代码简述</h2>
+<p><strong>调用</strong></p>
+<pre class="line-numbers"><code class="language-java">// 粒子变幻
+particleView.setConfigAndRefreshView(
+    new ParticleView.Config()
+            .setCanvasWidth(
+                    // 设置画布宽度
+                    getWindowManager().getDefaultDisplay().getWidth()
+            )
+            .setCanvasHeight(800) // 设置画布高度
+            .setParticleRefreshTime(50) // 设置每帧刷新间隔
+            .set_x_Step(15) // 设置 x 轴每次取像素点的间隔
+            .set_y_Step(19) // 设置  轴每次取像素点的间隔
+            .setParticleCallBack(
+                new ParticleView.ParticleCallBack() {
+                    @Override
+                    public ParticleView.Particle setParticle(ParticleView.Particle p, int index, int x, int y) {
+                        p.setX(x); // 设置获取回来的 x 为该 粒子的x坐标
+                        p.setY(y); // 设置获取回来的 y 为该 粒子的y坐标
+                        p.setIsZoom(true);  // 设置当前颗粒子是否启动缩放
+                        p.setRadiusMax(12); // 设置当前颗粒子最大的缩放半径
+                        p.setRadius(12);    // 设置当前颗粒子默认的半径
+
+                        /** 下面的 %3 是我演示 分批次 显示不同效果而设置 **/
+                        if(index % 3==0){
+                            p.setRectParticle(true); // 这个粒子是 正方形 的
+                            p.setIsHash(  // 设置它是否是散列的，即是随机移动
+                                    true,
+                                    new Random().nextInt(30)-15, // x 速率
+                                    new Random().nextInt(30)-15  // y 速率
+                            );
+                        }
+                        return p; // 返回这个粒子
+                    }
+
+                    @Override
+                    public boolean drawText(Bitmap bg,Canvas c) {
+                        /** 这里就是我们要自定义显示任意文字的地方 */
+                        MainActivity.this.drawText(bg,c,s);
+                        return true; /** 告诉它不要使用默认的 txt */
+                    }
+                }
+            )
+);
+</code></pre>
+<p><strong>源码地址</strong></p>
+<p><a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Faf913337456%2FXView">github.com/af913337456…</a></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2017/10/15</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -2621,7 +2686,7 @@ SortedSet s = Collections.synchronizedSortedSet(new TreeSet(...));</li>
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
-                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+                <div class="site-a-logo"><img src="media/17043409056338/logo.jpeg" /></div>
             
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
@@ -2635,8 +2700,8 @@ SortedSet s = Collections.synchronizedSortedSet(new TreeSet(...));</li>
 
 
 
-
-
+<a target="_blank" class="github" target="_blank" href="https://github.com/adolphJane" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:adolphdeveloper@gmail.com" title="Email">Email</a>
   <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
                 
               	 </div>

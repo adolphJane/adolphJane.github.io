@@ -18,7 +18,7 @@
  
 <script type="text/javascript">
   function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    var searchVal = 'site:www.ifantastic.ink ' + document.getElementById('search_input').value;
     document.getElementById('search_q').value = searchVal;
     return true;
   }
@@ -135,43 +135,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="15662693410122.html">
-                
-                  <h1>Docker搭建Maven私服</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p>由于Gradle和Maven依赖方式不一样，没法进行本地项目依赖，所以需要把Gradle项目打包发布到Maven仓库。发布到公共仓库又不太好，所以决定搭建个私有仓库，刚好家里有群辉Synology DS918+，可以通过Docker来搭建Maven私服。</p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="15662693410122.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2019/08/20</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%B7%A5%E5%85%B7.html'>工具</a></span>
-          				  
-          					    <span class="posted-in"><a href='Docker.html'>Docker</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="15639522586909.html">
                 
@@ -518,219 +481,14 @@ MD5值就是所要的应用签名，只是比下面提到的签名生成工具�
                       
                       <div class="a-content-text">
                         
-                        	<h2><a id="%E6%90%AD%E5%BB%BA%E7%8E%AF%E5%A2%83" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>搭建环境</h2>
-<h3><a id="%E5%AE%89%E8%A3%85%E7%8E%AF%E5%A2%83%E5%BF%85%E5%A4%87%E8%BD%AF%E4%BB%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>安装环境必备软件</h3>
-<p>官方推荐使用Homebrew来安装node和Watchman</p>
-<pre class="line-numbers"><code class="language-plain_text">brew install node
-brew install watchman
-</code></pre>
-<p>设置npm镜像来加速后面的过程</p>
-<pre class="line-numbers"><code class="language-plain_text">npm config set registry https://registry.npm.taobao.org --global
-npm config set disturl https://npm.taobao.org/dist --global
-</code></pre>
-<p>Watchman则是由 Facebook 提供的监视文件系统变更的工具。安装此工具可以提高开发时的性能（packager 可以快速捕捉文件的变化从而实现实时刷新）。<br />
-Yarn是 Facebook 提供的替代 npm 的工具，可以加速 node 模块的下载。React Native 的命令行工具用于执行创建、初始化、更新项目、运行打包服务（packager）等任务。</p>
-<pre class="line-numbers"><code class="language-plain_text">npm install -g yarn react-native-cli
-</code></pre>
-<p>安装完 yarn 后同理也要设置镜像源：</p>
-<pre class="line-numbers"><code class="language-plain_text">yarn config set registry https://registry.npm.taobao.org --global
-yarn config set disturl https://npm.taobao.org/dist --global
-</code></pre>
-<p>安装完 yarn 之后就可以用 yarn 代替 npm 了，例如用yarn代替npm install命令，用yarn add 某第三方库名代替npm install 某第三方库名。</p>
-<h3><a id="%E5%88%9B%E5%BB%BA%E6%96%B0%E9%A1%B9%E7%9B%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建新项目</h3>
-<p>使用 React Native 命令行工具来创建一个为&quot;AwesomeProject&quot;的新项目：</p>
-<pre class="line-numbers"><code class="language-plain_text">react-native init AwesomeProject
-</code></pre>
-<h3><a id="%E8%BF%90%E8%A1%8C%E9%A1%B9%E7%9B%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>运行项目</h3>
-<pre class="line-numbers"><code class="language-plain_text">cd AwesomeProject
-react-native run-android
-</code></pre>
-<h2><a id="%E5%BC%80%E5%8F%91novelproject" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>开发NovelProject</h2>
-<h3><a id="%E4%BD%BF%E7%94%A8%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>使用第三方库</h3>
-<h4><a id="react-navigation" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>React-navigation</h4>
-<h5><a id="%E5%AF%BC%E5%85%A5%E4%BE%9D%E8%B5%96%E5%BA%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>导入依赖库</h5>
-<p>在项目Terminal中输入命令行：</p>
-<pre class="line-numbers"><code class="language-plain_text">yarn add react-navigation
-</code></pre>
-<p>然后在package.json文件中就可以看到，依赖库已经导入完毕：</p>
-<pre class="line-numbers"><code class="language-plain_text">&quot;react-native-tab-navigator&quot;: &quot;^0.3.4&quot;,
-</code></pre>
-<p><strong>注意</strong>适配IOS要导入<code>react-native-gesture-handler</code>库，并进行关联</p>
-<pre class="line-numbers"><code class="language-plain_text">yarn add react-native-gesture-handler
-react-native link
-</code></pre>
-<h5><a id="%E9%85%8D%E7%BD%AEnavigator" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>配置Navigator</h5>
-<p>在项目的入口中直接配置StackNavigator，StackNavigator中注册所有需要跳转的界面，在这个项目中还有注册登录功能，在效果图中没有展示，这里不作探讨。首先是入口文件：</p>
-<pre class="line-numbers"><code class="language-plain_text">import React from 'react';
-import {StackNavigator} from 'react-navigation';
-import {TabNav} from &quot;./RootPage&quot;;
-import LoginPage from &quot;./page/Login/loginPage&quot;;
-import RegPage from &quot;./page/Login/regPage&quot;;
-import {FindAccountPage} from &quot;./page/Login/findAccountPage&quot;; // 路由导航
-
-const App = StackNavigator({
-        Login: {screen: LoginPage}, // 登录页
-        Reg: {screen: RegPage}, // 注册页
-        FindAccount: {screen: FindAccountPage}, // 找回密码页
-        Main: {
-            screen: TabNav,
-            navigationOptions: ({navigation}) =&gt; ({
-                header: null
-            })
-        }
-    },
-    {
-        initialRouteName: 'Login',
-        headerMode: 'screen'
-    });
-
-export default App;
-</code></pre>
-<p>上面可以注意到TabNav，也就是TabNavigator，是作为一个screen参数的值传入到StackNavigator中，在上面提到的navigationOptions的配置中，我们将header设置为null，也就是不要标题栏。</p>
-<p>接着进入到配置TabNavigator的RootPage中：</p>
-<pre class="line-numbers"><code class="language-plain_text">import React from 'react';
-import {TabNavigator} from 'react-navigation';
-
-import HomePage from './page/Home/HomePage';
-import FriendPage from './page/Friend/FriendPage';
-import TaskPage from './page/Task/TaskPage';
-import MinePage from './page/Mine/MinePage';
-import DealPage from './page/Deal/DealPage';
-
-export const TabNav = TabNavigator(
-    {
-        Home: {
-            screen: HomePage,
-        },
-        Task: {
-            screen: TaskPage,
-        },
-        Friend: {
-            screen: FriendPage,
-        },
-        Deal: {
-            screen: DealPage,
-        },
-        Mine: {
-            screen: MinePage,
-        }
-    },
-    {
-        tabBarOptions: {
-            //当前选中的tab bar的文本颜色和图标颜色
-            activeTintColor: '#4BC1D2',
-            //当前未选中的tab bar的文本颜色和图标颜色
-            inactiveTintColor: '#000',
-            //是否显示tab bar的图标，默认是false
-            showIcon: true,
-            //showLabel - 是否显示tab bar的文本，默认是true
-            showLabel: true,
-            //是否将文本转换为大小，默认是true
-            upperCaseLabel: false,
-            //material design中的波纹颜色(仅支持Android &gt;= 5.0)
-            pressColor: '#788493',
-            //按下tab bar时的不透明度(仅支持iOS和Android &lt; 5.0).
-            pressOpacity: 0.8,
-            //tab bar的样式
-            style: {
-                backgroundColor: '#fff',
-                paddingBottom: 1,
-                borderTopWidth: 0.2,
-                paddingTop:1,
-                borderTopColor: '#ccc',
-            },
-            //tab bar的文本样式
-            labelStyle: {
-                fontSize: 11,
-                margin: 1
-            },
-            //tab 页指示符的样式 (tab页下面的一条线).
-            indicatorStyle: {height: 0},
-        },
-        //tab bar的位置, 可选值： 'top' or 'bottom'
-        tabBarPosition: 'bottom',
-        //是否允许滑动切换tab页
-        swipeEnabled: true,
-        //是否在切换tab页时使用动画
-        animationEnabled: false,
-        //是否懒加载
-        lazy: true,
-        //返回按钮是否会导致tab切换到初始tab页？ 如果是，则设置为initialRoute，否则为none。 缺省为initialRoute。
-        backBehavior: 'none',
-    });
-</code></pre>
-<p>在这里我们可以看到，我们将底部导航的属性基本都用上了，这是为了方便大家在使用时作适合自己的选择，毕竟需求不一样，不过这个效果是可以接受的了~</p>
-<p>在这个界面中导入了其他五个子界面，每个子界面效果可以设置成差不多，例如下面这样：</p>
-<pre class="line-numbers"><code class="language-plain_text">import React, {Component} from 'react';
-import {
-    View,
-    Text,
-    Image,
-    StyleSheet,
-} from 'react-native';
-
-export default class FriendPage extends Component {
-    static navigationOptions = {
-        tabBarLabel: '好友',
-        tabBarIcon: ({focused}) =&gt; {
-            if (focused) {
-                return (
-                    &lt;Image style={styles.tabBarIcon} source={require('../../img/fri_sel.png')}/&gt;
-                );
-            }
-            return (
-                &lt;Image style={styles.tabBarIcon} source={require('../../img/fri_nor.png')}/&gt;
-            );
-        },
-    };
-
-    render() {
-        return (
-            &lt;View style={styles.container}&gt;
-                &lt;Text&gt;这是好友&lt;/Text&gt;
-            &lt;/View&gt;
-        );
-    }
-}
-const styles = StyleSheet.create({
-    container: {
-        flex: 1,
-        flexDirection: 'column',
-        justifyContent: 'center',
-        alignItems: 'center',
-    },
-    tabBarIcon: {
-        width: 21,
-        height: 21,
-    }
-});
-</code></pre>
-<p>在子界面中可以设置icon图标样式，表示在点击前后颜色的改变，效果如下：<br />
-<figure><img src="media/15590521983066/15590527801185.jpg" alt="" /></figure><br />
-<figure><img src="media/15590521983066/15590527846918.jpg" alt="" /></figure></p>
-<p>当然，我们也可以设置标题栏，只需要在下面代码中添加headerTitle属性：</p>
-<pre class="line-numbers"><code class="language-plain_text">export default class FriendPage extends Component {
-    static navigationOptions = {
-        tabBarLabel: '好友',
-        headerTitle: '好友',
-        tabBarIcon: ({focused}) =&gt; { ...
-</code></pre>
-<p>别忘了，在StackNavigator配置TabNavigator时不要设置header为null即可。</p>
-<pre class="line-numbers"><code class="language-plain_text">Main: {
-            screen: TabNav,
-            navigationOptions: ({navigation}) =&gt; ({
-             // header: null
-            })
-        }
-</code></pre>
-
+                        	
                         
                       </div>
                   </div>
                 </a>
                 <div class="read-more clearfix">
                   <div class="more-left left">
-                  
+                   <a href="15590521983066.html">Read more</a>&nbsp;&nbsp; 
                     <span class="date">2019/05/28</span>
                     <span>posted in&nbsp;</span> 
           				  
@@ -820,6 +578,42 @@ const styles = StyleSheet.create({
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="15586237778330.html">
+                
+                  <h1>工厂方法模式</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2><a id="%E5%B7%A5%E5%8E%82%E6%96%B9%E6%B3%95%E6%A8%A1%E5%BC%8F%E4%BB%8B%E7%BB%8D" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>工厂方法模式介绍</h2>
+<p>工厂方法模式（Factory Pattern）是一种创建型设计模式，是日常开发中使用频率较高的一种设计模式。下面就要我们一起去了解一下工厂方法设计模式。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                   <a href="15586237778330.html">Read more</a>&nbsp;&nbsp; 
+                    <span class="date">2019/05/23</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='%E8%AE%BE%E8%AE%A1%E6%A8%A1%E5%BC%8F.html'>设计模式</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -843,7 +637,7 @@ const styles = StyleSheet.create({
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
-                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+                <div class="site-a-logo"><img src="media/17043409056338/logo.jpeg" /></div>
             
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
@@ -857,8 +651,8 @@ const styles = StyleSheet.create({
 
 
 
-
-
+<a target="_blank" class="github" target="_blank" href="https://github.com/adolphJane" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:adolphdeveloper@gmail.com" title="Email">Email</a>
   <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
                 
               	 </div>

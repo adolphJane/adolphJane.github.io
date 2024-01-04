@@ -18,7 +18,7 @@
  
 <script type="text/javascript">
   function before_search(){
-    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    var searchVal = 'site:www.ifantastic.ink ' + document.getElementById('search_input').value;
     document.getElementById('search_q').value = searchVal;
     return true;
   }
@@ -135,78 +135,6 @@
 	<div class="large-8 medium-8 columns">
 		<div class="markdown-body home-categories">
 		
-			<div class="article">
-                <a class="clearlink" href="16390384112633.html">
-                
-                  <h1>网站链接</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<p><a href="https://mvnrepository.com/">Maven仓库</a><br />
-<a href="https://developer.aliyun.com/mvn/guide">阿里Maven仓库</a><br />
-<a href="https://plugins.gradle.org/">Gradle Plugin仓库</a><br />
-<a href="https://hub.docker.com/?ref=login">DockerHub</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2022/01/04</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E5%85%B6%E4%BB%96.html'>其他</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="16362497112794.html">
-                
-                  <h1>转变心态，营销原则</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                   <a href="16362497112794.html">Read more</a>&nbsp;&nbsp; 
-                    <span class="date">2021/11/07</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E8%90%A5%E9%94%80.html'>营销</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
 			<div class="article">
                 <a class="clearlink" href="16300352865963.html">
                 
@@ -3294,6 +3222,353 @@ override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
                 </div>
               </div><!-- article -->
         
+			<div class="article">
+                <a class="clearlink" href="16214955019940.html">
+                
+                  <h1>OpenGL ES for Android 视频缩放、旋转、平移</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在上一篇文章中我们介绍了<a href="16214944723657.html">为什么要使用OpenGL ES播放视频</a>，在末尾提到如果渲染视频的窗口宽高比和视频宽高比不一致会导致视频拉伸，这篇文章将会介绍如何通过视频的缩放来解决这个问题。</p>
+<p>我们希望当视频的比例和窗口的比例不一样时，其中一边占满全屏，另一边等比缩放并居中，其余部分显示黑色，这个效果和我们平时使用的视频播放器的效果是一样的，效果如图：</p>
+<p><figure><img src="media/16214955019940/16214955737188.jpg" alt="" /></figure></p>
+<p>我们在之前的基础上进行修改，修改顶点shader</p>
+<pre class="line-numbers"><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec2 a_TexCoordinate;
+varying vec2 v_TexCoord;
+uniform mat4 mvpMatrix;
+void main() {
+    v_TexCoord = a_TexCoordinate;
+    gl_Position = mvpMatrix*a_Position;
+}
+</code></pre>
+<p>在顶点shader中加入mvpMatrix（MVP矩阵）并与a_Position相乘。</p>
+<h2><a id="%E8%8E%B7%E5%8F%96mvpmatrix%E7%B4%A2%E5%BC%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>获取mvpMatrix索引</h2>
+<pre class="line-numbers"><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+            GLES20.glClearColor(0F, 0F, 0F, 1F)
+      ...
+            mvpMatrixLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;mvpMatrix&quot;)
+      ...
+}
+</code></pre>
+<h2><a id="%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%8F%8A%E6%B8%B2%E6%9F%93%E7%AA%97%E5%8F%A3%E7%9A%84%E5%AE%BD%E9%AB%98" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>获取视频及渲染窗口的宽高</h2>
+<pre class="line-numbers"><code class="language-kotlin">override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
+    GLES20.glViewport(0, 0, width, height)
+    screenWidth = width
+    screenHeight = height
+    if (videoWidth &gt; 0 &amp;&amp; videoHeight &gt; 0) {
+        computeMatrix()
+    }
+}
+mediaPlayer.setOnVideoSizeChangedListener { mp, width, height -&gt;
+    run {
+        videoWidth = width
+        videoHeight = height
+        if (screenWidth &gt; 0 &amp;&amp; screenHeight &gt; 0) {
+            computeMatrix()
+        }
+    }
+}
+</code></pre>
+<p>渲染窗口的宽高在onSurfaceChanged中获取，视频的宽高需要给meidaplay添加OnVideoSizeChangedListener回调，由于视频的播放是在onSurfaceCreated中调用且这2个回调都是异步的，因此无法判断先后顺序，因此在这2个回调中都增加判断，只有当视频和渲染窗口的宽高都获取到才计算MVP矩阵，或者我们也可以在onSurfaceChanged中调用视频播放，这样就可以只在OnVideoSizeChangedListener回调中计算矩阵。</p>
+<h2><a id="%E8%AE%A1%E7%AE%97%E7%9F%A9%E9%98%B5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>计算矩阵</h2>
+<p>假设视频的宽高比小于屏幕的宽高比，那么视频则在高度上铺满窗口，在宽度上进行缩放，为了不拉伸视频，缩放的系数为<code>1 - ((屏幕的宽高比 - 视频的宽高比) / 2)</code>,反之如果视频的宽高比大于屏幕的宽高比，视频在高度上的缩放的系数为<code>1 - ((视频的宽高比 - 屏幕的宽高比 ) / 2)</code>，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">var modelMatrix = FloatArray(16)
+fun computeMatrix() {
+    val videoRatio = videoWidth / videoHeight.toFloat()
+    val screenRatio = screenWidth / screenHeight.toFloat()
+    Matrix.setIdentityM(modelMatrix, 0)
+    if (videoRatio &gt; screenRatio) {
+        Matrix.scaleM(modelMatrix, 0, 1F, 1 - ((videoRatio - screenRatio) / 2), 1F)
+    } else if (videoRatio &lt; screenRatio) {
+        Matrix.scaleM(modelMatrix, 0, 1 - ((screenRatio - videoRatio) / 2), 1F, 1F)
+    }
+}
+</code></pre>
+<h2><a id="%E7%BB%98%E5%88%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>绘制</h2>
+<p>在绘制的时候设置modelMatrix矩阵，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">override fun onDrawFrame(p0: GL10?) {
+    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+    GLES20.glUseProgram(mProgramHandle)
+    //设置顶点数据
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+    //设置纹理顶点数据
+    texBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(texCoordLoc)
+    GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 0, texBuffer)
+    //设置纹理
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+    GLES20.glUniform1i(textureLoc, 0)
+    //设置mvp矩阵
+    GLES20.glUniformMatrix4fv(mvpMatrixLoc, 1, false, modelMatrix, 0)
+    GLES20.glDrawElements(
+        GLES20.GL_TRIANGLES,
+        index.size,
+        GLES20.GL_UNSIGNED_SHORT,
+        indexBuffer
+    )
+}
+</code></pre>
+<p>GLES20.glUniformMatrix4fv(mvpMatrixLoc, 1, false, modelMatrix, 0)为矩阵数据设置，其他已经在OpenGL ES 播放视频中介绍，这里不在介绍。</p>
+<p>到这里我们介绍完了视频的缩放功能，想一想如果在欢迎界面播放视频，我们希望视频充满屏幕，而不是出现黑屏，但市场上的手机屏幕比例各种各样，尤其是全面屏、折叠屏的出现，有16:9的、2:1的，还有16:10的，那么如何使用同一个视频去适配所有的屏幕呢？其实一样可以通过视频缩放而解决，只不过一个缩放视频，一个是放大视频。</p>
+<p>视频的旋转、平移和缩放是一样的，我们只需要对矩阵进行相应的操作，比如将视频旋转45度，代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">Matrix.rotateM(modelMatrix,0,45F,0F,0F,1F)
+</code></pre>
+<p>效果如下：<br />
+<figure><img src="media/16214955019940/16214961236820.jpg" alt="" style="width:400px;" /></figure></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214944723657.html">
+                
+                  <h1>为什么要使用OpenGL ES播放视频</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>我们都知道Android中有VideoView控件可以直接播放视频，既简单又实用，那么为什么我们还要用OpenGL ES来播放视频呢？那是因为使用OpenGL ES可以做更多的酷炫的动效，比如旋转视频、双指缩放视频、视频的截图、视频的录制、直播、换脸，还有类似“激萌”App里面的特效等这些都是VideoView所无法实现的，而通过OpenGL ES则可以实现这些酷炫的效果，当然这篇文章不会介绍如何这些实现这些效果，如果想了解这些动效请关注我，后面的文章会一一介绍。</p>
+<p>开始我们的表演，No 图 No Code，先来欣赏下效果图吧：</p>
+<p><figure><img src="media/16214944723657/opengl_es_video.gif" alt="opengl_es_video" /><figcaption>opengl_es_video<figcaption></figure></p>
+<h2><a id="shader" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>shader</h2>
+<p>首先我们先创建顶点和片段shader，顶点shader代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec2 a_TexCoordinate;
+varying vec2 v_TexCoord;
+void main() {
+    v_TexCoord = a_TexCoordinate;
+    gl_Position = a_Position;
+}
+</code></pre>
+<p>片段shader代码如下：</p>
+<pre class="line-numbers"><code class="language-plain_text">#extension GL_OES_EGL_image_external : require
+precision mediump float;
+uniform samplerExternalOES u_Texture;
+varying vec2 v_TexCoord;
+void main() {
+    gl_FragColor = texture2D(u_Texture, v_TexCoord);
+}
+</code></pre>
+<p>**注意：**顶点和片段shader是单独的文件，分别是video_vs.glsl和video_fs.glsl，存放于assets/glsl目录下。</p>
+<p>片段shader中u_Texture是纹理，注意它的类型是samplerExternalOES，并不是sampler2D，sampler2D是2D纹理，用于显示图片，而samplerExternalOES是Android特有的类型，用于绘制视频和相机。</p>
+<h2><a id="program" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>program</h2>
+<p>shader创建好后，我们编译shader并链接到program，然后获取其中参数的句柄，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    createProgram()
+    //获取vPosition索引
+    vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_Position&quot;)
+    texCoordLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_TexCoordinate&quot;)
+    textureLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;u_Texture&quot;)
+...
+}
+private fun createProgram() {
+    var vertexCode =
+        AssetsUtils.readAssetsTxt(
+            context = context,
+            filePath = &quot;glsl/video_vs.glsl&quot;
+        )
+    var fragmentCode =
+        AssetsUtils.readAssetsTxt(
+            context = context,
+            filePath = &quot;glsl/video_fs.glsl&quot;
+        )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<h2><a id="%E5%88%9B%E5%BB%BAtexture" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建texture</h2>
+<p>视频纹理的创建和2D纹理的创建略有不同，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">fun createOESTextureId(): Int {
+    val textures = IntArray(1)
+    GLES20.glGenTextures(1, textures, 0)
+    glCheck(&quot;texture generate&quot;)
+    GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
+    glCheck(&quot;texture bind&quot;)
+    GLES20.glTexParameterf(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_MIN_FILTER,
+        GLES20.GL_LINEAR.toFloat()
+    )
+    GLES20.glTexParameterf(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_MAG_FILTER,
+        GLES20.GL_LINEAR.toFloat()
+    )
+    GLES20.glTexParameteri(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_WRAP_S,
+        GLES20.GL_CLAMP_TO_EDGE
+    )
+    GLES20.glTexParameteri(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_WRAP_T,
+        GLES20.GL_CLAMP_TO_EDGE
+    )
+    return textures[0]
+}
+</code></pre>
+<p>不同之处在于</p>
+<pre class="line-numbers"><code class="language-kotlin">GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
+</code></pre>
+<p>GLES20.glTexParameterf函数的相关参数说明可以参照<a href="16213267803283.html">OpenGL ES 纹理过滤模式-glTexParameteri</a>。<br />
+纹理创建成功后返回纹理id，然后创建SurfaceTexture-&gt;Surface，将Surface设置给MediaPlayer，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    ...
+    textureId = GLTools.createOESTextureId()
+    var surfaceTexture = SurfaceTexture(textureId)
+    surfaceTexture.setOnFrameAvailableListener(frameAvailableListener)
+    
+    ...
+}
+</code></pre>
+<p>这里要说下frameAvailableListener，当surfaceTexture有新的一帧数据时将会回调frameAvailableListener，这个时候我们就会更新数据并绘制，在前面的文章我们介绍过在RenderMode=GLSurfaceView.RENDERMODE_WHEN_DIRTY模式下重新绘制需要调用glSurfaceView.requestRender(),因此我们在Activity中实现了frameAvailableListener，并将此实现传递给Renderer，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">class VideoActivity : AppCompatActivity(), SurfaceTexture.OnFrameAvailableListener {
+    override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) {
+        glSurfaceView.queueEvent {
+            surfaceTexture?.updateTexImage()
+            glSurfaceView.requestRender()
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.surface)
+        glSurfaceView.setEGLContextClientVersion(2)
+        glSurfaceView.setRenderer(MyRenderer(context = baseContext, frameAvailableListener = this))
+        glSurfaceView.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+    }
+  
+  ...
+}
+</code></pre>
+<h2><a id="%E5%88%9D%E5%A7%8B%E5%8C%96mediaplayer%E5%B9%B6%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>初始化MediaPlayer并播放视频</h2>
+<p>这里我们使用Android API自带的MediaPlayer，我个人建议如果是商业项目请使用<a href="https://github.com/bilibili/ijkplayer">ijkplayer（github开源)</a>，不管是自带的MediaPlayer和ijkplayer完成的是视频编解码工作，ijkplayer性能更加稳定、播放的格式更加全面。</p>
+<p>MediaPlayer初始化及视频播放代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    ...
+    textureId = GLTools.createOESTextureId()
+    var surfaceTexture = SurfaceTexture(textureId)
+    surfaceTexture.setOnFrameAvailableListener(frameAvailableListener)
+    mediaPlayer = MediaPlayer()
+    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+    val surface = Surface(surfaceTexture)
+    mediaPlayer.setSurface(surface)
+    startVideo()
+}
+fun startVideo() {
+    try {
+        mediaPlayer.reset()
+        val fd = context.assets.openFd(&quot;video/lion_chroma.mp4&quot;)
+        mediaPlayer.setDataSource(fd.fileDescriptor,fd.startOffset,fd.length)
+        mediaPlayer.prepare()
+        mediaPlayer.start()
+    } catch (e: Exception) {
+        Log.e(&quot;mqd&quot;,&quot;$e&quot;)
+    }
+}
+</code></pre>
+<p>lion_chroma.mp4视频文件我们存放在assets/video目录下，当然你可以播放SD上或者在线视频。</p>
+<h2><a id="%E5%88%9B%E5%BB%BA%E9%A1%B6%E7%82%B9%E5%9D%90%E6%A0%87%E3%80%81%E7%BA%B9%E7%90%86%E5%9D%90%E6%A0%87%E3%80%81%E9%A1%B6%E7%82%B9%E7%B4%A2%E5%BC%95%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建顶点坐标、纹理坐标、顶点索引数据</h2>
+<p>顶点坐标初始化如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">var vertexBuffer = GLTools.array2Buffer(
+            floatArrayOf(
+                -1.0f, 1.0f, 0.0f,  // top left
+                -1.0f, -1.0f, 0.0f,  // bottom left
+                1.0f, -1.0f, 0.0f,  // bottom right
+                1.0f, 1.0f, 0.0f  // top right
+            )
+        )
+</code></pre>
+<p>纹理坐标初始化如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">var texBuffer = GLTools.array2Buffer(
+            floatArrayOf(
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+                1.0f, 1.0f,
+                1.0f, 0.0f
+            )
+        )
+</code></pre>
+<p>顶点索引初始化如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">var index = shortArrayOf(3, 2, 0, 0, 1, 2)
+val indexBuffer = GLTools.array2Buffer(index)
+</code></pre>
+<h2><a id="%E7%BB%98%E5%88%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>绘制</h2>
+<p>所有准备工作完成后，开始绘制，代码如下：</p>
+<pre class="line-numbers"><code class="language-kotlin">override fun onDrawFrame(p0: GL10?) {
+    GLES20.glUseProgram(mProgramHandle)
+    //设置顶点数据
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+    //设置纹理顶点数据
+    texBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(texCoordLoc)
+    GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 0, texBuffer)
+    //设置纹理
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+    GLES20.glUniform1i(textureLoc, 0)
+    GLES20.glDrawElements(
+        GLES20.GL_TRIANGLES,
+        index.size,
+        GLES20.GL_UNSIGNED_SHORT,
+        indexBuffer
+    )
+}
+</code></pre>
+<p>到此我们的表演就结束了，运行起来就可以看到开始的效果图了，不过这里有一个小小的瑕疵，如果视频的比例和GLSurfaceView（绘制窗口）的比例不一样的话就会出现视频拉伸的现象，后面的文章我们将会解决这个问题，敬请期待。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
               
 
 
@@ -3317,7 +3592,7 @@ override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
-                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+                <div class="site-a-logo"><img src="media/17043409056338/logo.jpeg" /></div>
             
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
@@ -3331,8 +3606,8 @@ override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
 
 
 
-
-
+<a target="_blank" class="github" target="_blank" href="https://github.com/adolphJane" title="GitHub">GitHub</a>
+<a target="_blank" class="email" href="mailto:adolphdeveloper@gmail.com" title="Email">Email</a>
   <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
                 
               	 </div>
