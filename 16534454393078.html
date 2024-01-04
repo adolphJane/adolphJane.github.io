@@ -1,0 +1,1289 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android APK安装流程解析 - PackageInstaller - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="_self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="_self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android APK安装流程解析 - PackageInstaller</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2022/05/25</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.html'>Android源码分析</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p><strong>Android 是如何完成apk的安装的？安装时它又做了哪些事情，保存了哪些信息？存储的这些信息又有什么作用？</strong></p>
+<p>这篇文章，让我们带着以上问题来一起探讨一下android系统的apk安装流程。</p>
+<span id="more"></span><!-- more -->
+<hr />
+<p>让我们先从apk安装的调用代码开始追溯：</p>
+<pre><code class="language-java">Intent intent = new Intent(Intent.ACTION_VIEW);
+intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+Uri apkUri =FileProvider.getUriForFile(context, &quot;你的包名.fileProvider&quot;, file);
+intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+intent.setDataAndType(apkUri, &quot;application/vnd.android.package-archive&quot;);
+startActivity(intent)
+</code></pre>
+<p>代码内容很简单，启动一个<code>Action</code>为<code>Intent.ACTION_VIEW</code>,<code>Flag</code>为<code>Intent.FLAG_GRANT_READ_URI_PERMISSION</code>,Type为<code>application/vnd.android.package-archive</code>的Activity。</p>
+<p>这个Activity在哪里呢？</p>
+<p>Android 10之前，你可以在 <strong>/packages/apps/PackageInstaller/AndroidManifest.xml</strong> 中找到它：</p>
+<pre><code class="language-xml">        &lt;activity android:name=&quot;.InstallStart&quot;
+            android:exported=&quot;true&quot;
+            android:excludeFromRecents=&quot;true&quot;&gt;
+            &lt;intent-filter android:priority=&quot;1&quot;&gt;
+                &lt;action android:name=&quot;android.intent.action.VIEW&quot; /&gt;
+                &lt;action android:name=&quot;android.intent.action.INSTALL_PACKAGE&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+                &lt;data android:scheme=&quot;file&quot; /&gt;
+                &lt;data android:scheme=&quot;content&quot; /&gt;
+                &lt;data android:mimeType=&quot;application/vnd.android.package-archive&quot; /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter android:priority=&quot;1&quot;&gt;
+                &lt;action android:name=&quot;android.intent.action.INSTALL_PACKAGE&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+                &lt;data android:scheme=&quot;file&quot; /&gt;
+                &lt;data android:scheme=&quot;package&quot; /&gt;
+                &lt;data android:scheme=&quot;content&quot; /&gt;
+            &lt;/intent-filter&gt;
+            &lt;intent-filter android:priority=&quot;1&quot;&gt;
+                &lt;action android:name=&quot;android.content.pm.action.CONFIRM_PERMISSIONS&quot; /&gt;
+                &lt;category android:name=&quot;android.intent.category.DEFAULT&quot; /&gt;
+            &lt;/intent-filter&gt;
+        &lt;/activity&gt;
+</code></pre>
+<p>但是，在Android 10的源码里，<strong>谷歌已经将PackageInstaller 这个app删掉了</strong>，这意味着使用之前的安装方式会存在一定的风险（ps:国产手机系统在Android 10中都自己添加了PackageInstaller这个app）。Android 10推荐采用一个叫PackageInstaller的类来专门负责apk的安装与卸载工作，你可以在<br />
+<strong>/samples/ApiDemos/src/com/example/android/apis/content/InstallApkSessionApi.java</strong><br />
+中找到此Api的使用示例：</p>
+<pre><code class="language-java">PackageInstaller packageInstaller = getPackageManager().getPackageInstaller();
+PackageInstaller.SessionParams params = new PackageInstaller.SessionParams( 
+PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+int sessionId = packageInstaller.createSession(params);
+session = packageInstaller.openSession(sessionId);
+
+addApkToInstallSession(&quot;HelloActivity.apk&quot;, session);
+
+// Create an install status receiver.
+Context context = InstallApkSessionApi.this;
+Intent intent = new Intent(context, InstallApkSessionApi.class);
+intent.setAction(PACKAGE_INSTALLED_ACTION);
+PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, intent, 0);
+IntentSender statusReceiver = pendingIntent.getIntentSender();
+
+// Commit the session (this will start the installation workflow).
+session.commit(statusReceiver);
+</code></pre>
+<h2><a id="packageinstaller" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>PackageInstaller</h2>
+<p>我们还是先从<code>PackageInstaller</code>的定义开始看起，先上官方的说明：</p>
+<pre><code class="language-plain_text">Offers the ability to install, upgrade, and remove applications on the device. This
+includes support for apps packaged either as a single &quot;monolithic&quot; APK, or apps packaged
+as multiple &quot;split&quot; APKs.
+
+An app is delivered for installation through a `PackageInstaller.Session`, which any app
+can create. Once the session is created, the installer can stream one or more APKs into 
+place until it decides to either commit or destroy the session. Committing may require 
+user intervention to complete the installation, unless the caller falls into one of the 
+following categories, in which case the installation will complete automatically.
+
+-   the device owner
+-   the affiliated profile owner
+
+Sessions can install brand new apps, upgrade existing apps, or add new splits into an existing app.
+
+Apps packaged as multiple split APKs always consist of a single &quot;base&quot; APK (with 
+a `null` split name) and zero or more &quot;split&quot; APKs (with unique split names). Any subset 
+of these APKs can be installed together, as long as the following constraints are met:
+
+-   All APKs must have the exact same package name, version code, and signing certificates.
+-   All APKs must have unique split names.
+-   All installations must contain a single base APK.
+</code></pre>
+<ul>
+<li>提供在设备上安装、升级和删除应用程序的功能，应用程序既可以是整包也可以是拆分包。</li>
+<li>应用程序通过PackageInstaller.Session安装，任何应用程序都可以创建该Session。创建Session后，installer可以将一个或多个APK以流的形式传输到适当的位置，直到它决定提交或销毁Session。提交可能需要用户干预才能完成安装，除非调用方属于设备所有者或文件所有者，在这种情况下，安装将自动完成。</li>
+<li>Session可以安装全新的应用程序，升级现有应用程序，或将新拆分添加到现有应用程序中。</li>
+</ul>
+<h2><a id="packageinstaller-sessionparams" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>PackageInstaller.SessionParams</h2>
+<pre><code class="language-java">PackageInstaller.SessionParams params = new PackageInstaller.SessionParams( 
+PackageInstaller.SessionParams.MODE_FULL_INSTALL);
+</code></pre>
+<p><strong>SessionParams</strong> 有以下两个值得关注的参数：</p>
+<h3><a id="mode" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>mode</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th style="text-align: left">Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MODE_FULL_INSTALL</td>
+<td style="text-align: left">安装的Apk完全替换目标程序现有的Apk</td>
+</tr>
+<tr>
+<td>MODE_INHERIT_EXISTING</td>
+<td style="text-align: left">继承目标应用程序的任何现有APK，除非它们已被会话显式覆盖（基于拆分名称）</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="installlocation" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>installLocation</h3>
+<table>
+<thead>
+<tr>
+<th>Type</th>
+<th>Description</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>INSTALL_LOCATION_AUTO</td>
+<td>让系统决定理想的安装位置。</td>
+</tr>
+<tr>
+<td>INSTALL_LOCATION_INTERNAL_ONLY</td>
+<td>默认值，明确要求仅安装在手机内部存储上。</td>
+</tr>
+<tr>
+<td>INSTALL_LOCATION_PREFER_EXTERNAL</td>
+<td>更倾向安装在SD卡上。不能保证系统会遵守这一要求。如果外部存储不可用或太满，应用程序可能会安装在内部存储上。</td>
+</tr>
+</tbody>
+</table>
+<h3><a id="isstaged" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>isStaged</h3>
+<p>标识此Session是否在重启时安装。</p>
+<hr />
+<p>让我们回到PackageInstaller中，继续往下看。</p>
+<h2><a id="packageinstaller-createsession" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>packageInstaller.createSession</h2>
+<pre><code class="language-java">public int createSession(@NonNull SessionParams params) throws IOException {
+    try {
+        final String installerPackage;
+        if (params.installerPackageName == null) {
+            //这里的mInstallerPackageName指的是安装apk的应用程序包名，而不是目标apk的包名
+            installerPackage = mInstallerPackageName;
+        } else {
+            installerPackage = params.installerPackageName;
+        }
+        //调用PackageInstallerService里的createSession方法
+        return mInstaller.createSession(params, installerPackage, mUserId);
+    } catch (RuntimeException e) {
+        ExceptionUtils.maybeUnwrapIOException(e);
+        throw e;
+    } catch (RemoteException e) {
+        throw e.rethrowFromSystemServer();
+    }
+}
+</code></pre>
+<p>可以看到，<code>packageInstaller.createSession</code>方法最后将实际调用转交给服务端<code>PackageInstallerService</code>去执行。</p>
+<h2><a id="packageinstallerservice-createsession" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>PackageInstallerService.createSession</h2>
+<pre><code class="language-java">@Override
+public int createSession(SessionParams params, String installerPackageName, int userId) {
+    try {
+        return createSessionInternal(params, installerPackageName, userId);
+    } catch (IOException e) {
+        throw ExceptionUtils.wrap(e);
+    }
+}
+</code></pre>
+<h2><a id="createsessioninternal" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>createSessionInternal</h2>
+<pre><code class="language-java">private int createSessionInternal(SessionParams params, String installerPackageName, int userId)
+        throws IOException {
+    final int callingUid = Binder.getCallingUid();
+    mPermissionManager.enforceCrossUserPermission(
+            callingUid, userId, true, true, &quot;createSession&quot;);
+
+    //检查此用户是否被禁止安装程序
+    if (mPm.isUserRestricted(userId, UserManager.DISALLOW_INSTALL_APPS)) {
+        throw new SecurityException(&quot;User restriction prevents installing&quot;);
+    }
+
+    //如果安装来自adb 或者 root用户，param里增加 INSTALL_FROM_ADB 的FLAG
+    if ((callingUid == Process.SHELL_UID) || (callingUid == Process.ROOT_UID)) {
+        params.installFlags |= PackageManager.INSTALL_FROM_ADB;
+
+    } else {
+        // 只有具有INSTALL_PACKAGES权限的APP才允许以非调用者的身份设置为安装器
+        if (mContext.checkCallingOrSelfPermission(Manifest.permission.INSTALL_PACKAGES) !=
+                PackageManager.PERMISSION_GRANTED) {
+            mAppOps.checkPackage(callingUid, installerPackageName);
+        }
+        //移除以下三个FLAG
+        params.installFlags &amp;= ~PackageManager.INSTALL_FROM_ADB;
+        params.installFlags &amp;= ~PackageManager.INSTALL_ALL_USERS;
+        params.installFlags &amp;= ~PackageManager.INSTALL_ALLOW_TEST;
+        //如果APP已存在，则替换它
+        params.installFlags |= PackageManager.INSTALL_REPLACE_EXISTING;
+        if ((params.installFlags &amp; PackageManager.INSTALL_VIRTUAL_PRELOAD) != 0
+                &amp;&amp; !mPm.isCallerVerifier(callingUid)) {
+            params.installFlags &amp;= ~PackageManager.INSTALL_VIRTUAL_PRELOAD;
+        }
+    }
+
+    if (Build.IS_DEBUGGABLE || isDowngradeAllowedForCaller(callingUid)) {
+        //允许降级
+        params.installFlags |= PackageManager.INSTALL_ALLOW_DOWNGRADE;
+    } else {
+        //不允许降级，不允许向低版本升级
+        params.installFlags &amp;= ~PackageManager.INSTALL_ALLOW_DOWNGRADE;
+        params.installFlags &amp;= ~PackageManager.INSTALL_REQUEST_DOWNGRADE;
+    }
+
+   ...
+
+    if (!params.isMultiPackage) {
+        //安装时，只有系统组件可以绕过运行时权限。
+        if ((params.installFlags &amp; PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
+                &amp;&amp; mContext.checkCallingOrSelfPermission(Manifest.permission
+                .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
+            throw new SecurityException(&quot;You need the &quot;
+                    + &quot;android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission &quot;
+                    + &quot;to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag&quot;);
+        }
+
+        //如果AppIcon过大，则对它进行调整
+        if (params.appIcon != null) {
+            final ActivityManager am = (ActivityManager) mContext.getSystemService(
+                    Context.ACTIVITY_SERVICE);
+            final int iconSize = am.getLauncherLargeIconSize();
+            if ((params.appIcon.getWidth() &gt; iconSize * 2)
+                    || (params.appIcon.getHeight() &gt; iconSize * 2)) {
+                params.appIcon = Bitmap.createScaledBitmap(params.appIcon, iconSize, iconSize,
+                        true);
+            }
+        }
+
+        switch (params.mode) {
+            case SessionParams.MODE_FULL_INSTALL:
+            case SessionParams.MODE_INHERIT_EXISTING:
+                break;
+            default:
+                throw new IllegalArgumentException(&quot;Invalid install mode: &quot; + params.mode);
+        }
+
+        // If caller requested explicit location, sanity check it, otherwise
+        // resolve the best internal or adopted location.
+        if ((params.installFlags &amp; PackageManager.INSTALL_INTERNAL) != 0) {
+            if (!PackageHelper.fitsOnInternal(mContext, params)) {
+                throw new IOException(&quot;No suitable internal storage available&quot;);
+            }
+        } else if ((params.installFlags &amp; PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
+            // For now, installs to adopted media are treated as internal from
+            // an install flag point-of-view.
+            params.installFlags |= PackageManager.INSTALL_INTERNAL;
+        } else {
+            params.installFlags |= PackageManager.INSTALL_INTERNAL;
+
+            // Resolve best location for install, based on combination of
+            // requested install flags, delta size, and manifest settings.
+            final long ident = Binder.clearCallingIdentity();
+            try {
+            //根据给定的installLocation计算安装需要的大小，选择要安装应用程
+            //序的实际卷。只考虑内部卷和专用卷，并且更偏向将现有包保留在其当前卷上。
+            //volumeUuid 指的是 安装所在的卷的fsUuid,如果安装在内部存储上，则返回null
+                params.volumeUuid = PackageHelper.resolveInstallVolume(mContext, params);
+            } finally {
+                Binder.restoreCallingIdentity(ident);
+            }
+        }
+    }
+
+    final int sessionId;
+    final PackageInstallerSession session;
+    synchronized (mSessions) {
+        // 检查安装程序是否正常运行,打开的Installer Session不能超过1024个
+        final int activeCount = getSessionCount(mSessions, callingUid);
+        if (activeCount &gt;= MAX_ACTIVE_SESSIONS) {
+            throw new IllegalStateException(
+                    &quot;Too many active sessions for UID &quot; + callingUid);
+        }
+        //历史Session不能超过1048576个
+        final int historicalCount = mHistoricalSessionsByInstaller.get(callingUid);
+        if (historicalCount &gt;= MAX_HISTORICAL_SESSIONS) {
+            throw new IllegalStateException(
+                    &quot;Too many historical sessions for UID &quot; + callingUid);
+        }
+        //随机生成一个不超过Integer.MAX_VALUE的sessionId,并保存在mAllocatedSessions中
+        sessionId = allocateSessionIdLocked();
+    }
+
+    final long createdMillis = System.currentTimeMillis();
+    // We're staging to exactly one location
+    File stageDir = null;
+    String stageCid = null;
+    if (!params.isMultiPackage) {
+            if ((params.installFlags &amp; PackageManager.INSTALL_INTERNAL) != 0) {
+             //安装在内部存储上，volumeUuid 为null
+            //复制路径为/data/app/vmdl${sessionId}.tmp
+            stageDir = buildSessionDir(sessionId, params);
+        } else {
+            stageCid = buildExternalStageCid(sessionId);
+        }
+    }
+    //存储了安装相关的所有信息
+    session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
+            mInstallThread.getLooper(), mStagingManager, sessionId, userId,
+            installerPackageName, callingUid, params, createdMillis, stageDir, stageCid, false,
+            false, false, null, SessionInfo.INVALID_ID, false, false, false,
+            SessionInfo.STAGED_SESSION_NO_ERROR, &quot;&quot;);
+
+    //将sessionId和session绑定起来
+    synchronized (mSessions) {
+        mSessions.put(sessionId, session);
+    }
+    if (params.isStaged) {
+         //处理分阶段安装会话，即仅在重新启动后才需要安装的会话。
+        mStagingManager.createSession(session);
+    }
+
+    if ((session.params.installFlags &amp; PackageManager.INSTALL_DRY_RUN) == 0) {
+        //回调通知Session已创建成功
+        mCallbacks.notifySessionCreated(session.sessionId, session.userId);
+    }
+    //异步将session信息写入install_sessions.xml文件中
+    writeSessionsAsync();
+    return sessionId;
+}
+</code></pre>
+<p><code>createSessionInternal</code>方法主要是对 初始化apk的安装信息及环境，并创建一个sessionId,将安装Session与sessionId 进行绑定。</p>
+<h2><a id="packageinstaller-opensession" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>packageInstaller.openSession</h2>
+<pre><code class="language-java">public @NonNull Session openSession(int sessionId) throws IOException {
+    try {
+        try {
+            return new Session(mInstaller.openSession(sessionId));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    } catch (RuntimeException e) {
+        ExceptionUtils.maybeUnwrapIOException(e);
+        throw e;
+    }
+}
+</code></pre>
+<p>我们继续追踪<code>PackageInstallerService</code>中的<code>openSession</code>方法：</p>
+<h3><a id="packageinstallerservice-opensession" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>PackageInstallerService.openSession</h3>
+<pre><code class="language-java">public IPackageInstallerSession openSession(int sessionId) {
+    try {
+        return openSessionInternal(sessionId);
+    } catch (IOException e) {
+        throw ExceptionUtils.wrap(e);
+    }
+}
+</code></pre>
+<h3><a id="opensessioninternal" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>openSessionInternal</h3>
+<pre><code class="language-java">private IPackageInstallerSession openSessionInternal(int sessionId) throws IOException {
+    synchronized (mSessions) {
+        final PackageInstallerSession session = mSessions.get(sessionId);
+        if (session == null || !isCallingUidOwner(session)) {
+            throw new SecurityException(&quot;Caller has no access to session &quot; + sessionId);
+        }
+        //如果StageDir不为空，则创建此文件夹
+        //stageDir是写入客户端数据的暂存位置
+        session.open();
+        return session;
+    }
+}
+</code></pre>
+<p>可以看到，<code>openSessionInternal</code>方法只是根据<code>sessionId</code>查找在上一阶段通过<code>createSession</code>创建的<code>PackageInstallerSession</code>对象并将其返回。</p>
+<p>安装代码接下来调用了<code>addApkToInstallSession(&quot;HelloActivity.apk&quot;, session);</code>，这个方法的详细实现如下:</p>
+<pre><code class="language-java">private void addApkToInstallSession(String assetName, PackageInstaller.Session session)
+    throws IOException {
+        // It's recommended to pass the file size to openWrite(). Otherwise installation may fail
+        // if the disk is almost full.
+        try (OutputStream packageInSession = session.openWrite(&quot;package&quot;, 0, -1);
+            InputStream is = getAssets().open(assetName)) {
+            byte[] buffer = new byte[16384];
+            int n;
+            while ((n = is.read(buffer)) &gt;= 0) {
+                packageInSession.write(buffer, 0, n);
+            }
+        }
+}
+</code></pre>
+<h3><a id="session-openwrite" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>session.openWrite</h3>
+<p><code>openWrite</code>方法的主要作用是打开一个流，将APK文件写入Session。返回的流将开始在文件中请求的偏移量处写入数据，该偏移量可用于恢复部分写入的文件。如果指定了有效的文件长度，系统将预先分配底层磁盘空间，以优化磁盘上的位置。强烈建议在已知的情况下提供有效的文件长度。</p>
+<p>您可以将数据写入返回的流，也可以根据需要调用<code>fsync(OutputStream)</code>，以确保字节已持久化到磁盘，然后在完成时关闭。在调用<code>commit(IntentSender)</code>之前，必须关闭所有流。</p>
+<p><code>openWrite</code>的源码如下所示：</p>
+<pre><code class="language-java">public @NonNull OutputStream openWrite(@NonNull String name, long offsetBytes,
+        long lengthBytes) throws IOException {
+    try {
+        if (ENABLE_REVOCABLE_FD) {
+            return new ParcelFileDescriptor.AutoCloseOutputStream(
+                    mSession.openWrite(name, offsetBytes, lengthBytes));
+        } else {
+            //ENABLE_REVOCABLE_FD默认为false
+            final ParcelFileDescriptor clientSocket = mSession.openWrite(name,
+                    offsetBytes, lengthBytes);
+            return new FileBridge.FileBridgeOutputStream(clientSocket);
+        }
+    } catch (RuntimeException e) {
+        ExceptionUtils.maybeUnwrapIOException(e);
+        throw e;
+    } catch (RemoteException e) {
+        throw e.rethrowFromSystemServer();
+    }
+}
+</code></pre>
+<p>这个方法里我们重点关注这句话 <code>mSession.openWrite(name, offsetBytes, lengthBytes)</code>，它意味者最终由 <code>PackageInstallerSession</code>类里的<code>openWrite</code>方法继续来处理。</p>
+<h2><a id="packageinstallersession-openwrite" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>PackageInstallerSession.openWrite</h2>
+<pre><code class="language-java">@Override
+public ParcelFileDescriptor openWrite(String name, long offsetBytes, long lengthBytes) {
+    try {
+        return doWriteInternal(name, offsetBytes, lengthBytes, null);
+    } catch (IOException e) {
+        throw ExceptionUtils.wrap(e);
+    }
+}
+</code></pre>
+<p>继续看<code>doWriteInternal</code>方法：</p>
+<h3><a id="dowriteinternal" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>doWriteInternal</h3>
+<pre><code class="language-java">private ParcelFileDescriptor doWriteInternal(String name, long offsetBytes, long lengthBytes,
+                                              ParcelFileDescriptor incomingFd) throws IOException {
+    //快速检查状态是否正常，并为自己分配一个Pipe。
+    //然后，我们在锁之外进行大量的磁盘分配，但是这个打开的Pipe将阻止任何尝试的安装转换
+    final RevocableFileDescriptor fd;
+    final FileBridge bridge;
+    final File stageDir;
+    synchronized (mLock) {
+        if (PackageInstaller.ENABLE_REVOCABLE_FD) {
+            fd = new RevocableFileDescriptor();
+            bridge = null;
+            mFds.add(fd);
+        } else {
+            //走这里
+            fd = null;
+            bridge = new FileBridge();
+            mBridges.add(bridge);
+        }
+         //解析应写入暂存数据的实际位置。
+        stageDir = resolveStageDirLocked();
+    }
+
+    try {
+        //先使用安装程序提供的名称；我们之后会重命名
+        if (!FileUtils.isValidExtFilename(name)) {
+        //Check if given filename is valid for an ext4 filesystem.
+            throw new IllegalArgumentException(&quot;Invalid name: &quot; + name);
+        }
+        final File target;
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            target = new File(stageDir, name);
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+
+        // TODO: this should delegate to DCS so the system process avoids
+        // holding open FDs into containers.
+        //打开文件并设置权限为644
+        final FileDescriptor targetFd = Os.open(target.getAbsolutePath(),
+                O_CREAT | O_WRONLY, 0644);
+        Os.chmod(target.getAbsolutePath(), 0644);
+
+        // 如果指定了APK大小，先在磁盘中分配空间
+        if (stageDir != null &amp;&amp; lengthBytes &gt; 0) {
+            mContext.getSystemService(StorageManager.class).allocateBytes(targetFd, lengthBytes,
+                    PackageHelper.translateAllocateFlags(params.installFlags));
+        }
+
+        if (offsetBytes &gt; 0) {
+            Os.lseek(targetFd, offsetBytes, OsConstants.SEEK_SET);
+        }
+
+       if (incomingFd != null) {
+       //如果调用了session.write方法，incomingFd不为null，将会进入此分支
+                switch (Binder.getCallingUid()) {
+                    case android.os.Process.SHELL_UID:
+                    case android.os.Process.ROOT_UID:
+                    case android.os.Process.SYSTEM_UID:
+                        break;
+                    default:
+                        throw new SecurityException(
+                                &quot;Reverse mode only supported from shell or system&quot;);
+                }
+
+                // In &quot;reverse&quot; mode, we're streaming data ourselves from the
+                // incoming FD, which means we never have to hand out our
+                // sensitive internal FD. We still rely on a &quot;bridge&quot; being
+                // inserted above to hold the session active.
+                try {
+                    final Int64Ref last = new Int64Ref(0);
+                    //将数据写入暂存文件
+                    FileUtils.copy(incomingFd.getFileDescriptor(), targetFd, lengthBytes, null,
+                            Runnable::run, (long progress) -&gt; {
+                                if (params.sizeBytes &gt; 0) {
+                                    final long delta = progress - last.value;
+                                    last.value = progress;
+                                    addClientProgress((float) delta / (float) params.sizeBytes);
+                                }
+                            });
+                } finally {
+                    IoUtils.closeQuietly(targetFd);
+                    IoUtils.closeQuietly(incomingFd);
+
+                    //完成传输，关闭file bridge
+                    synchronized (mLock) {
+                        if (PackageInstaller.ENABLE_REVOCABLE_FD) {
+                            mFds.remove(fd);
+                        } else {
+                            bridge.forceClose();
+                            mBridges.remove(bridge);
+                        }
+                    }
+                }
+                return null;
+       } 
+
+       
+       bridge.setTargetFile(targetFd);
+       bridge.start();
+       return new ParcelFileDescriptor(bridge.getClientSocket());
+       
+    } catch (ErrnoException e) {
+        throw e.rethrowAsIOException();
+    }
+}
+</code></pre>
+<p><code>doWriteInternal</code>这个方法主要是初始化要安装的APK文件的磁盘存储空间（如果指定了大小的话），并创建了一个可以跨进程写文件的FileBridge对象，通过<code>ParcelFileDescriptor</code>类包装称文件输出流提供给应用层写入安装的APK数据。</p>
+<p>需要注意的是，后续的<code>session.write</code>方法调用的也是<code>doWriteInternal</code>，不同的是传入的参数<code>incomingFd</code>不为<code>null</code>，这意味着<code>doWriteInternal</code>会将数据写入到<code>incomingFd</code>这个文件描述符所对应的文件，它也是我们在调用<code>openWrite</code>方法时创建的文件。</p>
+<p>到这一步为止，我们完成了要安装的Apk的复制工作。</p>
+<h3><a id="session-commit" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>session.commit</h3>
+<p>现在到了我们最后一步了，将<code>Installer Session</code>提交，去真正执行安装Apk的工作。我们来看一下<code>commit</code>方法：</p>
+<pre><code class="language-java">public void commit(@NonNull IntentSender statusReceiver) {
+    try {
+        mSession.commit(statusReceiver, false);
+    } catch (RemoteException e) {
+        throw e.rethrowFromSystemServer();
+    }
+}
+</code></pre>
+<p>同样的，它会把此方法委托给<code>PackageInstallerSession</code>类去执行。需要注意的是，<code>commit</code>方法里有一个<code>IntentSender</code>参数，这个参数的作用是用来通知安装时<code>Session</code>状态的改变，比如 安装需要用户进一步确认、安装成功、安装失败等事件。</p>
+<h3><a id="packageinstallersession-commit" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>PackageInstallerSession.commit</h3>
+<pre><code class="language-java">public void commit(@NonNull IntentSender statusReceiver, boolean forTransfer) {
+    if (hasParentSessionId()) {
+        throw new IllegalStateException(
+                &quot;Session &quot; + sessionId + &quot; is a child of multi-package session &quot;
+                        + mParentSessionId +  &quot; and may not be committed directly.&quot;);
+    }
+    if (!markAsCommitted(statusReceiver, forTransfer)) {
+        return;
+    }
+    
+   ...
+   
+    mHandler.obtainMessage(MSG_COMMIT).sendToTarget();
+}
+</code></pre>
+<p><code>commit</code>方法最终向<code>mHandler</code>中发送了一条<code>MSG_COMMIT</code>的消息，而在这个消息里，实际执行的是<code>handleCommit</code>方法。</p>
+<h2><a id="handlecommit" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>handleCommit</h2>
+<pre><code class="language-java">private void handleCommit() {
+    ...
+
+    // 返回子Session列表，如果Session不是multipackage，则返回null
+    List&lt;PackageInstallerSession&gt; childSessions = getChildSessions();
+
+    try {
+        synchronized (mLock) {
+            commitNonStagedLocked(childSessions);
+        }
+    } catch (PackageManagerException e) {
+        final String completeMsg = ExceptionUtils.getCompleteMessage(e);
+        Slog.e(TAG, &quot;Commit of session &quot; + sessionId + &quot; failed: &quot; + completeMsg);
+        destroyInternal();
+        dispatchSessionFinished(e.error, completeMsg, null);
+    }
+}
+</code></pre>
+<h3><a id="commitnonstagedlocked" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>commitNonStagedLocked</h3>
+<pre><code class="language-java">private void commitNonStagedLocked(List&lt;PackageInstallerSession&gt; childSessions)
+        throws PackageManagerException {
+        //返回一个ActiveInstallSession对象
+    final PackageManagerService.ActiveInstallSession committingSession =
+            makeSessionActiveLocked();
+    if (committingSession == null) {
+        return;
+    }
+    if (isMultiPackage()) {
+        List&lt;PackageManagerService.ActiveInstallSession&gt; activeChildSessions =
+                new ArrayList&lt;&gt;(childSessions.size());
+        boolean success = true;
+        PackageManagerException failure = null;
+        for (int i = 0; i &lt; childSessions.size(); ++i) {
+            final PackageInstallerSession session = childSessions.get(i);
+            try {
+                final PackageManagerService.ActiveInstallSession activeSession =
+                        session.makeSessionActiveLocked();
+                if (activeSession != null) {
+                    activeChildSessions.add(activeSession);
+                }
+            } catch (PackageManagerException e) {
+                failure = e;
+                success = false;
+            }
+        }
+        if (!success) {
+            try {
+                mRemoteObserver.onPackageInstalled(
+                        null, failure.error, failure.getLocalizedMessage(), null);
+            } catch (RemoteException ignored) {
+            }
+            return;
+        }
+        mPm.installStage(activeChildSessions);
+    } else {
+       //我们通常执行的安装走这个分支
+        mPm.installStage(committingSession);
+    }
+}
+</code></pre>
+<p>在<code>commitNonStagedLocked</code>方法的最后，调用PMS的<code>installStage</code>方法，这样代码逻辑就进入了PMS中，让PMS去对要安装的APK文件做内容的解析，完成真正的安装工作。</p>
+<p>实际上，<code>PackageInstaller</code>只是负责安装前期的准备工作，它维持了一个安装会话，管理安装的参数，并提供将安装包临时复制到特定路径的功能，但真正实现安装还是得依靠PMS。</p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="16534581148449.html" 
+          title="Previous Post: Android APK安装流程解析 - PackageManageService">&laquo; Android APK安装流程解析 - PackageManageService</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="16533574488445.html" 
+          title="Next Post: 深入理解Handler">深入理解Handler &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
+
+
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>

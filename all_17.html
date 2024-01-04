@@ -38,7 +38,7 @@
       <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
         <ul id="main-menu" class="left">
         
-        <li id=""><a target="self" href="index.html">Home</a></li>
+        <li id=""><a target="_self" href="index.html">Home</a></li>
         
         <li id=""><a target="_self" href="archives.html">Archives</a></li>
         
@@ -67,7 +67,7 @@
 <aside class="left-off-canvas-menu">
       <ul class="off-canvas-list">
         
-        <li><a target="self" href="index.html">Home</a></li>
+        <li><a target="_self" href="index.html">Home</a></li>
         
         <li><a target="_self" href="archives.html">Archives</a></li>
         
@@ -77,27 +77,43 @@
         
             <li><a href="Android.html">Android</a></li>
         
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
             <li><a href="C++.html">C++</a></li>
         
             <li><a href="UI.html">UI</a></li>
         
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
         
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
         
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-        
             <li><a href="Mac.html">Mac</a></li>
         
             <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
          
 
       </ul>
@@ -120,3219 +136,103 @@
 		<div class="markdown-body home-categories">
 		
 			<div class="article">
-                <a class="clearlink" href="15561207869218.html">
+                <a class="clearlink" href="16214955019940.html">
                 
-                  <h1>Python学习笔记</h1>
+                  <h1>OpenGL ES for Android 视频缩放、旋转、平移</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<h2 id="toc_0">前言</h2>
-
-<p>由于写毕设要搭建后端爬虫的需求，所以开始学习Python语言。由于没有系统的学习，所以笔记可能会记得比较散乱，有时间会一一整理，把一些重要的学习知识点记下来。当然有时间也会整理基础知识。</p>
-
-<h2 id="toc_1">安装 Python</h2>
-
-<h3 id="toc_2">升级pip</h3>
-
-<p><code>pip3 install --upgrade pip</code></p>
-
-<h2 id="toc_3">安装 Python 虚拟环境</h2>
-
-<p><code>(sudo) pip3 install virtualenv virtualenvwrapper</code>  </p>
-
-<p>修改<code>~/.bash_profile</code>,添加以下语句  </p>
-
-<pre class="line-numbers"><code class="language-text">export WORKON_HOME=$HOME/.virtualenvs
-export PROJECT_HOME=$HOME/workspace
-source /usr/local/bin/virtualenvwrapper.sh
+                        	<p>在上一篇文章中我们介绍了<a href="16214944723657.html">为什么要使用OpenGL ES播放视频</a>，在末尾提到如果渲染视频的窗口宽高比和视频宽高比不一致会导致视频拉伸，这篇文章将会介绍如何通过视频的缩放来解决这个问题。</p>
+<p>我们希望当视频的比例和窗口的比例不一样时，其中一边占满全屏，另一边等比缩放并居中，其余部分显示黑色，这个效果和我们平时使用的视频播放器的效果是一样的，效果如图：</p>
+<p><img src="media/16214955019940/16214955737188.jpg" alt="" /></p>
+<p>我们在之前的基础上进行修改，修改顶点shader</p>
+<pre><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec2 a_TexCoordinate;
+varying vec2 v_TexCoord;
+uniform mat4 mvpMatrix;
+void main() {
+    v_TexCoord = a_TexCoordinate;
+    gl_Position = mvpMatrix*a_Position;
+}
 </code></pre>
-
-<p>修改后使之立即生效(也可以重启终端使之生效)：<br/><br/>
-<code>source ~/.bash_profile</code>  </p>
-
-<h3 id="toc_4">基本用法</h3>
-
-<h4 id="toc_5">1、创建一个虚拟开发环境</h4>
-
-<p><code>mkvirtualenv zqxt：创建运行环境zqxt</code><br/><br/>
-<code>workon zqxt: 工作在 zqxt 环境 或 从其它环境切换到 zqxt 环境</code><br/><br/>
-<code>deactivate: 退出终端环境</code><br/><br/>
-其它的： <br/>
-<code>rmvirtualenv ENV：删除运行环境ENV</code><br/><br/>
-<code>mkproject mic：创建mic项目和运行环境mic</code><br/><br/>
-<code>mktmpenv：创建临时运行环境</code><br/><br/>
-<code>lsvirtualenv: 列出可用的运行环境</code><br/><br/>
-<code>lssitepackages: 列出当前环境安装了的包</code><br/><br/>
-创建的环境是独立的，互不干扰，无需sudo权限即可使用 pip 来进行包的管理。  </p>
-
-<p>完成后在当前目录会创建一个test_env的文件夹，进入文件夹会发现生成了以下的目录，神奇吧  </p>
-
-<pre class="line-numbers"><code class="language-text">├── bin
-├── include
-│   └── python2.7
-├── lib
-│   └── python2.7       //所有的新包会被存在这
-│       ├── distutils
-│       ├── encodings
-│       ├── lib-dynload
-│       └── site-packages
-├── local
-│   ├── bin
-│   ├── include
-│   └── lib
+<p>在顶点shader中加入mvpMatrix（MVP矩阵）并与a_Position相乘。</p>
+<h2><a id="%E8%8E%B7%E5%8F%96mvpmatrix%E7%B4%A2%E5%BC%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>获取mvpMatrix索引</h2>
+<pre><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+            GLES20.glClearColor(0F, 0F, 0F, 1F)
+      ...
+            mvpMatrixLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;mvpMatrix&quot;)
+      ...
+}
 </code></pre>
-
-<h2 id="toc_6">安装Django</h2>
-
-<p><code>pip3 install Django</code>或者<code>pip install Django==1.10.6</code><br/><br/>
-在终端上输入Python,点击Enter,进入Python环境</p>
-
-<pre class="line-numbers"><code class="language-text">&gt;&gt;&gt; import django
-&gt;&gt;&gt; django.VERSION
-(1, 8, 16, &#39;final&#39;, 0)
-&gt;&gt;&gt; 
-&gt;&gt;&gt; django.get_version()
-&#39;1.8.16&#39;
-</code></pre>
-
-<p>这样就可以看见安装的django的版本号</p>
-
-<h3 id="toc_7">安装django-Celery，设置调度计划任务</h3>
-
-<p><code>pip3 install django-celery</code></p>
-
-<h3 id="toc_8">安装PIL（Python Imaging Library）</h3>
-
-<p>图片处理的扩展包:<br/>
-<code>brew install jpeg    #安装</code></p>
-
-<h3 id="toc_9">安装Django-Dynamic-Scraper(DDS)</h3>
-
-<p><code>pip3 install django-dynamic-scraper</code><br/><br/>
-<code>pip3 install scrapy-splash</code><br/>
-<code>pip3 install scrapy-djangoitem</code></p>
-
-<h2 id="toc_10">安装scrapy</h2>
-
-<p><code>pip3 install Scrapy 安装Scrapy</code>或者<code>pip3 install scrapy==1.3.3</code>  </p>
-
-<h2 id="toc_11">安装chardet-检测网页编码</h2>
-
-<p><code>pip3 install chardet  #安装chardet</code>  </p>
-
-<pre class="line-numbers"><code class="language-python">def GetHtml( url):  
-    page = urllib.request.urlopen(url)  
-    contex = page.read()  
-    return contex  
-
-print(sys.getfilesystemencoding())    #本地系统编码
-print(&#39;Html is encoding by : %&#39;,chardet.detect(GetHtml(url))) #网页编码
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/03/27</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python.html'>Python</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869186.html">
-                
-                  <h1>Mac命令行整理</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>命令行是操作Mac和Linux最基础和重要的内容，简单的命令行自然会随时记得。但是碰到配置环境以及安装软件这种活，还是得时不时的上网查询，而且在不同的电脑配置还得重新上网查询，所以在此记录一下，以节省以后使用命令行的时间。</p>
-
-<h2 id="toc_1">查看端口占用情况及杀死进程</h2>
-
-<p><code>sudo lsof -i :9000   #查看端口进程</code><br/>
-<code>sudo kill -9 716     #根据PID杀死进程</code></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/03/25</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869112.html">
-                
-                  <h1>Apache简单搭建文件共享服务器</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>因为公司需求，增加打包测试发布的效率以及方便查看log信息。所以需要搭建一个简单的文件服务器。Mac内置Apache，所以我们可以很方便的搭建起来。</p>
-
-<h2 id="toc_1">启动Apache</h2>
-
-<p>启动：<code>sudo apachectl start</code><br/><br/>
-停止：<code>sudo apachectl stop</code><br/><br/>
-重启：<code>sudo apachectl restart</code><br/><br/>
-查看 Apache 版本 <code>httpd -v</code><br/><br/>
-浏览器打开 <a href="http://127.0.0.1">http://127.0.0.1</a> 可以看到 It works! 的页面  </p>
-
-<h2 id="toc_2">文件根目录</h2>
-
-<h3 id="toc_3">系统级的根目录</h3>
-
-<p><code>http://localhosts/</code> 对应的是 <code>/Library/WebServer/Documents/</code>  </p>
-
-<h4 id="toc_4">系统级根目录默认没有开启目录列表，开启方法：</h4>
-
-<p>编辑 <code>/etc/apache2/httpd.conf</code><br/><br/>
-文件搜索找到 <code>&lt;Directory &quot;/Library/WebServer/Documents&quot;&gt;</code>将 <code>Options FollowSymLinks Multiviews</code> 修改为<code>Options Indexes FollowSymLinks Multiviews</code></p>
-
-<h3 id="toc_5">用户级根目录</h3>
-
-<p>另一个 Web 根目录默认是 ~/Sites ，10.9 中你需要手动创建这个Sites目录。<br/><br/>
-检查<code>/etc/apache2/users/</code>这个目录下是否有 <code>username.conf</code> 文件<br/><br/>
-如果没有，则需要新建一个，username 需要是你的账户名字，建议使用终端创建这个文件：<br/><br/>
-<code>cd /etc/apache2/users</code><br/><br/>
-<code>sudo vi username.conf</code><br/><br/>
-贴入以下内容，注意修改 username 为你的账户名字  </p>
-
-<pre class="line-numbers"><code class="language-text">&lt;Directory &quot;/Users/username/Sites/&quot;&gt;
-Options Indexes MultiViews FollowSymLinks
-AllowOverride All
-Order allow,deny
-Allow from all
-Require all granted
-&lt;/Directory&gt;
-</code></pre>
-
-<p>这个文件的权限应该是:  </p>
-
-<p><code>-rw-r--r-- 1 root wheel 298 Jun 28 16:47 username.conf</code></p>
-
-<p>如果不是，请修改:  </p>
-
-<p><code>sudo chmod 644 username.conf</code></p>
-
-<p>编辑 <code>/etc/apache2/httpd.conf</code> 文件，删除下列这些代码前的注释符号： <code>#</code></p>
-
-<pre class="line-numbers"><code class="language-text">Include /private/etc/apache2/extra/httpd-userdir.conf
-LoadModule authz_core_module libexec/apache2/mod_authz_core.so
-LoadModule authz_host_module libexec/apache2/mod_authz_host.so
-LoadModule userdir_module libexec/apache2/mod_userdir.so
-</code></pre>
-
-<p>编辑 <code>/etc/apache2/extra/httpd-userdir.conf</code>文件，删除下列这些代码前的注释符号： <code>#</code><br/><br/>
-<code>Include /private/etc/apache2/users/*.conf</code>  </p>
-
-<p>重启 Apache<br/><br/>
-<code>sudo apachectl restart</code><br/><br/>
-这时，这个网址应该已经可以用了：<br/><br/>
-<code>http://localhost/~username/</code>  </p>
-
-<h2 id="toc_6">想去除/~username/</h2>
-
-<p>~username看着的确比较累赘，所以我们重定向把他给去掉<br/><br/>
-进入<code>/Library/WebServer/Documents</code>文件夹中，找到<code>index.html.en</code>文件，在里面添加一行<code>&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;</code>。最后变成这个样子。  </p>
-
-<pre class="line-numbers"><code class="language-text">&lt;META HTTP-EQUIV=&quot;Refresh&quot; CONTENT=&quot;0; URL=/~rainbird&quot;&gt;
-&lt;html&gt;&lt;body&gt;&lt;h1&gt;It works!&lt;/h1&gt;&lt;/body&gt;&lt;/html&gt;
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/03/17</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869076.html">
-                
-                  <h1>Python-Crawler</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">总文件</h2>
-
-<pre class="line-numbers"><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;//table&#39;)
-        # for site in sties:
-        #   title = site.xpath(&#39;tr/td&#39;).extract()
-        #   print(site)
-        #   print(title)
-
-        #filename = &#39;school-%s.html&#39; % 1
-        #with open(filename, &#39;wb&#39;) as f:
-             #f.write(contents)
-        #self.log(&#39;Saved file %s&#39; % filename)
-</code></pre>
-
-<h2 id="toc_1">重点关注链接and标题</h2>
-
-<pre class="line-numbers"><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;//table&#39;)
-
-        title = sties[16].xpath(&#39;tr/td/a/text() | tr/td/a/@href | tr/td/text()&#39;).extract()
-        print(sties[10])
-        print(title)
-</code></pre>
-
-<h2 id="toc_2">日期时间</h2>
-
-<pre class="line-numbers"><code class="language-python">title = sties[25].xpath(&#39;tr/td/table/tr/td[@id=&quot;zb&quot;]/table/tr/td/span/text()&#39;).extract()
-        print(sties[10])
-        print(title)
-</code></pre>
-
-<h2 id="toc_3">通知公告</h2>
-
-<pre class="line-numbers"><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/index.php?c=Article&amp;a=idxnews&amp;lx=notice&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;/html/body/table/tr&#39;)
-        for site in sties:
-            title = site.xpath(&#39;td/a/@href | td/a/text()&#39;).extract()
-            print(site)
-            print(title)
-</code></pre>
-
-<h2 id="toc_4">新闻中心</h2>
-
-<pre class="line-numbers"><code class="language-python">import scrapy
-from scrapy.selector import Selector
-from scrapy.http import HtmlResponse
-
-class QuotesSpider(scrapy.Spider):
-    name = &quot;quotes&quot;
-
-    def start_requests(self):
-        urls = [
-            &#39;http://www.xujc.com.cn/index.php?c=Article&amp;a=idxnews&amp;lx=news&#39;,
-        ]
-        for url in urls:
-            yield scrapy.Request(url=url, callback=self.parse)
-
-    def parse(self,response):
-        sel = Selector(response)
-        sties = sel.xpath(&#39;/html/body/ul/li&#39;)
-        for site in sties:
-            title = site.xpath(&#39;a/@href | a/text()&#39;).extract()
-            print(site)
-            print(title)
-</code></pre>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/03/15</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Python.html'>Python</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869044.html">
-                
-                  <h1>Android ADB 命令</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">基本命令</h2>
-
-<ul>
-<li>进入指定设备 <code>adb -s serialNumber shell</code></li>
-<li>查看版本 <code>adb version</code></li>
-<li>查看日志 <code>adb logcat</code></li>
-<li>查看设备 <code>adb devices</code></li>
-<li>连接状态 <code>adb get-state</code></li>
-<li>启动ADB服务 <code>adb start-server</code></li>
-<li>停止ADB服务 <code>adb kill-server</code></li>
-<li>电脑推送到手机 <code>adb push [local path] [remote path]</code></li>
-<li>手机拉取到电脑 <code>adb pull [remote path] [local path]</code></li>
-</ul>
-
-<h2 id="toc_1">adb shell下的am 与 pm</h2>
-
-<blockquote>
-<p>注:am和pm命令必须先切换到adb shell模式下才能使用</p>
-</blockquote>
-
-<h3 id="toc_2">am</h3>
-
-<p>am全称activity manager，你能使用am去模拟各种系统的行为，例如去启动一个activity，强制停止进程，发送广播进程，修改设备屏幕属性等等。当你在adb shell命令下执行am命令:</p>
-
-<p><strong>am <command></strong></p>
-
-<ul>
-<li>启动app <code>am start -n {packageName}/.{activityName}</code></li>
-<li>杀app的进程 <code>am kill &lt;packageName&gt;</code></li>
-<li>强制停止一切 <code>am force-stop &lt;packageName&gt;</code></li>
-<li>启动服务 <code>am startservice</code></li>
-<li>停止服务 <code>am stopservice</code></li>
-<li>打开简书 <code>am start -a android.intent.action.VIEW -d http://www.jianshu.cn/</code></li>
-<li>拨打10086 <code>am start -a android.intent.action.CALL -d tel:10086</code></li>
-</ul>
-
-<h3 id="toc_3">pm</h3>
-
-<p>pm全称package manager，你能使用pm命令去模拟Android行为或者查询设备上的应用等，当你在adb shell命令下执行pm命令：</p>
-
-<p><strong>pm <command></strong></p>
-
-<ul>
-<li>列出手机所有的包名 <code>pm list packages</code></li>
-<li>安装/卸载 <code>pm install/uninstall</code></li>
-</ul>
-
-<h2 id="toc_4">模拟用户事件</h2>
-
-<ul>
-<li><strong>文本输入:</strong> <code>adb shell input text &lt;string&gt;</code>
-例:手机端输出demo字符串，相应指令：<code>adb shell input &quot;demo&quot;</code>.</li>
-<li><strong>键盘事件：</strong> <code>input keyevent &lt;KEYCODE&gt;</code>，其中KEYCODE见本文结尾的附表
-例:点击返回键，相应指令： <code>input keyevent 4</code>.</li>
-<li><strong>点击事件：</strong> <code>input tap &lt;x&gt; &lt;y&gt;</code>
-例: 点击坐标（500，500），相应指令： <code>input tap 500 500</code>.</li>
-<li><strong>滑动事件：</strong> <code>input swipe &lt;x1&gt; &lt;y1&gt; &lt;x2&gt; &lt;y2&gt; &lt;time&gt;</code>
-例: 从坐标(300，500)滑动到(100，500)，相应指令： <code>input swipe 300 500 100 500</code>.<br/>
-例: 200ms时间从坐标(300，500)滑动到(100，500)，相应指令： <code>input swipe 300 500 100 500 200</code>.</li>
-</ul>
-
-<h2 id="toc_5">logcat日志</h2>
-
-<ul>
-<li>显示包含的<code>logcat logcat \| grep &lt;str&gt;</code></li>
-<li>显示包含，并忽略大小写的<code>logcat logcat \| grep -i &lt;str&gt;</code></li>
-<li>读完所有log后返回，而不会一直等待 <code>logcat -d</code></li>
-<li>清空log并退出 <code>logcat -c</code></li>
-<li>打印最近的<code>count logcat -t &lt;count&gt;</code></li>
-<li>格式化输出Log，其中format有如下可选值： <code>logcat -v &lt;format&gt;</code>
-<ul>
-<li><strong>brief</strong> — 显示优先级/标记和原始进程的PID (默认格式)</li>
-<li><strong>process</strong> — 仅显示进程PID</li>
-<li><strong>tag</strong> — 仅显示优先级/标记</li>
-<li><strong>thread</strong> — 仅显示进程：线程和优先级/标记</li>
-<li><strong>raw</strong> — 显示原始的日志信息，没有其他的元数据字段</li>
-<li><strong>time</strong> — 显示日期，调用时间，优先级/标记，PID</li>
-<li><strong>long</strong> —显示所有的元数据字段并且用空行分隔消息内容</li>
-</ul></li>
-</ul>
-
-<h2 id="toc_6">远程ADB</h2>
-
-<p>为避免使用数据线，可通过wifi通信，前提是手机与PC处于同一局域网</p>
-
-<ul>
-<li><p><strong>启动方法:</strong> <code>adb tcpip 5555  //这一步，必须通过数据线把手机与PC连接后再执行</code><br/>
-<code>adb connect &lt;手机IP&gt;</code></p></li>
-<li><p>**停止方法: **<code>adb disconnect //断开wifi连接</code><br/>
-<code>adb usb //切换到usb模式</code></p></li>
-</ul>
-
-<h2 id="toc_7">其他命令</h2>
-
-<ul>
-<li>查看当前 <code>ls</code></li>
-<li>打印当前路径 <code>pwd</code></li>
-<li>查看当前连接的设备 <code>adb devices</code></li>
-<li>终止adb服务进程 <code>adb kill-server</code></li>
-<li>重启adb服务进程 <code>adb start-server</code></li>
-<li>PID是:8607 查看某个进程的日志 <code>adb logcat -v process |grep 8607</code></li>
-<li>清理缓存 <code>logcat -c</code></li>
-<li>打印xys标签log <code>adb logcat -s xys</code></li>
-<li>打印192.168.56.101:5555设备里的xys标签log <code>adb -s 192.168.56.101:5555 logcat -s xys</code></li>
-<li>打印在ActivityManager标签里包含start的日志 <code>adb logcat -s ActivityManager | findstr &quot;START&quot;</code>
-<ul>
-<li>&quot;-s&quot;选项 : 设置输出日志的标签, 只显示该标签的日志;</li>
-<li>&quot;-f&quot;选项 : 将日志输出到文件, 默认输出到标准输出流中, -f 参数执行不成功;</li>
-<li>&quot;-r&quot;选项 : 按照每千字节输出日志, 需要 -f 参数, 不过这个命令没有执行成功;</li>
-<li>&quot;-n&quot;选项 : 设置日志输出的最大数目, 需要 -r 参数, 这个执行 感觉 跟 adb logcat 效果一样;</li>
-<li>&quot;-v&quot;选项 : 设置日志的输出格式, 注意只能设置一项;</li>
-<li>&quot;-c&quot;选项 : 清空所有的日志缓存信息;</li>
-<li>&quot;-d&quot;选项 : 将缓存的日志输出到屏幕上, 并且不会阻塞;</li>
-<li>&quot;-t&quot;选项 : 输出最近的几行日志, 输出完退出, 不阻塞;</li>
-<li>&quot;-g&quot;选项 : 查看日志缓冲区信息;</li>
-<li>&quot;-b&quot;选项 : 加载一个日志缓冲区, 默认是 main, 下面详解;</li>
-<li>&quot;-B&quot;选项 : 以二进制形式输出日志;</li>
-</ul></li>
-<li>重启机器 <code>adb reboot</code></li>
-<li>获取序列号 <code>adb get-serialno</code></li>
-<li>重启到bootloader，即刷机模式 <code>adb reboot bootloader</code></li>
-<li>重启到recovery，即恢复模式 <code>adb reboot recovery</code></li>
-<li>安装APK：<code>adb install &lt;apkfile&gt; //比如：adb install baidu.apk</code></li>
-<li>安装apk到sd卡： <code>adb install -s &lt;apkfile&gt; // 比如：adb install -s baidu.apk</code></li>
-<li>卸载APK：<code>adb uninstall &lt;package&gt; //比如：adb uninstall com.baidu.search</code></li>
-<li>获取机器MAC地址 <code>adb shell cat /sys/class/net/wlan0/address</code></li>
-<li>启动应用：<code>adb shell am start -n &lt;package_name&gt;/.&lt;activity_class_name&gt; 例如:adb shell am start -n yf.o2o.store/yf.o2o.store.activity.LoginActivity</code></li>
-<li>查看占用内存排序 <code>adb shell top</code></li>
-<li>查看占用内存前6的app： <code>adb shell top -m 6</code></li>
-<li>刷新一次内存信息，然后返回：<code>adb shell top -n 1</code></li>
-<li>查询各进程内存使用情况：<code>adb shell procrank</code></li>
-<li>杀死一个进程：<code>adb shell kill [pid]</code></li>
-<li>查看进程列表：<code>adb shell ps</code></li>
-<li>查看指定进程状态：<code>adb shell ps -x [PID]</code></li>
-<li>查看后台services信息： <code>adb shell service list</code></li>
-<li>查看当前内存占用： <code>adb shell cat /proc/meminfo</code></li>
-<li>查看IO内存分区：<code>adb shell cat /proc/iomem</code></li>
-<li>将system分区重新挂载为可读写分区：<code>adb remount</code></li>
-<li>从本地复制文件到设备： <code>adb push &lt;local&gt; &lt;remote&gt;</code></li>
-<li>从设备复制文件到本地： <code>adb pull &lt;remote&gt; &lt;local&gt;</code></li>
-<li>列出目录下的文件和文件夹，等同于dos中的dir命令：<code>adb shell ls</code></li>
-<li>进入文件夹，等同于dos中的cd 命令：<code>adb shell cd &lt;folder&gt;</code></li>
-<li>重命名文件： <code>adb shell rename path/oldfilename path/newfilename</code></li>
-<li>删除system/avi.apk： <code>adb shell rm /system/avi.apk</code></li>
-<li>删除文件夹及其下面所有文件：<code>adb shell rm -r &lt;folder&gt;</code></li>
-<li>移动文件：<code>adb shell mv path/file newpath/file</code></li>
-<li>设置文件权限：<code>adb shell chmod 777 /system/fonts/DroidSansFallback.ttf</code></li>
-<li>新建文件夹：<code>adb shell mkdir path/foldelname</code></li>
-<li>查看文件内容：<code>adb shell cat &lt;file&gt;</code></li>
-<li>查看wifi密码：<code>adb shell cat /data/misc/wifi/*.conf</code></li>
-<li>清除log缓存：<code>adb logcat -c</code></li>
-<li>查看bug报告：<code>adb bugreport</code></li>
-<li>获取设备名称：<code>adb shell cat /system/build.prop</code></li>
-<li>查看ADB帮助：<code>adb help</code></li>
-<li>跑monkey：
-<ul>
-<li><code>adb shell monkey -v -p your.package.name 500</code></li>
-<li><code>adb -s 192.168.244.151:5555 shell monkey -v -p com.bolexim 500</code></li>
-</ul></li>
-<li>查看当前运行Activity: <code>adb shell &quot;dumpsys window | grep mCurrentFocus&quot;</code></li>
-</ul>
-
-<h2 id="toc_8">附表</h2>
-
-<p>下表中， 箭头左边为keycode值，箭头右边为keycode的含义，部分用中文标注</p>
-
-<table>
-<thead>
-<tr>
-<th style="text-align: left">KeyCode</th>
-<th style="text-align: left">Value</th>
-<th style="text-align: left">Description</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td style="text-align: left">0</td>
-<td style="text-align: left">KEYCODE_UNKNOWN</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">1</td>
-<td style="text-align: left">KEYCODE_MENU</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">2</td>
-<td style="text-align: left">KEYCODE_SOFT_RIGHT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">3</td>
-<td style="text-align: left">KEYCODE_HOME</td>
-<td style="text-align: left">Home键</td>
-</tr>
-<tr>
-<td style="text-align: left">4</td>
-<td style="text-align: left">KEYCODE_BACK</td>
-<td style="text-align: left">返回键</td>
-</tr>
-<tr>
-<td style="text-align: left">5</td>
-<td style="text-align: left">KEYCODE_CALL</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">6</td>
-<td style="text-align: left">KEYCODE_ENDCALL</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">7</td>
-<td style="text-align: left">KEYCODE_0</td>
-<td style="text-align: left">数字键0</td>
-</tr>
-<tr>
-<td style="text-align: left">8</td>
-<td style="text-align: left">KEYCODE_1</td>
-<td style="text-align: left">数字键1</td>
-</tr>
-<tr>
-<td style="text-align: left">9</td>
-<td style="text-align: left">KEYCODE_2</td>
-<td style="text-align: left">数字键2</td>
-</tr>
-<tr>
-<td style="text-align: left">10</td>
-<td style="text-align: left">KEYCODE_3</td>
-<td style="text-align: left">数字键3</td>
-</tr>
-<tr>
-<td style="text-align: left">11</td>
-<td style="text-align: left">KEYCODE_4</td>
-<td style="text-align: left">数字键4</td>
-</tr>
-<tr>
-<td style="text-align: left">12</td>
-<td style="text-align: left">KEYCODE_5</td>
-<td style="text-align: left">数字键5</td>
-</tr>
-<tr>
-<td style="text-align: left">13</td>
-<td style="text-align: left">KEYCODE_6</td>
-<td style="text-align: left">数字键6</td>
-</tr>
-<tr>
-<td style="text-align: left">14</td>
-<td style="text-align: left">KEYCODE_7</td>
-<td style="text-align: left">数字键7</td>
-</tr>
-<tr>
-<td style="text-align: left">15</td>
-<td style="text-align: left">KEYCODE_8</td>
-<td style="text-align: left">数字键8</td>
-</tr>
-<tr>
-<td style="text-align: left">16</td>
-<td style="text-align: left">KEYCODE_9</td>
-<td style="text-align: left">数字键9</td>
-</tr>
-<tr>
-<td style="text-align: left">17</td>
-<td style="text-align: left">KEYCODE_STAR</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">18</td>
-<td style="text-align: left">KEYCODE_POUND</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">19</td>
-<td style="text-align: left">KEYCODE_DPAD_UP</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">20</td>
-<td style="text-align: left">KEYCODE_DPAD_DOWN</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">21</td>
-<td style="text-align: left">KEYCODE_DPAD_LEFT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">22</td>
-<td style="text-align: left">KEYCODE_DPAD_RIGHT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">23</td>
-<td style="text-align: left">KEYCODE_DPAD_CENTER</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">24</td>
-<td style="text-align: left">KEYCODE_VOLUME_UP</td>
-<td style="text-align: left">音量键+</td>
-</tr>
-<tr>
-<td style="text-align: left">25</td>
-<td style="text-align: left">KEYCODE_VOLUME_DOWN</td>
-<td style="text-align: left">音量键-</td>
-</tr>
-<tr>
-<td style="text-align: left">26</td>
-<td style="text-align: left">KEYCODE_POWER</td>
-<td style="text-align: left">Power键</td>
-</tr>
-<tr>
-<td style="text-align: left">27</td>
-<td style="text-align: left">KEYCODE_CAMERA</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">28</td>
-<td style="text-align: left">KEYCODE_CLEAR</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">29</td>
-<td style="text-align: left">KEYCODE_A</td>
-<td style="text-align: left">字母键A</td>
-</tr>
-<tr>
-<td style="text-align: left">30</td>
-<td style="text-align: left">KEYCODE_B</td>
-<td style="text-align: left">字母键B</td>
-</tr>
-<tr>
-<td style="text-align: left">31</td>
-<td style="text-align: left">KEYCODE_C</td>
-<td style="text-align: left">字母键C</td>
-</tr>
-<tr>
-<td style="text-align: left">32</td>
-<td style="text-align: left">KEYCODE_D</td>
-<td style="text-align: left">字母键D</td>
-</tr>
-<tr>
-<td style="text-align: left">33</td>
-<td style="text-align: left">KEYCODE_E</td>
-<td style="text-align: left">字母键E</td>
-</tr>
-<tr>
-<td style="text-align: left">34</td>
-<td style="text-align: left">KEYCODE_F</td>
-<td style="text-align: left">字母键F</td>
-</tr>
-<tr>
-<td style="text-align: left">35</td>
-<td style="text-align: left">KEYCODE_G</td>
-<td style="text-align: left">字母键G</td>
-</tr>
-<tr>
-<td style="text-align: left">36</td>
-<td style="text-align: left">KEYCODE_H</td>
-<td style="text-align: left">字母键H</td>
-</tr>
-<tr>
-<td style="text-align: left">37</td>
-<td style="text-align: left">KEYCODE_I</td>
-<td style="text-align: left">字母键I</td>
-</tr>
-<tr>
-<td style="text-align: left">38</td>
-<td style="text-align: left">KEYCODE_J</td>
-<td style="text-align: left">字母键J</td>
-</tr>
-<tr>
-<td style="text-align: left">39</td>
-<td style="text-align: left">KEYCODE_K</td>
-<td style="text-align: left">字母键K</td>
-</tr>
-<tr>
-<td style="text-align: left">40</td>
-<td style="text-align: left">KEYCODE_L</td>
-<td style="text-align: left">字母键L</td>
-</tr>
-<tr>
-<td style="text-align: left">41</td>
-<td style="text-align: left">KEYCODE_M</td>
-<td style="text-align: left">字母键M</td>
-</tr>
-<tr>
-<td style="text-align: left">42</td>
-<td style="text-align: left">KEYCODE_N</td>
-<td style="text-align: left">字母键N</td>
-</tr>
-<tr>
-<td style="text-align: left">43</td>
-<td style="text-align: left">KEYCODE_O</td>
-<td style="text-align: left">字母键O</td>
-</tr>
-<tr>
-<td style="text-align: left">44</td>
-<td style="text-align: left">KEYCODE_P</td>
-<td style="text-align: left">字母键P</td>
-</tr>
-<tr>
-<td style="text-align: left">45</td>
-<td style="text-align: left">KEYCODE_Q</td>
-<td style="text-align: left">字母键Q</td>
-</tr>
-<tr>
-<td style="text-align: left">46</td>
-<td style="text-align: left">KEYCODE_R</td>
-<td style="text-align: left">字母键R</td>
-</tr>
-<tr>
-<td style="text-align: left">47</td>
-<td style="text-align: left">KEYCODE_S</td>
-<td style="text-align: left">字母键S</td>
-</tr>
-<tr>
-<td style="text-align: left">48</td>
-<td style="text-align: left">KEYCODE_T</td>
-<td style="text-align: left">字母键T</td>
-</tr>
-<tr>
-<td style="text-align: left">49</td>
-<td style="text-align: left">KEYCODE_U</td>
-<td style="text-align: left">字母键U</td>
-</tr>
-<tr>
-<td style="text-align: left">50</td>
-<td style="text-align: left">KEYCODE_V</td>
-<td style="text-align: left">字母键V</td>
-</tr>
-<tr>
-<td style="text-align: left">51</td>
-<td style="text-align: left">KEYCODE_W</td>
-<td style="text-align: left">字母键W</td>
-</tr>
-<tr>
-<td style="text-align: left">52</td>
-<td style="text-align: left">KEYCODE_X</td>
-<td style="text-align: left">字母键X</td>
-</tr>
-<tr>
-<td style="text-align: left">53</td>
-<td style="text-align: left">KEYCODE_Y</td>
-<td style="text-align: left">字母键Y</td>
-</tr>
-<tr>
-<td style="text-align: left">54</td>
-<td style="text-align: left">KEYCODE_Z</td>
-<td style="text-align: left">字母键Z</td>
-</tr>
-<tr>
-<td style="text-align: left">55</td>
-<td style="text-align: left">KEYCODE_COMMA</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">56</td>
-<td style="text-align: left">KEYCODE_PERIOD</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">57</td>
-<td style="text-align: left">KEYCODE_ALT_LEFT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">58</td>
-<td style="text-align: left">KEYCODE_ALT_RIGHT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">59</td>
-<td style="text-align: left">KEYCODE_SHIFT_LEFT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">60</td>
-<td style="text-align: left">KEYCODE_SHIFT_RIGHT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">61</td>
-<td style="text-align: left">KEYCODE_TAB</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">62</td>
-<td style="text-align: left">KEYCODE_SPACE</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">63</td>
-<td style="text-align: left">KEYCODE_SYM</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">64</td>
-<td style="text-align: left">KEYCODE_EXPLORER</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">65</td>
-<td style="text-align: left">KEYCODE_ENVELOPE</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">66</td>
-<td style="text-align: left">KEYCODE_ENTER</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">67</td>
-<td style="text-align: left">KEYCODE_DEL</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">68</td>
-<td style="text-align: left">KEYCODE_GRAVE</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">69</td>
-<td style="text-align: left">KEYCODE_MINUS</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">70</td>
-<td style="text-align: left">KEYCODE_EQUALS</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">71</td>
-<td style="text-align: left">KEYCODE_LEFT_BRACKET</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">72</td>
-<td style="text-align: left">KEYCODE_RIGHT_BRACKET</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">73</td>
-<td style="text-align: left">KEYCODE_BACKSLASH</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">74</td>
-<td style="text-align: left">KEYCODE_SEMICOLON</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">75</td>
-<td style="text-align: left">KEYCODE_APOSTROPHE</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">76</td>
-<td style="text-align: left">KEYCODE_SLASH</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">77</td>
-<td style="text-align: left">KEYCODE_AT</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">78</td>
-<td style="text-align: left">KEYCODE_NUM</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">79</td>
-<td style="text-align: left">KEYCODE_HEADSETHOOK</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">80</td>
-<td style="text-align: left">KEYCODE_FOCUS</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">81</td>
-<td style="text-align: left">KEYCODE_PLUS</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">82</td>
-<td style="text-align: left">KEYCODE_MENU</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">83</td>
-<td style="text-align: left">KEYCODE_NOTIFICATION</td>
-<td style="text-align: left"></td>
-</tr>
-<tr>
-<td style="text-align: left">84</td>
-<td style="text-align: left">KEYCODE_SEARCH</td>
-<td style="text-align: left"></td>
-</tr>
-</tbody>
-</table>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/03/05</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207869006.html">
-                
-                  <h1>Mac安装配置appium</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>因为公司需求，需要安装Appium来实现对手机APP的自动化测试，提升工作效率。所以来学习并记录一下Appium的安装以及使用的步骤，方便自己以后对App测试环境搭建的操作。</p>
-
-<h2 id="toc_1">一、安装Appium</h2>
-
-<h3 id="toc_2">(二) 安装Homebrew</h3>
-
-<ul>
-<li><code>$ /usr/bin/ruby -e &quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;  #下载</code></li>
-<li><code>$ brew update #更新</code></li>
-<li><code>$ brew -v #查看是否安装好，以及其版本号</code></li>
-</ul>
-
-<h3 id="toc_3">(三) 安装Node.js</h3>
-
-<p>使用homebrew来安装Node.js </p>
-
-<ul>
-<li><code>$ brew install node #安装</code></li>
-<li><code>$ node -v #查看是否安装好，以及其版本号</code></li>
-</ul>
-
-<h3 id="toc_4">(四) 安装npm</h3>
-
-<ul>
-<li><code>$ brew install npm</code></li>
-</ul>
-
-<h3 id="toc_5">(五) 安装appium服务端</h3>
-
-<p>推荐使用cnpm来安装：<a href="https://npm.taobao.org/">淘宝 NPM 镜像</a> 10分钟同步npmjs.org镜像，使用方式和npm完全一致</p>
-
-<ul>
-<li><code>$ npm install cnpm -g --registry=https://registry.npm.taobao.org</code></li>
-<li><code>$ npm view appium versions #查看appium所有的版本号</code></li>
-<li><code>$ cnpm install -g appium --no-cache $ cnpm install -g appium $ cnpm install -g appium-doctor</code></li>
-</ul>
-
-<h3 id="toc_6">(六) 检查appium环境检测</h3>
-
-<p>在环境监测中打叉的就是没安装成功或者环境没有配置完全的</p>
-
-<ul>
-<li><code>appium-doctor</code></li>
-</ul>
-
-<h4 id="toc_7">1、appium环境常见问题解决</h4>
-
-<h5 id="toc_8">(1) Xcode Command Line Tools are NOT installed!</h5>
-
-<pre class="line-numbers"><code class="language-text">- `xcode-select --install   #按照提示安装即可`
-</code></pre>
-
-<h5 id="toc_9">(2) Carthage was NOT found</h5>
-
-<pre class="line-numbers"><code class="language-text">- `$ brew install carthage       #carthage：类似cocoapods管理第三方代码，自动将工程编译为动态库，所以仅支持iOS8以上`
-</code></pre>
-
-<h5 id="toc_10">(3) ANDROID_HOME is NOT set!</h5>
-
-<pre class="line-numbers"><code class="language-text">- 使用最新版本Java
-- 修改Mac的开发环境
-- `vi .bash_profile`
-- `export JAVA_HOME=/Library/Java/JavaVirtualMachines/jdk1.8.0_111.jdk(版本记得改)/Contents/Home`
-- `export ANDROID_HOME=/Users/YourMacName/Library/Android/sdk`
-- `export PATH=$PATH:$ANDROID_HOME/tools:$ANDROID_HOME/platform-tools:${JAVA_HOME}/bin`
-- 修改完配置文件记得保存退出，然后`source .bash_profile`
-- 如果有问题记得修改在终端的Shall打开方式，调整为命令
-</code></pre>
-
-<h3 id="toc_11">(七) 安装appium客户端（Python为例）</h3>
-
-<ul>
-<li><code>brew search python   #查看可安装的python版本</code></li>
-<li><code>brew install python3     #安装python3</code></li>
-<li><code>pip install Appium-Python-Client   #安装python客户端</code>  </li>
-</ul>
-
-<h3 id="toc_12">(八) 安装支持iOS测试的插件</h3>
-
-<ul>
-<li><code>$ brew install libimobiledevice --HEAD  # install from HEAD to get important updates</code></li>
-<li><code>$ brew install ideviceinstaller         # 只是对iOS9有用</code></li>
-<li><code>$ npm install -g ios-deploy                # iOS10 以后的版本安装ios-deploy</code></li>
-<li><code>$ sudo gem install xcpretty            # 真机需要安装 xcpretty</code></li>
-</ul>
-
-<h2 id="toc_13">二、Appium测试</h2>
-
-<h3 id="toc_14">(一) iOS模拟器测试</h3>
-
-<ul>
-<li><code>xcodebuild -sdk iphonesimulator   #在xcodeproj项目工程目录下执行，编译生成build文件夹，并在其中生成app文件</code></li>
-<li><code>npm install -g authorize-ios   #安装iOS模拟器启动器</code> </li>
-<li><code>sudo authorize-ios   #启动iOS模拟器</code> </li>
-<li><code>appium &amp;    #启动appium服务器</code> </li>
-<li><code>python ***.py     #另开一个终端执行python脚本</code> </li>
-<li>iOS模拟器自动开启，安装应用并开始执行测试脚本</li>
-</ul>
-
-<h3 id="toc_15">(二) Android模拟器测试</h3>
-
-<ul>
-<li><code>appium -a 127.0.0.1 -p 4723 -U db3489d --no-reset</code></li>
-</ul>
-
-<h2 id="toc_16">三、Appium命令</h2>
-
-<h3 id="toc_17">(一) 服务端启动命令</h3>
-
-<p><strong>服务器标志</strong><br/>
-所有的标志都是可选的，但是有一些标志需要组合在一起才能生效。</p>
-
-<table>
-<thead>
-<tr>
-<th>标志</th>
-<th>默认值</th>
-<th>描述</th>
-<th>例子</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>--shell</td>
-<td>null</td>
-<td>进入 REPL 模式</td>
-<td></td>
-</tr>
-<tr>
-<td>--localizable-strings-dir</td>
-<td>en.lproj</td>
-<td>IOS only: 定位 .strings所在目录的相对路径</td>
-<td>--localizable-strings-dir en.lproj</td>
-</tr>
-<tr>
-<td>--app</td>
-<td>null</td>
-<td>iOS: 基于模拟器编译的 app 的绝对路径或者设备目标的 bundle_id； Android: apk 文件的绝对路径--app /abs/path/to/my.app</td>
-<td></td>
-</tr>
-<tr>
-<td>--ipa</td>
-<td>null</td>
-<td>(IOS-only) .ipa 文件的绝对路径</td>
-<td>--ipa /abs/path/to/my.ipa</td>
-</tr>
-<tr>
-<td>-U, --udid</td>
-<td>null</td>
-<td>连接物理设备的唯一设备标识符</td>
-<td>--udid 1adsf-sdfas-asdf-123sdf</td>
-</tr>
-<tr>
-<td>-a, --address</td>
-<td>0.0.0.0</td>
-<td>监听的 ip 地址</td>
-<td>--address 0.0.0.0</td>
-</tr>
-<tr>
-<td>-p, --port</td>
-<td>4723</td>
-<td>监听的端口</td>
-<td>--port 4723</td>
-</tr>
-<tr>
-<td>-ca, --callback-address</td>
-<td>null</td>
-<td>回调IP地址 (默认: 相同的IP地址)</td>
-<td>--callback-address 127.0.0.1</td>
-</tr>
-<tr>
-<td>-cp, --callback-port</td>
-<td>null</td>
-<td>回调端口号 (默认: 相同的端口号)</td>
-<td>--callback-port 4723</td>
-</tr>
-<tr>
-<td>-bp, --bootstrap-port</td>
-<td>4724</td>
-<td>(Android-only) 连接设备的端口号</td>
-<td>--bootstrap-port 4724</td>
-</tr>
-<tr>
-<td>-k, --keep-artifacts</td>
-<td>false</td>
-<td>弃用，无效。trace信息现在保留tmp目录下，每次运行前会清除该目录中的信息。 也可以参考 –trace-dir 。</td>
-<td></td>
-</tr>
-<tr>
-<td>-r, --backend-retries</td>
-<td>3</td>
-<td>(iOS-only) 遇到 crash 或者 超时，Instrument 重新启动的次数。</td>
-<td>--backend-retries 3</td>
-</tr>
-<tr>
-<td>--session-override</td>
-<td>false</td>
-<td>允许 session 被覆盖 (冲突的话)</td>
-<td></td>
-</tr>
-<tr>
-<td>--full-reset</td>
-<td>false</td>
-<td>(iOS) 删除整个模拟器目录。 (Android) 通过卸载应用（而不是清除数据）重置应用状态。在 Android 上，session 完成后也会删除应用。</td>
-<td></td>
-</tr>
-<tr>
-<td>--no-reset</td>
-<td>false</td>
-<td>session 之间不重置应用状态 (iOS: 不删除应用的 plist 文件； Android: 在创建一个新的 session 前不删除应用。)</td>
-<td></td>
-</tr>
-<tr>
-<td>-l, --pre-launch</td>
-<td>false</td>
-<td>在第一个 session 前，预启动应用 (iOS 需要 –app 参数，Android 需要 –app-pkg 和 –app-activity)</td>
-<td></td>
-</tr>
-<tr>
-<td>-lt, --launch-timeout  90000   (iOS-only) 等待 Instruments 启动的时间</td>
-<td></td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>-g, --log</td>
-<td>null</td>
-<td>将日志输出到指定文件</td>
-<td>--log /path/to/appium.log</td>
-</tr>
-<tr>
-<td>--log-level</td>
-<td>debug</td>
-<td>日志级别; 默认 (console[:file]): debug[:debug]</td>
-<td>--log-level debug</td>
-</tr>
-<tr>
-<td>--log-timestamp</td>
-<td>false</td>
-<td>在终端输出里显示时间戳</td>
-<td></td>
-</tr>
-<tr>
-<td>--local-timezone</td>
-<td>false</td>
-<td>使用本地时间戳</td>
-<td></td>
-</tr>
-<tr>
-<td>--log-no-colors</td>
-<td>false</td>
-<td>不在终端输出中显示颜色</td>
-<td></td>
-</tr>
-<tr>
-<td>-G, --webhook</td>
-<td>null</td>
-<td>同时发送日志到 HTTP 监听器</td>
-<td>--webhook localhost:9876</td>
-</tr>
-<tr>
-<td>--native-instruments-lib</td>
-<td>false</td>
-<td>(IOS-only) iOS 内建了一个怪异的不可能避免的延迟。我们在 Appium 里修复了它。如果你想用原来的，你可以使用这个参数。</td>
-<td></td>
-</tr>
-<tr>
-<td>--app-pkg</td>
-<td>null</td>
-<td>(Android-only) 你要运行的apk的java包。 (例如， com.example.android.myApp)</td>
-<td>--app-pkg com.example.android.myApp</td>
-</tr>
-<tr>
-<td>--app-activity</td>
-<td>null</td>
-<td>(Android-only) 打开应用时，启动的 Activity 的名字(比如， MainActivity)</td>
-<td>--app-activity MainActivity</td>
-</tr>
-<tr>
-<td>--app-wait-package</td>
-<td>false</td>
-<td>(Android-only) 你想等待的 Activity 的包名。(比如， com.example.android.myApp)</td>
-<td>--app-wait-package com.example.android.myApp</td>
-</tr>
-<tr>
-<td>--app-wait-activity</td>
-<td>false</td>
-<td>(Android-only) 你想等待的 Activity 名字(比如， SplashActivity)</td>
-<td>--app-wait-activity SplashActivity</td>
-</tr>
-<tr>
-<td>--android-coverage</td>
-<td>false</td>
-<td>(Android-only) 完全符合条件的 instrumentation 类。 作为命令 adb shell am instrument -e coverage true -w 的 -w 的参数</td>
-<td>--android-coverage com.my.Pkg/com.my.Pkg.instrumentation.MyInstrumentation</td>
-</tr>
-<tr>
-<td>--avd</td>
-<td>null</td>
-<td>(Android-only) 要启动的 avd 的名字</td>
-<td></td>
-</tr>
-<tr>
-<td>--avd-args</td>
-<td>null</td>
-<td>(Android-only) 添加额外的参数给要启动avd</td>
-<td>--avd-args -no-snapshot-load</td>
-</tr>
-<tr>
-<td>--device-ready-timeout</td>
-<td>5</td>
-<td>(Android-only) 等待设备准备好的时间，以秒为单位</td>
-<td>--device-ready-timeout 5</td>
-</tr>
-<tr>
-<td>--safari</td>
-<td>false</td>
-<td>(IOS-Only) 使用 Safari 应用</td>
-<td></td>
-</tr>
-<tr>
-<td>--device-name</td>
-<td>null</td>
-<td>待使用的移动设备名字</td>
-<td>--device-name iPhone Retina (4-inch), Android Emulator</td>
-</tr>
-<tr>
-<td>--platform-name</td>
-<td>null</td>
-<td>移动平台的名称: iOS, Android, or FirefoxOS</td>
-<td>--platform-name iOS</td>
-</tr>
-<tr>
-<td>--platform-version</td>
-<td>null</td>
-<td>移动平台的版本</td>
-<td>--platform-version 7.1</td>
-</tr>
-<tr>
-<td>--automation-name</td>
-<td>null</td>
-<td>自动化工具的名称: Appium or Selendroid</td>
-<td>--automation-name Appium</td>
-</tr>
-<tr>
-<td>--browser-name</td>
-<td>null</td>
-<td>移动浏览器的名称: Safari or Chrome</td>
-<td>--browser-name Safari</td>
-</tr>
-<tr>
-<td>--default-device, -dd</td>
-<td>false</td>
-<td>(IOS-Simulator-only) 使用instruments自己启动的默认模拟器</td>
-<td></td>
-</tr>
-<tr>
-<td>--force-iphone</td>
-<td>false</td>
-<td>(IOS-only) 无论应用要用什么模拟器，强制使用 iPhone 模拟器</td>
-<td></td>
-</tr>
-<tr>
-<td>--force-ipad</td>
-<td>false</td>
-<td>(IOS-only) 无论应用要用什么模拟器，强制使用 iPad 模拟器</td>
-<td></td>
-</tr>
-<tr>
-<td>--language</td>
-<td>null</td>
-<td>iOS / Android 模拟器的语言</td>
-<td>--language en</td>
-</tr>
-<tr>
-<td>--locale</td>
-<td>null</td>
-<td>Locale for the iOS simulator / Android Emulator</td>
-<td>--locale en_US</td>
-</tr>
-<tr>
-<td>--calendar-format</td>
-<td>null</td>
-<td>(IOS-only) iOS 模拟器的日历格式</td>
-<td>--calendar-format gregorian</td>
-</tr>
-<tr>
-<td>--orientation</td>
-<td>null</td>
-<td>(IOS-only) 初始化请求时，使用 LANDSCAPE (横屏) 或者 PORTRAIT (竖屏)</td>
-<td>--orientation LANDSCAPE</td>
-</tr>
-<tr>
-<td>--tracetemplate</td>
-<td>null</td>
-<td>(IOS-only) 指定 Instruments 使用的 tracetemplate 文件</td>
-<td>--tracetemplate /Users/me/Automation.tracetemplate</td>
-</tr>
-<tr>
-<td>--show-sim-log</td>
-<td>false</td>
-<td>(IOS-only) 如果设置了， iOS 模拟器的日志会写到终端上来</td>
-<td></td>
-</tr>
-<tr>
-<td>--show-ios-log</td>
-<td>false</td>
-<td>(IOS-only) 如果设置了， iOS 系统的日志会写到终端上来</td>
-<td></td>
-</tr>
-<tr>
-<td>--nodeconfig</td>
-<td>null</td>
-<td>指定 JSON 格式的配置文件 ，用来在 selenium grid 里注册 appiumd</td>
-<td>--nodeconfig /abs/path/to/nodeconfig.json</td>
-</tr>
-<tr>
-<td>-ra, --robot-address</td>
-<td>0.0.0.0</td>
-<td>robot 的 ip 地址</td>
-<td>--robot-address 0.0.0.0</td>
-</tr>
-<tr>
-<td>-rp, --robot-port</td>
-<td>-1</td>
-<td>robot 的端口地址</td>
-<td>--robot-port 4242</td>
-</tr>
-<tr>
-<td>--selendroid-port</td>
-<td>8080</td>
-<td>用来和 Selendroid 交互的本地端口</td>
-<td>--selendroid-port 8080</td>
-</tr>
-<tr>
-<td>--chromedriver-port</td>
-<td>9515</td>
-<td>ChromeDriver运行的端口</td>
-<td>--chromedriver-port 9515</td>
-</tr>
-<tr>
-<td>--chromedriver-executable</td>
-<td>null</td>
-<td>ChromeDriver 可执行文件的完整路径</td>
-<td></td>
-</tr>
-<tr>
-<td>--use-keystore</td>
-<td>false</td>
-<td>(Android-only) 设置签名 apk 的 keystore</td>
-<td></td>
-</tr>
-<tr>
-<td>--keystore-path</td>
-<td>(Android-only) keystore 的路径</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>--keystore-password</td>
-<td>android</td>
-<td>(Android-only) keystore 的密码</td>
-<td></td>
-</tr>
-<tr>
-<td>--key-alias</td>
-<td>androiddebugkey</td>
-<td>(Android-only) Key 的别名</td>
-<td></td>
-</tr>
-<tr>
-<td>--key-password</td>
-<td>android</td>
-<td>(Android-only) Key 的密码</td>
-<td></td>
-</tr>
-<tr>
-<td>--show-config</td>
-<td>false</td>
-<td>打印 Appium 服务器的配置信息，然后退出</td>
-<td></td>
-</tr>
-<tr>
-<td>--no-perms-check</td>
-<td>false</td>
-<td>跳过Appium对是否可以读/写必要文件的检查</td>
-<td></td>
-</tr>
-<tr>
-<td>--command-timeout</td>
-<td>60</td>
-<td>默认所有会话的接收命令超时时间 (在超时时间内没有接收到新命令，自动关闭会话)。 会被新的超时时间覆盖</td>
-<td></td>
-</tr>
-<tr>
-<td>--keep-keychains</td>
-<td>false</td>
-<td>(iOS) 当 Appium 启动或者关闭的时候，是否保留 keychains (Library/Keychains)</td>
-<td></td>
-</tr>
-<tr>
-<td>--strict-caps</td>
-<td>false</td>
-<td>如果所选设备是appium不承认的有效设备，会导致会话失败</td>
-<td></td>
-</tr>
-<tr>
-<td>--isolate-sim-device</td>
-<td>false  Xcode 6存在一个bug，那就是一些平台上如果其他模拟器设备先被删除时某个特定的模拟器只能在没有任何错误的情况下被建立。这个选项导致了Appium不得不删除除了正在使用设备以外其他所有的设备。请注意这是永久性删除，你可以使用simctl或xcode管理被Appium使用的设备类别。</td>
-<td></td>
-<td></td>
-</tr>
-<tr>
-<td>--tmp</td>
-<td>null</td>
-<td>可以被Appium用来管理临时文件的目录（绝对路径），比如存放需要移动的内置iOS应用程序。 默认的变量为 APPIUM_TMP_DIR ，在 *nix/Mac 为 /tmp 在windows上使用环境便令 TEMP 设定的目录。</td>
-<td></td>
-</tr>
-<tr>
-<td>--trace-dir</td>
-<td>null</td>
-<td>用于保存iOS instruments trace的 appium 目录，是绝对路径， 默认为 /appium-instruments</td>
-<td></td>
-</tr>
-<tr>
-<td>--intent-action</td>
-<td>android.intent.action.MAIN</td>
-<td>(Android-only) 用于启动 activity 的intent action</td>
-<td>--intent-action android.intent.action.MAIN</td>
-</tr>
-<tr>
-<td>--intent-category</td>
-<td>android.intent.category.LAUNCHER</td>
-<td>(Android-only) 用于启动 activity 的intent category</td>
-<td>--intent-category android.intent.category.APP_CONTACTS</td>
-</tr>
-<tr>
-<td>--intent-flags</td>
-<td>0x10200000</td>
-<td>(Android-only) 启动 activity 的标志</td>
-<td>--intent-flags 0x10200000</td>
-</tr>
-<tr>
-<td>--intent-args</td>
-<td>null</td>
-<td>(Android-only) 启动 activity 时附带额外的 intent 参数</td>
-<td>--intent-args 0x10200000</td>
-</tr>
-<tr>
-<td>--suppress-adb-kill-server</td>
-<td>false</td>
-<td>(Android-only) 如果被设定，阻止Appium杀掉adb实例。</td>
-<td></td>
-</tr>
-</tbody>
-</table>
-
-<h3 id="toc_18">(二) Android测试用例编写</h3>
-
-<h4 id="toc_19">1、例子:</h4>
-
-<pre class="line-numbers"><code class="language-python">import os
-
-import unittest
-from appium import webdriver
-from time import sleep
-
-PATH = lambda p: os.path.abspath(
-    os.path.join(os.path.dirname(__file__),p)
-)
-
-class XingQiuAndroidTests(unittest.TestCase):
-
-    def setUp(self):
-        desired_caps = {}
-        desired_caps[&#39;deviceName&#39;] = &#39;emulator-5554&#39;  #adb devices查到的设备名
-        desired_caps[&#39;platformName&#39;] = &#39;Android&#39;
-        desired_caps[&#39;platformVersion&#39;] = &#39;4.4&#39;
-        desired_caps[&#39;app&#39;] = PATH(
-            &#39;../../../Users/jiangruoming/Desktop/***.apk&#39;
-        )
-        desired_caps[&#39;appPackage&#39;] = &#39;com.***.***&#39;  #被测App的包名
-        desired_caps[&#39;appActivity&#39;] = &#39;.****&#39; #启动时的Activity
-
-        self.driver = webdriver.Remote(&#39;http://localhost:4723/wd/hub&#39;, desired_caps)
-
-    #earDown 方法在每个测试方法执行后调用，这个地方做所有清理工作，如退出
-    def tearDown(self):
-        self.driver.quit()
-
-    #放置的就是我们的测试脚本了，这部分我们并不陌生；因为我们执行的脚本就在这里。
-    def test_add_contacts(self):
-        el = self.driver.find_element_by_id(&quot;com.***.***:id/sign_phone&quot;)
-        el.click()
-
-        phone_number = self.driver.find_element_by_id(&quot;com.***.***:id/et_user_phone&quot;)
-        code = self.driver.find_element_by_id(&quot;com.***.***:id/et_smscode&quot;)
-        phone_number.send_keys(&quot;*********&quot;)
-        code.send_keys(&quot;****&quot;)
-
-        btn = self.driver.find_element_by_id(&quot;com.***.***:id/btn_finish&quot;)
-        btn.click()
-
-if __name__ == &#39;__main__&#39;:
-    suite = unittest.TestLoader().loadTestsFromTestCase(XingQiuAndroidTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-</code></pre>
-
-<h4 id="toc_20">2、测试流程</h4>
-
-<h5 id="toc_21">(1) 启动Appium</h5>
-
-<p><code>appium -a 127.0.0.1 -p 4723 --log /path/to/appium.log</code></p>
-
-<h5 id="toc_22">(2) 启动Android模拟器</h5>
-
-<p>由于测试apk不支持X86平台，所以Genymotion无法支持运行，原生arm模拟器运行过慢(胃都等疼了)。试过多个模拟器后，最终选定了夜神模拟器，效果还是不错的。但是由于其主要用于PC平台运行Android游戏，所以用于开发平台还是需要进行配置。</p>
-
-<h6 id="toc_23">a、adb配置</h6>
-
-<p>在Mac环境中加入adb的环境变量<br/><br/>
-<code>vi .bash_profile</code><br/><br/>
-<code>export PATH=/Users/Path/To/Android/sdk/platform-tools/:$PATH</code><br/><br/>
-<code>source .bash_profile</code>  </p>
-
-<h6 id="toc_24">b、adb连接</h6>
-
-<p>之后进入夜神的包内容中在adb所在文件夹运行adb连接命令<br/><br/>
-<code>adb connect 127.0.0.1:62001</code><br/>
-这样<code>adb devices</code>就能显示夜神模拟器的Device ID</p>
-
-<h5 id="toc_25">(3) 运行脚本</h5>
-
-<h3 id="toc_26">(三) iOS测试用例编写</h3>
-
-<h4 id="toc_27">1、例子:</h4>
-
-<pre class="line-numbers"><code class="language-python">import unittest
-import os
-from appium import webdriver
-from time import sleep
-
-
-PATH = lambda p: os.path.abspath(
-    os.path.join(os.path.dirname(__file__),p)
-)
-
-class XingQiuiOSTests(unittest.TestCase):
-
-    def setUp(self):
-        desired_caps = {}
-        desired_caps[&#39;platformName&#39;] = &#39;iOS&#39;
-        desired_caps[&#39;platformVersion&#39;] = &#39;10.2&#39;
-        desired_caps[&#39;deviceName&#39;] = &#39;iPhone Simulator&#39;
-        desired_caps[&#39;app&#39;] = PATH(&#39;../../../Users/jiangruoming/Desktop/***.app&#39;)
-
-        self.driver = webdriver.Remote(&#39;http://localhost:4723/wd/hub&#39;, desired_caps)
-
-    #def tearDown(self):
-        #self.driver.quit()
-
-    def test_add_contacts(self):
-
-        el2 = self.driver.find_elements_by_accessibility_id(&#39;Allow&#39;)
-
-        if el2:
-            el2[0].click()
-
-        el3 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeButton&#39;)[0]
-        el3.click()
-
-        el4 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeTextField&#39;)[0]
-        el4.send_keys(&quot;15088678313&quot;)
-
-        el5 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeTextField&#39;)[1]
-        el5.send_keys(&quot;1234&quot;)
-
-        el6 = self.driver.find_elements_by_class_name(&#39;XCUIElementTypeButton&#39;)[0]
-        el6.click()
-
-if __name__ == &#39;__main__&#39;:
-    suite = unittest.TestLoader().loadTestsFromTestCase(XingQiuiOSTests)
-    unittest.TextTestRunner(verbosity=2).run(suite)
-</code></pre>
-
-<h4 id="toc_28">2、XCUIElementType</h4>
-
-<pre class="line-numbers"><code class="language-python">XCUIElementTypeAny,
-    XCUIElementTypeUnknown,
-    XCUIElementTypeApplication,
-    XCUIElementTypeGroup,
-    XCUIElementTypeWindow,
-    XCUIElementTypeSheet,
-    XCUIElementTypeDrawer,
-    XCUIElementTypeAlert,
-    XCUIElementTypeDialog,
-    XCUIElementTypeButton,
-    XCUIElementTypeRadioButton,
-    XCUIElementTypeRadioGroup,
-    XCUIElementTypeCheckBox,
-    XCUIElementTypeDisclosureTriangle,
-    XCUIElementTypePopUpButton,
-    XCUIElementTypeComboBox,
-    XCUIElementTypeMenuButton,
-    XCUIElementTypeToolbarButton,
-    XCUIElementTypePopover,
-    XCUIElementTypeKeyboard,
-    XCUIElementTypeKey,
-    XCUIElementTypeNavigationBar,
-    XCUIElementTypeTabBar,
-    XCUIElementTypeTabGroup,
-    XCUIElementTypeToolbar,
-    XCUIElementTypeStatusBar,
-    XCUIElementTypeTable,
-    XCUIElementTypeTableRow,
-    XCUIElementTypeTableColumn,
-    XCUIElementTypeOutline,
-    XCUIElementTypeOutlineRow,
-    XCUIElementTypeBrowser,
-    XCUIElementTypeCollectionView,
-    XCUIElementTypeSlider,
-    XCUIElementTypePageIndicator,
-    XCUIElementTypeProgressIndicator,
-    XCUIElementTypeActivityIndicator,
-    XCUIElementTypeSegmentedControl,
-    XCUIElementTypePicker,
-    XCUIElementTypePickerWheel,
-    XCUIElementTypeSwitch,
-    XCUIElementTypeToggle,
-    XCUIElementTypeLink,
-    XCUIElementTypeImage,
-    XCUIElementTypeIcon,
-    XCUIElementTypeSearchField,
-    XCUIElementTypeScrollView,
-    XCUIElementTypeScrollBar,
-    XCUIElementTypeStaticText,
-    XCUIElementTypeTextField,
-    XCUIElementTypeDateField,
-    XCUIElementTypeTimeField,
-    XCUIElementTypeTextView,
-    XCUIElementTypeMenu,
-    XCUIElementTypeMenuItem,
-    XCUIElementTypeMenuBar,
-    XCUIElementTypeMenuBarItem,
-    XCUIElementTypeMap,
-    XCUIElementTypeWebView,
-    XCUIElementTypeIncrementArrow,
-    XCUIElementTypeDecrementArrow,
-    XCUIElementTypeTimeline,
-    XCUIElementTypeRatingIndicator,
-    XCUIElementTypeValueIndicator,
-    XCUIElementTypeSplitGroup,
-    XCUIElementTypeSplitter,
-    XCUIElementTypeRelevanceIndicator,
-    XCUIElementTypeColorWell,
-    XCUIElementTypeHelpTag,
-    XCUIElementTypeMatte,
-    XCUIElementTypeDockItem,
-    XCUIElementTypeRuler,
-    XCUIElementTypeRulerMarker,
-    XCUIElementTypeGrid,
-    XCUIElementTypeLevelIndicator,
-    XCUIElementTypeCell,
-    XCUIElementTypeLayoutArea,
-    XCUIElementTypeLayoutItem,
-    XCUIElementTypeHandle,
-</code></pre>
-
-<h4 id="toc_29">3、Appium Python API</h4>
-
-<h5 id="toc_30">(1) contexts</h5>
-
-<p><code>contexts(self)</code>:<br/><br/>
-Returns the contexts within the current session.<br/>
-返回当前会话中的上下文，使用后可以识别H5页面的控件<br/>
-Usage:<br/><br/>
-    <code>driver.contexts</code><br/><br/>
-用法:<br/><br/>
-    <code>driver.contexts</code></p>
-
-<h5 id="toc_31">(2) current_context</h5>
-
-<p><code>current_context(self)</code>:<br/><br/>
-Returns the current context of the current session.<br/><br/>
-返回当前会话的当前上下文<br/><br/>
-Usage:<br/><br/>
-    <code>driver.current_context</code><br/><br/>
-用法:<br/><br/>
-    <code>driver. current_context</code></p>
-
-<h5 id="toc_32">(3) context</h5>
-
-<p><code>context(self)</code>:<br/><br/>
-Returns the current context of the current session.<br/><br/>
-返回当前会话的当前上下文。<br/><br/>
-Usage:<br/><br/>
-    <code>driver.context</code><br/><br/>
-用法:<br/><br/>
-    <code>driver. Context</code></p>
-
-<h5 id="toc_33">(4) find_element_by_ios_uiautomation</h5>
-
-<p><code>find_element_by_ios_uiautomation(self, uia_string)</code>:<br/><br/>
-Finds an element by uiautomation in iOS.<br/><br/>
-通过iOS uiautomation查找元素<br/><br/>
-Args:  </p>
-
-<ul>
-<li>uia_string - The element name in the iOS UIAutomation library<br/>
-Usage:<br/>
-<code>driver.find_element_by_ios_uiautomation(&#39;.elements()[1].cells()[2]&#39;)</code>
-用法:<br/>
-<code>dr. find_element_by_ios_uiautomation(‘elements’)</code></li>
-</ul>
-
-<h5 id="toc_34">(5) find_element_by_accessibility_id</h5>
-
-<p><code>find_element_by_accessibility_id(self, id)</code>:<br/><br/>
-Finds an element by accessibility id.<br/><br/>
-通过accessibility id查找元素<br/><br/>
-Args:<br/><br/>
-    - id - a string corresponding to a recursive element search using the Id/Name that the native Accessibility options utilize<br/><br/>
-Usage:<br/><br/>
-    <code>driver.find_element_by_accessibility_id()</code><br/><br/>
-用法:<br/><br/>
-    <code>driver.find_element_by_accessibility_id(‘id’)</code></p>
-
-<h5 id="toc_35">(6) scroll</h5>
-
-<p><code>scroll(self, origin_el, destination_el)</code>:<br/>
-Scrolls from one element to another<br/><br/>
-从元素origin_el滚动至元素destination_el<br/><br/>
-Args:  </p>
-
-<ul>
-<li>originalEl - the element from which to being scrolling</li>
-<li>destinationEl - the element to scroll to<br/>
-Usage:<br/>
-<code>driver.scroll(el1, el2)</code>
-用法:<br/>
-<code>driver.scroll(el1,el2)</code></li>
-</ul>
-
-<h5 id="toc_36">(7) drag_and_drop</h5>
-
-<p><code>drag_and_drop(self, origin_el, destination_el)</code>:<br/><br/>
-Drag the origin element to the destination element<br/><br/>
-将元素origin_el拖到目标元素destination_el<br/><br/>
-Args:  </p>
-
-<ul>
-<li>originEl - the element to drag</li>
-<li>destinationEl - the element to drag to<br/>
-用法:<br/>
-<code>driver.drag_and_drop(el1,el2)</code></li>
-</ul>
-
-<h5 id="toc_37">(8) tap</h5>
-
-<p><code>tap(self, positions, duration=None)</code>:<br/><br/>
-Taps on an particular place with up to five fingers, holding for a certain time<br/><br/>
-模拟手指点击（最多五个手指），可设置按住时间长度（毫秒）<br/><br/>
-Args:</p>
-
-<ul>
-<li>positions - an array of tuples representing the x/y coordinates of the fingers to tap. Length can be up to five.</li>
-<li>duration - (optional) length of time to tap, in ms<br/>
-Usage:<br/>
-<code>driver.tap([(100, 20), (100, 60), (100, 100)], 500)</code>
-用法:<br/>
-<code>driver.tap([(x,y),(x1,y1)],500)</code></li>
-</ul>
-
-<h5 id="toc_38">(9) swipe</h5>
-
-<p><code>swipe(self, start_x, start_y, end_x, end_y, duration=None)</code>:<br/><br/>
-Swipe from one point to another point, for an optional duration.<br/><br/>
-从A点滑动至B点，滑动时间为毫秒<br/><br/>
-Args:<br/><br/>
-    - start_x - x-coordinate at which to start<br/>
-    - start_y - y-coordinate at which to start<br/>
-    - end_x - x-coordinate at which to stop<br/>
-    - end_y - y-coordinate at which to stop<br/>
-    - duration - (optional) time to take the swipe, in ms.  </p>
-
-<p>Usage:<br/><br/>
-    <code>driver.swipe(100, 100, 100, 400)</code><br/>
-用法:<br/><br/>
-    <code>driver.swipe(x1,y1,x2,y2,500)</code></p>
-
-<h5 id="toc_39">(10) flick</h5>
-
-<p><code>flick(self, start_x, start_y, end_x, end_y)</code>:<br/><br/>
-Flick from one point to another point.<br/><br/>
-按住A点后快速滑动至B点<br/><br/>
-Args:<br/><br/>
-    - start_x - x-coordinate at which to start<br/>
-    - start_y - y-coordinate at which to start<br/>
-    - end_x - x-coordinate at which to stop<br/>
-    - end_y - y-coordinate at which to stop<br/><br/>
-Usage:<br/><br/>
-    <code>driver.flick(100, 100, 100, 400)</code><br/>
-用法:<br/><br/>
-    <code>driver.flick(x1,y1,x2,y2)</code></p>
-
-<h5 id="toc_40">(11) pinch</h5>
-
-<p><code>pinch(self, element=None, percent=200, steps=50)</code>:<br/><br/>
-Pinch on an element a certain amount<br/><br/>
-在元素上执行模拟双指捏（缩小操作）<br/><br/>
-Args:  </p>
-
-<ul>
-<li>element - the element to pinch</li>
-<li>percent - (optional) amount to pinch. Defaults to 200%</li>
-<li>steps - (optional) number of steps in the pinch action</li>
-</ul>
-
-<p>Usage:<br/><br/>
-    <code>driver.pinch(element)</code><br/>
-用法:<br/>
-    <code>driver.pinch(element)</code></p>
-
-<h5 id="toc_41">(12) zoom</h5>
-
-<p><code>zoom(self, element=None, percent=200, steps=50)</code>:<br/>
-Zooms in on an element a certain amount<br/><br/>
-在元素上执行放大操作<br/><br/>
-Args:  </p>
-
-<ul>
-<li>element - the element to zoom</li>
-<li>percent - (optional) amount to zoom. Defaults to 200%</li>
-<li>steps - (optional) number of steps in the zoom action</li>
-</ul>
-
-<p>Usage:<br/>
-    <code>driver.zoom(element)</code><br/>
-用法: <br/>
-    <code>driver.zoom(element)</code></p>
-
-<h5 id="toc_42">(13) reset</h5>
-
-<p><code>reset(self)</code>:<br/><br/>
-Resets the current application on the device.<br/><br/>
-重置应用(类似删除应用数据)<br/><br/>
-用法:<br/>
-<code>driver.reset()</code></p>
-
-<h5 id="toc_43">(14) hide_keyboard</h5>
-
-<p><code>hide_keyboard(self, key_name=None, key=None, strategy=None)</code>:<br/>
-Hides the software keyboard on the device. In iOS, use <code>key_name</code> to press a particular key, or <code>strategy</code>. In Android, no parameters are used.<br/>
-隐藏键盘,iOS使用key_name隐藏，安卓不使用参数<br/>
-Args:  </p>
-
-<ul>
-<li>key_name - key to press</li>
-<li>strategy - strategy for closing the keyboard (e.g., <code>tapOutside</code>)</li>
-</ul>
-
-<p><code>driver.hide_keyboard()</code></p>
-
-<h5 id="toc_44">(15) keyevent</h5>
-
-<p><code>keyevent(self, keycode, metastate=None)</code>:<br/><br/>
-Sends a keycode to the device. Android only. Possible keycodes can be found in <a href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a>.<br/><br/>
-发送按键码（安卓仅有），按键码可以上网址中找到<br/><br/>
-Args:  </p>
-
-<ul>
-<li>keycode - the keycode to be sent to the device</li>
-<li>metastate - meta information about the keycode being sent</li>
-</ul>
-
-<p>用法:<br/>
-<code>dr.keyevent(‘4’)</code></p>
-
-<h5 id="toc_45">(16) press_keycode</h5>
-
-<p><code>press_keycode(self, keycode, metastate=None)</code>:<br/><br/>
-Sends a keycode to the device. Android only. Possible keycodes can be found in <a href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a>.<br/><br/>
-发送按键码（安卓仅有），按键码可以上网址中找到<br/>
-Args:   </p>
-
-<ul>
-<li>keycode - the keycode to be sent to the device</li>
-<li>metastate - meta information about the keycode being sent</li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.press_ keycode(‘4’)</code>  </p>
-
-<p>dr.keyevent(‘4’)与driver.press_ keycode(‘4’) 功能实现上一样的，都是按了返回键</p>
-
-<h5 id="toc_46">(17) long_press_keycode</h5>
-
-<p><code>long_press_keycode(self, keycode, metastate=None)</code>:<br/><br/>
-Sends a long press of keycode to the device. Android only. Possible keycodes can be found in <a href="http://developer.android.com/reference/android/view/KeyEvent.html">http://developer.android.com/reference/android/view/KeyEvent.html</a>.<br/><br/>
-发送一个长按的按键码（长按某键）<br/><br/>
-Args:   </p>
-
-<ul>
-<li>keycode - the keycode to be sent to the device</li>
-<li>metastate - meta information about the keycode being sent<br/>
-用法:<br/>
-<code>driver.long_press_keycode(‘4’)</code></li>
-</ul>
-
-<h5 id="toc_47">(18) current_activity</h5>
-
-<p><code>current_activity(self)</code>:<br/><br/>
-Retrieves the current activity on the device.<br/><br/>
-获取当前的activity<br/><br/>
-用法:<br/>
-<code>print(driver.current_activity())</code></p>
-
-<h5 id="toc_48">(19) wait_activity</h5>
-
-<p><code>wait_activity(self, activity, timeout, interval=1)</code>:<br/><br/>
-Wait for an activity: block until target activity presents or time out.<br/><br/>
-This is an Android-only method.<br/><br/>
-等待指定的activity出现直到超时，interval为扫描间隔1秒<br/><br/>
-即每隔几秒获取一次当前的activity<br/><br/>
-返回的True 或 False<br/><br/>
-Agrs:</p>
-
-<ul>
-<li>activity - target activity</li>
-<li>timeout - max wait time, in seconds</li>
-<li>interval - sleep interval between retries, in seconds</li>
-</ul>
-
-<p>用法:<br/>
-    <code>driver.wait_activity(‘.activity.xxx’,5,2)</code></p>
-
-<h5 id="toc_49">(20) background_app</h5>
-
-<p><code>background_app(self, seconds)</code>:<br/>
-Puts the application in the background on the device for a certain duration.<br/><br/>
-后台运行app多少秒<br/><br/>
-Args:  </p>
-
-<ul>
-<li>seconds - the duration for the application to remain in the background<br/>
-用法:
-<code>driver.background_app(5)</code><br/>
-置后台5秒后再运行</li>
-</ul>
-
-<h5 id="toc_50">(21) is_app_installed</h5>
-
-<p><code>is_app_installed(self, bundle_id)</code>:<br/><br/>
-Checks whether the application specified by <code>bundle_id</code> is installed on the device.<br/><br/>
-检查app是否有安装<br/><br/>
-返回 True or False<br/><br/>
-Args:  </p>
-
-<ul>
-<li>bundle_id - the id of the application to query<br/></li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.is_app_installed(“com.xxxx”)</code></p>
-
-<h5 id="toc_51">(22) install_app</h5>
-
-<p><code>install_app(self, app_path)</code>:<br/><br/>
-Install the application found at <code>app_path</code> on the device.<br/><br/>
-安装app,app_path为安装包路径<br/><br/>
-Args:  </p>
-
-<ul>
-<li>app_path - the local or remote path to the application to install</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.install_app(app_path)</code></p>
-
-<h5 id="toc_52">(23) remove_app</h5>
-
-<p><code>remove_app(self, app_id)</code>:<br/><br/>
-Remove the specified application from the device.<br/><br/>
-删除app<br/><br/>
-Args:  </p>
-
-<ul>
-<li>app_id - the application id to be removed<br/></li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.remove_app(“com.xxx.”)</code></p>
-
-<h5 id="toc_53">(24) launch_app</h5>
-
-<p><code>launch_app(self)</code>:<br/><br/>
-Start on the device the application specified in the desired capabilities.<br/><br/>
-启动app<br/><br/>
-用法:<br/><br/>
-<code>driver.launch_app()</code></p>
-
-<h5 id="toc_54">(25) close_app</h5>
-
-<p><code>close_app(self)</code>:<br/><br/>
-Stop the running application, specified in the desired capabilities, on the device.<br/><br/>
-关闭app<br/><br/>
-用法:<br/><br/>
-<code>driver.close_app()</code><br/><br/>
-启动和关闭app运行好像会出错</p>
-
-<h5 id="toc_55">(26) start_activity</h5>
-
-<p><code>start_activity(self, app_package, app_activity, **opts)</code>:<br/><br/>
-Opens an arbitrary activity during a test. If the activity belongs to another application, that application is started and the activity is opened.<br/><br/>
-This is an Android-only method.<br/><br/>
-在测试过程中打开任意活动。如果活动属于另一个应用程序，该应用程序的启动和活动被打开。<br/><br/>
-这是一个安卓的方法<br/><br/>
-Args:</p>
-
-<ul>
-<li>app_package - The package containing the activity to start.</li>
-<li>app_activity - The activity to start.</li>
-<li>app_wait_package - Begin automation after this package starts (optional).</li>
-<li>app_wait_activity - Begin automation after this activity starts (optional).</li>
-<li>intent_action - Intent to start (optional).</li>
-<li>intent_category - Intent category to start (optional).</li>
-<li>intent_flags - Flags to send to the intent (optional).</li>
-<li>optional_intent_arguments - Optional arguments to the intent (optional).</li>
-<li>stop_app_on_reset - Should the app be stopped on reset (optional)?</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.start_activity(app_package, app_activity)</code></p>
-
-<h5 id="toc_56">(27) lock</h5>
-
-<p><code>lock(self, seconds)</code>:<br/><br/>
-Lock the device for a certain period of time. iOS only.<br/><br/>
-锁屏一段时间  iOS专有<br/><br/>
-Args:  </p>
-
-<ul>
-<li>the duration to lock the device, in seconds</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.lock()</code></p>
-
-<h5 id="toc_57">(28) shake</h5>
-
-<p><code>shake(self)</code>:<br/><br/>
-Shake the device.<br/><br/>
-摇一摇手机<br/><br/>
-用法:<br/><br/>
-<code>driver.shake()</code></p>
-
-<h5 id="toc_58">(29) open_notifications</h5>
-
-<p><code>open_notifications(self)</code>:<br/><br/>
-Open notification shade in Android (API Level 18 and above)<br/><br/>
-打系统通知栏（仅支持API 18 以上的安卓系统）<br/><br/>
-用法:<br/><br/>
-<code>driver.open_notifications()</code></p>
-
-<h5 id="toc_59">(30) network_connection</h5>
-
-<p><code>network_connection(self)</code>:<br/><br/>
-Returns an integer bitmask specifying the network connection type.<br/><br/>
-Android only.<br/><br/>
-返回网络类型  数值<br/><br/>
-Possible values are available through the enumeration <code>appium.webdriver.ConnectionType</code><br/><br/>
-用法:<br/><br/>
-<code>driver.network_connection</code>  </p>
-
-<h5 id="toc_60">(31) set_network_connection</h5>
-
-<p><code>set_network_connection(self, connectionType)</code>:<br/><br/>
-Sets the network connection type. Android only.<br/><br/>
-Possible values:  </p>
-
-<table>
-<thead>
-<tr>
-<th>Value (Alias)</th>
-<th>Data</th>
-<th>Wifi</th>
-<th>Airplane Mode</th>
-</tr>
-</thead>
-
-<tbody>
-<tr>
-<td>0 (None)</td>
-<td>0</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>1 (Airplane Mode)</td>
-<td>0</td>
-<td>0</td>
-<td>1</td>
-</tr>
-<tr>
-<td>2 (Wifi only)</td>
-<td>0</td>
-<td>1</td>
-<td>0</td>
-</tr>
-<tr>
-<td>4 (Data only)</td>
-<td>1</td>
-<td>0</td>
-<td>0</td>
-</tr>
-<tr>
-<td>6 (All network on)</td>
-<td>1</td>
-<td>1</td>
-<td>0</td>
-</tr>
-</tbody>
-</table>
-
-<p>These are available through the enumeration appium.webdriver.ConnectionType`</p>
-
-<p>设置网络类型<br/><br/>
-Args:  </p>
-
-<ul>
-<li>connectionType - a member of the enum appium.webdriver.ConnectionType</li>
-</ul>
-
-<p>用法:<br/><br/>
-先加载from appium.webdriver.connectiontype import ConnectionType<br/><br/>
-<code>dr.set_network_connection(ConnectionType.WIFI_ONLY)</code><br/><br/>
-ConnectionType的类型有<br/><br/>
-NO_CONNECTION = 0<br/><br/>
-AIRPLANE_MODE = 1<br/><br/>
-WIFI_ONLY = 2<br/><br/>
-DATA_ONLY = 4<br/><br/>
-ALL_NETWORK_ON = 6  </p>
-
-<h5 id="toc_61">(32) available_ime_engines</h5>
-
-<p><code>available_ime_engines(self)</code>:<br/><br/>
-Get the available input methods for an Android device. Package and activity are returned (e.g., [&#39;com.android.inputmethod.latin/.LatinIME&#39;])<br/><br/>
-Android only.<br/><br/>
-返回安卓设备可用的输入法<br/><br/>
-用法:<br/><br/>
-<code>print(driver.available_ime_engines)</code></p>
-
-<h5 id="toc_62">(33) is_ime_active</h5>
-
-<p><code>is_ime_active(self)</code>:<br/><br/>
-Checks whether the device has IME service active. Returns True/False.<br/><br/>
-Android only.<br/><br/>
-检查设备是否有输入法服务活动。返回真/假。<br/><br/>
-安卓<br/><br/>
-用法: <br/>
-    <code>print(driver.is_ime_active())</code></p>
-
-<h5 id="toc_63">(34) activate_ime_engine</h5>
-
-<p><code>activate_ime_engine(self, engine)</code>:<br/><br/>
-Activates the given IME engine on the device.<br/><br/>
-Android only.<br/><br/>
-激活安卓设备中的指定输入法，设备可用输入法可以从“available_ime_engines”获取<br/><br/>
-Args:  </p>
-
-<ul>
-<li>engine - the package and activity of the IME engine to activate (e.g.,&#39;com.android.inputmethod.latin/.LatinIME&#39;)<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-    <code>driver.activate_ime_engine(“com.android.inputmethod.latin/.LatinIME”)</code></p>
-
-<h5 id="toc_64">(35) deactivate_ime_engine</h5>
-
-<p><code>deactivate_ime_engine(self)</code>:<br/><br/>
-Deactivates the currently active IME engine on the device.<br/><br/>
-Android only.<br/><br/>
-关闭安卓设备当前的输入法<br/><br/>
-用法:<br/>
-    <code>driver.deactivate_ime_engine()</code></p>
-
-<h5 id="toc_65">(36) active_ime_engine</h5>
-
-<p><code>active_ime_engine(self)</code>:<br/><br/>
-Returns the activity and package of the currently active IME engine (e.g.,&#39;com.android.inputmethod.latin/.LatinIME&#39;).<br/><br/>
-Android only.<br/><br/>
-返回当前输入法的包名<br/><br/>
-用法:<br/><br/>
-<code>driver.active_ime_engine</code>  </p>
-
-<h5 id="toc_66">(37) toggle_location_services</h5>
-
-<p><code>toggle_location_services(self)</code>:<br/><br/>
-Toggle the location services on the device. Android only.<br/><br/>
-打开安卓设备上的位置定位设置<br/><br/>
-用法:<br/>
-<code>driver.toggle_location_services()</code></p>
-
-<h5 id="toc_67">(38) set_location</h5>
-
-<p><code>set_location(self, latitude, longitude, altitude)</code>:<br/><br/>
-Set the location of the device<br/><br/>
-设置设备的经纬度<br/><br/>
-Args:  </p>
-
-<ul>
-<li>latitude纬度 - String or numeric value between -90.0 and 90.00</li>
-<li>longitude经度 - String or numeric value between -180.0 and 180.0</li>
-<li>altitude海拔高度- String or numeric value</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver.set_location(纬度，经度，高度)</code></p>
-
-<h5 id="toc_68">(39) tag_name</h5>
-
-<p><code>tag_name(self)</code>:<br/><br/>
-This element&#39;s <code>tagName</code> property.<br/><br/>
-返回元素的tagName属性<br/><br/>
-经实践返回的是class name<br/><br/>
-用法:<br/><br/>
-<code>element.tag_name()</code></p>
-
-<h5 id="toc_69">(40) text</h5>
-
-<p><code>text(self)</code>:<br/><br/>
-The text of the element.<br/><br/>
-返回元素的文本值<br/><br/>
-用法:<br/><br/>
-<code>element.text()</code></p>
-
-<h5 id="toc_70">(41) click</h5>
-
-<p><code>click(self)</code>:<br/><br/>
-Clicks the element.<br/><br/>
-点击元素<br/><br/>
-用法:<br/><br/>
-<code>element.click()</code></p>
-
-<h5 id="toc_71">(42) submit</h5>
-
-<p><code>submit(self)</code>:<br/><br/>
-Submits a form.<br/><br/>
-提交表单<br/><br/>
-用法:<br/><br/>
-暂无</p>
-
-<h5 id="toc_72">(43) clear</h5>
-
-<p><code>clear(self)</code>:<br/><br/>
-Clears the text if it&#39;s a text entry element.<br/><br/>
-清除输入的内容<br/><br/>
-用法:<br/><br/>
-<code>element.clear()</code></p>
-
-<h5 id="toc_73">(44) get_attribute</h5>
-
-<p><code>get_attribute(self, name)</code>:<br/><br/>
-详见@chenhengjie123 的超级链接<br/><br/>
-Gets the given attribute or property of the element.  </p>
-
-<pre class="line-numbers"><code class="language-text">1. 获取 content-desc 的方法为 get_attribute(&quot;name&quot;) ，而且还不能保证返回的一定是 content-desc （content-desc 为空时会返回 text 属性值）  
-2. get_attribute 方法不是我们在 uiautomatorviewer 看到的所有属性都能获取的（此处的名称均为使用 get_attribute 时使用的属性名称)
-可获取的：
-字符串类型：
-    `name(返回 content-desc 或 text)`
-    `text(返回 text)`
-    `className(返回 class，只有 API=&gt;18 才能支持)`
-    `resourceId(返回 resource-id，只有 API=&gt;18 才能支持)`
-</code></pre>
-
-<p>This method will first try to return the value of a property with the given name. If a property with that name doesn&#39;t exist, it returns the value of the attribute with the same name. If there&#39;s no attribute with that name, <code>None</code> is returned.Values which are considered truthy, that is equals &quot;true&quot; or &quot;false&quot;,are returned as booleans.  All other non-<code>None</code> values are returned as strings.  For attributes or properties which do not exist, <code>None</code> is returned.</p>
-
-<p>Args:</p>
-
-<ul>
-<li>name - Name of the attribute/property to retrieve.</li>
-</ul>
-
-<p>Example:<br/>
-    # Check if the &quot;active&quot; CSS class is applied to an element.</p>
-
-<p><code>is_active = &quot;active&quot; in target_element.get_attribute(&quot;class&quot;)</code></p>
-
-<p>用法:<br/><br/>
-暂无</p>
-
-<h5 id="toc_74">(45) is_selected</h5>
-
-<p><code>is_selected(self)</code>:<br/><br/>
-Returns whether the element is selected.<br/><br/>
-Can be used to check if a checkbox or radio button is selected.<br/><br/>
-返回元素是否选择。<br/><br/>
-可以用来检查一个复选框或单选按钮被选中。<br/><br/>
-用法:<br/><br/>
-<code>element.is_slected()</code></p>
-
-<h5 id="toc_75">(46) is_enabled</h5>
-
-<p><code>is_enabled(self)</code>:<br/><br/>
-Returns whether the element is enabled.<br/><br/>
-返回元素是否可用True of False<br/><br/>
-用法:<br/><br/>
-<code>element.is_enabled()</code></p>
-
-<h5 id="toc_76">(47) find_element_by_id</h5>
-
-<p><code>find_element_by_id(self, id_)</code>:<br/><br/>
-Finds element within this element&#39;s children by ID.<br/><br/>
-通过元素的ID定位元素<br/><br/>
-Args:  </p>
-
-<ul>
-<li>id_ - ID of child element to locate.<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_element_by_id(“id”)</code></p>
-
-<h5 id="toc_77">(48) find_elements_by_id</h5>
-
-<p><code>find_elements_by_id(self, id_)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by ID.<br/><br/>
-通过元素ID定位,含有该属性的所有元素<br/><br/>
-Args:   </p>
-
-<ul>
-<li>id_ - Id of child element to find.</li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_elements_by_id(“id”)</code></p>
-
-<h5 id="toc_78">(49) find_element_by_name</h5>
-
-<p><code>find_element_by_name(self, name)</code>:<br/><br/>
-Finds element within this element&#39;s children by name.<br/><br/>
-通过元素Name定位（元素的名称属性text）. <br/>
-Args:  </p>
-
-<ul>
-<li>name - name property of the element to find.<br/></li>
-</ul>
-
-<p>用法:<br/>
-<code>driver.find_element_by_name(“name”)</code></p>
-
-<h5 id="toc_79">(50) find_elements_by_name</h5>
-
-<p><code>find_elements_by_name(self, name)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by name.<br/><br/>
-通过元素Name定位（元素的名称属性text），含有该属性的所有元素. <br/>
-Args:  </p>
-
-<ul>
-<li>name - name property to search for.<br/></li>
-</ul>
-
-<p>用法:<br/>
-<code>driver.find_element_by_name(“name”)</code></p>
-
-<h5 id="toc_80">(51) find_element_by_link_text</h5>
-
-<p><code>find_element_by_link_text(self, link_text)</code>:<br/><br/>
-Finds element within this element&#39;s children by visible link text.<br/><br/>
-通过元素可见链接文本定位. <br/>
-Args:  </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p>用法:<br/>
-<code>driver.find_element_by_link_text(“text”)</code></p>
-
-<h5 id="toc_81">(52) find_elements_by_link_text</h5>
-
-<p><code>find_element_by_link_text(self, link_text)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by visible link text. <br/>
-通过元素可见链接文本定位,含有该属性的所有元素. <br/>
-Args:    </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p>用法: <br/>
-<code>driver.find_elements_by_link_text(“text”)</code></p>
-
-<h5 id="toc_82">(53) find_element_by_partial_link_text</h5>
-
-<p><code>find_element_by_partial_link_text(self, link_text)</code>:<br/><br/>
-Finds element within this element&#39;s children by partially visible link text.<br/><br/>
-通过元素部分可见链接文本定位. <br/>
-Args:  </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p><code>driver. find_element_by_partial_link_text(“text”)</code></p>
-
-<h5 id="toc_83">(54) find_elements_by_partial_link_text</h5>
-
-<p><code>find_elements_by_partial_link_text(self, link_text)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by link text.<br/><br/>
-通过元素部分可见链接文本定位,含有该属性的所有元素. <br/>
-Args:  </p>
-
-<ul>
-<li>link_text - Link text string to search for.<br/></li>
-</ul>
-
-<p><code>driver. find_elements_by_partial_link_text(“text”)</code></p>
-
-<h5 id="toc_84">(55) find_element_by_tag_name</h5>
-
-<p><code>find_element_by_tag_name(self, name)</code>:<br/>
-Finds element within this element&#39;s children by tag name.<br/><br/>
-通过查找html的标签名称定位元素<br/><br/>
-Args:</p>
-
-<ul>
-<li>name - name of html tag (eg: h1, a, span)</li>
-</ul>
-
-<p>用法:<br/><br/>
-    <code>driver.find_element_by_tag_name(“name”)</code></p>
-
-<h5 id="toc_85">(56) find_elements_by_tag_name</h5>
-
-<p><code>find_elements_by_tag_name(self, name)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by tag name.<br/>
-通过查找html的标签名称定位所有元素<br/><br/>
-Args:  </p>
-
-<ul>
-<li>name - name of html tag (eg: h1, a, span). </li>
-</ul>
-
-<p>用法:<br/>
-    <code>driver.find_elements_by_tag_name(“name”)</code></p>
-
-<h5 id="toc_86">(57) find_element_by_xpath</h5>
-
-<p><code>find_element_by_xpath(self, xpath)</code>:<br/><br/>
-Finds element by xpath.<br/><br/>
-通过Xpath定位元素，详细方法可参阅<a href="http://www.w3school.com.cn/xpath/">http://www.w3school.com.cn/xpath/</a><br/>
-Args:<br/>
-    xpath - xpath of element to locate.  &quot;//input[@class=&#39;myelement&#39;]&quot;<br/>
-    Note: The base path will be relative to this element&#39;s location.<br/>
-    This will select the first link under this element.<br/>
-    <code>myelement.find_elements_by_xpath(&quot;.//a&quot;)</code><br/>
-    However, this will select the first link on the page.<br/>
-    <code>myelement.find_elements_by_xpath(&quot;//a&quot;)</code>  </p>
-
-<p>用法 <code>find_element_by_xpath(“//*”)</code></p>
-
-<h5 id="toc_87">(58) find_elements_by_xpath</h5>
-
-<p><code>find_elements_by_xpath(self, xpath)</code>:<br/>
-Finds elements within the element by xpath.<br/><br/>
-Args:</p>
-
-<ul>
-<li>xpath - xpath locator string.</li>
-</ul>
-
-<p>Note: The base path will be relative to this element&#39;s location.<br/><br/>
-This will select all links under this element.<br/><br/>
-<code>myelement.find_elements_by_xpath(&quot;.//a&quot;)</code>. <br/>
-However, this will select all links in the page itself.<br/><br/>
-<code>myelement.find_elements_by_xpath(&quot;//a&quot;)</code>. </p>
-
-<p>用法:<br/><br/>
-<code>find_elements_by_xpath(“//*”)</code></p>
-
-<h5 id="toc_88">(59) find_element_by_class_name</h5>
-
-<p><code>find_element_by_class_name(self, name)</code>:<br/><br/>
-Finds element within this element&#39;s children by class name.<br/><br/>
-通过元素class name属性定位元素.<br/><br/>
-Args:  </p>
-
-<ul>
-<li>name - class name to search for.<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_element_by_class_name(“android.widget.LinearLayout”)</code></p>
-
-<h5 id="toc_89">(60) find_elements_by_class_name</h5>
-
-<p><code>find_elements_by_class_name(self, name)</code>:<br/><br/>
-Finds a list of elements within this element&#39;s children by class name.<br/><br/>
-通过元素class name属性定位所有含有该属性的元素. <br/>
-Args:  </p>
-
-<ul>
-<li>name - class name to search for.<br/></li>
-</ul>
-
-<p>用法:<br/><br/>
-<code>driver. find_elements_by_class_name(“android.widget.LinearLayout”)</code>. </p>
-
-<h5 id="toc_90">(61) find_element_by_css_selector</h5>
-
-<p><code>find_element_by_css_selector(self, css_selector)</code>:<br/><br/>
-Finds element within this element&#39;s children by CSS selector.<br/><br/>
-通过CSS选择器定位元素. <br/>
-Args:  </p>
-
-<ul>
-<li>css_selector - CSS selctor string, ex: &#39;a.nav#home&#39;</li>
-</ul>
-
-<h5 id="toc_91">(62) send_keys</h5>
-
-<p><code>send_keys(self, *value)</code>:<br/><br/>
-Simulates typing into the element.<br/><br/>
-在元素中模拟输入（开启appium自带的输入法并配置了appium输入法后，可以输入中英文）. <br/>
-Args:</p>
-
-<ul>
-<li>value - A string for typing, or setting form fields.  For setting file inputs, this could be a local file path.Use this to send simple key events or to fill out form fields:<br/>
-<code>form_textfield = driver.find_element_by_name(&#39;username&#39;)</code><br/>
-<code>form_textfield.send_keys(&quot;admin&quot;)</code><br/>
-This can also be used to set file inputs.<br/>
-<code>file_input = driver.find_element_by_name(&#39;profilePic&#39;)</code><br/>
-<code>file_input.send_keys(&quot;path/to/profilepic.gif&quot;)</code><br/>
-<code># Generally it&#39;s better to wrap the file path in one of the methods</code><br/>
-<code># in os.path to return the actual path to support cross OS testing.</code><br/>
-<code># file_input.send_keys(os.path.abspath(&quot;path/to/profilepic.gif&quot;))</code><br/>
-<code>driver.element.send_keys(“中英”)</code></li>
-</ul>
-
-<h5 id="toc_92">(63) is_displayed</h5>
-
-<p><code>is_displayed(self)</code>:<br/><br/>
-Whether the element is visible to a user.<br/><br/>
-此元素用户是否可见。简单地说就是隐藏元素和被控件挡住无法操作的元素（仅限 Selenium，appium是否实现了类似功能不是太确定）这一项都会返回 False. <br/>
-用法:<br/><br/>
-<code>driver.element.is_displayed()</code></p>
-
-<h5 id="toc_93">(64) location_once_scrolled_into_view</h5>
-
-<p><code>location_once_scrolled_into_view(self)</code>:<br/><br/>
- &quot;&quot;&quot;THIS PROPERTY MAY CHANGE WITHOUT WARNING. Use this to discover. where on the screen an element is so that we can click it. This method should cause the element to be scrolled into view.Returns the top lefthand corner location on the screen, or <code>None</code> if the element is not visible.</p>
-
-<p>暂不知道用法</p>
-
-<h5 id="toc_94">(65) size</h5>
-
-<p><code>size(self)</code>:<br/><br/>
-The size of the element.<br/><br/>
-获取元素的大小（高和宽）.<br/><br/>
-<code>new_size[&quot;height&quot;] = size[&quot;height&quot;]</code><br/><br/>
-<code>new_size[&quot;width&quot;] = size[&quot;width&quot;]</code>   </p>
-
-<p>用法:<br/><br/>
-<code>driver.element.size</code></p>
-
-<h5 id="toc_95">(66) value_of_css_property</h5>
-
-<p><code>value_of_css_property(self, property_name)</code>:<br/><br/>
-The value of a CSS property.<br/><br/>
-CSS属性<br/><br/>
-用法 暂不知  </p>
-
-<h5 id="toc_96">(67) location</h5>
-
-<p><code>location(self)</code>:<br/><br/>
-The location of the element in the renderable canvas.<br/><br/>
-获取元素左上角的坐标<br/><br/>
-用法:<br/><br/>
-<code>driver.element.location</code><br/><br/>
-返回element的x坐标, int类型<br/><br/>
-<code>driver.element.location.get(&#39;x&#39;)</code><br/><br/>
-返回element的y坐标, int类型<br/><br/>
-<code>driver.element.location.get(&#39;y&#39;)</code></p>
-
-<h5 id="toc_97">(68) rect</h5>
-
-<p><code>rect(self)</code>:<br/><br/>
-A dictionary with the size and location of the element.<br/><br/>
-元素的大小和位置的字典  </p>
-
-<h5 id="toc_98">(69) screenshot_as_base64</h5>
-
-<p><code>screenshot_as_base64(self)</code>:<br/><br/>
-Gets the screenshot of the current element as a base64 encoded string.<br/><br/>
-获取当前元素的截图为Base64编码的字符串<br/><br/>
-Usage:<br/><br/>
-<code>img_b64 = element.screenshot_as_base64</code></p>
-
-<h5 id="toc_99">(70) execute_script</h5>
-
-<p><code>execute_script(self, script, *args)</code>:<br/><br/>
-Synchronously Executes JavaScript in the current window/frame.<br/><br/>
-在当前窗口/框架（特指 Html 的 iframe ）同步执行 javascript 代码。你可以理解为如果这段代码是睡眠5秒，这五秒内主线程的 javascript 不会执行<br/><br/>
-Args:  </p>
-
-<ul>
-<li>script: The JavaScript to execute.</li>
-<li>*args: Any applicable arguments for your JavaScript.<br/>
-Usage:<br/>
-<code>driver.execute_script(&#39;document.title&#39;)</code></li>
-</ul>
-
-<h5 id="toc_100">(71) execute_async_script</h5>
-
-<p><code>execute_async_script(self, script, *args)</code>:<br/><br/>
-Asynchronously Executes JavaScript in the current window/frame.<br/><br/>
-插入 javascript 代码，只是这个是异步的，也就是如果你的代码是睡眠5秒，那么你只是自己在睡，页面的其他 javascript 代码还是照常执行<br/><br/>
-Args:  </p>
-
-<ul>
-<li>script: The JavaScript to execute.</li>
-<li>*args: Any applicable arguments for your JavaScript.</li>
-</ul>
-
-<p>Usage:<br/><br/>
-<code>driver.execute_async_script(&#39;document.title&#39;)</code></p>
-
-<h5 id="toc_101">(72) current_url</h5>
-
-<p><code>current_url(self)</code>:<br/><br/>
-Gets the URL of the current page.<br/><br/>
-获取当前页面的网址。<br/><br/>
-Usage:<br/><br/>
-<code>driver.current_url</code><br/>
-用法<br/><br/>
-<code>driver.current_url</code></p>
-
-<h5 id="toc_102">(73) page_source</h5>
-
-<p><code>page_source(self)</code>:<br/><br/>
-Gets the source of the current page.<br/><br/>
-获取当前页面的源<br/><br/>
-Usage:<br/><br/>
-<code>driver.page_source</code></p>
-
-<h5 id="toc_103">(74) close</h5>
-
-<p><code>close(self)</code>:<br/>
-Closes the current window.<br/><br/>
-关闭当前窗口<br/><br/>
-Usage:<br/><br/>
-<code>driver.close()</code></p>
-
-<h5 id="toc_104">(75) quit</h5>
-
-<p><code>quit(self)</code>:<br/><br/>
-Quits the driver and closes every associated window.<br/><br/>
-退出脚本运行并关闭每个相关的窗口连接<br/><br/>
-Usage:<br/><br/>
-<code>driver.quit()</code></p>
-
-<p>参考资料:<br/><br/>
-<a href="http://debugtalk.com/post/build-ideal-app-automation-test-framework/">打造心目中理想的自动化测试框(AppiumBooster)</a>   </p>
-
-<p><a href="http://debugtalk.com/post/build-app-automated-test-platform-from-0-to-1-Appium-inspector-iOS-simulator/">从0到1搭建移动App功能自动化测试平台（1）：模拟器中运行iOS应用</a>  </p>
-
-<p><a href="https://github.com/appium/python-client">Python-Client的github文档地址</a></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/02/28</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207868936.html">
-                
-                  <h1>LaTeX表示方法</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">一、指数和下标可以用<sup>和_后加相应字符来实现。</sup></h2>
-
-<p><figure><img src="media/15561207868936/15713264075302.png" alt=""/></figure></p>
-
-<h2 id="toc_1">二、平方根（square root）的输入命令为：\sqrt，n 次方根相应地为: \sqrt[n]。方根符号的大小由LATEX自动加以调整。也可用\surd 仅给出符号。</h2>
-
-<p><figure><img src="media/15561207868936/15713264213005.png" alt=""/></figure></p>
-
-<h2 id="toc_2">三、命令\overline 和\underline 在表达式的上、下方画出水平线。</h2>
-
-<p><figure><img src="media/15561207868936/15713264358808.png" alt=""/></figure></p>
-
-<h2 id="toc_3">四、命令\overbrace 和\underbrace 在表达式的上、下方给出一水平的大括号。</h2>
-
-<p><figure><img src="media/15561207868936/15713264468658.png" alt=""/></figure></p>
-
-<h2 id="toc_4">五、向量（Vectors）通常用上方有小箭头（arrow symbols）的变量表示。这可由\vec 得到。另两个命令\overrightarrow 和\overleftarrow在定义从A 到B 的向量时非常有用。</h2>
-
-<p><figure><img src="media/15561207868936/15713264649982.png" alt=""/></figure></p>
-
-<h2 id="toc_5">六、分数（fraction）使用\frac{...}{...} 排版。一般来说，1/2 这种形式更受欢迎，因为对于少量的分式，它看起来更好些。</h2>
-
-<p><figure><img src="media/15561207868936/15713264772357.png" alt=""/></figure></p>
-
-<h2 id="toc_6">七、积分运算符（integral operator）用\int 来生成。求和运算符（sum operator）由\sum 生成。乘积运算符（product operator）由\prod 生成。上限和下限用^ 和_来生成，类似于上标和下标。</h2>
-
-<p><figure><img src="media/15561207868936/15713264928671.png" alt=""/></figure></p>
-
-<h2 id="toc_7">以下提供一些常用符号的表示方法</h2>
-
-<p><figure><img src="media/15561207868936/15713265151036.png" alt=""/></figure> <br/>
-<figure><img src="media/15561207868936/15713265355830.png" alt=""/></figure><br/>
-<figure><img src="media/15561207868936/15713265726366.png" alt=""/></figure> <br/>
-<figure><img src="media/15561207868936/15713265959249.png" alt=""/></figure> <br/>
-<figure><img src="media/15561207868936/15713266129558.png" alt=""/></figure> <br/>
-<figure><img src="media/15561207868936/15713266264578.png" alt=""/></figure><br/>
-<figure><img src="media/15561207868936/15713266364253.png" alt=""/></figure></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/02/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207868967.html">
-                
-                  <h1>命令行工具使用</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">替换Ruby的源</h2>
-
-<ul>
-<li><code>$gem source -r https://rubygems.org/</code></li>
-<li><code>$ gem source -a https://ruby.taobao.org</code></li>
-<li><code>$ gem sources -l</code>要想验证是否替换成功了，可以执行</li>
-<li><code>CURRENT SOURCES　http://ruby.taobao.org/</code>正常的输出结果</li>
-</ul>
-
-<h2 id="toc_1">Mac OS X安装Ruby运行环境</h2>
-
-<ul>
-<li>先安装 Xcode 开发工具，它将帮你安装好 Unix 环境需要的开发包。</li>
-<li>安装 RVM
-<ul>
-<li><code>$ curl -L https://get.rvm.io | bash -s stable</code>期间可能会问你sudo管理员密码，以及自动通过homebrew安装依赖包，等待一段时间后就可以成功安装好 RVM。</li>
-<li><code>$ source ~/.rvm/scripts/rvm</code>载入 RVM 环境</li>
-<li><code>rvm -v</code>检查一下是否安装正确</li>
-</ul></li>
-<li>用 RVM 安装 Ruby 环境
-<ul>
-<li><code>$ rvm list known</code>列出已知的ruby版本</li>
-<li><code>$ rvm install 2.4.0</code>可以选择现有的rvm版本来进行安装</li>
-<li><code>$ rvm list</code>查询已经安装的ruby</li>
-<li><code>$ rvm remove 1.9.2</code>卸载一个已安装版本</li>
-</ul></li>
-<li>设置 Ruby 版本
-<ul>
-<li><code>$ rvm 2.0.0 --default</code>RVM 装好以后，需要执行下面的命令将指定版本的 Ruby 设置为系统默认版本</li>
-</ul></li>
-</ul>
-
-<h2 id="toc_2">Mac OS X安装cocoapods</h2>
-
-<ul>
-<li><code>sudo gem install cocoapods</code></li>
-<li>如果速度不行，更换源。</li>
-</ul>
-
-<h2 id="toc_3">Mac OS X安装命令行切图工具</h2>
-
-<ul>
-<li>由一张1024*1024的图片批量生成applogo
-<ul>
-<li>brew install imagemagick</li>
-<li>配置icon_convert.sh文件</li>
-<li>cd 到icon_convert.sh所在文件夹</li>
-<li>执行<code>./icon_convert.sh &#39;1024.png&#39;</code></li>
-<li>生成对应的appicon</li>
-</ul></li>
-</ul>
-
-<p><figure><img src="media/15561207868967/15713049185843.jpg" alt=""/></figure></p>
-
-                        
-                      </div>
-                  </div>
-                </a>
-                <div class="read-more clearfix">
-                  <div class="more-left left">
-                  
-                    <span class="date">2017/02/18</span>
-                    <span>posted in&nbsp;</span> 
-          				  
-          					    <span class="posted-in"><a href='%E6%9C%8D%E5%8A%A1%E5%99%A8.html'>服务器</a></span>
-          				   
-                    
-
-                  </div>
-                  <div class="more-right right">
-                  <span class="comments">
-                      
-
-                       
-                  </span>
-                  </div>
-                </div>
-              </div><!-- article -->
-        
-			<div class="article">
-                <a class="clearlink" href="15561207868826.html">
-                
-                  <h1>Android 冷启动实现APP秒开</h1>
-                  <div class="a-content">
-                      
-                      <div class="a-content-text">
-                        
-                        	<h2 id="toc_0">前言</h2>
-
-<p>在阅读这篇文章之前，首先需要理解几个东西：  </p>
-
-<ul>
-<li>1、什么是Android的冷启动时间？<br/>
-冷启动时间是指用户从手机桌面点击APP的那一刻起到启动页面的Activity调用onCreate()方法之间的这个时间段。</li>
-<li>2、在冷启动的时间段内发生了什么？<br/>
-首先我们要知道当打开一个Activity的时候发生了什么，在一个Activity打开时，如果该Activity所属的Application还没有启动，那么系统会为这个Activity创建一个进程（每创建一个进程都会调用一次Application，所以Application的onCreate()方法可能会被调用多次），在进程的创建和初始化中，势必会消耗一些时间，在这个时间里，WindowManager会先加载APP里的主题样式里的窗口背景（windowBackground）作为预览元素，然后才去真正的加载布局，如果这个时间过长，而默认的背景又是黑色或者白色，这样会给用户造成一种错觉，这个APP很卡，很不流畅，自然也影响了用户体验。<br/></li>
-</ul>
-
-<p>来看下效果图：<br/><br/>
-<strong>未优化：</strong><br/><br/>
-<figure><img src="media/15561207868826/20170227548242189443-4a70e91b2e124b48.gif" alt=""/></figure></p>
-
-<p><strong>优化方案一：</strong><br/><br/>
-<figure><img src="media/15561207868826/20170227487382189443-4829eba35492d39b.gif" alt=""/></figure></p>
-
-<p><strong>优化方案二：</strong><br/><br/>
-<figure><img src="media/15561207868826/20170227662152189443-c861191c8a80cd94.gif" alt=""/></figure></p>
-
-<h2 id="toc_1">历史原因</h2>
-
-<p>当系统启动一个APP时，zygote进程会首先创建一个新的进程去运行这个APP，但是进程的创建是需要时间的，在创建完成之前，界面是呈现假死状态的，这就很尴尬了，因为用户会以为没有点到APP而再次点击，这极大的降低用户体验，Android需要及时做出反馈去避免这段迷之尴尬。于是系统根据你的manifest文件设置的主题颜色的不同来展示一个白屏或者黑屏。而这个黑（白）屏正式的称呼应该是<strong>Preview Window</strong>,即预览窗口。</p>
-
-<p>好了，现在我们明白了，Preview Window其实是为了提高用户体验而有意设定的。因此，其实如果不是强迫症，它可能并不是一个问题。</p>
-
-<p>但是我猜大部分小伙伴应该是和我一样的强迫症患者：这么丑的黑屏怎么能出现在我的APP上呢？？？！！！</p>
-
-<p>所以，下面我们就来聊聊这个问题的解决方案。</p>
-
-<h2 id="toc_2">解决方案</h2>
-
-<p>既然决定解决这个问题，那么从哪里入手呢，Android在选择展示黑屏或者白屏的时候，是根据你设定的主题而不同的，也就是说，虽然你的代码没有被执行，你的配置文件却被提前读取了，用来作为展示Preview Window界面的依据。在用户点击手机桌面APP的时候，看到的黑屏或者白屏其实是界面渲染前的第一帧，如果你看懂了文章头的那2个问题，那么解决这个问题就非常轻松了，无非就是将Theme里的windowBackground设置成我们想要让用户看到的画面就可以了</p>
-
-<p>所以，我们的解决方案的切入口就是整个APP的manifest文件，更确切的说应该是主题配置文件。</p>
-
-<h3 id="toc_3">方案一 ：开历史倒车</h3>
-
-<p>这个方案就是禁止加载Preview Window，具体做法如下：</p>
-
-<p>style.xml</p>
-
-<style name="APPTheme" parent="@android:style/Theme.Holo.NoActionBar">
-   <item name="android:windowDisablePreview">true</item>
-</style>
-
-<p>将APPTheme设定为启动的Activity的主题，即可禁止Preview Window，当然，也有人通过把preview window设置为全透明，也达成了类似的效果。</p>
-
-<p>结果就是，当你点击APP时，界面会无响应一段时间，然后进入APP。</p>
-
-<p>我个人强烈不推荐这么做，因为Android想方设法提升的用户体验一下子被你打回解放前。</p>
-
-<h3 id="toc_4">方案二：自定义Preview Window</h3>
-
-<h4 id="toc_5">1、透明启动</h4>
-
-<p>将背景颜色设置为透明色，这样当用户点击桌面APP图片的时候，并不会&quot;立即&quot;进入APP，而且在桌面上停留一会，其实这时候APP已经是启动的了，只是我们心机的把Theme里的windowBackground的颜色设置成透明的，强行把锅甩给了手机应用厂商（手机反应太慢了啦，哈哈），其实现在微信也是这样做的，不信你可以试试。<br/>
-<code>&lt;style name=&quot;Appwelcome&quot; parent=&quot;android:Theme.Translucent.NoTitleBar.Fullscreen&quot;/&gt;</code><br/>
-透明化这种做法需要注意的一点，如果直接把Theme引入Activity，在运行的时候可能会出现如下异常：</p>
-
-<blockquote>
-<p>java.lang.IllegalStateException: You need to use a Theme.AppCompat theme (or descendant) with this activity.</p>
-</blockquote>
-
-<p>这个是因为使用了不兼容的Theme，例如我这里的Activity继承了AppCompatActivity，解决方案很简单：</p>
-
-<ul>
-<li>1、让其Activity集成Activity而不要集成兼容性的AppCompatActivity</li>
-<li>2、在onCreate()方法里的super.onCreate(savedInstanceState)之前设置我们原来APP的Theme</li>
-</ul>
-
-<pre class="line-numbers"><code class="language-java">public class MainActivity extends AppCompatActivity {
-    @Override
-    protected void onCreate(Bundle savedInstanceState) {
-            setTheme(R.style.AppTheme);
-            super.onCreate(savedInstanceState);
+<h2><a id="%E8%8E%B7%E5%8F%96%E8%A7%86%E9%A2%91%E5%8F%8A%E6%B8%B2%E6%9F%93%E7%AA%97%E5%8F%A3%E7%9A%84%E5%AE%BD%E9%AB%98" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>获取视频及渲染窗口的宽高</h2>
+<pre><code class="language-kotlin">override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
+    GLES20.glViewport(0, 0, width, height)
+    screenWidth = width
+    screenHeight = height
+    if (videoWidth &gt; 0 &amp;&amp; videoHeight &gt; 0) {
+        computeMatrix()
+    }
+}
+mediaPlayer.setOnVideoSizeChangedListener { mp, width, height -&gt;
+    run {
+        videoWidth = width
+        videoHeight = height
+        if (screenWidth &gt; 0 &amp;&amp; screenHeight &gt; 0) {
+            computeMatrix()
+        }
     }
 }
 </code></pre>
-
-<h4 id="toc_6">2、Logo图片启动</h4>
-
-<p>将背景图设置成我们APP的Logo图，作为APP启动的引导，现在市面上大部分的APP也是这么做的。<br/><br/>
-具体方法如下：</p>
-
-<p>style.xlm</p>
-
-<pre class="line-numbers"><code class="language-markup">&lt;style name=&quot;APPTheme&quot; parent=&quot;@android:style/Theme.Holo.NoActionBar&quot;&gt;
-    &lt;item name=&quot;android:windowBackground&quot;&gt;@drawable/splash_icon&lt;/item&gt;
-&lt;/style&gt;
-</code></pre>
-
-<p>同样将主题设置到启动的Activity的主题中，windowBackground就是即将展示的preview window。其中splash_icon可以是一整张图片，网上很多小伙伴也都是这么做的。其实它也可以是一个能解析出图片资源的XML文件，好像只有layer-list这种能做得到,因为它能够将多个drawable叠加起来展示。</p>
-
-<p>splash_icon.xml</p>
-
-<pre class="line-numbers"><code class="language-java">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;
-&lt;layer-list xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;
-    android:opacity=&quot;opaque&quot;&gt;
-    &lt;item android:drawable=&quot;@color/white&quot;/&gt;
-    &lt;item&gt;
-        &lt;bitmap
-            android:gravity=&quot;center&quot;
-            android:src=&quot;@drawable/qq&quot;/&gt;
-    &lt;/item&gt;
-&lt;/layer-list&gt;
-</code></pre>
-
-<p>这样设置之后，当你点击APP，会立马进入你配置的界面，然后启动欢迎页，效果如下<br/><br/>
-<figure><img src="media/15561207868826/2017022724594838b008fdb18f761ede8.gif" alt=""/></figure></p>
-
-<p>上面的2种做法，我们都需要将Theme引入对应的Activity</p>
-
-<pre class="line-numbers"><code class="language-java">&lt;activity
-    android:name=&quot;.app.main.MainActivity&quot;
-    android:theme=&quot;@style/AppWelcome&quot;
-    android:screenOrientation=&quot;portrait&quot;&gt;
-    &lt;intent-filter&gt;
-        &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-        &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-    &lt;/intent-filter&gt;
-&lt;/activity&gt;
-</code></pre>
-
-<p>那么，将preview window直接设置为图片和设置为xml文件有什么区别或者优劣呢？我先卖个关子。先谈谈这种方案的优劣，首先这种方案已经解决了原生preview window的单调难看的问题，在原来的基础上进一步提升了用户体验。可是我们的APP都是有欢（guang）迎（gao）页的，从preview window跳转到欢（guang）迎（gao）页是不可避免的，这样的话，两个界面的切换就会显得很突兀的，</p>
-
-<p>所以强迫症的我们，尝试让这两个界面的切换变成一个界面的变化，从而进一步提升显示效果，怎么样才能让两个界面切换看起来像是在同一个界面里的变化呢？答案就是： 动画。</p>
-
-<p>在这种需求下，图片和xml文件的区别就出来了，因为后者可以帮助我们更准确的实现动画。</p>
-
-<h3 id="toc_7">方案三：自定义Preview Window增强版</h3>
-
-<p>废话少说，我们先来看效果<br/><br/>
-<figure><img src="media/15561207868826/20170227597652f5ba2feffca1ca31a8c.gif" alt=""/></figure></p>
-
-<p>有了动画之后，界面切换顺畅了许多。<br/>
-上面的动画实现其实非常简单，无非就是放缩，移动，渐变的组合使用（我仅仅用作范例给大家参考），具体的动画代码细节就不谈了，有兴趣可以去github上看<a href="https://github.com/ladingwu/Splash">本次项目的demo</a>，我们重点来聊一聊思路。</p>
-
-<p>在这里我们需要明确一点的是，<strong>preview window</strong> 只能是静态图，它本身是不展示动画的，我们这里的动画，其实是在进入欢迎页之后的展示的。明确了这一点之后，整个动画效果的实现思路其实就已经摆在我们眼前了，那就是当界面从 <strong>Preview Window</strong> 跳转到 欢迎页 的时候，欢迎页必须首先展示一个和 <strong>Preview Window</strong> 一模一样的界面，让人看起来好像界面还没切换一样，然后再慢慢切换到欢迎页。</p>
-
-<p>然后，我们再来谈谈为什么设置xml的方式可以帮助我们更准确的实现动画，就是因为要保证 <strong>Preview Window</strong> 和欢迎页最开始展示的界面保持绝对一致，只有通过xml的布局才是达到这种效果。</p>
-
-<p>好了，启动页做到这个份儿上，应该就可以交货了，不过还有一个小问题需要大家注意的，那就是我们给Preview Window设置的背景图如果不做处理，图片就会一直存在于内存中，所以，当我们进入到欢迎页的时候，不要忘了把背景图设置为空：</p>
-
-<p>SplashActivity.java</p>
-
-<pre class="line-numbers"><code class="language-java">@Override
-protected void onCreate(@Nullable Bundle savedInstanceState) {
-    //将window的背景图设置为空
-    getWindow().setBackgroundDrawable(null);
-    super.onCreate(savedInstanceState);
+<p>渲染窗口的宽高在onSurfaceChanged中获取，视频的宽高需要给meidaplay添加OnVideoSizeChangedListener回调，由于视频的播放是在onSurfaceCreated中调用且这2个回调都是异步的，因此无法判断先后顺序，因此在这2个回调中都增加判断，只有当视频和渲染窗口的宽高都获取到才计算MVP矩阵，或者我们也可以在onSurfaceChanged中调用视频播放，这样就可以只在OnVideoSizeChangedListener回调中计算矩阵。</p>
+<h2><a id="%E8%AE%A1%E7%AE%97%E7%9F%A9%E9%98%B5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>计算矩阵</h2>
+<p>假设视频的宽高比小于屏幕的宽高比，那么视频则在高度上铺满窗口，在宽度上进行缩放，为了不拉伸视频，缩放的系数为<code>1 - ((屏幕的宽高比 - 视频的宽高比) / 2)</code>,反之如果视频的宽高比大于屏幕的宽高比，视频在高度上的缩放的系数为<code>1 - ((视频的宽高比 - 屏幕的宽高比 ) / 2)</code>，代码如下：</p>
+<pre><code class="language-kotlin">var modelMatrix = FloatArray(16)
+fun computeMatrix() {
+    val videoRatio = videoWidth / videoHeight.toFloat()
+    val screenRatio = screenWidth / screenHeight.toFloat()
+    Matrix.setIdentityM(modelMatrix, 0)
+    if (videoRatio &gt; screenRatio) {
+        Matrix.scaleM(modelMatrix, 0, 1F, 1 - ((videoRatio - screenRatio) / 2), 1F)
+    } else if (videoRatio &lt; screenRatio) {
+        Matrix.scaleM(modelMatrix, 0, 1 - ((screenRatio - videoRatio) / 2), 1F, 1F)
+    }
 }
 </code></pre>
-
-<h2 id="toc_8">关于启动优化</h2>
-
-<p>上面的做法其实可以达到&quot;秒开&quot;APP的效果，不过确不是真实的速度，在Activity创建过程中其实是会经过一系列framework层的操作，在日常开发中，我们都会去重写Application类，然后在Application里进行一些初始化操作，比如存放用户标识的静态化TOKEN，第三方SDK的初始化等。<br/><br/>
-这里给出几点建议：  </p>
-
-<ul>
-<li>1、不要让Application参与业务的操作</li>
-<li>2、不要在APPlication进行耗时操作，比如有些开发者会在自己的APP里一系列文件夹或文件（比如我自己），这些I/O操作应该放到&quot;确实该使用的时候再去创建&quot;亦或者是数据库的一些操作。</li>
-<li>3、不要以静态变量的方式在Application中保存数据等。</li>
-</ul>
-
-<p>当然这是绝对的理想主义，把上面的&quot;不要&quot;2字之前添上&quot;尽量&quot;2字吧，毕竟在实际开发中，这样做确实会让我们方便许多。</p>
-
-<p>对了，补充一点，布局也是很重要的，尽量的去减少布局的复杂性，布局深度，因为在View绘制的过程中，测量也是很耗费性能的。</p>
-
-<h2 id="toc_9">总结</h2>
-
-<p>到这里，关于Android启动页的相关问题就都讲完了。<br/><br/>
-最终的高清的效果图：<br/><br/>
-<figure><img src="media/15561207868826/201702274812409e2d6cccbbdf90fb06f.gif" alt=""/></figure></p>
+<h2><a id="%E7%BB%98%E5%88%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>绘制</h2>
+<p>在绘制的时候设置modelMatrix矩阵，代码如下：</p>
+<pre><code class="language-kotlin">override fun onDrawFrame(p0: GL10?) {
+    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+    GLES20.glUseProgram(mProgramHandle)
+    //设置顶点数据
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+    //设置纹理顶点数据
+    texBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(texCoordLoc)
+    GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 0, texBuffer)
+    //设置纹理
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+    GLES20.glUniform1i(textureLoc, 0)
+    //设置mvp矩阵
+    GLES20.glUniformMatrix4fv(mvpMatrixLoc, 1, false, modelMatrix, 0)
+    GLES20.glDrawElements(
+        GLES20.GL_TRIANGLES,
+        index.size,
+        GLES20.GL_UNSIGNED_SHORT,
+        indexBuffer
+    )
+}
+</code></pre>
+<p>GLES20.glUniformMatrix4fv(mvpMatrixLoc, 1, false, modelMatrix, 0)为矩阵数据设置，其他已经在OpenGL ES 播放视频中介绍，这里不在介绍。</p>
+<p>到这里我们介绍完了视频的缩放功能，想一想如果在欢迎界面播放视频，我们希望视频充满屏幕，而不是出现黑屏，但市场上的手机屏幕比例各种各样，尤其是全面屏、折叠屏的出现，有16:9的、2:1的，还有16:10的，那么如何使用同一个视频去适配所有的屏幕呢？其实一样可以通过视频缩放而解决，只不过一个缩放视频，一个是放大视频。</p>
+<p>视频的旋转、平移和缩放是一样的，我们只需要对矩阵进行相应的操作，比如将视频旋转45度，代码如下：</p>
+<pre><code class="language-plain_text">Matrix.rotateM(modelMatrix,0,45F,0F,0F,1F)
+</code></pre>
+<p>效果如下：<br />
+<img src="media/16214955019940/16214961236820.jpg" alt="" style="width:400px;" /></p>
 
                         
                       </div>
@@ -3341,7 +241,7 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/02/09</span>
+                    <span class="date">2021/05/20</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -3360,83 +260,202 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
               </div><!-- article -->
         
 			<div class="article">
-                <a class="clearlink" href="15561207868861.html">
+                <a class="clearlink" href="16214944723657.html">
                 
-                  <h1>Android Studio 关联 Bitbucket</h1>
+                  <h1>为什么要使用OpenGL ES播放视频</h1>
                   <div class="a-content">
                       
                       <div class="a-content-text">
                         
-                        	<h2 id="toc_0">前言</h2>
-
-<p>Github的确是一个开源代码浏览以及存放的好去处。但是当你想要创立一个私人仓库，存放自己的个人项目时，公开的仓库肯定是不行的，而私人账号必须要收费。对于那些手头紧，并且不想维护服务器的人来说，Bitbucket是个不错的选择。每个Bitbucket账号可以创立5个免费的私人仓库，够用了。最近在做毕业设计，需要将项目git到一个私人仓库，所以学习一下Android Studio和Bitbucket关联，毕竟能IDE中git，就觉得用SourceTree有点麻烦。</p>
-
-<h2 id="toc_1">Bitbucket简介</h2>
-
-<p>BitBucket 是一家源代码托管网站，采用Mercurial和Git作为分布式版本控制系统，同时提供商业计划和免费账户。常用的代码托管平台Github、SVN、Bitbucket中，Bitbucket具有以下优势：</p>
-
-<ul>
-<li>支持Hg，最易学易用（但不是最强大的）的分布式版本管理工具。同时也支持Git。他的网页端的git仓库不如github好用，但是作为远端仓库足够了。</li>
-<li>完全免费的闭源项目，还支持5人以内的合作开发。</li>
-<li>支持中文。</li>
-<li>官方的git工具SourceTree比GitHub for windows好用。</li>
-</ul>
-
-<h2 id="toc_2">使用步骤</h2>
-
-<h3 id="toc_3">一、安装Git</h3>
-
-<p>安装步骤都是一路默认下一步，这里就不做说明了，安装好了后，需要将AndroidStudio与Git进行关联：</p>
-
-<p>Android Studio–&gt; Preferences –&gt; Version Control –&gt; Git，在Path to Git executable栏找到Git安装目录中bin文件下的git文件。点击右侧的Test，如果出现如图中的成功提示框，表示AndroidStudio与Git已经关联成功。<br/>
-<figure><img src="media/15561207868861/15713246960472.png" alt=""/></figure></p>
-
-<h3 id="toc_4">二、在Bitbucket网站创建远程仓库</h3>
-
-<p>在Bitbucket网站上创建仓库<br/><br/>
-<figure><img src="media/15561207868861/15713247073567.png" alt=""/></figure></p>
-
-<p>记录下远程仓库的URL，后面会用到<br/>
-<figure><img src="media/15561207868861/15713247206326.png" alt=""/></figure></p>
-
-<h3 id="toc_5">三、在AndroidStudio中创建新项目</h3>
-
-<p>首先新建一个项目,然后进入项目后首先选择VCS–&gt;Enable Version Control Integration,然后选择Git，此时代码文件会变成红色<br/><br/>
-<figure><img src="media/15561207868861/15713247349739.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207868861/15713247482004.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207868861/15713247715529.png" alt=""/></figure></p>
-
-<p>接下来设置项目需要忽略上传的文件File–&gt;Settings –&gt; Version Control –&gt;Ignore Files<br/><br/>
-<figure><img src="media/15561207868861/15713247845617.png" alt=""/></figure></p>
-
-<p>接下来将项目添加到Git本地仓库中，在Project视图下，右键工程Git–&gt;Add,添加成功后，代码文件会变成绿色的。<br/><br/>
-<figure><img src="media/15561207868861/15713247974008.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207868861/15713248090123.png" alt=""/></figure> </p>
-
-<p>至此创建项目就完成了</p>
-
-<h3 id="toc_6">四、AndroidStudio中将项目提交并推送到远程仓库</h3>
-
-<p>进入AS项目中，选择VCS–&gt;Git-&gt;Commit File<br/><br/>
-<figure><img src="media/15561207868861/15713248252576.png" alt=""/></figure></p>
-
-<p>填写提交信息后，选择commit and Push<br/><br/>
-<figure><img src="media/15561207868861/15713248367087.png" alt=""/></figure></p>
-
-<p>之后点击Define remote 填入第二步中的远程仓库URL，点击OK校验URL后就可以Push了。<br/>
-<figure><img src="media/15561207868861/15713248467219.png" alt=""/></figure></p>
-
-<p><figure><img src="media/15561207868861/15713248552072.png" alt=""/></figure></p>
-
-<p>到此项目构建者的工作就算完成了，其他小伙伴可以直接参照第六步，从远程仓库剪切项目代码。</p>
-
-<h3 id="toc_7">五、别忘了给Bitbucket添加SSH密钥</h3>
-
-<p><code>ssh-keygen -t rsa -C &quot;your_email@example.com&quot;</code><br/><br/>
-使用你的邮件创建一个新的 SSH 密匙标签，将会生成 ~/.ssh/id_rsa 文件， 用于存储你的密匙。</p>
+                        	<p>我们都知道Android中有VideoView控件可以直接播放视频，既简单又实用，那么为什么我们还要用OpenGL ES来播放视频呢？那是因为使用OpenGL ES可以做更多的酷炫的动效，比如旋转视频、双指缩放视频、视频的截图、视频的录制、直播、换脸，还有类似“激萌”App里面的特效等这些都是VideoView所无法实现的，而通过OpenGL ES则可以实现这些酷炫的效果，当然这篇文章不会介绍如何这些实现这些效果，如果想了解这些动效请关注我，后面的文章会一一介绍。</p>
+<p>开始我们的表演，No 图 No Code，先来欣赏下效果图吧：</p>
+<p><img src="media/16214944723657/opengl_es_video.gif" alt="opengl_es_video" /></p>
+<h2><a id="shader" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>shader</h2>
+<p>首先我们先创建顶点和片段shader，顶点shader代码如下：</p>
+<pre><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec2 a_TexCoordinate;
+varying vec2 v_TexCoord;
+void main() {
+    v_TexCoord = a_TexCoordinate;
+    gl_Position = a_Position;
+}
+</code></pre>
+<p>片段shader代码如下：</p>
+<pre><code class="language-plain_text">#extension GL_OES_EGL_image_external : require
+precision mediump float;
+uniform samplerExternalOES u_Texture;
+varying vec2 v_TexCoord;
+void main() {
+    gl_FragColor = texture2D(u_Texture, v_TexCoord);
+}
+</code></pre>
+<p>**注意：**顶点和片段shader是单独的文件，分别是video_vs.glsl和video_fs.glsl，存放于assets/glsl目录下。</p>
+<p>片段shader中u_Texture是纹理，注意它的类型是samplerExternalOES，并不是sampler2D，sampler2D是2D纹理，用于显示图片，而samplerExternalOES是Android特有的类型，用于绘制视频和相机。</p>
+<h2><a id="program" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>program</h2>
+<p>shader创建好后，我们编译shader并链接到program，然后获取其中参数的句柄，代码如下：</p>
+<pre><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    createProgram()
+    //获取vPosition索引
+    vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_Position&quot;)
+    texCoordLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_TexCoordinate&quot;)
+    textureLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;u_Texture&quot;)
+...
+}
+private fun createProgram() {
+    var vertexCode =
+        AssetsUtils.readAssetsTxt(
+            context = context,
+            filePath = &quot;glsl/video_vs.glsl&quot;
+        )
+    var fragmentCode =
+        AssetsUtils.readAssetsTxt(
+            context = context,
+            filePath = &quot;glsl/video_fs.glsl&quot;
+        )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<h2><a id="%E5%88%9B%E5%BB%BAtexture" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建texture</h2>
+<p>视频纹理的创建和2D纹理的创建略有不同，代码如下：</p>
+<pre><code class="language-kotlin">fun createOESTextureId(): Int {
+    val textures = IntArray(1)
+    GLES20.glGenTextures(1, textures, 0)
+    glCheck(&quot;texture generate&quot;)
+    GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
+    glCheck(&quot;texture bind&quot;)
+    GLES20.glTexParameterf(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_MIN_FILTER,
+        GLES20.GL_LINEAR.toFloat()
+    )
+    GLES20.glTexParameterf(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_MAG_FILTER,
+        GLES20.GL_LINEAR.toFloat()
+    )
+    GLES20.glTexParameteri(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_WRAP_S,
+        GLES20.GL_CLAMP_TO_EDGE
+    )
+    GLES20.glTexParameteri(
+        GLES11Ext.GL_TEXTURE_EXTERNAL_OES,
+        GLES20.GL_TEXTURE_WRAP_T,
+        GLES20.GL_CLAMP_TO_EDGE
+    )
+    return textures[0]
+}
+</code></pre>
+<p>不同之处在于</p>
+<pre><code class="language-kotlin">GLES20.glBindTexture(GLES11Ext.GL_TEXTURE_EXTERNAL_OES, textures[0])
+</code></pre>
+<p>GLES20.glTexParameterf函数的相关参数说明可以参照<a href="16213267803283.html">OpenGL ES 纹理过滤模式-glTexParameteri</a>。<br />
+纹理创建成功后返回纹理id，然后创建SurfaceTexture-&gt;Surface，将Surface设置给MediaPlayer，代码如下：</p>
+<pre><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    ...
+    textureId = GLTools.createOESTextureId()
+    var surfaceTexture = SurfaceTexture(textureId)
+    surfaceTexture.setOnFrameAvailableListener(frameAvailableListener)
+    
+    ...
+}
+</code></pre>
+<p>这里要说下frameAvailableListener，当surfaceTexture有新的一帧数据时将会回调frameAvailableListener，这个时候我们就会更新数据并绘制，在前面的文章我们介绍过在RenderMode=GLSurfaceView.RENDERMODE_WHEN_DIRTY模式下重新绘制需要调用glSurfaceView.requestRender(),因此我们在Activity中实现了frameAvailableListener，并将此实现传递给Renderer，代码如下：</p>
+<pre><code class="language-kotlin">class VideoActivity : AppCompatActivity(), SurfaceTexture.OnFrameAvailableListener {
+    override fun onFrameAvailable(surfaceTexture: SurfaceTexture?) {
+        glSurfaceView.queueEvent {
+            surfaceTexture?.updateTexImage()
+            glSurfaceView.requestRender()
+        }
+    }
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        setContentView(R.layout.surface)
+        glSurfaceView.setEGLContextClientVersion(2)
+        glSurfaceView.setRenderer(MyRenderer(context = baseContext, frameAvailableListener = this))
+        glSurfaceView.renderMode = GLSurfaceView.RENDERMODE_CONTINUOUSLY
+    }
+  
+  ...
+}
+</code></pre>
+<h2><a id="%E5%88%9D%E5%A7%8B%E5%8C%96mediaplayer%E5%B9%B6%E6%92%AD%E6%94%BE%E8%A7%86%E9%A2%91" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>初始化MediaPlayer并播放视频</h2>
+<p>这里我们使用Android API自带的MediaPlayer，我个人建议如果是商业项目请使用<a href="https://github.com/bilibili/ijkplayer">ijkplayer（github开源)</a>，不管是自带的MediaPlayer和ijkplayer完成的是视频编解码工作，ijkplayer性能更加稳定、播放的格式更加全面。</p>
+<p>MediaPlayer初始化及视频播放代码如下：</p>
+<pre><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    ...
+    textureId = GLTools.createOESTextureId()
+    var surfaceTexture = SurfaceTexture(textureId)
+    surfaceTexture.setOnFrameAvailableListener(frameAvailableListener)
+    mediaPlayer = MediaPlayer()
+    mediaPlayer.setAudioStreamType(AudioManager.STREAM_MUSIC)
+    val surface = Surface(surfaceTexture)
+    mediaPlayer.setSurface(surface)
+    startVideo()
+}
+fun startVideo() {
+    try {
+        mediaPlayer.reset()
+        val fd = context.assets.openFd(&quot;video/lion_chroma.mp4&quot;)
+        mediaPlayer.setDataSource(fd.fileDescriptor,fd.startOffset,fd.length)
+        mediaPlayer.prepare()
+        mediaPlayer.start()
+    } catch (e: Exception) {
+        Log.e(&quot;mqd&quot;,&quot;$e&quot;)
+    }
+}
+</code></pre>
+<p>lion_chroma.mp4视频文件我们存放在assets/video目录下，当然你可以播放SD上或者在线视频。</p>
+<h2><a id="%E5%88%9B%E5%BB%BA%E9%A1%B6%E7%82%B9%E5%9D%90%E6%A0%87%E3%80%81%E7%BA%B9%E7%90%86%E5%9D%90%E6%A0%87%E3%80%81%E9%A1%B6%E7%82%B9%E7%B4%A2%E5%BC%95%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建顶点坐标、纹理坐标、顶点索引数据</h2>
+<p>顶点坐标初始化如下：</p>
+<pre><code class="language-kotlin">var vertexBuffer = GLTools.array2Buffer(
+            floatArrayOf(
+                -1.0f, 1.0f, 0.0f,  // top left
+                -1.0f, -1.0f, 0.0f,  // bottom left
+                1.0f, -1.0f, 0.0f,  // bottom right
+                1.0f, 1.0f, 0.0f  // top right
+            )
+        )
+</code></pre>
+<p>纹理坐标初始化如下：</p>
+<pre><code class="language-kotlin">var texBuffer = GLTools.array2Buffer(
+            floatArrayOf(
+                0.0f, 0.0f,
+                0.0f, 1.0f,
+                1.0f, 1.0f,
+                1.0f, 0.0f
+            )
+        )
+</code></pre>
+<p>顶点索引初始化如下：</p>
+<pre><code class="language-kotlin">var index = shortArrayOf(3, 2, 0, 0, 1, 2)
+val indexBuffer = GLTools.array2Buffer(index)
+</code></pre>
+<h2><a id="%E7%BB%98%E5%88%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>绘制</h2>
+<p>所有准备工作完成后，开始绘制，代码如下：</p>
+<pre><code class="language-kotlin">override fun onDrawFrame(p0: GL10?) {
+    GLES20.glUseProgram(mProgramHandle)
+    //设置顶点数据
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+    //设置纹理顶点数据
+    texBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(texCoordLoc)
+    GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 0, texBuffer)
+    //设置纹理
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+    GLES20.glUniform1i(textureLoc, 0)
+    GLES20.glDrawElements(
+        GLES20.GL_TRIANGLES,
+        index.size,
+        GLES20.GL_UNSIGNED_SHORT,
+        indexBuffer
+    )
+}
+</code></pre>
+<p>到此我们的表演就结束了，运行起来就可以看到开始的效果图了，不过这里有一个小小的瑕疵，如果视频的比例和GLSurfaceView（绘制窗口）的比例不一样的话就会出现视频拉伸的现象，后面的文章我们将会解决这个问题，敬请期待。</p>
 
                         
                       </div>
@@ -3445,7 +464,1038 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
                 <div class="read-more clearfix">
                   <div class="more-left left">
                   
-                    <span class="date">2017/02/09</span>
+                    <span class="date">2021/05/20</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214169624793.html">
+                
+                  <h1>OpenGL ES for Android 绘制旋转的地球</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p><img src="media/16214169624793/earch.gif" alt="earch " style="width:400px;" /></p>
+<p>No 图 No Code，上面旋转的地球是不是很酷炫，下面就让我们开始说说如何绘制旋转地球吧？绘制旋转地球需要3个步骤：<br />
+计算球体顶点数据。<br />
+地球纹理贴图。<br />
+通过MVP矩阵旋转地球。</p>
+<h2><a id="%E8%AE%A1%E7%AE%97%E7%90%83%E4%BD%93%E9%A1%B6%E7%82%B9%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>计算球体顶点数据</h2>
+<p>我们知道OpenGL中最基本的图元是三角形，任何复杂的图形都可以分解为一个个的三角形，球体也不例外，假设球体上有“经纬度”，通过“经纬度”将球体分割为一个个的四边形，如下图：</p>
+<p><img src="media/16214169624793/16214932707820.jpg" alt="w400" /></p>
+<p>在把这些四边形分割为2个三角形，所以绘制球体的关键是计算“经纬度”相交的点的坐标。</p>
+<p>假设球体的中心在坐标的原点（方便计算），半径为radius，n个经度，m个纬度，计算顶点坐标、索引、纹理坐标方法如下：</p>
+<pre><code class="language-kotlin">fun generateSphere(radius: Float, rings: Int, sectors: Int) {
+    val PI = Math.PI.toFloat()
+    val PI_2 = (Math.PI / 2).toFloat()
+    val R = 1f / rings.toFloat()
+    val S = 1f / sectors.toFloat()
+    var r: Short
+    var s: Short
+    var x: Float
+    var y: Float
+    var z: Float
+    val numPoint = (rings + 1) * (sectors + 1)
+    val vertexs = FloatArray(numPoint * 3)
+    val texcoords = FloatArray(numPoint * 2)
+    val indices = ShortArray(numPoint * 6)
+    var t = 0
+    var v = 0
+    r = 0
+    while (r &lt; rings + 1) {
+        s = 0
+        while (s &lt; sectors + 1) {
+            x =
+                (Math.cos((2f * PI * s.toFloat() * S).toDouble()) * Math.sin((PI * r.toFloat() * R).toDouble())).toFloat()
+            y = -Math.sin((-PI_2 + PI * r.toFloat() * R).toDouble()).toFloat()
+            z =
+                (Math.sin((2f * PI * s.toFloat() * S).toDouble()) * Math.sin((PI * r.toFloat() * R).toDouble())).toFloat()
+            texcoords[t++] = s * S
+            texcoords[t++] = r * R
+            vertexs[v++] = x * radius
+            vertexs[v++] = y * radius
+            vertexs[v++] = z * radius
+            s++
+        }
+        r++
+    }
+    var counter = 0
+    val sectorsPlusOne = sectors + 1
+    r = 0
+    while (r &lt; rings) {
+        s = 0
+        while (s &lt; sectors) {
+            indices[counter++] = (r * sectorsPlusOne + s).toShort()       //(a)
+            indices[counter++] = ((r + 1) * sectorsPlusOne + s).toShort()    //(b)
+            indices[counter++] = (r * sectorsPlusOne + (s + 1)).toShort()  // (c)
+            indices[counter++] = (r * sectorsPlusOne + (s + 1)).toShort()  // (c)
+            indices[counter++] = ((r + 1) * sectorsPlusOne + s).toShort()    //(b)
+            indices[counter++] = ((r + 1) * sectorsPlusOne + (s + 1)).toShort()  // (d)
+            s++
+        }
+        r++
+    }
+    vertexBuffer = GLTools.array2Buffer(vertexs)
+    texBuffer = GLTools.array2Buffer(texcoords)
+    mIndicesBuffer = GLTools.array2Buffer(indices)
+    indicesNum = indices.size
+}
+</code></pre>
+<p>这个顶点的数据计算需要有比较好的立体感。最难的顶点坐标和纹理坐标已经获取，下面开始介绍如何绘制地球。</p>
+<h2><a id="%E9%A1%B6%E7%82%B9shader%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>顶点shader代码如下：</h2>
+<pre><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec2 a_TexCoord;
+uniform mat4 mvpMatrix;
+varying vec2 v_TexCoord;
+void main() {
+    v_TexCoord = a_TexCoord;
+    gl_Position = mvpMatrix * a_Position;
+}
+</code></pre>
+<h2><a id="%E7%89%87%E6%AE%B5shader%E4%BB%A3%E7%A0%81%E5%A6%82%E4%B8%8B%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>片段shader代码如下：</h2>
+<pre><code class="language-plain_text">precision mediump float;
+uniform sampler2D u_Texture;
+varying vec2 v_TexCoord;
+void main() {
+    gl_FragColor = texture2D(u_Texture, v_TexCoord);
+}
+</code></pre>
+<h2><a id="%E5%88%9B%E5%BB%BAprogram%E3%80%81%E5%8F%96%E5%8F%82%E6%95%B0%E5%8F%A5%E6%9F%84%E5%B9%B6%E7%94%9F%E6%88%90%E9%A1%B6%E7%82%B9%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建program、取参数句柄并生成顶点数据</h2>
+<pre><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    GLES20.glClearColor(0F, 0F, 0F, 1F)
+    createProgram()
+    generateSphere(2F,75,150)
+    //获取vPosition索引
+    vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_Position&quot;)
+    texCoordLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_TexCoord&quot;)
+    mvpMatrixLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;mvpMatrix&quot;)
+    textureLoc= GLES20.glGetUniformLocation(mProgramHandle, &quot;u_Texture&quot;)
+}
+private fun createProgram() {
+    var vertexCode =
+        AssetsUtils.readAssetsTxt(
+            context = context,
+            filePath = &quot;glsl/sphere_vs.glsl&quot;
+        )
+    var fragmentCode =
+        AssetsUtils.readAssetsTxt(
+            context = context,
+            filePath = &quot;glsl/sphere_fs.glsl&quot;
+        )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<p><code>sphere_vs.glsl</code> 和 <code>sphere_fs.glsl</code>分别表示顶点shader和片段shader的文件，存放于assets/glsl目录下，readAssetsTxt为读取assets目录下文件的公用方法。generateSphere方式就是开始介绍的顶点数据生成的方法。</p>
+<h2><a id="%E5%9C%B0%E7%90%83%E7%BA%B9%E7%90%86%E8%B4%B4%E5%9B%BE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>地球纹理贴图</h2>
+<p>地球纹理图片如下：<br />
+<img src="media/16214169624793/16214937795833.jpg" alt="" /></p>
+<p>将地球图片转为纹理，代码如下：</p>
+<pre><code class="language-kotlin">override fun onSurfaceCreated(p0: GL10?, p1: EGLConfig?) {
+    ...
+    var bitmap =
+        BitmapFactory.decodeResource(context.resources, R.drawable.earth)
+    textureId = GLTools.loadTexture(bitmap)
+}
+</code></pre>
+<p>GLTools.loadTexture为封装的工具类方法，在<a href="16213193313649.html">OpenGL ES 绘制纹理</a>文章中已经详细介绍，图片纹理的相关内容也可以参考此文章。</p>
+<h2><a id="mvp%E7%9F%A9%E9%98%B5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>MVP矩阵</h2>
+<p>初始化MVP矩阵代码如下：</p>
+<pre><code class="language-kotlin">var modelMatrix = FloatArray(16)
+var viewMatrix = FloatArray(16)
+var projectionMatrix = FloatArray(16)
+override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
+    GLES20.glViewport(0, 0, width, height)
+    Matrix.setIdentityM(viewMatrix, 0)
+    Matrix.setLookAtM(
+        viewMatrix, 0,
+        0F, 5F, 10F,
+        0F, 0F, 0F,
+        0F, 1F, 0F
+    )
+    Matrix.setIdentityM(projectionMatrix, 0)
+    val ratio = width.toFloat() / height
+    //设置透视投影
+    Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 20f)
+}
+</code></pre>
+<h2><a id="%E7%BB%98%E5%88%B6%E5%B9%B6%E9%80%9A%E8%BF%87mvp%E7%9F%A9%E9%98%B5%E6%97%8B%E8%BD%AC%E5%9C%B0%E7%90%83" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>绘制并通过MVP矩阵旋转地球</h2>
+<pre><code class="language-kotlin">override fun onDrawFrame(p0: GL10?) {
+    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+    GLES20.glUseProgram(mProgramHandle)
+    //设置顶点数据
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+    //设置纹理顶点数据
+    texBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(texCoordLoc)
+    GLES20.glVertexAttribPointer(texCoordLoc, 2, GLES20.GL_FLOAT, false, 0, texBuffer)
+    //设置纹理
+    GLES20.glActiveTexture(GLES20.GL_TEXTURE0)
+    GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId)
+    GLES20.glUniform1i(textureLoc, 0)
+    updateMvpMatrix()
+    GLES20.glUniformMatrix4fv(mvpMatrixLoc, 1, false, mMvpMatrix, 0)
+    GLES20.glDrawElements(
+        GLES20.GL_TRIANGLES,
+        indicesNum,
+        GLES20.GL_UNSIGNED_SHORT,
+        mIndicesBuffer
+    )
+}
+
+var currentRotateDegree = 0F
+
+fun updateMvpMatrix() {
+    Matrix.setIdentityM(modelMatrix, 0)
+    Matrix.rotateM(modelMatrix, 0, currentRotateDegree++, 0F, 1F, 0F)
+    var mTempMvMatrix = FloatArray(16)
+    Matrix.setIdentityM(mTempMvMatrix, 0)
+    Matrix.multiplyMM(mTempMvMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+    Matrix.multiplyMM(mMvpMatrix, 0, projectionMatrix, 0, mTempMvMatrix, 0)
+}
+</code></pre>
+<p>到此地球的绘制就结束了，我们经常听说的天空穹、全景（VR）球体模式和地球的绘制基本一样，只不过是相机位置的不同而已。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214166776860.html">
+                
+                  <h1>OpenGL ES for Android 深度测试</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2><a id="%E4%BB%80%E4%B9%88%E6%98%AF%E6%B7%B1%E5%BA%A6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>什么是深度</h2>
+<p>深度就像是现实世界中物体与我们自己之间的距离，而在OpenGL中，深度是像素点（可以理解为现实世界中的物体）距离相机的距离，深度信息保存在深度缓存中，深度值越大则离相机越远。</p>
+<h2><a id="%E6%B7%B1%E5%BA%A6%E6%B5%8B%E8%AF%95%E6%9C%89%E4%BB%80%E4%B9%88%E4%BD%9C%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>深度测试有什么作用</h2>
+<p>在OpenGL ES中默认是不开启深度测试的，不使用深度测试的时候，先绘制较近的物体，然后绘制较远的物体，当远处的物体和近处的物体出现重叠时导致近处的物体被远处的物体遮挡，这不符合实际的现象，也不是我们想要的效果。</p>
+<p>深度测试则是可以解决这种问题，开启深度测试后，深度缓存中存储着的每个像素点都包含<strong>深度信息</strong>，当绘制新的像素时，先和深度缓存中的深度值进行比较，当深度值比深度缓存中的深度值大时（也就是离相机远）则使用原来大颜色值绘制，反之则使用新的颜色值。</p>
+<p>另外需要注意的是并不是Z的值越大深度值就越大，而是比较物体距相机的距离，启用深度测试不适用于绘制透明的物体。</p>
+<h2><a id="%E5%90%AF%E7%94%A8%E6%B7%B1%E5%BA%A6%E6%B5%8B%E8%AF%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>启用深度测试</h2>
+<p>在OpenGL ES中默认是不开启深度测试的，开启深度测试代码如下：</p>
+<pre><code class="language-plain_text">GLES20.glEnable(GLES20.GL_DEPTH_TEST)
+</code></pre>
+<p>在每次绘制（onDrawFrame方法）时先清除上次的深度缓存和颜色缓存：</p>
+<pre><code class="language-plain_text">GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+</code></pre>
+<p>默认情况下新像素的深度值小于深度缓存中的值则使用新像素的值，也可以理解为通过深度测试，这是深度测试的默认方式，我们可以通过glDepthFunc方法修改其默认值，可以修改的方式有：</p>
+<ul>
+<li>GL_NEVER：没有处理</li>
+<li>GL_ALWAYS：总处理</li>
+<li>GL_LESS：小于</li>
+<li>GL_LEQUAL：小于等于</li>
+<li>GL_EQUAL：等于</li>
+<li>GL_GEQUAL：大于等于</li>
+<li>GL_GREATER：大于</li>
+<li>GL_NOTEQUAL：不等于</li>
+</ul>
+<p>默认值是GL_LESS。</p>
+<p>glDepthFunc方法使用方式如下：</p>
+<pre><code class="language-plain_text"> GLES20.glDepthFunc(GLES20.GL_LESS)
+</code></pre>
+<p>在 <a href="16214102827208.html">OpenGL ES for Android 绘制立方体</a> 中是典型的深度测试用例，通过这篇文章可以查看开启深度测试和不开启的区别。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214102827208.html">
+                
+                  <h1>OpenGL ES for Android 绘制立方体</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>立方体有6个面，8个顶点，因此绘制立方体其实就是绘制6个面。</p>
+<h2><a id="%E9%A1%B6%E7%82%B9shader%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>顶点shader：</h2>
+<pre><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec4 a_color;
+varying vec4 v_color;
+void main() {
+    v_color = a_color;
+    gl_Position = a_Position;
+}
+</code></pre>
+<p>a_Position为顶点数据，a_color为顶点颜色数据，v_color为varying变量，传递给片段shader使用。</p>
+<h2><a id="%E7%89%87%E6%AE%B5shader%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>片段shader：</h2>
+<pre><code class="language-plain_text">precision mediump float;
+uniform vec4 u_color;
+varying vec4 v_color;
+void main() {
+    gl_FragColor = v_color;
+}
+</code></pre>
+<h2><a id="%E5%88%9B%E5%BB%BAprogram%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>创建program：</h2>
+<pre><code class="language-kotlin">private fun createProgram() {
+    var vertexCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/cube_vs.glsl&quot;
+    )
+    var fragmentCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/cube_fs.glsl&quot;
+    )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<p>cube_vs.glsl和cube_fs.glsl分别表示顶点shader和片段shader的文件，存放于assets/glsl目录下，readAssetsTxt为读取assets目录下文件的公用方法。</p>
+<h2><a id="%E8%8E%B7%E5%8F%96%E5%8F%82%E6%95%B0%E5%8F%A5%E6%9F%84" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>获取参数句柄</h2>
+<pre><code class="language-kotlin">vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_Position&quot;)
+mColorLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;a_color&quot;)
+</code></pre>
+<h2><a id="%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A1%B6%E7%82%B9%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>初始化顶点数据</h2>
+<pre><code class="language-kotlin">private val r: Float = 0.5f
+//顶点坐标
+var vertexBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        -r, r, r,//0
+        -r, -r, r,//1
+        r, -r, r,//2
+        r, r, r,//3
+        r, -r, -r,//4
+        r, r, -r,//5
+        -r, -r, -r,//6
+        -r, r, -r//7
+    )
+)
+</code></pre>
+<h2><a id="%E5%88%9D%E5%A7%8B%E5%8C%96%E7%B4%A2%E5%BC%95%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>初始化索引数据</h2>
+<pre><code class="language-plain_text">var mIndices = shortArrayOf(
+            0, 1, 2, 0, 2, 3,
+            3, 2, 4, 3, 4, 5,
+            5, 4, 6, 5, 6, 7,
+            7, 6, 1, 7, 1, 0,
+            7, 0, 3, 7, 3, 5,
+            6, 1, 2, 6, 2, 4
+        )
+val mIndicesBuffer = GLTools.array2Buffer(mIndices)
+</code></pre>
+<h2><a id="%E5%88%9D%E5%A7%8B%E5%8C%96%E9%A2%9C%E8%89%B2%E6%95%B0%E6%8D%AE" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>初始化颜色数据</h2>
+<pre><code class="language-kotlin">var colorBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        1f,1f,0f,1f,
+        1f,1f,0f,1f,
+        1f,1f,0f,1f,
+        1f,1f,0f,1f,
+        1f,0f,0f,1f,
+        1f,0f,0f,1f,
+        1f,0f,0f,1f,
+        1f,0f,0f,1f
+    )
+)
+</code></pre>
+<h2><a id="%E7%BB%98%E5%88%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>绘制</h2>
+<pre><code class="language-kotlin">GLES20.glUseProgram(mProgramHandle)
+//设置顶点数据
+vertexBuffer.position(0)
+GLES20.glEnableVertexAttribArray(vPositionLoc)
+GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+//设置颜色数据
+colorBuffer.position(0)
+GLES20.glEnableVertexAttribArray(mColorLoc)
+GLES20.glVertexAttribPointer(mColorLoc, 3, GLES20.GL_FLOAT, false, 0, colorBuffer)
+GLES20.glDrawElements(
+    GLES20.GL_TRIANGLES,
+    mIndices.size,
+    GLES20.GL_UNSIGNED_SHORT,
+    mIndicesBuffer
+)
+</code></pre>
+<p>效果图如下：<br />
+<img src="media/16214102827208/16214108117792.jpg" alt="w400" /></p>
+<p>我们仅仅看到一个矩形，并没有看到立方体啊？实际上我们已经绘制立方体了，只不过其他面被前面的面挡住了导致我们看不到其他面，如何才能看到其他面呢？这时候需要使用mvp矩阵。</p>
+<h2><a id="%E4%BF%AE%E6%94%B9%E9%A1%B6%E7%82%B9shader%E5%A6%82%E4%B8%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>修改顶点shader如下</h2>
+<pre><code class="language-plain_text">attribute vec4 a_Position;
+attribute vec4 a_color;
+uniform mat4 mvpMatrix;
+varying vec4 v_color;
+void main() {
+    v_color = a_color;
+    gl_Position = mvpMatrix * a_Position;
+}
+</code></pre>
+<p>添加了mvpMatrix矩阵。</p>
+<h2><a id="%E8%8E%B7%E5%8F%96mvpmatrix%E7%9F%A9%E9%98%B5%E5%8F%A5%E6%9F%84" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>获取mvpMatrix矩阵句柄</h2>
+<pre><code class="language-plain_text">mvpMatrixLoc = GLES20.glGetUniformLocation(mProgramHandle,&quot;mvpMatrix&quot;)
+</code></pre>
+<h2><a id="%E8%AE%BE%E7%BD%AEmvp%E7%9F%A9%E9%98%B5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>设置mvp矩阵</h2>
+<pre><code class="language-kotlin">override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
+    GLES20.glViewport(0, 0, width, height)
+    var modelMatrix = FloatArray(16)
+    Matrix.setIdentityM(modelMatrix, 0)
+    var viewMatrix = FloatArray(16)
+    Matrix.setIdentityM(viewMatrix, 0)
+    Matrix.setLookAtM(viewMatrix, 0,
+        0F, 5F, 10F,
+        0F, 0F, 0F,
+        0F, 1F, 0F)
+    var projectionMatrix = FloatArray(16)
+    Matrix.setIdentityM(projectionMatrix, 0)
+    val ratio = width.toFloat() / height
+    //设置透视投影
+    Matrix.frustumM(projectionMatrix, 0, -ratio, ratio, -1f, 1f, 3f, 20f)
+    var mTempMvMatrix = FloatArray(16)
+    Matrix.setIdentityM(mTempMvMatrix, 0)
+    Matrix.multiplyMM(mTempMvMatrix, 0, viewMatrix, 0, modelMatrix, 0)
+    Matrix.multiplyMM(mMvpMatrix, 0, projectionMatrix, 0, mTempMvMatrix, 0)
+}
+</code></pre>
+<p>在onSurfaceChanged中设置矩阵，绘制的时候设置矩阵数据：</p>
+<pre><code class="language-plain_text">GLES20.glUniformMatrix4fv(mvpMatrixLoc, 1, false, mMvpMatrix, 0)
+</code></pre>
+<p>效果如下：<br />
+<img src="media/16214102827208/16214109661136.jpg" alt="w400" /></p>
+<p>我们发现立方体穿透了，出现这样的效果是因为没有开启深度检测，在绘制前清除深度缓存并开启深度检测，代码如下：</p>
+<pre><code class="language-plain_text">GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT or GLES20.GL_DEPTH_BUFFER_BIT)
+GLES20.glEnable(GLES20.GL_DEPTH_TEST)
+</code></pre>
+<p>效果如下：<br />
+<img src="media/16214102827208/16214111682880.jpg" alt="w400" /></p>
+<p>我们将立方体旋转45度，这样就可以看到立方体的侧面了，将模型矩阵旋转45度代码如下：</p>
+<pre><code class="language-kotlin">var modelMatrix = FloatArray(16)
+Matrix.setIdentityM(modelMatrix, 0)
+Matrix.rotateM(modelMatrix,0,45F,0F,1F,0F)
+</code></pre>
+<p>效果如下：<br />
+<img src="media/16214102827208/16214111985671.jpg" alt="w400" /></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214093075376.html">
+                
+                  <h1>OpenGL ES for Android 绘制矩形和正方形</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>前面的文章介绍了如何 绘制三角形，在OpenGL ES中没有直接绘制矩形的方式，通过绘制2个三角形的方式绘制矩形。</p>
+<p>绘制矩形的顶点shader：</p>
+<pre><code class="language-plain_text">attribute vec4 vPosition;
+void main() {
+    gl_Position = vPosition;
+}
+</code></pre>
+<p>绘制矩形的片段shader：</p>
+<pre><code class="language-plain_text">precision mediump float;
+void main() {
+  gl_FragColor = vec4(1,0,0,1);
+}
+</code></pre>
+<p>创建program：</p>
+<pre><code class="language-kotlin">private fun createProgram() {
+    var vertexCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/triangle_vertex.glsl&quot;
+    )
+    var fragmentCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/triangle_fragment.glsl&quot;
+    )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<p><code>triangle_vertex.glsl</code>和<code>triangle_vertex.glsl</code>分别表示顶点shader和片段shader的文件，存放于assets/glsl目录下，readAssetsTxt为读取assets目录下文件的公用方法。</p>
+<p>获取参数句柄：</p>
+<pre><code class="language-plain_text">vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;vPosition&quot;)
+</code></pre>
+<p>初始化顶点数据，代码如下：</p>
+<pre><code class="language-kotlin">var vertexBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        -0.5f, 0.5f, 0.0f,
+        -0.5f, -0.5f, 0.0f,
+        0.5f, -0.5f, 0.0f,
+        0.5f, 0.5f, 0.0f
+    )
+)
+</code></pre>
+<p>初始化索引数据，代码如下：</p>
+<pre><code class="language-plain_text">var index = shortArrayOf(3,2,0,0, 1, 2)
+val indexBuffer = GLTools.array2Buffer(index)
+</code></pre>
+<p>绘制：</p>
+<pre><code class="language-plain_text">GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+            GLES20.glUseProgram(mProgramHandle)
+            vertexBuffer.position(0)
+            GLES20.glEnableVertexAttribArray(vPositionLoc)
+            GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+            GLES20.glDrawElements(GLES20.GL_TRIANGLES, index.size, GLES20.GL_UNSIGNED_SHORT,indexBuffer)
+</code></pre>
+<p>效果图如下：<br />
+<img src="media/16214093075376/16214095401656.jpg" alt="w400" /></p>
+<p>上面设置的顶点虽然都是0.5，但不一定是正方形，0.5表示x轴或者y轴的一半，如果绘制的窗口本身是矩形，那么绘制出来的也是矩形，如何绘制出正方形呢？<br />
+绘制正方形需要根据绘制窗口的宽高计算顶点数据，计算方式如下：</p>
+<pre><code class="language-plain_text">override fun onSurfaceChanged(p0: GL10?, width: Int, height: Int) {
+    GLES20.glViewport(0, 0, width, height)
+    var ratio = width / height.toFloat()
+    vertexBuffer = GLTools.array2Buffer(
+        floatArrayOf(
+            -0.5f, 0.5f * ratio, 0.0f,
+            -0.5f, -0.5f * ratio, 0.0f,
+            0.5f, -0.5f * ratio, 0.0f,
+            0.5f, 0.5f * ratio, 0.0f
+        )
+    )
+}
+</code></pre>
+<p>onSurfaceChanged是Renderer实现的方法，这个方法有宽高参数，计算宽高比，保持x轴不变，计算y轴长度，效果如下：<br />
+<img src="media/16214093075376/16214096083915.jpg" alt="w400" /></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214074127077.html">
+                
+                  <h1>OpenGL ES 变量、结构体、语句、函数、精度</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<h2><a id="%E5%8F%98%E9%87%8F" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>变量</h2>
+<h3><a id="void" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>void</h3>
+<p>表示空，用于无返回值的函数。比如顶点shader中main函数：</p>
+<pre><code class="language-plain_text">void main() {
+    gl_Position = vPosition;
+}
+</code></pre>
+<h3><a id="float%E3%80%81int%E3%80%81bool" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>float、int、bool</h3>
+<p>分别代表浮点型，整型，布尔型。定义各类型变量如下：</p>
+<pre><code class="language-plain_text">float f = 1.0;
+int i =0;
+bool b = true;
+</code></pre>
+<h3><a id="vec2%E3%80%81vec3%E3%80%81vec4" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>vec2、vec3、vec4</h3>
+<p>分别包含2、3、4个float类型的向量。定义变量如下：</p>
+<pre><code class="language-plain_text">vec2 v2 = vec2(1.0, 0.0);
+vec3 v3 = vec3(1.0, 0.0, 0.5);
+vec4 v4 = vec4(1.0, 0.0, 0.5,0.5);
+</code></pre>
+<p>如果只给一个参数，则向量中其他值也会使用此值，比如给vec4一个1.0的值：</p>
+<pre><code class="language-plain_text">vec4 v5 = vec4(1.0);
+</code></pre>
+<p>等价于：</p>
+<pre><code class="language-plain_text">vec4 v5 = vec4(1.0,1.0,1.0,1.0);
+</code></pre>
+<p>注意：提供给向量的参数只能是1个或者对应向量个数，比如vec4类型不能提供2个参数：</p>
+<pre><code class="language-plain_text">vec4 v6 = vec4(1.0,1.0);    //上面给vec4提供2个参数的写法是错误的。
+</code></pre>
+<p>经常使用的内置变量gl_Position和gl_FragColor是vec4类型，在片段shader中设置颜色：</p>
+<pre><code class="language-plain_text">gl_FragColor = vec4(1.0,0.0,0.0,1.0);
+</code></pre>
+<p>ivec2, ivec3, ivec4和vec2、vec3、vec4用法一样，区别就是ivec的参数是int类型。<br />
+bvec2, bvec3, bvec4和vec2、vec3、vec4用法一样，区别就是bvec的参数是bool类型。</p>
+<h3><a id="%E5%90%91%E9%87%8F%E5%88%86%E9%87%8F" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>向量分量</h3>
+<p>获取向量分量有2种方式：</p>
+<ul>
+<li>通过 “.” 符号获取，向量分量为{x, y, z, w} ， {r, g, b, a} 或 {s, t, r, q} ，{x, y, z, w}是位置相关的分量，{r, g, b, a}是颜色相关的分量，{s, t, r, q}是纹理坐标相关的分量，但是(x,y,z,w)、(r,g,b,a)和(s,t,r,q)不能混合使用。</li>
+<li>通过数组下标获取，例如v2[0]。</li>
+</ul>
+<p>用法如下：</p>
+<pre><code class="language-plain_text">vec4 v4 = vec4(1.0, 0.0, 0.5,0.5);
+float a = v4.x;
+vec2 v2 = v4.xy;
+vec4 v5 = vec4(v4.x,v4.y,v4.z,v4.w);
+vec4 color = vec4(v4.r,v4.g,v4.b,v4.a);
+</code></pre>
+<h3><a id="mat2-mat3-mat4" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>mat2, mat3, mat4</h3>
+<p>分别表示2x2，3x3，4x4浮点型矩阵。如果只提供一个参数，则该值做为矩阵对角线的值，也就是单位矩阵，比如mat4(1.0)，就是4x4单位矩阵。<br />
+也可以按照如下方式定义矩阵：</p>
+<pre><code class="language-plain_text">mat3 m3 = mat3(1.0, 0.0, 0.0,  // 第一列
+               0.0, 1.0, 0.0,  // 第二列
+               0.0, 1.0, 1.0); // 第三列
+</code></pre>
+<h3><a id="sampler2d%E3%80%81samplercube%E3%80%81samplerexternaloes" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>sampler2D、samplerCube、samplerExternalOES</h3>
+<ul>
+<li><code>sampler2D</code>：2D纹理，可以用于绘制图片。</li>
+<li><code>amplerCube</code>：立方体纹理。</li>
+<li><code>samplerExternalOES</code>：Android端用于绘制视频或者相机预览，使用samplerExternalOES需要在shader头部添加 <code>#extension GL_OES_EGL_image_external: require</code>。<br />
+用法如下：</li>
+</ul>
+<pre><code class="language-plain_text">#extension GL_OES_EGL_image_external : require
+uniform samplerExternalOES u_Texture;
+</code></pre>
+<h2><a id="%E7%BB%93%E6%9E%84%E4%BD%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>结构体</h2>
+<p>在GLSL中允许声明结构体，和c语言类型，声明如下：</p>
+<pre><code class="language-plain_text">struct myStruct {
+  vec4 color;
+  vec4 position;
+} myVertex;
+</code></pre>
+<p>声明了一个myStruct类型的变量myVertex。初始化如下：</p>
+<pre><code class="language-plain_text">myVertex = myStruct(vec4(0.0, 1.0, 0.0, 0.0),vec4(0.5, 0.5,0.5, 0.5));
+</code></pre>
+<p>类型要和结构体中一一对应。</p>
+<p>获取结构体值的方式如下：</p>
+<pre><code class="language-plain_text">vec4 color = myVertex.color;
+vec4 position = myVertex.position;
+</code></pre>
+<h2><a id="%E5%9F%BA%E6%9C%AC%E8%AF%AD%E5%8F%A5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>基本语句</h2>
+<h3><a id="if-else" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>if-else</h3>
+<p>if-else 是条件判断语句，用法如下：</p>
+<pre><code class="language-plain_text">if (color.a &lt; 0.25) {
+  gl_FragColor = vec4(1,0,0,1);
+} else {
+  gl_FragColor = vec4(1,0,0,color.a);
+}
+</code></pre>
+<h3><a id="for%E5%BE%AA%E7%8E%AF" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>for 循环</h3>
+<p>使用for循环时，循环变量必须是编译时已知，用法如下：</p>
+<pre><code class="language-plain_text">float sum = 0;
+for (int i = 0; i &lt; 10; i++) {
+  sum += i;
+}
+</code></pre>
+<p>第一种典型的错误用法：</p>
+<pre><code class="language-plain_text">float myArr[4];
+float sum = 0;
+for (int i = 0; i &lt; 3; i++) {
+  sum += myArr[i]; 
+}
+</code></pre>
+<p>[ ]中只能为常量或 uniform 变量，不能为整数量变量（如：i，j，k）。</p>
+<p>第二种典型的错误用法：</p>
+<pre><code class="language-plain_text">uniform int loopIter;
+for (int i = 0; i &lt; loopIter; i++) {
+  sum += i;
+}
+</code></pre>
+<p>上面的用法是错误的，循环变量 loopIter 的值必须是编译时已知。</p>
+<h2><a id="%E5%87%BD%E6%95%B0" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>函数</h2>
+<p>函数的用法和C语言基本相同，在GLSL中不能递归调用且必须声明返回值类型，如果没有返回值则使用void。用法如下：</p>
+<pre><code class="language-plain_text">vec4 getPosition(float a) {
+    return vec4(0.0,0.0,0.0,a);
+}
+
+void main() {
+}
+</code></pre>
+<h2><a id="%E7%B2%BE%E5%BA%A6%E9%99%90%E5%AE%9A%E7%AC%A6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>精度限定符</h2>
+<p>在GLSL中精度限定符分为低（lowp）、中（mediump）、高（highp）精度。当使用低精度时可以更加高效的运行，如果精度不合理可能会出现失真的问题，曾经在项目中遇到过拍照黑边的问题就是精度的问题引起的。</p>
+<p>指定默认精度方式如下：</p>
+<pre><code class="language-plain_text">precision mediump float;
+</code></pre>
+<p>如果未使用的精度限定符的变量将会使用此默认值，用法如下：</p>
+<pre><code class="language-plain_text">//指定精度
+highp vec4 position;
+//默认精度
+vec4 color;
+</code></pre>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214040342279.html">
+                
+                  <h1>OpenGL ES for Android 绘制三角形</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在Android中绘制三角形的顶点shader如下：</p>
+<pre><code class="language-plain_text">attribute vec4 vPosition;
+void main() {
+    gl_Position = vPosition;
+}
+</code></pre>
+<p>vPosition是顶点，由应用程序传入。</p>
+<p>片段shader代码如下：</p>
+<pre><code class="language-plain_text">precision mediump float;
+void main() {
+  gl_FragColor = vec4(1,0,0,1);
+}
+</code></pre>
+<p>创建program：</p>
+<pre><code class="language-kotlin">private fun createProgram() {
+    var vertexCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/triangle_vertex.glsl&quot;
+    )
+    var fragmentCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/triangle_fragment.glsl&quot;
+    )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<p><code>triangle_vertex.glsl</code>和<code>triangle_vertex.glsl</code>分别表示顶点shader和片段shader的文件，存放于assets/glsl目录下，readAssetsTxt为读取assets目录下文件的公用方法。</p>
+<p>获取参数句柄：</p>
+<pre><code class="language-plain_text">vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;vPosition&quot;)
+</code></pre>
+<p>初始化线的顶点数据，代码如下：</p>
+<pre><code class="language-kotlin">var vertexBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        0.0f, 0.5f, 0.0f, // top
+        -0.5f, -0.5f, 0.0f, // bottom left
+        0.5f, -0.5f, 0.0f  // bottom right
+    )
+)
+</code></pre>
+<p>绘制：</p>
+<pre><code class="language-kotlin">override fun onDrawFrame(p0: GL10?) {
+    GLES20.glUseProgram(mProgramHandle)
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+            
+    GLES20.glDrawArrays(GLES20.GL_TRIANGLES, 0, 3)
+}
+</code></pre>
+<p>GL_TRIANGLES表示绘制三角形。</p>
+<p>三角形的绘制有3种方式：</p>
+<ul>
+<li>
+<p>GL_TRIANGLES：3个顶点绘制一个三角形，即使三角形的顶点有重复的，也必须在顶点数组中声明。如果有6个顶点，那么1，2，3组成一个三角形，4，5，6组成一个三角形。</p>
+</li>
+<li>
+<p>GL_TRIANGLE_STRIP：前一个三角形的后两个顶点，和接下来的一个顶点组成另外一个三角形，如果有6个顶点，组成三角形的顶点有（1，2，3）、（2，3，4）、（3，4，5）、（4，5，6）共4个三角形，所以有N个顶点，则绘制出的三角形有N-2个。</p>
+</li>
+<li>
+<p>GL_TRIANGLE_FAN：以第一个点为中心点，其它顶点作为边缘点绘制出组成扇型的相邻三角形，如果有6个顶点，组成三角形的顶点有（1，2，3）、（1，3，4）、（1，4，5）、（1，5，6）共4个三角形</p>
+</li>
+</ul>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16214028753106.html">
+                
+                  <h1>OpenGL ES for Android 绘制线</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>下面将会完成绘制一条线，线的颜色由应用程序确定，顶点shader代码如下：</p>
+<pre><code class="language-plain_text">attribute vec4 vPosition;
+
+void main() {
+    gl_Position = vPosition;
+}
+</code></pre>
+<p>vPosition是顶点，由应用程序传入。</p>
+<p>片段shader代码如下：</p>
+<pre><code class="language-plain_text">precision mediump float;
+uniform vec4 u_color;
+void main() {
+    gl_FragColor = u_color;
+}
+</code></pre>
+<p>u_color 表示线的颜色，由应用程序传入。</p>
+<p>创建program：</p>
+<pre><code class="language-kotlin">fun createProgram() {
+    var vertexCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/line_vs.glsl&quot;
+    )
+    var fragmentCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/line_fs.glsl&quot;
+    )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<p>line_vs.glsl和line_fs.glsl分别表示顶点shader和片段shader的文件，存放于assets/glsl目录下，readAssetsTxt为读取assets目录下文件的公用方法。</p>
+<p>获取参数句柄：</p>
+<pre><code class="language-kotlin">vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;vPosition&quot;)
+uColorLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;u_color&quot;)
+</code></pre>
+<p>初始化线的顶点数据，代码如下：</p>
+<pre><code class="language-kotlin">val vertexBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        -0.5F, 0.5F, 0F,
+        0.5F, 0.5F, 0F,
+        0.5F, -0.5F, 0F,
+        -0.5F, -0.5F, 0F
+    )
+)
+</code></pre>
+<p>初始化线的颜色数据，代码如下：</p>
+<pre><code class="language-plain_text">val colorBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        //r,g,b,a
+        1F, 0F, 0F, 1F
+    )
+)
+</code></pre>
+<p>绘制:</p>
+<pre><code class="language-kotlin">override fun onDrawFrame(gl: GL10?) {
+    GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT)
+    GLES20.glUseProgram(mProgramHandle)
+
+    vertexBuffer.position(0)
+    GLES20.glEnableVertexAttribArray(vPositionLoc)
+    GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+
+    GLES20.glUniform4fv(uColorLoc, 1, colorBuffer)
+    GLES20.glDrawArrays(GLES20.GL_LINES, 0, 4)
+}
+</code></pre>
+<p>设置顶点数据和颜色数据，GLES20.GL_LINES表示绘制线。</p>
+<p>线的绘制有3种方式：</p>
+<ul>
+<li>GL_LINES：俩俩组成一条直线，比如上面的4个点分别编号为1，2，3，4，1和2组成一条直线，3和4组成一条直线，如果点点个数为奇数，那么最后一个点将会抛弃。</li>
+<li>GL_LINE_STRIP：还是上面的4个点，1和2，2和3，3和4各组成一条直线。</li>
+<li>GL_LINE_LOOP：和GL_LINE_STRIP相比多了一个最后一个点和第一个点的连线。</li>
+</ul>
+<p>效果图如下：<br />
+<img src="media/16214028753106/16214033374728.jpg" alt="" /></p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/19</span>
+                    <span>posted in&nbsp;</span> 
+          				  
+          					    <span class="posted-in"><a href='Android.html'>Android</a></span>
+          				   
+                    
+
+                  </div>
+                  <div class="more-right right">
+                  <span class="comments">
+                      
+
+                       
+                  </span>
+                  </div>
+                </div>
+              </div><!-- article -->
+        
+			<div class="article">
+                <a class="clearlink" href="16213290408786.html">
+                
+                  <h1>OpenGL ES for Android 绘制一个点</h1>
+                  <div class="a-content">
+                      
+                      <div class="a-content-text">
+                        
+                        	<p>在Android中开发OpenGL ES的应用程序是无法调试 shader代码的，因此绘制点是一个很好的调试方法，为了定位问题经常会将一些结果输出的屏幕上，比如人脸识别关键点项目，想要确定人脸关键点是否正确，将关键点绘制在人脸对应位置上可以很好的展示人脸关键点正确与否。</p>
+<p>下面将会完成绘制一个点，点的颜色由应用程序确定，顶点shader代码如下：</p>
+<pre><code class="language-plain_text">attribute vec4 vPosition;
+
+void main() {
+    gl_Position = vPosition;
+    gl_PointSize = 5.0;
+}
+</code></pre>
+<p>vPosition是点绘制的位置，由应用程序传入，gl_PointSize是内置变量，代表点的大小，单位是像素、像素、像素，重要的事情说3遍，另外点的形状为方形、方形、方形，不是圆形，因为像素都是方形的。</p>
+<p>有人会问单位是像素岂不是无法适配，在低分辨率的设备上显示比高分辨率要大，如果想绘制一个100分之一大小的点如何绘制啊？如果想绘制100分之一大小的点可以按照绘制方形的形式绘制。</p>
+<p>绘制一点的片段shader代码如下：</p>
+<pre><code class="language-plain_text">precision mediump float;
+uniform vec4 u_color;
+void main() {
+    gl_FragColor = u_color;
+}
+</code></pre>
+<p>u_color变量是点的颜色，由应用程序传入。</p>
+<p>创建program代码如下：</p>
+<pre><code class="language-plain_text">fun createProgram() {
+    var vertexCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/point_vs.glsl&quot;
+    )
+    var fragmentCode = AssetsUtils.readAssetsTxt(
+        context = context,
+        filePath = &quot;glsl/point_fs.glsl&quot;
+    )
+    mProgramHandle = GLTools.createAndLinkProgram(vertexCode, fragmentCode)
+}
+</code></pre>
+<p><code>point_vs.glsl</code>和<code>point_fs.glsl</code>分别表示顶点shader和片段shader的文件，存放于assets/glsl目录下，readAssetsTxt为读取assets目录下文件的公用方法。</p>
+<p>获取参数句柄：</p>
+<pre><code class="language-kotlin">vPositionLoc = GLES20.glGetAttribLocation(mProgramHandle, &quot;vPosition&quot;)
+uColorLoc = GLES20.glGetUniformLocation(mProgramHandle, &quot;u_color&quot;)
+</code></pre>
+<p>初始化顶点数据，代码如下：</p>
+<pre><code class="language-plain_text">val vertexBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        0F, 0F, 0F
+    )
+)
+</code></pre>
+<p>初始化颜色数据，代码如下：</p>
+<pre><code class="language-kotlin">val colorBuffer = GLTools.array2Buffer(
+    floatArrayOf(
+        //r,g,b,a
+        0F, 1F, 0F, 1F
+    )
+)
+</code></pre>
+<p>绘制：</p>
+<pre><code class="language-kotlin">GLES20.glUseProgram(mProgramHandle)
+vertexBuffer.position(0)
+GLES20.glEnableVertexAttribArray(vPositionLoc)
+GLES20.glVertexAttribPointer(vPositionLoc, 3, GLES20.GL_FLOAT, false, 0, vertexBuffer)
+GLES20.glUniform4fv(uColorLoc, 1, colorBuffer)
+GLES20.glDrawArrays(GLES20.GL_POINTS, 0, 1)
+</code></pre>
+<p>设置顶点数据和颜色数据，GLES20.GL_POINTS表示绘制点。</p>
+
+                        
+                      </div>
+                  </div>
+                </a>
+                <div class="read-more clearfix">
+                  <div class="more-left left">
+                  
+                    <span class="date">2021/05/18</span>
                     <span>posted in&nbsp;</span> 
           				  
           					    <span class="posted-in"><a href='Android.html'>Android</a></span>
@@ -3486,6 +1536,8 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
                 <div class="social">
@@ -3517,27 +1569,43 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
         
             <a href="Android.html"><strong>Android</strong></a>
         
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
             <a href="C++.html"><strong>C++</strong></a>
         
             <a href="UI.html"><strong>UI</strong></a>
         
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
         
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
         
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-        
             <a href="Mac.html"><strong>Mac</strong></a>
         
             <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
          
         </p>
 
@@ -3554,31 +1622,31 @@ protected void onCreate(@Nullable Bundle savedInstanceState) {
 	      
 		      
 			      <li class="post">
-			        <a href="16155265432695.html">混入（mixin）</a>
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16145671673295.html">多态</a>
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16136612078589.html">继承</a>
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16127020620600.html">封装</a>
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
 			      </li>
 		     
 		  
@@ -3633,22 +1701,89 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
 
 
-  
 
+div.code-toolbar {
+  position: relative;
+}
 
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
 
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
 
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
 
-
-
-
-
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
 
 <style type="text/css">
 figure{margin: 0;padding: 0;}

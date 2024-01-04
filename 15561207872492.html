@@ -38,7 +38,7 @@
       <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
         <ul id="main-menu" class="left">
         
-        <li id=""><a target="self" href="index.html">Home</a></li>
+        <li id=""><a target="_self" href="index.html">Home</a></li>
         
         <li id=""><a target="_self" href="archives.html">Archives</a></li>
         
@@ -67,7 +67,7 @@
 <aside class="left-off-canvas-menu">
       <ul class="off-canvas-list">
         
-        <li><a target="self" href="index.html">Home</a></li>
+        <li><a target="_self" href="index.html">Home</a></li>
         
         <li><a target="_self" href="archives.html">Archives</a></li>
         
@@ -77,27 +77,43 @@
         
             <li><a href="Android.html">Android</a></li>
         
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
             <li><a href="C++.html">C++</a></li>
         
             <li><a href="UI.html">UI</a></li>
         
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
         
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
         
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-        
             <li><a href="Mac.html">Mac</a></li>
         
             <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
          
 
       </ul>
@@ -141,18 +157,12 @@
 
       <div class="article-content">
       <p>Android5.0之后新增了很多好看的转场动画，相比于以前的overridePendingTransition()丰富了很多，特别新增了共享元素跳转的方式。本篇文章介绍转场动画框架的基本概念，并着手自己实现转场动画。</p>
-
 <span id="more"></span><!-- more -->
-
-<h2 id="toc_0">Scene（场景）</h2>
-
+<h2><a id="scene%EF%BC%88%E5%9C%BA%E6%99%AF%EF%BC%89" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Scene（场景）</h2>
 <p>Scene保存了一个布局文件。我们可以通过以下方式生成一个Scene：</p>
-
 <p><code>public static Scene getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context)</code></p>
-
 <p>这个方法时静态的，传入一个根布局ViewGroup(作为显示场景的容器),一个layoutId(场景的显示内容),最后传入当前上下文。源码很短，我们一起来看一下：</p>
-
-<pre class="line-numbers"><code class="language-java">public static Scene getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context) {
+<pre><code class="language-java">public static Scene getSceneForLayout(ViewGroup sceneRoot, int layoutId, Context context) {
         SparseArray&lt;Scene&gt; scenes = (SparseArray&lt;Scene&gt;) sceneRoot.getTag(
                 com.android.internal.R.id.scene_layoutid_cache);
         if (scenes == null) {
@@ -169,19 +179,15 @@
         }
     }
 </code></pre>
-
 <ul>
 <li>根据一个固定的Tag取得保存依附于这个ViewGroup的scene集合SparseArray<Scene> scenes,如果是空就先new一个。</li>
 <li>以要显示场景的layoutId为Key，先尝试获取这个场景，如果已经有这个layoutId对应的场景就直接返回，没有就先调用构造方法生成一个再放入进去，然后返回。</li>
 <li>一个scene只能对应一个布局，scene只是简单保存了sceneRoot, layoutId, context的值，并没有通过layoutId来分析处理里面的View信息（也没有必要）</li>
 <li>可以通过<code>setEnterAction(Runnable action)</code>,<code>setExitAction(Runnable action)</code>，在场景被加载和移除时回调，做相应的操作。</li>
 </ul>
-
-<h2 id="toc_1">Transition(变换）</h2>
-
+<h2><a id="transition%E5%8F%98%E6%8D%A2%EF%BC%89" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Transition(变换）</h2>
 <p>上面的介绍scene将一个或多个布局和一个加载这些布局的根布局建立起关系。真正的动画是由Transition实现的。所以大致的流程是：</p>
-
-<pre class="line-numbers"><code class="language-java">//为Scene创建scene root  
+<pre><code class="language-java">//为Scene创建scene root  
 mSceneRoot = (ViewGroup) findViewById(R.id.scene_root);  
 //创建 scenes  
 Scene mAScene = Scene.getSceneForLayout(mSceneRoot, R.layout.a_scene, this);  
@@ -191,29 +197,22 @@ Transition mFadeTransition = new Fade();
 //用TransitionManager负责场景变换
 TransitionManager.go(mEndingScene, mFadeTransition);
 </code></pre>
-
-<h2 id="toc_2">自定义Transition</h2>
-
+<h2><a id="%E8%87%AA%E5%AE%9A%E4%B9%89transition" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义Transition</h2>
 <p>Transition是个抽象类，必须要实现以下方法：</p>
-
 <ul>
 <li><code>public abstract void captureStartValues(TransitionValues transitionValues);</code>捕获当前场景的视图，这里会对视图树中所有的View调用，有几个View就会调用几次。</li>
 <li><code>public abstract void captureEndValues(TransitionValues transitionValues);</code>捕获目标场景的视图，这里会对视图树中所有的View调用，有几个View就会调用几次。</li>
 <li><code>public Animator createAnimator(ViewGroup sceneRoot, TransitionValues startValues,TransitionValues endValues)</code>（不实现方法这个就没动画效果）从命名就可以看到captureStartValues和captureStartValues分别用来捕获当前场景和目标场景。</li>
 </ul>
-
 <p>TransitionValues有三个重要属性，对理解Transition框架的机制有很大帮助。</p>
-
 <ul>
 <li><code>View view</code>:就是一个场景的一个View,在里面拿到View，我们可以从里面得到这个View我们所需要的属性。</li>
 <li><code>Map&lt;String, Object&gt; values</code>：默认为空，我们拿到属性后需要放到里面，如果这个Transition需要改变多个属性，就可以放多次进去。</li>
 <li><code>ArrayList&lt;Transition&gt; targetedTransitions</code>：默认为空，用来记录这个View执行了哪些Transition，我们可以在对这个View执行Transition的时候，把这个Transition存进去。</li>
 </ul>
-
-<p>createAnimator方法就是Transition真正的实现方法了，返回一个属性动画。<br/>
+<p>createAnimator方法就是Transition真正的实现方法了，返回一个属性动画。<br />
 好了实战开始，我们就实现一个Transition来实现直角移动：</p>
-
-<pre class="line-numbers"><code class="language-java">public class ChangeRect extends Transition {
+<pre><code class="language-java">public class ChangeRect extends Transition {
 
     private static final String PROPNAME_BER =
             &quot;changeposition:Rect&quot;;
@@ -263,20 +262,13 @@ TransitionManager.go(mEndingScene, mFadeTransition);
     }
 }
 </code></pre>
-
-<h2 id="toc_3">总结</h2>
-
+<h2><a id="%E6%80%BB%E7%BB%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>总结</h2>
 <p>简述下Transition框架的执行机制，我们定义了两个Scene，，当我们通过  <code>TransitionManager.go( scene , transition)</code>，从Scene跳转到目标Scene的时候，会去取得scene对应布局，遍历布局中的每一个View（包括根布局和容器View），获取我们需要的属性。通过View的Id我们建立起两个布局中View的对应关系，所以最终只会在目标场景执行原场景有相同Id的View的动画（满足startValues != null &amp;&amp;  endValues!= null）。这篇文章只是简单解析了转场动画的原理，详细的两个页面的跳转将会的下一篇展开。</p>
-
-<h2 id="toc_4">Content Transition</h2>
-
+<h2><a id="content-transition" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Content Transition</h2>
 <p>Content Transition就是最常见的转场动画了。为了方便大家理解，我们先来上个图。</p>
-
 <p>部分代码：</p>
-
-<h3 id="toc_5">源Activity：</h3>
-
-<pre class="line-numbers"><code class="language-java">Slide slide=new Slide();
+<h3><a id="%E6%BA%90activity%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>源Activity：</h3>
+<pre><code class="language-java">Slide slide=new Slide();
 slide.setDuration(3000);
 slide.setSlideEdge(Gravity.BOTTOM);
 getWindow().setExitTransition(slide);
@@ -286,10 +278,8 @@ explode.setDuration(3000);
 explode.setMode(Visibility.MODE_IN);
 getWindow().setReenterTransition(explode);
 </code></pre>
-
-<h3 id="toc_6">目标Activity：</h3>
-
-<pre class="line-numbers"><code class="language-java">Slide slideEnter=new Slide();
+<h3><a id="%E7%9B%AE%E6%A0%87activity%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>目标Activity：</h3>
+<pre><code class="language-java">Slide slideEnter=new Slide();
 slideEnter.setDuration(1500);
 slideEnter.setSlideEdge(Gravity.RIGHT);
 getWindow().setEnterTransition(slideEnter);
@@ -299,26 +289,20 @@ slide.setDuration(1500);
 slide.setSlideEdge(Gravity.RIGHT);
 getWindow().setReturnTransition(slide);
 </code></pre>
-
 <p>然后在A页面调用方法跳到B页面：</p>
-
-<pre class="line-numbers"><code class="language-java">Intent intent = new Intent(this, BActivity.class);
+<pre><code class="language-java">Intent intent = new Intent(this, BActivity.class);
 ActivityOptionsCompat activityOptionsCompat = ActivityOptionsCompat.makeSceneTransitionAnimation(this);
 startActivity(intent, activityOptionsCompat.toBundle());
 </code></pre>
-
 <p>可以看到一共可以设置四个Transition：</p>
-
 <ul>
 <li>(1)setExitTransition() - 当A 跳转到 B时,A中的View退出场景的效果（默认Null）</li>
 <li>(2)setEnterTransition() - 当A 跳转到 B时，B中的View进入场景的效果（默认Fade）</li>
 <li>(3)setReturnTransition() - 当B 返回 A时,B中的View退出场景的效果（默认同EnterTransition）</li>
 <li>(4)setReenterTransition() - 当B 返回 A时,A中的View进入场景的效果（默认同ExitTransition）</li>
 </ul>
-
 <p>以上这个过程同样可以看做是Transition作用在Scene上的一系列效果，只不过这里的Scene从上一篇中的单一布局换成了Window。不过细心的同学可能发现了，明明我为四个过程都设置动画效果，可为什么ExitTransition没有生效呢？接下来我们为每个Transition加入监听，看看动画的执行流程。下面是其中一个的代码，其他三个都一样：</p>
-
-<pre class="line-numbers"><code class="language-java">Explode explode = new Explode();
+<pre><code class="language-java">Explode explode = new Explode();
 explode.setDuration(3000);
 explode.setMode(Visibility.MODE_IN);
   explode.addListener(new Transition.TransitionListener(){
@@ -351,50 +335,34 @@ explode.setMode(Visibility.MODE_IN);
         });
    getWindow().setReenterTransition(explode);
 </code></pre>
-
 <p>再次执行程序，日志信息如下：</p>
-
-<p><figure><img src="media/15561207872492/15713057229285.jpg" alt=""/></figure></p>
-
-<p>原来A页面的退出动画和B页面的进入动画、B页面的返回动画和A页面的重现动画是并行执行的。也就是说A页面的ExitTransition不是没有执行，而是在它执行的时候，B页面已经覆盖上来，并且EnterTransition已经同时在执行了，这时A页面已经不可见了。这也是Android默认的转场动画执行流程。<br/><br/>
-那问题来了，如果想要并行执行该怎么办呢？<br/><br/>
-有两种方法：<br/><br/>
+<p><img src="media/15561207872492/15713057229285.jpg" alt="" /></p>
+<p>原来A页面的退出动画和B页面的进入动画、B页面的返回动画和A页面的重现动画是并行执行的。也就是说A页面的ExitTransition不是没有执行，而是在它执行的时候，B页面已经覆盖上来，并且EnterTransition已经同时在执行了，这时A页面已经不可见了。这也是Android默认的转场动画执行流程。<br />
+那问题来了，如果想要并行执行该怎么办呢？<br />
+有两种方法：<br />
 在设置Transition的时候同时设置不允许Transition重叠，也就是并行执行：</p>
-
-<pre class="line-numbers"><code class="language-java">getWindow().setAllowEnterTransitionOverlap(false);
+<pre><code class="language-java">getWindow().setAllowEnterTransitionOverlap(false);
 getWindow().setWindowAllowReturnTransitionOverlap(false);
 </code></pre>
-
 <p>或者在主题文件全局设置这个属性，这样无疑更好，即减少了代码又保证了应用视觉效果的统一：</p>
-
-<pre class="line-numbers"><code class="language-text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt;
+<pre><code class="language-plain_text">&lt;item name=&quot;android:windowAllowEnterTransitionOverlap&quot;&gt;false&lt;/item&gt;
 &lt;item name=&quot;android:windowAllowReturnTransitionOverlap&quot;&gt;false&lt;/item&gt;
 </code></pre>
-
-<p>修改后效果如下：<br/>
+<p>修改后效果如下：<br />
 日志也显示现在是串行执行了：</p>
-
-<p><figure><img src="media/15561207872492/15713057362519.jpg" alt=""/></figure></p>
-
-<h2 id="toc_7">生命周期分析</h2>
-
+<p><img src="media/15561207872492/15713057362519.jpg" alt="" /></p>
+<h2><a id="%E7%94%9F%E5%91%BD%E5%91%A8%E6%9C%9F%E5%88%86%E6%9E%90" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>生命周期分析</h2>
 <p>保持上面的打印信息不变，我们增加两个Activity的生命周期日志信息，串行结果如下：</p>
-
-<p><figure><img src="media/15561207872492/15713057490633.jpg" alt=""/></figure></p>
-
+<p><img src="media/15561207872492/15713057490633.jpg" alt="" /></p>
 <p>并行如下：</p>
-
-<p><figure><img src="media/15561207872492/15713057620196.jpg" alt=""/></figure></p>
-
+<p><img src="media/15561207872492/15713057620196.jpg" alt="" /></p>
 <p>可以得到如下信息：</p>
-
 <ul>
 <li>在A页面的onPause执行前，ExitTransition就已经开始执行了</li>
 <li>Transition不会阻塞BActivity的生命周期，尽管是串行执行的，即使ExitTransition没结束，BActivity已经执行完OnResume了。</li>
 <li>ReturnExitTransition需要等到AActivity OnStart执行完才开始执行，而且ReturnExitTransition会阻塞AActivity的生命周期，AActivity的OnResume会等到ReturnExitTransition执行完再执行。关于这点可以简要说明下：直接调用Finish不会有动画直接结束掉，需要执行onBackPressed()才会有ReturnExitTransition。看源码就很明显了：</li>
 </ul>
-
-<pre class="line-numbers"><code class="language-java"> public void onBackPressed() {
+<pre><code class="language-java"> public void onBackPressed() {
         if (mActionBar != null &amp;&amp; mActionBar.collapseActionView()) {
             return;
         }
@@ -404,12 +372,9 @@ getWindow().setWindowAllowReturnTransitionOverlap(false);
         }
     }
 </code></pre>
-
-<h2 id="toc_8">总结</h2>
-
+<h2><a id="%E6%80%BB%E7%BB%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>总结</h2>
 <p>最后简单分析下转场动画的大致流程（以slide为例），看过上一篇文章的同学应该很好理解：</p>
-
-<pre class="line-numbers"><code class="language-text">1.从DecoerView开始，依次遍历获得当前Window上的视图树里的所有View
+<pre><code class="language-plain_text">1.从DecoerView开始，依次遍历获得当前Window上的视图树里的所有View
 
 2.执行captureStartValues(TransitionValues transitionValues)，捕获View开始状态的一些属性（visibility，Parent，LocationOnScree）
 
@@ -419,72 +384,47 @@ getWindow().setWindowAllowReturnTransitionOverlap(false);
 
 5.比较属性的不同,创建属性动画。下一个过程就是返回属性动画并执行了。
 </code></pre>
-
 <p>这是ExitTransiton的流程，其他三个也差不多。下一篇将会讲带共享元素的转场动画，也是material design中很有特色的动画了。</p>
-
 <p>终于到了material design转场动画中最好玩，最有特色的一部分了。我们沿用上一篇的图，不过将跳转Activity的代码作如下更改：</p>
-
-<pre class="line-numbers"><code class="language-java">Intent intent = new Intent(this,BBBActivity.class);
+<pre><code class="language-java">Intent intent = new Intent(this,BBBActivity.class);
 ActivityOptionsCompat activityOptionsCompat =ActivityOptionsCompat.makeSceneTransitionAnimation(this
                 , new Pair&lt;View, String&gt;(shared_image, &quot;shared_image_&quot;)
                 , new Pair&lt;View, String&gt;(shared_text, &quot;shared_text_&quot;));
 startActivity(intent, activityOptionsCompat.toBundle());
 </code></pre>
-
 <p>然后在BBBActivity的布局文件想要设置共享元素的部分设置android:transitionName，值和上个页面中设置的值要一一对应，比如：</p>
-
-<pre class="line-numbers"><code class="language-text"> &lt;TextView
+<pre><code class="language-plain_text"> &lt;TextView
             android:id=&quot;@+id/tv_show&quot;
             android:layout_width=&quot;wrap_content&quot;
             android:layout_height=&quot;wrap_content&quot;
             android:text=&quot;我是一行文字&quot;
             android:transitionName=&quot;shared_text_&quot;/&gt;         
 </code></pre>
-
-<p>当然也可以在代码中设置（注意要在调用时机，不能晚于OnResume）：<code>shared_image.setTransitionName(&quot;shared_image_&quot;);</code><br/>
+<p>当然也可以在代码中设置（注意要在调用时机，不能晚于OnResume）：<code>shared_image.setTransitionName(&quot;shared_image_&quot;);</code><br />
 这样简单两步，咱们的带共享元素的转场动画就改造完成了：</p>
-
-<p><figure><img src="media/15561207872492/20171111151041179398841.gif" alt=""/></figure></p>
-
-<h2 id="toc_9">自定义共享元素动画</h2>
-
+<p><img src="media/15561207872492/20171111151041179398841.gif" alt="" /></p>
+<h2><a id="%E8%87%AA%E5%AE%9A%E4%B9%89%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%E5%8A%A8%E7%94%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义共享元素动画</h2>
 <p>自带的共享元素动画很简单，可以通过如下代码定义进入和返回动画：</p>
-
-<pre class="line-numbers"><code class="language-text"> getWindow().setSharedElementEnterTransition(Transition transition) 
+<pre><code class="language-plain_text"> getWindow().setSharedElementEnterTransition(Transition transition) 
  getWindow().setSharedElementReturnTransition(Transition transition)
 </code></pre>
-
 <p>仔细一看这两个方法都只需要一个transition作为动画，所以意味着自定义共享元素动画就是自定义Transition了。套用第一篇自定义的那个直角移动ChangeRect，效果如下：</p>
-
-<p><figure><img src="media/15561207872492/20171111151041183822484.gif" alt=""/></figure></p>
-
-<h2 id="toc_10">其他方法</h2>
-
+<p><img src="media/15561207872492/20171111151041183822484.gif" alt="" /></p>
+<h2><a id="%E5%85%B6%E4%BB%96%E6%96%B9%E6%B3%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>其他方法</h2>
 <p>上面我们只用两个方法就完成了一次完整的共享元素进入到返回动画。但其实和普通的转场动画一样，设置共享元素的转场动画有四个，除了上面介绍的还有两个就是</p>
-
-<pre class="line-numbers"><code class="language-text">setSharedElementExitTransition
+<pre><code class="language-plain_text">setSharedElementExitTransition
 setSharedElementReenterTransition
 </code></pre>
-
 <p>看命名方式和普通的转场动画非常相似，也就是共享元素离开和重现动画的方法。但是共享元素转场是为了表现两个页面相似内容连贯性而设计的，一组动画就足以完成了。但如果我们都加上后会怎么样呢？为了动画更明显，我们把普通动画设为串行：</p>
-
-<p><figure><img src="media/15561207872492/2017111115104118664268.gif" alt=""/></figure></p>
-
+<p><img src="media/15561207872492/2017111115104118664268.gif" alt="" /></p>
 <p>可以看到新增的两个并没有生效，通过日志打印也可以卡出这一点：</p>
-
-<p><figure><img src="media/15561207872492/15713058665084.jpg" alt=""/></figure></p>
-
+<p><img src="media/15561207872492/15713058665084.jpg" alt="" /></p>
 <p>SharedElementExitTransition和SharedElementReenterTransition开始后立即就结束了。关于这一点，参看stackoverflow上的回答，简单来说这两个动画的设计只是为了作一些初始化而存在的。当我们点击跳转按钮的时候，马上就已经跳到了B（参看上一篇生命周期的分析），而共享元素动画没有所谓的串行机制，会马上执行SharedElementEnterTransition，所以转场动画内部会立即结束掉ExitTransition。而ReenterTransition我们也可以从gif图看到，SharedElementReturnTransition已经完成了动画，将目标View变为目标状态，所以不再进行SharedElementReturnTransition（也因为没必要），所以只进行了普通转场动画的ReenterTransition。</p>
-
-<h2 id="toc_11">共享元素执行空间</h2>
-
+<h2><a id="%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%E6%89%A7%E8%A1%8C%E7%A9%BA%E9%97%B4" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>共享元素执行空间</h2>
 <p>Window中有个关于共享元素的设置setSharedElementsUseOverlay(boolean sharedElementsUseOverlay)，我们将其设为false，重启App：</p>
-
-<p><figure><img src="media/15561207872492/20171111151041191716571.gif" alt=""/></figure></p>
-
+<p><img src="media/15561207872492/20171111151041191716571.gif" alt="" /></p>
 <p>可以看到动画执行流程没有变但是共享元素在移动过程中被遮住了，我们来看源码</p>
-
-<pre class="line-numbers"><code class="language-text">  protected void moveSharedElementsToOverlay() {
+<pre><code class="language-plain_text">  protected void moveSharedElementsToOverlay() {
         if (mWindow == null || !mWindow.getSharedElementsUseOverlay()) {
             return;
         }
@@ -509,19 +449,12 @@ setSharedElementReenterTransition
         }
     }
 </code></pre>
-
 <p>可以看到,如果<code>getSharedElementsUseOverlay==true</code>（也就是默认状态），系统会得到这个View，然后<code>GhostView.addGhost(view, decor, tempMatrix)</code>，放置在decorView的Overlay上，因为是decorView，所以也就是在整个view树结构的最上层。Overlay它是view的最上面的一个透明的层，添加到上面的和view不会被其他View遮挡住。</p>
-
-<h2 id="toc_12">拓展：共享元素形变动画</h2>
-
+<h2><a id="%E6%8B%93%E5%B1%95%EF%BC%9A%E5%85%B1%E4%BA%AB%E5%85%83%E7%B4%A0%E5%BD%A2%E5%8F%98%E5%8A%A8%E7%94%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>拓展：共享元素形变动画</h2>
 <p>前面的动画效果都是操作View原有的一些属性，View的内容没有(或者内容没有改变），所以如果与Svg矢量动画配合一番，会产生怎么样的效果呢：</p>
-
-<p><figure><img src="media/15561207872492/20171111151041200523866.gif" alt=""/></figure></p>
-
+<p><img src="media/15561207872492/20171111151041200523866.gif" alt="" /></p>
 <p>其实很简单，监听SharedElementEnterTransition和SharedElementReturnTransition动画，在其执行的时候执行矢量动画就行了。在更多关于这个矢量动画实现的东西可以参考这篇文章。</p>
-
-<h2 id="toc_13">写在最后</h2>
-
+<h2><a id="%E5%86%99%E5%9C%A8%E6%9C%80%E5%90%8E" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>写在最后</h2>
 <p>好了关于Android转场动画的内容完结了，代码已上传<a href="https://link.juejin.im/?target=https%3A%2F%2Fgithub.com%2Frenjianan%2Ftranslate">gitHub</a>，欢迎指正！</p>
 
 
@@ -567,6 +500,8 @@ setSharedElementReenterTransition
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
                 <div class="social">
@@ -598,27 +533,43 @@ setSharedElementReenterTransition
         
             <a href="Android.html"><strong>Android</strong></a>
         
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
             <a href="C++.html"><strong>C++</strong></a>
         
             <a href="UI.html"><strong>UI</strong></a>
         
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
         
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
         
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-        
             <a href="Mac.html"><strong>Mac</strong></a>
         
             <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
          
         </p>
 
@@ -635,31 +586,31 @@ setSharedElementReenterTransition
 	      
 		      
 			      <li class="post">
-			        <a href="16155265432695.html">混入（mixin）</a>
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16145671673295.html">多态</a>
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16136612078589.html">继承</a>
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16127020620600.html">封装</a>
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
 			      </li>
 		     
 		  
@@ -714,24 +665,89 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
 
 
-  
 
+div.code-toolbar {
+  position: relative;
+}
 
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
 
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
 
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
 
-
-
-
-
-<script src="asset/prism.js"></script>
-
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
 
 <style type="text/css">
 figure{margin: 0;padding: 0;}

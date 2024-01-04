@@ -38,7 +38,7 @@
       <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
         <ul id="main-menu" class="left">
         
-        <li id=""><a target="self" href="index.html">Home</a></li>
+        <li id=""><a target="_self" href="index.html">Home</a></li>
         
         <li id=""><a target="_self" href="archives.html">Archives</a></li>
         
@@ -67,7 +67,7 @@
 <aside class="left-off-canvas-menu">
       <ul class="off-canvas-list">
         
-        <li><a target="self" href="index.html">Home</a></li>
+        <li><a target="_self" href="index.html">Home</a></li>
         
         <li><a target="_self" href="archives.html">Archives</a></li>
         
@@ -77,27 +77,43 @@
         
             <li><a href="Android.html">Android</a></li>
         
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
             <li><a href="C++.html">C++</a></li>
         
             <li><a href="UI.html">UI</a></li>
         
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
         
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
         
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-        
             <li><a href="Mac.html">Mac</a></li>
         
             <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
          
 
       </ul>
@@ -141,34 +157,21 @@
 
       <div class="article-content">
       <p>在Android（Java）开发中，基本都会遇到java.lang.OutOfMemoryError（本文简称OOM），这种错误解决起来相对于一般的Exception或者Error都要难一些，主要是由于错误产生的root cause不是很显而易见。由于没有办法能够直接拿到用户的内存dump文件，如果错误发生在线上的版本，分析起来就会更加困难。本文从一个具体的案例切入，介绍OOM分析的思路及相关工具的使用。</p>
-
-<h2 id="toc_0">案例背景</h2>
-
+<h2><a id="%E6%A1%88%E4%BE%8B%E8%83%8C%E6%99%AF" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>案例背景</h2>
 <p>在美团App 7.4~7.7版本期间，美食业务的OOM数量居高不下，远高于历史水平，主要都是DECODE本地的资源出错。</p>
-
-<p><figure><img src="media/15561207872056/15713351740374.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713351740374.png" alt="" /></p>
 <p>图中OOM数量为各版本发版后第一个月的统计量，包含新发版本及历史版本。对比了同时期其他业务的情况，也有类似OOM。由于美食业务的访问量占美团App的比重较大，因此，OOM的数量相对其他业务也多一些。</p>
-
 <p>思路方案</p>
-
 <p>在问题较为严重的7.6~7.7版本期间，团队对OOM频现的原因有过各种猜测。笔者怀疑过是否是业务上某些修改引起的，例如头图尺寸变大，或者是由页面模块加载方式引起的等等。但这些与OOM问题出现的时间并不吻合。其次也怀疑过是否由某些ROM的Bug导致，但此推断缺乏有力的证据支撑。因此，要找到OOM的root cause，根本途径还是找到谁占的内存最多，然后再根据具体case具体分析，为什么占了这么多。</p>
-
 <p>采集用户手机内存信息</p>
-
 <p>要分析内存的占用，需要内存的dump文件，但是dump文件一般都比较大，让用户配合上传dump文件不合适。所以希望能够运行时采集一些内存的特征然后随着crash日志上报上来。当用户发生OOM时，dump出用户的内存，然后基于com.squareup.haha:haha:2.0.3分析，得到一些关键数据（内存占用最多的实例及所占比例等）。但这个方案很快就被证明是不可行的。主要基于下面几个原因：</p>
-
-<p>需要引入新的库。<br/>
-dump和分析内存都很耗时，效率难以接受。<br/>
-OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二次OOM，得不偿失。<br/>
+<p>需要引入新的库。<br />
+dump和分析内存都很耗时，效率难以接受。<br />
+OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二次OOM，得不偿失。<br />
 模拟复现OOM</p>
-
 <p>采集用户手机内存信息的方案不可行，那么只能采取复现用户场景的方式。由于发生OOM时，用户操作路径的不确定性，无法精确复现线上的OOM，因此采取模拟复现的方式，最终发生OOM时的栈信息基本一致即可。为了能够尽量模拟用户发生OOM的场景，需要基本条件基本一致，即用户使用的手机的各种相关参数。</p>
-
 <p>挖掘OOM特征</p>
-
 <p>分析7.4以来的OOM，列出发生OOM的机器的特征，主要是内存和分辨率，适当考虑其它因素例如系统版本。</p>
-
 <table>
 <thead>
 <tr>
@@ -179,7 +182,6 @@ OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二�
 <th style="text-align: center">stack log</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td style="text-align: center">OPPO N1(T/W)</td>
@@ -281,47 +283,28 @@ OOM时内存已经几乎耗尽，再加载内存dump文件并分析会导致二�
 </tr>
 </tbody>
 </table>
-
 <p>这些特征可以总结为：内存一般，分辨率偏高，OOM的堆栈log基本一致。其中，OPPO N1(T/W)上所发生的OOM比重较高，约为65%，因此选定这款机器作为复现OOM的机器。</p>
-
-<h3 id="toc_1">关键数据（内存dump文件）</h3>
-
+<h3><a id="%E5%85%B3%E9%94%AE%E6%95%B0%E6%8D%AE%EF%BC%88%E5%86%85%E5%AD%98dump%E6%96%87%E4%BB%B6%EF%BC%89" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>关键数据（内存dump文件）</h3>
 <p>需要复现OOM然后获取内存dump。思路是采取内存压力测试，让问题暴露的快速且充分。具体方案为：</p>
-
 <ul>
 <li>选取图片资源多且较为复杂的页面，比如美食的POI详情页。</li>
 <li>加载30次该页面，为了增加OOM的几率，30个POI页面的ID是不同的。</li>
 </ul>
-
 <p>OOM发生后，使用Android Studio自带的Android Monitor dump出HPROF文件，然后使用SDK中的hprof-conv（位于sdk_root/platform-tools）工具转换为标准的Java堆转储文件格式，这样可以使用MAT（Eclipse Memory Analyzer）继续分析。</p>
-
 <p>切到histogram视图，按shadow heap降序排列。</p>
-
 <p>选取byte数组，右击-&gt;list objects-&gt;with incoming references，降序排列可以看到有很多大小一致的byte[]实例。</p>
-
-<p><figure><img src="media/15561207872056/15713351847042.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713351847042.png" alt="" /></p>
 <p>右击其中一个数组-&gt;Path to GC Roots-&gt; exclude xxx references</p>
-
-<p><figure><img src="media/15561207872056/15713351917312.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713351917312.png" alt="" /></p>
 <p>如上图所示，这些byte[]都是系统的EdgeEffect的drawable所持有，drawable对应的bitmap占用的空间为1566 * 406 * 4 = 2543184，与byte数组的大小一致。</p>
-
 <p>再看另外一个：</p>
-
-<p><figure><img src="media/15561207872056/15713352000259.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713352000259.png" alt="" /></p>
 <p>这些byte[]是被App的一个背景图所持有，如下图：</p>
-
-<p><figure><img src="media/15561207872056/15713352074955.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713352074955.png" alt="" /></p>
 <p>通过ImageView的ID（如图）及build目录下的R.txt反查可知该ImageView的ID名称，即可知其设置的背景图的大小为720 * 200（xhdpi），加载到内存并考虑density，size刚好是1080 * 300 * 4 = 1296000，与byte数组大小一致。</p>
-
-<h3 id="toc_2">数据分析</h3>
-
+<h3><a id="%E6%95%B0%E6%8D%AE%E5%88%86%E6%9E%90" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>数据分析</h3>
 <p>为什么会出现这些大小一致的byte数组，或者说，为什么会创建多份EdgeEffect的drawable？查看EdgeEffect的源码（4.2.2）可知，其drawable成员也是通过<code>Resources.getDrawable</code>系统调用获取的。</p>
-
-<pre class="line-numbers"><code class="language-java">/**
+<pre><code class="language-java">/**
  * Construct a new EdgeEffect with a theme appropriate for the provided context.
  * @param context Context used to provide theming and resource information for the EdgeEffect
  */
@@ -336,10 +319,8 @@ public EdgeEffect(Context context) {
     mInterpolator = new DecelerateInterpolator();
 }
 </code></pre>
-
 <p>ImageView(View)获取background对应的drawable的过程类似。</p>
-
-<pre class="line-numbers"><code class="language-text">for (int i = 0; i &lt; N; i++) {
+<pre><code class="language-plain_text">for (int i = 0; i &lt; N; i++) {
     int attr = a.getIndex(i);
     switch (attr) {
         case com.android.internal.R.styleable.View_background:
@@ -349,35 +330,23 @@ public EdgeEffect(Context context) {
     }
 }
 </code></pre>
-
 <p>不论是Resources.getDrawable还是TypedArray.getDrawable，最终都会调用Resources.loadDrawable。继续看<code>Resources.loadDrawable</code>的源码，发现的确是使用了缓存。对于同一个drawable资源，系统只会加载一次，之后都会从缓存去取。</p>
-
 <p>既然drawable的加载机制并没有问题，那么drawable所在的缓存实例或者获取drawable的Resources实例是否是同一个呢？通过下面的代码，打印出每个Activity的Resources实例及Resources实例的drawable cache。</p>
-
-<pre class="line-numbers"><code class="language-java">//noinspection unchecked
+<pre><code class="language-java">//noinspection unchecked
 LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt; cache = (LongSparseArray&lt;WeakReference&lt;Drawable.ConstantState&gt;&gt;) Hack.into(Resources.class).field(&quot;mDrawableCache&quot;).get(getResources());
 Object appCache = Hack.into(Resources.class).field(&quot;mDrawableCache&quot;).get(getApplication().getResources());
 Log.e(&quot;oom&quot;, &quot;Resources: {application=&quot; + getApplication().getResources() + &quot;, activity=&quot; + getResources() + &quot;}&quot;);
 Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + appCache + &quot;, activity=&quot; + cache + &quot;}&quot;);
 </code></pre>
-
-<p><figure><img src="media/15561207872056/15713352192193.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713352192193.png" alt="" /></p>
 <p>这也进一步解释了另外一个现象，即这些大小相同的数组的个数基本和启动Activity的数量成正比。</p>
-
-<p>通过数据分析可知，这些drawable之所以存在多份，是因为其所在的Resources实例并不是同一个。进一步debug可知，Resources实例存在多个的原因是开启了标志位<code>sCompatVectorFromResourcesEnabled</code>。<br/>
+<p>通过数据分析可知，这些drawable之所以存在多份，是因为其所在的Resources实例并不是同一个。进一步debug可知，Resources实例存在多个的原因是开启了标志位<code>sCompatVectorFromResourcesEnabled</code>。<br />
 虽然最终造成OOM突然增多的原因只是开启一个标志位，但是这也告诫大家阅读API文档的重要性，其实很多时候API的使用说明已经明确告知了使用的限制条件甚至风险。</p>
-
 <p>7.8版本关闭了此标志，发版后第一个月的OOM数量（包含历史版本）为153，如下图。</p>
-
-<p><figure><img src="media/15561207872056/15713352268703.png" alt=""/></figure></p>
-
+<p><img src="media/15561207872056/15713352268703.png" alt="" /></p>
 <p>其中新版本发生的OOM数量为22。</p>
-
-<h2 id="toc_3">总结</h2>
-
+<h2><a id="%E6%80%BB%E7%BB%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>总结</h2>
 <p>对于线上出现的OOM，如何分析和解决可以大致分为三个步骤：</p>
-
 <ol>
 <li>充分挖掘特征。在挖掘特征时，需要多方面考虑，此过程更多的是猜测怀疑，所以可能的方面都要考虑到，包括但不限于代码改动、机器特征、时间特征等，必要时还需要做一定的统计分析。</li>
 <li>根据掌握的特征寻找稳定的复现的途径。一般需要做内存压力测试，这样比较容易达到OOM的临界值，只是简单的一些正常操作难以触发OOM。</li>
@@ -427,6 +396,8 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
                 <div class="social">
@@ -458,27 +429,43 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
         
             <a href="Android.html"><strong>Android</strong></a>
         
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
             <a href="C++.html"><strong>C++</strong></a>
         
             <a href="UI.html"><strong>UI</strong></a>
         
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
         
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
         
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-        
             <a href="Mac.html"><strong>Mac</strong></a>
         
             <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
          
         </p>
 
@@ -495,31 +482,31 @@ Log.e(&quot;oom&quot;, &quot;Resources.mDrawableCache: {application=&quot; + app
 	      
 		      
 			      <li class="post">
-			        <a href="16155265432695.html">混入（mixin）</a>
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16145671673295.html">多态</a>
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16136612078589.html">继承</a>
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16127020620600.html">封装</a>
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
 			      </li>
 		     
 		  
@@ -574,24 +561,89 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
 
 
-  
 
+div.code-toolbar {
+  position: relative;
+}
 
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
 
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
 
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
 
-
-
-
-
-<script src="asset/prism.js"></script>
-
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
 
 <style type="text/css">
 figure{margin: 0;padding: 0;}

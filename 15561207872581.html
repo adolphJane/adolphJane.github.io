@@ -38,7 +38,7 @@
       <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
         <ul id="main-menu" class="left">
         
-        <li id=""><a target="self" href="index.html">Home</a></li>
+        <li id=""><a target="_self" href="index.html">Home</a></li>
         
         <li id=""><a target="_self" href="archives.html">Archives</a></li>
         
@@ -67,7 +67,7 @@
 <aside class="left-off-canvas-menu">
       <ul class="off-canvas-list">
         
-        <li><a target="self" href="index.html">Home</a></li>
+        <li><a target="_self" href="index.html">Home</a></li>
         
         <li><a target="_self" href="archives.html">Archives</a></li>
         
@@ -77,27 +77,43 @@
         
             <li><a href="Android.html">Android</a></li>
         
-            <li><a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html">随手记</a></li>
-        
             <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
         
             <li><a href="C++.html">C++</a></li>
         
             <li><a href="UI.html">UI</a></li>
         
-            <li><a href="MySQL.html">MySQL</a></li>
-        
-            <li><a href="%E7%AE%97%E6%B3%95.html">算法</a></li>
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
         
             <li><a href="Game.html">Game</a></li>
         
             <li><a href="Python.html">Python</a></li>
         
-            <li><a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html">跨平台开发</a></li>
-        
             <li><a href="Mac.html">Mac</a></li>
         
             <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
          
 
       </ul>
@@ -140,57 +156,54 @@
       </div><!-- article -->
 
       <div class="article-content">
-      <h2 id="toc_0">前言</h2>
-
+      <h2><a id="%E5%89%8D%E8%A8%80" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>前言</h2>
 <p>　　在很多视频播放器中，都存在使用不同的手势来控制进度、亮度\音量和暂停播放等功能。Android提供了一个GestureDetector来帮助我们识别一些基本的触摸手势（还有ScaleGestureDetector可以识别缩放手势），让我们很方便地实现手势控制功能。下面我们就来学习一下GestureDetector的使用和通过源码（Android7.0）来分析一下它的实现，让我们对触摸事件处理的理解更加深入。</p>
-
 <span id="more"></span><!-- more -->
-
-<h2 id="toc_1">GestureDetector介绍</h2>
-
-<p>　　Detector的意思就是探测者，所以GestureDetector就是用来监听手势的发生。它内部有3个Listener接口，用来回调不同类型的触摸事件，用一个简略的类图来显示：<br/>
-　　<br/>
-<figure><img src="media/15561207872581/15713059947377.jpg" alt=""/></figure></p>
-
+<h2><a id="gesturedetector%E4%BB%8B%E7%BB%8D" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>GestureDetector介绍</h2>
+<p>　　Detector的意思就是探测者，所以GestureDetector就是用来监听手势的发生。它内部有3个Listener接口，用来回调不同类型的触摸事件，用一个简略的类图来显示：<br />
+　　<br />
+<img src="media/15561207872581/15713059947377.jpg" alt="" /></p>
 <p>里面这些接口的方法，就是相应触摸事件的回调，实现了这些方法，就能实现传入触摸事件之后做出相应的回调。</p>
-
-<h2 id="toc_2">一些回调接口：</h2>
-
+<h2><a id="%E4%B8%80%E4%BA%9B%E5%9B%9E%E8%B0%83%E6%8E%A5%E5%8F%A3%EF%BC%9A" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>一些回调接口：</h2>
 <ol>
-<li><p>OnGestureListener，这个Listener监听一些手势，如单击、滑动、长按等操作： </p>
+<li>
+<p>OnGestureListener，这个Listener监听一些手势，如单击、滑动、长按等操作：</p>
 <ul>
-<li>onDown(MotionEvent e):用户按下屏幕的时候的回调。 </li>
-<li>onShowPress(MotionEvent e)：用户按下按键后100ms（根据Android7.0源码）还没有松开或者移动就会回调，官方在源码的解释是说一般用于告诉用户已经识别按下事件的回调（我暂时想不出有什么用途，因为这个回调触发之后还会触发其他的，不像长按）。 </li>
-<li>onLongPress(MotionEvent e)：用户长按后（好像不同手机的时间不同，源码里默认是100ms+500ms）触发，触发之后不会触发其他回调，直至松开（UP事件）。 </li>
-<li>onScroll(MotionEvent e1, MotionEvent e2,float distanceX, float distanceY)：手指滑动的时候执行的回调（接收到MOVE事件，且位移大于一定距离），e1,e2分别是之前DOWN事件和当前的MOVE事件，distanceX和distanceY就是当前MOVE事件和上一个MOVE事件的位移量。 </li>
-<li>onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY)：用户执行抛操作之后的回调，MOVE事件之后手松开（UP事件）那一瞬间的x或者y方向速度，如果达到一定数值（源码默认是每秒50px），就是抛操作（也就是快速滑动的时候松手会有这个回调，因此基本上有onFling必然有onScroll）。 </li>
+<li>onDown(MotionEvent e):用户按下屏幕的时候的回调。</li>
+<li>onShowPress(MotionEvent e)：用户按下按键后100ms（根据Android7.0源码）还没有松开或者移动就会回调，官方在源码的解释是说一般用于告诉用户已经识别按下事件的回调（我暂时想不出有什么用途，因为这个回调触发之后还会触发其他的，不像长按）。</li>
+<li>onLongPress(MotionEvent e)：用户长按后（好像不同手机的时间不同，源码里默认是100ms+500ms）触发，触发之后不会触发其他回调，直至松开（UP事件）。</li>
+<li>onScroll(MotionEvent e1, MotionEvent e2,float distanceX, float distanceY)：手指滑动的时候执行的回调（接收到MOVE事件，且位移大于一定距离），e1,e2分别是之前DOWN事件和当前的MOVE事件，distanceX和distanceY就是当前MOVE事件和上一个MOVE事件的位移量。</li>
+<li>onFling(MotionEvent e1, MotionEvent e2, float velocityX,float velocityY)：用户执行抛操作之后的回调，MOVE事件之后手松开（UP事件）那一瞬间的x或者y方向速度，如果达到一定数值（源码默认是每秒50px），就是抛操作（也就是快速滑动的时候松手会有这个回调，因此基本上有onFling必然有onScroll）。</li>
 <li>onSingleTapUp(MotionEvent e)：用户手指松开（UP事件）的时候如果没有执行onScroll()和onLongPress()这两个回调的话，就会回调这个，说明这是一个点击抬起事件，但是不能区分是否双击事件的抬起。</li>
-</ul></li>
-<li><p>OnDoubleTapListener，这个Listener监听双击和单击事件。 </p>
+</ul>
+</li>
+<li>
+<p>OnDoubleTapListener，这个Listener监听双击和单击事件。</p>
 <ul>
-<li>onSingleTapConfirmed(MotionEvent e)：可以确认（通过单击DOWN后300ms没有下一个DOWN事件确认）这不是一个双击事件，而是一个单击事件的时候会回调。 </li>
-<li>onDoubleTap(MotionEvent e)：可以确认这是一个双击事件的时候回调。 </li>
+<li>onSingleTapConfirmed(MotionEvent e)：可以确认（通过单击DOWN后300ms没有下一个DOWN事件确认）这不是一个双击事件，而是一个单击事件的时候会回调。</li>
+<li>onDoubleTap(MotionEvent e)：可以确认这是一个双击事件的时候回调。</li>
 <li>onDoubleTapEvent(MotionEvent e)：onDoubleTap()回调之后的输入事件（DOWN、MOVE、UP）都会回调这个方法（这个方法可以实现一些双击后的控制，如让View双击后变得可拖动等）。</li>
-</ul></li>
-<li><p>OnContextClickListener，很多人都不知道ContextClick是什么，我以前也不知道，直到我把平板接上了外接键盘——原来这就是鼠标右键。。。 </p>
+</ul>
+</li>
+<li>
+<p>OnContextClickListener，很多人都不知道ContextClick是什么，我以前也不知道，直到我把平板接上了外接键盘——原来这就是鼠标右键。。。</p>
 <ul>
 <li>onContextClick(MotionEvent e)：当鼠标/触摸板，右键点击时候的回调。</li>
-</ul></li>
-<li><p>SimpleOnGestureListener，实现了上面三个接口的类，拥有上面三个的所有回调方法。 </p>
+</ul>
+</li>
+<li>
+<p>SimpleOnGestureListener，实现了上面三个接口的类，拥有上面三个的所有回调方法。</p>
 <ul>
 <li>由于SimpleOnGestureListener不是抽象类，所以继承它的时候只需要选取我们所需要的回调方法来重写就可以了，非常方便，也减少了代码量，符合接口隔离原则，也是模板方法模式的实现。而实现上面的三个接口中的一个都要全部重写里面的方法，所以我们一般都是选择SimpleOnGestureListener。</li>
-</ul></li>
+</ul>
+</li>
 </ol>
-
 <blockquote>
 <p>ps:上面所有的回调方法的返回值都是boolean类型，和View的事件传递机制一样，返回true表示消耗了事件，flase表示没有消耗。</p>
 </blockquote>
-
-<h2 id="toc_3">GestureDetector的使用</h2>
-
+<h2><a id="gesturedetector%E7%9A%84%E4%BD%BF%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>GestureDetector的使用</h2>
 <p>GestureDetector的使用很简单，因为它的功能就是定义为识别手势，所以使用的话就是输入完整的触摸事件（完整的意思就是用户所有的触摸操作都是输入给它。为什么要强调完整，因为我上一篇博客就是分享如何拦截子View的部分触摸事件），识别然后进行相应的回调：</p>
-
-<pre class="line-numbers"><code class="language-java">    private void init(Context context){
+<pre><code class="language-java">    private void init(Context context){
         mOnGestureListener = new MyOnGestureListener();
         mGestureDetector = new GestureDetector(context,mOnGestureListener);
 //        mGestureDetector.setIsLongpressEnabled(false);
@@ -212,20 +225,14 @@
         });
     }
 </code></pre>
-
 <blockquote>
 <p>如上面的代码，要使用OnGestureListener和OnDoubleTapListener里面的回调需要调用GestureDetector.onTouchEvent()方法，而使用OnContextClickListener的话则是需要调用onGenericMotionEvent()方法，注意一个是在onTouch()方法一个是在onGenericMotion()方法。</p>
 </blockquote>
-
 <p>　　看完了上面一堆文字，其实你就会懂得如何使用GestureDetector了，这里有GestureDetector的实践。但是如果你想了解它的回调的时机为什么会是这样的，想具体了解它们的回调时机，可以继续看下去，下面是源码分析。</p>
-
-<h2 id="toc_4">GestureDetector源码分析</h2>
-
-<h3 id="toc_5">初始化处理</h3>
-
+<h2><a id="gesturedetector%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>GestureDetector源码分析</h2>
+<h3><a id="%E5%88%9D%E5%A7%8B%E5%8C%96%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>初始化处理</h3>
 <p>　　GestureDetector的源码接近800行，这在Android源码中已经算是比较短的了（毕竟注释也占一两百行了），所以说它的实现也不是很复杂的。从它的构造方法开始：</p>
-
-<pre class="line-numbers"><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
+<pre><code class="language-java">    public GestureDetector(Context context, OnGestureListener listener) {
         this(context, listener, null);
     }
 
@@ -279,10 +286,8 @@
         mDoubleTapSlopSquare = doubleTapSlop * doubleTapSlop;
     }
 </code></pre>
-
 <p>　　可见GestureDetector的创建就是初始化一些属性，然后就是把对应的Listener设置好，还有初始化Handler，而这里的GestureHandler，是控制onShowPress()，onLongPress()，onSingleTapConfirmed()`回调的关键：</p>
-
-<pre class="line-numbers"><code class="language-java">  private class GestureHandler extends Handler {
+<pre><code class="language-java">  private class GestureHandler extends Handler {
         //省略构造函数...
 
         @Override
@@ -297,7 +302,7 @@
                 break;
 
             case TAP:
-                // If the user&#39;s finger is still down, do not count it as a tap
+                // If the user's finger is still down, do not count it as a tap
                 //这里控制SingleTapConfirmed的回调，
                 if (mDoubleTapListener != null) {
                     if (!mStillDown) {
@@ -324,12 +329,9 @@
         mListener.onLongPress(mCurrentDownEvent);
     }
 </code></pre>
-
-<h3 id="toc_6">输入处理</h3>
-
+<h3><a id="%E8%BE%93%E5%85%A5%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>输入处理</h3>
 <p>　　初始化完之后，就是看它的如何处理输入了，这是它的核心逻辑：</p>
-
-<pre class="line-numbers"><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
+<pre><code class="language-java">    public boolean onTouchEvent(MotionEvent ev) {
         //检查事件输入的一致性,log出来一致性的信息，如：有事件只有up没有down
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onTouchEvent(ev, 0);
@@ -399,18 +401,13 @@
         return handled;
     }
 </code></pre>
-
 <p>　　上面的注释写得很清楚了，主要onTouchEvent()的主要思路就是先对输入事件做出统一处理，提取一些共有的信息，如多个点同时触摸时候的中心焦点和滑动速度等，然后根据事件的分类做出相应的处理。</p>
-
 <blockquote>
 <p>ps：InputEventConsistencyVerifier对输入事件进行的一致性检测的结果并不影响GestureDetector的运行，如果检测到一致性不符合的事件（只有UP事件而前面没有DOWN事件），就只会输出log告诉开发者。</p>
 </blockquote>
-
-<h4 id="toc_7">DOWN事件处理</h4>
-
+<h4><a id="down%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>DOWN事件处理</h4>
 <p>　　下面进入DOWN事件的处理：</p>
-
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_DOWN:
             if (mDoubleTapListener != null) {
                 //处理双击
@@ -478,25 +475,19 @@
         return (deltaX * deltaX + deltaY * deltaY &lt; mDoubleTapSlopSquare);
     }
 </code></pre>
-
-<p>可见，对DOWN事件涉及： </p>
-
+<p>可见，对DOWN事件涉及：</p>
 <ul>
-<li>处理单击判断：如果收到一次DOWN事件，而且前段时间没有DOWN事件的话，会发送一个延时的TAP信息，而一段时间（300ms）之后没有被取消的话，就执行GestureHandler里面的TAP单击确认操作。 </li>
-<li>处理双击判断：如果前面也有一次DOWN事件，而且也符合isConsideredDoubleTap()的条件（第一次点击后没有移动超出范围，第二次点击也在附近），就可以确认双击，执行onDoubleTap()和onDoubleTapEvent()的回调。 </li>
-<li>处理长按判断：先看用户是否允许检测长按，然后就是发送一个延时的LONG_PRESS信息，如果到时候还没被取消的话就是回调长按方法了。 </li>
+<li>处理单击判断：如果收到一次DOWN事件，而且前段时间没有DOWN事件的话，会发送一个延时的TAP信息，而一段时间（300ms）之后没有被取消的话，就执行GestureHandler里面的TAP单击确认操作。</li>
+<li>处理双击判断：如果前面也有一次DOWN事件，而且也符合isConsideredDoubleTap()的条件（第一次点击后没有移动超出范围，第二次点击也在附近），就可以确认双击，执行onDoubleTap()和onDoubleTapEvent()的回调。</li>
+<li>处理长按判断：先看用户是否允许检测长按，然后就是发送一个延时的LONG_PRESS信息，如果到时候还没被取消的话就是回调长按方法了。</li>
 <li>处理showPress判断：这个和长按差不多，就是时间（100ms）短了一点而已。</li>
 </ul>
-
 <blockquote>
 <p>PS：handled是boolean变量，|=符号是用符号右边的值跟左边的值进行或运算再赋值给左边。a |= b等价于a = a | b，这里使handled变量初始值为false，进行了多次|=操作，一旦有结果是true的话，handled最后的值就是true，所有结果都是false最后才会false，onTouchEvent()方法最后返回这个handled，就可以表示事件有没被处理，实现了对事件处理的封装。</p>
 </blockquote>
-
-<h4 id="toc_8">MOVE事件处理</h4>
-
+<h4><a id="move%E4%BA%8B%E4%BB%B6%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>MOVE事件处理</h4>
 <p>然后再看看对MOVE事件的处理：</p>
-
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_MOVE:
             //如果是正在长按和点击了鼠标右键
             if (mInLongPress || mInContextClick) {
@@ -537,19 +528,14 @@
             break;
     //...
 </code></pre>
-
-<p>可见，对MOVE事件涉及： </p>
-
+<p>可见，对MOVE事件涉及：</p>
 <ul>
-<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。 </li>
+<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。</li>
 <li>onScroll()回调：当MOVE不是长按，不是DoubleTapEvent之后，当移动距离大于一定距离之后，就会进入Scroll模式，然后两个MOVE事件的位移距离scrollX或者scrollY大于1px，都会调用onScroll()。</li>
 </ul>
-
-<h4 id="toc_9">UP事件的处理</h4>
-
+<h4><a id="up%E4%BA%8B%E4%BB%B6%E7%9A%84%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>UP事件的处理</h4>
 <p>接下来再看UP事件：</p>
-
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_UP:
             mStillDown = false;
             MotionEvent currentUpEvent = MotionEvent.obtain(ev);
@@ -602,17 +588,14 @@
             break;
     //...
 </code></pre>
-
-<p>可见，对MOVE事件涉及： </p>
-
+<p>可见，对MOVE事件涉及：</p>
 <ul>
-<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。 </li>
-<li>onSingleTapUp()回调：DOWN事件之后没有MOVE，或者MOVE的距离没有超出范围，mAlwaysInTapRegion才不会变成false，回调onSingleTapUp()。 </li>
+<li>onDoubleTapEvent()回调：只要确认是双击之后，mIsDoubleTapping为true，除了长按，后面的MOVE事件都会只回调onDoubleTapEvent()。</li>
+<li>onSingleTapUp()回调：DOWN事件之后没有MOVE，或者MOVE的距离没有超出范围，mAlwaysInTapRegion才不会变成false，回调onSingleTapUp()。</li>
 <li>onSingleTapConfirmed()回调：从前面GestureHandler里面的TAP消息的实现可以看到：</li>
 </ul>
-
-<pre class="line-numbers"><code class="language-java">            case TAP:
-                // If the user&#39;s finger is still down, do not count it as a tap
+<pre><code class="language-java">            case TAP:
+                // If the user's finger is still down, do not count it as a tap
                 //这里控制SingleTapConfirmed的回调，
                 if (mDoubleTapListener != null) {
                     if (!mStillDown) {
@@ -625,18 +608,13 @@
                 }
                 break;
 </code></pre>
-
-<p>　　之前看过，TAP消息是延时（300ms）发送的，然而实际逻辑中，是抬起手指才算是点击，所以这里处理TAP的时候就不一定立刻调用onSingleTapConfirmed()，而是判断手指是否松开了，是松开的话就立刻回调。如果还未松开那就把标志位mDeferConfirmSingleTap设置为true，等到收到UP事件的时候再回调。 </p>
-
+<p>　　之前看过，TAP消息是延时（300ms）发送的，然而实际逻辑中，是抬起手指才算是点击，所以这里处理TAP的时候就不一定立刻调用onSingleTapConfirmed()，而是判断手指是否松开了，是松开的话就立刻回调。如果还未松开那就把标志位mDeferConfirmSingleTap设置为true，等到收到UP事件的时候再回调。</p>
 <ul>
 <li>onFling()回调：当UP事件的速度大于一定速度时，就会回调onFling()，至于mIgnoreNextUpEvent参数，是只有鼠标右键点击的时候才会为true，具体看后面。</li>
 </ul>
-
-<h4 id="toc_10">多点触摸的处理</h4>
-
+<h4><a id="%E5%A4%9A%E7%82%B9%E8%A7%A6%E6%91%B8%E7%9A%84%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>多点触摸的处理</h4>
 <p>　　对于多个手指落下，前面的统一处理已经是把所有手指的坐标值加起来然后算平均值了，所以我们多根手指触摸的时候，其实滑动的实际点是这些手指的中心焦点。回看上面的MOVE事件处理，中心焦点的位置值FocusX和FocusY决定onScroll(onScroll(MotionEvent e1, MotionEvent e2, float distanceX, float distanceY))的后两个参数值，所以处理多点触控的话就使用它们比较方便。因为MotionEvent是使用数组装着当前屏幕上所有指针的动作的，使用前两个参数的话还要循环用getX(int pointerIndex)和getY(int pointerIndex)方法取出各个指针的值再自己处理。</p>
-
-<pre class="line-numbers"><code class="language-java">    //...
+<pre><code class="language-java">    //...
         case MotionEvent.ACTION_POINTER_DOWN:
             mDownFocusX = mLastFocusX = focusX;
             mDownFocusY = mLastFocusY = focusY;
@@ -687,14 +665,10 @@
         mIgnoreNextUpEvent = false;
     }
 </code></pre>
-
 <p>　　这是对多个手指的UP和DOWN事件处理，其实就是做一些取消操作而让多点触摸不影响单点触摸的应用，例如在多个手指落下的时候取消点击信息等。</p>
-
-<h4 id="toc_11">ContextClick的处理</h4>
-
+<h4><a id="contextclick%E7%9A%84%E5%A4%84%E7%90%86" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>ContextClick的处理</h4>
 <p>　　ContextClick的事件是由onGenericMotionEvent()传入：</p>
-
-<pre class="line-numbers"><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
+<pre><code class="language-java">    public boolean onGenericMotionEvent(MotionEvent ev) {
         if (mInputEventConsistencyVerifier != null) {
             mInputEventConsistencyVerifier.onGenericMotionEvent(ev, 0);
         }
@@ -727,15 +701,10 @@
         return false;
     }
 </code></pre>
-
 <p>由此可以，当按键按下（ACTION_BUTTON_PRESS）的时候已经回调onContextClick()。</p>
-
-<h2 id="toc_12">总结</h2>
-
+<h2><a id="%E6%80%BB%E7%BB%93" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>总结</h2>
 <p>读完源码，总结出来的每个回调的调用时机如下表：</p>
-
 <p>PS：除去onContextClick()，因为它的按下鼠标右键时候是发出一系列的事件。</p>
-
 <table>
 <thead>
 <tr>
@@ -745,7 +714,6 @@
 <th style="text-align: center">UP事件</th>
 </tr>
 </thead>
-
 <tbody>
 <tr>
 <td style="text-align: center">onDown(MotionEvent e)</td>
@@ -801,15 +769,22 @@
 <td style="text-align: center">√</td>
 <td style="text-align: center">√</td>
 </tr>
+<tr>
+<td style="text-align: center">　　</td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+</tr>
+<tr>
+<td style="text-align: center">从上面的分析可以看出，虽然GestureDetector能识别很多手势，但是也是不能满足所有的需求的，如滑动和长按之后松开没有回调（这个可以重写onTouch()捕捉UP事件实现）、多点触控缩放手势的实现（这个可以用ScaleGestureDetector）等。</td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+<td style="text-align: center"></td>
+</tr>
 </tbody>
 </table>
-
-<p>　　<br/>
-从上面的分析可以看出，虽然GestureDetector能识别很多手势，但是也是不能满足所有的需求的，如滑动和长按之后松开没有回调（这个可以重写onTouch()捕捉UP事件实现）、多点触控缩放手势的实现（这个可以用ScaleGestureDetector）等。</p>
-
-<h2 id="toc_13">后话</h2>
-
-<p>　　有人问我看GestureDetector源码这么仔细有什么用，它又不是很常用的东西，网上随便一搜一堆资料。我的回答是因为我觉得要用一个东西的话，首先就是要搞清楚它能干什么，它的限制是什么，为什么要选择它，关于这些方面，网上的很多关于GestureDetector的资料都没有达到我想了解的程度，加上GestureDetector并不复杂，所以写下了这篇博客，这样就可以从源码层面上了解到它的回调是什么时候调用，有bug的时候也能更快的找出。<br/><br/>
+<h2><a id="%E5%90%8E%E8%AF%9D" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>后话</h2>
+<p>　　有人问我看GestureDetector源码这么仔细有什么用，它又不是很常用的东西，网上随便一搜一堆资料。我的回答是因为我觉得要用一个东西的话，首先就是要搞清楚它能干什么，它的限制是什么，为什么要选择它，关于这些方面，网上的很多关于GestureDetector的资料都没有达到我想了解的程度，加上GestureDetector并不复杂，所以写下了这篇博客，这样就可以从源码层面上了解到它的回调是什么时候调用，有bug的时候也能更快的找出。<br />
 　　不管怎样，GestureDetector里面的SimpleOnGestureListener的设计，和对触摸事件的处理方式是很值得我学习的，记录分享至此，水平有限，如果错漏，欢迎指正和讨论。</p>
 
 
@@ -855,6 +830,8 @@
     <div id="sidebar" class="sidebar">
           <div id="site-info" class="site-info">
             
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
                 <h1>MagicalRice的Blog</h1>
                 <div class="site-des">技术博客</div>
                 <div class="social">
@@ -886,27 +863,43 @@
         
             <a href="Android.html"><strong>Android</strong></a>
         
-            <a href="%E9%9A%8F%E6%89%8B%E8%AE%B0.html"><strong>随手记</strong></a>
-        
             <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
         
             <a href="C++.html"><strong>C++</strong></a>
         
             <a href="UI.html"><strong>UI</strong></a>
         
-            <a href="MySQL.html"><strong>MySQL</strong></a>
-        
-            <a href="%E7%AE%97%E6%B3%95.html"><strong>算法</strong></a>
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
         
             <a href="Game.html"><strong>Game</strong></a>
         
             <a href="Python.html"><strong>Python</strong></a>
         
-            <a href="%E8%B7%A8%E5%B9%B3%E5%8F%B0%E5%BC%80%E5%8F%91.html"><strong>跨平台开发</strong></a>
-        
             <a href="Mac.html"><strong>Mac</strong></a>
         
             <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
          
         </p>
 
@@ -923,31 +916,31 @@
 	      
 		      
 			      <li class="post">
-			        <a href="16155265432695.html">混入（mixin）</a>
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16145671673295.html">多态</a>
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16136612078589.html">继承</a>
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16127020620600.html">封装</a>
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
 			      </li>
 		     
 		  
 		      
 			      <li class="post">
-			        <a href="16106747969027.html">GitHub搜索技巧</a>
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
 			      </li>
 		     
 		  
@@ -1002,24 +995,89 @@ Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
       </div>
     </div>
 
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
 
 
-  
 
+div.code-toolbar {
+  position: relative;
+}
 
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
 
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
 
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
 
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
 
-
-
-
-
-<script src="asset/prism.js"></script>
-
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
 
 <style type="text/css">
 figure{margin: 0;padding: 0;}

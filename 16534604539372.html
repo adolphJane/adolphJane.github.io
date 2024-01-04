@@ -1,0 +1,1780 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  Android APP启动分析 - 进程创建 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="_self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="_self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>Android APP启动分析 - 进程创建</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2022/05/25</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Android%E6%BA%90%E7%A0%81%E5%88%86%E6%9E%90.html'>Android源码分析</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <p>通过<a href="16533540076884.html">Android启动分析-SystemServer</a>可以得知，系统在完成所有的初始化工作后，会通过<code>mAtmInternal.startHomeOnAllDisplays(currentUserId, &quot;systemReady&quot;);</code>这条语句，来启动android系统的第一个App，即Launcher应用。这篇文章，我们便以Launcher为引子来探讨一下App的启动流程，在启动App时，系统究竟做了哪些操作？</p>
+<span id="more"></span><!-- more -->
+<p>在AMS调用<code>startHomeOnAllDisplays</code>方法后，经过层层追溯，我们最终将目光定位到<code>RootActivityContainer</code>中的<code>startHomeOnDisplay</code>方法。</p>
+<p><code>RootActivityContainer</code>源码路径为 <code>/frameworks/base/services/core/java/com/android/server/wm/RootActivityContainer.java</code>,其相关代码如下：</p>
+<pre><code class="language-java">boolean startHomeOnDisplay(int userId, String reason, int displayId, boolean allowInstrumenting,
+         boolean fromHomeKey) {
+     // 如果displayId无效，则退回到顶层拥有焦点的显示设备
+     if (displayId == INVALID_DISPLAY) {
+         displayId = getTopDisplayFocusedStack().mDisplayId;
+     }
+
+     Intent homeIntent = null;
+     ActivityInfo aInfo = null;
+     if (displayId == DEFAULT_DISPLAY) {
+         //获取lancher的第一个页面的intent，其category为Intent.CATEGORY_HOME
+         homeIntent = mService.getHomeIntent();
+         //通过intent找到launcher中AndroidManifest对应的activity标签，解析出相应的ActivityInfo和applicationInfo信息
+         aInfo = resolveHomeActivity(userId, homeIntent);
+     } else if (shouldPlaceSecondaryHomeOnDisplay(displayId)) {
+         //多屏显示功能，具体参考https://source.android.google.cn/devices/tech/display/multi_display/system-decorations#launcher，在此不做分析
+         Pair&lt;ActivityInfo, Intent&gt; info = resolveSecondaryHomeActivity(userId, displayId);
+         aInfo = info.first;
+         homeIntent = info.second;
+     }
+     if (aInfo == null || homeIntent == null) {
+         return false;
+     }
+     //在启动前，校验是否满足启动条件，大概校验了 displayId的有效性、对应activity的启动模式、是否处于工厂测试模式等等
+     if (!canStartHomeOnDisplay(aInfo, displayId, allowInstrumenting)) {
+         return false;
+     }
+
+     // 更新component信息
+     homeIntent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
+     homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
+     // 传入的fromHomeKey的值为false
+     if (fromHomeKey) {
+         homeIntent.putExtra(WindowManagerPolicy.EXTRA_FROM_HOME_KEY, true);
+     }
+     // Update the reason for ANR debugging to verify if the user activity is the one that
+     // actually launched.
+     final String myReason = reason + &quot;:&quot; + userId + &quot;:&quot; + UserHandle.getUserId(
+             aInfo.applicationInfo.uid) + &quot;:&quot; + displayId;
+       //转到ActivityStartController类中继续调用startHomeActivity方法
+     mService.getActivityStartController().startHomeActivity(homeIntent, aInfo, myReason,
+             displayId);
+     return true;
+ }
+</code></pre>
+<p>我们继续往下追踪：</p>
+<p><code>ActivityStartController</code>的源码路径为<br />
+<code>/frameworks/base/services/core/java/com/android/server/wm/ActivityStartController.java</code></p>
+<p>相关代码如下：</p>
+<pre><code class="language-java">    void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason, int displayId) {
+        //这句话只是创建了一个ActivityOptions的对象
+        final ActivityOptions options = ActivityOptions.makeBasic();
+        //FULLSCREEN模式启动Activity
+        options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        if (!ActivityRecord.isResolverActivity(aInfo.name)) {
+            // 判断当前是否拥有多个launcher并处于选择launcher状态，否的话设置ACTIVITY_TYPE_HOME属性，直接启动launcher的activity
+            options.setLaunchActivityType(ACTIVITY_TYPE_HOME);
+        }
+        options.setLaunchDisplayId(displayId);
+        //执行启动任务
+        mLastHomeActivityStartResult = obtainStarter(intent, &quot;startHomeActivity: &quot; + reason)
+                .setOutActivity(tmpOutRecord)
+                .setCallingUid(0)
+                .setActivityInfo(aInfo)
+                .setActivityOptions(options.toBundle())
+                .execute();
+        mLastHomeActivityStartRecord = tmpOutRecord[0];
+        final ActivityDisplay display =
+                mService.mRootActivityContainer.getActivityDisplay(displayId);
+        final ActivityStack homeStack = display != null ? display.getHomeStack() : null;
+        if (homeStack != null &amp;&amp; homeStack.mInResumeTopActivity) {
+            // If we are in resume section already, home activity will be initialized, but not
+            // resumed (to avoid recursive resume) and will stay that way until something pokes it
+            // again. We need to schedule another resume.
+            mSupervisor.scheduleResumeTopActivities();
+        }
+    }
+</code></pre>
+<p>我们从<code>obtainStarter</code>这行代码开始看起，这段代码的执行，意味着开始进入了activity的启动流程。</p>
+<pre><code class="language-java">ActivityStarter obtainStarter(Intent intent, String reason) {
+        return mFactory.obtain().setIntent(intent).setReason(reason);
+}
+</code></pre>
+<p>这里<code>mFactory</code>是一个<code>Factory</code>接口，其实现类为<code>DefaultFactory</code> 。</p>
+<pre><code class="language-java">    public ActivityStarter obtain() {
+        ActivityStarter starter = mStarterPool.acquire();
+        if (starter == null) {
+            starter = new ActivityStarter(mController, mService, mSupervisor, mInterceptor);
+        }
+        return starter;
+    }
+</code></pre>
+<p>调用<code>obtain</code>方法时，会首先尝试从缓存池中获取一个ActivityStarter对象，如果获取不到，才去新建一个。</p>
+<p>我们将目光回转，重新聚焦到<code>execute</code>这个方法上。</p>
+<pre><code class="language-java"> int execute() {
+        try {
+            if (mRequest.mayWait) {
+                return startActivityMayWait(mRequest.caller, mRequest.callingUid,
+                        mRequest.callingPackage, mRequest.realCallingPid, mRequest.realCallingUid,
+                        mRequest.intent, mRequest.resolvedType,
+                        mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
+                        mRequest.resultWho, mRequest.requestCode, mRequest.startFlags,
+                        mRequest.profilerInfo, mRequest.waitResult, mRequest.globalConfig,
+                        mRequest.activityOptions, mRequest.ignoreTargetSecurity, mRequest.userId,
+                        mRequest.inTask, mRequest.reason,
+                        mRequest.allowPendingRemoteAnimationRegistryLookup,
+                        mRequest.originatingPendingIntent, mRequest.allowBackgroundActivityStart);
+            } else {
+                return startActivity(mRequest.caller, mRequest.intent, mRequest.ephemeralIntent,
+                        mRequest.resolvedType, mRequest.activityInfo, mRequest.resolveInfo,
+                        mRequest.voiceSession, mRequest.voiceInteractor, mRequest.resultTo,
+                        mRequest.resultWho, mRequest.requestCode, mRequest.callingPid,
+                        mRequest.callingUid, mRequest.callingPackage, mRequest.realCallingPid,
+                        mRequest.realCallingUid, mRequest.startFlags, mRequest.activityOptions,
+                        mRequest.ignoreTargetSecurity, mRequest.componentSpecified,
+                        mRequest.outActivity, mRequest.inTask, mRequest.reason,
+                        mRequest.allowPendingRemoteAnimationRegistryLookup,
+                        mRequest.originatingPendingIntent, mRequest.allowBackgroundActivityStart);
+            }
+        } finally {
+            onExecutionComplete();
+        }
+    }
+</code></pre>
+<p>mayWait为false,进入else分支。</p>
+<pre><code class="language-java">  private int startActivity(IApplicationThread caller, Intent intent, Intent ephemeralIntent,
+            String resolvedType, ActivityInfo aInfo, ResolveInfo rInfo,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            IBinder resultTo, String resultWho, int requestCode, int callingPid, int callingUid,
+            String callingPackage, int realCallingPid, int realCallingUid, int startFlags,
+            SafeActivityOptions options,
+            boolean ignoreTargetSecurity, boolean componentSpecified, ActivityRecord[] outActivity,
+            TaskRecord inTask, boolean allowPendingRemoteAnimationRegistryLookup,
+            PendingIntentRecord originatingPendingIntent, boolean allowBackgroundActivityStart) {
+        ...
+
+        //创建被启动的activity对应的ActivityRecord对象
+        ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
+                callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
+                resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
+                mSupervisor, checkedOptions, sourceRecord);
+        if (outActivity != null) {
+            outActivity[0] = r;
+        }
+        final ActivityStack stack = mRootActivityContainer.getTopDisplayFocusedStack();
+
+        //如果我们启动的activity与当前恢复的activity的uid不同，请检查是否允许应用程序切换。
+        if (voiceSession == null &amp;&amp; (stack.getResumedActivity() == null
+                || stack.getResumedActivity().info.applicationInfo.uid != realCallingUid)) {
+            if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
+                    realCallingPid, realCallingUid, &quot;Activity start&quot;)) {
+                if (!(restrictedBgActivity &amp;&amp; handleBackgroundActivityAbort(r))) {
+                    mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
+                            sourceRecord, startFlags, stack, callerApp));
+                }
+                ActivityOptions.abort(checkedOptions);
+                return ActivityManager.START_SWITCHES_CANCELED;
+            }
+        }
+
+        mService.onStartActivitySetDidAppSwitch();
+        mController.doPendingActivityLaunches(false);
+
+        final int res = startActivity(r, sourceRecord, voiceSession, voiceInteractor, startFlags,
+                true /* doResume */, checkedOptions, inTask, outActivity, restrictedBgActivity);
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outActivity[0]);
+        return res;
+    }
+</code></pre>
+<p>在最后，代码会进入如下分支：</p>
+<pre><code class="language-java">   private int startActivity(final ActivityRecord r, ActivityRecord sourceRecord,
+                IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+                int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+                ActivityRecord[] outActivity, boolean restrictedBgActivity) {
+        int result = START_CANCELED;
+        final ActivityStack startedActivityStack;
+        try {
+            mService.mWindowManager.deferSurfaceLayout();
+            result = startActivityUnchecked(r, sourceRecord, voiceSession, voiceInteractor,
+                    startFlags, doResume, options, inTask, outActivity, restrictedBgActivity);
+        } finally {
+            final ActivityStack currentStack = r.getActivityStack();
+            startedActivityStack = currentStack != null ? currentStack : mTargetStack;
+
+            if (ActivityManager.isStartResultSuccessful(result)) {
+                if (startedActivityStack != null) {
+                    // If there is no state change (e.g. a resumed activity is reparented to
+                    // top of another display) to trigger a visibility/configuration checking,
+                    // we have to update the configuration for changing to different display.
+                    final ActivityRecord currentTop =
+                            startedActivityStack.topRunningActivityLocked();
+                    if (currentTop != null &amp;&amp; currentTop.shouldUpdateConfigForDisplayChanged()) {
+                        mRootActivityContainer.ensureVisibilityAndConfig(
+                                currentTop, currentTop.getDisplayId(),
+                                true /* markFrozenIfConfigChanged */, false /* deferResume */);
+                    }
+                }
+            } else {
+                // If we are not able to proceed, disassociate the activity from the task.
+                // Leaving an activity in an incomplete state can lead to issues, such as
+                // performing operations without a window container.
+                final ActivityStack stack = mStartActivity.getActivityStack();
+                if (stack != null) {
+                    stack.finishActivityLocked(mStartActivity, RESULT_CANCELED,
+                            null /* intentResultData */, &quot;startActivity&quot;, true /* oomAdj */);
+                }
+
+                // Stack should also be detached from display and be removed if it's empty.
+                if (startedActivityStack != null &amp;&amp; startedActivityStack.isAttached()
+                        &amp;&amp; startedActivityStack.numActivities() == 0
+                        &amp;&amp; !startedActivityStack.isActivityTypeHome()) {
+                    startedActivityStack.remove();
+                }
+            }
+            mService.mWindowManager.continueSurfaceLayout();
+        }
+
+        postStartActivityProcessing(r, result, startedActivityStack);
+
+        return result;
+    }
+</code></pre>
+<p>其中，调用了startActivityUnchecked方法。</p>
+<pre><code class="language-java"> private int startActivityUnchecked(final ActivityRecord r, ActivityRecord sourceRecord,
+            IVoiceInteractionSession voiceSession, IVoiceInteractor voiceInteractor,
+            int startFlags, boolean doResume, ActivityOptions options, TaskRecord inTask,
+            ActivityRecord[] outActivity, boolean restrictedBgActivity) {
+      ...
+
+        //如果正在启动的activity与当前在顶部的activity相同，那么我们需要检查它是否应该只启动一次
+        final ActivityStack topStack = mRootActivityContainer.getTopDisplayFocusedStack();
+        final ActivityRecord topFocused = topStack.getTopActivity();
+        final ActivityRecord top = topStack.topRunningNonDelayedActivityLocked(mNotTop);
+        final boolean dontStart = top != null &amp;&amp; mStartActivity.resultTo == null
+                &amp;&amp; top.mActivityComponent.equals(mStartActivity.mActivityComponent)
+                &amp;&amp; top.mUserId == mStartActivity.mUserId
+                &amp;&amp; top.attachedToProcess()
+                &amp;&amp; ((mLaunchFlags &amp; FLAG_ACTIVITY_SINGLE_TOP) != 0
+                || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK))
+                // This allows home activity to automatically launch on secondary display when
+                // display added, if home was the top activity on default display, instead of
+                // sending new intent to the home activity on default display.
+                &amp;&amp; (!top.isActivityTypeHome() || top.getDisplayId() == mPreferredDisplayId);
+        if (dontStart) {
+            // For paranoia, make sure we have correctly resumed the top activity.
+            topStack.mLastPausedActivity = null;
+            if (mDoResume) {
+                mRootActivityContainer.resumeFocusedStacksTopActivities();
+            }
+            ActivityOptions.abort(mOptions);
+            if ((mStartFlags &amp; START_FLAG_ONLY_IF_NEEDED) != 0) {
+                // We don't need to start a new activity, and the client said not to do
+                // anything if that is the case, so this is it!
+                return START_RETURN_INTENT_TO_CALLER;
+            }
+
+            deliverNewIntent(top);
+
+            // Don't use mStartActivity.task to show the toast. We're not starting a new activity
+            // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
+            mSupervisor.handleNonResizableTaskIfNeeded(top.getTaskRecord(), preferredWindowingMode,
+                    mPreferredDisplayId, topStack);
+
+            return START_DELIVERED_TO_TOP;
+        }
+        
+        ...
+        //往ActivityStack中写入启动的activity记录，同时更新TaskRecord信息
+        mTargetStack.startActivityLocked(mStartActivity, topFocused, newTask, mKeepCurTransition,
+                mOptions);
+        if (mDoResume) {
+            final ActivityRecord topTaskActivity =
+                    mStartActivity.getTaskRecord().topRunningActivityLocked();
+            if (!mTargetStack.isFocusable()
+                    || (topTaskActivity != null &amp;&amp; topTaskActivity.mTaskOverlay
+                    &amp;&amp; mStartActivity != topTaskActivity)) {
+                //如果activity无焦点的，我们不能恢复它，但仍然希望确保它在启动时时变得可见(这也将触发入场动画)。此外，我们不希望在当前有覆盖层的Task中恢复activity，因为正在启动的activity只需要处于可见的暂停状态，直到覆盖层被移除。
+                mTargetStack.ensureActivitiesVisibleLocked(mStartActivity, 0, !PRESERVE_WINDOWS);
+                // Go ahead and tell window manager to execute app transition for this activity
+                // since the app transition will not be triggered through the resume channel.
+                mTargetStack.getDisplay().mDisplayContent.executeAppTransition();
+            } else {
+                // If the target stack was not previously focusable (previous top running activity
+                // on that stack was not visible) then any prior calls to move the stack to the
+                // will not update the focused stack.  If starting the new activity now allows the
+                // task stack to be focusable, then ensure that we now update the focused stack
+                // accordingly.
+                if (mTargetStack.isFocusable()
+                        &amp;&amp; !mRootActivityContainer.isTopDisplayFocusedStack(mTargetStack)) {
+                    mTargetStack.moveToFront(&quot;startActivityUnchecked&quot;);
+                }
+                mRootActivityContainer.resumeFocusedStacksTopActivities(
+                        mTargetStack, mStartActivity, mOptions);
+            }
+        } else if (mStartActivity != null) {
+            mSupervisor.mRecentTasks.add(mStartActivity.getTaskRecord());
+        }
+        mRootActivityContainer.updateUserStack(mStartActivity.mUserId, mTargetStack);
+
+        mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTaskRecord(),
+                preferredWindowingMode, mPreferredDisplayId, mTargetStack);
+
+        return START_SUCCESS;
+    }
+</code></pre>
+<p>我们关注一下这行代码,</p>
+<pre><code class="language-java"> mRootActivityContainer.resumeFocusedStacksTopActivities(
+                        mTargetStack, mStartActivity, mOptions);
+</code></pre>
+<p>它调用了<code>RootActivityContainer</code>的<code>resumeFocusedStacksTopActivities</code>方法，启动目标<code>ActivityStack</code>的最顶层activity。</p>
+<p>我们接着往下追踪，它调用了 <code>ActivityStack</code>的<code>resumeTopActivityInnerLocked</code>方法。</p>
+<pre><code class="language-java"> private boolean resumeTopActivityInnerLocked(ActivityRecord prev, ActivityOptions options) {
+       ...
+
+        //暂停上一个activity
+        boolean pausing = getDisplay().pauseBackStacks(userLeaving, next, false);
+        if (mResumedActivity != null) {
+            if (DEBUG_STATES) Slog.d(TAG_STATES,
+                    &quot;resumeTopActivityLocked: Pausing &quot; + mResumedActivity);
+            pausing |= startPausingLocked(userLeaving, false, next, false);
+        }
+       ...
+
+  // 如果最近的activity没有历史记录，但由于设备进入睡眠状态而被停止，而不是停止+销毁，我们需要确保销毁它，因为我们正在使一个新的activity处于最顶层。
+        if (shouldSleepActivities() &amp;&amp; mLastNoHistoryActivity != null &amp;&amp;
+                !mLastNoHistoryActivity.finishing) {
+            if (DEBUG_STATES) Slog.d(TAG_STATES,
+                    &quot;no-history finish of &quot; + mLastNoHistoryActivity + &quot; on new resume&quot;);
+            requestFinishActivityLocked(mLastNoHistoryActivity.appToken, Activity.RESULT_CANCELED,
+                    null, &quot;resume-no-history&quot;, false);
+            mLastNoHistoryActivity = null;
+        }
+
+        if (prev != null &amp;&amp; prev != next &amp;&amp; next.nowVisible) {
+
+            /*下一个activity已经可见，所以现在隐藏前一个activity的窗口，以便我们可以尽快显示新的activity。
+            我们只有在前一个结束时才这样做，这意味着它在resume的那个之上，所以快速隐藏它是有好处的。
+            否则，我们希望按照正常的方式显示resume的activity，
+            这样我们就可以根据新activity是否全屏来决定是否应该隐藏以前的activity。*/
+            if (prev.finishing) {
+                prev.setVisibility(false);
+                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
+                        &quot;Not waiting for visible to hide: &quot; + prev
+                        + &quot;, nowVisible=&quot; + next.nowVisible);
+            } else {
+                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH,
+                        &quot;Previous already visible but still waiting to hide: &quot; + prev
+                        + &quot;, nowVisible=&quot; + next.nowVisible);
+            }
+
+        }
+
+        // Launching this app's activity, make sure the app is no longer
+        // considered stopped.
+        try {
+            AppGlobals.getPackageManager().setPackageStoppedState(
+                    next.packageName, false, next.mUserId); /* TODO: Verify if correct userid */
+        } catch (RemoteException e1) {
+        } catch (IllegalArgumentException e) {
+            Slog.w(TAG, &quot;Failed trying to unstop package &quot;
+                    + next.packageName + &quot;: &quot; + e);
+        }
+
+        // 我们正在启动下一个activity，所以告诉window manager，上一个activity很快就会被隐藏。这样，它可以知道在计算所需的屏幕方向时忽略它。
+        boolean anim = true;
+        final DisplayContent dc = getDisplay().mDisplayContent;
+        if (prev != null) {
+            if (prev.finishing) {
+                if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
+                        &quot;Prepare close transition: prev=&quot; + prev);
+                if (mStackSupervisor.mNoAnimActivities.contains(prev)) {
+                    anim = false;
+                    dc.prepareAppTransition(TRANSIT_NONE, false);
+                } else {
+                    dc.prepareAppTransition(
+                            prev.getTaskRecord() == next.getTaskRecord() ? TRANSIT_ACTIVITY_CLOSE
+                                    : TRANSIT_TASK_CLOSE, false);
+                }
+                prev.setVisibility(false);
+            } else {
+                if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
+                        &quot;Prepare open transition: prev=&quot; + prev);
+                if (mStackSupervisor.mNoAnimActivities.contains(next)) {
+                    anim = false;
+                    dc.prepareAppTransition(TRANSIT_NONE, false);
+                } else {
+                    dc.prepareAppTransition(
+                            prev.getTaskRecord() == next.getTaskRecord() ? TRANSIT_ACTIVITY_OPEN
+                                    : next.mLaunchTaskBehind ? TRANSIT_TASK_OPEN_BEHIND
+                                            : TRANSIT_TASK_OPEN, false);
+                }
+            }
+        } else {
+            if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, &quot;Prepare open transition: no previous&quot;);
+            if (mStackSupervisor.mNoAnimActivities.contains(next)) {
+                anim = false;
+                dc.prepareAppTransition(TRANSIT_NONE, false);
+            } else {
+                dc.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false);
+            }
+        }
+
+        if (anim) {
+            next.applyOptionsLocked();
+        } else {
+            next.clearOptionsLocked();
+        }
+
+        mStackSupervisor.mNoAnimActivities.clear();
+
+        if (next.attachedToProcess()) {
+            ... 
+            //只有启动过的activity才会进入此分支
+        } else {
+            // Whoops, need to restart this activity!
+            if (!next.hasBeenLaunched) {
+                next.hasBeenLaunched = true;
+            } else {
+                if (SHOW_APP_STARTING_PREVIEW) {
+                    //冷启动的过渡页，在这里会载入manifest配置的主题背景，如果没有的话，默认白屏或黑屏
+                    next.showStartingWindow(null /* prev */, false /* newTask */,
+                            false /* taskSwich */);
+                }
+                if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, &quot;Restarting: &quot; + next);
+            }
+            if (DEBUG_STATES) Slog.d(TAG_STATES, &quot;resumeTopActivityLocked: Restarting &quot; + next);
+            mStackSupervisor.startSpecificActivityLocked(next, true, true);
+        }
+
+        return true;
+    }
+</code></pre>
+<p>通过源码，我们可以得知：先对上一个<code>Activity</code>执行pause操作，再启动目标activity，最终进入到了<code>ActivityStackSupervior.startSpecificActivityLocked</code>方法中。在启动Activity之前，调用了<code>next.showStartingWindow</code>方法来展示一个window，这就是冷启动时出现白屏的原因。</p>
+<p>我们继续往下追踪：</p>
+<p><code>ActivityStackSupervisor</code>的源码路径为 <code>/frameworks/base/services/core/java/com/android/server/wm/ActivityStackSupervisor.java</code></p>
+<pre><code class="language-java"> void startSpecificActivityLocked(ActivityRecord r, boolean andResume, boolean checkConfig) {
+        // Is this activity's application already running?
+        final WindowProcessController wpc =
+                mService.getProcessController(r.processName, r.info.applicationInfo.uid);
+
+        boolean knownToBeDead = false;
+        if (wpc != null &amp;&amp; wpc.hasThread()) {
+            try {
+                realStartActivityLocked(r, wpc, andResume, checkConfig);
+                return;
+            } catch (RemoteException e) {
+                Slog.w(TAG, &quot;Exception when starting activity &quot;
+                        + r.intent.getComponent().flattenToShortString(), e);
+            }
+
+            // If a dead object exception was thrown -- fall through to
+            // restart the application.
+            knownToBeDead = true;
+        }
+
+        // Suppress transition until the new activity becomes ready, otherwise the keyguard can
+        // appear for a short amount of time before the new process with the new activity had the
+        // ability to set its showWhenLocked flags.
+        if (getKeyguardController().isKeyguardLocked()) {
+            r.notifyUnknownVisibilityLaunched();
+        }
+
+        try {
+            if (Trace.isTagEnabled(TRACE_TAG_ACTIVITY_MANAGER)) {
+                Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, &quot;dispatchingStartProcess:&quot;
+                        + r.processName);
+            }
+            //发布消息以启动进程，从而避免在ATMS锁被持有的情况下调用AMS时可能出现的死锁
+            final Message msg = PooledLambda.obtainMessage(
+                    ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
+                    r.info.applicationInfo, knownToBeDead, &quot;activity&quot;, r.intent.getComponent());
+            mService.mH.sendMessage(msg);
+        } finally {
+            Trace.traceEnd(TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+</code></pre>
+<p>上面这段方法里有个很重要的判断，<code>if(wpc != null &amp;&amp; wpc.hasThread())</code>,通过进程名和<code>application uid</code> 获取的<code>WindowProcessController</code>对象进行校验，判断要启动的<code>activity</code>进程是否已启动。显然，app第一次启动时，进程还不存在，首先先得创建应用进程。</p>
+<pre><code class="language-java">final Message msg = PooledLambda.obtainMessage(
+                 ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
+                 r.info.applicationInfo, knownToBeDead, &quot;activity&quot;, r.intent.getComponent());
+         mService.mH.sendMessage(msg);
+</code></pre>
+<p>这里通过Handler，发送了一条Message,以避免在ATMS锁被持有的情况下调用AMS时可能出现的死锁。这条Message实际调用的是<code>ActivityManagerService</code>的<code>startProcess</code>方法。</p>
+<h2><a id="%E5%90%AF%E5%8A%A8%E8%BF%9B%E7%A8%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>启动进程</h2>
+<p><code>ActivityManagerService</code>的源码位置为 <code>/frameworks/base/services/core/java/com/android/server/am/ActivityManagerService.java</code><br />
+<code>startProcess</code>实际调用的是<code>startProcessLocked</code>方法，我们直接从它看起。</p>
+<pre><code class="language-java">final ProcessRecord startProcessLocked(String processName,
+            ApplicationInfo info, boolean knownToBeDead, int intentFlags,
+            HostingRecord hostingRecord, boolean allowWhileBooting,
+            boolean isolated, boolean keepIfLarge) {
+        return mProcessList.startProcessLocked(processName, info, knownToBeDead, intentFlags,
+                hostingRecord, allowWhileBooting, isolated, 0 /* isolatedUid */, keepIfLarge,
+                null /* ABI override */, null /* entryPoint */, null /* entryPointArgs */,
+                null /* crashHandler */);
+    }
+</code></pre>
+<p>这里调用的是 <code>ProcessList</code>类里的<code>startProcessLocked</code>的方法，我们继续往下看。</p>
+<pre><code class="language-java">  final ProcessRecord startProcessLocked(String processName, ApplicationInfo info,
+            boolean knownToBeDead, int intentFlags, HostingRecord hostingRecord,
+            boolean allowWhileBooting, boolean isolated, int isolatedUid, boolean keepIfLarge,
+            String abiOverride, String entryPoint, String[] entryPointArgs, Runnable crashHandler) {
+            
+        ...
+        
+        ProcessRecord app;
+        // 以下三种情况，我们不需要做任何额外的处理
+        // (1) 存在一个application 记录
+        // (2) 调用者认为它仍然存活，或者没有线程对象连接到它，所以我们知道它没有crash
+        // (3) 有一个pid分配给它，所以它要么正在启动，要么已经运行
+     
+        if (app != null &amp;&amp; app.pid &gt; 0) {
+            if ((!knownToBeDead &amp;&amp; !app.killed) || app.thread == null) {
+                // 我们已经有应用程序在运行，或者正在等待它出现(我们有一个pid，但还没有它的线程)，所以保持它
+                if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, &quot;App already running: &quot; + app);
+                // If this is a new package in the process, add the package to the list
+                app.addPackage(info.packageName, info.longVersionCode, mService.mProcessStats);
+                checkSlow(startTime, &quot;startProcess: done, added package to proc&quot;);
+                return app;
+            }
+
+            // An application record is attached to a previous process,
+            // clean it up now.
+            if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, &quot;App died: &quot; + app);
+            checkSlow(startTime, &quot;startProcess: bad proc running, killing&quot;);
+            ProcessList.killProcessGroup(app.uid, app.pid);
+            mService.handleAppDiedLocked(app, true, true);
+            checkSlow(startTime, &quot;startProcess: done killing old proc&quot;);
+        }
+
+        if (app == null) {
+            checkSlow(startTime, &quot;startProcess: creating new process record&quot;);
+            //创建一条ProcessRecord
+            app = new ProcessRecordLocked(info, processName, isolated, isolatedUid, hostingRecord);
+            if (app == null) {
+                Slog.w(TAG, &quot;Failed making new process record for &quot;
+                        + processName + &quot;/&quot; + info.uid + &quot; isolated=&quot; + isolated);
+                return null;
+            }
+            app.crashHandler = crashHandler;
+            app.isolatedEntryPoint = entryPoint;
+            app.isolatedEntryPointArgs = entryPointArgs;
+            checkSlow(startTime, &quot;startProcess: done creating new process record&quot;);
+        } else {
+            // If this is a new package in the process, add the package to the list
+            app.addPackage(info.packageName, info.longVersionCode, mService.mProcessStats);
+            checkSlow(startTime, &quot;startProcess: added package to existing proc&quot;);
+        }
+
+        // If the system is not ready yet, then hold off on starting this
+        // process until it is.
+        if (!mService.mProcessesReady
+                &amp;&amp; !mService.isAllowedWhileBooting(info)
+                &amp;&amp; !allowWhileBooting) {
+            if (!mService.mProcessesOnHold.contains(app)) {
+                mService.mProcessesOnHold.add(app);
+            }
+            if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES,
+                    &quot;System not ready, putting on hold: &quot; + app);
+            checkSlow(startTime, &quot;startProcess: returning with proc on hold&quot;);
+            return app;
+        }
+
+        checkSlow(startTime, &quot;startProcess: stepping in to startProcess&quot;);
+        final boolean success = startProcessLocked(app, hostingRecord, abiOverride);
+        checkSlow(startTime, &quot;startProcess: done starting proc!&quot;);
+        return success ? app : null;
+    }
+</code></pre>
+<p>可以看到，在启动一个新的进程时，有两个比较重要的步骤。一是通过<code>newProcessRecordLocked</code>方法首先创建一条进程记录，然后再通过<code>startProcessLocked</code>方法去创建一个进程。</p>
+<pre><code class="language-java"> boolean startProcessLocked(ProcessRecord app, HostingRecord hostingRecord,
+            boolean disableHiddenApiChecks, boolean mountExtStorageFull,
+            String abiOverride) {
+   
+            int uid = app.uid;
+            int[] gids = null;
+            int mountExternal = Zygote.MOUNT_EXTERNAL_NONE;
+            if (!app.isolated) {
+               ...
+
+            final String entryPoint = &quot;android.app.ActivityThread&quot;;
+            return startProcessLocked(hostingRecord, entryPoint, app, uid, gids,
+                    runtimeFlags, mountExternal, seInfo, requiredAbi, instructionSet, invokeWith,
+                    startTime);
+        } catch (RuntimeException e) {
+            Slog.e(ActivityManagerService.TAG, &quot;Failure starting process &quot; + app.processName, e);
+
+            mService.forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
+                    false, false, true, false, false, app.userId, &quot;start failure&quot;);
+            return false;
+        }
+    }
+</code></pre>
+<p>这里请注意一下<code>entryPoint</code>这个变量的值————<code>android.app.ActivityThread</code>，它会经过一段漫长的调用链，最终在<code>RuntimeInit</code>这个类中发挥它的作用。</p>
+<pre><code class="language-java">boolean startProcessLocked(HostingRecord hostingRecord,
+            String entryPoint,
+            ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
+            String seInfo, String requiredAbi, String instructionSet, String invokeWith,
+            long startTime) {
+        app.pendingStart = true;
+        app.killedByAm = false;
+        app.removed = false;
+        app.killed = false;
+       
+       ...
+       
+        final long startSeq = app.startSeq = ++mProcStartSeqCounter;
+        app.setStartParams(uid, hostingRecord, seInfo, startTime);
+        app.setUsingWrapper(invokeWith != null
+                || SystemProperties.get(&quot;wrap.&quot; + app.processName) != null);
+        mPendingStarts.put(startSeq, app);
+
+        if (mService.mConstants.FLAG_PROCESS_START_ASYNC) {
+        //默认以异步方式启动
+            mService.mProcStartHandler.post(() -&gt; {
+                try {
+                    final Process.ProcessStartResult startResult = startProcess(app.hostingRecord,
+                            entryPoint, app, app.startUid, gids, runtimeFlags, mountExternal,
+                            app.seInfo, requiredAbi, instructionSet, invokeWith, app.startTime);
+                    synchronized (mService) {
+                        handleProcessStartedLocked(app, startResult, startSeq);
+                    }
+                } catch (RuntimeException e) {
+                    synchronized (mService) {
+                        Slog.e(ActivityManagerService.TAG, &quot;Failure starting process &quot;
+                                + app.processName, e);
+                        mPendingStarts.remove(startSeq);
+                        app.pendingStart = false;
+                        mService.forceStopPackageLocked(app.info.packageName,
+                                UserHandle.getAppId(app.uid),
+                                false, false, true, false, false, app.userId, &quot;start failure&quot;);
+                    }
+                }
+            });
+            return true;
+        } else {
+            try {
+                final Process.ProcessStartResult startResult = startProcess(hostingRecord,
+                        entryPoint, app,
+                        uid, gids, runtimeFlags, mountExternal, seInfo, requiredAbi, instructionSet,
+                        invokeWith, startTime);
+                handleProcessStartedLocked(app, startResult.pid, startResult.usingWrapper,
+                        startSeq, false);
+            } catch (RuntimeException e) {
+                Slog.e(ActivityManagerService.TAG, &quot;Failure starting process &quot;
+                        + app.processName, e);
+                app.pendingStart = false;
+                mService.forceStopPackageLocked(app.info.packageName, UserHandle.getAppId(app.uid),
+                        false, false, true, false, false, app.userId, &quot;start failure&quot;);
+            }
+            return app.pid &gt; 0;
+        }
+    }
+</code></pre>
+<p>继续看<code>startProcess</code>方法：</p>
+<pre><code class="language-java">private Process.ProcessStartResult startProcess(HostingRecord hostingRecord, String entryPoint,
+            ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
+            String seInfo, String requiredAbi, String instructionSet, String invokeWith,
+            long startTime) {
+        try {
+            final Process.ProcessStartResult startResult;
+            //hostingRecord初始化参数为null，并未指定mHostingZygote属性，因此会进入最后一个分支
+            if (hostingRecord.usesWebviewZygote()) {
+                startResult = startWebView(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, null, app.info.packageName,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            } else if (hostingRecord.usesAppZygote()) {
+                final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
+
+                startResult = appZygote.getProcess().start(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, null, app.info.packageName,
+                        /*useUsapPool=*/ false,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            } else {
+                startResult = Process.start(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, invokeWith, app.info.packageName,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            }
+            checkSlow(startTime, &quot;startProcess: returned from zygote!&quot;);
+            return startResult;
+        } finally {
+            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        }
+    }
+</code></pre>
+<p><code>Process</code>的源码位置为 <code>frameworks/base/core/java/android/os/Process.java</code>。</p>
+<pre><code class="language-java"> public static ProcessStartResult start(@NonNull final String processClass,
+                                           @Nullable final String niceName,
+                                           int uid, int gid, @Nullable int[] gids,
+                                           int runtimeFlags,
+                                           int mountExternal,
+                                           int targetSdkVersion,
+                                           @Nullable String seInfo,
+                                           @NonNull String abi,
+                                           @Nullable String instructionSet,
+                                           @Nullable String appDataDir,
+                                           @Nullable String invokeWith,
+                                           @Nullable String packageName,
+                                           @Nullable String[] zygoteArgs) {
+        return ZYGOTE_PROCESS.start(processClass, niceName, uid, gid, gids,
+                    runtimeFlags, mountExternal, targetSdkVersion, seInfo,
+                    abi, instructionSet, appDataDir, invokeWith, packageName,
+                    /*useUsapPool=*/ true, zygoteArgs);
+    }
+</code></pre>
+<p>其中<code>ZYGOTE_PROCESS</code>是一个<code>ZygoteProcess</code>对象，它实际调用的是<code>ZygoteProcess</code>里的start方法。</p>
+<pre><code class="language-java">public final Process.ProcessStartResult start(@NonNull final String processClass,
+                                                  final String niceName,
+                                                  int uid, int gid, @Nullable int[] gids,
+                                                  int runtimeFlags, int mountExternal,
+                                                  int targetSdkVersion,
+                                                  @Nullable String seInfo,
+                                                  @NonNull String abi,
+                                                  @Nullable String instructionSet,
+                                                  @Nullable String appDataDir,
+                                                  @Nullable String invokeWith,
+                                                  @Nullable String packageName,
+                                                  boolean useUsapPool,
+                                                  @Nullable String[] zygoteArgs) {
+        // TODO (chriswailes): Is there a better place to check this value?
+        if (fetchUsapPoolEnabledPropWithMinInterval()) {
+            informZygotesOfUsapPoolStatus();
+        }
+
+        try {
+            return startViaZygote(processClass, niceName, uid, gid, gids,
+                    runtimeFlags, mountExternal, targetSdkVersion, seInfo,
+                    abi, instructionSet, appDataDir, invokeWith, /*startChildZygote=*/ false,
+                    packageName, useUsapPool, zygoteArgs);
+        } catch (ZygoteStartFailedEx ex) {
+            Log.e(LOG_TAG,
+                    &quot;Starting VM process through Zygote failed&quot;);
+            throw new RuntimeException(
+                    &quot;Starting VM process through Zygote failed&quot;, ex);
+        }
+    }
+</code></pre>
+<pre><code class="language-java"> private Process.ProcessStartResult startViaZygote(@NonNull final String processClass,
+                                                      @Nullable final String niceName,
+                                                      final int uid, final int gid,
+                                                      @Nullable final int[] gids,
+                                                      int runtimeFlags, int mountExternal,
+                                                      int targetSdkVersion,
+                                                      @Nullable String seInfo,
+                                                      @NonNull String abi,
+                                                      @Nullable String instructionSet,
+                                                      @Nullable String appDataDir,
+                                                      @Nullable String invokeWith,
+                                                      boolean startChildZygote,
+                                                      @Nullable String packageName,
+                                                      boolean useUsapPool,
+                                                      @Nullable String[] extraArgs)
+                                                      throws ZygoteStartFailedEx {
+        ArrayList&lt;String&gt; argsForZygote = new ArrayList&lt;&gt;();
+
+        // --runtime-args, --setuid=, --setgid=,
+        // and --setgroups= must go first
+        argsForZygote.add(&quot;--runtime-args&quot;);
+        argsForZygote.add(&quot;--setuid=&quot; + uid);
+        argsForZygote.add(&quot;--setgid=&quot; + gid);
+        argsForZygote.add(&quot;--runtime-flags=&quot; + runtimeFlags);
+        if (mountExternal == Zygote.MOUNT_EXTERNAL_DEFAULT) {
+            argsForZygote.add(&quot;--mount-external-default&quot;);
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_READ) {
+            argsForZygote.add(&quot;--mount-external-read&quot;);
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_WRITE) {
+            argsForZygote.add(&quot;--mount-external-write&quot;);
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_FULL) {
+            argsForZygote.add(&quot;--mount-external-full&quot;);
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_INSTALLER) {
+            argsForZygote.add(&quot;--mount-external-installer&quot;);
+        } else if (mountExternal == Zygote.MOUNT_EXTERNAL_LEGACY) {
+            argsForZygote.add(&quot;--mount-external-legacy&quot;);
+        }
+
+        argsForZygote.add(&quot;--target-sdk-version=&quot; + targetSdkVersion);
+
+        // --setgroups is a comma-separated list
+        if (gids != null &amp;&amp; gids.length &gt; 0) {
+            StringBuilder sb = new StringBuilder();
+            sb.append(&quot;--setgroups=&quot;);
+
+            int sz = gids.length;
+            for (int i = 0; i &lt; sz; i++) {
+                if (i != 0) {
+                    sb.append(',');
+                }
+                sb.append(gids[i]);
+            }
+
+            argsForZygote.add(sb.toString());
+        }
+
+        if (niceName != null) {
+            argsForZygote.add(&quot;--nice-name=&quot; + niceName);
+        }
+
+        if (seInfo != null) {
+            argsForZygote.add(&quot;--seinfo=&quot; + seInfo);
+        }
+
+        if (instructionSet != null) {
+            argsForZygote.add(&quot;--instruction-set=&quot; + instructionSet);
+        }
+
+        if (appDataDir != null) {
+            argsForZygote.add(&quot;--app-data-dir=&quot; + appDataDir);
+        }
+
+        if (invokeWith != null) {
+            argsForZygote.add(&quot;--invoke-with&quot;);
+            argsForZygote.add(invokeWith);
+        }
+
+        if (startChildZygote) {
+            argsForZygote.add(&quot;--start-child-zygote&quot;);
+        }
+
+        if (packageName != null) {
+            argsForZygote.add(&quot;--package-name=&quot; + packageName);
+        }
+
+        argsForZygote.add(processClass);
+
+        if (extraArgs != null) {
+            Collections.addAll(argsForZygote, extraArgs);
+        }
+
+        synchronized(mLock) {
+            // The USAP pool can not be used if the application will not use the systems graphics
+            // driver.  If that driver is requested use the Zygote application start path.
+            return zygoteSendArgsAndGetResult(openZygoteSocketIfNeeded(abi),
+                                              useUsapPool,
+                                              argsForZygote);
+        }
+    }
+</code></pre>
+<p>值得注意的是上面这段代码的<code>openZygoteSocketIfNeeded</code>这个方法，它采用<code>socket</code>通信方式，尝试连接路径为<code>/dev/socket/</code>、名称为<code>zygote</code>的服务端。</p>
+<p><code>zygoteSendArgsAndGetResult</code>方法里实际调用了<code>attemptZygoteSendArgsAndGetResult</code>方法，内容如下：</p>
+<pre><code class="language-java"> private Process.ProcessStartResult attemptZygoteSendArgsAndGetResult(
+            ZygoteState zygoteState, String msgStr) throws ZygoteStartFailedEx {
+        try {
+            final BufferedWriter zygoteWriter = zygoteState.mZygoteOutputWriter;
+            final DataInputStream zygoteInputStream = zygoteState.mZygoteInputStream;
+
+            zygoteWriter.write(msgStr);
+            zygoteWriter.flush();
+
+            // Always read the entire result from the input stream to avoid leaving
+            // bytes in the stream for future process starts to accidentally stumble
+            // upon.
+            Process.ProcessStartResult result = new Process.ProcessStartResult();
+            result.pid = zygoteInputStream.readInt();
+            result.usingWrapper = zygoteInputStream.readBoolean();
+
+            if (result.pid &lt; 0) {
+                throw new ZygoteStartFailedEx(&quot;fork() failed&quot;);
+            }
+
+            return result;
+        } catch (IOException ex) {
+            zygoteState.close();
+            Log.e(LOG_TAG, &quot;IO Exception while communicating with Zygote - &quot;
+                    + ex.toString());
+            throw new ZygoteStartFailedEx(ex);
+        }
+    }
+</code></pre>
+<p>请注意上述方法的<code>zygoteWriter</code>这个变量，它负责将进程启动参数发送给服务端，由服务端去孵化进程。那么，这个服务端到底是哪个类呢？</p>
+<p>答案是<code>ZygoteServer.java</code>,源码路径为 <code>frameworks/base/core/java/com/android/internal/os/ZygoteServer.java</code>.</p>
+<p>ZygoteServer会在系统启动的时候，创建一个Socket服务端，用于接收客户端的fork请求。ZygoteServer在初始化结束后，会调用<code>runSelectLoop</code>方法，用于处理客户端的消息。当客户端请求fork进程时，<code>runSelectLoop</code>方法会转交给<code>ZygoteConnection</code>类的<code>processOneCommand</code>方法去处理。</p>
+<pre><code class="language-java"> Runnable processOneCommand(ZygoteServer zygoteServer) {
+        String args[];
+        ZygoteArguments parsedArgs = null;
+        FileDescriptor[] descriptors;
+
+       ...
+
+        pid = Zygote.forkAndSpecialize(parsedArgs.mUid, parsedArgs.mGid, parsedArgs.mGids,
+                parsedArgs.mRuntimeFlags, rlimits, parsedArgs.mMountExternal, parsedArgs.mSeInfo,
+                parsedArgs.mNiceName, fdsToClose, fdsToIgnore, parsedArgs.mStartChildZygote,
+                parsedArgs.mInstructionSet, parsedArgs.mAppDataDir, parsedArgs.mTargetSdkVersion);
+
+        try {
+            if (pid == 0) {
+                // in child
+                zygoteServer.setForkChild();
+
+                zygoteServer.closeServerSocket();
+                IoUtils.closeQuietly(serverPipeFd);
+                serverPipeFd = null;
+
+                return handleChildProc(parsedArgs, descriptors, childPipeFd,
+                        parsedArgs.mStartChildZygote);
+            } else {
+                // In the parent. A pid &lt; 0 indicates a failure and will be handled in
+                // handleParentProc.
+                IoUtils.closeQuietly(childPipeFd);
+                childPipeFd = null;
+                handleParentProc(pid, descriptors, serverPipeFd);
+                return null;
+            }
+        } finally {
+            IoUtils.closeQuietly(childPipeFd);
+            IoUtils.closeQuietly(serverPipeFd);
+        }
+    }
+</code></pre>
+<pre><code class="language-java"> public static int forkAndSpecialize(int uid, int gid, int[] gids, int runtimeFlags,
+            int[][] rlimits, int mountExternal, String seInfo, String niceName, int[] fdsToClose,
+            int[] fdsToIgnore, boolean startChildZygote, String instructionSet, String appDataDir,
+            int targetSdkVersion) {
+        ZygoteHooks.preFork();
+        // Resets nice priority for zygote process.
+        resetNicePriority();
+        int pid = nativeForkAndSpecialize(
+                uid, gid, gids, runtimeFlags, rlimits, mountExternal, seInfo, niceName, fdsToClose,
+                fdsToIgnore, startChildZygote, instructionSet, appDataDir);
+        // Enable tracing as soon as possible for the child process.
+        if (pid == 0) {
+            Zygote.disableExecuteOnly(targetSdkVersion);
+            Trace.setTracingEnabled(true, runtimeFlags);
+
+            // Note that this event ends at the end of handleChildProc,
+            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, &quot;PostFork&quot;);
+        }
+        ZygoteHooks.postForkCommon();
+        return pid;
+    }
+</code></pre>
+<p>上述<strong>Zygote</strong>类在这个过程中主要做了以下几点工作：</p>
+<ol>
+<li>调用dalvik中<code>ZygoteHooks</code>的<code>preFrok</code>进行预处理，主要是停止4个Daemon子线程，HeapTaskDaemon、ReferenceQueueDaemon、FinalizerDaemon、FinalizerWatchdogDaemon,等待所有的子线程结束，最后完成gc堆的初始化工作。</li>
+<li>调用<code>com_android_internal_os_zygote.cpp</code>中的<code>nativeForkAndSpecialize</code>方法，主要工作是通过linux机制fork一个子进程，以及进程的一些资源处理，selinux权限处理，JAVA堆线程的一些处理。</li>
+<li>调用<code>ZygoteHooks</code>的<code>postForkCommon</code>方法，启动Zygote的4个Daemon线程。</li>
+</ol>
+<p>在执行<code>forkAndSpecialize</code>方法后，代码将继续执行<code>ZygoteConnection</code>中的<code>handleChildProc</code>这个方法。</p>
+<pre><code class="language-java">private Runnable handleChildProc(ZygoteArguments parsedArgs, FileDescriptor[] descriptors,
+           FileDescriptor pipeFd, boolean isZygote) {
+      ...
+      
+       if (parsedArgs.mInvokeWith != null) {
+           WrapperInit.execApplication(parsedArgs.mInvokeWith,
+                   parsedArgs.mNiceName, parsedArgs.mTargetSdkVersion,
+                   VMRuntime.getCurrentInstructionSet(),
+                   pipeFd, parsedArgs.mRemainingArgs);
+
+           // Should not get here.
+           throw new IllegalStateException(&quot;WrapperInit.execApplication unexpectedly returned&quot;);
+       } else {
+           if (!isZygote) {
+           //进入此分支
+               return ZygoteInit.zygoteInit(parsedArgs.mTargetSdkVersion,
+                       parsedArgs.mRemainingArgs, null /* classLoader */);
+           } else {
+               return ZygoteInit.childZygoteInit(parsedArgs.mTargetSdkVersion,
+                       parsedArgs.mRemainingArgs, null /* classLoader */);
+           }
+       }
+   }
+</code></pre>
+<pre><code class="language-java">public static final Runnable zygoteInit(int targetSdkVersion, String[] argv,
+            ClassLoader classLoader) {
+         ...
+         //初始化运行环境
+        RuntimeInit.commonInit();
+        //启动binder线程池
+        ZygoteInit.nativeZygoteInit();
+        //程序入口函数
+        return RuntimeInit.applicationInit(targetSdkVersion, argv, classLoader);
+    }
+</code></pre>
+<p><code>RuntimeInit.applicationInit</code>这个方法</p>
+<pre><code class="language-java">protected static Runnable applicationInit(int targetSdkVersion, String[] argv,
+            ClassLoader classLoader) {
+        // If the application calls System.exit(), terminate the process
+        // immediately without running any shutdown hooks.  It is not possible to
+        // shutdown an Android application gracefully.  Among other things, the
+        // Android runtime shutdown hooks close the Binder driver, which can cause
+        // leftover running threads to crash before the process actually exits.
+        nativeSetExitWithoutCleanup(true);
+
+        // We want to be fairly aggressive about heap utilization, to avoid
+        // holding on to a lot of memory that isn't needed.
+        VMRuntime.getRuntime().setTargetHeapUtilization(0.75f);
+        VMRuntime.getRuntime().setTargetSdkVersion(targetSdkVersion);
+
+        final Arguments args = new Arguments(argv);
+
+        // The end of of the RuntimeInit event (see #zygoteInit).
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
+        // Remaining arguments are passed to the start class's static main
+        return findStaticMain(args.startClass, args.startArgs, classLoader);
+    }
+</code></pre>
+<pre><code class="language-java"> protected static Runnable findStaticMain(String className, String[] argv,
+            ClassLoader classLoader) {
+        Class&lt;?&gt; cl;
+
+        try {
+            cl = Class.forName(className, true, classLoader);
+        } catch (ClassNotFoundException ex) {
+            throw new RuntimeException(
+                    &quot;Missing class when invoking static main &quot; + className,
+                    ex);
+        }
+
+        Method m;
+        try {
+            m = cl.getMethod(&quot;main&quot;, new Class[] { String[].class });
+        } catch (NoSuchMethodException ex) {
+            throw new RuntimeException(
+                    &quot;Missing static main on &quot; + className, ex);
+        } catch (SecurityException ex) {
+            throw new RuntimeException(
+                    &quot;Problem getting static main on &quot; + className, ex);
+        }
+
+        int modifiers = m.getModifiers();
+        if (! (Modifier.isStatic(modifiers) &amp;&amp; Modifier.isPublic(modifiers))) {
+            throw new RuntimeException(
+                    &quot;Main method is not public and static on &quot; + className);
+        }
+
+        /*
+         * This throw gets caught in ZygoteInit.main(), which responds
+         * by invoking the exception's run() method. This arrangement
+         * clears up all the stack frames that were required in setting
+         * up the process.
+         */
+        return new MethodAndArgsCaller(m, argv);
+    }
+</code></pre>
+<p>这里通过反射获得了<code>className</code>变量中的main方法，并传递给<code>MethodAndArgsCaller</code>用于构造一个<code>Runnable</code>。只要执行此<code>Runnable</code>，就会开始执行className变量中的main方法。</p>
+<p><code>className</code>变量的值究竟是什么呢？</p>
+<p>还记得我们前文重点强调的<code>entryPoint</code>这个变量吗？不记得的读者请自行返回再查看一下。<code>android.app.ActivityThread</code>就是我们要执行的目标类。</p>
+<p><code>ActivityThread</code>类main方法的调用，标识着 <strong>应用已全部完成进程的创建和初始化过程，下面将进入Application和Activity的创建与启动流程</strong>。下一篇文章，我们再来继续探讨剩下的内容。<br />
+最后，让我们用图表对上述流程做一个总结归纳：</p>
+<p>最后，让我们用图表对上述流程做一个总结归纳：</p>
+<pre><code class="language-java">[ActivityManagerService.java]
+mAtmInternal.startHomeOnAllDisplays(currentUserId, &quot;systemReady&quot;);
+   |
+[RootActivityContainer.java]
+startHomeOnDisplay()		     //获取lancher的第一个页面的intent，其category为Intent.CATEGORY_HOME
+   |
+[ActivityStartController.java]
+startHomeActivity()
+   |
+[ActivityStarter.java]
+execute()			     //开始进入activity启动流程	
+startActivity()
+startActivityUnchecked()
+   |
+[RootActivityContainer.java]
+resumeFocusedStacksTopActivities()   //启动目标ActivityStack的最顶层activity
+   |
+[ActivityStack.java]
+resumeTopActivityInnerLocked()      //暂停上一个activity,载入manifest的主题背景
+   |
+[ActivityStackSupervisor.java]
+startSpecificActivityLocked()       //检查进程是否已启动，通过handler消息机制启动新的进程
+   |
+[ActivityManagerService.java]
+startProcessLocked()
+   |
+[ProcessList.java]
+startProcessLocked()               //指定了进程创建成功后程序启动入口类为android.app.ActivityThread
+startProcess()
+   |
+[Process.java]
+start()
+   |
+[ZygoteProcess.java]
+start()
+startViaZygote()		   //初始化Zygote的启动参数，连接ZygoteServer服务端
+attemptZygoteSendArgsAndGetResult()
+   |
+[ZygoteServer.java]
+processOneCommand()
+   |		|
+   |  [Zygote.java]
+   |  forkAndSpecialize()
+   |        |
+   |  [ZygoteHooks.java]
+   |	  preFrok()		   //停止4个子线程，等待所有的子线程结束，最后完成gc堆的初始化工作
+   |		|
+   |  [com_android_internal_os_zygote.cpp]	
+   |  nativeForkAndSpecialize()       //fork子进程
+   |        |
+   |  [ZygoteHooks.java]
+   |  postForkCommon()                //启动Zygote的4个Daemon线程
+   |
+[ZygoteConnection.java]
+handleChildProc()
+   |
+[ZygoteInit.java]
+zygoteInit()				//初始化运行环境、启动binder线程池
+   |
+[RuntimeInit.java]
+applicationInit()
+   |
+[ActivityThread.java]
+main()
+</code></pre>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="16534637893224.html" 
+          title="Previous Post: Android APP启动分析 - Activity启动">&laquo; Android APP启动分析 - Activity启动</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="16534581148449.html" 
+          title="Next Post: Android APK安装流程解析 - PackageManageService">Android APK安装流程解析 - PackageManageService &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
+
+
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>

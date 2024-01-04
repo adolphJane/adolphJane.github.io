@@ -1,0 +1,1869 @@
+<!doctype html>
+<html class="no-js" lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>
+    
+  ASM字节码插桩 - MagicalRice的Blog
+  
+  </title>
+  
+  
+  <link href="atom.xml" rel="alternate" title="MagicalRice的Blog" type="application/atom+xml">
+    <link rel="stylesheet" href="asset/css/foundation.min.css" />
+    <link rel="stylesheet" href="asset/css/docs.css" />
+    <script src="asset/js/vendor/modernizr.js"></script>
+    <script src="asset/js/vendor/jquery.js"></script>
+ 
+<script type="text/javascript">
+  function before_search(){
+    var searchVal = 'site:adolph.cc ' + document.getElementById('search_input').value;
+    document.getElementById('search_q').value = searchVal;
+    return true;
+  }
+</script>
+  </head>
+  <body class="antialiased hide-extras">
+    
+    <div class="marketing off-canvas-wrap" data-offcanvas>
+      <div class="inner-wrap">
+
+
+<nav class="top-bar docs-bar hide-for-small" data-topbar>
+
+
+  <section class="top-bar-section">
+  <div class="row">
+      <div style="position: relative;width:100%;"><div style="position: absolute; width:100%;">
+        <ul id="main-menu" class="left">
+        
+        <li id=""><a target="_self" href="index.html">Home</a></li>
+        
+        <li id=""><a target="_self" href="archives.html">Archives</a></li>
+        
+        </ul>
+
+        <ul class="right" id="search-wrap">
+          <li>
+<form target="_blank" onsubmit="return before_search();" action="https://google.com/search" method="get">
+    <input type="hidden" id="search_q" name="q" value="" />
+    <input tabindex="1" type="search" id="search_input"  placeholder="Search"/>
+</form>
+</li>
+          </ul>
+      </div></div>
+  </div>
+  </section>
+
+</nav>
+
+        <nav class="tab-bar show-for-small">
+  <a href="javascript:void(0)" class="left-off-canvas-toggle menu-icon">
+    <span> &nbsp; MagicalRice的Blog</span>
+  </a>
+</nav>
+
+<aside class="left-off-canvas-menu">
+      <ul class="off-canvas-list">
+        
+        <li><a target="_self" href="index.html">Home</a></li>
+        
+        <li><a target="_self" href="archives.html">Archives</a></li>
+        
+
+    <li><label>Categories</label></li>
+
+        
+            <li><a href="Android.html">Android</a></li>
+        
+            <li><a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html">服务器</a></li>
+        
+            <li><a href="C++.html">C++</a></li>
+        
+            <li><a href="UI.html">UI</a></li>
+        
+            <li><a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html">代码之美</a></li>
+        
+            <li><a href="Game.html">Game</a></li>
+        
+            <li><a href="Python.html">Python</a></li>
+        
+            <li><a href="Mac.html">Mac</a></li>
+        
+            <li><a href="%E5%85%B6%E4%BB%96.html">其他</a></li>
+        
+            <li><a href="Flutter.html">Flutter</a></li>
+        
+            <li><a href="ReactNative.html">ReactNative</a></li>
+        
+            <li><a href="Java.html">Java</a></li>
+        
+            <li><a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html">音视频开发</a></li>
+        
+            <li><a href="%E7%BD%91%E7%BB%9C.html">网络</a></li>
+        
+            <li><a href="%E7%BD%91%E9%A1%B5.html">网页</a></li>
+        
+            <li><a href="%E5%B7%A5%E5%85%B7-1-2.html">工具</a></li>
+        
+            <li><a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html">人工智能</a></li>
+        
+            <li><a href="%E5%88%9B%E4%B8%9A.html">创业</a></li>
+        
+            <li><a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html">思维提升</a></li>
+        
+            <li><a href="GPU%E6%B8%B2%E6%9F%93.html">GPU渲染</a></li>
+         
+
+      </ul>
+    </aside>
+
+<a class="exit-off-canvas" href="#"></a>
+
+
+        <section id="main-content" role="main" class="scroll-container">
+        
+       
+
+ <script type="text/javascript">
+  $(function(){
+    $('#menu_item_index').addClass('is_active');
+  });
+</script>
+<div class="row">
+  <div class="large-8 medium-8 columns">
+      <div class="markdown-body article-wrap">
+       <div class="article">
+          
+          <h1>ASM字节码插桩</h1>
+     
+        <div class="read-more clearfix">
+          <span class="date">2021/08/26</span>
+
+          <span>posted in&nbsp;</span> 
+          
+              <span class="posted-in"><a href='Gradle.html'>Gradle</a></span>
+           
+         
+          <span class="comments">
+            
+
+            
+          </span>
+
+        </div>
+      </div><!-- article -->
+
+      <div class="article-content">
+      <h2><a id="%E5%89%8D%E8%A8%80" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>前言</h2>
+<p>之前已经学习过了AspectJ的插桩形式。AspectJ是Java中流行的AOP编程扩展框架，从底层实现上来看，AspectJ内部使用的是BCEL框架来完成，在使用上来看，AspectJ框架有自己的一定优势：成熟稳定、使用简单。但是相比于ASM，它的功能无法满足某些场景的需求，如果想针对所有函数都做插桩，AspectJ会带来不少的性能影响。</p>
+<h2><a id="asm" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>ASM</h2>
+<p>ASM 是一个 Java 字节码操控框架。它能被用来动态生成类或者增强既有类的功能。ASM 可以直接产生二进制 class 文件，也可以在类被加载入 Java 虚拟机之前动态改变类行为。Java class 被存储在严格格式定义的 .class 文件里，这些类文件拥有足够的元数据来解析类中的所有元素：类名称、方法、属性以及 Java 字节码（指令）。ASM 从类文件中读入信息后，能够改变类行为，分析类信息，甚至能够根据用户要求生成新类。<br />
+ASM的功能非常强大，它可以满足100%的场景，其主要特点有：</p>
+<ul>
+<li>操作灵活，可以根据需求自定义修改、插入、删除。</li>
+<li>上手难， 需要对Java字节码有比较深入的了解。</li>
+</ul>
+<p>ASM更加高效直接，因而有时需要掌握一些必不可少的Java字节码知识以及Java虚拟机运行机制。</p>
+<h2><a id="android%E6%89%93%E5%8C%85%E6%B5%81%E7%A8%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Android打包流程</h2>
+<p>详见 <a href="16299648825877.html">Android的编译打包流程</a></p>
+<h2><a id="%E8%87%AA%E5%AE%9A%E4%B9%89gradle%E6%8F%92%E4%BB%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义Gradle插件</h2>
+<p>详见 <a href="16299652966526.html">自定义Gradle插件</a></p>
+<h2><a id="%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8transform-api" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>如何使用Transform API</h2>
+<p>因为是编译期间搞事情，所以首先要在编译期间找一个时间点，这也就是本节 Transform 的内容，找到“作案”地点后，接下来就是“作案对象”了，这里选择的是对编译后的 .class 字节码下手，要用到的工具就是后面要介绍的 ASM 了。</p>
+<p><img src="media/16299642191691/16300316152463.jpg" alt="" /></p>
+<p>上面是官方出品的编译打包签名流程，我们要搞事情的位置就是 Java Compiler 编译成 .class Files 之到打包为 .dex Files 这之间。Google 官方在 Android Gradle 的 1.5.0 版本以后提供了 Transfrom API, 允许第三方自定义插件在打包 dex 文件之前的编译过程中操作 .class 文件，所以这里先要做的就是实现一个自定义的 Transform 进行.class文件遍历拿到所有方法，修改完成对原文件进行替换。</p>
+<p>下面说一下如何引入 Transform 依赖，在 Android gradle 插件 1.5 版本以前，是有一个单独的 transform api 的；从 2.0 版本开始，就直接并入到 gradle api 中了。</p>
+<p><strong>Gradle 1.5:</strong></p>
+<pre><code class="language-plain_text">Compile ‘com.android.tools.build:transfrom-api:1.5.0’
+</code></pre>
+<p><strong>Gradle 2.0 开始:</strong></p>
+<pre><code class="language-plain_text">implementation 'com.android.tools.build:gradle:3.5.2'
+</code></pre>
+<p>Transform是作用在.class编译后，打包成.dex前，可以对.class和resource进行再处理的部分。为了验证，我们建立一个项目Build的一次。</p>
+<p><img src="media/16299642191691/16300317711266.jpg" alt="" /></p>
+<p>可以很清楚的看到，原生就带了一系列Transform供使用。那么这些Transform是怎么组织在一起的呢，我们用一张图表示：</p>
+<p><img src="media/16299642191691/16300318396313.jpg" alt="" /></p>
+<p>每个Transform其实都是一个gradle task，Android编译器中的TaskManager将每个Transform串连起来，第一个Transform接收来自javac编译的结果，以及已经拉取到在本地的第三方依赖（jar. aar），还有resource资源，注意，这里的resource并非android项目中的res资源，而是asset目录下的资源。 这些编译的中间产物，在Transform组成的链条上流动，每个Transform节点可以对class进行处理再传递给下一个Transform。我们常见的混淆，Desugar等逻辑，它们的实现如今都是封装在一个个Transform中，而我们自定义的Transform，会插入到这个Transform链条的最前面。</p>
+<p>但其实，上面这幅图，只是展示Transform的其中一种情况。而Transform其实可以有两种输入，一种是消费型的，当前Transform需要将消费型型输出给下一个Transform，另一种是引用型的，当前Transform可以读取这些输入，而不需要输出给下一个Transform，比如Instant Run就是通过这种方式，检查两次编译之间的diff的。</p>
+<h2><a id="transform%E8%A7%A3%E8%AF%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Transform解读</h2>
+<pre><code class="language-java">class TraceTransform extends Transform {
+
+    @Override
+    String getName() {
+        return &quot;TraceLog&quot;    }
+
+    @Override
+    Set&lt;QualifiedContent.ContentType&gt; getInputTypes() {
+        return TransformManager.CONTENT_CLASS    }
+
+    @Override
+    Set&lt;? super QualifiedContent.Scope&gt; getScopes() {
+        return TransformManager.SCOPE_FULL_PROJECT    }
+
+    @Override
+    boolean isIncremental() {
+        return true
+    }
+
+    @Override
+    void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
+        super.transform(transformInvocation)
+        ......
+    }
+}
+</code></pre>
+<p>我们一项项分析：</p>
+<h3><a id="1-getname" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>1.getName</h3>
+<pre><code class="language-plain_text">    @Override
+    String getName() {
+        return &quot;TraceLog&quot;    
+    }
+</code></pre>
+<p>Name顾名思义，就是我们的Transform名称，再回到我们刚刚Build的流程里：<br />
+<img src="media/16299642191691/16300325934575.jpg" alt="" /><br />
+这个最终的名字是如何构成的呢？好像跟我们这边的定义的名字有区别。以transform开头，之后拼接ContentType，这个ContentType代表着这个Transform的输入文件的类型，类型主要有两种，一种是Classes，另一种是Resources，ContentType之间使用And连接，拼接完成后加上With，之后紧跟的就是这个Transform的Name，name在getName()方法中重写返回即可。</p>
+<h3><a id="2-getinputtypes" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>2.getInputTypes</h3>
+<pre><code class="language-plain_text">    @Override
+    Set&lt;QualifiedContent.ContentType&gt; getInputTypes() {
+        return TransformManager.CONTENT_CLASS    
+    }
+</code></pre>
+<p>先来看代码注释，注释写的很清晰了，必须是CLASSES(0x01),RESOURCES(0x02)之一，相当于Transform需要处理的类型。</p>
+<pre><code class="language-plain_text">    /**
+     * Returns the type(s) of data that is consumed by the Transform. This may be more than
+     * one type.
+     *
+     * &lt;strong&gt;This must be of type {@link QualifiedContent.DefaultContentType}&lt;/strong&gt;
+     */
+    @NonNull
+    public abstract Set&lt;ContentType&gt; getInputTypes();
+    
+    ----------------------------------
+    
+     /**
+     * The type of of the content.
+     */
+    enum DefaultContentType implements ContentType {
+        /**
+         * The content is compiled Java code. This can be in a Jar file or in a folder. If
+         * in a folder, it is expected to in sub-folders matching package names.
+         */
+        CLASSES(0x01),
+
+        /** The content is standard Java resources. */
+        RESOURCES(0x02);
+
+        private final int value;
+
+        DefaultContentType(int value) {
+            this.value = value;
+        }
+
+        @Override
+        public int getValue() {
+            return value;
+        }
+    }
+
+</code></pre>
+<h3><a id="3-getscopes" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>3.getScopes</h3>
+<pre><code class="language-java">    @Override
+    Set&lt;? super QualifiedContent.Scope&gt; getScopes() {
+        return TransformManager.SCOPE_FULL_PROJECT    
+    }
+</code></pre>
+<p>先来看源码注释，这个的作用相当于用来Transform表明作用域</p>
+<pre><code class="language-java">    /**
+     * Returns the scope(s) of the Transform. This indicates which scopes the transform consumes.
+     */
+    @NonNull
+    public abstract Set&lt;Scope&gt; getScopes();
+开发一共可以选如下几种：
+
+    /**
+     * The scope of the content.
+     *
+     * &lt;p&gt;
+     * This indicates what the content represents, so that Transforms can apply to only part(s)
+     * of the classes or resources that the build manipulates.
+     */
+    enum Scope implements ScopeType {
+        /** Only the project (module) content */
+        PROJECT(0x01),
+        /** Only the sub-projects (other modules) */
+        SUB_PROJECTS(0x04),
+        /** Only the external libraries */
+        EXTERNAL_LIBRARIES(0x10),
+        /** Code that is being tested by the current variant, including dependencies */
+        TESTED_CODE(0x20),
+        /** Local or remote dependencies that are provided-only */
+        PROVIDED_ONLY(0x40),
+
+        /**
+         * Only the project's local dependencies (local jars)
+         *
+         * @deprecated local dependencies are now processed as {@link #EXTERNAL_LIBRARIES}
+         */
+        @Deprecated        PROJECT_LOCAL_DEPS(0x02),
+        /**
+         * Only the sub-projects's local dependencies (local jars).
+         *
+         * @deprecated local dependencies are now processed as {@link #EXTERNAL_LIBRARIES}
+         */
+        @Deprecated        SUB_PROJECTS_LOCAL_DEPS(0x08);
+
+</code></pre>
+<p>一般来说如果是要处理所有class字节码，Scope我们一般使用TransformManager.SCOPE_FULL_PROJECT。即</p>
+<pre><code class="language-java">public static final Set&lt;Scope&gt; SCOPE_FULL_PROJECT = Sets.immutableEnumSet(Scope.PROJECT, Scope.SUB_PROJECTS, Scope.EXTERNAL_LIBRARIES);
+</code></pre>
+<h3><a id="4-isincremental" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>4.isIncremental</h3>
+<pre><code class="language-java">@Override
+boolean isIncremental() {
+    return true
+}
+</code></pre>
+<p>增量编译开关。当我们开启增量编译的时候，相当input包含了changed/removed/added三种状态，实际上还有notchanged。需要做的操作如下：</p>
+<ul>
+<li><strong>NOTCHANGED</strong>: 当前文件不需处理，甚至复制操作都不用；</li>
+<li><strong>ADDED</strong>、<strong>CHANGED</strong>: 正常处理，输出给下一个任务；</li>
+<li><strong>REMOVED</strong>: 移除outputProvider获取路径对应的文件。</li>
+</ul>
+<h3><a id="5-transform" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>5.transform</h3>
+<pre><code class="language-java">@Override
+void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
+    super.transform(transformInvocation)
+    ......
+}
+</code></pre>
+<p>先来看一下源码注释，它是Transform处理文件的核心代码：</p>
+<pre><code class="language-java"> /**
+     * Executes the Transform.
+     *
+     * &lt;p&gt;The inputs are packaged as an instance of {@link TransformInvocation}
+     * &lt;ul&gt;
+     *     &lt;li&gt;The &lt;var&gt;inputs&lt;/var&gt; collection of {@link TransformInput}. These are the inputs
+     *     that are consumed by this Transform. A transformed version of these inputs must
+     *     be written into the output. What is received is controlled through
+     *     {@link #getInputTypes()}, and {@link #getScopes()}.&lt;/li&gt;
+     *     &lt;li&gt;The &lt;var&gt;referencedInputs&lt;/var&gt; collection of {@link TransformInput}. This is
+     *     for reference only and should be not be transformed. What is received is controlled
+     *     through {@link #getReferencedScopes()}.&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * A transform that does not want to consume anything but instead just wants to see the content
+     * of some inputs should return an empty set in {@link #getScopes()}, and what it wants to
+     * see in {@link #getReferencedScopes()}.
+     *
+     * &lt;p&gt;Even though a transform's {@link Transform#isIncremental()} returns true, this method may
+     * be receive &lt;code&gt;false&lt;/code&gt; in &lt;var&gt;isIncremental&lt;/var&gt;. This can be due to
+     * &lt;ul&gt;
+     *     &lt;li&gt;a change in secondary files ({@link #getSecondaryFiles()},
+     *     {@link #getSecondaryFileOutputs()}, {@link #getSecondaryDirectoryOutputs()})&lt;/li&gt;
+     *     &lt;li&gt;a change to a non file input ({@link #getParameterInputs()})&lt;/li&gt;
+     *     &lt;li&gt;an unexpected change to the output files/directories. This should not happen unless
+     *     tasks are improperly configured and clobber each other's output.&lt;/li&gt;
+     *     &lt;li&gt;a file deletion that the transform mechanism could not match to a previous input.
+     *     This should not happen in most case, except in some cases where dependencies have
+     *     changed.&lt;/li&gt;
+     * &lt;/ul&gt;
+     * In such an event, when &lt;var&gt;isIncremental&lt;/var&gt; is false, the inputs will not have any
+     * incremental change information:
+     * &lt;ul&gt;
+     *     &lt;li&gt;{@link JarInput#getStatus()} will return {@link Status#NOTCHANGED} even though
+     *     the file may be added/changed.&lt;/li&gt;
+     *     &lt;li&gt;{@link DirectoryInput#getChangedFiles()} will return an empty map even though
+     *     some files may be added/changed.&lt;/li&gt;
+     * &lt;/ul&gt;
+     *
+     * @param transformInvocation the invocation object containing the transform inputs.
+     * @throws IOException if an IO error occurs.
+     * @throws InterruptedException
+     * @throws TransformException Generic exception encapsulating the cause.
+     */
+    public void transform(@NonNull TransformInvocation transformInvocation)
+            throws TransformException, InterruptedException, IOException {
+        // Just delegate to old method, for code that uses the old API.
+        //noinspection deprecation
+        transform(transformInvocation.getContext(), transformInvocation.getInputs(),
+                transformInvocation.getReferencedInputs(),
+                transformInvocation.getOutputProvider(),
+                transformInvocation.isIncremental());
+    }
+</code></pre>
+<p>大致意思如下，具体大家一定要仔细看注释：</p>
+<ul>
+<li>如果拿取了getInputs()的输入进行消费，则transform后必须再输出给下一级</li>
+<li>如果拿取了getReferencedInputs()的输入，则不应该被transform。</li>
+<li>是否增量编译要以transformInvocation.isIncremental()为准。</li>
+</ul>
+<p>在 transform 方法中主要做的事情就是把 Inputs 保存到 outProvider 提供的位置去。生成的位置见下图：<br />
+<img src="media/16299642191691/16300345809682.jpg" alt="" /></p>
+<p>后面会讲到代码，主要有两个 transform 方法，一个 transformJar 就是简单的拷贝，另一个 transformDirectory，我们就是在这里用 ASM 对字节码进行修改的。</p>
+<h2><a id="transform%E6%B3%A8%E5%86%8C%E5%92%8C%E4%BD%BF%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Transform注册和使用</h2>
+<p>在gradle插件中注册</p>
+<pre><code class="language-java">class TracePlugin implements Plugin&lt;Project&gt;{
+
+    @Override
+    void apply(Project project) {
+        println &quot;------trace plugin begin-------&quot;
+        def android = project.extensions.findByType(AppExtension.class)
+        android.registerTransform(new TraceTransform(project))
+        println &quot;------trace plugin end-------&quot;
+    }
+
+}
+</code></pre>
+<p>参考<a href="16300352865963.html">Gradle Transform详解</a></p>
+<h2><a id="asm%E5%BA%93%E7%BB%93%E6%9E%84" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>ASM库结构</h2>
+<p>ASM 库是一款基于 Java 字节码层面的代码分析和修改工具。ASM 可以直接生产二进制的 class 文件，也可以在类被加载入 JVM 之前动态修改类行为。<br />
+ASM 库的结构如下所示：</p>
+<p><img src="media/16299642191691/16300433538254.jpg" alt="" /></p>
+<ul>
+<li><strong>Core</strong>：为其他包提供基础的读、写、转化Java字节码和定义的API，并且可以生成Java字节码和实现大部分字节码的转换，在 访问者模式和ASM 中介绍的几个重要的类就在 Core API 中：ClassReader、ClassVisitor 和 ClassWriter 类.</li>
+<li><strong>Tree</strong>：提供了 Java 字节码在内存中的表现</li>
+<li><strong>Commons</strong>：提供了一些常用的简化字节码生成、转换的类和适配器</li>
+<li><strong>Util</strong>：包含一些帮助类和简单的字节码修改类，有利于在开发或者测试中使用</li>
+<li><strong>XML</strong>：提供一个适配器将XML和SAX-comliant转化成字节码结构，可以允许使用XSLT去定义字节码转化</li>
+</ul>
+<h3><a id="core-api%E4%BB%8B%E7%BB%8D" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>Core API 介绍</h3>
+<p><img src="media/16299642191691/16593607509568.jpg" alt="" /></p>
+<ul>
+<li><strong>ClassReader类</strong>，负责读取.class文件里的内容，然后拆分成各个不同的部分。</li>
+<li><strong>ClassVisitor类</strong>，负责对.class文件中某一部分里的信息进行修改。</li>
+<li><strong>ClassWriter类</strong>，负责将各个不同的部分重新组合成一个完整的.class文件。</li>
+</ul>
+<p><img src="media/16299642191691/16587520665262.jpg" alt="ASM调用时序" /></p>
+<p><img src="media/16299642191691/16587521735794.jpg" alt="ASM核心类关系" /></p>
+<h4><a id="1-classvisitor%E6%8A%BD%E8%B1%A1%E7%B1%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>(1)ClassVisitor 抽象类</h4>
+<p>如下所示，在 ClassVisitor 中提供了和类结构同名的一些方法，这些方法会对类中相应的部分进行操作，而且是有顺序的：</p>
+<pre><code class="language-plain_text">visit
+[ visitSource ] 
+[ visitOuterClass ] 
+( visitAnnotation | visitAttribute )* 
+( visitInnerClass | visitField | visitMethod )* 
+visitEnd
+</code></pre>
+<p>visit方法最先被调用，接着调用零次或一次visitSource方法，调用零次或一次visitOuterClass方法，接下来按任意顺序调用任意多次visitAnnotation和visitAttribute方法，再按任意顺序调用任意多次visitInnerClass、visitField、visitMethod方法，最后调用visitEnd。</p>
+<pre><code class="language-java">public abstract class ClassVisitor {
+    ......
+
+    public void visit(int version, int access, String name, String signature, String superName, String[] interfaces);
+    public void visitSource(String source, String debug);
+    public void visitOuterClass(String owner, String name, String desc);
+    public AnnotationVisitor visitAnnotation(String desc, boolean visible);
+    public AnnotationVisitor visitTypeAnnotation(int typeRef, TypePath typePath, String desc, boolean visible);
+    public void visitAttribute(Attribute attr);
+    public void visitInnerClass(String name, String outerName, String innerName, int access);
+    public FieldVisitor visitField(int access, String name, String desc, String signature, Object value);
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions);
+    public void visitEnd();
+}
+</code></pre>
+<ul>
+<li><code>void visit(int version, int access, String name, String signature, String superName, String[] interfaces)</code> 该方法是当扫描类时第一个调用的方法，主要用于类声明使用。下面是对方法中各个参数的示意：visit( 类版本 , 修饰符 , 类名 ,泛型信息 , 继承的父类 , 实现的接口)</li>
+<li><code>AnnotationVisitor visitAnnotation(String desc, boolean visible)</code> 该方法是当扫描器扫描到类注解声明时进行调用。下面是对方法中各个参数的示意：visitAnnotation(注解类型 , 注解是否可以在JVM 中可见)。</li>
+<li><code>FieldVisitor visitField(int access, String name, String desc, String signature, Object value)</code> 该方法是当扫描器扫描到类中字段时进行调用。下面是对方法中各个参数的示意：visitField(修饰符 , 字段名 , 字段类型 , 泛型描述 , 默认值)</li>
+<li><code>MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions)</code> 该方法是当扫描器扫描到类的方法时进行调用。下面是对方法中各个参数的示意：visitMethod(修饰符 , 方法名 , 方法签名 ,泛型信息 , 抛出的异常)</li>
+<li><code>void visitEnd()</code> 该方法是当扫描器完成类扫描时才会调用，如果想在类中追加某些方法</li>
+</ul>
+<h4><a id="2-classreader%E7%B1%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>(2)ClassReader类</h4>
+<p>这个类会将 .class 文件读入到 ClassReader 中的字节数组中，它的 accept 方法接受一个 ClassVisitor 实现类，并按照顺序调用 ClassVisitor 中的方法。<br />
+值得注意的是，ClassReader类accept方法的第二个参数flags是一个位掩码（bit-mask），可以选择组合的值有下面这些。</p>
+<ul>
+<li><strong>SKIP_DEBUG</strong>：跳过类文件中的调试信息，比如行号信息（LineNumberTable）等。</li>
+<li><strong>SKIP_CODE</strong>：跳过方法体中的Code属性（方法字节码、异常表等）。</li>
+<li><strong>EXPAND_FRAMES</strong>：展开StackMapTable属性。</li>
+<li><strong>SKIP_FRAMES</strong>：跳过StackMapTable属性。</li>
+</ul>
+<h4><a id="3-classwriter%E7%B1%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>(3)ClassWriter 类</h4>
+<p>ClassWriter 是一个 ClassVisitor 的子类，是和 ClassReader 对应的类，ClassReader 是将 .class 文件读入到一个字节数组中，ClassWriter 是将修改后的类的字节码内容以字节数组的形式输出。在ClassVisitor的visit方法中可以对原始的字节码做修改，ClassWriter的toByteArray方法则把最终修改的字节码以byte数组的形式返回。</p>
+<h4><a id="4-methodvisitor-adviceadapter" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>(4)MethodVisitor &amp; AdviceAdapter</h4>
+<p>MethodVisitor 是一个抽象类，当 ASM 的 ClassReader 读取到 Method 时就转入 MethodVisitor 接口处理。<br />
+AdviceAdapter 是 MethodVisitor 的子类，使用 AdviceAdapter 可以更方便的修改方法的字节码。其中比较重要的几个方法如下：</p>
+<ul>
+<li><code>void visitCode()</code>：表示 ASM 开始扫描这个方法</li>
+<li><code>void onMethodEnter()</code>：进入这个方法</li>
+<li><code>void onMethodExit()</code>：即将从这个方法出去</li>
+<li><code>void onVisitEnd()</code>：表示方法扫码完毕</li>
+</ul>
+<p>用于生成和变转已编译方法的都是基于 <code>MethodVisitor</code> 抽象类的，它由 <code>ClassVisitor.visitMethod()</code> 方法返回。</p>
+<p><a href="16594943664575.html">ASM - MethodVisitor</a></p>
+<h4><a id="5-fieldvisitor%E6%8A%BD%E8%B1%A1%E7%B1%BB" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>(5)FieldVisitor 抽象类</h4>
+<p>FieldVisitor 是一个抽象类，当 ASM 的 ClassReader 读取到 Field 时就转入 FieldVisitor 接口处理。和分析 MethodVisitor 的方法一样，也可以查看源码注释进行学习，这里不再详细介绍。</p>
+<h2><a id="%E6%93%8D%E4%BD%9C%E6%B5%81%E7%A8%8B" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>操作流程</h2>
+<ol>
+<li>需要创建一个 ClassReader 对象，将 .class 文件的内容读入到一个字节数组中</li>
+<li>然后需要一个 ClassWriter 的对象将操作之后的字节码的字节数组回写</li>
+<li>需要事件过滤器 ClassVisitor。在调用 ClassVisitor 的某些方法时会产生一个新的 XXXVisitor对象，当我们需要修改对应的内容时只要实现自己的 XXXVisitor 并返回就可以了</li>
+</ol>
+<pre><code class="language-java">input.directoryInputs.each { DirectoryInput directoryInput -&gt;
+    if (directoryInput.file.isDirectory()) {
+        directoryInput.file.eachFileRecurse { File file -&gt;
+            def name = file.name
+            if (name.endsWith(&quot;.class&quot;) &amp;&amp; !(name == (&quot;R.class&quot;)) &amp;&amp; !name.startsWith(&quot;R\$&quot;) &amp;&amp; !(name == (&quot;BuildConfig.class&quot;))) {
+
+                ClassReader reader = new ClassReader(file.bytes)
+                ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
+                ClassVisitor visitor = new TraceVisitor(writer)
+                reader.accept(visitor, ClassReader.EXPAND_FRAMES)
+
+                byte[] code = writer.toByteArray()
+                def classPath = file.parentFile.absolutePath + File.separator + name
+                FileOutputStream fos = new FileOutputStream(classPath)
+                fos.write(code)
+                fos.close()
+            }
+        }
+    }
+</code></pre>
+<p>虽然有了ASM这种框架，可以很方便的修改class文件，但是如果不熟悉框架的使用，写起来还是有点吃力<br />
+人类总是懒惰的，试图找出一些捷径，于是有了一款Idea插件——<strong>ASM Bytecode Outline</strong></p>
+<h2><a id="%E5%AE%9E%E8%B7%B5%E6%93%8D%E4%BD%9C" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>实践操作</h2>
+<h3><a id="%E6%96%B0%E5%A2%9E%E4%B8%80%E4%B8%AA%E5%AD%97%E6%AE%B5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>新增一个字段</h3>
+<p>以以下代码为例，使用javac编译为class文件</p>
+<pre><code class="language-java">public class MyMain {
+}
+</code></pre>
+<p>这里采用<code>visitEnd</code>方法中进行添加字段的操作，使用下面的代码可以给<code>MyMain</code>新增一个String类型的<code>xyz</code>字段</p>
+<pre><code class="language-kotlin">val bytes: ByteArray = FileUtils.readFileToByteArray(File(&quot;./MyMain.class&quot;))
+val cr: ClassReader = ClassReader(bytes)
+val cw: ClassWriter = ClassWriter(0)
+val cv: ClassVisitor = object : ClassVisitor(ASM9, cw) {
+    override fun visitEnd() {
+        super.visitEnd()
+        val fv: FieldVisitor = cv.visitField(Opcodes.ACC_PUBLIC, &quot;xyz&quot;, &quot;Ljava/lang/String;&quot;, null, null)
+        if (fv != null) fv.visitEnd()
+    }
+}
+cr.accept(cv, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG)
+val bytesModified: ByteArray = cw.toByteArray()
+FileUtils.writeByteArrayToFile(File(&quot;./MyMain2.class&quot;), bytesModified)
+</code></pre>
+<p>使用javap查看<code>MyMain2</code>的字节码，可以看到已经多了一个类型为String的<code>xyz</code>变量。</p>
+<h3><a id="%E6%96%B0%E5%A2%9E%E6%96%B9%E6%B3%95" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>新增方法</h3>
+<p>同样以<code>MyMain</code>类为例，给这个类新增一个<code>xyz</code>方法。</p>
+<pre><code class="language-kotlin">val bytes: ByteArray = FileUtils.readFileToByteArray(File(&quot;./MyMain.class&quot;))
+val cr: ClassReader = ClassReader(bytes)
+val cw: ClassWriter = ClassWriter(0)
+val cv: ClassVisitor = object : ClassVisitor(ASM9, cw) {
+    override fun visitEnd() {
+        super.visitEnd()
+        val mv: MethodVisitor = cv.visitMethod(Opcodes.ACC_PUBLIC, &quot;xyz&quot;, &quot;(ILjava/lang/String;)V&quot;, null, null)
+        if (mv != null) mv.visitEnd()
+    }
+}
+cr.accept(cv, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG)
+val bytesModified: ByteArray = cw.toByteArray()
+FileUtils.writeByteArrayToFile(File(&quot;./MyMain2.class&quot;), bytesModified)
+</code></pre>
+<p>使用javap查看<code>MyMain2</code>的字节码，确认<code>xyz</code>方法已经生成。</p>
+<h3><a id="%E7%A7%BB%E9%99%A4%E6%96%B9%E6%B3%95%E5%92%8C%E5%AD%97%E6%AE%B5" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>移除方法和字段</h3>
+<p>以下面<code>MyMain</code>类为例，删掉<code>abc</code>字段和<code>xyz</code>方法</p>
+<pre><code class="language-plain_text">public class MyMain {
+    private int abc = 0;
+    private int def = 0;
+    
+    public void foo() {}
+    
+    public int xyz(int a, String b) {
+        return 0;
+    }
+}
+</code></pre>
+<p>如果仔细观察<code>ClassVisitor</code>类的<code>visit</code>方法，会发现<code>visitField</code>、<code>visitMethod</code>等方法是有返回值的，如果这些方法直接返回<code>null</code>，这些字段、方法将从类中被移除，代码如下所示。</p>
+<pre><code class="language-kotlin">val bytes: ByteArray = FileUtils.readFileToByteArray(File(&quot;./MyMain.class&quot;))
+val cr: ClassReader = ClassReader(bytes)
+val cw: ClassWriter = ClassWriter(0)
+val cv: ClassVisitor = object : ClassVisitor(ASM9, cw) {
+    override fun visitField(access: Int, name: String?, descriptor: String?, signature: String?, value: Any?): FieldVisitor? {
+        if (&quot;abc&quot; == name) return null
+        return super.visitField(access, name, descriptor, signature, value)
+    }
+
+    override fun visitMethod(access: Int, name: String?, descriptor: String?, signature: String?, exceptions: Array&lt;out String&gt;?): MethodVisitor? {
+        if (&quot;xyz&quot; == name) return null
+
+        return super.visitMethod(access, name, descriptor, signature, exceptions)
+    }
+}
+cr.accept(cv, ClassReader.SKIP_CODE or ClassReader.SKIP_DEBUG)
+val bytesModified: ByteArray = cw.toByteArray()
+FileUtils.writeByteArrayToFile(File(&quot;./MyMain2.class&quot;), bytesModified)
+</code></pre>
+<h3><a id="%E4%BF%AE%E6%94%B9%E6%96%B9%E6%B3%95%E5%86%85%E5%AE%B9" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>修改方法内容</h3>
+<p>MethodVisitor类主要用来处理访问一个方法触发的事件，与ClassVisitor一样，它也有很多<code>visit</code>方法，这些<code>visit</code>方法也有一定的调用时序。</p>
+<pre><code class="language-plain_text">(visitParameter)* 
+[visitAnnotationDefault] 
+(visitAnnotation | visitParameterAnnotation | visitAttribute)*
+[
+    visitCode 
+    (visitFrame | visit&lt;i&gt;X&lt;/i&gt;Insn | visitLabel | visitInsnAnnotation | visitTryCatchBlock | visitTryCatchAnnotation | visitLocalVariable | visitLocalVariableAnnotation | visitLineNumber )* 
+    visitMaxs
+]
+</code></pre>
+<p>其中<code>visitCode</code>和<code>visitMaxs</code>可以作为方法体中字节码的开始和结束，<code>visitEnd</code>是MethodVisitor所有事件的结束。</p>
+<p>以下面的<code>foo</code>方法为例，把方法体的返回值改为<code>a+100</code></p>
+<pre><code class="language-java">public class MyMain {
+    public static void main(String[] args) {
+        System.out.println(new MyMain().foo(1));
+    }
+
+    public int foo(int a) {
+        return a; // 修改为 return a + 100;
+    }
+}
+</code></pre>
+<p>为了替换foo的方法体，一个可选的做法是在ClassVisitor的<code>visitMethod</code>方法返回<code>null</code>以删除原<code>foo</code>方法，然后在<code>visitEnd</code>方法中新增一个foo方法，如下面的代码所示：</p>
+<pre><code class="language-plain_text">byte[] bytes = FileUtils.readFileToByteArray(new File(&quot;./MyMain.class&quot;));
+ClassReader cr = new ClassReader(bytes);
+ClassWriter cw = new ClassWriter(0);
+ClassVisitor cv = new ClassVisitor(ASM7, cw) {
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+
+        if (&quot;foo&quot;.equals(name)) {
+            // 删除 foo 方法
+            return null;
+        }
+        return super.visitMethod(access, name, desc, signature, exceptions);
+    }
+
+    @Override
+    public void visitEnd() {
+        // 新增 foo 方法
+        MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC, &quot;foo&quot;, &quot;(I)I&quot;, null, null);
+
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ILOAD, 1);
+        mv.visitIntInsn(Opcodes.BIPUSH, 100);
+        mv.visitInsn(Opcodes.IADD);
+        mv.visitInsn(Opcodes.IRETURN);
+        mv.visitEnd();
+    }
+};
+cr.accept(cv, 0);
+byte[] bytesModified = cw.toByteArray();
+FileUtils.writeByteArrayToFile(new File(&quot;./MyMain.class&quot;), bytesModified);
+</code></pre>
+<p>使用javap查看生成的foo方法字节码，可以看到方法字节码已经被替换，如下所示。</p>
+<pre><code class="language-plain_text">public int foo();
+descriptor: ()I
+flags: ACC_PUBLIC
+Code:
+stack=0, locals=0, args_size=1
+ 0: iload_1
+ 1: bipush        100
+ 3: iadd
+ 4: ireturn
+</code></pre>
+<p>使用java运行MyMain，会发现抛出了ClassFormatError异常，提示入参无法放到局部变量表locals中，详细的错误信息如下所示。</p>
+<pre><code class="language-plain_text">java -cp . MyMain    
+Error: A JNI error has occurred, please check your installation and try again
+Exception in thread &quot;main&quot; java.lang.ClassFormatError: Arguments can't fit into locals in class file MyMain
+</code></pre>
+<p>再回过头来查看生成的字节码，会发现它的stack和locals都等于0，从前面的内容可以知道Java虚拟机根据字节码中stack和locals的值来分配操作数栈和局部变量表的空间，如果两个值都等于0则不能加载操作数和存储方法参数。</p>
+<p>从源代码可以分析出，最大栈的大小为2（a，100），局部变量表的大小为2（this，a）。一个可选的办法是在<code>mv.visitEnd()</code>代码之前新增<code>mv.visitMaxs(2，2)</code>以手动指定stack和locals的大小。</p>
+<p>另一个方法是让ASM自动计算stack和locals，这与ClassWriter构造器方法参数有关，如下所示。</p>
+<ul>
+<li><code>new ClassWriter(0)</code>：这种方式不会自动计算操作数栈和局部变量表的大小，需要我们手动指定。</li>
+<li><code>new ClassWriter(ClassWriter.COMPUTE_MAXS)</code>：这种方式会自动计算操作数栈和局部变量表的大小，前提是需要调用<code>visitMaxs</code>来触发计算上述两个值，参数值可以随便指定。</li>
+<li><code>new ClassWriter(ClassWriter.COMPUTE_FRAMES)</code>：不仅会计算操作数栈和局部变量表，还会自动计算StackMapFrames。在Java 6之后JVM在class文件的Code属性中引入了StackMapTable属性，作用是为了提高JVM在类型检查时验证过程的效率，里面记录的是一个方法中操作数栈与局部变量区的类型在一些特定位置的状态。</li>
+</ul>
+<p>虽然COMPUTE_FRAMES隐式地包含了COMPUTE_MAXS，一般在使用中还是会同时指定，调用的代码如下所示。</p>
+<pre><code class="language-plain_text">new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES)
+</code></pre>
+<pre><code class="language-plain_text">byte[] bytes = FileUtils.readFileToByteArray(new File(&quot;./MyMain.class&quot;));
+ClassReader cr = new ClassReader(bytes);
+// 指定 ClassWriter 自动计算
+ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_MAXS | ClassWriter.COMPUTE_FRAMES);
+ClassVisitor cv = new ClassVisitor(ASM7, cw) {
+    @Override
+    public MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+
+        if (&quot;foo&quot;.equals(name)) {
+            // 删除 foo 方法
+            return null;
+        }
+        return super.visitMethod(access, name, desc, signature, exceptions);
+    }
+
+    @Override
+    public void visitEnd() {
+        // 新增 foo 方法
+        MethodVisitor mv = cv.visitMethod(Opcodes.ACC_PUBLIC, &quot;foo&quot;, &quot;(I)I&quot;, null, null);
+
+        mv.visitCode();
+        mv.visitVarInsn(Opcodes.ILOAD, 1);
+        mv.visitIntInsn(Opcodes.BIPUSH, 100);
+        mv.visitInsn(Opcodes.IADD);
+        mv.visitInsn(Opcodes.IRETURN);
+        // 触发计算
+        mv.visitMaxs(0, 0);
+        mv.visitEnd();
+    }
+};
+cr.accept(cv, 0);
+byte[] bytesModified = cw.toByteArray();
+FileUtils.writeByteArrayToFile(new File(&quot;./MyMain.class&quot;), bytesModified);
+</code></pre>
+<p>这个时候使用java执行MyMain，就可以正常输出结果，如下所示。</p>
+<pre><code class="language-plain_text">java -cp . MyMain
+101
+</code></pre>
+<h3><a id="adviceadapter%E4%BD%BF%E7%94%A8" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>AdviceAdapter使用</h3>
+<p>AdviceAdapter是一个抽象类，继承自MethodVisitor，可以很方便地在方法的开始和结束前插入代码，它的两个核心方法介绍如下所示。</p>
+<ul>
+<li><code>onMethodEnter</code>：方法开始或者构造器方法中父类的构造器调用以后被回调。</li>
+<li><code>onMethodExit</code>：正常退出和异常退出时被调用。正常退出指的是遇到RETURN、ARETURN、LRETURN等方法正常返回的情况。异常退出指的是遇到ATHROW指令，有异常抛出方法返回的情况。</li>
+</ul>
+<h3><a id="%E7%BB%99%E6%96%B9%E6%B3%95%E5%8A%A0%E4%B8%8Atry-catch" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>给方法加上try catch</h3>
+<p>很显然上一个小节的代码无法在代码抛出未捕获异常时输出err quit，比如把foo代码做细微修改，如下所示。</p>
+<pre><code class="language-plain_text">public void foo() {
+    System.out.println(&quot;step 1&quot;);
+    int a = 1 / 0;
+    System.out.println(&quot;step 2&quot;);
+}
+</code></pre>
+<p>这里需要介绍ASM的<code>Label</code>类，与它的英文含义一样，可以给字节码指令地址打标签，标记特定的字节码位置，用于后续跳转等。新增一个Label可以用MethodVisitor的visitLabel方法，如下所示。</p>
+<pre><code class="language-plain_text">Label startLabel = new Label();
+mv.visitLabel(startLabel);
+</code></pre>
+<p>JVM的异常处理是通过异常表来实现的，<code>try-catch-finally</code>语句块实际上是标定了异常处理的范围。ASM中可以用<code>visitTryCatchBlock</code>方法来给一段代码块增加异常表，它的方法签名如下所示。</p>
+<pre><code class="language-plain_text">public void visitTryCatchBlock(Label start, Label end, Label handler, String type)
+</code></pre>
+<p>其中start、end表示异常表<strong>开始和结束的位置</strong>，handler表示<strong>异常发生后需要跳转到哪里继续执行</strong>，可以理解为catch语句块开始的位置，type是<strong>异常的类型</strong>。</p>
+<p>为了给整个方法体包裹<code>try-catch</code>语句，<strong>start Label应该放在方法<code>visitCode</code>之后</strong>，<strong>end Label则放在<code>visitMaxs</code>调用之前</strong>，代码如下所示。</p>
+<pre><code class="language-plain_text">Label startLabel = new Label();
+
+@Override
+protected void onMethodEnter() {
+    super.onMethodEnter();
+    mv.visitLabel(startLabel);
+
+    mv.visitFieldInsn(GETSTATIC, &quot;java/lang/System&quot;, &quot;out&quot;, &quot;Ljava/io/PrintStream;&quot;);
+    mv.visitLdcInsn(&quot;enter &quot; + name);
+    mv.visitMethodInsn(INVOKEVIRTUAL, &quot;java/io/PrintStream&quot;, &quot;println&quot;, &quot;(Ljava/lang/String;)V&quot;, false);
+}
+
+@Override
+public void visitMaxs(int maxStack, int maxLocals) {
+    // 生成异常表
+    Label endLabel = new Label();
+    mv.visitTryCatchBlock(startLabel, endLabel, endLabel, null);
+    mv.visitLabel(endLabel);
+    
+    // 生成异常处理代码块
+    finallyBlock(ATHROW);
+    mv.visitInsn(ATHROW);
+    super.visitMaxs(maxStack, maxLocals);
+}
+
+private void finallyBlock(int opcode) {
+    mv.visitFieldInsn(GETSTATIC, &quot;java/lang/System&quot;, &quot;out&quot;, &quot;Ljava/io/PrintStream;&quot;);
+    if (opcode == Opcodes.ATHROW) {
+        mv.visitLdcInsn(&quot;err exit &quot; + name);
+    } else {
+        mv.visitLdcInsn(&quot;normal exit &quot; + name);
+    }
+    mv.visitMethodInsn(INVOKEVIRTUAL, &quot;java/io/PrintStream&quot;, &quot;println&quot;, &quot;(Ljava/lang/String;)V&quot;, false);
+}
+
+@Override
+protected void onMethodExit(int opcode) {
+    super.onMethodExit(opcode);
+    // 处理正常返回的场景
+    if (opcode != ATHROW) finallyBlock(opcode);
+}
+</code></pre>
+<p>前面介绍过onMethodExit在方法正常退出和异常退出时都会被调用。添加完异常处理表以后，程序异常退出时都会进入异常代码处理模块，为了避免重复处理，在onMethodExit中只会处理正常退出的情况，不必处理ATHROW指令。</p>
+<h2><a id="tracelog" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>TraceLog</h2>
+<p>使用自定义 Gradle 插件 + ASM 的方式实现了和 JakeWharton 的 hugo 库同样的功能的库，将特定注解的方法的传入参数、返回结果和执行时间打印到 Logcat 中，方便开发调试。</p>
+<p><img src="media/16299642191691/16300448202499.jpg" alt="" /></p>
+<p>整个工程分3个模块，主模块是调用方，就是使用@TraceLog的地方。plugin模块是自定义的gradle插件。因为打印日志和业务无关性，这里把打印日志的功能单独拆分成一个模块tracelibrary。plugin模块依赖traceLibrary，在字节码插桩时调用traceLibrary里面的方法打印日志。</p>
+<h3><a id="%E8%87%AA%E5%AE%9A%E4%B9%89gradle-plugin" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>自定义gradle plugin</h3>
+<p><strong>build.gradle</strong></p>
+<pre><code class="language-java">apply plugin: 'groovy'
+//使用该插件，才能使用uploadArchives
+apply plugin: 'maven'
+
+repositories {
+    jcenter()
+}
+
+dependencies {
+    //使用gradle sdk
+    compile gradleApi()
+    //使用groovy sdk
+    compile localGroovy()
+    implementation 'com.android.tools.build:gradle:3.5.2'
+    implementation 'org.ow2.asm:asm-all:5.2'
+}
+
+sourceCompatibility = &quot;1.8&quot;
+targetCompatibility = &quot;1.8&quot;
+
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.version = '1.0.0'
+        pom.artifactId = 'tracePlugin'
+        pom.groupId = 'com.example.watson.plugin'
+        repository(url: &quot;file:///D:/repository/&quot;)
+    }
+}
+</code></pre>
+<p><strong>TracePlugin.groovy</strong></p>
+<pre><code class="language-java">class TracePlugin implements Plugin&lt;Project&gt;{
+
+    @Override
+    void apply(Project project) {
+        println &quot;------trace plugin begin-------&quot;
+        def android = project.extensions.findByType(AppExtension.class)
+        android.registerTransform(new TraceTransform(project))
+        println &quot;------trace plugin end-------&quot;
+    }
+
+}
+</code></pre>
+<p><strong>TraceTransform.groovy</strong></p>
+<pre><code class="language-java">class TraceTransform extends Transform {
+
+    Project project
+
+    TraceTransform(Project project) {
+        this.project = project
+    }
+
+    @Override
+    String getName() {
+        return &quot;TraceLog&quot;
+    }
+
+    @Override
+    Set&lt;QualifiedContent.ContentType&gt; getInputTypes() {
+        return TransformManager.CONTENT_CLASS
+    }
+
+    @Override
+    Set&lt;? super QualifiedContent.Scope&gt; getScopes() {
+        return TransformManager.SCOPE_FULL_PROJECT
+    }
+
+    @Override
+    boolean isIncremental() {
+        return false
+    }
+
+    @Override
+    void transform(TransformInvocation transformInvocation) throws TransformException, InterruptedException, IOException {
+        transformInvocation.inputs.each { TransformInput input -&gt;
+            input.directoryInputs.each { DirectoryInput directoryInput -&gt;
+                if (directoryInput.file.isDirectory()) {
+                    directoryInput.file.eachFileRecurse { File file -&gt;
+                        def name = file.name
+                        if (name.endsWith(&quot;.class&quot;) &amp;&amp; !(name == (&quot;R.class&quot;))
+                                &amp;&amp; !name.startsWith(&quot;R\$&quot;) &amp;&amp; !(name == (&quot;BuildConfig.class&quot;))) {
+
+                            ClassReader reader = new ClassReader(file.bytes)
+                            ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_MAXS)
+                            ClassVisitor visitor = new TraceVisitor(writer)
+                            reader.accept(visitor, ClassReader.EXPAND_FRAMES)
+
+                            byte[] code = writer.toByteArray()
+                            def classPath = file.parentFile.absolutePath + File.separator + name
+                            FileOutputStream fos = new FileOutputStream(classPath)
+                            fos.write(code)
+                            fos.close()
+                        }
+                    }
+                }
+
+                def dest = transformInvocation.outputProvider.getContentLocation(directoryInput.name,directoryInput.contentTypes, directoryInput.scopes, Format.DIRECTORY)
+
+                FileUtils.copyDirectory(directoryInput.file, dest)
+            }
+
+            input.jarInputs.each { JarInput jarInput -&gt;
+                def jarName = jarInput.name
+                def md5Name = DigestUtils.md5Hex(jarInput.file.getAbsolutePath())
+                if (jarName.endsWith(&quot;.jar&quot;)) {
+                    jarName = jarName.substring(0, jarName.length() - 4)
+                }
+
+                def dest = transformInvocation.outputProvider.getContentLocation(jarName + md5Name,jarInput.contentTypes, jarInput.scopes, Format.JAR)
+                FileUtils.copyFile(jarInput.file, dest)
+            }
+        }
+    }
+}
+</code></pre>
+<p><strong>TraceVisitor.groovy</strong></p>
+<pre><code class="language-java">class TraceVisitor extends ClassVisitor {
+
+    private String mClassName
+
+    TraceVisitor(ClassVisitor classVisitor) {
+        super(Opcodes.ASM5, classVisitor)
+    }
+
+    @Override
+    void visit(int version, int access, String name, String signature, String superName, String[] interfaces) {
+        super.visit(version, access, name, signature, superName, interfaces);
+        this.mClassName = name
+    }
+
+    @Override
+    MethodVisitor visitMethod(int access, String name, String desc, String signature, String[] exceptions) {
+        MethodVisitor methodVisitor = super.visitMethod(access, name, desc, signature, exceptions)
+        methodVisitor = new TraceMethodVisitor(Opcodes.ASM5, methodVisitor, access, mClassName, name, desc)
+        return methodVisitor
+    }
+}
+</code></pre>
+<p><strong>TraceMethodVisitor.groovy</strong></p>
+<pre><code class="language-java">class TraceMethodVisitor extends AdviceAdapter {
+
+    private static final String COST_ANNOTATION_DESC = &quot;Lcom/example/tracelibrary/TraceLog;&quot;
+
+    private boolean isInjected = false
+
+    private int startTimeId
+
+    private int methodId
+
+    private String className
+
+    private String methodName
+
+    private String desc
+
+    private boolean isStaticMethod
+
+    private Type[] argumentArrays
+
+    TraceMethodVisitor(int api, MethodVisitor mv, int access, String className, String methodName, String desc) {
+        super(api, mv, access, methodName, desc)
+        this.className = className
+        this.methodName = methodName
+        this.desc = desc
+        argumentArrays = Type.getArgumentTypes(desc)
+        isStaticMethod = ((access &amp; Opcodes.ACC_STATIC) != 0)
+    }
+
+    @Override
+    AnnotationVisitor visitAnnotation(String desc, boolean visible) {
+        if (COST_ANNOTATION_DESC.equals(desc)) {
+            isInjected = true
+        }
+        return super.visitAnnotation(desc, visible)
+    }
+
+    @Override
+    protected void onMethodEnter() {
+        if (isInjected) {
+            methodId = newLocal(Type.INT_TYPE)
+            mv.visitMethodInsn(INVOKESTATIC, &quot;com/example/tracelibrary/core/MethodCache&quot;, &quot;request&quot;, &quot;()I&quot;, false)
+            mv.visitIntInsn(ISTORE, methodId)
+
+            for (int i = 0; i &lt; argumentArrays.length; i++) {
+                Type type = argumentArrays[i]
+                int index = isStaticMethod ? i : (i + 1)
+                switch (type.getSort()) {
+                    case Type.BOOLEAN:
+                    case Type.CHAR:
+                    case Type.BYTE:
+                    case Type.SHORT:
+                    case Type.INT:
+                        mv.visitVarInsn(ILOAD, index)
+                        box(type)
+                        break
+                    case Type.FLOAT:
+                        mv.visitVarInsn(FLOAD, index)
+                        box(type)
+                        break
+                    case Type.LONG:
+                        mv.visitVarInsn(LLOAD, index)
+                        box(type)
+                        break
+                    case Type.DOUBLE:
+                        mv.visitVarInsn(DLOAD, index)
+                        box(type)
+                        break
+                    case Type.ARRAY:
+                    case Type.OBJECT:
+                        mv.visitVarInsn(ALOAD, index)
+                        box(type)
+                        break
+                }
+                mv.visitVarInsn(ILOAD, methodId)
+                visitMethodInsn(INVOKESTATIC, &quot;com/example/tracelibrary/core/MethodCache&quot;, &quot;addMethodArgument&quot;,
+                        &quot;(Ljava/lang/Object;I)V&quot;, false)
+            }
+
+            startTimeId = newLocal(Type.LONG_TYPE)
+            mv.visitMethodInsn(INVOKESTATIC, &quot;java/lang/System&quot;, &quot;currentTimeMillis&quot;, &quot;()J&quot;, false)
+            mv.visitIntInsn(LSTORE, startTimeId)
+        }
+    }
+
+    @Override
+    protected void onMethodExit(int opcode) {
+        if (isInjected) {
+            if (opcode == RETURN) {
+                visitInsn(ACONST_NULL)
+            } else if (opcode == ARETURN || opcode == ATHROW) {
+                dup()
+            } else {
+                if (opcode == LRETURN || opcode == DRETURN) {
+                    dup2()
+                } else {
+                    dup()
+                }
+                box(Type.getReturnType(this.methodDesc))
+            }
+            mv.visitLdcInsn(className)
+            mv.visitLdcInsn(methodName)
+            mv.visitLdcInsn(desc)
+            mv.visitVarInsn(LLOAD, startTimeId)
+            mv.visitVarInsn(ILOAD, methodId)
+            mv.visitMethodInsn(INVOKESTATIC, &quot;com/example/tracelibrary/core/MethodCache&quot;, &quot;updateMethodInfo&quot;,
+                    &quot;(Ljava/lang/Object;Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;JI)V&quot;, false)
+
+            mv.visitVarInsn(ILOAD, methodId)
+            mv.visitMethodInsn(INVOKESTATIC, &quot;com/example/tracelibrary/core/MethodCache&quot;,
+                    &quot;printMethodInfo&quot;, &quot;(I)V&quot;, false)
+        }
+    }
+}
+</code></pre>
+<h3><a id="%E7%AC%AC%E4%B8%89%E6%96%B9%E5%BA%93%E6%96%87%E4%BB%B6" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>第三方库文件</h3>
+<p>看到，自定义gradle插件的TraceMethodVisitor会在方法执行前后织入需要的功能，这些功能就是第三方库的内容。</p>
+<p><strong>build.gradle</strong></p>
+<pre><code class="language-java">apply plugin: 'com.android.library'
+//使用该插件，才能使用uploadArchives
+apply plugin: 'maven'
+
+android {
+    compileSdkVersion 29
+    buildToolsVersion &quot;29.0.2&quot;
+
+
+    defaultConfig {
+        minSdkVersion 15
+        targetSdkVersion 29
+        versionCode 1
+        versionName &quot;1.0&quot;
+
+        testInstrumentationRunner &quot;androidx.test.runner.AndroidJUnitRunner&quot;
+        consumerProguardFiles 'consumer-rules.pro'
+    }
+
+    buildTypes {
+        release {
+            minifyEnabled false
+            proguardFiles getDefaultProguardFile('proguard-android-optimize.txt'), 'proguard-rules.pro'
+        }
+    }
+
+}
+
+dependencies {
+    compile 'org.ow2.asm:asm-all:5.2'
+}
+
+uploadArchives {
+    repositories.mavenDeployer {
+        pom.version = '1.0.0'
+        pom.artifactId = 'traceLibrary'
+        pom.groupId = 'com.example.watson.library'
+        repository(url: &quot;file:///D:/repository/&quot;)
+    }
+}
+</code></pre>
+<p><strong>MethodCache.java</strong></p>
+<pre><code class="language-java">public class MethodCache {
+
+    /**
+     * 方法缓存默认大小
+     */
+    private static final int INIT_CACHE_SIZE = 1024;
+    /**
+     * 方法名缓存
+     */
+    private static Vector&lt;MethodInfo&gt; mCacheMethods = new Vector&lt;&gt;(INIT_CACHE_SIZE);
+
+    /**
+     * 占位并生成方法ID
+     *
+     * @return 返回 方法 Id
+     */
+    public static int request() {
+        mCacheMethods.add(new MethodInfo());
+        return mCacheMethods.size() - 1;
+    }
+
+    public static void addMethodArgument(Object argument, int id) {
+        MethodInfo methodInfo = mCacheMethods.get(id);
+        methodInfo.addArgument(argument);
+    }
+
+    public static void updateMethodInfo(Object result, String className, String methodName, String methodDesc, long startTime, int id) {
+        MethodInfo methodInfo = mCacheMethods.get(id);
+        methodInfo.setCost((System.currentTimeMillis() - startTime));
+        methodInfo.setResult(result);
+        methodInfo.setMethodDesc(methodDesc);
+        methodInfo.setClassName(className);
+        methodInfo.setMethodName(methodName);
+    }
+
+    public static void printMethodInfo(int id) {
+        MethodInfo methodInfo = mCacheMethods.get(id);
+        Printer.printMethodInfo(methodInfo);
+    }
+}
+</code></pre>
+<p><strong>MethodInfo.java</strong></p>
+<pre><code class="language-java">public class MethodInfo {
+
+    private static final String OUTPUT_FORMAT = &quot;The method's name is %s ,the cost is %dms and the result is &quot;;
+
+    private String mClassName;              // 类名
+    private String mMethodName;             // 方法名
+    private String mMethodDesc;             // 方法描述符
+    private Object mResult;                 // 方法执行结果
+    private long mCost;                     // 方法执行耗时
+    private List&lt;Object&gt; mArgumentList;     // 方法参数列表
+
+    MethodInfo() {
+        mArgumentList = new ArrayList&lt;&gt;();
+    }
+
+    @Override
+    public String toString() {
+        return String.format(Locale.CHINA, OUTPUT_FORMAT, getMethodName(), mCost) + mResult;
+    }
+
+    /**
+     * @param className 设置类名
+     */
+    public void setClassName(String className) {
+        mClassName = className;
+    }
+
+    /**
+     * @return 返回类名
+     */
+    public String getClassName() {
+        mClassName = mClassName.replace(&quot;/&quot;, &quot;.&quot;);
+        return mClassName;
+    }
+
+    /**
+     * @param methodName 设置方法名
+     */
+    public void setMethodName(String methodName) {
+        mMethodName = methodName;
+    }
+
+    /**
+     * @return 返回方法名
+     */
+    public String getMethodName() {
+        StringBuilder msg = new StringBuilder();
+        Type[] argumentTypes = Type.getArgumentTypes(mMethodDesc);
+        msg.append('(');
+        for (int i = 0; i &lt; argumentTypes.length; i++) {
+            msg.append(argumentTypes[i].getClassName());
+            if (i != argumentTypes.length - 1) {
+                msg.append(&quot;, &quot;);
+            }
+        }
+        msg.append(')');
+        mMethodName = mMethodName + msg.toString();
+        return mMethodName;
+    }
+
+    /**
+     * @param cost 设置方法执行耗时
+     */
+    public void setCost(long cost) {
+        this.mCost = cost;
+    }
+
+    /**
+     * @return 返回方法执行耗时
+     */
+    public long getCost() {
+        return mCost;
+    }
+
+    /**
+     * @param result 设置方法执行结果
+     */
+    public void setResult(Object result) {
+        this.mResult = result;
+    }
+
+    /**
+     * @return 返回方法执行结果
+     */
+    public Object getResult() {
+        return mResult;
+    }
+
+    /**
+     * @param methodDesc 设置方法描述符
+     */
+    public void setMethodDesc(String methodDesc) {
+        this.mMethodDesc = methodDesc;
+    }
+
+    /**
+     * 添加方法参数
+     *
+     * @param argument 方法参数
+     */
+    public void addArgument(Object argument) {
+        mArgumentList.add(argument);
+    }
+
+    /**
+     * @return 得到方法参数列表
+     */
+    public List&lt;Object&gt; getArgumentList() {
+        return mArgumentList;
+    }
+}
+</code></pre>
+<p><strong>Printer.java</strong></p>
+<pre><code class="language-java">public class Printer {
+    private static final String TAG = &quot;TraceLog&quot;;
+
+    private static final char TOP_LEFT_CORNER = '┌';
+    private static final char BOTTOM_LEFT_CORNER = '└';
+    private static final char HORIZONTAL_LINE = '│';
+    private static final String DOUBLE_DIVIDER = &quot;───────────────────────────────────------&quot;;
+    private static final String TOP_BORDER = TOP_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
+    private static final String BOTTOM_BORDER = BOTTOM_LEFT_CORNER + DOUBLE_DIVIDER + DOUBLE_DIVIDER;
+
+    private static final String CLASS_NAME_FORMAT = &quot;%s The class's name: %s&quot;;
+    private static final String METHOD_NAME_FORMAT = &quot;%s The method's name: %s&quot;;
+    private static final String ARGUMENT_FORMAT = &quot;%s The arguments: &quot;;
+    private static final String RESULT_FORMAT = &quot;%s The result: &quot;;
+    private static final String COST_TIME_FORMAT = &quot;%s The cost time: %dms&quot;;
+
+    public static void printMethodInfo(MethodInfo methodInfo) {
+        Log.i(String.valueOf(0) + TAG, TOP_BORDER);
+        Log.i(String.valueOf(1) + TAG, String.format(CLASS_NAME_FORMAT, HORIZONTAL_LINE, methodInfo.getClassName()));
+        Log.i(String.valueOf(2) + TAG, String.format(METHOD_NAME_FORMAT, HORIZONTAL_LINE, methodInfo.getMethodName()));
+        Log.i(String.valueOf(3) + TAG, String.format(ARGUMENT_FORMAT, HORIZONTAL_LINE) + methodInfo.getArgumentList());
+        Log.i(String.valueOf(4) + TAG, String.format(RESULT_FORMAT, HORIZONTAL_LINE) + methodInfo.getResult());
+        Log.i(String.valueOf(5) + TAG, String.format(Locale.CHINA, COST_TIME_FORMAT, HORIZONTAL_LINE, methodInfo.getCost()));
+        Log.i(String.valueOf(6) + TAG, BOTTOM_BORDER);
+    }
+}
+</code></pre>
+<p><strong>最后是注解的定义：</strong></p>
+<pre><code class="language-java">@Target(ElementType.METHOD)
+public @interface TraceLog {
+}
+</code></pre>
+<h3><a id="%E4%B8%BBmodule" class="anchor" aria-hidden="true"><span class="octicon octicon-link"></span></a>主Module</h3>
+<p>主Module是使用方，使用方式：</p>
+<p>(1)项目工程的gradle.build添加gradle编译脚本依赖：</p>
+<pre><code class="language-java">buildscript {
+    repositories {
+        maven {
+            url uri('D:/repository')
+        }
+    }
+    dependencies {
+        classpath 'com.example.watson.plugin:tracePlugin:1.0.0'
+    }
+}
+</code></pre>
+<p>这里我使用的仓库是本地文件夹，以后可以上传服务器，做到远程依赖</p>
+<p>(2)在需要使用的 module 中的 build.gradle 中应用插件：</p>
+<pre><code class="language-plain_text">apply plugin: com.example.watson.plugin.TracePlugin
+</code></pre>
+<p>同时添加第三方库依赖，这里同样使用的仓库是本地文件夹，以后可以上传服务器，做到远程依赖</p>
+<pre><code class="language-java">repositories {
+    maven {
+        url uri('D:/repository')
+    }
+}
+...
+implementation 'com.example.watson.library:traceLibrary:1.0.0'
+</code></pre>
+<p>(3)添加注解<br />
+在需要被hook的方法上添加@TraceLog注解</p>
+<pre><code class="language-java">public class MainActivity extends AppCompatActivity {
+    private static final String TAG = &quot;MainActivity&quot;;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        findViewById(R.id.btn).setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                printPerson(new Person(66, &quot;watson&quot;), 100, true, (byte) 0, 'W');
+            }
+        });
+
+    }
+
+    @TraceLog
+    private Person printPerson(Person person, int x, boolean flag, byte time, char temp) {
+        Log.i(TAG, &quot;flag is &quot; + flag);
+        Log.i(TAG, &quot;time is &quot; + time);
+        Log.i(TAG, &quot;temp is &quot; + temp);
+        person.setName(&quot;jack&quot;);
+        person.setAge(x);
+        try {
+            Thread.sleep(1000);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return person;
+    }
+}
+</code></pre>
+<p>在编译后，我们可以找到被织入代码后的类文件方法：</p>
+<p><strong>D:\project\plugin-master\app\build\intermediates\transforms\TraceLog\debug\28\com\example\watson\MainActivity.class</strong></p>
+<pre><code class="language-java">@TraceLog
+private Person printPerson(Person person, int x, boolean flag, byte time, char temp) {
+    int var6 = MethodCache.request();
+    MethodCache.addMethodArgument(person, var6);
+    MethodCache.addMethodArgument(new Integer(x), var6);
+    MethodCache.addMethodArgument(new Boolean(flag), var6);
+    MethodCache.addMethodArgument(new Byte(time), var6);
+    MethodCache.addMethodArgument(new Character(temp), var6);
+    long var7 = System.currentTimeMillis();
+    Log.i(&quot;MainActivity&quot;, &quot;flag is &quot; + flag);
+    Log.i(&quot;MainActivity&quot;, &quot;time is &quot; + time);
+    Log.i(&quot;MainActivity&quot;, &quot;temp is &quot; + temp);
+    person.setName(&quot;jack&quot;);
+    person.setAge(x);
+
+    try {
+        Thread.sleep(1000L);
+    } catch (Exception var10) {
+        var10.printStackTrace();
+    }
+
+    MethodCache.updateMethodInfo(person, &quot;com/example/watson/MainActivity&quot;, &quot;printPerson&quot;, &quot;(Lcom/example/watson/Person;IZBC)Lcom/example/watson/Person;&quot;, var7, var6);
+    MethodCache.printMethodInfo(var6);
+    return person;
+}
+</code></pre>
+<p>点击按钮，测试结果：</p>
+<p><img src="media/16299642191691/16300464158614.jpg" alt="" /></p>
+
+
+    
+
+      </div>
+
+      <div class="row">
+        <div class="large-6 columns">
+        <p class="text-left" style="padding:15px 0px;">
+      
+          <a href="16299648825877.html" 
+          title="Previous Post: Android的编译打包流程">&laquo; Android的编译打包流程</a>
+      
+        </p>
+        </div>
+        <div class="large-6 columns">
+      <p class="text-right" style="padding:15px 0px;">
+      
+          <a  href="16259905217494.html" 
+          title="Next Post: LinkedListEntry">LinkedListEntry &raquo;</a>
+      
+      </p>
+        </div>
+      </div>
+      <div class="comments-wrap">
+        <div class="share-comments">
+          
+
+          
+
+          
+        </div>
+      </div>
+    </div><!-- article-wrap -->
+  </div><!-- large 8 -->
+
+
+
+
+ <div class="large-4 medium-4 columns">
+  <div class="hide-for-small">
+    <div id="sidebar" class="sidebar">
+          <div id="site-info" class="site-info">
+            
+                <div class="site-a-logo"><img src="media/16898402251241/logo.jpeg" /></div>
+            
+                <h1>MagicalRice的Blog</h1>
+                <div class="site-des">技术博客</div>
+                <div class="social">
+
+
+
+
+
+
+
+
+
+
+
+  <a target="_blank" class="rss" href="atom.xml" title="RSS">RSS</a>
+                
+              	 </div>
+          	</div>
+
+             
+
+              <div id="site-categories" class="side-item ">
+                <div class="side-header">
+                  <h2>Categories</h2>
+                </div>
+                <div class="side-content">
+
+      	<p class="cat-list">
+        
+            <a href="Android.html"><strong>Android</strong></a>
+        
+            <a href="%E6%9C%8D%E5%8A%A1%E5%99%A8.html"><strong>服务器</strong></a>
+        
+            <a href="C++.html"><strong>C++</strong></a>
+        
+            <a href="UI.html"><strong>UI</strong></a>
+        
+            <a href="%E4%BB%A3%E7%A0%81%E4%B9%8B%E7%BE%8E.html"><strong>代码之美</strong></a>
+        
+            <a href="Game.html"><strong>Game</strong></a>
+        
+            <a href="Python.html"><strong>Python</strong></a>
+        
+            <a href="Mac.html"><strong>Mac</strong></a>
+        
+            <a href="%E5%85%B6%E4%BB%96.html"><strong>其他</strong></a>
+        
+            <a href="Flutter.html"><strong>Flutter</strong></a>
+        
+            <a href="ReactNative.html"><strong>ReactNative</strong></a>
+        
+            <a href="Java.html"><strong>Java</strong></a>
+        
+            <a href="%E9%9F%B3%E8%A7%86%E9%A2%91%E5%BC%80%E5%8F%91.html"><strong>音视频开发</strong></a>
+        
+            <a href="%E7%BD%91%E7%BB%9C.html"><strong>网络</strong></a>
+        
+            <a href="%E7%BD%91%E9%A1%B5.html"><strong>网页</strong></a>
+        
+            <a href="%E5%B7%A5%E5%85%B7-1-2.html"><strong>工具</strong></a>
+        
+            <a href="%E4%BA%BA%E5%B7%A5%E6%99%BA%E8%83%BD.html"><strong>人工智能</strong></a>
+        
+            <a href="%E5%88%9B%E4%B8%9A.html"><strong>创业</strong></a>
+        
+            <a href="%E6%80%9D%E7%BB%B4%E6%8F%90%E5%8D%87.html"><strong>思维提升</strong></a>
+        
+            <a href="GPU%E6%B8%B2%E6%9F%93.html"><strong>GPU渲染</strong></a>
+         
+        </p>
+
+
+                </div>
+              </div>
+
+              <div id="site-categories" class="side-item">
+                <div class="side-header">
+                  <h2>Recent Posts</h2>
+                </div>
+                <div class="side-content">
+                <ul class="posts-list">
+	      
+		      
+			      <li class="post">
+			        <a href="16946950953153.html">Debian 关闭休眠</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16946000122919.html">Debian 查看 Linux 硬盘大小、类型和硬件信息</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945997927114.html">Debian 查看硬件温度</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945994928906.html">Debian 查看Linux版本</a>
+			      </li>
+		     
+		  
+		      
+			      <li class="post">
+			        <a href="16945989810086.html">Debian 查看CPU和内存</a>
+			      </li>
+		     
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		  
+		      
+		   
+		  		</ul>
+                </div>
+              </div>
+        </div><!-- sidebar -->
+      </div><!-- hide for small -->
+</div><!-- large 4 -->
+
+</div><!-- row -->
+
+ <div class="page-bottom clearfix">
+  <div class="row">
+   <p class="copyright">Copyright &copy; 2015
+Powered by <a target="_blank" href="http://www.mweb.im">MWeb</a>,&nbsp; 
+Theme used <a target="_blank" href="http://github.com">GitHub CSS</a>.</p>
+  </div>
+</div>
+
+        </section>
+      </div>
+    </div>
+
+<style>.mweb-charts{background:#fff;}
+body{ box-sizing: border-box;
+    margin: 0 auto;}
+@media print{
+    pre, code, pre code {
+     overflow: visible !important;
+     white-space: pre-wrap !important;       /* css-3 */
+     white-space: -moz-pre-wrap !important;  /* Mozilla, since 1999 */
+     white-space: -pre-wrap !important;      /* Opera 4-6 */
+     white-space: -o-pre-wrap !important;    /* Opera 7 */
+     word-wrap: break-word !important;       /* Internet Explorer 5.5+ */
+    }
+    html,body{margin:0;padding:4px;}
+}
+
+
+
+div.code-toolbar {
+  position: relative;
+}
+
+div.code-toolbar > .toolbar {
+  position: absolute;
+  z-index: 10;
+  top: .3em;
+  right: .2em;
+  transition: opacity 0.3s ease-in-out;
+  opacity: 0;
+}
+
+div.code-toolbar:hover > .toolbar {
+  opacity: 1;
+}
+
+/* Separate line b/c rules are thrown out if selector is invalid.
+   IE11 and old Edge versions don't support :focus-within. */
+div.code-toolbar:focus-within > .toolbar {
+  opacity: 1;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item {
+  display: inline-block;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a {
+  cursor: pointer;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > button {
+  background: none;
+  border: 0;
+  color: inherit;
+  font: inherit;
+  line-height: normal;
+  overflow: visible;
+  padding: 0;
+  -webkit-user-select: none; /* for button */
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a,
+div.code-toolbar > .toolbar > .toolbar-item > button,
+div.code-toolbar > .toolbar > .toolbar-item > span {
+  color: inherit;
+  font-size: .8em;
+  padding: 4px .5em;
+  background: #f5f2f0;
+  background: rgba(224, 224, 224, 0.4);
+  box-shadow: 0 2px 0 0 rgba(0,0,0,0.2);
+  border-radius: .5em;
+}
+
+div.code-toolbar > .toolbar > .toolbar-item > a:hover,
+div.code-toolbar > .toolbar > .toolbar-item > a:focus,
+div.code-toolbar > .toolbar > .toolbar-item > button:hover,
+div.code-toolbar > .toolbar > .toolbar-item > button:focus,
+div.code-toolbar > .toolbar > .toolbar-item > span:hover,
+div.code-toolbar > .toolbar > .toolbar-item > span:focus {
+  color: inherit;
+  text-decoration: none;
+}
+</style><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/line-numbers/prism-line-numbers.min.js"></script><script>!function(){if("undefined"!=typeof Prism&&"undefined"!=typeof document){var e=[],t={},n=function(){};Prism.plugins.toolbar={};var a=Prism.plugins.toolbar.registerButton=function(n,a){var r;r="function"==typeof a?a:function(e){var t;return"function"==typeof a.onClick?((t=document.createElement("button")).type="button",t.addEventListener("click",(function(){a.onClick.call(this,e)}))):"string"==typeof a.url?(t=document.createElement("a")).href=a.url:t=document.createElement("span"),a.className&&t.classList.add(a.className),t.textContent=a.text,t},n in t?console.warn('There is a button with the key "'+n+'" registered already.'):e.push(t[n]=r)},r=Prism.plugins.toolbar.hook=function(a){var r=a.element.parentNode;var l=a.element.classList;if(l.contains('language-mermaid') || l.contains('language-echarts') || l.contains('language-plantuml')){return;} if(r&&/pre/i.test(r.nodeName)&&!r.parentNode.classList.contains("code-toolbar")){var o=document.createElement("div");o.classList.add("code-toolbar"),r.parentNode.insertBefore(o,r),o.appendChild(r);var i=document.createElement("div");i.classList.add("toolbar");var l=e,d=function(e){for(;e;){var t=e.getAttribute("data-toolbar-order");if(null!=t)return(t=t.trim()).length?t.split(/\s*,\s*/g):[];e=e.parentElement}}(a.element);d&&(l=d.map((function(e){return t[e]||n}))),l.forEach((function(e){var t=e(a);if(t){var n=document.createElement("div");n.classList.add("toolbar-item"),n.appendChild(t),i.appendChild(n)}})),o.appendChild(i)}};a("label",(function(e){var t=e.element.parentNode;if(t&&/pre/i.test(t.nodeName)&&t.hasAttribute("data-label")){var n,a,r=t.getAttribute("data-label");try{a=document.querySelector("template#"+r)}catch(e){}return a?n=a.content:(t.hasAttribute("data-url")?(n=document.createElement("a")).href=t.getAttribute("data-url"):n=document.createElement("span"),n.textContent=r),n}})),Prism.hooks.add("complete",r)}}();</script><link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/toolbar/prism-toolbar.min.css"><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/copy-to-clipboard/prism-copy-to-clipboard.min.js"></script><script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/plugins/autoloader/prism-autoloader.min.js"></script><style>div.code-toolbar > .toolbar > .toolbar-item > a, div.code-toolbar > .toolbar > .toolbar-item > button, div.code-toolbar > .toolbar > .toolbar-item > span {padding: 4px .5em; background: #f5f2f0; background: rgba(224, 224, 224, 0.4);}</style>
+
+<style type="text/css">
+figure{margin: 0;padding: 0;}
+figcaption{text-align:center;}
+
+/* PrismJS 1.14.0
+ http://prismjs.com/download.html#themes=prism&languages=markup+css+clike+javascript */
+/**
+ * prism.js default theme for JavaScript, CSS and HTML
+ * Based on dabblet (http://dabblet.com)
+ * @author Lea Verou
+ */
+
+code[class*="language-"],
+pre[class*="language-"] {
+    color: black;
+    background: none;
+    text-shadow: 0 1px white;
+    font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+    text-align: left;
+    white-space: pre;
+    word-spacing: normal;
+    word-break: normal;
+    word-wrap: normal;
+    line-height: 1.5;
+    
+    -moz-tab-size: 4;
+    -o-tab-size: 4;
+    tab-size: 4;
+    
+    -webkit-hyphens: none;
+    -moz-hyphens: none;
+    -ms-hyphens: none;
+    hyphens: none;
+}
+
+pre[class*="language-"]::-moz-selection, pre[class*="language-"] ::-moz-selection,
+code[class*="language-"]::-moz-selection, code[class*="language-"] ::-moz-selection {
+    text-shadow: none;
+    background:#b3d4fc;
+}
+
+pre[class*="language-"]::selection, pre[class*="language-"] ::selection,
+code[class*="language-"]::selection, code[class*="language-"] ::selection {
+    text-shadow: none;
+    background: #b3d4fc;
+}
+
+@media print {
+    code[class*="language-"],
+    pre[class*="language-"] {
+        text-shadow: none;
+    }
+}
+
+/* Code blocks */
+pre[class*="language-"] {
+    padding: 1em;
+    margin: .5em 0;
+    overflow: auto;
+}
+
+:not(pre) > code[class*="language-"],
+pre[class*="language-"] {
+    background: #F7F7F7;
+}
+
+/* Inline code */
+:not(pre) > code[class*="language-"] {
+    padding: .1em;
+    border-radius: .3em;
+    white-space: normal;
+}
+
+.token.comment,
+.token.prolog,
+.token.doctype,
+.token.cdata {
+    color: slategray;
+}
+
+.token.punctuation {
+    color: #999;
+}
+
+.namespace {
+    opacity: .7;
+}
+
+.token.property,
+.token.tag,
+.token.boolean,
+.token.number,
+.token.constant,
+.token.symbol,
+.token.deleted {
+    color: #905;
+}
+
+.token.selector,
+.token.attr-name,
+.token.string,
+.token.char,
+.token.builtin,
+.token.inserted {
+    color: #690;
+}
+
+.token.operator,
+.token.entity,
+.token.url,
+.language-css .token.string,
+.style .token.string {
+    color: #9a6e3a;
+    background: hsla(0, 0%, 100%, .5);
+}
+
+.token.atrule,
+.token.attr-value,
+.token.keyword {
+    color: #07a;
+}
+
+.token.function,
+.token.class-name {
+    color: #DD4A68;
+}
+
+.token.regex,
+.token.important,
+.token.variable {
+    color: #e90;
+}
+
+.token.important,
+.token.bold {
+    font-weight: bold;
+}
+.token.italic {
+    font-style: italic;
+}
+
+.token.entity {
+    cursor: help;
+}
+
+
+pre[class*="language-"].line-numbers {
+    position: relative;
+    padding-left: 3.8em;
+    counter-reset: linenumber;
+}
+
+pre[class*="language-"].line-numbers > code {
+    position: relative;
+    white-space: inherit;
+}
+
+.line-numbers .line-numbers-rows {
+    position: absolute;
+    pointer-events: none;
+    top: 0;
+    font-size: 100%;
+    left: -3.8em;
+    width: 3em; /* works for line-numbers below 1000 lines */
+    letter-spacing: -1px;
+    border-right: 1px solid #999;
+
+    -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
+
+}
+
+    .line-numbers-rows > span {
+        pointer-events: none;
+        display: block;
+        counter-increment: linenumber;
+    }
+
+        .line-numbers-rows > span:before {
+            content: counter(linenumber);
+            color: #999;
+            display: block;
+            padding-right: 0.8em;
+            text-align: right;
+        }
+
+</style>
+
+  
+    
+
+    <script src="asset/js/foundation.min.js"></script>
+    <script>
+      $(document).foundation();
+      function fixSidebarHeight(){
+        var w1 = $('.markdown-body').height();
+          var w2 = $('#sidebar').height();
+          if (w1 > w2) { $('#sidebar').height(w1); };
+      }
+      $(function(){
+        fixSidebarHeight();
+      })
+      $(window).load(function(){
+          fixSidebarHeight();
+      });
+     
+    </script>
+
+
+
+  </body>
+</html>
